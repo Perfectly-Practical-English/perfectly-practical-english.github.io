@@ -798,10 +798,6 @@ html.ui-ready h1[data-auto-title] {
 
 ~ TV Commercial Slideshow Template
 
-Use with Gamma:
-
-https://gamma.app/
-
 TV Commercial Slideshow Template
 
 Instructions:
@@ -840,10 +836,6 @@ Slide text (copy exactly):
 
 Image prompt:
 [Image: A clean, attractive image matching the conclusion.]
-
-
-Suno: https://suno.com/discover
-Gamma: https://gamma.app/
 
 ~
 
@@ -3967,7 +3959,7 @@ window.saveResult = async function saveResult(text) {
 
     const btn = document.createElement("button");
     btn.id = "sunoLyricsButton";
-    btn.textContent = "🎵 Copy Lyrics for Suno";
+    btn.textContent = "Copy Text Only";
 
     btn.style.position = "fixed";
     btn.style.bottom = "20px";
@@ -4112,8 +4104,64 @@ window.saveResult = async function saveResult(text) {
 })();
 </script>
 
+<script>
+(function () {
 
+    function createButtons() {
 
+        if (document.getElementById("floating-app-links")) return;
+
+        const container = document.createElement("div");
+        container.id = "floating-app-links";
+
+        Object.assign(container.style, {
+            position: "fixed",
+            left: "50%",
+            bottom: "20px",
+            transform: "translateX(-50%)",
+            display: "flex",
+            gap: "12px",
+            zIndex: "999999"
+        });
+
+        function makeButton(label, url) {
+            const btn = document.createElement("button");
+
+            btn.textContent = label;
+
+            Object.assign(btn.style, {
+                padding: "12px 20px",
+                border: "none",
+                borderRadius: "8px",
+                background: "#333",
+                color: "#fff",
+                cursor: "pointer",
+                fontSize: "14px",
+                fontWeight: "600",
+                boxShadow: "0 2px 8px rgba(0,0,0,.25)"
+            });
+
+            btn.onclick = () => window.open(url, "_blank", "noopener,noreferrer");
+
+            return btn;
+        }
+
+        container.appendChild(makeButton("Suno", "https://suno.com/discover"));
+        container.appendChild(makeButton("Gamma", "https://gamma.app/"));
+
+        document.body.appendChild(container);
+    }
+
+    createButtons();
+
+    // Re-add if your app redraws the page
+    new MutationObserver(createButtons).observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+
+})();
+</script>
 
 </body>
 </html>
