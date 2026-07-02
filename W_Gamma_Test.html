@@ -818,30 +818,30 @@ Only include people or characters when the image prompt explicitly asks for them
 
 Slide 1 – Introduction
 Slide text (copy exactly):
-[Try new and delicious "Fruity Pill." It is a healthy fruit snack.]
+[Text: Try new and delicious "Fruity Pill." It is a healthy fruit snack.]
 Image prompt:
-[A clean, attractive package of Fruity Pill]
+[Image: A clean, attractive package of Fruity Pill]
 
 Slide 2 – Product Description
 Slide text (copy exactly):
-[Fruity Pill is a small, colorful pill. It comes in many bright colors and tastes like real fruit. It is made by mixing fruit flavors and vitamins and putting it inside a pill.]
+[Text: Fruity Pill is a small, colorful pill. It comes in many bright colors and tastes like real fruit. It is made by mixing fruit flavors and vitamins and putting it inside a pill.]
 Image prompt:
-[A clean, attractive picture of all kinds of grapes, pineapples, oranges, apples, pears, bananas]
+[Image: A clean, attractive picture of all kinds of grapes, pineapples, oranges, apples, pears, bananas]
 
 Slide 3 – Persuasion
 Slide text (copy exactly):
-[People should buy Fruity Pill because it is delicious, healthy, and fun to eat. It tastes sweet and fruity. People feel happy and excited when they eat Fruity Pill.]
+[Text: People should buy Fruity Pill because it is delicious, healthy, and fun to eat. It tastes sweet and fruity. People feel happy and excited when they eat Fruity Pill.]
 Image prompt:
-[A clean, attractive picture of people enjoying the product]
+[Image: A clean, attractive picture of people enjoying the product]
 
 Slide 4 – Conclusion
 Slide text (copy exactly):
-[People can buy Fruity Pill at supermarkets, convenience stores, and online.]
-[One Fruity Pill pack costs $2.99.]
+[Text: People can buy Fruity Pill at supermarkets, convenience stores, and online.]
+[Text: One Fruity Pill pack costs $2.99.]
 Slogan:
-["Fruity Pill – All Your Favorite Fruits in One Delicious Pill!"]
+[Text: "Fruity Pill – All Your Favorite Fruits in One Delicious Pill!"]
 Image prompt:
-[A clean, attractive image matching the conclusion.]
+[Image: A clean, attractive image matching the conclusion.]
 
 Note to Students (not part of Gamma slides or images):
 
@@ -4010,6 +4010,120 @@ window.saveResult = async function saveResult(text) {
 
 })();
 </script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+(function () {
+
+    function showBracketedText() {
+
+        document.querySelectorAll(".question-text").forEach(container => {
+
+            // Read the rendered text
+            const text = container.innerText;
+
+            // Find everything inside [...]
+            const matches = [...text.matchAll(/\[(.*?)\]/gs)];
+
+            if (!matches.length) return;
+
+            // Replace the content with only the bracketed text
+            container.innerHTML = matches
+                .map(m => `<p>${m[1].trim()}</p>`)
+                .join("");
+
+        });
+
+    }
+
+    const observer = new MutationObserver(showBracketedText);
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+
+})();
+</script>
+
+<script>
+(function () {
+
+    const waitForButton = setInterval(() => {
+
+        const btn = document.getElementById("copySelected");
+        const src = document.getElementById("rawTextSource");
+
+        if (!btn || !src) return;
+
+        clearInterval(waitForButton);
+
+        btn.addEventListener("click", async function (e) {
+
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            // Original Gamma prompt
+            let gammaText = src.textContent;
+
+            // Current edited slide text
+            const editedLines = [];
+
+            document.querySelectorAll(".question-text p").forEach(p => {
+                editedLines.push(p.innerText.trim());
+            });
+
+            let index = 0;
+
+            // Replace every [...] block with the edited version
+            gammaText = gammaText.replace(/\[(.*?)\]/gs, function (match) {
+
+                if (index >= editedLines.length) return match;
+
+                const replacement = editedLines[index++];
+                return "[" + replacement + "]";
+            });
+
+            // Select everything
+            const temp = document.createElement("textarea");
+            temp.value = gammaText;
+            document.body.appendChild(temp);
+
+            temp.focus();
+            temp.select();
+            temp.setSelectionRange(0, temp.value.length);
+
+            try {
+                await navigator.clipboard.writeText(temp.value);
+                alert("Gamma prompt copied.");
+            } catch (err) {
+                console.error(err);
+                document.execCommand("copy");
+            }
+
+            document.body.removeChild(temp);
+
+        }, true);
+
+    }, 100);
+
+})();
+</script>
+
+
+
+
 
 </body>
 </html>
