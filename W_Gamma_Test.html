@@ -798,20 +798,18 @@ html.ui-ready h1[data-auto-title] {
 
 ~ TV Commercial Slideshow Template
 
-TV Commercial Slideshow Template
-
 Use with Gamma:
 
 https://gamma.app/
 
-Instructions:
+TV Commercial Slideshow Template
 
+Instructions:
 
 Create exactly four slides.
 Do not add title slides, ending slides, or extra slides.
 Use only the information provided below.
-Copy all slide text exactly as written.
-Do not change the product name.
+Use the slide text exactly as provided. Do not intentionally change wording.Do not change the product name.
 Do not change, rewrite, summarize, paraphrase, or correct any slide text.
 Do not add any new information.
 Generate one image for each slide using only the corresponding slide text and image prompt.
@@ -820,30 +818,38 @@ Only include people or characters when the image prompt explicitly asks for them
 
 Slide 1 – Introduction
 Slide text (copy exactly):
-(Try new and delicious "Fruity Pill." It is a healthy fruit snack.)
+[Try new and delicious "Fruity Pill." It is a healthy fruit snack.]
 Image prompt:
-(A clean, attractive package of Fruity Pill)
+[A clean, attractive package of Fruity Pill]
 
 Slide 2 – Product Description
 Slide text (copy exactly):
-(Fruity Pill is a small, colorful pill. It comes in many bright colors and tastes like real fruit. It is made by mixing fruit flavors and vitamins and putting it inside a pill.)
+[Fruity Pill is a small, colorful pill. It comes in many bright colors and tastes like real fruit. It is made by mixing fruit flavors and vitamins and putting it inside a pill.]
 Image prompt:
-(A clean, attractive picture of all kinds of grapes, pineapples, oranges, apples, pears, bananas)
+[A clean, attractive picture of all kinds of grapes, pineapples, oranges, apples, pears, bananas]
 
 Slide 3 – Persuasion
 Slide text (copy exactly):
-(People should buy Fruity Pill because it is delicious, healthy, and fun to eat. It tastes sweet and fruity. People feel happy and excited when they eat Fruity Pill.)
+[People should buy Fruity Pill because it is delicious, healthy, and fun to eat. It tastes sweet and fruity. People feel happy and excited when they eat Fruity Pill.]
 Image prompt:
-(A clean, attractive picture of people enjoying the product)
+[A clean, attractive picture of people enjoying the product]
 
 Slide 4 – Conclusion
 Slide text (copy exactly):
-(People can buy Fruity Pill at supermarkets, convenience stores, and online.)
-(One Fruity Pill pack costs $2.99.)
+[People can buy Fruity Pill at supermarkets, convenience stores, and online.]
+[One Fruity Pill pack costs $2.99.]
 Slogan:
-("Fruity Pill – All Your Favorite Fruits in One Delicious Pill!")
+["Fruity Pill – All Your Favorite Fruits in One Delicious Pill!"]
 Image prompt:
-(A clean, attractive image matching the conclusion.)
+[A clean, attractive image matching the conclusion.]
+
+Note to Students (not part of Gamma slides or images):
+
+Task:
+Create a Food Product song using only the information above.
+
+External tool:
+Suno: https://suno.com/discover
 ~
 
 BLANK
@@ -3853,7 +3859,7 @@ window.saveResult = async function saveResult(text) {
   // CSS injected automatically
   const style = document.createElement("style");
   style.textContent = `
-    .parenthesis-highlight{
+    .bracket-highlight{
       background:#fff9c4;
       border-radius:2px;
     }
@@ -3870,20 +3876,20 @@ window.saveResult = async function saveResult(text) {
 
     const text = node.nodeValue;
 
-    // Skip if no parentheses
-    if (!/\([^()]*\)/.test(text)) return;
+    // Skip if no square brackets like [text]
+    if (!/\[[^\[\]]+\]/.test(text)) return;
 
     const span = document.createElement("span");
 
     span.innerHTML = text.replace(
-      /\([^()]*\)/g,
-      '<span class="parenthesis-highlight">$&</span>'
+      /\[[^\[\]]+\]/g,
+      '<span class="bracket-highlight">$&</span>'
     );
 
     node.parentNode.replaceChild(span, node);
   }
 
-  function run(root=document.body) {
+  function run(root = document.body) {
 
     const walker = document.createTreeWalker(
       root,
@@ -3930,6 +3936,79 @@ window.saveResult = async function saveResult(text) {
 
 })();
 
+</script>
+
+<script>
+(function () {
+
+  function extractBracketContent() {
+    const text = document.body.innerText || "";
+    const matches = [...text.matchAll(/\[([^\[\]]+)\]/g)];
+
+    // Remove duplicates while preserving order
+    const seen = new Set();
+
+    return matches
+      .map(m => m[1].trim())
+      .filter(line => line.length > 0)
+      .filter(line => {
+        if (seen.has(line)) return false;
+        seen.add(line);
+        return true;
+      });
+  }
+
+  function copyLyrics() {
+    const lyrics = extractBracketContent().join("\n\n");
+
+    if (!lyrics) {
+      alert("No bracketed text found.");
+      return;
+    }
+
+    navigator.clipboard.writeText(lyrics)
+      .then(() => alert("Lyrics copied for Suno!"))
+      .catch(err => console.error(err));
+  }
+
+  function createButton() {
+    if (document.getElementById("sunoLyricsButton")) return;
+
+    const btn = document.createElement("button");
+    btn.id = "sunoLyricsButton";
+    btn.textContent = "🎵 Copy Lyrics for Suno";
+
+    btn.style.position = "fixed";
+    btn.style.bottom = "20px";
+    btn.style.right = "20px";
+    btn.style.zIndex = "999999";
+    btn.style.padding = "12px 16px";
+    btn.style.background = "#ffcc00";
+    btn.style.border = "none";
+    btn.style.borderRadius = "8px";
+    btn.style.cursor = "pointer";
+    btn.style.fontWeight = "bold";
+
+    btn.onclick = copyLyrics;
+
+    document.body.appendChild(btn);
+  }
+
+  function init() {
+    if (!document.body) {
+      setTimeout(init, 50);
+      return;
+    }
+    createButton();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+
+})();
 </script>
 
 </body>
