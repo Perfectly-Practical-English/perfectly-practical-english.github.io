@@ -85,7 +85,7 @@ button {
   cursor: pointer;
   user-select: none;
 
-white-space: normal;
+  white-space: nowrap;
 
   transition: background 0.15s ease, transform 0.08s ease;
 }
@@ -251,44 +251,26 @@ input[type=text] {
 
 .sentence {
   position: absolute;
-  display: flex;
-  flex-direction: column;
-
   font-size: 15px;
   font-weight: 600;
-
-  width: 30ch;
-  max-width: 30ch;
-
-
-
-  white-space: normal;
-  overflow-wrap: break-word;
-  word-break: normal;
-
-  line-height: 1.25;
-
+  white-space: nowrap;
   user-select: none;
   pointer-events: none;
-
   color: #fff;
   text-shadow: 0 0 3px rgba(0,0,0,0.3);
   z-index: 1;
-
   transition: opacity 0.2s linear;
 }
+
 .blank {
   display: inline-block;
   border-bottom: 2px solid #fff;
-
-  min-width: 1.5em;
-  width: 1.5em;
-
+  min-width: 30px;
   text-align: center;
   color: red;
-
-  transition: none;
+  transition: all 0.2s ease;
 }
+
 .blank.expand {
   transform: scale(1.4);
 }
@@ -421,19 +403,22 @@ const wordListSource = `
 ~Unit 0 – Food Items Set A
 
 We need |a| loaf of bread.
-There isn't one at home.
+We only need one loaf.
 
 There isn't |any| milk in the carton.
 The carton is completely empty.
 
-How |much| water is left in the bottle?
-I only need the amount, not the number of bottles.
+Is there |any| water left in the bottle?
+I only want to know if there is water.
 
 I bought |a| bag of chips.
 I only bought one bag.
 
-How |many| slices of pizza did the children eat?
-Count the slices for me.
+The children ate |some| burgers after school.
+They ate an unspecified amount.
+
+How |many| bottles of water do we need for the trip?
+Please count the bottles.
 
 There aren't |any| packets of hot sauce.
 We have zero packets.
@@ -442,16 +427,13 @@ She ate |a| bar of chocolate after lunch.
 She only ate one bar.
 
 There is |some| tuna in the can.
-But there isn't enough for two sandwiches.
+There is a little, but not enough for two sandwiches.
 
-There isn't |much| peanut butter in the jar.
-Only a little remains.
+There isn't |any| peanut butter in the jar.
+The jar is empty.
 
 He drank |a| glass of lemonade with his meal.
 He only had one glass.
-
-There are |a lot of| boxes of cereal in the warehouse.
-More than five hundred boxes are stored there.
 
 She opened |a| carton of juice for breakfast.
 She only opened one carton.
@@ -459,234 +441,74 @@ She only opened one carton.
 There isn't |any| ice cream in the tub.
 The tub is empty.
 
-How |many| cans of soda are in the fridge?
-Please count the cans.
+There are |some| cans of soda in the fridge.
+There are a few cans.
+
+Please pass me |a| loaf of bread.
+I only want one loaf.
+
+
+
+
+
+
+
+
+
 
 ~Unit 0 – Food Items Set B
 
-There is |some| milk in the carton.
-But not enough for a bowl of cereal.
+There is |a| carton of milk on the table.
+There is one carton.
 
-There is |a lot of| bread in the bakery this morning.
-Hundreds of loaves were baked today.
+Is there |much| bread left?
+I want to know the amount of bread.
 
 He made |a| cup of noodles for lunch.
 He only prepared one cup.
 
-Please pass me |the| pizza.
-It's the pizza we ordered earlier.
 
-She bought |a| jar of peanut butter yesterday.
-She only bought one jar.
 
-How |many| bottles of water do we need for the trip?
-Please count the bottles.
+How |many| bars of chocolate did the children eat?
+Please count the bars.
+
+
+Please pass me |a| slice of pizza.
+I only want one slice.
 
 There isn't |much| juice left in the carton.
 Only a small amount remains.
 
-There is |some| hot sauce in the packet.
-But there isn't enough for everyone.
-
-Please put |the| can of tuna into the bag.
-I mean the one on the top shelf.
-
-We bought |a| tub of ice cream for the party.
-We only bought one tub.
-
-There are |a lot of| cartons of milk in the delivery truck.
-More than three hundred cartons were delivered.
-
-I drank |the| lemonade this morning.
-It was the lemonade you made yesterday.
+She bought |a| jar of peanut butter yesterday.
+She only bought one jar.
 
 How |many| cartons of milk were delivered today?
 Please count the cartons.
 
+Is there |much| hot sauce in the packet?
+I want to know the amount inside.
+
+Please put |a| can of tuna into the bag.
+I only need one can.
+
+We bought |a| tub of ice cream for the party.
+We only bought one tub.
 
 
-~Unit 1 – Family and Friends - Present Simple
+There isn't |much| peanut butter in the jar.
+Only a little remains.
 
-I usually |go| to school with my sister.
-My brother |doesn’t| play video games after dinner.
-Anna |listens to| music every evening before bed.
-|Does| your cousin live in your city?
-We |are never| late for our first lesson.
-He |watches| TV series every weekend.
-What time |does| your mother usually get home?
-My friends |go shopping| on Saturday afternoons.
-I |don’t| often use my phone before school.
-|Do| you usually do homework in the evening?
-My grandmother |exercises| in the park every morning.
-I |don’t read| books very often.
-Where |does| your best friend go after school?
-My sister |is| interested in science fiction films.
-We |have dinner| at 6 p.m. every day.
-They |usually spend| holidays with their family.
-|Does| your uncle work in a shop?
-I |don’t go out| during the school week.
-How often |do| your parents visit their friends?
-She |plays| basketball very well.
 
-~Unit 2 – Food - Countable and Uncountable Nouns • Articles
 
-There is |some| milk in the fridge.
-We don’t have |any| potatoes for dinner.
-She bought |a packet of| pasta at the supermarket.
-He wants |an| apple for his snack.
-There are |some| grapes in the bowl.
-We need |a bottle of| oil for cooking.
-There isn’t |any| sugar in the cupboard.
-I usually have |a sandwich| for lunch at school.
-Can I have |some| water, please?
-There are only |a few| eggs in the fridge.
-We bought |a loaf of| bread and some butter.
-I don’t eat |much| chocolate.
-She made |a salad| for dinner.
-There is |an| orange on the table.
-We had |the| best pizza in the restaurant.
-How |many| bananas are in the basket?
-How |much| milk is in the bottle?
-They ordered |a pizza| for dinner.
-There aren’t |many| tomatoes in the fridge.
-He put |the| sauce on the pasta.
+There aren't |many| bottles of water in the fridge.
+Only a few bottles remain.
 
-~Unit 3 – Work - Present Continuous • Present Simple vs Present Continuous
+I drank |a| glass of lemonade this morning.
+I only had one glass.
 
-My mother |is working| at the hospital today.
-The mechanic |repairs| cars every morning.
-We |are doing| a school project this week.
-She |works| in a small office in town.
-They |are talking| to the teacher right now.
-My father |doesn’t work| on Sundays.
-The volunteers |are learning| English this month.
-He usually |makes| breakfast for his family.
-I |am not working| today because it is Sunday.
-The teacher |teaches| geography at our school.
-We |are preparing| for the exam at the moment.
-My uncle |works outside| every weekday morning.
-The receptionist |is serving| guests right now.
-They |don’t work| in the evening after 6 p.m.
-I |am learning| new grammar rules this week.
-She |does voluntary| work at the animal shelter.
-The builder |is putting| the desk together now.
-My brother |doesn’t earn| enough money for a car.
-The students |are discussing| their answers in class.
-He |works for| a company in London.
+How |much| lemonade did he drink?
+I want the amount, not the number of glasses.
 
-~Unit 4 – People - Comparative and Superlative Adjectives • Have to / Don’t Have to
-
-My brother is |taller| than my cousin.
-This jacket is |more comfortable| than my old coat.
-Sofia is |the friendliest| student in the class.
-My hair is |shorter| than it was last year.
-That was |the most interesting| lesson this week.
-My sister |has to| wear a school uniform every day.
-We |don’t have to| go to school on Sundays.
-These trainers are |better| than my old shoes.
-Tom is |more sociable| than his brother.
-This is |the worst| restaurant in town.
-You |have to| bring your ID card to the exam.
-My haircut is |much shorter| than before.
-He is |the funniest| boy in our class.
-Those boots are |more expensive| than these trainers.
-I |don’t have to| wake up early on Saturday.
-My aunt is |older| than my father.
-This dress is |the most stylish| in the shop.
-My cousin is |more confident| than last year.
-We |have to bring| our passports for travel.
-That actor is |the most successful| in the country.
-
-~Unit 5 – Education - Must / Mustn’t • Should / Shouldn’t • Past Simple
-
-Students |must| arrive on time for lessons.
-You |mustn’t| use your phone in exams.
-We |should| practise more for tests.
-He |shouldn’t| forget his homework.
-My classroom |was| on the ground floor.
-They |were| at school yesterday morning.
-I |could| use a computer when I was a child.
-Students |must wear| school uniforms every day.
-You |shouldn’t| talk during lessons.
-The science lab |was very| modern.
-We |couldn’t| finish the exercise in class.
-My teachers |were always| very kind.
-You |mustn’t| be late for school.
-I |could use| a calculator in primary school.
-The canteen |wasn’t| open yesterday.
-We |should focus| on revision for exams.
-She |couldn’t| attend school last week.
-There |were| many students in the hall.
-You |must study| every day.
-The workshop |was interesting| for students.
-
-~Unit 6 – Health and Sport - Past Simple
-
-I |played| football yesterday afternoon.
-She |won| the race last weekend.
-We |didn’t go| jogging because it was raining.
-|Did| you watch the match last night?
-The runner |reached| the finish line first.
-I |wasn’t| very active before last year.
-She |trained| every day before the competition.
-|Did| your friend join the team last year?
-They |didn’t get| enough sleep after training.
-I |thought| swimming was difficult before.
-After the match, we |rested| for an hour.
-My cousin |went| cycling last Saturday.
-What |did| you do after school yesterday?
-I |couldn’t stand| running before I trained.
-The game |started| at 6 p.m. yesterday.
-We |didn’t score| any goals in the match.
-|Did| she win the medal last year?
-My friend |tried| yoga for the first time.
-I |didn’t enjoy| the training session.
-We |watched| the football game on TV.
-
-~Unit 7 – Travel - Present Perfect
-
-I |have never| travelled by plane before.
-|Have| you ever visited Spain?
-My parents |have already| booked the hotel.
-We |have just| arrived at the airport.
-She |hasn’t| packed her suitcase yet.
-|Have| you ever stayed in a hostel?
-They |haven’t made| any plans yet.
-We |have checked in| already.
-My brother |has never| been abroad.
-|Has| your friend bought the tickets yet?
-I |have just| finished my journey.
-|Have| you ever been to Italy?
-We |have just received| our boarding passes.
-The passengers |haven’t arrived| yet.
-I |haven’t been| to that city yet.
-She |has just made| a reservation.
-We |have never| travelled by ferry before.
-|Have| you finished packing yet?
-We |have already crossed| the border.
-I |have already visited| that museum.
-
-~Unit 8 – Nature - Future with will • Be going to
-
-I think it |will be| cold tomorrow.
-Look! It |is going to| rain very soon.
-Scientists say many animals |will disappear|.
-We |are going to| plant trees this weekend.
-I |will protect| the environment.
-Sea levels |will rise| in the future.
-My family |is going to go| hiking next weekend.
-|Are| you going to visit the zoo tomorrow?
-I don’t think people |will| stop pollution quickly.
-We |won’t waste| water.
-There |is going to be| heavy rain tonight.
-What |are| you going to do after school?
-We |are going to use| less plastic from now on.
-The city |is going to build| new parks next year.
-Fish |will survive| in clean rivers.
-|Will| it snow tomorrow morning?
-We |will buy| eco-friendly products.
-My brother |is going to turn off| the lights now.
-I think temperatures |will increase| in summer.
 
 `;
 </script>
@@ -741,34 +563,9 @@ window.addEventListener("sectionchange", (e) => {
     .map(s => s.trim())
     .filter(Boolean);
 
-for (let i = 0; i < lines.length; i++) {
-
-  const line1 = lines[i];
-
-  if (!line1.includes("|")) continue;
-
-  const line2 =
-    lines[i + 1] && !lines[i + 1].includes("|")
-      ? lines[i + 1]
-      : "";
-
-  // PACK BOTH INTO SINGLE STRING (IMPORTANT)
-  const combined =
-    line2
-      ? line1 + "\n" + line2
-      : line1;
-
-  sentences.push(combined);
-
-  const matches = line1.match(/\|(.+?)\|/g);
-  if (matches) {
-    matches.forEach(m =>
-      allCorrectAnswers.push(m.replace(/\|/g, ""))
-    );
-  }
-
-  if (line2) i++;
-}
+  lines.forEach(line => {
+    if (!line.includes("|")) return;
+    sentences.push(line);
 
     const matches = line.match(/\|(.+?)\|/g);
     if (matches) {
@@ -1047,7 +844,7 @@ window.sentences = sentences; // 🔒 ensure global sync
 let allCorrectAnswers = []; // rebuilt on every sectionchange
 
  // <-- NEW: store unique correct answers
-let mcOptionCount = 3; // total number of buttons (1 correct + 1 distractor)
+let mcOptionCount = 8; // total number of buttons (1 correct + 1 distractor)
 
 
 (async () => {
@@ -1134,73 +931,23 @@ function spawnPlaneBurst(){
 // --- Spawn Sentences ---
 function spawnSentence(text){
   if(!text.includes('|')) return;
-
-  const lines = text.split('\n');
-  const mainLine = lines[0];
-  const contextLine = (lines[1] && !lines[1].includes('|')) ? lines[1] : '';
-
-  const span = document.createElement('span');
-span.className = 'sentence';
-span.innerHTML = '';
-
-// CRITICAL FIX: force real vertical layout container
-span.style.display = 'inline-block';
-span.style.whiteSpace = 'normal';
-span.style.width = '30ch';
-
-  // make vertical stacking guaranteed
-  span.style.display = 'flex';
-  span.style.flexDirection = 'column';
-
-  const mainWrap = document.createElement('div');
-
-  const parts = mainLine.split(/\|(.+?)\|/);
-  let blanks = [];
-
-  for(let i = 0; i < parts.length; i++){
-    if(i % 2 === 0){
-      mainWrap.appendChild(document.createTextNode(parts[i]));
-    } else {
-      const b = document.createElement('span');
-      b.className = 'blank';
-      b.dataset.answer = parts[i];
-      b.textContent = '';
-      blanks.push({elem:b,answered:false});
-      mainWrap.appendChild(b);
+  const span=document.createElement('span'); span.className='sentence'; span.innerHTML='';
+  const parts=text.split(/\|(.+?)\|/);
+  let blanks=[];
+  for(let i=0;i<parts.length;i++){
+    if(i%2===0) span.appendChild(document.createTextNode(parts[i]));
+    else{
+      const b=document.createElement('span'); b.className='blank';
+      b.dataset.answer=parts[i]; b.textContent=''; blanks.push({elem:b,answered:false});
+      span.appendChild(b);
     }
   }
-
-  span.appendChild(mainWrap);
-
-  // SECOND LINE (context) — always visible
-  if(contextLine){
-    const ctx = document.createElement('div');
-    ctx.textContent = contextLine;
-
-    ctx.style.fontSize = '12px';
-    ctx.style.color = '#aaa';
-    ctx.style.marginTop = '4px';
-    ctx.style.opacity = '0.9';
-
-    span.appendChild(ctx);
-  }
-
   gameArea.appendChild(span);
-
-  const minY = gameArea.clientHeight * 0.1;
-  const maxY = gameArea.clientHeight * 0.5 - span.offsetHeight;
-
-  span.style.top = (Math.random() * (maxY - minY) + minY) + 'px';
-  span.style.left = gameArea.clientWidth + 30 + 'px';
-
-  activeSentences.push({
-    span,
-    x: parseFloat(span.style.left),
-    speed: -0.45 - Math.random() * 0.2,
-    blanks,
-    finished: false
-  });
-
+  const minY = gameArea.clientHeight*0.1;
+  const maxY = gameArea.clientHeight*0.5 - span.offsetHeight;
+  span.style.top = (Math.random()*(maxY-minY)+minY)+'px';
+  span.style.left = gameArea.clientWidth+30+'px';
+  activeSentences.push({span,x:parseFloat(span.style.left),speed:-0.45-Math.random()*0.2,blanks,finished:false});
   totalWords++;
   generateMCButtons(blanks[0].elem.dataset.answer);
 }
@@ -2012,84 +1759,6 @@ window.saveResult = async function saveResult(text) {
 };
 
 </script>
-
-<script>
-
-function splitIntoTwoLines(text, maxLength = 30) {
-  const words = text.split(' ');
-  let line1 = '';
-  let line2 = '';
-
-  for (const word of words) {
-    const testLine = line1 ? line1 + ' ' + word : word;
-
-    if (testLine.length <= maxLength) {
-      line1 = testLine;
-    } else {
-      line2 = words.slice(words.indexOf(word)).join(' ');
-      break;
-    }
-  }
-
-  return line2 ? `${line1}\n${line2}` : line1;
-}
-
-</script>
-
-
-
-
-<script>
-(function () {
-
-  const original = window.spawnSentence;
-  if (!original) return;
-
-  window.spawnSentence = function (text) {
-
-    // run your original logic
-    original(text);
-
-    // get latest rendered sentence
-    const wrappers = document.querySelectorAll('.sentence');
-    const el = wrappers[wrappers.length - 1];
-    if (!el) return;
-
-    // split into lines
-    const lines = text.split("\n");
-
-    // must have second line
-    if (lines.length < 2) return;
-
-    const secondLine = lines[1].trim();
-
-    // safety: only display if it's NOT an answer line
-    if (!secondLine || secondLine.includes("|")) return;
-
-    // prevent duplicates
-    if (el.dataset.contextAdded === "1") return;
-    el.dataset.contextAdded = "1";
-
-    // create context line UNDER first line
-    const ctx = document.createElement("div");
-    ctx.textContent = secondLine;
-
-    Object.assign(ctx.style, {
-      fontSize: "12px",
-      color: "#aaa",
-      marginTop: "4px",
-      opacity: "0.9",
-      display: "block"
-    });
-
-    el.appendChild(ctx);
-  };
-
-})();
-</script>
-
-
-
 
 </body>
 </html>
