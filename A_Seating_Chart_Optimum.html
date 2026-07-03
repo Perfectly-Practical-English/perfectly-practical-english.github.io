@@ -144,8 +144,9 @@ body {
 
 /* FLOOR MATCHES WIDTH EXACTLY */
 .floor {
-  margin-top: 14px;
-  min-height: 90px;
+  margin-top: 10px;     /* slightly reduced */
+  min-height: 40px;     /* key change (was 90px) */
+  max-height: 60px;     /* prevents vertical stretching */
   border: 1px dashed #b6c7dd;
   border-radius: 10px;
   padding: 10px;
@@ -340,10 +341,10 @@ Seat 7.	 16.2 46930 !Nakhun Prukboonyaprat Nakhun
 Seat 8.	 16.2 46923 Pannatat Akkarayaphakphon Meen
 Seat 9.	  16.2 47124 Jadechula Pattanaphechakun Nae-Non
 Seat 10. 16.2 
-Seat 11. 16.2 43093 
+Seat 11. 16.2
 Seat 12. 16.2 
 Seat 13. 16.2 46496 !Theeraphat Chunphonehisan Tata
-Seat 14. 16.2 46923 Panpuris Teankamonsupachod Tee
+Seat 14. 16.2 43093 Panpuris Teankamonsupachod Tee
 Seat 15. 16.2 55555 Teacher David
 Seat 16. 16.2 43128 Nutphalod
 Seat 17. 16.2 46934 Boonpipob Mojanakul Nava
@@ -450,6 +451,7 @@ function render() {
   seating.appendChild(buildRow(students, cls, 0));
   seating.appendChild(buildRow(students, cls, 10));
   seating.appendChild(buildFloor(cls));
+seating.appendChild(buildInstructionField());
 }
 
 function buildRow(students, cls, startIndex) {
@@ -705,5 +707,37 @@ function randomizeSeats() {
 
 </div>
 
+<script>
+
+const GLOBAL_INSTRUCTIONS = `
+Class rules:
+
+Stop talking when the teacher is talking.
+Do not distract your friend when the teacher is talking.
+Sit up straight.
+Keep your pen or pencil in your hand.
+Keep up with the class.
+
+`.trim();
+
+function buildInstructionField() {
+  const box = document.createElement("div");
+
+  box.style.marginTop = "6px";
+  box.style.width = "100%";
+  box.style.padding = "8px 10px";
+  box.style.border = "1px solid #c7ddff";
+  box.style.borderRadius = "8px";
+  box.style.background = "#f8fbff";
+  box.style.fontSize = "12px";
+  box.style.whiteSpace = "pre-wrap";
+  box.style.lineHeight = "1.3";
+
+  box.textContent = GLOBAL_INSTRUCTIONS;
+
+  return box;
+}
+
+</script>
 </body>
 </html>
