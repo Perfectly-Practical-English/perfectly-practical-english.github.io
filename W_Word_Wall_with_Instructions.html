@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+
+:root{
+
+    --bg:#dff2ff;
+    --panel:#ececec;
+
+    --gridBorder:#666;
+    --cellBorder:#b8b8b8;
+
+    --rightPanel:#f7f7f7;
+
+}
+
+/* ==========================================================
+   GLOBAL
+========================================================== */
+
+*{
+    box-sizing:border-box;
+}
+
+html,
+body{
+
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+
+    background:var(--bg);
+
+    font-family:"Comic Sans MS",cursive;
+
+}
+
+/* ==========================================================
+   PAGE
+========================================================== */
+
+.page{
+    position:relative;
+    width:100vw;
+    height:100vh;
+
+    display:grid;
+    grid-template-columns:2fr 1fr;
+
+    overflow:hidden;
+}
+
+/* CRITICAL FIX */
+#leftPane{
+    min-height:0;
+    display:flex;
+    flex-direction:column;
+}
+
+#wordwall{
+    flex:1;
+
+    display:grid;
+    grid-template-columns:repeat(10,1fr);
+    grid-auto-rows:26px;
+
+    gap:0;
+    padding:12px;
+
+    overflow-y:auto;
+    overflow-x:hidden;
+}
+/* SCROLLABLE AREA */
+#wordwall{
+    flex:1;
+    min-height:0;
+
+    display:grid;
+    grid-template-columns:repeat(10,1fr);
+    grid-auto-rows:26px;
+
+    gap:0;
+    padding:12px;
+
+    overflow-y:auto;     /* vertical scroll ONLY */
+    overflow-x:hidden;   /* no horizontal scroll */
+}
+/* ==========================================================
+   GRID CELLS
+========================================================== */
+
+.cell{
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+    border:1px solid var(--cellBorder);
+
+    background:#f3f3f3;
+
+    overflow:hidden;
+
+    min-width:0;
+    min-height:0;
+
+}
+
+/* ==========================================================
+   RIGHT PANEL
+========================================================== */
+
+#rightPane{
+
+    display:flex;
+    flex-direction:column;
+
+    background:var(--rightPanel);
+
+    overflow:hidden;
+
+}
+
+/* ==========================================================
+   WRITING PROMPT
+========================================================== */
+
+#prompt{
+
+    padding:10px;
+
+    font-size:10px;
+
+    line-height:1.15;
+
+    white-space:pre-wrap;
+
+    overflow:auto;
+
+    flex:1;
+
+}
+
+/* ==========================================================
+   TILE
+========================================================== */
+
+.tile{
+
+    display:flex;
+
+    justify-content:center;
+    align-items:center;
+
+width:100%;
+height:100%;
+    padding:1px 4px;
+
+    border:1px solid #666;
+    border-radius:2px;
+
+    background:white;
+
+    cursor:pointer;
+
+    user-select:none;
+
+    overflow:hidden;
+
+    text-align:center;
+
+    font-size:8pt;
+
+}
+
+/* ==========================================================
+   SELECTED TILE
+========================================================== */
+
+.tile.selectedTile{
+
+    outline:3px solid #2d7cff;
+    outline-offset:-2px;
+
+}
+
+/* ==========================================================
+   CATEGORY COLOURS
+========================================================== */
+
+.color-Adjectives{
+    background:#d9f7b2;
+}
+
+.color-Nouns{
+    background:#ffe1a8;
+}
+
+.color-Verbs{
+    background:#ffcccc;
+}
+
+/* if future files contain these */
+
+.color-Adverbs{
+    background:#ffd1dc;
+}
+
+.color-Pronouns{
+    background:#e0c3fc;
+}
+
+.color-Determiners{
+    background:#c8f7c5;
+}
+
+.color-Prepositions{
+    background:#ffd8b1;
+}
+
+.color-Conjunctions{
+    background:#cfe8ff;
+}
+
+.color-Interjections{
+    background:#d3d3d3;
+}
+
+/* ==========================================================
+   PNG OVERLAY
+========================================================== */
+
+#overlayLayer{
+
+    position:absolute;
+
+    inset:0;
+
+    z-index:5000;
+
+    pointer-events:none;
+
+}
+
+.overlayPng{
+
+    position:absolute;
+
+    cursor:move;
+
+    pointer-events:auto;
+
+    user-select:none;
+    -webkit-user-drag:none;
+
+}
+
+/* ==========================================================
+   PNG TOOLBAR
+========================================================== */
+
+#pngToolbar{
+
+    position:fixed;
+
+    left:50%;
+    bottom:16px;
+
+    transform:translateX(-50%);
+
+    display:flex;
+    flex-direction:column;
+
+    gap:6px;
+
+    padding:8px;
+
+    max-height:45vh;
+    max-width:calc(100vw - 20px);
+
+    overflow-y:auto;
+    overflow-x:hidden;
+
+    background:#333;
+
+    border:8px solid #b28ae8;
+
+    border-radius:8px;
+
+    z-index:100000;
+
+    box-shadow:0 3px 14px rgba(0,0,0,.4);
+
+}
+#pngToolbar button{
+
+    width:190px;
+
+    height:34px;
+
+    border:2px solid #b28ae8;
+
+    border-radius:5px;
+
+    background:white;
+
+    cursor:pointer;
+
+    text-align:left;
+
+    padding:0 8px;
+
+    font-family:inherit;
+
+}
+
+#pngToolbar button:hover{
+
+    background:#f2edff;
+
+}
+
+#pngToolbar button.selected{
+
+    background:#e6dcff;
+
+    border-color:#7348d4;
+
+}
+
+/* ==========================================================
+   EDITING
+========================================================== */
+
+.tile[contenteditable="true"]{
+
+    cursor:text;
+
+    user-select:text;
+
+    outline:2px solid #4b8cff;
+
+}
+
+/* ==========================================================
+   SCROLLBAR
+========================================================== */
+
+::-webkit-scrollbar{
+
+    width:10px;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#bbb;
+    border-radius:10px;
+
+}
+
+::-webkit-scrollbar-track{
+
+    background:#eee;
+
+}
+
+
+.star-tile{
+    background:white !important;
+    border:1px solid #666;
+}
+
+.color-Flex{
+    background:#e8e8e8;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="page">
+
+    <!-- ======================================================
+         LEFT SIDE
+    ======================================================= -->
+
+    <div id="leftPane">
+
+        <div id="wordwall">
+            <!-- 100 cells are created by JavaScript -->
+        </div>
+
+    </div>
+
+    <!-- ======================================================
+         RIGHT SIDE
+    ======================================================= -->
+
+    <div id="rightPane">
+
+        <div id="prompt"></div>
+
+    </div>
+
+    <!-- ======================================================
+         PNG OVERLAY
+    ======================================================= -->
+
+    <div id="overlayLayer"></div>
+
+</div>
+
+</body>
+
+<script>
+/*==========================================================
+    LOAD DATA
+==========================================================*/
+
+let WORDS = [];
+let PNGS = [];
+
+async function loadData(){
+
+const res = await fetch("./W_Word_Wall_Midterm.txt");
+if (!res.ok) throw new Error("TXT load failed: " + res.status);
+const txt = await res.text();
+
+    const sections={};
+    let current="";
+
+    txt.split(/\r?\n/).forEach(line=>{
+
+        if(line.startsWith("~")){
+            current=line.substring(1).trim();
+            sections[current]=[];
+            return;
+        }
+
+        if(current){
+            sections[current].push(line);
+        }
+
+    });
+
+    loadWords(sections["Left Table"] || sections["left table"] || []);
+
+document.getElementById("prompt").textContent =
+    (sections["Top Right Field"] || sections["top right field"] || []).join("\n").trim();
+
+loadImages(sections["Image References"] || sections["image references"] || []);
+
+buildGrid();
+
+if(window.buildToolbar){
+    window.buildToolbar();
+}
+
+}
+
+/*==========================================================
+    WORDS
+==========================================================*/
+
+function loadWords(lines){
+
+    WORDS = [];
+
+    lines.forEach(line => {
+
+        line = line.trim();
+
+        if (!line) return;
+
+        // Ignore old category headers
+        if (line.startsWith("|") && line.endsWith("|")) return;
+
+        const tile = document.createElement("div");
+        tile.className = "tile";
+
+        const isStar = line.startsWith("★") || line.startsWith("*");
+
+        const clean = isStar
+            ? line.replace(/^[★*]\s*/, "")
+            : line;
+
+        // Parse:
+        // word - noun
+        const parts = clean.split(/\s+-\s+/);
+
+        const word = parts[0].trim();
+        const pos = (parts[1] || "").toLowerCase();
+
+        tile.textContent = word;
+        tile.dataset.pos = pos;
+
+        if (isStar) {
+            tile.classList.add("star-tile");
+        }
+
+        switch (pos) {
+
+            case "noun":
+                tile.classList.add("color-Nouns");
+                break;
+
+            case "verb":
+                tile.classList.add("color-Verbs");
+                break;
+
+            case "adjective":
+                tile.classList.add("color-Adjectives");
+                break;
+
+            case "adverb":
+                tile.classList.add("color-Adverbs");
+                break;
+
+            case "pronoun":
+                tile.classList.add("color-Pronouns");
+                break;
+
+            case "determiner":
+                tile.classList.add("color-Determiners");
+                break;
+
+            case "preposition":
+                tile.classList.add("color-Prepositions");
+                break;
+
+            case "conjunction":
+                tile.classList.add("color-Conjunctions");
+                break;
+
+            case "interjection":
+                tile.classList.add("color-Interjections");
+                break;
+
+            default:
+                tile.classList.add("color-Flex");
+                break;
+        }
+
+        WORDS.push(tile);
+
+    });
+
+}
+/*==========================================================
+    IMAGES
+==========================================================*/
+
+function loadImages(lines){
+
+    PNGS=[];
+
+    lines.forEach(line=>{
+
+        line=line.trim();
+
+        if(!line) return;
+
+        const parts=line.split("|");
+
+        PNGS.push({
+
+            label:parts[0].replace(/\.[^.]+$/,""),
+
+            file:parts[0].trim(),
+
+            width:parseInt(parts[1])||120
+
+        });
+
+    });
+
+}
+
+/*==========================================================
+    GRID
+==========================================================*/
+
+function buildGrid(){
+
+    const grid=document.getElementById("wordwall");
+
+    grid.innerHTML="";
+
+const ROWS = 30;   // Change this whenever you want more/fewer rows
+const COLS = 10;
+
+
+for(let i=0;i<ROWS*COLS;i++){
+        const cell=document.createElement("div");
+        cell.className="cell";
+
+if(WORDS[i]){
+    if (WORDS[i].parentNode) WORDS[i].parentNode.removeChild(WORDS[i]);
+    cell.appendChild(WORDS[i]);
+}
+
+        grid.appendChild(cell);
+
+    }
+
+}
+</script>
+
+
+<script>
+/*==========================================================
+    TILE INTERACTION
+==========================================================*/
+
+let selectedTile=null;
+let editingTile=null;
+let oldText="";
+
+/*----------------------------------------------------------
+    Helpers
+----------------------------------------------------------*/
+
+function allCells(){
+    return document.querySelectorAll("#wordwall .cell");
+}
+
+function getTile(cell){
+    return cell.querySelector(".tile");
+}
+
+function clearSelection(){
+
+    document
+        .querySelectorAll(".tile.selectedTile")
+        .forEach(t=>t.classList.remove("selectedTile"));
+
+    selectedTile=null;
+
+}
+
+function selectTile(tile){
+
+    clearSelection();
+
+    selectedTile=tile;
+
+    tile.classList.add("selectedTile");
+
+}
+
+/*----------------------------------------------------------
+    Editing
+----------------------------------------------------------*/
+
+function editTile(tile){
+
+    if(editingTile) return;
+
+    editingTile=tile;
+    oldText=tile.textContent;
+
+    tile.contentEditable=true;
+
+    tile.focus();
+
+    const range=document.createRange();
+
+    range.selectNodeContents(tile);
+
+    const sel=window.getSelection();
+
+    sel.removeAllRanges();
+
+    sel.addRange(range);
+
+}
+
+function finishEdit(save){
+
+if(!editingTile) return;
+
+if(!save){
+    editingTile.textContent = oldText;
+}
+
+if(editingTile.textContent.trim()===""){
+    editingTile.remove();
+    editingTile = null;
+    return;
+}
+
+editingTile.contentEditable = false;
+
+editingTile = null;/*----------------------------------------------------------
+    Install handlers
+----------------------------------------------------------*/
+
+function installTileHandlers(){
+
+    allCells().forEach(cell=>{
+
+        if(cell.dataset.ready === "1") return;
+
+        cell.dataset.ready="1";
+
+        cell.addEventListener("click",function(e){
+
+            const tile=getTile(cell);
+
+            if(tile){
+
+                selectTile(tile);
+
+                e.stopPropagation();
+
+                return;
+
+            }
+
+            if(selectedTile){
+
+                cell.appendChild(selectedTile);
+
+                clearSelection();
+
+            }
+
+        });
+
+        cell.addEventListener("dblclick",function(e){
+
+            let tile=getTile(cell);
+
+            if(tile){
+
+                editTile(tile);
+
+                e.stopPropagation();
+
+                return;
+
+            }
+
+tile = document.createElement("div");
+tile.className = "tile";
+
+cell.appendChild(tile);
+
+editTile(tile);
+        });
+
+    });
+
+}
+
+/*----------------------------------------------------------
+    Observe DOM
+----------------------------------------------------------*/
+
+const observer=new MutationObserver(function(){
+    if (!window._tilesInstalled) {
+    installTileHandlers();
+    window._tilesInstalled = true;
+}
+    observer.disconnect();
+});
+observer.observe(document.body,{
+
+    childList:true,
+    subtree:true
+
+});
+
+/*----------------------------------------------------------
+    Blur saves edits
+----------------------------------------------------------*/
+
+document.addEventListener("focusout",function(){
+
+    if(editingTile){
+
+        finishEdit(true);
+
+    }
+
+},true);
+
+/*----------------------------------------------------------
+    Keyboard
+----------------------------------------------------------*/
+
+document.addEventListener("keydown",function(e){
+
+    if(editingTile){
+
+        if(e.key==="Escape"){
+
+            e.preventDefault();
+
+            finishEdit(false);
+
+        }
+
+        return;
+
+    }
+
+    const tile=document.querySelector(".tile.selectedTile");
+
+    if(!tile) return;
+
+    if(e.key==="Delete" || e.key==="Backspace"){
+
+        e.preventDefault();
+
+        tile.remove();
+
+        clearSelection();
+
+    }
+
+});
+
+/*----------------------------------------------------------
+    Click background = deselect
+----------------------------------------------------------*/
+
+document.addEventListener("click",function(e){
+
+    if(!e.target.closest(".tile")){
+
+        clearSelection();
+
+    }
+
+});
+</script>
+
+<script>
+/*==========================================================
+    PNG OVERLAY TOOL
+==========================================================*/
+
+(function(){
+
+const page=document.querySelector(".page");
+const overlay=document.getElementById("overlayLayer");
+
+let placeMode=null;
+let selectedPng=null;
+
+/*----------------------------------------------------------
+    Toolbar
+----------------------------------------------------------*/
+
+const bar=document.createElement("div");
+bar.id="pngToolbar";
+document.body.appendChild(bar);
+
+function buildToolbar(){
+
+    bar.innerHTML="";
+
+    const select=document.createElement("button");
+    select.textContent="Select";
+    bar.appendChild(select);
+
+    select.onclick=function(){
+
+        placeMode=null;
+
+        [...bar.querySelectorAll("button")]
+            .forEach(b=>b.classList.remove("selected"));
+
+    };
+
+    const clear=document.createElement("button");
+    clear.textContent="Clear";
+    bar.appendChild(clear);
+
+    clear.onclick=function(){
+
+        const tile=document.querySelector(".tile.selectedTile");
+
+        if(tile){
+
+            tile.remove();
+
+            clearSelection();
+
+            return;
+
+        }
+
+        if(selectedPng){
+
+            selectedPng.remove();
+
+            selectedPng=null;
+
+        }
+
+    };
+
+    PNGS.forEach(item=>{
+
+        const b=document.createElement("button");
+
+        b.textContent=item.label;
+
+        b.onclick=function(){
+
+            [...bar.querySelectorAll("button")]
+                .forEach(x=>x.classList.remove("selected"));
+
+            b.classList.add("selected");
+
+            placeMode=item;
+
+            overlay.style.pointerEvents="auto";
+
+        };
+
+        bar.appendChild(b);
+
+    });
+
+}
+
+/*----------------------------------------------------------
+    Place image
+----------------------------------------------------------*/
+
+overlay.addEventListener("pointerdown",function(e){
+
+    if(!placeMode) return;
+
+    const rect=page.getBoundingClientRect();
+
+    const img=document.createElement("img");
+
+    img.className="overlayPng";
+
+    img.src=placeMode.file;
+
+    img.style.width=placeMode.width+"px";
+
+    img.style.left=
+        (e.clientX-rect.left-placeMode.width/2)+"px";
+
+    img.style.top=
+        (e.clientY-rect.top-placeMode.width/2)+"px";
+
+    overlay.appendChild(img);
+
+    enableDrag(img);
+
+    overlay.style.pointerEvents="none";
+
+    placeMode=null;
+
+    [...bar.querySelectorAll("button")]
+        .forEach(x=>x.classList.remove("selected"));
+
+});
+
+/*----------------------------------------------------------
+    Drag
+----------------------------------------------------------*/
+
+function enableDrag(el){
+
+    el.addEventListener("pointerdown",function(ev){
+
+        ev.preventDefault();
+        ev.stopPropagation();
+
+        selectedPng=el;
+
+        const rect=page.getBoundingClientRect();
+
+        const startLeft=parseFloat(el.style.left)||0;
+        const startTop=parseFloat(el.style.top)||0;
+
+        const offsetX=(ev.clientX-rect.left)-startLeft;
+        const offsetY=(ev.clientY-rect.top)-startTop;
+
+        function move(e){
+
+            el.style.left=
+                ((e.clientX-rect.left)-offsetX)+"px";
+
+            el.style.top=
+                ((e.clientY-rect.top)-offsetY)+"px";
+
+        }
+
+        function up(){
+
+            window.removeEventListener("pointermove",move);
+            window.removeEventListener("pointerup",up);
+
+        }
+
+        window.addEventListener("pointermove",move);
+        window.addEventListener("pointerup",up);
+
+    });
+
+}
+
+/*----------------------------------------------------------
+    Toolbar drag
+----------------------------------------------------------*/
+
+(function(){
+
+let dragging=false;
+let ox=0;
+let oy=0;
+
+bar.addEventListener("pointerdown",function(e){
+
+    if(e.target.tagName==="BUTTON") return;
+
+    dragging=true;
+
+    const r=bar.getBoundingClientRect();
+
+    ox=e.clientX-r.left;
+    oy=e.clientY-r.top;
+
+    bar.style.left=r.left+"px";
+    bar.style.top=r.top+"px";
+    bar.style.bottom="auto";
+    bar.style.transform="none";
+
+});
+
+window.addEventListener("pointermove",function(e){
+
+    if(!dragging) return;
+
+    bar.style.left=(e.clientX-ox)+"px";
+    bar.style.top=(e.clientY-oy)+"px";
+
+});
+
+window.addEventListener("pointerup",function(){
+
+    dragging=false;
+
+});
+
+})();
+
+/*----------------------------------------------------------
+    Init
+----------------------------------------------------------*/
+
+/*----------------------------------------------------------
+    Init
+----------------------------------------------------------*/
+
+window.buildToolbar = buildToolbar;
+
+})();</script>
+
+
+<script>
+window.addEventListener("DOMContentLoaded", async function () {
+
+    await loadData();
+
+    // Override all colours from the source file.
+    
+
+    installTileHandlers();
+
+});
+</script>
+
+<script>
+/*==========================================================
+    TEMPORARY: Ignore invalid colour classes
+    Delete this script when using proper parts-of-speech files.
+==========================================================*/
+
+(function () {
+
+    const originalAdd = DOMTokenList.prototype.add;
+
+    DOMTokenList.prototype.add = function (...tokens) {
+
+        const filtered = tokens.filter(token => {
+
+            // Ignore invalid colour classes like
+            // "color-Potato Chips"
+            if (token.startsWith("color-") && /\s/.test(token)) {
+                return false;
+            }
+
+            return true;
+
+        });
+
+        if (filtered.length) {
+            originalAdd.apply(this, filtered);
+        }
+
+    };
+
+})();
+</script>
+
+</body>
+</html>
