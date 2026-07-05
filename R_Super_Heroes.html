@@ -1,0 +1,4608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PerfectlyPracticalEnglish.netlify.app</title>
+
+<style>
+
+/* =====================
+   1. FIRST PAINT / MODE GATING
+===================== */
+
+#layout,
+#dynamicTOC {
+  display: none;
+}
+
+/* HARD enabled */
+html.show-hard #layout {
+  display: block;
+}
+
+/* DYNAMIC enabled */
+html.show-dynamic #dynamicTOC {
+  display: block;
+}
+
+/* =====================
+   2. GLOBAL BASE TYPOGRAPHY
+===================== */
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #222;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f6fa;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Hide page until auto-open logic finishes */
+html.pre-auto-open body > *:not(#loader) {
+  visibility: hidden;
+}
+
+h2 {
+  margin: 20px 0 10px 0;
+}
+
+h3 {
+  margin: 0 0 6px 0;
+  color: #1976d2;
+  font-size: 12px;
+}
+
+.word {
+  cursor: pointer;
+  color: inherit;
+}
+
+.word:hover {
+  background-color: rgba(26,115,232,0.2);
+}
+
+.sentence {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.highlight {
+  background-color: #ffff00;
+  color: #000000;
+}
+
+.visually-hidden {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+
+/* =====================
+   4. DYNAMIC TOC
+===================== */
+
+#tocButtons {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tocColumn button {
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+
+  display: block;
+  width: 100%;
+  background-color: #2b5d84;
+  color: #ffffff;
+
+  padding: 10px 10px 10px 15px;
+  border-radius: 6px;
+
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+
+  box-sizing: border-box;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tocColumn button:hover,
+.readAloudBtn:hover {
+  background-color: #1f4563;
+}
+
+#tocContainer h3 {
+  color: #2b5d84;
+  margin-left: 20px;
+}
+
+.parsedHeader {
+  color: #2b5d84;
+  font-weight: bold;
+  margin-left: -3px;
+
+}
+
+.parsedSubheader {
+  color: #2b5d84;
+  font-weight: bold;
+  margin-top: 14px;
+  margin-bottom: 8px;
+}
+
+/* =====================
+   6. MODAL ISOLATION
+===================== */
+
+body.modal-open {
+  overflow: hidden;
+}
+
+body.modal-open #tocRoot,
+body.modal-open #tocColLeft,
+body.modal-open #tocColRight {
+  display: none;
+}
+
+#modalRoot {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  display: none;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding-top: 20px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  overscroll-behavior: contain;
+
+  z-index: 20000;
+}
+
+#modalRoot.active {
+  display: flex;
+  flex-direction: column;  /* stack bars vertically */
+  gap: 0;                  /* remove the transparent strip */
+  background: #ffffff;     /* force pure white */
+}
+/* =====================
+   7. QUIZ MODAL LAYOUT
+===================== */
+
+#quizModal {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+
+  height: calc(100dvh - var(--kb-offset, 0px));
+
+  margin: 0 auto;
+
+  padding: 0 10px 120px 10px;
+
+  background: #ffffff;
+  box-sizing: border-box;
+
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  border-radius: 8px;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#quizModal h2 {
+  font-size: 12px;
+}
+
+#quizModalContent {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#quizSections {
+  width: 100%;
+  margin-left: 0;
+  padding-top: 10px;  /* Kill switch header spacing */
+  box-sizing: border-box;
+}
+
+#quizSections > * {
+  padding: 3px 0;
+  margin-bottom: 16px;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+#quizSections .section > h2 {
+  margin: 0 0 8px 0;
+  scroll-margin-top: 100px;
+}
+
+#quizSections .quiz-subsection {
+  margin: 10px 0;
+}
+
+#quizSections .quiz-subsection:first-of-type {
+  margin-top: 0;
+}
+
+#quizSections .quiz-subsection h3 {
+  margin: 0 0 8px 0;
+}
+
+#quizSections h3 {
+  scroll-margin-top: 10px;
+}
+
+.question-text {
+  margin-top: -5px;
+}
+
+.question-text h3 {
+  margin: 16px 0 8px;
+}
+
+.question-text:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.exercise-container {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.exercise p {
+  margin-bottom: 4px;
+}
+
+
+/* =====================
+   8. CONTROL BARS (Stacked Sticky Inside Scroll Container)
+===================== */
+
+/* Hidden by default */
+#chapterVerseControls,
+#readaloudControls {
+  display: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  box-sizing: border-box;
+
+  line-height: 0; /* kill inherited inline height */
+}
+
+/* Show when modal active */
+#modalRoot.active #chapterVerseControls,
+#modalRoot.active #readaloudControls {
+  display: block; /* block is safer than flex at container level */
+}
+
+/* --------------------------------------------------
+   BOTH BARS STICK (same scroll context)
+-------------------------------------------------- */
+
+#chapterVerseControls {
+  position: relative;
+  top: auto;
+  z-index: 40;
+}
+
+#readaloudControls {
+  position: relative;
+  top: auto;
+  z-index: 39;
+  border-top: 1px solid #eee;
+}
+
+/* REMOVE stacking math completely */
+#chapterVerseControls + #readaloudControls {
+  top: auto;
+}
+/* Keep layout behavior inside controlRow */
+#chapterVerseControls .controlRow,
+#readaloudControls .controlRow {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+#readaloudControls {
+  border-top: 1px solid #ffffff;
+  padding-top: 6px;
+}
+
+/* --------------------------------------------------
+   Buttons & Select Layout
+-------------------------------------------------- */
+
+#chapterVerseControls select,
+#chapterVerseControls button,
+#readaloudControls select,
+#readaloudControls button {
+  flex: 0 0 calc((100% - 18px) / 4);
+  max-width: calc((100% - 18px) / 4);
+  min-width: 0;
+
+  height: 36px;
+  line-height: 36px;
+
+  box-sizing: border-box;
+  font-size: 13px;
+  border-radius: 6px;
+
+  margin: 0;
+  padding: 0 10px;
+  vertical-align: middle;
+}
+
+/* Select normalization */
+#chapterVerseControls select,
+#readaloudControls select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+}
+
+/* Button alignment */
+#chapterVerseControls button,
+#readaloudControls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hide select scrollbar */
+#chapterVerseControls select::-webkit-scrollbar,
+#readaloudControls select::-webkit-scrollbar {
+  width: 0;
+}
+
+/* Readaloud wrapper safety */
+.readaloud-block,
+.readaloud-block .readaloud-buttons {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  box-sizing: border-box;
+}/* =====================
+   9. BUTTON SYSTEM
+===================== */
+
+#modalRoot button {
+  height: 36px;
+  font-size: 12px;
+  background: #2b5d84;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+#modalRoot button:hover:not(:disabled) {
+  background: #1f4563;
+}
+
+#modalRoot button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+#modalRoot button:disabled {
+  background: #8aa3b8;
+  cursor: not-allowed;
+}
+
+
+/* =====================
+   10. SCOREBOARD
+===================== */
+
+#scoreboard {
+  display: block;
+  position: sticky;
+  bottom: 0;
+
+  left: 2px;              /* ← actual visual shift (try 1px if too much) */
+
+  background: #fff;
+  padding: 10px;
+  border: 2px solid #add8e6;
+
+  width: calc(100% - 2px); /* compensate so it doesn’t overflow right */
+  box-sizing: border-box;
+
+  z-index: 10;
+}
+
+.scoreboard-main pre,
+#scoreOutput {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  display: block;
+}
+
+.scoreboard-buttons {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.scoreboard-buttons > * {
+  flex: 1 1 0;        /* equal width */
+  min-width: 0;
+  height: 36px;
+}
+
+
+
+/* =====================
+   11. SHARED TOC STRUCTURE CONTRACT
+===================== */
+
+#layout,
+#tocContainer {
+  width: 100%;
+  max-width: 360px;
+  margin: 20px auto;
+  padding: 5px 10px;
+  box-sizing: border-box;
+}
+
+.container,
+#tocButtons {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.column,
+.tocColumn {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+
+/* =====================
+   12. GLOBAL SCROLLBAR SUPPRESSION
+===================== */
+
+html,
+body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  /* 🔥 ADD THIS */
+  overflow-anchor: none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+#quizModal::-webkit-scrollbar,
+#mvWindow::-webkit-scrollbar {
+  display: none;
+}
+
+#quizModal,
+#mvWindow {
+  scrollbar-width: none;
+}
+
+
+/* Make all 4-item control rows identical */
+/* ========================
+   FLEXIBLE CONTROL ROW SYSTEM
+========================= */
+
+.controlRow {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+/* shared styling */
+.controlRow > * {
+  min-width: 0;
+  height: 36px;
+  box-sizing: border-box;
+  font-size: 13px;
+  border-radius: 6px;
+  padding: 0 10px;
+}
+
+/* Chapter + Verse selects wider */
+.controlRow select:nth-child(1),
+.controlRow select:nth-child(2) {
+  flex: 1.3 1 0;
+}
+
+/* Buttons slightly smaller */
+.controlRow button {
+  flex: 0.8 1 0;
+}
+/* ========================
+   NAME / ID / SUBMIT / CLOSE ROW
+========================= */
+
+/* each row */
+.top-controls {
+  display: flex;
+  gap: 6px;              /* horizontal spacing only */
+  margin: 0;             /* remove transparent margin */
+  width: 100%;
+}
+
+.top-controls > * {
+  flex: 1 1 0;        /* equal width for all 4 */
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 13px;
+}
+
+.top-controls input {
+  border: 1px solid #ccc;
+}
+
+.top-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copyrightSection {
+  font-size: 9px;
+  opacity: 0.7;
+
+  padding: 0 6px;
+  box-sizing: border-box;
+
+  margin-top: 15px;
+  padding-left: 1px;
+
+  text-align: left;
+
+  display: block;
+}
+
+/* enforce vertical stacking */
+.copyrightSection > div {
+  display: block;
+}
+
+.visitor-count {
+  font-size: 12px;
+  opacity: 0.75;
+  margin-top: 4px;
+}
+
+.quiz-scoreboard {
+  width: 100%;
+  box-sizing: border-box;
+
+  margin-bottom: 12px;
+  padding: 6px;
+
+  border: 1px solid #9aaed1;
+  border-radius: 6px;
+  background: #f9f9f9;
+
+  font-family: monospace;
+  font-size: 12px;
+}
+
+
+/* vertical stacking container */
+
+/* Make only Chapter & Verse text smaller */
+#chapterVerseControls select {
+  font-size: 10px;   /* adjust to 9px, 11px, etc. */
+}
+
+.reading-active {
+  background-color: yellow !important;
+  scroll-margin-top: 120px;
+}
+
+#loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #f5f6fa; /* match page background */
+  z-index: 9999;
+}
+
+/* Inner box matches your layout width */
+#loaderContent {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+
+  text-align: center;
+  padding: 20px;
+
+  font-size: 16px;
+  font-weight: bold;
+  color: #2b5d84; /* 🔵 your button blue */
+}
+
+#helloBar {
+  height: 40px;              /* acts as buffer */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12px;
+  color: #2b5d84;
+
+  background: #ffffff;
+  transition: opacity 0.15s ease, height 0.15s ease;
+}
+
+
+
+/* =========================
+   🔥 MOBILE KEYBOARD FIX LAYER
+   (SAFE OVERRIDE ZONE)
+========================= */
+
+html, body {
+  height: 100%;
+}
+
+/* Prevent layout jump caused by keyboard resize */
+#modalRoot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  height: 100dvh; /* modern mobile viewport fix */
+  min-height: 100vh;
+}
+
+/* Better behavior when keyboard opens */
+@supports (height: 100dvh) {
+  #modalRoot {
+    height: 100dvh;
+  }
+}
+
+/* fallback smooth behavior for older mobile browsers */
+@media (max-width: 768px) {
+  #modalRoot {
+    transition: transform 0.12s ease-out;
+  }
+}
+
+/* optional: stabilize bottom UI elements (your proxy button) */
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+.modal-close-btn {
+  width: 36px;
+  height: 36px;
+
+  padding: 0;
+  line-height: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 16px;
+
+  background: #2b5d84;
+  color: #fff;
+
+  border: none;
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  transition: background 0.15s, transform 0.1s;
+
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.modal-close-btn:hover {
+  background: #1f4563;
+}
+
+.modal-close-btn:active {
+  transform: scale(0.97);
+}
+
+
+h1[data-auto-title] {
+  visibility: hidden;
+}
+
+html.ui-ready h1[data-auto-title] {
+  visibility: visible;
+}
+
+#layout,
+#tocContainer {
+  padding-bottom: 30px;
+}
+
+
+.visits-bottom-space {
+  height: 140px; /* adjust this freely */
+  width: 100%;
+}
+
+
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div id="loaderContent">Loading...</div>
+</div>
+<div id="rawTextSource" class="visually-hidden">
+
+
+
+~
+
+Superhero Name
+We'll start with the superhero's name, which often sets the tone for their personality, powers, and overall story. It can be symbolic of their abilities, their mission, or their persona.
+
+Where is he from?
+Is he from a specific city, country, or perhaps a different world or dimension? His origin could shape the cultural aspects of his values and behavior. For example, a hero from a futuristic city may have a different outlook on technology and progress compared to someone from a war-torn region or a mystical realm.
+
+What is his physical appearance like?
+This includes his height, build, age, and overall physical traits. Does he have any distinctive features, like glowing eyes, scars, or a particular aura? You can also describe how he carries himself—whether he’s athletic, imposing, or slender. Physical attributes can sometimes reflect personality—does he look imposing, or is there something about his appearance that makes him blend in more with everyday people?
+
+What are his character attributes?
+Consider the hero's personality traits:
+•	Is he brave, witty, compassionate, or stoic?
+•	Does he have any flaws or emotional struggles that humanize him?
+•	Is he driven by vengeance, or is he more idealistic?
+•	Does he have a sense of humor, or does he take things more seriously?
+•	How does he interact with others—does he trust easily, or does he keep people at a distance?
+•	
+What values does he believe in?
+A superhero’s beliefs or values could range from justice, equality, and freedom to personal responsibility, environmentalism, or protecting the innocent. What is it that motivates him to fight evil or help others? These values will shape his actions and decisions—does he believe in mercy, or is he willing to take extreme actions to stop evil?
+
+What does his costume look like?
+Does his outfit have a thematic color scheme or design? Does it symbolize something, like a bird for freedom or dark colors for stealth? Think about what the costume's material and design convey—does he wear high-tech armor, or is it something more agile and lightweight? Is there an emblem that represents his values or mission? Perhaps his suit offers him protection, camouflages him, or provides some kind of enhanced capability.
+
+How did he become a superhero?
+What triggered his transformation? Did he undergo an experiment gone wrong, inherit special abilities, or choose to act after a tragic event? Was his rise to heroism sudden, or did he gradually discover his powers and take on this new role? This origin story is crucial in understanding his motivations—does he fight for personal revenge, out of a sense of duty, or because he saw a greater need in the world?
+
+What is his alter ego?
+Who is he, or who does he pretend to be when he’s not in his superhero role? Is he an ordinary citizen with a regular job, or does he have a public persona (like a journalist or scientist)? How does his alter ego differ from his superhero self? Does he struggle to balance the two lives, or does he keep them separated? This can also help shape his vulnerabilities—does he hide his true identity to protect loved ones, or does he feel isolated because no one knows who he really is?
+
+What are his superpowers?
+Here’s where you define the hero's abilities. Are they based on science (like an enhanced intellect), magic, technology, or natural phenomena (super strength, flying, telekinesis, etc.)? Does he have one primary power or a combination of abilities? Are his powers innate, or did he have to train or acquire them? This section is important because it shows what sets him apart from ordinary humans and how he might be able to tackle the challenges he faces.
+
+What weapons does he have?
+Does he rely on physical weapons, like swords, guns, or other advanced tools? Or is it more about his powers? Perhaps he has specialized tech or gadgets he uses in battle, such as energy shields, grappling hooks, or a utility belt full of high-tech items. This can help define his approach to crime-fighting—does he use brute force, stealth, or advanced technology to get the job done?
+
+What vehicles does he use?
+Does he have a signature vehicle, such as a high-tech car, an aircraft, or a motorcycle? The vehicle can say a lot about his style—whether it’s sleek and fast, durable and intimidating, or camouflaged for stealth. Maybe his vehicle is equipped with advanced gadgets or serves as a mobile base of operations. It’s a great way to add another dimension to his hero persona.
+
+Where is his headquarters hidden?
+Every superhero needs a base of operations! Is it hidden deep in a mountain, beneath a city, or even in space? How accessible is it to the hero? Does it have advanced technology, hidden entrances, or secret passageways? This is the place where the hero plans, stores equipment, and perhaps even retreats when not on missions. It could also house crucial information about his enemies or the larger mission he’s working toward.
+
+Who are his friends?
+Does he have a team, a sidekick, or alliances with other superheroes? What role do they play in his journey—do they provide emotional support, help in battles, or offer knowledge? Are they integral to his success, or do they simply share his values? This section can reveal how he interacts with others in the superhero world—does he trust easily, or is he more of a lone wolf?
+
+Who are his ordinary human friends?
+These are the people who don’t know about his superhero persona but play an important role in his everyday life. They can be friends, family, colleagues, or mentors who provide support, advice, or sometimes even act as emotional anchors for him. They may not have powers, but they help ground him and give him a sense of normalcy. These relationships can also highlight his vulnerabilities—he might fear putting them in danger if they find out about his secret life.
+
+Who are his enemies?
+Does he have one arch-nemesis or a whole array of enemies? What motivates them? Are they also superpowered, or do they represent something that challenges the hero’s values (e.g., a corrupt government, a global corporation, or a natural disaster)? This section can help create a compelling opposition—heroes need great villains to make their stories exciting, and the hero’s greatest challenges often come from those who are just as determined, if not more so, to achieve their own goals.
+
+What are his weaknesses?
+No hero is perfect, and weaknesses add depth. Does he have physical vulnerabilities (like Kryptonite for Superman), emotional struggles (fear of failure, abandonment issues), or moral dilemmas? Perhaps he’s easily manipulated or has a fatal flaw that puts him in difficult situations. Weaknesses don’t just make the character more relatable—they also create opportunities for growth and improvement, making the hero’s victories feel more earned.
+
+What is his goal or mission in life?
+Every superhero has a reason for what they do. It could be a personal vendetta, a greater cause, or a moral code. Does he aim to rid the world of evil, protect a specific group of people, or challenge societal issues? The mission gives a sense of purpose and direction to the character’s actions. Whether it's saving the world, seeking redemption, or ensuring justice, the hero's goal will drive all his decisions and actions.
+
+This fully fleshed-out version provides a comprehensive, detailed guide to creating a superhero character that feels rich and multidimensional. The added focus on ordinary human friends brings in the emotional depth and grounding that many heroes need, balancing their extraordinary powers with real-world connections.
+You said:
+Please add an part about if he has an animal as a friend or sidekick.
+ChatGPT said:
+Absolutely! Adding an animal sidekick or friend can be a fun and unique aspect of a superhero character. Animals as companions often bring out different qualities in heroes—whether it's loyalty, courage, or a deep bond that transcends human understanding. This can also provide a unique dynamic in the superhero’s personal life and abilities.
+Here’s how I’d integrate this section into the overall profile:
+
+Superhero Name
+We'll start with the superhero's name, which often sets the tone for their personality, powers, and overall story. It can be symbolic of their abilities, their mission, or their persona.
+
+Where is he from?
+Is he from a specific city, country, or perhaps a different world or dimension? His origin could shape the cultural aspects of his values and behavior. For example, a hero from a futuristic city may have a different outlook on technology and progress compared to someone from a war-torn region or a mystical realm.
+
+What is his physical appearance like?
+This includes his height, build, age, and overall physical traits. Does he have any distinctive features, like glowing eyes, scars, or a particular aura? You can also describe how he carries himself—whether he’s athletic, imposing, or slender. Physical attributes can sometimes reflect personality—does he look imposing, or is there something about his appearance that makes him blend in more with everyday people?
+
+What are his character attributes?
+Consider the hero's personality traits:
+• Is he brave, witty, compassionate, or stoic?
+• Does he have any flaws or emotional struggles that humanize him?
+• Is he driven by vengeance, or is he more idealistic?
+• Does he have a sense of humor, or does he take things more seriously?
+• How does he interact with others—does he trust easily, or does he keep people at a distance?
+	
+What values does he believe in?
+A superhero’s beliefs or values could range from justice, equality, and freedom to personal responsibility, environmentalism, or protecting the innocent. What is it that motivates him to fight evil or help others? These values will shape his actions and decisions—does he believe in mercy, or is he willing to take extreme actions to stop evil?
+
+What does his costume look like?
+Does his outfit have a thematic color scheme or design? Does it symbolize something, like a bird for freedom or dark colors for stealth? Think about what the costume's material and design convey—does he wear high-tech armor, or is it something more agile and lightweight? Is there an emblem that represents his values or mission? Perhaps his suit offers him protection, camouflages him, or provides some kind of enhanced capability.
+
+How did he become a superhero?
+What triggered his transformation? Did he undergo an experiment gone wrong, inherit special abilities, or choose to act after a tragic event? Was his rise to heroism sudden, or did he gradually discover his powers and take on this new role? This origin story is crucial in understanding his motivations—does he fight for personal revenge, out of a sense of duty, or because he saw a greater need in the world?
+
+What is his alter ego?
+Who is he, or who does he pretend to be when he’s not in his superhero role? Is he an ordinary citizen with a regular job, or does he have a public persona (like a journalist or scientist)? How does his alter ego differ from his superhero self? Does he struggle to balance the two lives, or does he keep them separated? This can also help shape his vulnerabilities—does he hide his true identity to protect loved ones, or does he feel isolated because no one knows who he really is?
+
+What are his superpowers?
+Here’s where you define the hero's abilities. Are they based on science (like an enhanced intellect), magic, technology, or natural phenomena (super strength, flying, telekinesis, etc.)? Does he have one primary power or a combination of abilities? Are his powers innate, or did he have to train or acquire them? This section is important because it shows what sets him apart from ordinary humans and how he might be able to tackle the challenges he faces.
+
+What weapons does he have?
+Does he rely on physical weapons, like swords, guns, or other advanced tools? Or is it more about his powers? Perhaps he has specialized tech or gadgets he uses in battle, such as energy shields, grappling hooks, or a utility belt full of high-tech items. This can help define his approach to crime-fighting—does he use brute force, stealth, or advanced technology to get the job done?
+
+What vehicles does he use?
+Does he have a signature vehicle, such as a high-tech car, an aircraft, or a motorcycle? The vehicle can say a lot about his style—whether it’s sleek and fast, durable and intimidating, or camouflaged for stealth. Maybe his vehicle is equipped with advanced gadgets or serves as a mobile base of operations. It’s a great way to add another dimension to his hero persona.
+
+Where is his headquarters hidden?
+Every superhero needs a base of operations! Is it hidden deep in a mountain, beneath a city, or even in space? How accessible is it to the hero? Does it have advanced technology, hidden entrances, or secret passageways? This is the place where the hero plans, stores equipment, and perhaps even retreats when not on missions. It could also house crucial information about his enemies or the larger mission he’s working toward.
+
+Who are his friends?
+Does he have a team, a sidekick, or alliances with other superheroes? What role do they play in his journey—do they provide emotional support, help in battles, or offer knowledge? Are they integral to his success, or do they simply share his values? This section can reveal how he interacts with others in the superhero world—does he trust easily, or is he more of a lone wolf?
+
+Who are his ordinary human friends?
+These are the people who don’t know about his superhero persona but play an important role in his everyday life. They can be friends, family, colleagues, or mentors who provide support, advice, or sometimes even act as emotional anchors for him. They may not have powers, but they help ground him and give him a sense of normalcy. These relationships can also highlight his vulnerabilities—he might fear putting them in danger if they find out about his secret life.
+
+Does he have an animal companion or sidekick?
+Does your superhero have an animal companion or sidekick who assists him in his crime-fighting or personal life? The animal could be an extraordinary creature (like a genetically enhanced animal or a mythical beast) or just a loyal, everyday pet that plays an important role in his life. Does the animal have special abilities, or is it more of an emotional anchor? For example, a dog might be fiercely loyal and provide companionship, while a more exotic animal like a bird could help with reconnaissance or even share a mental bond with the hero. This animal could also serve as a reminder of the superhero’s humanity—sometimes the most unassuming sidekick can provide the most valuable support.
+
+Who are his enemies?
+Does he have one arch-nemesis or a whole array of enemies? What motivates them? Are they also superpowered, or do they represent something that challenges the hero’s values (e.g., a corrupt government, a global corporation, or a natural disaster)? This section can help create a compelling opposition—heroes need great villains to make their stories exciting, and the hero’s greatest challenges often come from those who are just as determined, if not more so, to achieve their own goals.
+
+What are his weaknesses?
+No hero is perfect, and weaknesses add depth. Does he have physical vulnerabilities (like Kryptonite for Superman), emotional struggles (fear of failure, abandonment issues), or moral dilemmas? Perhaps he’s easily manipulated or has a fatal flaw that puts him in difficult situations. Weaknesses don’t just make the character more relatable—they also create opportunities for growth and improvement, making the hero’s victories feel more earned.
+
+What is his goal or mission in life?
+Every superhero has a reason for what they do. It could be a personal vendetta, a greater cause, or a moral code. Does he aim to rid the world of evil, protect a specific group of people, or challenge societal issues? The mission gives a sense of purpose and direction to the character’s actions. Whether it's saving the world, seeking redemption, or ensuring justice, the hero's goal will drive all his decisions and actions.~
+
+BLANK
+?BLANK
+
+~Aquaman
+Identity and Alter Ego
+Aquaman’s real name is Arthur Curry, a man born of two worlds: the surface and the sea. He lives both as a human and as the king of Atlantis, often struggling to balance these identities.
+Everyday Life and Occupation
+Arthur serves as King of Atlantis, ruling an advanced underwater civilization. When on land, he operates as a Justice League member and global protector.
+Origin Story
+Arthur is the son of a human lighthouse keeper and an Atlantean queen. His mixed heritage grants him unique abilities and places him at the center of political tension between land and sea.
+Powers and Abilities
+Aquaman possesses superhuman strength, speed, durability, and the ability to breathe underwater. He can communicate telepathically with marine life.
+Costume and Visual Design
+His classic orange and green armor symbolizes Atlantean royalty and is designed to withstand extreme ocean pressure.
+Equipment, Weapons, and Technology
+Aquaman wields the Trident of Atlantis, a mystical weapon capable of controlling seas and generating immense power.
+Vehicles and Bases
+His primary base is Atlantis, though he frequently travels via sea creatures and advanced Atlantean vessels.
+Friends, Allies, and Teams
+He is a founding member of the Justice League.
+Enemies and Major Conflicts
+Key foes include Black Manta and Ocean Master, often representing internal and political conflict.
+Themes and Narrative Role
+Aquaman explores leadership, identity, and environmental responsibility.~
+
+BLANK
+?BLANK
+
+~Batman
+Identity and Alter Ego
+Batman is the masked identity of Bruce Wayne, a billionaire philanthropist who hides his crusade behind a public image of wealth and privilege.
+Everyday Life and Occupation
+By day, Bruce Wayne manages Wayne Enterprises. By night, he operates as Gotham City’s vigilante protector.
+Origin Story
+After witnessing the murder of his parents as a child, Bruce dedicates his life to fighting crime and preventing others from experiencing similar loss.
+Powers and Abilities
+Batman has no superpowers. His strength lies in intelligence, detective skills, martial arts mastery, and strategic thinking.
+Costume and Visual Design
+The bat-themed suit uses fear as a psychological weapon and provides armor, stealth, and mobility.
+Equipment, Weapons, and Technology
+Batman uses gadgets such as grappling guns, smoke bombs, and advanced surveillance systems.
+Vehicles and Bases
+The Batmobile, Batcave, and Batwing are central to his operations.
+Friends, Allies, and Teams
+Key allies include Alfred Pennyworth, Robin, and the Justice League.
+Enemies and Major Conflicts
+Notable villains include The Joker, Two-Face, and The Riddler.
+Themes and Narrative Role
+Batman represents justice through discipline, fear, and human resilience.~
+
+BLANK
+?BLANK
+
+~Catwoman
+Identity and Alter Ego
+Catwoman is Selina Kyle, a skilled thief who walks the line between hero and criminal.
+Everyday Life and Occupation
+Selina survives as a professional burglar, often targeting the wealthy and corrupt.
+Origin Story
+Her origin varies, but most versions depict her as a woman shaped by poverty and betrayal, leading her into crime.
+Powers and Abilities
+She has no superpowers but excels in agility, stealth, and hand-to-hand combat.
+Costume and Visual Design
+Her sleek, cat-themed suit enhances mobility and night operations.
+Equipment, Weapons, and Technology
+Catwoman uses whips, claws, and lock-picking tools.
+Vehicles and Bases
+She operates independently, often from hidden urban locations.
+Friends, Allies, and Teams
+Her most significant relationship is with Batman, defined by trust and conflict.
+Enemies and Major Conflicts
+She clashes with Gotham’s criminals and law enforcement alike.
+Themes and Narrative Role
+Catwoman explores morality, independence, and anti-heroism.~
+
+BLANK
+?BLANK
+
+~Flash
+Identity and Alter Ego
+The Flash is most commonly Barry Allen, a forensic scientist with a strong belief in justice.
+Everyday Life and Occupation
+Barry works as a crime scene investigator, using science to solve crimes.
+Origin Story
+After a lab accident involving chemicals and lightning, Barry gains access to the Speed Force.
+Powers and Abilities
+Super speed, accelerated healing, time travel, and enhanced perception.
+Costume and Visual Design
+His red suit reduces friction and protects his body at high speeds.
+Equipment, Weapons, and Technology
+Occasionally uses Speed Force–powered gadgets.
+Vehicles and Bases
+Relies on speed rather than vehicles.
+Friends, Allies, and Teams
+Member of the Justice League.
+Enemies and Major Conflicts
+Notable villains include Reverse-Flash and Captain Cold.
+Themes and Narrative Role
+The Flash embodies optimism, consequence, and the science of time.~
+
+BLANK
+?BLANK
+
+~Green Lantern
+Identity and Alter Ego
+One of the most famous Green Lanterns is Hal Jordan, a test pilot chosen for his willpower.
+Everyday Life and Occupation
+Hal works as a pilot while serving the Green Lantern Corps, an intergalactic police force.
+Origin Story
+Chosen by a dying alien’s power ring, Hal becomes Earth’s Green Lantern.
+Powers and Abilities
+The ring creates solid light constructs powered by willpower.
+Costume and Visual Design
+The uniform symbolizes Corps membership and authority.
+Equipment, Weapons, and Technology
+The Power Ring is his primary tool.
+Vehicles and Bases
+Operates from space sectors and alien worlds.
+Friends, Allies, and Teams
+Justice League and Green Lantern Corps.
+Enemies and Major Conflicts
+Includes Sinestro and cosmic threats.
+Themes and Narrative Role
+Green Lantern explores responsibility and self-control.~
+
+BLANK
+?BLANK
+
+~Wonder Woman
+Identity and Alter Ego
+Wonder Woman is Diana, princess of the Amazons.
+Everyday Life and Occupation
+She acts as a diplomat and warrior between worlds.
+Origin Story
+Raised on Themyscira, she leaves her homeland to stop human conflict.
+Powers and Abilities
+Super strength, speed, combat skill, and immortality.
+Costume and Visual Design
+Her armor reflects Amazonian culture and myth.
+Equipment, Weapons, and Technology
+Lasso of Truth, bracelets, sword, and shield.
+Vehicles and Bases
+Invisible Jet; Themyscira.
+Friends, Allies, and Teams
+Justice League.
+Enemies and Major Conflicts
+Ares, Cheetah, and gods of war.
+Themes and Narrative Role
+Truth, justice, and compassion through strength.~
+
+BLANK
+?BLANK
+
+~Superman
+Identity and Alter Ego
+Superman’s real name is Kal-El, though he lives on Earth under the human identity Clark Kent. Clark works hard to appear ordinary, using his mild-mannered personality to hide his true nature.
+Everyday Life and Occupation
+As Clark Kent, Superman works as a journalist for the Daily Planet, allowing him to stay informed about world events and crises. His civilian life helps him remain connected to humanity.
+Origin Story
+Kal-El was born on the planet Krypton, which was destroyed shortly after his birth. His parents sent him to Earth in a spacecraft, where he was raised by Jonathan and Martha Kent, who taught him strong moral values.
+Powers and Abilities
+Superman has superhuman strength, speed, flight, invulnerability, heat vision, x-ray vision, freeze breath, and super hearing. His powers come from Earth’s yellow sun.
+Costume and Visual Design
+His blue suit, red cape, and “S” shield symbolize hope and protection. The costume is made from Kryptonian materials.
+Equipment, Weapons, and Technology
+Superman relies primarily on his natural abilities rather than technology.
+Vehicles and Bases
+He uses the Fortress of Solitude as a secret base and place of reflection.
+Friends, Allies, and Teams
+Key allies include Lois Lane, Jimmy Olsen, and the Justice League.
+Enemies and Major Conflicts
+Major villains include Lex Luthor, General Zod, and Doomsday.
+Themes and Narrative Role
+Superman represents hope, morality, and the responsibility that comes with great power.~
+
+BLANK
+?BLANK
+
+~Supergirl
+Identity and Alter Ego
+Supergirl’s real name is Kara Zor-El, the cousin of Superman. Like him, she hides her Kryptonian identity behind a human persona.
+Everyday Life and Occupation
+Depending on the version, Kara attends school, works ordinary jobs, or lives under Superman’s guidance while learning to control her powers.
+Origin Story
+Kara was sent from Krypton to protect baby Kal-El, but her journey was delayed. She arrived on Earth years later to find her cousin already grown and established as Superman.
+Powers and Abilities
+Supergirl shares the same abilities as Superman, including super strength, flight, speed, heat vision, and freeze breath. In some stories, she is even more powerful due to less restraint.
+Costume and Visual Design
+Her costume mirrors Superman’s symbol, reinforcing their family connection while emphasizing agility and speed.
+Equipment, Weapons, and Technology
+She relies primarily on her powers, though some versions include Kryptonian technology.
+Vehicles and Bases
+She often shares access to the Fortress of Solitude.
+Friends, Allies, and Teams
+Supergirl frequently works with Superman and other Justice League members.
+Enemies and Major Conflicts
+Her enemies often target her youth and emotional vulnerability.
+Themes and Narrative Role
+Supergirl explores identity, belonging, and emotional growth alongside immense power.~
+
+BLANK
+?BLANK
+
+~Ant-Man
+Identity and Alter Ego
+The best-known Ant-Man is Scott Lang, a former thief who becomes a superhero. Earlier versions include scientist Hank Pym, who originally created the Ant-Man technology.
+Everyday Life and Occupation
+Scott Lang struggles to balance hero work with being a good father to his daughter, Cassie. He often lives modestly and works as a consultant or part-time engineer.
+Origin Story
+Scott steals a special suit created by Hank Pym but later earns Pym’s trust. The suit allows him to change size, and Scott uses it to become a hero rather than a criminal.
+Powers and Abilities
+Ant-Man can shrink to insect size or grow to giant size while keeping full strength. He can also communicate with ants.
+Costume and Visual Design
+The suit is red and black with a helmet that controls size changes and allows insect communication.
+Equipment, Weapons, and Technology
+His suit uses Pym Particles, advanced technology that alters physical size.
+Vehicles and Bases
+Ant-Man often works from Avengers facilities or mobile labs.
+Friends, Allies, and Teams
+He is a member of the Avengers and works closely with Wasp.
+Enemies and Major Conflicts
+Villains often try to steal Pym Particle technology.
+Themes and Narrative Role
+Ant-Man highlights redemption, family, and the idea that heroes can come from unexpected places.~
+
+BLANK
+?BLANK
+
+~Black Panther
+Identity and Alter Ego
+Black Panther is T’Challa, king of the African nation of Wakanda.
+Everyday Life and Occupation
+T’Challa rules Wakanda as both a political leader and protector, balancing diplomacy with heroism.
+Origin Story
+After his father’s death, T’Challa becomes king and earns the Black Panther title through ancient rituals.
+Powers and Abilities
+He has enhanced strength, speed, reflexes, and senses gained from a special heart-shaped herb.
+Costume and Visual Design
+His black suit is sleek and intimidating, designed for stealth and power.
+Equipment, Weapons, and Technology
+The suit is made of Vibranium, absorbing energy and enhancing attacks. He also uses advanced Wakandan technology.
+Vehicles and Bases
+Wakanda itself acts as his base, featuring futuristic aircraft and labs.
+Friends, Allies, and Teams
+Black Panther works with the Avengers and Wakandan allies like Shuri.
+Enemies and Major Conflicts
+Major enemies include Killmonger and outside forces seeking Wakanda’s resources.
+Themes and Narrative Role
+Black Panther explores leadership, heritage, and responsibility to one’s people.~
+
+BLANK
+?BLANK
+
+~Black Widow
+Identity and Alter Ego
+Black Widow’s real name is Natasha Romanoff.
+Everyday Life and Occupation
+Natasha operates as a spy and intelligence agent, often working independently.
+Origin Story
+She was trained from childhood in a secret program called the Red Room, turning her into a skilled assassin.
+Powers and Abilities
+She has no superpowers but is an elite fighter, gymnast, and strategist.
+Costume and Visual Design
+Her black tactical suit is designed for flexibility, stealth, and combat efficiency.
+Equipment, Weapons, and Technology
+She uses batons, firearms, and electronic wrist weapons called Widow’s Bite.
+Vehicles and Bases
+Black Widow uses safe houses and Avengers facilities.
+Friends, Allies, and Teams
+She is a core member of the Avengers, closely allied with Hawkeye.
+Enemies and Major Conflicts
+Her past frequently returns to challenge her, including former handlers and spies.
+Themes and Narrative Role
+Black Widow focuses on redemption, identity, and overcoming a dark past.~
+
+BLANK
+?BLANK
+
+~Captain America
+Identity and Alter Ego
+Captain America is Steve Rogers, a physically weak but morally strong young man.
+Everyday Life and Occupation
+Steve struggles to live in the modern world after being frozen for decades.
+Origin Story
+During World War II, Steve volunteers for a Super Soldier Serum experiment, transforming him into a peak human.
+Powers and Abilities
+He has enhanced strength, endurance, reflexes, and leadership skills.
+Costume and Visual Design
+His red, white, and blue suit symbolizes American ideals and unity.
+Equipment, Weapons, and Technology
+His indestructible Vibranium shield is both defensive and offensive.
+Vehicles and Bases
+He operates from Avengers headquarters and military facilities.
+Friends, Allies, and Teams
+Captain America leads the Avengers and works closely with Bucky Barnes.
+Enemies and Major Conflicts
+Key enemies include Red Skull and HYDRA.
+Themes and Narrative Role
+Captain America represents courage, sacrifice, and standing up for what is right.~
+
+BLANK
+?BLANK
+
+~Daredevil
+Identity and Alter Ego
+Daredevil is Matt Murdock, a blind lawyer.
+Everyday Life and Occupation
+By day, Matt defends the innocent in court; by night, he fights crime in Hell’s Kitchen.
+Origin Story
+A chemical accident blinded Matt but heightened his remaining senses to superhuman levels.
+Powers and Abilities
+He has enhanced hearing, smell, touch, and radar-like perception.
+Costume and Visual Design
+His red suit includes horns and protects him during combat.
+Equipment, Weapons, and Technology
+He uses a multi-purpose billy club for fighting and movement.
+Vehicles and Bases
+Daredevil relies on rooftops and hidden urban routes rather than vehicles.
+Friends, Allies, and Teams
+Allies include Foggy Nelson and Karen Page.
+Enemies and Major Conflicts
+His main enemy is Wilson Fisk (Kingpin).
+Themes and Narrative Role
+Daredevil explores justice, guilt, and morality.~
+
+BLANK
+?BLANK
+
+~Groot
+Identity and Alter Ego
+Groot is a sentient alien plant species known as a Flora Colossus, originating from Planet X. He does not use a secret identity.
+Everyday Life and Occupation
+Groot travels through space as a member of the Guardians of the Galaxy, functioning as both protector and emotional support for the team.
+Origin Story
+Originally portrayed as a hostile alien, Groot was later reimagined as a heroic figure. He leaves his home planet and forms strong bonds with fellow outcasts.
+Powers and Abilities
+Groot has super strength, rapid healing, and the ability to regenerate from small fragments. He can control plant growth and reshape his body.
+Costume and Visual Design
+Groot’s body is his appearance: bark-covered, tree-like, and constantly evolving depending on age and injury.
+Equipment, Weapons, and Technology
+He relies entirely on natural abilities rather than tools.
+Vehicles and Bases
+He travels aboard spacecraft used by the Guardians.
+Friends, Allies, and Teams
+Close allies include Rocket Raccoon, Star-Lord, and the Guardians of the Galaxy.
+Enemies and Major Conflicts
+Groot faces cosmic threats and galactic tyrants.
+Themes and Narrative Role
+Groot represents loyalty, sacrifice, and communication beyond words.~
+
+BLANK
+?BLANK
+
+~Hawkeye
+Identity and Alter Ego
+Hawkeye is Clint Barton, a master archer with no superpowers.
+Everyday Life and Occupation
+Clint often works as a covert agent and struggles to balance hero life with family responsibilities.
+Origin Story
+Raised in a circus, Clint trained as an acrobat and marksman before being recruited into intelligence work.
+Powers and Abilities
+He has perfect aim, quick reflexes, and exceptional combat training.
+Costume and Visual Design
+His suit is practical and lightweight, designed for mobility and precision.
+Equipment, Weapons, and Technology
+Hawkeye uses a high-tech bow with specialized arrows, including explosive and grappling types.
+Vehicles and Bases
+He operates from Avengers bases or covert locations.
+Friends, Allies, and Teams
+He is a long-time Avenger and close ally of Black Widow.
+Enemies and Major Conflicts
+He faces criminals, mercenaries, and international threats.
+Themes and Narrative Role
+Hawkeye highlights human skill and determination among superpowered heroes.~
+
+BLANK
+?BLANK
+
+~Hulk
+Identity and Alter Ego
+The Hulk is the alter ego of Dr. Bruce Banner, a brilliant scientist.
+Everyday Life and Occupation
+Banner works as a researcher but lives in isolation to avoid transforming.
+Origin Story
+Banner was exposed to intense gamma radiation during an experiment, causing him to transform when angry.
+Powers and Abilities
+The Hulk possesses unlimited strength that increases with anger, near invulnerability, and rapid healing.
+Costume and Visual Design
+Hulk’s appearance is massive, green, and intimidating, with torn clothing reflecting loss of control.
+Equipment, Weapons, and Technology
+He uses no weapons; his body is the weapon.
+Vehicles and Bases
+Hulk often destroys vehicles unintentionally rather than using them.
+Friends, Allies, and Teams
+He is a founding member of the Avengers.
+Enemies and Major Conflicts
+Enemies include the Abomination and military forces.
+Themes and Narrative Role
+Hulk explores inner conflict, control, and fear of power.~
+
+BLANK
+?BLANK
+
+~Iron Man
+Identity and Alter Ego
+Iron Man is Tony Stark, a genius inventor and billionaire.
+Everyday Life and Occupation
+Tony runs Stark Industries and lives publicly as Iron Man.
+Origin Story
+Captured during a weapons demonstration, Tony builds a powered suit to escape and later redesigns it for heroism.
+Powers and Abilities
+Without his suit, Tony is human; with it, he gains flight, super strength, and advanced weaponry.
+Costume and Visual Design
+The red-and-gold armor evolves constantly, reflecting technological progress.
+Equipment, Weapons, and Technology
+His suit includes repulsor beams, AI systems, and nanotechnology.
+Vehicles and Bases
+He operates from high-tech labs and Avengers headquarters.
+Friends, Allies, and Teams
+A founding member of the Avengers.
+Enemies and Major Conflicts
+Enemies include Obadiah Stane and Thanos.
+Themes and Narrative Role
+Iron Man explores responsibility, innovation, and redemption.~
+
+BLANK
+?BLANK
+
+~Loki
+Identity and Alter Ego
+Loki Laufeyson is the adopted brother of Thor and a god of Asgard.
+Everyday Life and Occupation
+Loki operates as a trickster, ruler, or wanderer depending on the story.
+Origin Story
+Born a Frost Giant, Loki was adopted by Odin and raised as Asgardian royalty.
+Powers and Abilities
+He possesses magic, illusion creation, shape-shifting, and longevity.
+Costume and Visual Design
+His green and gold attire symbolizes deception and royalty.
+Equipment, Weapons, and Technology
+Often uses enchanted daggers and magical artifacts.
+Vehicles and Bases
+Travels between realms using magical transport.
+Friends, Allies, and Teams
+Complex relationship with Thor and occasional alliances with heroes.
+Enemies and Major Conflicts
+Conflicts stem from jealousy, identity, and power struggles.
+Themes and Narrative Role
+Loki embodies chaos, free will, and moral ambiguity.~
+
+BLANK
+?BLANK
+
+~Punisher
+Identity and Alter Ego
+The Punisher is Frank Castle, a former Marine with no secret identity.
+Everyday Life and Occupation
+Frank lives off the grid, dedicating his life entirely to waging war on criminals.
+Origin Story
+After witnessing his family murdered by organized crime, Frank abandons normal life and becomes the Punisher.
+Powers and Abilities
+He has no superpowers but possesses elite military training, tactical intelligence, and endurance.
+Costume and Visual Design
+His black outfit features a white skull symbol, meant to strike fear into criminals.
+Equipment, Weapons, and Technology
+He uses firearms, explosives, knives, and military-grade equipment.
+Vehicles and Bases
+Uses safe houses, stolen vehicles, and hidden weapon caches.
+Friends, Allies, and Teams
+Occasionally works with Daredevil and Spider-Man, though methods clash.
+Enemies and Major Conflicts
+Targets crime families, gangs, and corrupt officials.
+Themes and Narrative Role
+The Punisher explores justice, vengeance, and moral limits.~
+
+BLANK
+?BLANK
+
+~Spider-Man
+Identity and Alter Ego
+Spider-Man is Peter Parker, a high school student turned superhero.
+Everyday Life and Occupation
+Peter struggles with school, jobs, and relationships while protecting New York City.
+Origin Story
+Bitten by a radioactive spider, Peter gains powers but learns responsibility after his uncle’s death.
+Powers and Abilities
+Super strength, agility, wall-crawling, spider-sense, and reflexes.
+Costume and Visual Design
+Red-and-blue suit with web patterns symbolizes agility and friendliness.
+Equipment, Weapons, and Technology
+Uses web-shooters invented by Peter himself.
+Vehicles and Bases
+Primarily swings through the city using webs.
+Friends, Allies, and Teams
+Allies include MJ, Aunt May, and the Avengers.
+Enemies and Major Conflicts
+Villains include Green Goblin, Doctor Octopus, and Venom.
+Themes and Narrative Role
+Spider-Man focuses on responsibility, youth, and sacrifice.~
+
+BLANK
+?BLANK
+
+~Storm
+Identity and Alter Ego
+Storm is Ororo Munroe, a mutant worshipped as a goddess in her youth.
+Everyday Life and Occupation
+She serves as a leader within the X-Men and a protector of mutants.
+Origin Story
+After discovering her mutant abilities, Ororo joins Professor Xavier’s school.
+Powers and Abilities
+Controls weather, including lightning, wind, and storms.
+Costume and Visual Design
+Her flowing white or black costumes reflect elegance and power.
+Equipment, Weapons, and Technology
+Relies primarily on mutant abilities.
+Vehicles and Bases
+Operates from the X-Mansion and jet aircraft.
+Friends, Allies, and Teams
+Leader of the X-Men and ally of Black Panther.
+Enemies and Major Conflicts
+Faces mutant-hating groups and powerful villains.
+Themes and Narrative Role
+Storm represents leadership, identity, and balance.~
+
+BLANK
+?BLANK
+
+~Thor
+Identity and Alter Ego
+Thor Odinson is the Norse God of Thunder.
+Everyday Life and Occupation
+Thor serves as a warrior prince of Asgard and defender of Earth.
+Origin Story
+Banished to Earth to learn humility, Thor proves himself worthy of power.
+Powers and Abilities
+Super strength, lightning control, flight, and immortality.
+Costume and Visual Design
+Armor and red cape reflect warrior heritage.
+Equipment, Weapons, and Technology
+Wields the enchanted hammer Mjolnir.
+Vehicles and Bases
+Travels between realms using magical portals.
+Friends, Allies, and Teams
+Member of the Avengers.
+Enemies and Major Conflicts
+Enemies include Loki and Frost Giants.
+Themes and Narrative Role
+Thor explores worthiness, power, and destiny.~
+
+BLANK
+?BLANK
+
+~Wolverine
+Identity and Alter Ego
+Wolverine is Logan, a mutant with a mysterious past.
+Everyday Life and Occupation
+Lives as a loner but teaches and protects young mutants.
+Origin Story
+Born with mutation and later given an adamantium skeleton.
+Powers and Abilities
+Rapid healing, enhanced senses, and retractable claws.
+Costume and Visual Design
+Yellow-and-blue suit reflects ferocity and agility.
+Equipment, Weapons, and Technology
+His claws are part of his body.
+Vehicles and Bases
+Operates from the X-Mansion.
+Friends, Allies, and Teams
+Core member of the X-Men.
+Enemies and Major Conflicts
+Faces Weapon X and mutant hunters.
+Themes and Narrative Role
+Wolverine examines identity, violence, and redemption.~
+
+BLANK
+?BLANK
+
+~Writing Prompts
+1. Superhero Name
+2. Where is he from?
+3. What is his physical appearance like?
+4. What are his character attributes?
+5. What values does he believe in?
+6. What does his costume look like?
+7. How did he become a superhero?
+8. What is his alter ego?
+9. What are his superpowers?
+10. What weapons does he have?
+11. What vehicles does he use?
+12. Where is his headquarters hidden?
+13. Who are his friends? (superhero allies, sidekicks, etc.)
+14. Who are his ordinary human friends? (regular people who are important to him)
+15. Who are his enemies?
+16. What are his weaknesses?
+17. What is his goal or mission in life?
+Writing Task: Create a Superhero Profile
+Who is the greatest superhero you can think of?
+Your superhero can come from a movie or comic book, or you can invent one yourself.
+Respond to the prompts below using complete sentences. Try to use the suggested vocabulary in each section.
+
+
+1. Title of Your Text
+Prompt:
+What will be the title of your text?
+You may use ideas like:
+• Criminals beware!!
+• Introducing…
+• A Great American Hero
+• A Great Thai Hero!
+• The Greatest Hero in the World
+Sentence starter:
+The title of my text is “__________.”
+
+
+2. Name and Abilities of Your Superhero
+Prompt:
+What is the name of your favorite superhero? Describe his abilities.
+Suggested vocabulary:
+strength, speed, intelligence, magic
+Sentence starters:
+My favorite superhero is called __________.
+He has great strength and speed.
+He is very intelligent, and he can also use magic.
+
+
+3. Personality
+Prompt:
+Describe his personality. What kind of hero is he?
+Suggested vocabulary:
+good, kind, brave, fearless, determined, intelligent, resourceful, inventive, well-trained, strong, tough, flexible, fast, agile
+Sentence starters:
+He is a good and kind hero who always helps people.
+He is brave and fearless, even in dangerous situations.
+He is resourceful, well-trained, and very determined.
+
+
+4. Costume
+Prompt:
+Describe his costume. What does he wear?
+Suggested vocabulary:
+costume, mask, suit, cape, boots, gloves, belt
+Sentence starters:
+He wears a special costume to hide his identity.
+His costume includes a mask, a suit, and a long cape.
+He also wears boots, gloves, and a belt.
+
+
+5. Weapons and Vehicles
+Prompt:
+What weapons does he use?
+Does he have a vehicle?
+Suggested vocabulary:
+weapons, vehicles, car, plane, boat, motorcycle, helicopter, jet pack
+Sentence starters:
+He uses advanced weapons to fight criminals.
+He has several vehicles. He drives a fast car and flies using a jet pack.
+Sometimes, he pilots a plane or a helicopter.
+
+
+6. Secret Lair
+Prompt:
+Does he have a secret lair? Where does he go after fighting crime?
+Suggested vocabulary:
+secret headquarters, secret lair, cave, fortress, laboratory
+Sentence starters:
+He has a secret lair that no one knows about.
+He goes back to his secret headquarters, which is hidden in a fortress.
+Inside, there is a high-tech laboratory where he plans his missions.
+
+
+Optional Extension (for stronger students)
+• Add a villain
+• Explain why he is the greatest hero
+• Write a final warning message to criminals~
+
+
+
+
+</div>
+
+
+<!-- ================= HARD-CODED TOC ================= -->
+<!-- <div id="layout">
+
+<h1 data-auto-title></h1>
+
+  <div class="container">
+    <div class="column">
+      <h2>Old Testament</h2>
+      <ul class="index">
+
+
+      </ul>
+    </div>
+
+    <div class="column">
+      <h2>New Testament</h2>
+      <ul class="index">
+
+
+      </ul>
+    </div>
+  </div>
+
+</div> -->
+<!-- END #layout -->
+
+
+<!-- ================= DYNAMIC TOC ================= -->
+<div id="dynamicTOC">
+  <div id="tocContainer">
+
+<h1 data-auto-title></h1>
+
+    <div id="tocButtons">
+      <div class="tocColumn" id="tocColLeft"></div>
+      <div class="tocColumn" id="tocColRight"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= QUIZ MODAL ================= -->
+<div id="modalRoot">
+  <div id="quizModal">
+
+<!--<div id="helloBar">Hello!</div> -->
+
+    <!-- CONTROL BARS LIVE HERE -->
+    <div id="chapterVerseControls">
+      <div class="controlRow">
+
+<button id="instructionsBtn">Instructions</button>
+<!-- <select id="chapterSelect"></select> -->
+
+<button id="strategiesBtn">Strategies</button>
+<!-- <select id="verseSelect"></select> -->
+
+<button id="signalwordsBtn">Signals</button>
+<!-- <button id="goBtn">Go</button> -->
+
+<button onclick="goToNextQuiz()">Go to Quiz</button>
+
+      </div>
+    </div>
+
+    <div id="readaloudControls">
+      <div class="controlRow">
+        <button id="highlightSelected">Highlight</button>
+        <button id="copySelected">Copy</button>
+        <button id="startBtn">Audio</button>
+        <button id="closeModalBtn">Close</button>
+      </div>
+    </div>
+
+    <!-- ACTUAL CONTENT -->
+    <div id="quizModalContent">
+      <div id="quizSections"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+(function(){
+
+
+  // [1] GET INPUT SOURCE
+  const src = document.getElementById("rawTextSource");
+  if (!src) return;
+
+  const raw = src.textContent.trim();
+  const lines = raw.split("\n");
+
+  // [2] REGEX RULES
+  const urlRegex = /^https?:\/\/\S+$/i;
+  const urlAnywhere = /(https?:\/\/\S+)/gi;
+
+  // [3] BUILD OUTPUT ARRAYS
+  const htmlResult = [];
+  const speechChunks = [];
+
+  // [4] PARSE LOOP (UNCHANGED LOGIC)
+  for (let i = 0; i < lines.length; i++) {
+
+    let line = lines[i].trim();
+    let next = (lines[i + 1] || "").trim();
+
+    // TITLE + URL HANDLING
+    if (line && !urlRegex.test(line) && urlRegex.test(next)) {
+
+      htmlResult.push(
+        `<a href="${next}" target="_blank" rel="noopener">${line}</a>`
+      );
+
+      speechChunks.push(line);
+
+      i++;
+      continue;
+    }
+
+    // INLINE URL HANDLING
+    const htmlLine = line.replace(urlAnywhere, url =>
+      `<a href="${url}" target="_blank" rel="noopener">${url}</a>`
+    );
+
+    htmlResult.push(htmlLine);
+
+    const cleanText = line.replace(urlAnywhere, "").trim();
+    if (cleanText) {
+      speechChunks.push(cleanText);
+    }
+  }
+
+  // [5] OUTPUT (UNCHANGED — SAFE FOR UI SYSTEM)
+  window.rawText = htmlResult.join("\n");
+
+// SIGNAL: parser is done
+window.parserReady = true;
+
+  // [6] READ-ALOUD HANDOFF (FIXED TO NOT BREAK UI)
+
+  // IMPORTANT:
+  // - no immediate execution
+  // - no blocking
+  // - no fallback globals
+  // - queued after UI thread
+
+  setTimeout(() => {
+    if (typeof window.onParsedTextReady === "function") {
+      window.onParsedTextReady(speechChunks);
+    }
+  }, 0);
+
+})();
+
+</script>
+
+<script>
+(function primeFemaleVoiceOnce() {
+  const synth = window.speechSynthesis;
+  if (!synth) return;
+
+  let primed = false;
+
+  function tryPrime() {
+    if (primed) return;
+
+    const voices = synth.getVoices();
+    if (!voices.length) return;
+
+    const femaleVoice =
+      voices.find(v => /Aria|Zira|Samantha|Victoria|Moira/i.test(v.name)) ||
+      voices.find(v => v.lang && v.lang.startsWith("en")) ||
+      voices[0];
+
+    if (!femaleVoice) return;
+
+    const u = new SpeechSynthesisUtterance(" ");
+    u.voice = femaleVoice;
+    u.volume = 0;
+    u.rate = 1;
+    u.pitch = 1;
+
+    synth.speak(u);
+    primed = true;
+  }
+
+  tryPrime();
+
+  synth.onvoiceschanged = tryPrime;
+
+  // Better Android + mobile coverage (replaces click + touchstart)
+  document.addEventListener("pointerdown", tryPrime, { once: true });
+})();
+</script>
+
+<script>
+(function () {
+
+  function cleanSpeechText(text) {
+    text = text.replace(/\b\d+:\d+\s*/g, '');
+    text = text.replace(/<br\s*\/?>/gi, ' ');
+    text = text.replace(/\n+/g, ' ');
+    text = text.replace(/\s+\./g, '.');
+    text = text.replace(/\.(\S)/g, '. $1');
+    text = text.replace(/\s+/g, ' ').trim();
+    return text;
+  }
+
+  const OriginalUtterance = window.SpeechSynthesisUtterance;
+
+  function PatchedUtterance(text) {
+    return new OriginalUtterance(cleanSpeechText(text));
+  }
+
+  // 🔧 preserve prototype for Android/WebView compatibility
+  PatchedUtterance.prototype = OriginalUtterance.prototype;
+
+  window.SpeechSynthesisUtterance = PatchedUtterance;
+
+})();
+</script>
+
+<script>
+(function() {
+  // ====== 2. Parse Sections ======
+const raw = window.rawText;
+
+if (!raw) return; // IMPORTANT: stop if parser not ready
+
+const segments = raw.split("~").map(s => s.trim()).filter(Boolean);
+  const sections = [];
+
+  for (let i = 0; i < segments.length; i += 2) {
+    const storyBlock = segments[i] || "";
+    const questionBlock = segments[i + 1] || '';
+
+    const lines = storyBlock.split("\n").map(l => l.trim()).filter(Boolean);
+
+    let titleLine = lines[0] || "Untitled Section";
+
+    sections.push({
+      title: titleLine,
+      content: lines.join("\n"),
+      questions: questionBlock
+    });
+  }
+
+window.sections = sections;
+
+
+  // ====== 3. Build TOC ======
+  const leftCol = document.getElementById('tocColLeft');
+  const rightCol = document.getElementById('tocColRight');
+  if (!leftCol || !rightCol) return;
+
+  leftCol.innerHTML = '';
+  rightCol.innerHTML = '';
+  const midpoint = Math.ceil(sections.length / 2);
+
+  sections.forEach((sec, idx) => {
+    const btn = document.createElement('button');
+    btn.textContent = sec.title;
+    btn.addEventListener('click', () => openQuizModal(idx));
+    if (idx < midpoint) leftCol.appendChild(btn);
+    else rightCol.appendChild(btn);
+  });
+
+// ====== 4. Modal Rendering ======
+window.openQuizModal = function(idx) {
+
+  const container = document.getElementById('quizSections');
+  container.innerHTML = '';
+
+  generateQuizSection(sections[idx], idx);
+
+  document.getElementById('modalRoot').classList.add('active');
+  document.body.classList.add('modal-open');
+
+  moveControlsIntoModal();
+
+  // 📌 Chapter/Verse system (navigation layer)
+  buildChapterVerseLogic();
+};
+
+document.addEventListener("click", function(e) {
+
+  const closeBtn = e.target.closest("[data-close-quiz]");
+  if (!closeBtn) return;
+
+  // 🔒 Stronger prevent auto-reopen
+  window.__quizJustClosed = Date.now();
+
+  const modalRoot = document.getElementById("modalRoot");
+  const container = document.getElementById("quizSections");
+
+  // 🔥 1. CLOSE FIRST
+  modalRoot?.classList.remove("active");
+  document.body.classList.remove("modal-open");
+
+  // 🔥 2. Clear content
+  if (container) container.innerHTML = "";
+
+  // 🔥 3. Kill smooth scroll
+  document.documentElement.style.scrollBehavior = "auto";
+
+  // 🔥 4. Immediate reset
+  window.scrollTo(0, 0);
+
+  const modal = document.getElementById("quizModal");
+  if (modal) modal.scrollTop = 0;
+
+  const modalContent = document.getElementById("quizModalContent");
+  if (modalContent) modalContent.scrollTop = 0;
+
+  // 🔥 5. Prevent browser restoring old position
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+
+  if (window.resetQuizScrollState) {
+    window.resetQuizScrollState();
+  }
+
+  // 🔥 FINAL OVERRIDE (critical)
+  setTimeout(() => {
+    window.scrollTo(0, 0);
+  }, 0);
+
+  requestAnimationFrame(() => {
+    window.scrollTo(0, 0);
+  });
+
+});
+
+function generateQuizSection(section, idx) {
+  const container = document.getElementById('quizSections');
+
+// ===== Paragraph numbering control =====
+// true  = number story paragraphs
+// false = never number story paragraphs
+const NUMBER_PARAGRAPHS = false;
+
+// Helper: render story paragraphs with optional numbering
+function renderNumberedLines(lines, sectionTitle) {
+  return lines
+    .filter((line, idx) => {
+      // ❌ Remove duplicate header (first line only)
+      if (
+        idx === 0 &&
+        sectionTitle &&
+        line.trim().toLowerCase() === sectionTitle.trim().toLowerCase()
+      ) {
+        return false;
+      }
+      return true;
+    })
+    .map((line, lineIdx) => {
+      // Never number if disabled
+      if (!NUMBER_PARAGRAPHS) {
+        return `<p>${line}</p>`;
+      }
+
+      // Defensive: do not double-number
+      if (/^\d+\.\s/.test(line)) {
+        return `<p>${line}</p>`;
+      }
+
+      return `<p>${lineIdx + 1}. ${line}</p>`;
+    })
+    .join("");
+}
+
+
+let sectionHTML = `
+  <div class="section" data-section-idx="${idx}">
+    <h2 class="parsedHeader">${section.title}</h2>
+    <div class="question-text" contenteditable="true">
+      ${renderNumberedLines(
+        section.content.split("\n").map(l => l.trim()).filter(Boolean),
+        section.title
+      )}
+    </div>
+`;
+
+    const SUBSECTION_MARKERS = [
+      "Quiz",
+      "Concept Quiz",
+      "Context Quiz",
+      "Comprehension Quiz",
+      "Grammar Quiz",
+      "Vocabulary Quiz"
+
+    ];
+
+    const lines = section.questions.split("\n").map(l => l.trim()).filter(Boolean);
+    const subsections = [];
+    let currentSub = null;
+
+let hasBlankLine = false;
+let hasNullBlankLine = false;
+
+lines.forEach(line => {
+  // Detect special lines
+  if (/^\s*blank\s*$/i.test(line)) hasBlankLine = true;
+  if (/^\s*\?blank\s*$/i.test(line)) hasNullBlankLine = true;
+
+  // If both are present, skip all subsections
+  if (hasBlankLine && hasNullBlankLine) {
+    currentSub = null; // do not create any subsection
+    return;
+  }
+
+  if (SUBSECTION_MARKERS.some(marker =>
+  line.toLowerCase().startsWith(marker.toLowerCase())
+)) {
+
+    currentSub = { title: line, questions: [] };
+    subsections.push(currentSub);
+  } else if (currentSub) {
+    currentSub.questions.push(line);
+  }
+});
+
+    subsections.forEach(sub => {
+      const slug = sub.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+      sub.slug = slug;
+
+      sectionHTML += `<h3 class="parsedSubheader">${sub.title}</h3>`;
+      sectionHTML += `<div class="quiz-subsection" data-subsection="${sub.title}" data-sub-slug="${slug}">`;
+
+sectionHTML += `
+  <div class="top-controls">
+    <input type="text" class="quiz-name" placeholder="Name">
+    <input type="text" class="quiz-id" placeholder="ID">
+    <button type="button" class="quiz-submit">Submit</button>
+    <button type="button" class="quiz-close">Close</button>
+  </div>
+
+        <div class="quiz-scoreboard"
+             style="display:none; width:100%; margin-bottom:12px;
+                    padding:6px; border:1px solid #9aaed1; border-radius:6px;
+                    background:#f9f9f9; font-family:monospace; font-size:12px;">
+          <pre class="scoreboard-data" style="margin:0; white-space:pre-wrap;"></pre>
+          <div class="scoreboard-buttons" style="margin-top:6px; display:flex; gap:6px;">
+            <button type="button" class="score-copy">Copy</button>
+            <button type="button" class="score-txt">TXT</button>
+            <button type="button" class="score-png">PNG</button>
+          </div>
+        </div>
+      `;
+
+      // ===== Question Parsing (supports ? at start + optional second line starting with -) =====
+      sub.questions = sub.questions.map(l => l.trim()).filter(Boolean);
+      let qIndex = 0;
+
+      for (let i = 0; i < sub.questions.length; i++) {
+        let line = sub.questions[i];
+
+        if (!line.startsWith('?')) continue;
+
+        // main question text
+        let question = line.replace(/^\?\s*/, '');
+
+        // optional second line
+        if (i + 1 < sub.questions.length && sub.questions[i + 1].startsWith('-')) {
+          question += ' ' + sub.questions[i + 1].replace(/^-+\s*/, '');
+          i++;
+        }
+
+        // collect options until next question
+        const options = [];
+        let j = i + 1;
+        while (j < sub.questions.length && !sub.questions[j].startsWith('?')) {
+          options.push(sub.questions[j]);
+          j++;
+        }
+
+        const correctPipe = options
+          .filter(o => /\|.*?\|/.test(o))
+          .map(o => o.replace(/\|/g, '').trim())
+          .join('|');
+
+        sectionHTML += `<div class="exercise" data-correct="${correctPipe}">`;
+        sectionHTML += `<p><strong>${qIndex + 1}. ${question}</strong></p>`;
+
+        options.forEach((opt, oi) => {
+          const clean = opt.replace(/\|/g, '').trim();
+          sectionHTML += `
+            <label>
+              <input type="radio" name="q${idx}_${sub.title}_${qIndex}" value="${clean}" data-correct="${correctPipe}">
+              ${String.fromCharCode(65 + oi)}) ${clean}
+            </label><br>
+          `;
+        });
+
+        sectionHTML += `</div>`;
+        qIndex++;
+        i = j - 1;
+      }
+
+      sectionHTML += `</div>`;
+    });
+
+    sectionHTML += `</div>`;
+    container.insertAdjacentHTML('beforeend', sectionHTML);
+  }
+
+  // ====== 5. Event Delegation ======
+  document.getElementById('quizSections').addEventListener('click', e => {
+    const sub = e.target.closest('.quiz-subsection');
+    if (!sub) return;
+
+    if (e.target.classList.contains('quiz-submit')) {
+      const sub = e.target.closest('.quiz-subsection');
+      if (!sub) return;
+
+      const name = sub.querySelector('.quiz-name')?.value || 'Anonymous';
+      const id   = sub.querySelector('.quiz-id')?.value || 'N/A';
+
+      const section = sub.closest('.section')?.querySelector('h2')?.textContent.trim() || 'Unknown Section';
+      const subsection = sub.dataset.subsection || 'Unknown Subsection';
+
+      const exercises = sub.querySelectorAll('.exercise');
+      let correctAnswers = 0;
+      exercises.forEach(ex => {
+correctAnswers += Number(ex.dataset.score || 0);
+
+
+      });
+      const totalExercises = exercises.length;
+      const percentage = totalExercises > 0 ? Math.round((correctAnswers / totalExercises) * 100) : 0;
+
+      const now = new Date();
+      const pad = n => n.toString().padStart(2,'0');
+      const dateString = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+      const filename = window.location.pathname.split('/').pop();
+      const resultText = `${filename}|${section}::${subsection}|${name}|${id}|${dateString}|${correctAnswers}/${totalExercises}|${percentage}%`;
+
+      const board = sub.querySelector('.quiz-scoreboard');
+      const dataEl = board.querySelector('.scoreboard-data');
+      if (dataEl) dataEl.textContent = resultText;
+      board.style.display = 'block';
+    }
+
+
+  });
+})();
+</script>
+
+
+
+
+
+
+
+
+<!-- ====== Consolidated Highlight + Read-Aloud + Emoji Speech + Active Highlight ====== -->
+<script>
+(function() {
+
+  /* =========================================================
+     GLOBALS
+  ========================================================= */
+  const highlightBtn = document.getElementById('highlightSelected');
+  const copyBtn = document.getElementById('copySelected');
+  const startBtn = document.getElementById('startBtn');
+  const pauseResumeBtn = document.getElementById('pauseResumeBtn');
+  const restartBtn = document.getElementById('restartBtn');
+
+  const synth = window.speechSynthesis;
+
+  let teacherVoice = null;
+  let studentVoice = null;
+
+  let narratorActive = false;
+  let lastContainer = null;
+  let lastOffset = 0;
+  let lastCharIndex = 0;
+  let utterance = null;
+
+  let activeParagraph = null;
+  let monitorInterval = null;
+
+
+  /* =========================================================
+     LOAD VOICES (Merged Logic — Nothing Removed)
+  ========================================================= */
+  function loadVoices() {
+    const voices = synth.getVoices();
+    if (!voices.length) return;
+
+    // First script preference logic
+    teacherVoice =
+      voices.find(v => v.name.includes("Zira")) ||
+      voices.find(v => v.name === "Microsoft Zira" && v.lang === "en-US") ||
+      voices.find(v => v.name.includes("Samantha")) ||
+      voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("female")) ||
+      voices[0];
+
+    studentVoice =
+      voices.find(v => v.name.includes("Aria")) ||
+      voices.find(v => v.name === "Microsoft Aria" && v.lang.startsWith("en-GB")) ||
+      voices.find(v => v.name.includes("Victoria")) ||
+      voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("female")) ||
+      voices[0];
+  }
+
+  synth.onvoiceschanged = loadVoices;
+  loadVoices();
+
+
+  /* =========================================================
+     HIGHLIGHT LOGIC (UNCHANGED)
+  ========================================================= */
+  highlightBtn?.addEventListener('click', () => {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) return;
+
+    const highlightClass = 'highlight';
+    const container = range.commonAncestorContainer.nodeType === 3
+      ? range.commonAncestorContainer.parentNode
+      : range.commonAncestorContainer;
+
+    const allNodes = Array.from(container.querySelectorAll('p, li, div, span'));
+    const intersectingNodes = allNodes.filter(node => range.intersectsNode(node));
+
+    if (!intersectingNodes.length && range.startContainer.nodeType === 3) {
+      const parentSpan = range.startContainer.parentNode;
+      if (parentSpan.classList?.contains(highlightClass)) {
+        parentSpan.replaceWith(...parentSpan.childNodes);
+      } else {
+        const span = document.createElement('span');
+        span.className = highlightClass;
+        range.surroundContents(span);
+      }
+      sel.removeAllRanges();
+      return;
+    }
+
+    const alreadyHighlighted = intersectingNodes.some(n => n.classList?.contains(highlightClass));
+    if (alreadyHighlighted) {
+      intersectingNodes.forEach(n => {
+        if (n.classList.contains(highlightClass)) {
+          n.replaceWith(...n.childNodes);
+        }
+      });
+      sel.removeAllRanges();
+      return;
+    }
+
+    intersectingNodes.forEach(node => {
+      const span = document.createElement('span');
+      span.className = highlightClass;
+      node.parentNode.insertBefore(span, node);
+      span.appendChild(node);
+    });
+
+    sel.removeAllRanges();
+  });
+
+
+  /* =========================================================
+     COPY SELECTED TEXT
+  ========================================================= */
+  copyBtn?.addEventListener('click', () => {
+    const sel = window.getSelection();
+    const text = sel.toString().trim();
+
+    if (!text) {
+      alert("Select text first.");
+      return;
+    }
+
+    navigator.clipboard.writeText(text)
+      .then(() => alert("Copied!"))
+      .catch(err => console.error(err));
+  });
+
+
+  /* =========================================================
+     READABLE CONTAINER LOGIC
+  ========================================================= */
+  function getReadableContainer() {
+    const sel = window.getSelection();
+    let node = sel?.anchorNode;
+
+    while (node) {
+      if (node.classList?.contains?.('question-text')) return node;
+      if (node.id === 'mvTextContainer') return node;
+      node = node.parentNode;
+    }
+    return null;
+  }
+
+  function getCursorOffset(container) {
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return 0;
+
+    const range = sel.getRangeAt(0);
+    const pre = document.createRange();
+    pre.setStart(container, 0);
+    pre.setEnd(range.startContainer, range.startOffset);
+    return pre.toString().length;
+  }
+
+/* =========================================================
+   MOBILE CHUNKING (ADD HERE)
+========================================================= */
+
+function buildChunks(text) {
+
+  const MAX = /Mobi|Android/i.test(navigator.userAgent) ? 120 : 180;
+
+  const sentences = text
+    .replace(/([.?!]+)\s+/g, "$1|")
+    .split("|")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const chunks = [];
+  let buffer = "";
+
+  for (let s of sentences) {
+
+    // 🔥 handle very long sentences safely
+    if (s.length > MAX) {
+      for (let i = 0; i < s.length; i += MAX) {
+        chunks.push(s.slice(i, i + MAX));
+      }
+      continue;
+    }
+
+    if ((buffer + s).length > MAX) {
+      if (buffer.trim()) chunks.push(buffer.trim());
+      buffer = s + " ";
+    } else {
+      buffer += s + " ";
+    }
+  }
+
+  if (buffer.trim()) chunks.push(buffer.trim());
+
+  return chunks;
+}
+
+
+
+
+
+
+  /* =========================================================
+     SPEAK FROM CURSOR
+  ========================================================= */
+function speakFrom(container, offset) {
+
+  const fullText = container.textContent || "";
+  const text = fullText.slice(offset);
+  if (!text.trim()) return;
+
+  const chunks = [];
+  const MAX = /Mobi|Android/i.test(navigator.userAgent) ? 120 : 180;
+
+  // --- sentence-based chunking ---
+  const sentences = text
+    .replace(/([.?!])\s+/g, "$1|")
+    .split("|")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  let buffer = "";
+  for (let s of sentences) {
+    if ((buffer + s).length > MAX) {
+      if (buffer) chunks.push(buffer);
+      buffer = s + " ";
+    } else {
+      buffer += s + " ";
+    }
+  }
+  if (buffer) chunks.push(buffer);
+
+  let chunkIndex = 0;
+  let globalOffset = offset;   // 🔥 CRITICAL
+
+  narratorActive = true;
+  lastContainer = container;
+  lastOffset = offset;
+
+  function speakChunk() {
+
+    if (chunkIndex >= chunks.length) {
+      narratorActive = false;
+      lastOffset = 0;
+      lastCharIndex = 0;
+      return;
+    }
+
+    const chunkText = chunks[chunkIndex];
+
+    utterance = new SpeechSynthesisUtterance(chunkText);
+    utterance.voice = teacherVoice;
+
+    utterance.onboundary = (e) => {
+      if (e.name === "word") {
+        // 🔥 maintain continuous index for your highlighter system
+        lastCharIndex = globalOffset + e.charIndex;
+      }
+    };
+
+    utterance.onend = () => {
+      // 🔥 advance global offset correctly
+      globalOffset += chunkText.length;
+      chunkIndex++;
+      speakChunk();
+    };
+
+    synth.speak(utterance);
+  }
+
+  speakChunk();
+}
+
+  /* =========================================================
+     START BUTTON
+  ========================================================= */
+  startBtn?.addEventListener('click', () => {
+
+    const container = getReadableContainer();
+    if (!container) {
+      alert("Place cursor inside readable text");
+      return;
+    }
+
+    const offset = getCursorOffset(container);
+
+if (synth.speaking || synth.paused) {
+  synth.cancel();
+  clearHighlight();   // ← ADD THIS LINE
+  narratorActive = false;
+  return;
+}
+
+    lastCharIndex = offset;
+    speakFrom(container, offset);
+  });
+
+
+  /* =========================================================
+     EMOJI SPEECH OVERLAYS
+  ========================================================= */
+  function addSpeechEmojis() {
+    const paragraphs = document.querySelectorAll('.question-text p, .sentence, #quizSections p');
+
+    paragraphs.forEach(p => {
+      if (p.dataset.speechOverlay) return;
+      p.dataset.speechOverlay = '1';
+
+      const text = p.textContent.trim();
+      let speaker = null;
+
+      if (/^teacher:/i.test(text)) speaker = 'teacher';
+      else if (/^student:/i.test(text)) speaker = 'student';
+      else return;
+
+      const emoji = speaker === 'teacher' ? '👩‍🦰' : '👧';
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.style.all = 'unset';
+      btn.style.cursor = 'pointer';
+      btn.style.fontSize = '14px';
+      btn.style.display = 'inline';
+      btn.style.margin = '0';
+      btn.style.padding = '0';
+      btn.style.lineHeight = '1';
+      btn.style.verticalAlign = 'baseline';
+      btn.title = speaker === 'teacher' ? 'Teacher Speech' : 'Student Speech';
+      btn.textContent = emoji + ' ';
+
+btn.addEventListener('click', () => {
+
+  // Stop current speech
+if (synth.speaking) {
+  synth.cancel();
+  clearHighlight();   // ← ADD THIS LINE
+}
+
+  // Remove any existing highlight
+  document.querySelectorAll(".reading-active")
+    .forEach(el => el.classList.remove("reading-active"));
+
+  // Highlight this paragraph (pale yellow)
+  p.classList.add("reading-active");
+
+  const lineText = text.replace(/^(teacher:|student:)\s*/i, '');
+  const utter = new SpeechSynthesisUtterance(lineText);
+
+  if (speaker === 'teacher') {
+    utter.voice = teacherVoice;
+    utter.rate = 0.88;
+    utter.pitch = 1.15;
+    utter.volume = 0.95;
+  } else {
+    utter.voice = studentVoice;
+    utter.rate = 0.98;
+    utter.pitch = 1.50;
+    utter.volume = 0.80;
+  }
+
+  utter.onend = () => {
+    p.classList.remove("reading-active");
+  };
+
+  synth.speak(utter);
+});      p.insertBefore(btn, p.firstChild);
+    });
+  }
+
+  addSpeechEmojis();
+  setInterval(addSpeechEmojis, 1000);
+
+
+  /* =========================================================
+     ACTIVE READING HIGHLIGHT
+  ========================================================= */
+
+  if (!document.getElementById("speechHighlightStyle")) {
+    const style = document.createElement("style");
+    style.id = "speechHighlightStyle";
+    style.textContent = `
+.reading-active {
+  background-color: #fff9c4 !important;
+  transition: background-color 0.4s ease;
+}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function clearHighlight() {
+    if (activeParagraph) {
+      activeParagraph.classList.remove("reading-active");
+      activeParagraph = null;
+    }
+  }
+
+  function startMonitoring() {
+    if (monitorInterval) return;
+
+    monitorInterval = setInterval(function(){
+      if (!synth.speaking) {
+        clearHighlight();
+        clearInterval(monitorInterval);
+        monitorInterval = null;
+      }
+    }, 100);
+  }
+
+  document.addEventListener("click", function(e){
+
+    const btn = e.target.closest("button");
+    if (!btn) return;
+
+    const p = btn.closest("p");
+    if (!p) return;
+
+    if (synth.speaking) {
+      clearHighlight();
+      return;
+    }
+
+    setTimeout(function(){
+      if (synth.speaking) {
+        clearHighlight();
+        activeParagraph = p;
+        p.classList.add("reading-active");
+        startMonitoring();
+      }
+    }, 50);
+
+  });
+
+})();
+</script>
+
+<!-- End-->
+
+<script>
+(function(){
+
+  const synth = window.speechSynthesis;
+
+  let paragraphs = [];
+  let paragraphRanges = [];
+  let currentIndex = -1;
+
+  let baseOffset = 0;          // where speech started in full text
+  let lastSpokenGlobal = 0;    // last spoken absolute character index
+  let lastStartContainer = null;
+  let lastStartOffset = 0;
+
+  /* ===============================
+     Pale Yellow Highlight CSS
+  =============================== */
+  if (!document.getElementById("autoParagraphHighlightStyle")) {
+    const style = document.createElement("style");
+    style.id = "autoParagraphHighlightStyle";
+    style.textContent = `
+      .auto-paragraph-active {
+        background-color: #fff9c4;
+        transition: background-color 0.4s ease;
+      }
+      .auto-paragraph-fade {
+        background-color: transparent;
+        transition: background-color 0.8s ease;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function clearAll() {
+    paragraphs.forEach(p => {
+      p.classList.remove("auto-paragraph-active");
+      p.classList.remove("auto-paragraph-fade");
+    });
+  }
+
+  function fadeParagraph(index) {
+    if (index < 0 || index >= paragraphs.length) return;
+    const p = paragraphs[index];
+    p.classList.remove("auto-paragraph-active");
+    p.classList.add("auto-paragraph-fade");
+    setTimeout(() => {
+      p.classList.remove("auto-paragraph-fade");
+    }, 800);
+  }
+
+  function highlightParagraph(index) {
+    if (index < 0 || index >= paragraphs.length) return;
+    paragraphs[index].classList.add("auto-paragraph-active");
+  }
+
+  function collectParagraphsFrom(root) {
+    paragraphs = Array.from(root.querySelectorAll("p"))
+      .filter(p => p.textContent.trim().length > 0);
+
+    paragraphRanges = [];
+    let runningLength = 0;
+
+    paragraphs.forEach(p => {
+      const len = p.textContent.length;
+      paragraphRanges.push({
+        start: runningLength,
+        end: runningLength + len
+      });
+      runningLength += len;
+    });
+  }
+
+function findParagraphIndex(globalCharIndex) {
+
+  const BUFFER = 8; // helps catch short dialogue lines
+
+  for (let i = 0; i < paragraphRanges.length; i++) {
+    const r = paragraphRanges[i];
+
+    if (
+      globalCharIndex >= (r.start - BUFFER) &&
+      globalCharIndex < (r.end + BUFFER)
+    ) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+  function getCursorInfo() {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return null;
+
+    const range = sel.getRangeAt(0);
+
+    let container = range.startContainer;
+    while (container && container.nodeType !== 1) {
+      container = container.parentNode;
+    }
+    if (!container) return null;
+
+    const root = container.closest("#mvTextContainer, .question-text") || document.body;
+
+    const preRange = document.createRange();
+    preRange.setStart(root, 0);
+    preRange.setEnd(range.startContainer, range.startOffset);
+
+    const offset = preRange.toString().length;
+
+    return { root, offset, container };
+  }
+
+/* ========================================== 
+   Hook safely into speech (NO AUTO-HIGHLIGHT)
+========================================== */
+const originalSpeak = synth.speak.bind(synth);
+
+synth.speak = function(utterance) {
+
+  const cursorInfo = getCursorInfo();
+  if (!cursorInfo) return originalSpeak(utterance);
+
+  const { offset, container } = cursorInfo;
+
+  // Detect if cursor moved
+  const cursorMoved =
+    container !== lastStartContainer ||
+    offset !== lastStartOffset;
+
+  if (cursorMoved) {
+    baseOffset = offset;
+    lastSpokenGlobal = offset;
+  }
+
+  lastStartContainer = container;
+  lastStartOffset = offset;
+
+  // Optional: still track position silently (no UI effects)
+  utterance.addEventListener("boundary", function(e){
+    if (e.name !== "word") return;
+    lastSpokenGlobal = baseOffset + e.charIndex;
+  });
+
+  utterance.addEventListener("end", function(){
+    if (!synth.speaking) {
+      lastSpokenGlobal = 0;
+      baseOffset = 0;
+    }
+  });
+
+  return originalSpeak(utterance);
+};</script>
+
+<!-- ====== 5. Emoji + Audio Feedback ====== -->
+<script>
+(function() {
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playCorrect() { 
+    audioCtx.resume().then(() => { 
+      const o = audioCtx.createOscillator(); 
+      const g = audioCtx.createGain(); 
+      o.type = "sine"; 
+      o.frequency.setValueAtTime(800, audioCtx.currentTime); 
+      g.gain.setValueAtTime(0.4, audioCtx.currentTime); 
+      o.connect(g); g.connect(audioCtx.destination); 
+      o.start(); o.stop(audioCtx.currentTime + 0.25); 
+    }); 
+  }
+
+  function playWrong() { 
+    audioCtx.resume().then(() => { 
+      const o = audioCtx.createOscillator(); 
+      const g = audioCtx.createGain(); 
+      o.type = "triangle"; 
+      o.frequency.setValueAtTime(450, audioCtx.currentTime); 
+      o.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.25); 
+      g.gain.setValueAtTime(0.4, audioCtx.currentTime); 
+      o.connect(g); g.connect(audioCtx.destination); 
+      o.start(); o.stop(audioCtx.currentTime + 0.25); 
+    }); 
+  }
+
+  function normalize(str){ 
+    return str.trim().toLowerCase().replace(/\s+/g," "); 
+  }
+
+  // ======================
+  // HANDLE ANSWER SELECTION
+  // ======================
+  document.body.addEventListener('change', e => {
+    const exercise = e.target.closest('.exercise');
+    if (!exercise) return;
+
+    // Emojis & sound (fire every change)
+    const textInputs = Array.from(exercise.querySelectorAll("input[type='text'], textarea"));
+    const selectedInputs = Array.from(exercise.querySelectorAll("input:checked"));
+
+    const userAnswers = textInputs.length 
+      ? textInputs.map(i => normalize(i.value)) 
+      : selectedInputs.map(i => normalize(i.value));
+
+    const correctAnswers = Array.from(exercise.querySelectorAll('[data-correct]'))
+      .map(i => normalize(i.dataset.correct));
+
+    const isCorrect = userAnswers.every(ans => correctAnswers.includes(ans));
+
+    // Remove previous emojis
+    exercise.querySelectorAll('.mc-emoji').forEach(span => span.remove());
+
+    // Add emojis
+    selectedInputs.forEach(inp => {
+      const lbl = inp.closest("label");
+      if (lbl) {
+        const span = document.createElement('span');
+        span.className = "mc-emoji";
+        span.style.marginLeft = "8px";
+        span.textContent = isCorrect ? "😊" : "😢";
+        lbl.appendChild(span);
+      }
+    });
+
+    textInputs.forEach(inp => {
+      const span = document.createElement('span');
+      span.className = "mc-emoji";
+      span.style.marginLeft = "8px";
+      span.textContent = isCorrect ? "😊" : "😢";
+      inp.parentNode.insertBefore(span, inp.nextSibling);
+    });
+
+    if (isCorrect) playCorrect(); else playWrong();
+
+// ======================
+// FIRST CLICK SCORING
+// ======================
+if (exercise.dataset.firstResponseLocked) return;
+exercise.dataset.firstResponseLocked = 'true';
+
+const totalExercises = 1; // each exercise counts as 1
+const correctCount = isCorrect ? 1 : 0;
+const percentage = correctCount * 100;
+
+// store score in the element so Submit can display later
+exercise.dataset.score = correctCount;
+exercise.dataset.percentage = percentage;
+});
+
+
+
+
+
+
+
+  // ======================
+  // SUBMIT BUTTON (DISPLAY SCOREBOARD ONLY)
+  // ======================
+  document.body.addEventListener('click', e => {
+    if (!e.target.classList.contains('quiz-submit')) return;
+    const sub = e.target.closest('.quiz-subsection');
+    if (!sub) return;
+
+    const exercises = sub.querySelectorAll('.exercise');
+
+    // Aggregate first-click scores
+    let correctCount = 0;
+    exercises.forEach(ex => {
+      const sc = Number(ex.dataset.score || 0);
+      correctCount += sc;
+    });
+
+    const totalExercises = exercises.length;
+    const percentage = totalExercises > 0 ? Math.round((correctCount / totalExercises) * 100) : 0;
+
+    // Display in scoreboard
+    const board = sub.querySelector('.quiz-scoreboard');
+    if (board) {
+      const dataEl = board.querySelector('.scoreboard-data');
+      const name = sub.querySelector('.quiz-name')?.value || 'Anonymous';
+      const id   = sub.querySelector('.quiz-id')?.value || 'N/A';
+      const section = sub.closest('.section')?.querySelector('h2')?.textContent || 'Unknown Section';
+      const subsection = sub.dataset.subsection || 'Unknown Subsection';
+      const now = new Date();
+      const pad = n => n.toString().padStart(2,'0');
+      const dateString = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      const filename = window.location.pathname.split('/').pop();
+
+const resultText = `${filename}|${section.replace(/:+$/, '').trim()}: ${subsection.replace(/^:+/, '').trim()}|${name}|${id}|${dateString}|${correctCount}/${totalExercises}|${percentage}%`;
+      if (dataEl) dataEl.textContent = resultText;
+
+if (window.saveResult) {
+  const finalResultText = board.querySelector('.scoreboard-data')?.textContent;
+if (finalResultText && window.saveResult) {
+  window.saveResult(finalResultText);
+}
+}
+
+      board.style.display = 'block';
+    }
+  });
+
+})();
+</script>
+
+
+<!--<script>
+(function () {
+
+  if (document.getElementById("global-green-border")) return;
+
+  const border = document.createElement("div");
+  border.id = "global-green-border";
+
+  Object.assign(border.style, {
+    position: "fixed",
+    inset: "0",
+    pointerEvents: "none",
+    zIndex: "2147483647",
+    boxShadow: "inset 0 0 0 10px #39FF14"
+  });
+
+  document.documentElement.appendChild(border);
+
+})();
+</script>-->
+
+<script>
+(function () {
+
+  if (document.getElementById("global-green-border")) return;
+
+  const border = document.createElement("div");
+  border.id = "global-green-border";
+
+  Object.assign(border.style, {
+    position: "fixed",
+    inset: "0",
+    pointerEvents: "none",
+    zIndex: "2147483647",
+    boxShadow: "inset 0 0 0 10px #39FF14",
+    willChange: "transform",
+    transition: "transform 0.12s ease-out"
+  });
+
+  document.documentElement.appendChild(border);
+
+  function adjustForKeyboard() {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const keyboardOffset =
+      window.innerHeight - vv.height - vv.offsetTop;
+
+    border.style.transform =
+      `translateY(-${Math.max(0, keyboardOffset)}px)`;
+  }
+
+  const vv = window.visualViewport;
+
+  if (vv) {
+    vv.addEventListener("resize", adjustForKeyboard);
+    vv.addEventListener("scroll", adjustForKeyboard);
+  }
+
+  adjustForKeyboard();
+
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script>
+(function() {
+  const quizSections = document.getElementById('quizSections');
+
+  // Event delegation for scoreboard buttons
+  quizSections.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+
+    const board = e.target.closest('.quiz-scoreboard');
+    if (!board) return;
+
+    const dataEl = board.querySelector('.scoreboard-data');
+    if (!dataEl) return;
+
+    const text = dataEl.textContent;
+
+    // ===== COPY =====
+    if (btn.classList.contains('score-copy')) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+      }).catch(err => console.error(err));
+    }
+
+    // ===== TXT =====
+    if (btn.classList.contains('score-txt')) {
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'quiz-score.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ===== PNG WITH 10px MARGIN =====
+    if (btn.classList.contains('score-png')) {
+      if (typeof html2canvas === 'undefined') {
+        alert('html2canvas library is required for PNG export.');
+        return;
+      }
+
+      // create temporary wrapper with 10px padding
+      const wrapper = document.createElement('div');
+      wrapper.style.padding = '10px';
+      wrapper.style.background = '#f9f9f9';
+      wrapper.style.display = 'inline-block';
+      wrapper.style.fontFamily = 'monospace';
+      wrapper.style.fontSize = '12px';
+      wrapper.style.whiteSpace = 'pre-wrap';
+      wrapper.style.lineHeight = '1.4';
+      wrapper.appendChild(dataEl.cloneNode(true));
+
+      document.body.appendChild(wrapper);
+
+      html2canvas(wrapper).then(canvas => {
+        canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'quiz-score.png';
+          a.click();
+          URL.revokeObjectURL(url);
+          document.body.removeChild(wrapper); // clean up
+        });
+      });
+    }
+
+
+  }); // <- this closes the quizSections click listener
+
+})(); // <- this closes the IIFE
+</script>
+
+
+
+<script>
+(function() {
+  // Enable/disable submit and radios based on inputs
+  function updateControls(subsection) {
+    const nameInput = subsection.querySelector('.quiz-name');
+    const idInput = subsection.querySelector('.quiz-id');
+    const submitBtn = subsection.querySelector('.quiz-submit');
+    const radios = subsection.querySelectorAll('input[type="radio"]');
+
+    const enabled = nameInput.value.trim() && idInput.value.trim();
+
+    // Enable/disable submit
+    submitBtn.disabled = !enabled;
+
+    // Enable/disable radios
+    radios.forEach(r => r.disabled = !enabled);
+  }
+
+  // Monitor input fields in all subsections
+  document.body.addEventListener('input', e => {
+    if (e.target.matches('.quiz-name, .quiz-id')) {
+      const subsection = e.target.closest('.quiz-subsection');
+      if (!subsection) return;
+      updateControls(subsection);
+    }
+  });
+
+  // Initialize all subsections on page load
+  document.querySelectorAll('.quiz-subsection').forEach(sub => updateControls(sub));
+})();
+</script>
+
+
+<script>
+(function() {
+  const normalize = str => str.trim().toLowerCase().replace(/\s+/g, " ");
+
+  document.body.addEventListener('change', e => {
+    const exercise = e.target.closest('.exercise');
+    if (!exercise) return;
+
+    // ----- Gather user answers -----
+    const textInputs = Array.from(exercise.querySelectorAll("input[type='text'], textarea"));
+    const selectedInputs = Array.from(exercise.querySelectorAll("input:checked"));
+
+    const userAnswers = textInputs.length 
+      ? textInputs.map(i => normalize(i.value))
+      : selectedInputs.map(i => normalize(i.value));
+
+    const correctAnswers = Array.from(exercise.querySelectorAll('[data-correct]'))
+      .map(i => normalize(i.dataset.correct));
+
+    const isCorrect = userAnswers.every(ans => correctAnswers.includes(ans));
+
+    // ----- Add emojis -----
+    const addEmoji = (element) => {
+      if (!element.nextSibling || !element.nextSibling.classList?.contains('mc-emoji')) {
+        const span = document.createElement('span');
+        span.className = 'mc-emoji';
+        span.style.marginLeft = '8px';
+        span.textContent = isCorrect ? '😊' : '😟';
+        element.parentNode.insertBefore(span, element.nextSibling);
+      }
+    };
+
+    textInputs.forEach(addEmoji);
+
+    selectedInputs.forEach(inp => {
+      const label = inp.closest('label');
+      if (label && !label.querySelector('.mc-emoji')) {
+        const span = document.createElement('span');
+        span.className = 'mc-emoji';
+        span.style.marginLeft = '8px';
+        span.textContent = isCorrect ? '😊' : '😟';
+        label.appendChild(span);
+      }
+    });
+
+  }); // close event listener
+})(); // close IIFE
+</script>
+
+<script>
+/* ==========================================================
+   GLOBAL PAGE TITLE ENGINE
+========================================================== */
+
+(function () {
+
+  function buildFormattedTitle() {
+
+    let filename = window.location.pathname.split("/").pop() || "";
+    filename = filename.replace(/\.[^/.]+$/, "");
+    filename = decodeURIComponent(filename);
+
+    const allowedPrefixes = [
+      "g_game_","v_game_","rr_","cdf_","cdr_",
+      "ws_","r_","a_","g_","v_"
+    ];
+
+    for (let prefix of allowedPrefixes) {
+      if (filename.startsWith(prefix)) {
+        filename = filename.substring(prefix.length);
+        break;
+      }
+    }
+
+    let rawTitle = filename.replace(/_/g," ").trim();
+    if (!rawTitle) rawTitle = "Untitled";
+
+    const minorWords = [
+      "a","an","the","and","but","or","nor",
+      "for","so","yet","at","by","in","of","on","to","up","as","off","out"
+    ];
+
+    // ✅ Acronyms to preserve in uppercase
+    const acronyms = ["ot", "nt"];
+
+    return rawTitle.split(/\s+/).map((word, i) => {
+
+      const lower = word.toLowerCase();
+
+      // preserve acronyms like OT / NT
+      if (acronyms.includes(lower)) {
+        return lower.toUpperCase();
+      }
+
+      // first word always capitalized
+      if (i === 0) {
+        return lower.charAt(0).toUpperCase() + lower.slice(1);
+      }
+
+      // minor words stay lowercase
+      if (minorWords.includes(lower)) {
+        return lower;
+      }
+
+      // default title case
+      return lower.charAt(0).toUpperCase() + lower.slice(1);
+
+    }).join(" ");
+  }
+
+  window.pageTitle = buildFormattedTitle();
+
+  window.applyPageTitle = function(root=document){
+    root.querySelectorAll("h1[data-auto-title]").forEach(h=>{
+      h.textContent = window.pageTitle;
+      h.style.textTransform = "none";
+      h.style.visibility = "visible";
+    });
+  };
+
+})();
+
+/* ==========================================================
+   PAGE INIT
+========================================================== */
+
+document.addEventListener("DOMContentLoaded",function(){
+
+  window.applyPageTitle();
+
+});
+
+
+/* ==========================================================
+   AUTO OPEN SINGLE SECTION
+========================================================== */
+
+(function(){
+
+  function tryAutoOpenSingleSection(){
+
+    if(!window.sections || !Array.isArray(window.sections)) return;
+    if(typeof window.openQuizModal !== "function") return;
+
+    const root=document.documentElement;
+
+    const hardOn=root.classList.contains("show-hard");
+    const dynamicOn=root.classList.contains("show-dynamic");
+
+const recentlyClosed =
+  window.__quizJustClosed &&
+  (Date.now() - window.__quizJustClosed < 1500);
+
+if (window.sections.length === 1 && !hardOn && !dynamicOn && !recentlyClosed) {
+  window.openQuizModal(0);
+}
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",tryAutoOpenSingleSection);
+  }else{
+    tryAutoOpenSingleSection();
+  }
+
+})();
+
+
+
+
+
+/* ==========================================================
+   MODAL CONTROL MOVEMENT + CHAPTER/VERSE SYSTEM (ROBUST)
+========================================================== */
+
+function moveControlsIntoModal(){
+
+  const modalContent=document.getElementById("quizModalContent");
+  if(!modalContent) return;
+
+  const chapterControls=document.getElementById("chapterVerseControls");
+  const readAloud=document.getElementById("readaloudControls");
+
+  if(chapterControls && !modalContent.contains(chapterControls)){
+    modalContent.insertBefore(chapterControls,modalContent.firstChild);
+  }
+
+  if(readAloud){
+    readAloud.style.display="block";
+
+    if(!modalContent.contains(readAloud)){
+      modalContent.insertBefore(
+        readAloud,
+        chapterControls?.nextSibling || modalContent.firstChild
+      );
+    }
+  }
+}
+
+
+function buildChapterVerseLogic(){
+
+  const modal=document.getElementById("quizModal");
+  if(!modal) return;
+
+  const readAloud=modal.querySelector("#readaloudControls");
+  const chapterControls=modal.querySelector("#chapterVerseControls");
+  const textContainer=modal.querySelector("#quizSections");
+
+  const chapterSelect=modal.querySelector("#chapterSelect");
+  const verseSelect=modal.querySelector("#verseSelect");
+  const goBtn=modal.querySelector("#goBtn");
+
+  if(!textContainer || !chapterSelect || !verseSelect || !goBtn){
+    console.warn("Chapter/Verse system missing required elements");
+    return;
+  }
+
+  if(chapterControls){
+    chapterControls.style.display="block";
+  }
+
+  const paragraphs=[...textContainer.querySelectorAll("p")];
+  if(!paragraphs.length){
+    console.warn("No paragraphs found for chapter/verse mapping");
+    return;
+  }
+
+  const structure={};
+  let currentChapter=null;
+
+  // ===== helper: normalize text =====
+  const clean = (t)=>t.trim().replace(/\s+/g,' ');
+
+  paragraphs.forEach(p=>{
+
+    const text=clean(p.textContent);
+
+    // ===== FLEXIBLE CHAPTER MATCHING =====
+    const chapMatch=
+      text.match(/^chapter\s*:?\s*(\d+)/i) ||
+      text.match(/^#?\s*chapter\s*(\d+)/i) ||
+      text.match(/^(\d+)\.\s*chapter/i);
+
+    // ===== FLEXIBLE VERSE MATCHING =====
+    const verseMatch=
+      text.match(/^verse\s*:?\s*(\d+)/i) ||
+      text.match(/^v\s*(\d+)/i);
+
+    const fullRefMatch=text.match(/^(\d+):(\d+)\s/);
+
+    // ===== chapter detection =====
+    if(chapMatch){
+      currentChapter=chapMatch[1];
+      if(!structure[currentChapter]) structure[currentChapter]={};
+      return;
+    }
+
+    // ===== verse detection (context-based) =====
+    if(currentChapter && verseMatch){
+      structure[currentChapter][verseMatch[1]]=p;
+      return;
+    }
+
+    // ===== inline chapter:verse detection =====
+    if(fullRefMatch){
+      const c=fullRefMatch[1];
+      const v=fullRefMatch[2];
+
+      if(!structure[c]) structure[c]={};
+      structure[c][v]=p;
+
+      currentChapter=c;
+    }
+
+  });
+
+  // ===== DEBUG SAFETY =====
+  if(Object.keys(structure).length===0){
+    console.warn("ChapterVerse structure is EMPTY. Check formatting.");
+  }
+
+  // ===== populate chapters =====
+  chapterSelect.innerHTML="";
+
+  Object.keys(structure).forEach(ch=>{
+    const opt=document.createElement("option");
+    opt.value=ch;
+    opt.textContent="Chapter "+ch;
+    chapterSelect.appendChild(opt);
+  });
+
+  function updateVerses(){
+
+    verseSelect.innerHTML="";
+    const ch=chapterSelect.value;
+    if(!structure[ch]) return;
+
+    Object.keys(structure[ch]).forEach(v=>{
+      const opt=document.createElement("option");
+      opt.value=v;
+      opt.textContent="Verse "+v;
+      verseSelect.appendChild(opt);
+    });
+
+  }
+
+  chapterSelect.onchange=updateVerses;
+  updateVerses();
+
+  function clearHighlights(){
+    paragraphs.forEach(p=>p.classList.remove("selected-verse"));
+  }
+
+  function getControlsOffset(extraPadding=0){
+
+    const readHeight=readAloud ? readAloud.offsetHeight : 0;
+
+    const chapterHeight=
+      chapterControls &&
+      chapterControls.style.display!=="none"
+      ? chapterControls.offsetHeight
+      : 0;
+
+    return readHeight + chapterHeight + extraPadding;
+  }
+
+  goBtn.onclick=function(){
+
+    const chapter=chapterSelect.value;
+    const verse=verseSelect.value;
+
+    if(!structure[chapter] || !structure[chapter][verse]){
+      console.warn("Verse not found:", chapter, verse);
+      return;
+    }
+
+    const target=structure[chapter][verse];
+
+    clearHighlights();
+    target.classList.add("selected-verse");
+
+    const offset=getControlsOffset(10);
+
+    modal.scrollTo({
+      top:target.offsetTop-offset,
+      behavior:"smooth"
+    });
+  };
+
+  window.chapterVerseStructure = structure; // debug access
+}
+
+/* ==========================================================
+   MODAL ARROW SCROLL
+========================================================== */
+
+(function(){
+
+  const modalRoot=document.getElementById("modalRoot");
+  const modal=document.getElementById("quizModal");
+  if(!modalRoot || !modal) return;
+
+  const SCROLL_AMOUNT=50;
+  let enabled=false;
+
+  function isTypingTarget(target){
+
+    return target.closest("input, textarea")
+      || target.isContentEditable
+      || target.closest("[contenteditable='true']");
+
+  }
+
+  function handleKeydown(e){
+
+    if(!enabled) return;
+    if(e.key!=="ArrowDown" && e.key!=="ArrowUp") return;
+    if(isTypingTarget(e.target)) return;
+
+    e.preventDefault();
+
+    modal.scrollBy({
+      top:e.key==="ArrowDown" ? SCROLL_AMOUNT : -SCROLL_AMOUNT,
+      behavior:"smooth"
+    });
+
+  }
+
+  function enable(){
+    if(enabled) return;
+    enabled=true;
+    document.addEventListener("keydown",handleKeydown);
+  }
+
+  function disable(){
+    enabled=false;
+    document.removeEventListener("keydown",handleKeydown);
+  }
+
+  const observer=new MutationObserver(()=>{
+    const active=modalRoot.classList.contains("active");
+    if(active) enable();
+    else disable();
+  });
+
+  observer.observe(modalRoot,{attributes:true,attributeFilter:["class"]});
+
+})();
+
+
+/* ==========================================================
+   STRICT SUBMIT LOCK
+========================================================== */
+
+(function(){
+
+  function updateSubsectionState(sub){
+
+    const name=sub.querySelector('.quiz-name');
+    const id=sub.querySelector('.quiz-id');
+    const submit=sub.querySelector('.quiz-submit');
+    const radios=sub.querySelectorAll('input[type="radio"]');
+
+    if(!name || !id || !submit) return;
+
+    const enabled=name.value.trim() && id.value.trim();
+
+    submit.disabled=!enabled;
+    radios.forEach(r=>r.disabled=!enabled);
+
+  }
+
+  function initSub(sub){
+
+    if(sub.dataset.lockInitialized) return;
+    sub.dataset.lockInitialized="1";
+
+    const name=sub.querySelector('.quiz-name');
+    const id=sub.querySelector('.quiz-id');
+    if(!name || !id) return;
+
+    updateSubsectionState(sub);
+
+    name.addEventListener("input",()=>updateSubsectionState(sub));
+    id.addEventListener("input",()=>updateSubsectionState(sub));
+
+  }
+
+  function scan(){
+    document.querySelectorAll('.quiz-subsection').forEach(initSub);
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",scan);
+  }else{
+    scan();
+  }
+
+  new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
+
+})();
+
+
+/* ==========================================================
+   GLOBAL LINK FADE
+========================================================== */
+
+document.addEventListener("click",function(e){
+
+  const link=e.target.closest("a");
+  if(!link) return;
+
+  e.preventDefault();
+
+  document.body.style.transition="opacity 80ms ease";
+  document.body.style.opacity="0";
+
+  setTimeout(()=>{
+    window.location.href=link.href;
+  },80);
+
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const targets = [
+    { parent:"#layout", content:"#layout", gap:-30 },
+    { parent:"#tocContainer", content:"#tocContainer", gap:-20 },
+    { parent:"#quizModal", content:"#quizModalContent", gap:-30 }
+  ];
+
+  const copyrightHTML = `
+    <section class="copyrightSection">
+      <div class="footer-note copyright">
+        © <span class="auto-year"></span> Perfectly Practical English™. All rights reserved.
+      </div>
+<div id="visitor-count">Visits: loading...</div>
+
+    </section>
+  `;
+
+  function insertCopyright(parent){
+    if (!parent.querySelector(":scope > .copyrightSection")) {
+      parent.insertAdjacentHTML("beforeend", copyrightHTML);
+    }
+  }
+
+  function adjust(parent, content, desiredGap){
+
+    const copyright = parent.querySelector(".copyrightSection");
+    const last = content.lastElementChild;
+
+    if (!copyright || !last) return;
+
+    const lastBottom = last.getBoundingClientRect().bottom;
+    const copyTop = copyright.getBoundingClientRect().top;
+
+    const currentGap = copyTop - lastBottom;
+    const adjust = currentGap - desiredGap;
+
+    copyright.style.marginTop = (-adjust - 5) + "px";
+  }
+
+  function update(){
+
+    targets.forEach(t => {
+
+      const parent = document.querySelector(t.parent);
+      const content = document.querySelector(t.content);
+
+      if (!parent || !content) return;
+
+      insertCopyright(parent);
+      adjust(parent, content, t.gap);
+
+    });
+
+  }
+
+  // set year
+  document.querySelectorAll(".auto-year").forEach(el=>{
+    el.textContent = new Date().getFullYear();
+  });
+
+  update();
+
+  window.addEventListener("resize", update);
+
+});
+</script>
+
+<script>
+(function(){
+
+  const startBtn = document.getElementById('startBtn');
+  let activeEl = null;
+
+  let startX = 0;
+  let startY = 0;
+  let isDragging = false;
+
+  const DRAG_THRESHOLD = 8;
+
+  const X_THRESHOLD = 60;
+  const Y_THRESHOLD = 30;
+
+  const synth = window.speechSynthesis;
+
+  /* =========================
+     STYLE (soft + fade out)
+  ========================= */
+  if (!document.getElementById("chunkHighlightStyle")) {
+    const style = document.createElement("style");
+    style.id = "chunkHighlightStyle";
+    style.textContent = `
+      .chunk-active {
+        background: #fff9c4;
+        transition: background 0.6s ease;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function fadeHighlight() {
+    if (!activeEl) return;
+
+    activeEl.style.background = "transparent";
+
+    setTimeout(() => {
+      if (activeEl) {
+        activeEl.classList.remove("chunk-active");
+        activeEl.style.background = "";
+        activeEl = null;
+      }
+    }, 600);
+  }
+
+  function setHighlight(el) {
+    if (activeEl) {
+      activeEl.classList.remove("chunk-active");
+    }
+    activeEl = el;
+    el.classList.add("chunk-active");
+  }
+
+  function placeCursorAtStart(el) {
+    const range = document.createRange();
+    const sel = window.getSelection();
+
+    range.selectNodeContents(el);
+    range.collapse(true);
+
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  /* =========================
+     POINTER TRACKING
+  ========================= */
+  document.addEventListener("pointerdown", (e) => {
+    startX = e.clientX;
+    startY = e.clientY;
+    isDragging = false;
+  });
+
+  document.addEventListener("pointermove", (e) => {
+    if (Math.abs(e.clientX - startX) > DRAG_THRESHOLD ||
+        Math.abs(e.clientY - startY) > DRAG_THRESHOLD) {
+      isDragging = true;
+    }
+  });
+
+  /* =========================
+     TAP → TOGGLE PLAY/STOP
+  ========================= */
+  document.addEventListener("pointerup", function(e){
+
+    if (isDragging) return;
+
+    const sel = window.getSelection();
+    if (sel && !sel.isCollapsed) return;
+
+    const p = e.target.closest(".question-text p, #quizSections p");
+    if (!p) return;
+
+    if (e.target.closest("button, input, label")) return;
+
+    const rect = p.getBoundingClientRect();
+
+    const isRightZone = e.clientX > rect.right - X_THRESHOLD;
+    const isBottomZone = e.clientY > rect.bottom - Y_THRESHOLD;
+
+    if (!(isRightZone && isBottomZone)) return;
+
+    // =========================
+    // 🔥 TOGGLE LOGIC
+    // =========================
+
+    if (synth.speaking) {
+      // STOP
+      synth.cancel();
+      fadeHighlight();
+      return;
+    }
+
+    // START (fresh)
+    setHighlight(p);
+    placeCursorAtStart(p);
+
+    setTimeout(() => {
+      if (startBtn) startBtn.click();
+    }, 40);
+
+  });
+
+  /* =========================
+     AUTO FADE WHEN SPEECH ENDS
+  ========================= */
+  const originalSpeak = synth.speak.bind(synth);
+
+  synth.speak = function(utterance) {
+
+    utterance.addEventListener("end", () => {
+      fadeHighlight();
+    });
+
+    return originalSpeak(utterance);
+  };
+
+})();
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<script>
+(function () {
+
+  const synth = window.speechSynthesis;
+  const startBtn = document.getElementById("startBtn");
+  if (!startBtn) return;
+
+  // -------------------------
+  // CREATE BOTTOM BUTTON
+  // -------------------------
+  const proxyBtn = document.createElement("button");
+  document.body.appendChild(proxyBtn);
+
+  // -------------------------
+  // DETECT VISIBILITY
+  // -------------------------
+  function isVisible(el) {
+    if (!el) return false;
+
+    const rect = el.getBoundingClientRect();
+
+    return (
+      rect.width > 0 &&
+      rect.height > 0 &&
+      rect.top < window.innerHeight &&
+      rect.bottom > 0
+    );
+  }
+
+  // -------------------------
+  // SYNC LABEL
+  // -------------------------
+  function syncLabel() {
+    const topLabel = startBtn.textContent?.trim() || "Start";
+    proxyBtn.textContent = topLabel;
+  }
+
+  // -------------------------
+  // 🔥 KEYBOARD-AWARE POSITIONING
+  // -------------------------
+  function adjustForKeyboard() {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const keyboardOffset =
+      window.innerHeight - vv.height - vv.offsetTop;
+
+    proxyBtn.style.transform =
+      `translateY(-${Math.max(0, keyboardOffset)}px)`;
+  }
+
+  // -------------------------
+  // 🔥 SYNC STYLES
+  // -------------------------
+  function syncStyles() {
+    const cs = window.getComputedStyle(startBtn);
+
+    Object.assign(proxyBtn.style, {
+      position: "fixed",
+      bottom: "20px",
+      left: "20px",
+      zIndex: 999999,
+      padding: "10px 14px",
+      borderRadius: "6px",
+      border: cs.border,
+      background: cs.backgroundColor,
+      color: cs.color,
+      fontSize: cs.fontSize,
+      fontFamily: cs.fontFamily,
+      fontWeight: cs.fontWeight,
+      cursor: "pointer",
+      boxShadow: "0 4px 8px rgba(0,0,0,0.5)",
+      userSelect: "none",
+
+      // 🔥 important for smooth movement
+      willChange: "transform",
+      transition: "transform 0.12s ease-out"
+    });
+  }
+
+  // -------------------------
+  // MAIN CLICK
+  // -------------------------
+  proxyBtn.addEventListener("click", () => {
+    startBtn.click();
+  });
+
+  // -------------------------
+  // KEEP IN SYNC
+  // -------------------------
+  const observer = new MutationObserver(() => {
+    syncLabel();
+    syncStyles();
+  });
+
+  observer.observe(startBtn, {
+    subtree: true,
+    childList: true,
+    characterData: true
+  });
+
+  setInterval(() => {
+    syncLabel();
+    syncStyles();
+  }, 300);
+
+  // -------------------------
+  // 🔥 KEYBOARD EVENTS
+  // -------------------------
+  const vv = window.visualViewport;
+
+  if (vv) {
+    vv.addEventListener("resize", adjustForKeyboard);
+    vv.addEventListener("scroll", adjustForKeyboard);
+  }
+
+  // -------------------------
+  // INIT
+  // -------------------------
+  syncLabel();
+  syncStyles();
+  adjustForKeyboard();
+
+})();
+</script>
+
+
+<script>
+(function(){
+
+const RAW_TEXT = `
+Open Section Content 
+1. Click blue buttons to open sections.
+
+---
+
+Reader Tools
+
+1. Highlight - Select text and click to highlight.
+2. Click again to remove highlight.
+3. Copy - Select text and click to copy.
+4. Click Close to exit.
+
+---
+
+Quiz
+
+1. Enter Name and ID.
+2. Select best answer.
+3. Click Submit to see score.
+4. Click Close to exit.
+`;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("instructionsBtn");
+  if (!btn) return;
+
+  // create isolated modal ONCE
+  let modal = document.getElementById("info-instructions-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "info-instructions-modal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      background: "rgba(0,0,0,0.6)",
+      display: "none",
+      zIndex: "999999",
+      padding: "40px",
+      boxSizing: "border-box"
+    });
+
+modal.innerHTML = `
+  <div style="
+    max-width:700px;
+    margin:0 auto;
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    position:relative;
+    max-height:80vh;
+    overflow:auto;
+    font-family:inherit;
+    box-sizing:border-box;
+  ">
+
+<button id="close-instructions-modal" class="modal-close-btn">✕</button>
+
+    <pre style="
+      white-space:pre-wrap;
+      margin:0;
+      padding-top:10px;
+      overflow-wrap:break-word;
+      word-break:break-word;
+    ">${RAW_TEXT}</pre>
+
+  </div>
+`;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#close-instructions-modal").onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+});
+
+})();
+</script>
+
+<script>
+(function(){
+
+const RAW_TEXT = `
+Comprehensive reading strategy checklist
+
+1. Cut texts into small pieces.
+2. Collect context clues.
+3. Reread when lost.
+4. Scan titles and images.
+5. Identify known/unknown words.
+6. Use background knowledge.
+7. Break down word parts.
+8. Look up vocabulary.
+9. Identify signal words.
+`;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("strategiesBtn");
+  if (!btn) return;
+
+  let modal = document.getElementById("info-strategies-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "info-strategies-modal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      background: "rgba(0,0,0,0.6)",
+      display: "none",
+      zIndex: "999999",
+      padding: "40px",
+      boxSizing: "border-box"
+    });
+
+    modal.innerHTML = `
+      <div style="
+        max-width:700px;
+        margin:0 auto;
+        background:#fff;
+        padding:20px;
+        border-radius:10px;
+        position:relative;
+        max-height:80vh;
+        overflow:auto;
+        font-family:inherit;
+      ">
+
+<button id="close-strategies-modal" class="modal-close-btn">✕</button>
+
+        <pre style="white-space:pre-wrap;margin:0;">${RAW_TEXT}</pre>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#close-strategies-modal").onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+});
+
+})();
+</script>
+
+<script>
+(function(){
+
+const RAW_TEXT = `
+Common Signal Word Categories and Examples
+
+• Time ⏰: words that tell when something happens
+
+on, at, in, before, after, since, until, during, for, now, yesterday, today, tomorrow, later, then, when, while, once
+
+• Addition ➕: words that add ideas together
+
+and, also, too, with, plus, as well as, not only...but also, both...and
+
+• Cause / Effect 🔗: words that show a reason or result
+
+because, so, since, because of, due to, as a result, therefore, that’s why
+
+• Comparison / Similarity / Difference ⚖️: words that compare things
+
+like, as, as...as, than, similar to, different from, more than, less than, the most, just as...so, whereas, in contrast to
+
+• Contrast / Opposition 🎭: words that show differences
+
+but, although, though, even though, however, yet, still, despite, instead, whereas, while, on the other hand
+
+• Frequency 〰️: words that tell how often something happens
+
+always, usually, often, sometimes, occasionally, rarely, never, every day, once a week, hardly ever, from time to time
+
+• Possibility / Certainty 🎲: words that show how possible or sure something is
+
+maybe, probably, possibly, must, might, may, could, can, definitely, certainly
+
+• Advice / Obligation / Permission ☝️: words that tell rules or give guidance
+
+must, must not, have to, don’t have to, should, ought to, had better, can, cannot, may, could
+
+• Manner 🎭: words that tell how something is done
+
+quickly, slowly, carefully, easily, well, badly, with, by, in a...way, as
+
+• Place / Location 📍: words that tell where something is
+
+in, on, at, under, above, between, near, next to, here, there, everywhere, anywhere
+
+• Condition 🌧️: words that show something depends on something else
+
+if, unless, in case, on condition that
+
+• Emphasis / Focus 🎯: words that make something stronger or more important
+
+only, just, even, especially, mainly, particularly
+
+• Questions (Interrogatives) ❓: words used to ask questions
+
+how, when, where, why
+
+• Relative Words 👨‍👩‍👧‍👦: words that connect ideas about time, place, reason, or manner
+
+when, where, why, how
+
+• Direction / Movement 🧭: words that show movement or direction
+
+to, from, toward, away from, up, down, forward, back
+
+• Affirmative and Negative ✔️❌: words that show yes or no
+
+yes, no
+`;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("signalwordsBtn");
+  if (!btn) return;
+
+  let modal = document.getElementById("info-signalwords-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "info-signalwords-modal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      background: "rgba(0,0,0,0.6)",
+      display: "none",
+      zIndex: "999999",
+      padding: "40px",
+      boxSizing: "border-box"
+    });
+
+    modal.innerHTML = `
+      <div style="
+        max-width:700px;
+        margin:0 auto;
+        background:#fff;
+        padding:20px;
+        border-radius:10px;
+        position:relative;
+        max-height:80vh;
+        overflow:auto;
+        font-family:inherit;
+      ">
+
+<button id="close-signalwords-modal" class="modal-close-btn">✕</button>
+
+        <pre style="white-space:pre-wrap;margin:0;">${RAW_TEXT}</pre>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#close-signalwords-modal").onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+});
+
+})();
+</script>
+
+
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<script>
+
+function goToNextQuiz(){
+
+  const modal = document.getElementById("quizModal");
+  const container = modal?.querySelector("#quizSections");
+
+  // ✔️ TARGET THE ACTUAL BUTTON (NOT THE FUNCTION)
+  const goBtn = document.querySelector('button[onclick="goToNextQuiz()"]');
+
+  if(!container) return;
+
+  const originalLabel = goBtn?.textContent || "Go to Quiz";
+
+  function showNoQuizEmoji(){
+
+    if(!goBtn) return;
+
+    goBtn.textContent = "🚫";
+
+    setTimeout(() => {
+      goBtn.textContent = originalLabel;
+    }, 900);
+
+  }
+
+  const firstQuiz = container.querySelector(".quiz-subsection");
+
+  // ===== NO QUIZ FOUND =====
+  if(!firstQuiz){
+    showNoQuizEmoji();
+    return;
+  }
+
+  const readAloud = modal?.querySelector("#readaloudControls");
+  const chapterControls = modal?.querySelector("#chapterVerseControls");
+
+  const offset =
+    (readAloud?.offsetHeight || 0) +
+    (chapterControls?.offsetHeight || 0) +
+    20;
+
+  modal.scrollTo({
+    top: firstQuiz.offsetTop - offset,
+    behavior: "smooth"
+  });
+
+}
+
+</script>
+
+<script>
+// ===== UNIVERSAL CLOSE HANDLER (safe + no blank bug) =====
+document.addEventListener("click", (e) => {
+
+  const closeBtn = e.target.closest(
+    ".quiz-close, .modal-close, #closeModalBtn"
+  );
+
+  if (!closeBtn) return;
+
+  e.preventDefault();
+
+  // Smooth fade instead of hard visibility kill
+  document.body.style.opacity = "0";
+
+  // Close modal immediately
+  const modalRoot = document.getElementById("modalRoot");
+  if (modalRoot) modalRoot.classList.remove("active");
+
+  document.body.classList.remove("modal-open");
+
+  // Force full reload
+  setTimeout(() => {
+    location.replace(window.location.pathname);
+  }, 80);
+
+});
+</script>
+
+
+<script>
+(function () {
+
+  function showPage() {
+    const root = document.documentElement;
+    const loader = document.getElementById("loader");
+
+    // Remove old gating (safe even if unused)
+    root.classList.remove("pre-auto-open", "show-hard", "show-dynamic");
+
+    // ✅ Reveal UI (controls title via CSS)
+    root.classList.add("ui-ready");
+
+    // Force key containers visible
+    const layout = document.getElementById("layout");
+    const toc = document.getElementById("dynamicTOC");
+
+    if (layout) layout.style.display = "block";
+    if (toc) toc.style.display = "block";
+
+    // Fallback: reveal hidden content if needed
+    if (!layout && !toc) {
+      document.body.style.visibility = "visible";
+      document.querySelectorAll(".visually-hidden").forEach(el => {
+        el.style.position = "static";
+        el.style.left = "0";
+      });
+    }
+
+    // Kill loader LAST
+    if (loader) loader.remove();
+  }
+
+  // Run immediately (prevents stuck loader)
+  showPage();
+
+  // Backup safety
+  document.addEventListener("DOMContentLoaded", showPage);
+  window.addEventListener("load", showPage);
+  setTimeout(showPage, 1500);
+
+})();
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const targets = [
+    { parent:"#layout", content:"#layout", gap:-30 },
+    { parent:"#tocContainer", content:"#tocContainer", gap:-20 },
+    { parent:"#quizModal", content:"#quizModalContent", gap:-30 }
+  ];
+
+  const copyrightHTML = `
+    <section class="copyrightSection">
+
+      <!-- 10px invisible space ABOVE copyright -->
+      <div class="spacer spacer-top"></div>
+
+      <div class="footer-note copyright">
+        © <span class="auto-year"></span> Perfectly Practical English™. All rights reserved.
+      </div>
+
+      <div id="visitor-count" class="visitor-count">
+        Visits: loading...
+      </div>
+
+      <!-- 30px invisible space BELOW visits -->
+      <div class="spacer spacer-bottom"></div>
+
+
+    </section>
+  `;
+
+  function insertCopyright(parent){
+    if (!parent.querySelector(":scope > .copyrightSection")) {
+      parent.insertAdjacentHTML("beforeend", copyrightHTML);
+    }
+  }
+
+  function adjust(parent, content, desiredGap){
+
+    const copyright = parent.querySelector(".copyrightSection");
+    const last = content.lastElementChild;
+
+    if (!copyright || !last) return;
+
+    const lastBottom = last.getBoundingClientRect().bottom;
+    const copyTop = copyright.getBoundingClientRect().top;
+
+    const currentGap = copyTop - lastBottom;
+    const adjust = currentGap - desiredGap;
+
+    const extraOffset = 5; // try 5–10px
+
+copyright.style.marginTop = (-adjust + extraOffset) + "px";
+  }
+
+  async function updateVisitorCount() {
+
+    const namespace = "PerfectlyPracticalEnglish";
+    const key = "homepage";
+
+    const isOwner =
+      localStorage.getItem("isOwner") === "true";
+
+    const isLocal =
+      location.hostname === "localhost" ||
+      location.hostname === "127.0.0.1";
+
+    const alreadyCounted =
+      sessionStorage.getItem("counted");
+
+    let data;
+
+    try {
+
+      if (!isOwner && !isLocal && !alreadyCounted) {
+
+        data = await fetch(
+          `https://api.countapi.xyz/hit/${namespace}/${key}`
+        ).then(r => r.json());
+
+        sessionStorage.setItem("counted", "true");
+
+      } else {
+
+        data = await fetch(
+          `https://api.countapi.xyz/get/${namespace}/${key}`
+        ).then(r => r.json());
+
+      }
+
+      document.querySelectorAll("#visitor-count").forEach(el => {
+        el.textContent = `Total: ${data.value} visits`;
+      });
+
+    } catch (err) {
+
+      console.error("Visitor counter failed:", err);
+
+      document.querySelectorAll("#visitor-count").forEach(el => {
+        el.textContent = "Visits unavailable";
+      });
+
+    }
+
+  }
+
+  function update(){
+
+    targets.forEach(t => {
+
+      const parent = document.querySelector(t.parent);
+      const content = document.querySelector(t.content);
+
+      if (!parent || !content) return;
+
+      insertCopyright(parent);
+      adjust(parent, content, t.gap);
+
+    });
+
+  }
+
+  // Set current year
+  document.querySelectorAll(".auto-year").forEach(el => {
+    el.textContent = new Date().getFullYear();
+  });
+
+  update();
+  updateVisitorCount();
+
+  window.addEventListener("resize", update);
+
+});
+</script>
+
+<script>
+function fixModalScrollRoom() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+
+  const keyboardHeight =
+    window.innerHeight - vv.height - vv.offsetTop;
+
+  const modal = document.getElementById("quizModal");
+  if (!modal) return;
+
+  modal.style.height =
+    `calc(100dvh - ${keyboardHeight}px)`;
+}
+
+window.visualViewport?.addEventListener("resize", fixModalScrollRoom);
+window.visualViewport?.addEventListener("scroll", fixModalScrollRoom);
+window.addEventListener("resize", fixModalScrollRoom);
+
+fixModalScrollRoom();
+
+</script>
+
+<!-- SUPABASE LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const supabaseClient = window.supabase?.createClient(
+  'https://etwwriloppklhhkmswpr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+);
+
+if (!supabaseClient) {
+  console.error("❌ Supabase failed to initialize");
+}
+
+let lastUploadedScore = null;
+
+window.saveResult = async function saveResult(text) {
+
+  if (!supabaseClient) {
+    console.error("❌ No Supabase client");
+    return;
+  }
+
+  // ======================
+  // NORMALIZE INPUT
+  // ======================
+  let cleaned;
+
+  try {
+    cleaned = (typeof text === "string")
+      ? text
+      : JSON.stringify(text);
+
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+
+  } catch (err) {
+    console.error("❌ Normalize error:", err);
+    return;
+  }
+
+  if (!cleaned) {
+    console.error("❌ Empty value blocked");
+    return;
+  }
+
+  if (cleaned === lastUploadedScore) {
+    console.log("⚠️ Duplicate blocked");
+    return;
+  }
+
+  lastUploadedScore = cleaned;
+
+  console.log("📤 INSERTING INTO scoreboard_raw:", cleaned);
+
+  const { data, error } = await supabaseClient
+    .from("scoreboard_raw")
+    .insert([
+      { result_text: cleaned }
+    ])
+    .select();
+
+  if (error) {
+    console.error("❌ INSERT FAILED FULL ERROR:", error);
+    return;
+  }
+
+  console.log("✅ INSERT SUCCESS:", data);
+};
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+

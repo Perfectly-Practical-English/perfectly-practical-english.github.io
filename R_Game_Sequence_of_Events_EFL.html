@@ -1,0 +1,1444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sentence Scramble</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: #f3f4f6;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .container {
+      width: 100%;
+      max-width: 800px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      padding: 16px;
+    }
+.top-bar {
+  display: flex;
+  gap: 3px;
+  flex-wrap: nowrap;
+  align-items: center;
+  width: 100%;
+}
+
+/* Shared sizing for all top-bar controls */
+.top-bar input,
+.top-bar button {
+  flex: 1 1 0;          /* 🔑 span the full row width */
+  min-width: 0;
+
+  height: 40px;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: none;
+  box-sizing: border-box;
+}
+
+/* Inputs slightly wider than buttons (optional but sane) */
+#playerName,
+#playerID {
+  flex: 2 1 0;
+  padding: 0 8px;
+  border: 1px solid #cbd5e1;
+}
+
+/* Buttons */
+#startBtn,
+#submitBtn {
+  flex: 1 1 0;
+  background: #3b82f6;
+  color: #fff;
+  cursor: pointer;
+}
+    #startBtn:hover, #submitBtn:hover {
+      background: #2563eb;
+    }
+    .tiles-wrapper {
+      overflow: hidden;
+      position: relative;
+      margin-top: 12px;
+    }
+    .tiles {
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.8s ease-out;
+      will-change: transform;
+    }
+.tile {
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  margin: 8px 0;
+  border-radius: 12px;
+  font-size: 1.05rem;
+  cursor: pointer;
+  user-select: none;
+  min-height: 64px;
+  box-sizing: border-box;
+
+  background: #e0f2fe;                 /* light blue */
+  border: 1px solid #7dd3fc;
+  box-shadow: 0 4px 8px rgba(0,0,0,.12);
+
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+
+    .tile-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .num {
+      font-weight: 700;
+      color: #0b1220;
+      line-height: 1.2;
+    }
+    .sentence {
+      flex: 1;
+      line-height: 1.25;
+      color: #0f172a;
+    }
+
+.tile {
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,.18);
+}
+.blank {
+  display: inline-block;
+  min-width: 50px;
+  padding: 0 6px;
+  border-bottom: 2px solid #999;
+  color: red;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+}
+
+    .emoji {
+      min-width: 34px;
+      text-align: center;
+      font-size: 1.3rem;
+      user-select: none;
+    }
+    .countdown {
+      font-size: 0.85rem;
+      color: #475569;
+      text-align: center;
+      margin-top: 6px;
+    }
+    .scoreboard {
+      border-top: 2px solid #e2e8f0;
+      padding-top: 8px;
+      display: none;
+      white-space: pre-line;
+      font-family: monospace;
+      font-size: 0.95rem;
+      color: #0f172a;
+    }
+    .score-buttons {
+      margin-top: 6px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      display: none;
+    }
+    .score-buttons button {
+      padding: 6px 10px;
+      font-size: 0.9rem;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      background: #3b82f6;
+      color: #fff;
+    }
+    .score-buttons button:hover {
+      background: #2563eb;
+    }
+
+
+/* Footer styles */
+#copyrightSection {
+  margin-top: 0px;   /* move it up by 20px */
+  text-align: left;    /* flush left text */
+  padding: 0;          /* remove centering padding */
+  font-size: 8px;
+}
+
+
+/* ===============================
+   FORM ROW (shared layout)
+   =============================== */
+
+.formRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: nowrap;        /* 🔒 NEVER stack */
+  gap: 6px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+/* Buttons in a row */
+.formRow > button {
+  margin-top: -10px;   /* bump buttons up 3–5px */
+
+  flex: 0 0 38px;
+  height: 38px;
+  padding: 0;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Selector field behaves like an input */
+.formRow > #sectionWheelContainer {  flex: 1 1 auto;
+  min-width: 0;
+  height: 38px;
+  position: relative;
+  background: #fff;
+  border: 1px solid #999;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
+}
+
+/* BUTTONS */
+.sectionBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  font-size: 18px;
+  padding: 0;
+  line-height: 1;
+  z-index: 2;
+}
+
+#sectionUp {
+  left: -3px;
+}
+
+#sectionDown {
+  right: -3px;
+}
+
+
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="top-bar">
+      <input type="text" id="playerName" placeholder="Name">
+      <input type="text" id="playerID" placeholder="ID">
+      <button id="startBtn">Start</button>
+      <button id="submitBtn">Submit</button>
+    </div>
+
+<div class="formRow">
+  <button type="button" id="sectionUp">▲</button>
+
+  <div id="sectionWheelContainer">
+    <div class="wheel"></div>
+  </div>
+
+  <button type="button" id="sectionDown">▼</button>
+</div>
+
+
+    <div class="tiles-wrapper">
+      <div class="tiles" id="tiles"></div>
+    </div>
+
+    <div class="scoreboard" id="scoreboard"></div>
+    <div class="score-buttons" id="scoreButtons">
+      <button id="copyScore">Copy</button>
+      <button id="downloadTxt">↓TXT</button>
+      <button id="downloadPng">↓PNG</button>
+    </div>
+
+  <!-- Copyright Footer Section -->
+  <section id="copyrightSection">
+    <div class="footer-note copyright">© 2026 Perfectly Practical English™. All rights reserved.</div>
+  </section>
+
+  </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+window.activeSectionText = "";
+window.activeSectionIndex = 0;
+</script>
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+  const startBtn = document.getElementById("startBtn");
+
+  startBtn.addEventListener("click", () => {
+
+    const index = window.getSelectedSectionIndex?.();
+
+    if (index == null || Number(index) === 0) {
+      alert("Select a topic first.");
+      return;
+    }
+
+    // 🔥 Get real section data directly (NO event system)
+    const section = sectionSource?.[index - 1];
+
+    if (!section || !section.text) {
+      alert("Section not found.");
+      return;
+    }
+
+    // 🔥 FORCE STATE
+    window.activeSectionIndex = index;
+    window.activeSectionText = section.text;
+
+    // 🔥 BUILD GAME DIRECTLY (bypasses broken pipeline)
+    if (typeof buildGame === "function") {
+      buildGame();
+    } else {
+      alert("Game not ready yet. Refresh the page.");
+    }
+  });
+});</script>
+
+<script>
+
+// Raw sentences for scramble game
+const rawSentences = `
+
+~Visiting Bigfoot in the Forest
+
+A group of campers find strange footprints in the forest.
+They decide to follow the footprints carefully.
+They walk deeper between the tall trees.
+Suddenly, they hear a loud, mysterious howl nearby.
+Then they see Bigfoot peeking out at them from behind a tree.
+Bigfoot invites them to visit his giant redwood treehouse.
+They climb up and enter the warm, cozy home.
+They meet Bigfoot’s family and make friends.
+Afterwards, they eat delicious nuts and berries from the forest with the Bigfoot family.
+Finally, it is time to say goodbye, but the campers promise to visit again soon.~
+
+
+~Visiting Nessie Under the Surface of Loche Ness
+
+A group of divers find strange ripples in the water.
+They decide to follow the current carefully.
+They dive deeper between old rotten logs.
+Suddenly, they hear a loud, mysterious roar nearby.
+Then they see Nessie peeking out at them from inside an underwater cave.
+Nessie invites them to visit her underwater cavern.
+They dive deeper up and enter the warm, cozy cave.
+They meet Nessie’s family and make friends.
+Afterwards, they eat delicious fish and seaweed from the lake with sea monster family.
+Finally, it is time to say goodbye, but the divers promise to visit again soon.~
+`;
+
+
+// --------------------------------------------------
+// SECTION SELECTOR SOURCE (non-destructive)
+// --------------------------------------------------
+
+const sectionSource = rawSentences
+  .split("~")
+  .map(s => s.trim())
+  .filter(Boolean)
+  .map(block => {
+    const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
+    return {
+      label: lines[0],      // appears in selector
+      text: lines.slice(1).join("\n") // emitted on select
+    };
+  });
+/* =========================================
+   SEQUENCE SCRAMBLE GAME ENGINE
+   (Shell-compatible, section-aware)
+   ========================================= */
+
+let sentences = [];
+let selected = null;
+const container = document.getElementById('tiles');
+
+
+// 🔁 Rebuild game when section changes
+// 🔁 Rebuild game when section changes
+window.addEventListener("sectionchange", async (e) => {
+  const index = e.detail?.index;
+  const text  = e.detail?.text;
+
+  if (
+  index == null ||
+  Number(index) === 0 ||
+  !text ||
+  !text.trim()
+) return;
+
+  // 🔒 lock in the selected section
+window.activeSectionIndex = index;
+window.activeSectionText = text;
+
+  buildGame();
+});
+
+
+// 🧱 Build game tiles
+async function buildGame() {
+  container.innerHTML = "";
+  selected = null;
+
+const raw = window.activeSectionText || "";
+
+if (!raw.trim()) {
+  alert("Select a section first.");
+  return;
+}
+
+  sentences = raw
+    .trim()
+    .split("\n")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const shuffled = shuffle([...sentences]);
+
+shuffled.forEach(text => {
+  const div = document.createElement('div');
+  div.className = 'tile';
+
+  div.innerHTML = `
+    <div class="tile-header">
+      <span class="num"></span>
+      <span class="sentence">${text}</span>
+    </div>
+  `;
+
+div.style.pointerEvents = 'auto';
+div.style.background = "#e0f2fe";
+div.classList.remove("correct");
+
+
+  div.addEventListener('click', () => handleTileClick(div));
+  container.appendChild(div);
+});
+
+const submitBtn = document.getElementById('submitBtn');
+const scoreboard = document.getElementById('scoreboard');
+
+if (submitBtn) submitBtn.disabled = false;
+if (scoreboard) scoreboard.style.display = 'none';
+}
+
+// 🔁 Click-to-swap
+function handleTileClick(tile) {
+  if (!selected) {
+    selected = tile;
+    tile.classList.add('selected');
+    return;
+  }
+
+  if (selected === tile) {
+    tile.classList.remove('selected');
+    selected = null;
+    return;
+  }
+
+const s1 = selected.querySelector('.sentence');
+const s2 = tile.querySelector('.sentence');
+
+const tmp = s1.textContent;
+s1.textContent = s2.textContent;
+s2.textContent = tmp;
+
+  selected.classList.remove('selected');
+  selected = null;
+}
+
+// 🔀 Shuffle helper
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+
+</script>
+
+<script>
+
+
+/* =========================================
+   SECTION DIAL — SCROLL + CLICK ONLY
+   (SECTION-SCOPED, MC-SAFE, AUTO-TRIGGERING)
+   ========================================= */
+
+(function () {
+
+  const ITEM_HEIGHT = 38;
+
+  let sections = [];
+let sectionIndex = 0; // placeholder (no selection yet)
+
+  let offset = 0;
+  let startY = 0;
+  let dragging = false;
+let isProgrammaticSelect = false;
+
+
+  /* ---------- GLOBAL MC POOL (SECTION ONLY) ---------- */
+  window.sectionAnswerPool = [];
+
+  function rebuildMCPool(sectionText) {
+    window.sectionAnswerPool = sectionText
+      .split("\n")
+      .map(line => {
+        const m = line.match(/\|([^|]+)\|/);
+        return m ? m[1] : null;
+      })
+      .filter(Boolean);
+}
+
+
+  /* ---------- PARSE SECTIONS (STRICT ~ BOUNDARIES) ---------- */
+  function parseSections(raw) {
+    const chunks = raw.split(/\n(?=~+)/);
+
+    return chunks
+      .map(chunk => chunk.trim())
+      .filter(chunk => chunk.startsWith("~"))
+      .map(chunk => {
+        const lines = chunk.split("\n");
+        const name = lines.shift().replace(/^~+/, "").trim();
+        const text = lines.join("\n").trim();
+        return { name, text };
+      });
+  }
+
+sections = [
+  { name: "Select a category.", text: "" },
+  ...sectionSource.map(s => ({
+    name: s.label,
+    text: s.text
+  }))
+];
+
+
+  /* ---------- BUILD UI ---------- */
+  const wheelContainer = document.getElementById("sectionWheelContainer");
+
+
+// ▲ / ▼ BUTTONS
+const btnUp = document.getElementById("sectionUp");
+const btnDown = document.getElementById("sectionDown");
+
+btnUp.addEventListener("click", () => {
+  selectSection(sectionIndex - 1, true);
+});
+
+btnDown.addEventListener("click", () => {
+  selectSection(sectionIndex + 1, true);
+});
+  wheelContainer.style.cssText = `
+    position: relative;
+    height: ${ITEM_HEIGHT}px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    touch-action: pan-y;
+    cursor: pointer;
+  `;
+
+const wheel = document.createElement("div");
+wheel.className = "section-wheel";
+wheel.style.cssText = `
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  will-change: transform;
+`;
+
+
+
+
+  sections.forEach((sec, index) => {
+    const item = document.createElement("div");
+    item.textContent = sec.name;
+    item.style.cssText = `
+      height: ${ITEM_HEIGHT}px;
+      line-height: ${ITEM_HEIGHT}px;
+      text-align: center;
+      font-size: ${index === 0 ? "14px" : "15px"};
+      font-style: ${index === 0 ? "italic" : "normal"};
+      color: ${index === 0 ? "#999" : "#777"};
+      user-select: none;
+      white-space: nowrap;
+    `;
+
+item.addEventListener("click", () => {
+  if (index === 0) return;
+  selectSection(index, true);
+});
+
+
+
+    wheel.appendChild(item);
+  });
+
+  wheelContainer.appendChild(wheel);
+
+
+
+
+  /* ---------- UPDATE ---------- */
+function update() {
+  wheel.style.transform = `translateY(${offset}px)`;
+
+  [...wheel.children].forEach((el, i) => {
+    if (i === sectionIndex && i !== 0) {
+      el.style.color = "#1f5fbf";
+      el.style.fontWeight = "700";
+    } else {
+      el.style.color = i === 0 ? "#999" : "#777";
+      el.style.fontWeight = "600";
+    }
+  });
+}
+  function fireSectionChange() {
+if (sectionIndex === 0) return;
+
+const section = sections[sectionIndex];
+
+
+    window.sectionSelectionChanged = true;
+
+    // 🔑 BUILD MC POOL HERE
+    rebuildMCPool(section.text);
+
+    window.dispatchEvent(new CustomEvent("sectionchange", {
+      detail: {
+        index: sectionIndex,
+
+        name: section.name,
+        text: section.text
+      }
+    }));
+  }
+
+// 🔓 expose for Start button
+window.fireSelectedSection = fireSectionChange;
+
+
+function snap() {
+  offset = -sectionIndex * ITEM_HEIGHT;
+
+  wheel.style.transition = "transform 0.15s ease-out";
+  update();
+  setTimeout(() => wheel.style.transition = "", 150);
+}
+
+
+
+
+function selectSection(index, fire = false) {
+
+  sectionIndex = Math.max(
+    0,
+    Math.min(sections.length - 1, Number(index))
+  );
+
+  offset = -sectionIndex * ITEM_HEIGHT;
+
+  snap();
+
+  if (fire && sectionIndex !== 0) {
+    fireSectionChange();
+  }
+}
+
+
+
+
+
+  /* ---------- DRAG ---------- */
+  function start(y) {
+    dragging = true;
+    startY = y;
+  }
+
+  function move(y) {
+    if (!dragging) return;
+    offset += y - startY;
+    startY = y;
+    update();
+  }
+
+  function end() {
+    if (!dragging) return;
+    dragging = false;
+    snap(true);
+  }
+
+  wheelContainer.addEventListener("mousedown", e => start(e.clientY));
+  window.addEventListener("mousemove", e => move(e.clientY));
+  window.addEventListener("mouseup", end);
+
+  wheelContainer.addEventListener("touchstart", e => start(e.touches[0].clientY), { passive: true });
+  wheelContainer.addEventListener("touchmove", e => move(e.touches[0].clientY), { passive: true });
+  wheelContainer.addEventListener("touchend", end);
+
+wheelContainer.addEventListener("wheel", e => {
+  e.preventDefault();
+
+  if (e.deltaY > 0) {
+    selectSection(sectionIndex + 1, true);
+  } else {
+    selectSection(sectionIndex - 1, true);
+  }
+}, { passive: false });
+
+
+
+
+
+  /* ---------- SECTION SELECTION BRIDGE ---------- */
+window.getSelectedSectionText = function () {
+  if (sectionIndex === 0) return "";
+  return sections[sectionIndex]?.text || "";
+};
+
+window.getSelectedSectionIndex = function () {
+  return sectionIndex;
+};
+
+window.selectSectionByIndex = function (index) {
+
+  index = Number(index);
+
+  if (index <= 0 || !sections[index]) return;
+
+  const section = sections[index];
+
+  // 🔥 CRITICAL: set globals immediately (THIS IS WHAT WAS MISSING)
+  window.activeSectionIndex = index;
+  window.activeSectionText = section.text;
+
+  window.dispatchEvent(new CustomEvent("sectionchange", {
+    detail: {
+      index,
+      name: section.name,
+      text: section.text
+    }
+  }));
+};
+// 🔑 START ON PLACEHOLDER VISUALLY, BUT ALLOW SELECTION
+selectSection(0, false);
+
+})();
+</script>
+
+<script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  'use strict';
+  /* ===============================
+     HARD GUARDS
+     =============================== */
+
+  const submitBtn  = document.getElementById("submitBtn");
+  const scoreboard = document.getElementById("scoreboard");
+  const scoreBtns  = document.getElementById("scoreButtons");
+
+  const nameInput = document.getElementById("playerName");
+  const idInput   = document.getElementById("playerID");
+
+  if (!submitBtn || !scoreboard) {
+    console.warn("⚠️ Add-on aborted: submitBtn or scoreboard missing");
+    return;
+  }
+
+  /* ===============================
+     FORCE SCOREBOARD WRAPPING
+     =============================== */
+
+  Object.assign(scoreboard.style, {
+    whiteSpace: "normal",
+    wordBreak: "break-word",
+    overflowWrap: "anywhere",
+    maxWidth: "100%"
+  });
+
+  /* ===============================
+     HELPERS
+     =============================== */
+
+  function pad(n) {
+    return String(n).padStart(2, "0");
+  }
+
+  function intlTimestamp() {
+    const d = new Date();
+    return `${pad(d.getDate())}/${pad(d.getMonth()+1)}/${d.getFullYear()} ` +
+           `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+
+  function getFilename() {
+    return decodeURIComponent(
+      location.pathname.split("/").pop() || "index.html"
+    );
+  }
+
+function getSectionName() {
+  const index = window.activeSectionIndex || 0;
+
+  if (
+    typeof sectionSource !== "undefined" &&
+    sectionSource[index - 1]
+  ) {
+    return sectionSource[index - 1].label;
+  }
+
+  return "Unknown Section";
+}
+  /* ===============================
+     CANONICAL SCORE STRING
+     =============================== */
+
+function buildScoreString() {
+  const tiles = [...document.querySelectorAll(".tile")];
+
+  if (!tiles.length) return null;
+
+  const raw = window.activeSectionText;
+
+  if (!raw) return "NO SECTION DATA";
+
+  const correctOrder = raw
+    .split("\n")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  let correct = 0;
+  const total = tiles.length;
+
+  tiles.forEach((tile, i) => {
+    const current = tile.querySelector(".sentence")?.textContent.trim();
+    const expected = correctOrder[i];
+
+    if (current === expected) {
+      correct++;
+      tile.classList.add("correct");
+      tile.style.background = "#bbf7d0";
+    } else {
+      tile.style.background = "#fecaca";
+    }
+  });
+
+  const percent = total ? Math.round((correct / total) * 100) : 0;
+
+  return [
+    getFilename(),
+    getSectionName(),
+    nameInput?.value.trim() || "",
+    idInput?.value.trim() || "",
+    intlTimestamp(),
+    `${correct}/${total}`,
+    `${percent}%`
+  ].join("|");
+}
+  /* ===============================
+     SUBMIT (NON-DESTRUCTIVE)
+     =============================== */
+
+submitBtn.addEventListener("click", async () => {
+  console.log("GAME OVER");
+
+  const tiles = document.querySelectorAll(".tile");
+
+if (!tiles.length) {
+  return "NO TILES FOUND";
+}
+  // Optional: still try to build score, but NEVER block game over
+const dataString = buildScoreString();
+
+// 🔥 SEND TO SUPABASE
+await saveResult(dataString);
+
+scoreboard.textContent = dataString;
+
+// 🔥 HARD FORCE VISIBILITY (overrides any CSS edge cases)
+scoreboard.style.cssText = `
+  display: block !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  height: auto !important;
+  border-top: 2px solid #e2e8f0;
+  padding-top: 8px;
+  white-space: pre-line;
+  font-family: monospace;
+  font-size: 0.95rem;
+  color: #0f172a;
+`;
+if (scoreBtns) scoreBtns.style.display = "flex";
+
+tiles.forEach(t => {
+  t.style.pointerEvents = "none";
+});
+
+submitBtn.disabled = true;
+});
+
+  /* ===============================
+     DOWNLOAD / COPY
+     =============================== */
+
+  function sanitizeFilename(name) {
+    return name.replace(/[\\/:*?"<>|]+/g, "_").slice(0, 200) || "score";
+  }
+
+  function buildDownloadName() {
+    return sanitizeFilename(buildScoreString() || "score");
+  }
+
+  document.getElementById("copyScore")?.addEventListener("click", () => {
+    if (!scoreboard.textContent) return;
+navigator.clipboard?.writeText(scoreboard.textContent)
+  .then(() => alert("Score copied!"))
+  .catch(() => alert("Clipboard blocked"));
+  });
+
+  document.getElementById("downloadTxt")?.addEventListener("click", () => {
+    if (!scoreboard.textContent) return;
+    const blob = new Blob([scoreboard.textContent], { type: "text/plain" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = buildDownloadName() + ".txt";
+    a.click();
+  });
+
+document.getElementById("downloadPng")?.addEventListener("click", async () => {
+  if (!scoreboard.textContent || !window.html2canvas) return;
+
+  // match on-screen wrapping width
+  const renderWidth = scoreboard.getBoundingClientRect().width;
+
+  const wrapper = document.createElement("div");
+  wrapper.style.position = "fixed";
+  wrapper.style.left = "-9999px";
+  wrapper.style.top = "0";
+  wrapper.style.width = renderWidth + "px";   // ✅ key fix
+  wrapper.style.padding = "10px";              // ✅ 10px margin
+  wrapper.style.background = "#fff";
+  wrapper.style.fontFamily = "monospace";
+  wrapper.style.fontSize = "14px";
+  wrapper.style.whiteSpace = "pre-wrap";
+  wrapper.style.wordBreak = "break-word";
+  wrapper.style.overflowWrap = "anywhere";
+  wrapper.style.color = "#000";
+  wrapper.textContent = scoreboard.textContent;
+
+  document.body.appendChild(wrapper);
+
+  try {
+    const canvas = await html2canvas(wrapper, {
+      scale: 2,
+      backgroundColor: "#fff"
+    });
+
+    const a = document.createElement("a");
+    a.href = canvas.toDataURL("image/png");
+    a.download = buildDownloadName() + ".png";
+    a.click();
+  } finally {
+    wrapper.remove();
+  }
+});
+
+});
+</script>
+
+
+
+<script>
+// Neon green border
+const borderDiv = document.createElement("div");
+borderDiv.style.position = "fixed";
+borderDiv.style.inset = "0";
+borderDiv.style.border = "10px solid #39FF14";
+borderDiv.style.boxSizing = "border-box";
+borderDiv.style.zIndex = "9999";
+borderDiv.style.pointerEvents = "none";
+document.body.appendChild(borderDiv);
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Get filename only
+    let filename = window.location.pathname.split("/").pop();
+
+    // Remove .html
+    filename = filename.replace(/\.html$/i, "");
+
+    // Remove everything up to and including the first underscore
+    // (treats that as the prefix)
+    filename = filename.replace(/^[^_]*_/, "");
+
+    // Convert underscores to spaces
+    const title = filename.replace(/_/g, " ");
+
+    // Replace the first <h1>
+    const h1 = document.querySelector("h1");
+    if (h1) {
+        h1.textContent = title;
+    }
+});
+</script>
+
+<script>
+
+(function(){
+
+/* =========================
+   RAW INSTRUCTIONS TEXT
+========================= */
+
+const RAW_TEXT = `
+
+How to play...
+
+1. Enter Name and ID..
+2. Select a category.
+3. Click Start to begin.
+4. Click to select tiles.
+5. Click to move the tiles into the correct order from top to bottom.
+5. Click Submit to see your score.
+6. Copy or download your score.
+
+`;
+
+
+/* =========================
+   RAW TEXT PARSER
+========================= */
+
+function parseRawInstructions(text){
+
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+
+  lines.forEach(line => {
+
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
+
+    html.push(`<p>${line}</p>`);
+  });
+
+  return html.join("");
+}
+
+
+/* =========================
+   CREATE STYLE
+========================= */
+
+const style = document.createElement("style");
+
+style.textContent = `
+#instructionsBtn{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  padding:10px 16px;
+  background:#2e8b57;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 4px 8px rgba(0,0,0,0.6);
+  z-index:99998;
+}
+
+#instructionsBtn:hover{
+  background:#257047;
+}
+
+#instructionsRoot{
+  position:fixed;
+  inset:0;
+  display:none;
+  z-index:99999;
+}
+
+#instructionsBackdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.35);
+}
+
+#instructionsModal{
+  position:absolute;
+  top:25px;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(650px,90vw);
+  max-height:90vh;
+  background:#fff;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+#instructionsHeader{
+  padding:12px 16px;
+  border-bottom:1px solid #ddd;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+#instructionsTitle{
+  color:#1976d2;
+  font-weight:600;
+  font-size:1.1em;
+}
+
+#instructionsBack{
+  border:none;
+  background:none;
+  font-size:20px;
+  cursor:pointer;
+  color:#1976d2;
+  font-weight:600;
+}
+
+#instructionsContent{
+  padding:2px 18px 18px 18px;
+  overflow-y:auto;
+  line-height:1.6;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+
+#instructionsContent::-webkit-scrollbar{
+  display:none;
+}
+
+#instructionsContent h3{
+  color:#1976d2;
+  margin:12px 0 4px 0;
+  font-weight:600;
+}
+
+#instructionsContent p{
+  margin:4px 0;
+}
+
+#instructionsContent hr{
+  margin:12px 0;
+}
+`;
+
+document.head.appendChild(style);
+
+
+/* =========================
+   CREATE BUTTON
+========================= */
+
+const btn = document.createElement("button");
+btn.id = "instructionsBtn";
+btn.textContent = "Instructions";
+
+document.body.appendChild(btn);
+
+
+/* =========================
+   CREATE MODAL
+========================= */
+
+const root = document.createElement("div");
+root.id = "instructionsRoot";
+
+root.innerHTML = `
+<div id="instructionsBackdrop"></div>
+
+<div id="instructionsModal">
+
+  <div id="instructionsHeader">
+    <button id="instructionsBack">←</button>
+    <span id="instructionsTitle">Instructions</span>
+  </div>
+
+  <div id="instructionsContent">
+    ${parseRawInstructions(RAW_TEXT)}
+  </div>
+
+</div>
+`;
+
+document.body.appendChild(root);
+
+
+/* =========================
+   SCROLL LOCK
+========================= */
+
+const modalContent = document.getElementById("instructionsContent");
+
+modalContent.addEventListener("wheel", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+modalContent.addEventListener("touchmove", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+
+/* =========================
+   OPEN / CLOSE
+========================= */
+
+function openModal(){
+  root.style.display="block";
+  document.body.style.overflow="hidden";
+  document.documentElement.style.overflow="hidden";
+}
+
+function closeModal(){
+  root.style.display="none";
+  document.body.style.overflow="";
+  document.documentElement.style.overflow="";
+}
+
+btn.onclick = openModal;
+
+document.getElementById("instructionsBack").onclick = closeModal;
+document.getElementById("instructionsBackdrop").onclick = closeModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape") closeModal();
+});
+
+/* =========================
+   DYNAMIC BODY PADDING FOR BUTTON
+========================= */
+
+function adjustBodyPadding(){
+  const btnHeight = btn.offsetHeight + -25; // include some gap
+  document.body.style.paddingBottom = `${btnHeight}px`;
+}
+
+// Initial adjustment
+adjustBodyPadding();
+
+// Update if window is resized (responsive)
+window.addEventListener("resize", adjustBodyPadding);
+
+})();
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<!-- SUPABASE LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const supabaseClient = window.supabase?.createClient(
+  'https://etwwriloppklhhkmswpr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+);
+
+if (!supabaseClient) {
+  console.error("❌ Supabase failed to initialize");
+}
+
+window.lastUploadedScore = null;
+
+window.saveResult = async function saveResult(text) {
+
+  if (!supabaseClient) {
+    console.error("❌ No Supabase client");
+    return;
+  }
+
+  let cleaned;
+
+  try {
+
+    cleaned = String(text)
+      .replace(/\s+/g, " ")
+      .trim();
+
+  } catch (err) {
+
+    console.error("❌ Normalize error:", err);
+    return;
+  }
+
+  if (!cleaned) {
+    console.error("❌ Empty value blocked");
+    return;
+  }
+
+  if (cleaned === window.lastUploadedScore) {
+    console.log("⚠️ Duplicate blocked");
+    return;
+  }
+
+ 
+
+  console.log("📤 INSERTING:", cleaned);
+
+  // Parse existing score line
+  const parts = cleaned.split("|");
+
+  const file_name      = parts[0] || "";
+  const category       = parts[1] || "";
+  const student_name   = parts[2] || "";
+  const student_id     = parts[3] || "";
+  const datetime       = parts[4] || "";
+
+  let score_correct = null;
+  let score_total   = null;
+  let score_percent = null;
+
+  // Parse 12/30
+  if (parts[5]) {
+
+    const scoreMatch = parts[5].match(/^(\d+)\/(\d+)$/);
+
+    if (scoreMatch) {
+      score_correct = Number(scoreMatch[1]);
+      score_total   = Number(scoreMatch[2]);
+    }
+  }
+
+  // Parse 40%
+  if (parts[6]) {
+
+    const pctMatch = parts[6].match(/^(\d+)%$/);
+
+    if (pctMatch) {
+      score_percent = Number(pctMatch[1]);
+    }
+  }
+
+  const { data, error } = await supabaseClient
+  .from("scoreboard_raw")
+  .insert([
+    {
+      result_text: cleaned
+    }
+  ])
+  .select();
+
+if (error) {
+  console.error("❌ INSERT FAILED:", error);
+  alert("❌ INSERT FAILED:\n" + error.message);
+  return;
+}
+
+window.lastUploadedScore = cleaned;
+
+console.log("✅ INSERT SUCCESS:", data);
+alert("✅ Score saved successfully");};
+</script>
+
+
+
+
+</body>
+</html>
+
+
+
+
+
+

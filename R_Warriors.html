@@ -1,0 +1,5912 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PerfectlyPracticalEnglish.netlify.app</title>
+
+<style>
+
+/* =====================
+   1. FIRST PAINT / MODE GATING
+===================== */
+
+#layout,
+#dynamicTOC {
+  display: none;
+}
+
+/* HARD enabled */
+html.show-hard #layout {
+  display: block;
+}
+
+/* DYNAMIC enabled */
+html.show-dynamic #dynamicTOC {
+  display: block;
+}
+
+/* =====================
+   2. GLOBAL BASE TYPOGRAPHY
+===================== */
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #222;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f6fa;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Hide page until auto-open logic finishes */
+html.pre-auto-open body > *:not(#loader) {
+  visibility: hidden;
+}
+
+h2 {
+  margin: 20px 0 10px 0;
+}
+
+h3 {
+  margin: 0 0 6px 0;
+  color: #1976d2;
+  font-size: 12px;
+}
+
+.word {
+  cursor: pointer;
+  color: inherit;
+}
+
+.word:hover {
+  background-color: rgba(26,115,232,0.2);
+}
+
+.sentence {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.highlight {
+  background-color: #ffff00;
+  color: #000000;
+}
+
+.visually-hidden {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+
+/* =====================
+   4. DYNAMIC TOC
+===================== */
+
+#tocButtons {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tocColumn button {
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+
+  display: block;
+  width: 100%;
+  background-color: #2b5d84;
+  color: #ffffff;
+
+  padding: 10px 10px 10px 15px;
+  border-radius: 6px;
+
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+
+  box-sizing: border-box;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tocColumn button:hover,
+.readAloudBtn:hover {
+  background-color: #1f4563;
+}
+
+#tocContainer h3 {
+  color: #2b5d84;
+  margin-left: 20px;
+}
+
+.parsedHeader {
+  color: #2b5d84;
+  font-weight: bold;
+  margin-left: -3px;
+
+}
+
+.parsedSubheader {
+  color: #2b5d84;
+  font-weight: bold;
+  margin-top: 14px;
+  margin-bottom: 8px;
+}
+
+/* =====================
+   6. MODAL ISOLATION
+===================== */
+
+body.modal-open {
+  overflow: hidden;
+}
+
+body.modal-open #tocRoot,
+body.modal-open #tocColLeft,
+body.modal-open #tocColRight {
+  display: none;
+}
+
+#modalRoot {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  display: none;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding-top: 20px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  overscroll-behavior: contain;
+
+  z-index: 20000;
+}
+
+#modalRoot.active {
+  display: flex;
+  flex-direction: column;  /* stack bars vertically */
+  gap: 0;                  /* remove the transparent strip */
+  background: #ffffff;     /* force pure white */
+}
+/* =====================
+   7. QUIZ MODAL LAYOUT
+===================== */
+
+#quizModal {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+
+  height: calc(100dvh - var(--kb-offset, 0px));
+
+  margin: 0 auto;
+
+  padding: 0 10px 120px 10px;
+
+  background: #ffffff;
+  box-sizing: border-box;
+
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  border-radius: 8px;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#quizModal h2 {
+  font-size: 12px;
+}
+
+#quizModalContent {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#quizSections {
+  width: 100%;
+  margin-left: 0;
+  padding-top: 10px;  /* Kill switch header spacing */
+  box-sizing: border-box;
+}
+
+#quizSections > * {
+  padding: 3px 0;
+  margin-bottom: 16px;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+#quizSections .section > h2 {
+  margin: 0 0 8px 0;
+  scroll-margin-top: 100px;
+}
+
+#quizSections .quiz-subsection {
+  margin: 10px 0;
+}
+
+#quizSections .quiz-subsection:first-of-type {
+  margin-top: 0;
+}
+
+#quizSections .quiz-subsection h3 {
+  margin: 0 0 8px 0;
+}
+
+#quizSections h3 {
+  scroll-margin-top: 10px;
+}
+
+.question-text {
+  margin-top: -5px;
+}
+
+.question-text h3 {
+  margin: 16px 0 8px;
+}
+
+.question-text:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.exercise-container {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.exercise p {
+  margin-bottom: 4px;
+}
+
+
+/* =====================
+   8. CONTROL BARS (Stacked Sticky Inside Scroll Container)
+===================== */
+
+/* Hidden by default */
+#chapterVerseControls,
+#readaloudControls {
+  display: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  box-sizing: border-box;
+
+  line-height: 0; /* kill inherited inline height */
+}
+
+/* Show when modal active */
+#modalRoot.active #chapterVerseControls,
+#modalRoot.active #readaloudControls {
+  display: block; /* block is safer than flex at container level */
+}
+
+/* --------------------------------------------------
+   BOTH BARS STICK (same scroll context)
+-------------------------------------------------- */
+
+#chapterVerseControls {
+  position: relative;
+  top: auto;
+  z-index: 40;
+}
+
+#readaloudControls {
+  position: relative;
+  top: auto;
+  z-index: 39;
+  border-top: 1px solid #eee;
+}
+
+/* REMOVE stacking math completely */
+#chapterVerseControls + #readaloudControls {
+  top: auto;
+}
+/* Keep layout behavior inside controlRow */
+#chapterVerseControls .controlRow,
+#readaloudControls .controlRow {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+#readaloudControls {
+  border-top: 1px solid #ffffff;
+  padding-top: 6px;
+}
+
+/* --------------------------------------------------
+   Buttons & Select Layout
+-------------------------------------------------- */
+
+#chapterVerseControls select,
+#chapterVerseControls button,
+#readaloudControls select,
+#readaloudControls button {
+  flex: 0 0 calc((100% - 18px) / 4);
+  max-width: calc((100% - 18px) / 4);
+  min-width: 0;
+
+  height: 36px;
+  line-height: 36px;
+
+  box-sizing: border-box;
+  font-size: 13px;
+  border-radius: 6px;
+
+  margin: 0;
+  padding: 0 10px;
+  vertical-align: middle;
+}
+
+/* Select normalization */
+#chapterVerseControls select,
+#readaloudControls select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+}
+
+/* Button alignment */
+#chapterVerseControls button,
+#readaloudControls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hide select scrollbar */
+#chapterVerseControls select::-webkit-scrollbar,
+#readaloudControls select::-webkit-scrollbar {
+  width: 0;
+}
+
+/* Readaloud wrapper safety */
+.readaloud-block,
+.readaloud-block .readaloud-buttons {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  box-sizing: border-box;
+}/* =====================
+   9. BUTTON SYSTEM
+===================== */
+
+#modalRoot button {
+  height: 36px;
+  font-size: 12px;
+  background: #2b5d84;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+#modalRoot button:hover:not(:disabled) {
+  background: #1f4563;
+}
+
+#modalRoot button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+#modalRoot button:disabled {
+  background: #8aa3b8;
+  cursor: not-allowed;
+}
+
+
+/* =====================
+   10. SCOREBOARD
+===================== */
+
+#scoreboard {
+  display: block;
+  position: sticky;
+  bottom: 0;
+
+  left: 2px;              /* ← actual visual shift (try 1px if too much) */
+
+  background: #fff;
+  padding: 10px;
+  border: 2px solid #add8e6;
+
+  width: calc(100% - 2px); /* compensate so it doesn’t overflow right */
+  box-sizing: border-box;
+
+  z-index: 10;
+}
+
+.scoreboard-main pre,
+#scoreOutput {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  display: block;
+}
+
+.scoreboard-buttons {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.scoreboard-buttons > * {
+  flex: 1 1 0;        /* equal width */
+  min-width: 0;
+  height: 36px;
+}
+
+
+
+/* =====================
+   11. SHARED TOC STRUCTURE CONTRACT
+===================== */
+
+#layout,
+#tocContainer {
+  width: 100%;
+  max-width: 360px;
+  margin: 20px auto;
+  padding: 5px 10px;
+  box-sizing: border-box;
+}
+
+.container,
+#tocButtons {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.column,
+.tocColumn {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+
+/* =====================
+   12. GLOBAL SCROLLBAR SUPPRESSION
+===================== */
+
+html,
+body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  /* 🔥 ADD THIS */
+  overflow-anchor: none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+#quizModal::-webkit-scrollbar,
+#mvWindow::-webkit-scrollbar {
+  display: none;
+}
+
+#quizModal,
+#mvWindow {
+  scrollbar-width: none;
+}
+
+
+/* Make all 4-item control rows identical */
+/* ========================
+   FLEXIBLE CONTROL ROW SYSTEM
+========================= */
+
+.controlRow {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+/* shared styling */
+.controlRow > * {
+  min-width: 0;
+  height: 36px;
+  box-sizing: border-box;
+  font-size: 13px;
+  border-radius: 6px;
+  padding: 0 10px;
+}
+
+/* Chapter + Verse selects wider */
+.controlRow select:nth-child(1),
+.controlRow select:nth-child(2) {
+  flex: 1.3 1 0;
+}
+
+/* Buttons slightly smaller */
+.controlRow button {
+  flex: 0.8 1 0;
+}
+/* ========================
+   NAME / ID / SUBMIT / CLOSE ROW
+========================= */
+
+/* each row */
+.top-controls {
+  display: flex;
+  gap: 6px;              /* horizontal spacing only */
+  margin: 0;             /* remove transparent margin */
+  width: 100%;
+}
+
+.top-controls > * {
+  flex: 1 1 0;        /* equal width for all 4 */
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 13px;
+}
+
+.top-controls input {
+  border: 1px solid #ccc;
+}
+
+.top-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copyrightSection {
+  font-size: 9px;
+  opacity: 0.7;
+
+  padding: 0 6px;
+  box-sizing: border-box;
+
+  margin-top: 15px;
+  padding-left: 1px;
+
+  text-align: left;
+
+  display: block;
+}
+
+/* enforce vertical stacking */
+.copyrightSection > div {
+  display: block;
+}
+
+.visitor-count {
+  font-size: 12px;
+  opacity: 0.75;
+  margin-top: 4px;
+}
+
+.quiz-scoreboard {
+  width: 100%;
+  box-sizing: border-box;
+
+  margin-bottom: 12px;
+  padding: 6px;
+
+  border: 1px solid #9aaed1;
+  border-radius: 6px;
+  background: #f9f9f9;
+
+  font-family: monospace;
+  font-size: 12px;
+}
+
+
+/* vertical stacking container */
+
+/* Make only Chapter & Verse text smaller */
+#chapterVerseControls select {
+  font-size: 10px;   /* adjust to 9px, 11px, etc. */
+}
+
+.reading-active {
+  background-color: yellow !important;
+  scroll-margin-top: 120px;
+}
+
+#loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #f5f6fa; /* match page background */
+  z-index: 9999;
+}
+
+/* Inner box matches your layout width */
+#loaderContent {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+
+  text-align: center;
+  padding: 20px;
+
+  font-size: 16px;
+  font-weight: bold;
+  color: #2b5d84; /* 🔵 your button blue */
+}
+
+#helloBar {
+  height: 40px;              /* acts as buffer */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12px;
+  color: #2b5d84;
+
+  background: #ffffff;
+  transition: opacity 0.15s ease, height 0.15s ease;
+}
+
+
+
+/* =========================
+   🔥 MOBILE KEYBOARD FIX LAYER
+   (SAFE OVERRIDE ZONE)
+========================= */
+
+html, body {
+  height: 100%;
+}
+
+/* Prevent layout jump caused by keyboard resize */
+#modalRoot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  height: 100dvh; /* modern mobile viewport fix */
+  min-height: 100vh;
+}
+
+/* Better behavior when keyboard opens */
+@supports (height: 100dvh) {
+  #modalRoot {
+    height: 100dvh;
+  }
+}
+
+/* fallback smooth behavior for older mobile browsers */
+@media (max-width: 768px) {
+  #modalRoot {
+    transition: transform 0.12s ease-out;
+  }
+}
+
+/* optional: stabilize bottom UI elements (your proxy button) */
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+.modal-close-btn {
+  width: 36px;
+  height: 36px;
+
+  padding: 0;
+  line-height: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 16px;
+
+  background: #2b5d84;
+  color: #fff;
+
+  border: none;
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  transition: background 0.15s, transform 0.1s;
+
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.modal-close-btn:hover {
+  background: #1f4563;
+}
+
+.modal-close-btn:active {
+  transform: scale(0.97);
+}
+
+
+h1[data-auto-title] {
+  visibility: hidden;
+}
+
+html.ui-ready h1[data-auto-title] {
+  visibility: visible;
+}
+
+#layout,
+#tocContainer {
+  padding-bottom: 30px;
+}
+
+
+.visits-bottom-space {
+  height: 140px; /* adjust this freely */
+  width: 100%;
+}
+
+
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div id="loaderContent">Loading...</div>
+</div>
+<div id="rawTextSource" class="visually-hidden">
+
+
+~Warrior Cultures
+
+Each of these cultures and groups has contributed to the tapestry of human history, leaving behind legacies that continue to shape our world today.
+
+Each of these cultures and groups has contributed to the tapestry of human history, leaving behind legacies that continue to shape our world today. From the noble knights of medieval Europe to the stealthy ninjas of feudal Japan, from the legendary Spartans of ancient Greece to the resilient Maasai tribes of East Africa, each civilization and group has left its mark on the collective memory of humanity.
+
+Whether through their military conquests, cultural achievements, or philosophical insights, these diverse cultures have enriched our understanding of what it means to be human. They have inspired stories of heroism and courage, innovation and discovery, resilience and adaptation. Their traditions and values have been passed down through generations, influencing societies far beyond their original borders.
+
+As we reflect on the legacies of these cultures and groups, we are reminded of the richness and diversity of human experience. From the towering pyramids of the ancient Pharaohs to the nomadic tents of the Mongolian steppes, from the bustling markets of Carthaginian ports to the serene villages of Cherokee homelands, each culture has its own unique story to tell.
+
+In studying and celebrating these cultures, we gain a deeper appreciation for the complexity and beauty of our shared heritage. We recognize the interconnectedness of human civilizations throughout history and the importance of preserving and honoring the traditions of those who came before us.
+
+As we look to the future, may we draw inspiration from the wisdom and achievements of these cultures and groups. May we continue to learn from their successes and failures, their triumphs and struggles. And may we strive to build a more inclusive, compassionate, and harmonious world that honors the diverse tapestry of human culture and history.~
+
+BLANK
+?BLANK
+
+~Medieval Knights
+
+Location: Primarily Europe during the Middle Ages.
+
+Culture: Knights were part of a hierarchical society known as feudalism, serving lords in exchange for land and protection.
+
+Clothing: They wore suits of armor, often consisting of chainmail and plate armor, along with a helmet and shield.
+
+Equipment: Swords, lances, and shields were their primary weapons, with some knights also using bows and arrows.
+
+Lifestyle: Knights dedicated their lives to chivalry, bravery, and loyalty to their lords, often participating in tournaments and wars.
+
+Philosophy: The code of chivalry emphasized honor, courtesy, and gallantry towards women.
+
+Legacy: Knights left a legacy of valor and romanticism, immortalized in literature, art, and folklore.~
+
+BLANK
+?BLANK
+
+~Ninja
+
+Location: Japan, mainly during the feudal era.
+
+Culture: Ninja were covert agents and mercenaries trained in espionage, sabotage, and guerrilla warfare.
+
+Clothing: They wore dark clothing such as ninja suits (shinobi shozoku) to blend into the shadows.
+
+Equipment: Ninja utilized a variety of weapons and tools including shuriken, kunai, swords, and smoke bombs.
+
+Lifestyle: Ninja lived secretive lives, often operating under the cover of darkness and employing stealth and deception.
+
+Philosophy: Their philosophy focused on adaptability, stealth, and loyalty to their clan or employer.
+
+Legacy: Ninja have become iconic figures in popular culture, symbolizing stealth and cunning.~
+
+BLANK
+?BLANK
+
+~Samurai
+
+Location: Japan during the feudal era.
+
+Culture: Samurai were warriors who served feudal lords (daimyo) and followed a strict code of honor called Bushido.
+
+Clothing: They wore traditional Japanese armor (yoroi) made of lacquered plates and helmets adorned with elaborate crests.
+
+Equipment: Samurai wielded katana swords, wakizashi, and bows, and were skilled in martial arts.
+
+Lifestyle: Samurai lived disciplined lives dedicated to martial training, meditation, and loyalty to their lord.
+
+Philosophy: Bushido emphasized virtues such as loyalty, honor, self-discipline, and mastery of martial skills.
+
+Legacy: Samurai left a lasting impact on Japanese culture, influencing art, literature, and philosophy.~
+
+BLANK
+?BLANK
+
+~Cowboys
+
+Location: Western United States during the 19th century.
+
+Culture: Cowboys were cattle herders and ranch hands who worked on ranches and cattle drives.
+
+Clothing: They wore wide-brimmed hats, bandanas, jeans, boots, and spurs for practicality and protection.
+
+Equipment: Cowboys carried lassos, pistols, rifles, and Bowie knives for herding cattle and self-defense.
+
+Lifestyle: Cowboys led rugged lives, spending long hours in the saddle, enduring harsh weather conditions, and facing the dangers of the frontier.
+
+Philosophy: Cowboy culture valued independence, self-reliance, and a strong work ethic.
+
+Legacy: Cowboys have become iconic symbols of the American West, celebrated in literature, film, and folklore.~
+
+BLANK
+?BLANK
+
+~Aztecs
+
+Location: Central Mexico during the 14th to 16th centuries.
+
+Culture: The Aztecs were a Mesoamerican civilization known for their advanced agriculture, architecture, and complex social structure.
+
+Clothing: Aztec clothing was colorful and made from cotton or agave fibers, with elaborate feathered headdresses reserved for nobility.
+
+Equipment: Aztec warriors wielded weapons such as macuahuitl (wooden swords embedded with obsidian blades), spears, and shields.
+
+Lifestyle: Aztecs were primarily farmers, but also engaged in trade, warfare, and religious rituals.
+
+Philosophy: Their religion centered around the worship of gods such as Huitzilopochtli and Quetzalcoatl, with human sacrifice playing a significant role.
+
+Legacy: The Aztecs left behind impressive architectural ruins, artwork, and a rich cultural heritage.~
+
+BLANK
+?BLANK
+
+~Maasai Tribe
+
+Location: East Africa, primarily Kenya and Tanzania.
+
+Culture: The Maasai are a semi-nomadic pastoralist tribe known for their distinctive customs, language, and attire.
+
+Clothing: Maasai men traditionally wear red shuka (blankets) and carry spears, while women adorn themselves with elaborate beadwork and cowhide skirts.
+
+Equipment: Spears, clubs, and bows were used for hunting and protection.
+
+Lifestyle: The Maasai herd cattle, goats, and sheep, practicing transhumance to find grazing land.
+
+Philosophy: Their culture values communal living, bravery, and a deep connection to their land and cattle.
+
+Legacy: The Maasai are known for their resilience in preserving their traditional way of life amidst modernization and outside influences.~
+
+BLANK
+?BLANK
+
+~Incas
+
+Location: Andean region of South America during the 15th and 16th centuries.
+
+Culture: The Inca Empire was the largest pre-Columbian civilization in the Americas, known for its advanced architecture, engineering, and administrative systems.
+
+Clothing: Inca nobility wore garments made of fine textiles adorned with intricate designs, while commoners wore simpler clothing.
+
+Equipment: Inca warriors used weapons such as slings, spears, and clubs, often made of stone or bronze.
+
+Lifestyle: The Inca economy was based on agriculture, with extensive terraced fields and irrigation systems supporting their population.
+
+Philosophy: Inca religion centered around the worship of the sun god Inti and other nature deities, with rituals and sacrifices performed to ensure agricultural fertility and social harmony.
+
+Legacy: The Inca left behind impressive ruins such as Machu Picchu and a cultural legacy that continues to inspire awe and admiration.~
+
+BLANK
+?BLANK
+
+~Mongolians
+
+Location: Central Asia during the 13th and 14th centuries.
+
+Culture: The Mongols were nomadic pastoralists known for their fierce military conquests and administrative innovations.
+
+Clothing: Mongolian clothing consisted of woolen garments such as deels (robes) and hats, adapted for the harsh continental climate.
+
+Equipment: Mongol warriors were skilled horsemen and archers, using composite bows, swords, and lances in battle.
+
+Lifestyle: The Mongols lived in yurts and followed a pastoral lifestyle, herding livestock across the vast steppes.
+
+Philosophy: Genghis Khan, the founder of the Mongol Empire, emphasized meritocracy, religious tolerance, and loyalty to the khans.
+
+Legacy: The Mongol Empire was the largest contiguous land empire in history, leaving a lasting impact on trade, culture, and geopolitics.~
+
+BLANK
+?BLANK
+
+~Vikings
+
+Location: Scandinavia during the 8th to 11th centuries.
+
+Culture: Vikings were seafaring Norse warriors known for their raids, trade, and exploration.
+
+Clothing: Vikings wore woolen tunics, trousers, and cloaks, often adorned with intricate patterns and brooches.
+
+Equipment: Viking warriors wielded swords, axes, spears, and shields, with some using bows and arrows.
+
+Lifestyle: Vikings were farmers, traders, and raiders, exploring and settling in regions as far as North America and the Mediterranean.
+
+Philosophy: Viking society valued courage, honor, and loyalty to kin and clan, as well as belief in Norse mythology and gods like Odin and Thor.
+
+Legacy: Vikings left a legacy of exploration, trade, and cultural exchange, influencing regions across Europe and beyond.~
+
+BLANK
+?BLANK
+
+~Pirates of the Golden Age
+
+Location: Caribbean Sea and Atlantic Ocean during the 17th and 18th centuries.
+
+Culture: Golden Age pirates were outlaws who operated outside the law, engaging in piracy, smuggling, and privateering.
+
+Clothing: Pirates wore a mix of clothing including loose-fitting shirts, trousers, boots, and bandanas, often accessorized with belts and sashes for carrying weapons and tools.
+
+Equipment: Pirates carried cutlasses, pistols, muskets, and boarding axes, along with navigational instruments for plundering ships and coastal towns.
+
+Lifestyle: Pirate life was characterized by adventure, risk-taking, and a sense of freedom, with crews governing themselves democratically aboard their ships.
+
+Philosophy: Pirates adhered to their own code of conduct, which included principles of fair distribution of plunder, mutual respect, and democratic decision-making.
+
+Legacy: Despite their lawless reputation, pirates have been romanticized in popular culture, becoming symbols of rebellion against authority and freedom on the high seas.~
+
+BLANK
+?BLANK
+
+~Navy Seals
+
+Location: United States, operating worldwide in various environments.
+
+Culture: Navy SEALs are elite special operations forces trained for unconventional warfare, counter-terrorism, and reconnaissance missions.
+
+Clothing: SEALs wear specialized combat uniforms and gear tailored for their missions, including body armor, helmets, and night vision goggles.
+
+Equipment: SEALs are equipped with a wide range of firearms, explosives, and specialized gear such as rebreathers for underwater operations.
+
+Lifestyle: SEALs undergo rigorous training and live by the motto "The only easy day was yesterday," embodying resilience, teamwork, and dedication.
+
+Philosophy: SEAL ethos emphasizes honor, integrity, and relentless pursuit of excellence in every aspect of their operations.
+
+Legacy: SEALs have earned a reputation as one of the most elite and effective special operations forces in the world, with their exploits inspiring awe and admiration.~
+
+BLANK
+?BLANK
+
+~KGB
+
+Location: Soviet Union, operating domestically and internationally during the Cold War era.
+
+Culture: The KGB was the main security agency of the Soviet Union, responsible for intelligence gathering, counterintelligence, and state security.
+
+Clothing: KGB agents wore civilian clothing or uniforms depending on their assignments, often blending into their surroundings for covert operations.
+
+Equipment: KGB operatives used a variety of surveillance equipment, firearms, and espionage tools to carry out their missions.
+
+Lifestyle: KGB agents led clandestine lives, working in secrecy to protect the interests of the Soviet state and maintain internal control.
+
+Philosophy: The KGB operated under the ideology of communism, viewing espionage and covert action as essential tools for advancing Soviet interests.
+
+Legacy: The KGB left a legacy of espionage, subterfuge, and political intrigue, shaping the geopolitics of the Cold War era and beyond.~
+
+BLANK
+?BLANK
+
+~CIA
+
+Location: United States, operating globally in intelligence gathering, analysis, and covert operations.
+
+Culture: The Central Intelligence Agency (CIA) is the principal foreign intelligence and counterintelligence agency of the United States government.
+
+Clothing: CIA operatives dress in civilian attire or adopt disguises as needed for undercover work, blending into diverse environments around the world.
+
+Equipment: CIA officers utilize state-of-the-art surveillance technology, communication devices, and weaponry to carry out their missions.
+
+Lifestyle: CIA personnel lead secretive lives, often working in high-stress environments with the constant threat of exposure.
+
+Philosophy: The CIA's mission is to collect and analyze intelligence to inform national security decisions and protect American interests.
+
+Legacy: The CIA has played a significant role in shaping U.S. foreign policy and national security strategy, with its operations and interventions leaving a controversial legacy.~
+
+BLANK
+?BLANK
+
+~Roman Legion
+
+Location: Ancient Rome, from the Roman Kingdom to the fall of the Western Roman Empire.
+
+Culture: The Roman legions were the primary military units of ancient Rome, renowned for their discipline, organization, and tactical prowess.
+
+Clothing: Legionaries wore tunics, cloaks, and armor such as lorica segmentata or chainmail, along with helmets adorned with distinctive plumes or crests.
+
+Equipment: Roman soldiers were equipped with swords (gladius), javelins (pila), shields (scutum), and helmets (galea), among other gear.
+
+Lifestyle: Legionaries lived a regimented life, undergoing rigorous training, marching long distances, and engaging in military campaigns across the empire.
+
+Philosophy: Roman military culture emphasized discipline, loyalty to the state, and obedience to authority, with soldiers swearing allegiance to the emperor.
+
+Legacy: The Roman legions left a lasting legacy of military innovation, conquest, and governance, influencing warfare and statecraft for centuries.~
+
+BLANK
+?BLANK
+
+~Spartans
+
+Location: Ancient Greece, primarily in the city-state of Sparta.
+
+Culture: Spartans were renowned warriors known for their military prowess, discipline, and austerity.
+
+Clothing: Spartan warriors wore simple garments such as tunics and cloaks, eschewing luxury and adornment in favor of practicality.
+
+Equipment: Spartans were armed with bronze helmets, breastplates, greaves, spears, and shields, with some elite warriors carrying swords.
+
+Lifestyle: Spartans lived a life of militarism, with boys undergoing rigorous training in the agoge system to become elite soldiers.
+
+Philosophy: Spartan society valued discipline, courage, and the collective welfare of the state above individual interests.
+
+Legacy: The Spartans left a legacy of military excellence and resilience, famously holding off the Persian invasion at the Battle of Thermopylae and inspiring admiration for their warrior ethos.~
+
+BLANK
+?BLANK
+
+~Comanche
+
+Location: North America, primarily in the Southern Plains region.
+
+Culture: The Comanche were a Native American tribe known for their horsemanship, warrior culture, and nomadic lifestyle.
+
+Clothing: Comanche clothing included buckskin garments adorned with beadwork, feathers, and quillwork, reflecting their cultural identity and artistic expression.
+
+Equipment: Comanche warriors used bows, lances, and shields made from buffalo hide, along with firearms acquired through trade with Europeans.
+
+Lifestyle: Comanche society revolved around hunting, warfare, and the seasonal migration of buffalo herds, following the rhythms of the Great Plains.
+
+Philosophy: Comanche culture emphasized bravery, honor, and respect for nature, with spiritual beliefs centered around animism and shamanism.
+
+Legacy: The Comanche were formidable opponents of European colonization, resisting encroachment on their lands and leaving a cultural legacy that endures today.~
+
+BLANK
+?BLANK
+
+~Apache
+
+Location: North America, primarily in the Southwestern United States.
+
+Culture: The Apache were a Native American tribe known for their warrior traditions, resilience, and adaptation to diverse environments.
+
+Clothing: Apache clothing varied depending on the region and climate, with garments made from animal hides, cotton, or woven fibers.
+
+Equipment: Apache warriors utilized bows and arrows, spears, knives, and later firearms acquired through trade with Spanish and American settlers.
+
+Lifestyle: Apaches were semi-nomadic, living in camps and settlements while following seasonal patterns of hunting, gathering, and raiding.
+
+Philosophy: Apache culture valued independence, self-reliance, and spiritual harmony with the natural world, guided by traditional teachings and ceremonies.
+
+Legacy: The Apache left a legacy of resistance against colonial forces, with legendary leaders such as Geronimo inspiring admiration for their defiance and bravery.~
+
+BLANK
+?BLANK
+
+~Cherokee
+
+Location: North America, primarily in the Southeastern United States.
+
+Culture: The Cherokee were a Native American tribe known for their complex social structure, agriculture, and cultural achievements.
+
+Clothing: Cherokee clothing included deerskin garments decorated with beadwork, fringe, and feather adornments, reflecting their cultural identity and craftsmanship.
+
+Equipment: Cherokee warriors used bows, tomahawks, and knives for hunting, defense, and warfare, adapting to changing circumstances with the introduction of firearms.
+
+Lifestyle: Cherokee society was organized into matrilineal clans, with agriculture, trade, and spiritual ceremonies playing central roles in their lives.
+
+Philosophy: Cherokee culture emphasized harmony with nature, community cooperation, and reverence for ancestors and spirits, as reflected in their traditional beliefs and practices.
+
+Legacy: The Cherokee left a rich legacy of literature, art, and governance, contributing to American democracy and Native American rights movements.~
+
+BLANK
+?BLANK
+
+~Cossacks
+
+Location: Eastern Europe, particularly in the regions of modern-day Russia, Ukraine, and Kazakhstan.
+
+Culture: Cossacks were a semi-military, semi-nomadic people known for their independent spirit, martial skills, and frontier lifestyle.
+
+Clothing: Cossack attire typically included long tunics, trousers, boots, and fur hats (papakha), often embellished with intricate embroidery and decorative elements.
+
+Equipment: Cossack warriors were skilled horsemen and marksmen, wielding weapons such as sabers, lances, pistols, and rifles.
+
+Lifestyle: Cossacks lived in semi-autonomous communities known as host territories, practicing a mix of farming, herding, and military activities.
+
+Philosophy: Cossack culture valued freedom, self-reliance, and loyalty to the collective, with a strong sense of honor and camaraderie among fellow Cossacks.
+
+Legacy: The Cossacks played a significant role in defending the Russian frontier, expanding the Russian Empire, and preserving their cultural identity amidst changing political landscapes.~
+
+BLANK
+?BLANK
+
+~Maori
+
+Location: New Zealand, primarily in the North Island and South Island.
+
+Culture: The Maori are the indigenous Polynesian people of New Zealand, known for their rich oral traditions, carving, and performing arts.
+
+Clothing: Traditional Maori clothing included woven garments such as piupiu (flax skirts), korowai (feather cloaks), and taonga (ornamental jewelry), often adorned with intricate patterns and symbolism.
+
+Equipment: Maori warriors wielded weapons such as taiaha (long wooden spears), mere (short clubs), and patu (short-handled clubs), crafted with exquisite skill and imbued with cultural significance.
+
+Lifestyle: Maori society was organized into tribal groups (iwi) with strong kinship ties, practicing agriculture, fishing, and gathering, while upholding cultural traditions and protocols.
+
+Philosophy: Maori culture emphasized mana (prestige), whakapapa (genealogy), and kaitiakitanga (stewardship of the land), guided by spiritual beliefs and tikanga (customary practices).
+
+Legacy: The Maori have preserved their cultural heritage through language revitalization, land rights activism, and cultural resurgence, enriching New Zealand's national identity.~
+
+BLANK
+?BLANK
+
+~Zulu
+
+Location: Southern Africa, primarily in present-day South Africa, particularly in the region of KwaZulu-Natal.
+
+Culture: The Zulu are a Bantu-speaking ethnic group known for their martial traditions, centralized kingdom, and vibrant cultural expressions.
+
+Clothing: Zulu attire includes colorful garments such as isishweshwe (printed fabric) and ibheshu (apron-like skirts for men), often accessorized with beadwork, cowhide shields, and headdresses.
+
+Equipment: Zulu warriors wielded weapons such as spears (assegai), clubs (knobkerries), and shields (isihlangu), with skilled tactics and formations honed through centuries of warfare.
+
+Lifestyle: Zulu society was organized into clans (izibongo) under a monarchy led by a king (inkosi), with agriculture, cattle herding, and military service forming integral parts of their economy and culture.
+
+Philosophy: Zulu culture emphasized concepts such as ubuntu (humanity), umzabalazo (resistance), and ukukhanya nokuthula (light and peace), guided by ancestral wisdom and spiritual beliefs.
+
+Legacy: The Zulu Kingdom, under leaders such as Shaka Zulu, left a profound impact on Southern African history, shaping political alliances, warfare strategies, and cultural identity.~
+
+BLANK
+?BLANK
+
+~Carthaginians
+
+Location: Ancient Carthage, located in present-day Tunisia on the coast of North Africa.
+
+Culture: The Carthaginians were a maritime trading civilization known for their commercial prowess, seafaring expertise, and conflict with the Roman Republic.
+
+Clothing: Carthaginian attire consisted of tunics, robes, and cloaks made from linen or wool, with richly dyed fabrics and intricate patterns reflecting their cosmopolitan culture.
+
+Equipment: Carthaginian soldiers were equipped with weapons such as swords, spears, and shields, with a strong naval tradition employing triremes and quinqueremes in warfare.
+
+Lifestyle: Carthaginian society was built on commerce, with a network of colonies and trading posts across the Mediterranean, facilitating the exchange of goods, ideas, and culture.
+
+Philosophy: Carthaginian culture valued commerce, diplomacy, and cultural exchange, with a pantheon of gods reflecting Phoenician influence and syncretism with indigenous beliefs.
+
+Legacy: Despite their eventual defeat by Rome, the Carthaginians left a legacy of maritime exploration, trade networks, and cultural diffusion, influencing Mediterranean civilizations for centuries.~
+
+BLANK
+?BLANK
+
+~Huns
+
+Location: Central Asia, known for their migrations and invasions into Europe and Asia during the late antiquity period.
+
+Culture: The Huns were a nomadic confederation of Eurasian steppe tribes known for their ferocity in warfare, horseback riding, and military tactics.
+
+Clothing: Hunnic attire included garments made from animal skins, fur, and textiles obtained through trade or conquest, adapted for mobility and protection in the harsh steppe environment.
+
+Equipment: Hun warriors were skilled archers and cavalrymen, wielding composite bows, lances, and sabers, with a reputation for lightning-fast raids and hit-and-run tactics.
+
+Lifestyle: Hun society was organized around tribal chieftains (khans) and kinship ties, with a subsistence economy based on pastoralism, hunting, and occasional plunder.
+
+Philosophy: Hun culture emphasized strength, courage, and loyalty to the tribe, with shamanistic beliefs and rituals guiding their spiritual worldview and animistic reverence for nature.
+
+Legacy: The Huns left a legacy of disruption and instability in the late antiquity period, contributing to the decline of the Roman Empire and reshaping the geopolitical landscape of Eurasia.~
+
+BLANK
+?BLANK
+
+~Pharaohs
+
+Location: Ancient Egypt, from the early dynastic period to the Ptolemaic period.
+
+Culture: The Pharaohs were the rulers of ancient Egypt, considered divine monarchs with absolute authority over politics, religion, and society.
+
+Clothing: Pharaohs wore elaborate ceremonial garments and regalia symbolizing their divine status, including crowns, robes, and ornate jewelry crafted from precious metals and gemstones.
+
+Equipment: Pharaohs wielded symbolic weapons such as the crook and flail, representing their roles as shepherds of the people and protectors of Ma'at (order and justice).
+
+Lifestyle: Pharaohs lived in luxury within palaces and temples, surrounded by courtiers, priests, and servants, while undertaking grand building projects and military campaigns to expand their influence.
+
+Philosophy: Pharaonic ideology emphasized the divine right of kingship, the concept of Ma'at as the cosmic order, and the cult of the gods and ancestors as sources of legitimacy and power.
+
+Legacy: The Pharaohs left a monumental legacy of architecture, art, and religious beliefs, shaping the cultural identity of ancient Egypt and influencing civilizations throughout history.~
+
+BLANK
+?BLANK
+
+~Royal Canadian Mounted Police
+
+Location: Canada, serving as the federal and national police force of Canada.
+
+Culture: The Royal Canadian Mounted Police (RCMP) is known for its iconic red serge uniforms, stetson hats, and distinguished presence in Canadian law enforcement.
+
+Clothing: RCMP officers wear traditional red serge tunics adorned with insignia, riding breeches, brown riding boots, and Stetson hats as part of their ceremonial attire.
+
+Equipment: RCMP officers are equipped with firearms, batons, handcuffs, and other law enforcement tools necessary for maintaining public safety and enforcing the law.
+
+Lifestyle: RCMP officers undergo extensive training in policing, horsemanship, and wilderness survival, serving in diverse roles such as patrol, investigations, and specialized units.
+
+Philosophy: The RCMP upholds principles of integrity, professionalism, and community service, working to uphold the rule of law and protect the rights and freedoms of Canadians.
+
+Legacy: The RCMP has a storied history dating back to its founding in 1873, playing a crucial role in Canada's development, law enforcement, and national identity.~
+
+BLANK
+?BLANK
+
+~British SAS
+
+Location: United Kingdom, operating globally as an elite special forces unit.
+
+Culture: The British Special Air Service (SAS) is renowned for its specialized training, covert operations, and counterterrorism missions.
+
+Clothing: SAS operatives wear specialized combat uniforms and gear tailored for stealth and mobility, including night vision goggles, body armor, and camouflage.
+
+Equipment: SAS operators are equipped with a wide range of firearms, explosives, and tactical equipment for conducting high-risk operations in diverse environments.
+
+Lifestyle: SAS soldiers undergo rigorous selection and training, operating in small teams with autonomy and flexibility to accomplish complex and sensitive missions.
+
+Philosophy: The SAS ethos emphasizes adaptability, resilience, and leadership, with a focus on unconventional warfare, counterinsurgency, and hostage rescue.
+
+Legacy: The SAS has a storied history of daring exploits and operational successes, earning a reputation as one of the world's premier special operations forces.~
+
+BLANK
+?BLANK
+
+~Viet Cong
+
+Location: Vietnam, operating during the Vietnam War as a guerrilla force.
+
+Culture: The Viet Cong, or National Liberation Front (NLF), was a communist-led insurgency movement in South Vietnam, fighting against the government of South Vietnam and its allies.
+
+Clothing: Viet Cong fighters wore civilian clothing or uniforms indistinguishable from the local population, allowing them to blend in and conduct covert operations.
+
+Equipment: Viet Cong guerrillas utilized a variety of weapons including rifles, machine guns, grenades, booby traps, and improvised explosives.
+
+Lifestyle: Viet Cong fighters lived clandestine lives, operating in remote jungles, tunnels, and villages, conducting hit-and-run attacks and ambushes against enemy forces.
+
+Philosophy: The Viet Cong ideology centered around Marxist-Leninist principles, national liberation, and opposition to imperialism, with a commitment to the reunification of Vietnam under communist rule.
+
+Legacy: The Viet Cong insurgency played a significant role in the Vietnam War, contributing to the eventual withdrawal of American forces and the reunification of Vietnam under communist rule.~
+
+BLANK
+?BLANK
+
+~Phoenicians
+
+Location: Ancient Phoenicia, located in the Eastern Mediterranean, including present-day Lebanon, Syria, and Israel.
+
+Culture: The Phoenicians were a maritime civilization known for their seafaring expertise, trade networks, and cultural exchange in the ancient world.
+
+Clothing: Phoenician attire included garments made from linen, wool, and imported fabrics such as silk, with styles influenced by neighboring civilizations and trade partners.
+
+Equipment: Phoenician sailors used advanced shipbuilding techniques to construct sturdy vessels such as the trireme and merchant ships, facilitating trade and exploration.
+
+Lifestyle: Phoenician society was centered around maritime commerce, with bustling port cities such as Tyre and Sidon serving as hubs for trade, industry, and cultural exchange.
+
+Philosophy: Phoenician culture valued entrepreneurship, innovation, and cosmopolitanism, with a polytheistic religion featuring gods such as Baal, Astarte, and Melqart.
+
+Legacy: The Phoenicians left a lasting legacy of seafaring, trade, and cultural diffusion, spreading their influence throughout the Mediterranean and beyond, including the development of the alphabet.~
+
+BLANK
+?BLANK
+
+~French Foreign Legion
+
+Location: France, operating globally as a legendary military unit composed of foreign volunteers.
+
+Culture: The French Foreign Legion is known for its diverse composition, rigorous training, and willingness to accept individuals seeking a fresh start or new identity.
+
+Clothing: Legionnaires wear the iconic kepi blanc (white kepi) and blue uniform adorned with insignia representing their regiment and service within the Legion.
+
+Equipment: Legionnaires are equipped with standard French military gear including firearms, body armor, and equipment for combat operations in various environments.
+
+Lifestyle: Legionnaires undergo demanding training and live by the Legion's motto "Legio Patria Nostra" (The Legion is our homeland), fostering camaraderie and esprit de corps.
+
+Philosophy: The Foreign Legion values discipline, loyalty, and camaraderie, offering a path to redemption for those seeking a second chance and a sense of belonging.
+
+Legacy: The French Foreign Legion has a storied history dating back to its founding in 1831, participating in numerous campaigns and earning a reputation for valor and professionalism.~
+
+BLANK
+?BLANK
+
+~Spetsnaz
+
+Location: Russia, operating as elite special forces units within the Russian military.
+
+Culture: Spetsnaz units are known for their specialized training, combat skills, and proficiency in unconventional warfare and counterterrorism.
+
+Clothing: Spetsnaz operators wear camouflage uniforms and gear tailored for their mission requirements, including body armor, helmets, and specialized equipment.
+
+Equipment: Spetsnaz operatives are equipped with a wide range of firearms, explosives, and tactical gear, customized for missions ranging from reconnaissance to direct action.
+
+Lifestyle: Spetsnaz soldiers undergo rigorous selection and training, operating in small teams with a high degree of autonomy and adaptability to accomplish complex missions.
+
+Philosophy: Spetsnaz units embody the principles of loyalty, discipline, and proficiency in combat, with a focus on mission accomplishment and the protection of Russian interests.
+
+Legacy: The Spetsnaz have a distinguished history of operations dating back to World War II, earning a reputation for bravery, skill, and professionalism in service to the Russian Federation.~
+
+BLANK
+?BLANK
+
+~Bruce Lee
+(1940–1973)
+Word Count: 548
+
+Bruce Lee was born in 1940 in San Francisco but raised in Hong Kong, a city pulsing with tradition, discipline, and cinematic energy. From a young age, Lee was immersed in both performance and combat. As a child actor, he appeared in numerous Hong Kong films, but behind the camera his life was marked by street fights and restless intensity. Concerned for his safety, his parents enrolled him in martial arts training, where Lee studied Wing Chun under the legendary Ip Man. What began as self-defense quickly became obsession. Lee was not satisfied with tradition alone — he wanted truth, efficiency, and mastery.
+
+As a teenager, Lee moved to the United States, where he encountered racial barriers and cultural resistance. Martial arts were often dismissed as exotic or inferior, and Lee faced discrimination even within martial arts communities. Instead of retreating, he challenged limitations. He studied philosophy, anatomy, physics, and psychology, believing combat should evolve with knowledge. Lee rejected rigid styles, developing his own system called Jeet Kune Do, or “The Way of the Intercepting Fist.” His philosophy emphasized adaptability, simplicity, and personal expression. For Lee, martial arts were not just fighting — they were a path to self-discovery.
+
+Lee’s charisma and skill soon attracted Hollywood attention, but progress was slow. He appeared as Kato in The Green Hornet, showcasing speed and precision unseen by Western audiences. Yet major roles remained out of reach due to racial stereotyping. Frustrated, Lee returned to Hong Kong, where the film industry recognized his star power. Films such as The Big Boss, Fist of Fury, and Way of the Dragon exploded in popularity. Lee’s movements were sharp, explosive, and brutally honest. He did not merely fight — he communicated intensity, philosophy, and rebellion through motion.
+
+Bruce Lee’s international breakthrough came with Enter the Dragon in 1973, a film that fused Eastern martial arts with Western storytelling. It introduced global audiences to kung fu cinema and shattered cultural barriers. Tragically, Lee died suddenly at the age of 32, just before the film’s worldwide release. His death shocked the world, transforming him into a mythic figure almost overnight.
+
+Bruce Lee’s legacy extends far beyond film. He reshaped martial arts by rejecting blind tradition and embracing personal evolution. He challenged racial stereotypes, redefined masculinity, and inspired generations of fighters, filmmakers, and thinkers. Bruce Lee was not just an action star — he was a philosopher in motion. His impact on cinema, pop culture, and modern martial arts remains unmatched, proving that true power lies in freedom of expression.~
+
+Quiz
+
+?Where was Bruce Lee born?
+Hong Kong
+|San Francisco|
+Shanghai
+Los Angeles
+
+?Which martial art did Bruce Lee study under Ip Man?
+Karate
+|Wing Chun|
+Taekwondo
+Judo
+
+?What philosophy guided Bruce Lee’s martial approach?
+Tradition only
+|Adaptability and efficiency|
+Strength alone
+Competition rules
+
+?What was Bruce Lee’s martial arts system called?
+Kung Fu Supreme
+|Jeet Kune Do|
+Dragon Style
+Iron Fist
+
+?Which TV role introduced Lee to Western audiences?
+Kung Fu
+|The Green Hornet|
+Walker Texas Ranger
+Enter the Dragon
+
+?Why did Lee return to Hong Kong filmmaking?
+Boredom
+|Lack of Hollywood opportunities|
+Family pressure
+Financial collapse
+
+?Which film became Lee’s global breakthrough?
+Fist of Fury
+|Enter the Dragon|
+The Big Boss
+Way of the Dragon
+
+?How old was Bruce Lee when he died?
+28
+30
+|32|
+40
+
+?What did Lee believe martial arts should express?
+Violence
+|The individual|
+Rules
+Tradition
+
+?What best defines Bruce Lee’s legacy?
+Sports trophies
+|Revolutionizing martial arts and cinema|
+Military combat
+Political power
+
+~Jackie Chan
+(1954– )
+Word Count: 531
+
+Jackie Chan was born in 1954 in Hong Kong, a city where survival often required resilience, discipline, and adaptability. His early life was defined by hardship. As a child, Chan was enrolled in the China Drama Academy, a strict Peking Opera school known for brutal training. Students endured years of physical punishment, acrobatics, martial arts, and performance drills. The environment was harsh, but it forged extraordinary skill. Chan emerged with unmatched athleticism, timing, and endurance — tools that would later redefine action cinema.
+
+Unlike many martial artists, Chan did not seek to emulate Bruce Lee’s intensity. Early attempts to market him as “the next Bruce Lee” failed. Chan recognized that he could not replace Lee — so he reinvented the genre. Drawing inspiration from silent film comedians like Buster Keaton and Charlie Chaplin, Chan fused martial arts with physical comedy. Pain became part of the performance. He fell, stumbled, and improvised, turning vulnerability into strength. This approach humanized the action hero.
+
+Chan’s breakthrough came with Drunken Master and later Drunken Master II, where he blended complex fight choreography with humor and rhythm. His fights were not about domination, but survival. In Police Story, Chan pushed action realism to unprecedented levels, performing extremely dangerous stunts himself. He slid down electrified poles, crashed through glass, and risked severe injury — often without safety equipment. Broken bones, burns, and near-fatal accidents became part of his career.
+
+Despite massive success in Asia, Hollywood initially struggled to understand Chan. Early American films failed to capture his unique style. It wasn’t until Rush Hour that Chan found global stardom, allowing him to showcase his humor, athleticism, and charm. Even then, he resisted Hollywood’s reliance on stunt doubles and camera tricks, insisting on authenticity.
+
+Jackie Chan’s influence extends beyond acting. He revolutionized stunt coordination, raised safety awareness, and inspired generations of performers worldwide. Unlike traditional action heroes, Chan’s characters succeed through creativity, persistence, and humor. He made martial arts accessible and joyful, without sacrificing skill.
+
+Jackie Chan is more than a movie star — he is a bridge between cultures and eras. By redefining what an action hero could be, Chan proved that laughter, pain, and perseverance could coexist. His legacy is written not just in films, but in every stunt performed with heart, risk, and human imperfection.~
+
+Quiz
+
+?Where was Jackie Chan born?
+China
+|Hong Kong|
+Taiwan
+Singapore
+
+?What school trained Jackie Chan as a child?
+Shaolin Temple
+|China Drama Academy|
+Beijing University
+Royal Ballet
+
+?What genre did Chan blend with martial arts?
+Horror
+Drama
+|Physical comedy|
+Science fiction
+
+?Which film showcased Chan’s dangerous stunt work?
+Rush Hour
+|Police Story|
+Shanghai Noon
+Karate Kid
+
+?Who inspired Chan’s comedic style?
+Bruce Lee
+|Charlie Chaplin and Buster Keaton|
+Clint Eastwood
+Jet Li
+
+?Why did early Hollywood films fail Chan?
+Language barriers
+|They misunderstood his style|
+Low budgets
+Poor acting
+
+?Which film launched Chan’s Hollywood success?
+Rumble in the Bronx
+|Rush Hour|
+The Tuxedo
+Shanghai Knights
+
+?Does Chan perform his own stunts?
+Sometimes
+|Almost always|
+Never
+Only early career
+
+?What risk did Chan accept for authenticity?
+Career loss
+|Severe injury|
+Legal trouble
+Financial ruin
+
+?What defines Jackie Chan’s legacy?
+Martial arts only
+|Redefining action through comedy and realism|
+Box office records
+Political influence
+
+~Jet Li
+(1963– )
+Word Count: 512
+
+Jet Li was born in 1963 in Beijing, China, and rose to prominence through discipline rather than spectacle. From a young age, Li trained in Wushu, China’s modernized martial arts system emphasizing form, speed, and balance. His talent was extraordinary. By the age of 11, he had become a national champion, representing China internationally. Unlike many action stars, Li’s foundation was competitive mastery, not cinema. His movements were precise, fluid, and rooted in decades of rigorous training.
+
+Li transitioned into film in the early 1980s, starring in Shaolin Temple, which became a cultural phenomenon in China. His calm intensity and technical excellence contrasted sharply with louder action heroes. Li’s characters embodied honor, restraint, and inner strength. Films like Once Upon a Time in China and Fearless reinforced his image as a martial artist deeply connected to Chinese history and identity.
+
+Hollywood eventually took notice. Li entered Western cinema with films like Lethal Weapon 4 and Romeo Must Die, where his speed and authenticity set him apart. Unlike many Western action stars, Li relied on technique rather than brute force. He brought legitimacy to martial arts choreography, even when Hollywood simplified storytelling.
+
+Despite success, Li faced personal challenges, including severe injuries and health struggles. Over time, he reduced physically demanding roles, turning toward philanthropy and spiritual pursuits. His later work emphasized legacy rather than dominance.
+
+Jet Li’s influence lies in authenticity. He brought competitive martial arts into mainstream cinema without sacrificing discipline or respect. His career bridged cultures, proving that quiet mastery can be as powerful as spectacle.~
+
+Quiz
+
+?Where was Jet Li born?
+Shanghai
+|Beijing|
+Hong Kong
+Taipei
+
+?What martial art did Jet Li master?
+Karate
+|Wushu|
+Taekwondo
+Judo
+
+?At what age did Li become a national champion?
+15
+13
+|11|
+18
+
+?Which film launched Li’s acting career?
+Fearless
+|Shaolin Temple|
+Hero
+The One
+
+?What quality defines Li’s fighting style?
+Power
+|Precision and speed|
+Aggression
+Improvisation
+
+?Which Hollywood film introduced Li to Western audiences?
+Rush Hour
+|Lethal Weapon 4|
+Matrix
+Blade
+
+?Which film focused on Chinese cultural pride?
+Romeo Must Die
+|Once Upon a Time in China|
+The One
+Unleashed
+
+?Why did Li reduce action roles later?
+Loss of interest
+|Health issues|
+Career failure
+Legal trouble
+
+?What separates Li from many action stars?
+Height
+|Competitive martial arts mastery|
+Comedy
+Weapons use
+
+?What defines Jet Li’s legacy?
+Box office success
+|Authentic martial arts cinema|
+Stunt innovation
+Comedy action
+
+~Donnie Yen
+(1963– )
+Word Count: 525
+
+Donnie Yen was born in 1963 in Guangzhou, China, and raised in a household shaped by discipline and performance. His mother was a respected martial arts master, and his upbringing blended traditional training with artistic expression. Yen studied multiple martial arts, including Taekwondo, Wushu, boxing, and mixed combat styles, giving him versatility rare even among elite fighters. Unlike stars molded for a single discipline, Yen became a complete martial artist.
+
+Early in his career, Yen struggled for recognition. Hong Kong cinema was saturated with talent, and his serious demeanor lacked mainstream appeal. However, Yen refused to compromise authenticity. He refined his style, emphasizing realism, speed, and tactical brutality. His breakthrough came with the Ip Man series, portraying Bruce Lee’s legendary teacher. Yen’s performance combined emotional depth with technical mastery, revitalizing kung fu cinema for a new generation.
+
+The Ip Man films were not merely action spectacles — they were cultural statements. Yen portrayed discipline, restraint, and national identity, grounding combat in philosophy. His fight scenes emphasized close-range combat and efficiency, influencing modern choreography worldwide.
+
+Yen later entered Hollywood, appearing in Rogue One and John Wick: Chapter 4, where his precision and presence elevated ensemble casts. Even internationally, Yen maintained creative control, ensuring authenticity remained intact.
+
+Donnie Yen’s legacy is revival. He bridged traditional kung fu and modern action cinema, proving that martial arts storytelling still had depth and relevance. His influence continues to shape how combat is portrayed on screen.~
+
+Quiz
+
+?Where was Donnie Yen born?
+Hong Kong
+|Guangzhou|
+Shanghai
+Beijing
+
+?Who influenced Yen’s early martial training?
+Bruce Lee
+|His mother|
+Jackie Chan
+Jet Li
+
+?What distinguishes Yen’s martial skill?
+Single style mastery
+|Versatility across disciplines|
+Weapons focus
+Gymnastics
+
+?Which role revived kung fu cinema?
+Hero
+|Ip Man|
+Fearless
+Enter the Dragon
+
+?What philosophy shaped the Ip Man films?
+Aggression
+|Discipline and restraint|
+Entertainment only
+Comedy
+
+?Which Hollywood film featured Yen as a blind warrior?
+Matrix
+|Rogue One|
+Mission Impossible
+Blade
+
+?What fighting range does Yen emphasize?
+Long-range kicks
+|Close-range efficiency|
+Weapons only
+Aerial combat
+
+?Why was Yen initially overlooked?
+Poor skill
+|Crowded industry|
+Language barrier
+Lack of training
+
+?What impact did Ip Man have?
+Ended kung fu films
+|Revitalized the genre|
+Reduced action cinema
+Focused on comedy
+
+?What defines Donnie Yen’s legacy?
+Fame alone
+|Modernizing kung fu cinema|
+Stunt comedy
+Western dominance
+
+~Chuck Norris
+(1940– )
+Word Count: 523
+
+Chuck Norris was born in 1940 in Ryan, Oklahoma, far from the bright lights of Hollywood or the mystique of martial arts cinema. His early life was marked by instability, poverty, and a shy temperament that contrasted sharply with the tough persona he would later embody. Norris struggled academically and socially, lacking direction or confidence. Nothing in his childhood suggested global fame or cultural immortality. His transformation began not in a dojo, but in the disciplined environment of the United States Air Force.
+
+While stationed in South Korea, Norris was introduced to martial arts, specifically Tang Soo Do and Taekwondo. What began as physical training quickly became a source of identity and purpose. Norris trained obsessively, discovering a talent for combat rooted in discipline rather than flash. He went on to become a world champion in karate, dominating tournaments throughout the 1960s. His victories were not just physical — they represented personal reinvention. Norris had forged confidence through mastery.
+
+Transitioning from competition to cinema was not immediate. Norris entered Hollywood through training other actors, including Steve McQueen, who encouraged him to pursue acting. Early roles cast Norris as villains or secondary figures, most notably in Way of the Dragon, where he fought Bruce Lee in an iconic showdown. Though he lost on screen, the moment cemented his credibility. He was not a performer pretending to fight — he was a legitimate martial artist.
+
+By the late 1970s and 1980s, Norris became a leading action star. Films like Good Guys Wear Black, Missing in Action, and Delta Force established his image as a stoic, unstoppable force. Unlike more acrobatic stars, Norris emphasized directness and power. His characters embodied American toughness during the Cold War era, resonating with audiences seeking strength and certainty.
+
+Later in life, Norris achieved unexpected pop culture immortality through internet memes exaggerating his invincibility. While humorous, these memes reflected a deeper truth: Norris had become a symbol larger than himself. Beyond entertainment, he promoted martial arts education, discipline, and character development through programs like Kickstart Kids.
+
+Chuck Norris’s legacy is paradoxical. He began as an insecure youth and became both a serious martial artist and a mythic figure. His career bridges competition, cinema, and cultural folklore, proving that discipline can reshape destiny — and sometimes, turn a man into a legend.~
+
+Quiz
+
+?Where was Chuck Norris born?
+Texas
+|Oklahoma|
+California
+Florida
+
+?What introduced Norris to martial arts?
+Street fighting
+|Military service in Korea|
+Film training
+College sports
+
+?Which martial arts did Norris study?
+Kung Fu only
+|Taekwondo and Tang Soo Do|
+Judo and Aikido
+Muay Thai
+
+?Who encouraged Norris to act?
+Bruce Lee
+|Steve McQueen|
+Jet Li
+Clint Eastwood
+
+?Which film featured Norris fighting Bruce Lee?
+Enter the Dragon
+|Way of the Dragon|
+Fist of Fury
+Ip Man
+
+?What defined Norris’s action style?
+Comedy
+|Direct power and toughness|
+Acrobatics
+Weapons
+
+?Which era made Norris a star?
+1970s–1980s
+|Cold War era|
+Silent film era
+2000s
+
+?What unexpected phenomenon revived Norris’s fame?
+Documentaries
+|Internet memes|
+Video games
+Music videos
+
+?What educational program did Norris support?
+Shaolin Academy
+|Kickstart Kids|
+Olympic Karate
+UFC Youth
+
+?What best defines Norris’s legacy?
+Acting awards
+|Discipline turned into cultural myth|
+Stunt innovation
+Comedy action
+
+~Jean-Claude Van Damme
+(1960– )
+Word Count: 515
+
+Jean-Claude Van Damme was born in 1960 in Brussels, Belgium, a quiet beginning for a man who would become one of the most physically iconic action stars of his era. As a child, Van Damme was small, shy, and frequently bullied. Seeking confidence, he began training in Shotokan karate and kickboxing, disciplines that demanded precision, flexibility, and mental focus. Over time, his body transformed — lean, explosive, and remarkably flexible.
+
+Van Damme’s athleticism set him apart. He became a competitive martial artist, earning championships and developing his signature high kicks and splits. Unlike many fighters, Van Damme trained in ballet as well, understanding that balance and grace enhanced combat effectiveness. This combination of strength and elegance would become his trademark.
+
+Hollywood success did not come easily. Van Damme arrived in the United States with limited money, language barriers, and no connections. Early roles were humiliating, including appearing inside a monster costume. Refusing to quit, he relentlessly trained and auditioned until his breakthrough arrived with Bloodsport in 1988. The film showcased his athletic prowess and introduced audiences to a new kind of action star — one defined by physical expression rather than brute size.
+
+Throughout the late 1980s and 1990s, Van Damme became a global star. Films like Kickboxer, Universal Soldier, and Timecop emphasized his flexibility, speed, and intensity. His on-screen persona combined vulnerability with ferocity, making him relatable despite his extraordinary abilities.
+
+However, fame brought excess. Van Damme struggled with substance abuse and personal instability, leading to career decline. In later years, he staged a critical comeback through self-aware performances and renewed discipline. His emotional monologue in JCVD revealed depth previously unseen.
+
+Jean-Claude Van Damme’s legacy is physical poetry. He brought martial arts aesthetics into mainstream Hollywood and proved that motion itself could tell a story. His journey reflects both the power and danger of fame — and the resilience required to reclaim oneself.~
+
+Quiz
+
+?Where was Van Damme born?
+France
+|Belgium|
+Netherlands
+Germany
+
+?Which martial art did he train in early?
+Kung Fu
+|Shotokan karate|
+Judo
+Aikido
+
+?What unusual training improved his balance?
+Gymnastics
+|Ballet|
+Swimming
+Yoga
+
+?Which film launched his career?
+Kickboxer
+|Bloodsport|
+Universal Soldier
+Timecop
+
+?What physical trait defined Van Damme’s style?
+Strength only
+|High kicks and splits|
+Weapons
+Ground fighting
+
+?What challenge did Van Damme face in Hollywood?
+Age
+|Language and money|
+Height
+Training
+
+?What caused his career decline?
+Poor acting
+|Substance abuse|
+Injuries
+Legal issues
+
+?Which film marked his emotional comeback?
+Kickboxer
+|JCVD|
+Bloodsport
+Timecop
+
+?What made Van Damme unique among action stars?
+Comedy
+|Physical expression|
+Weapons mastery
+Stunt driving
+
+?What defines his legacy?
+Box office dominance
+|Martial arts as movement art|
+Political influence
+Directing
+
+~Sammo Hung
+(1952– )
+Word Count: 522
+
+Sammo Hung was born in 1952 in Hong Kong, a city that would become synonymous with martial arts cinema. From a young age, Hung trained at the China Drama Academy alongside future legends like Jackie Chan. While not fitting the traditional image of a lean action hero, Hung possessed extraordinary agility, timing, and martial intelligence. His size became an advantage rather than a limitation.
+
+Hung’s greatest contribution was not just acting, but choreography. He redefined fight scenes, blending realism, rhythm, and narrative. As a director and stunt coordinator, Hung emphasized teamwork and safety while pushing creative boundaries. His work helped shape the “golden age” of Hong Kong action cinema.
+
+On screen, Hung broke stereotypes. He proved that martial mastery was not dependent on appearance. Films like Enter the Fat Dragon and Pedicab Driver showcased both humor and ferocity. Behind the scenes, Hung mentored countless performers, influencing generations.
+
+In later years, Hung transitioned into television and international projects, including Martial Law. His legacy remains foundational — without Sammo Hung, modern action choreography would look very different.~
+
+Quiz
+
+?Where was Sammo Hung born?
+China
+|Hong Kong|
+Taiwan
+Japan
+
+?Where did Hung train as a child?
+Shaolin Temple
+|China Drama Academy|
+Military school
+Film studio
+
+?What set Hung apart physically?
+Height
+|His large build|
+Speed alone
+Weapons
+
+?What was Hung’s key contribution?
+Acting only
+|Fight choreography|
+Comedy writing
+Stunt driving
+
+?Which era did Hung influence most?
+Silent era
+|Hong Kong golden age|
+Modern CGI era
+Hollywood noir
+
+?What stereotype did Hung challenge?
+Nationality
+|Appearance-based martial ability|
+Gender roles
+Age
+
+?Who did Hung mentor?
+Only himself
+|Future action stars|
+Politicians
+Athletes
+
+?Which skill defined Hung’s action scenes?
+Slow motion
+|Rhythm and realism|
+Gunplay
+Explosions
+
+?Did Hung work internationally?
+No
+|Yes|
+Only briefly
+After retirement
+
+?What defines Sammo Hung’s legacy?
+Fame
+|Architect of modern fight choreography|
+Comedy acting
+Awards
+
+~Michelle Yeoh
+(1962– )
+Word Count: 508
+
+Michelle Yeoh was born in 1962 in Malaysia and trained not for combat, but for classical dance. Her early focus on ballet instilled discipline, balance, and grace — skills that would later define her action career. A spinal injury ended her dance aspirations, forcing reinvention rather than surrender.
+
+Entering Hong Kong cinema, Yeoh defied expectations. At a time when women were rarely action leads, she performed her own stunts, embracing danger with elegance. Films like Yes, Madam! established her as a serious action star. Unlike many contemporaries, Yeoh emphasized precision and authenticity.
+
+Her international breakthrough came with Crouching Tiger, Hidden Dragon, where movement became poetry. Yeoh’s performance blended emotion, restraint, and physical mastery, earning global acclaim. She later balanced action with dramatic roles, refusing to be confined.
+
+Michelle Yeoh’s legacy is revolutionary. She expanded representation, redefined female strength, and proved that action cinema could be both powerful and graceful.~
+
+Quiz
+
+?Where was Michelle Yeoh born?
+China
+|Malaysia|
+Hong Kong
+Singapore
+
+?What was Yeoh’s original training?
+Karate
+|Ballet|
+Gymnastics
+Wushu
+
+?What ended her dance career?
+Loss of interest
+|Spinal injury|
+Age
+Competition
+
+?What made Yeoh stand out early?
+Comedy
+|Performing her own stunts|
+Weapons
+Speed
+
+?Which film brought her global acclaim?
+Yes, Madam!
+|Crouching Tiger, Hidden Dragon|
+Tomorrow Never Dies
+Hero
+
+?What did Yeoh challenge in cinema?
+Budget limits
+|Gender roles|
+Technology
+Comedy norms
+
+?What quality defines Yeoh’s action style?
+Aggression
+|Grace and precision|
+Brute force
+Improvisation
+
+?Did Yeoh limit herself to action films?
+Yes
+|No|
+Only early career
+Only Hollywood
+
+?What cultural impact did Yeoh have?
+Fashion
+|Expanded representation|
+Music
+Sports
+
+?What defines Michelle Yeoh’s legacy?
+Awards
+|Redefining female action heroes|
+Stunt records
+Box office totals
+
+~Tony Jaa
+(1976– )
+Word Count: 523
+
+Tony Jaa was born in 1976 in a rural village in Surin Province, Thailand, far from film studios, fame, or modern conveniences. His childhood was shaped by rice fields, hard labor, and local traditions rather than global pop culture. From a young age, Jaa was fascinated by martial arts films he saw on worn VHS tapes, particularly the work of Bruce Lee and Jackie Chan. These films ignited a dream that seemed impossible for a boy growing up in poverty. Yet that dream would eventually change the global perception of Muay Thai forever.
+
+Unlike many action stars, Tony Jaa did not begin with formal film training. He trained relentlessly in Muay Thai, the national martial art of Thailand, a brutal and practical fighting style using fists, elbows, knees, and shins. His training emphasized endurance, pain tolerance, and discipline. Jaa also studied traditional Thai martial arts and acrobatics, developing explosive athleticism. He practiced alone, often performing dangerous stunts without safety equipment, driven by obsession rather than opportunity.
+
+Jaa’s breakthrough came in 2003 with Ong-Bak: Muay Thai Warrior. The film stunned audiences worldwide. Unlike modern action movies reliant on wires, CGI, or rapid editing, Ong-Bak showcased raw physical combat. Every jump, flip, and strike was real. Jaa famously refused to use stunt doubles or special effects, performing life-threatening sequences himself. His style was primal, aggressive, and deeply rooted in tradition, offering audiences something they had not seen before.
+
+The success of Ong-Bak revived global interest in practical martial arts cinema. Jaa became an international sensation almost overnight, praised for authenticity and intensity. He followed with Tom-Yum-Goong
+(also known as The Protector), which featured one of the longest uncut fight scenes in cinema history. These films established Jaa not just as an action star, but as a cultural ambassador for Thai martial arts.
+
+Despite success, Jaa’s career faced turbulence. Disputes with studios, exhaustion, and spiritual searching led him to temporarily withdraw from filmmaking. During this time, he entered a Buddhist monastery, seeking balance away from fame. His return to cinema came years later, including roles in international franchises like Fast & Furious 7.
+
+Tony Jaa’s legacy is authenticity. He reminded the world that martial arts cinema could still be grounded in real danger, real pain, and real skill. His rise from rural Thailand to global screens represents discipline overcoming circumstance, and tradition finding its voice in modern cinema.~
+
+Quiz
+
+?Where was Tony Jaa born?
+Bangkok
+|Surin Province, Thailand|
+Hong Kong
+Japan
+
+?Which martial art defines Jaa’s style?
+Karate
+|Muay Thai|
+Kung Fu
+Taekwondo
+
+?What made Ong-Bak unique?
+Comedy
+|No CGI or wire work|
+Gun fights
+Slow motion
+
+?What did Jaa refuse to use?
+Costumes
+|Stunt doubles|
+Dialogue
+Weapons
+
+?Which film featured a famous long uncut fight scene?
+Ong-Bak
+|The Protector|
+Ip Man
+Hero
+
+?What tradition influenced Jaa’s fighting?
+Western boxing
+|Thai martial arts|
+Judo
+Wrestling
+
+?Why did Jaa step away from films?
+Injury
+|Spiritual retreat|
+Legal issues
+Retirement
+
+?Which franchise did Jaa later join?
+Mission Impossible
+|Fast & Furious|
+James Bond
+Marvel
+
+?What did Jaa revive globally?
+Action comedy
+|Interest in Muay Thai|
+Silent films
+Western cinema
+
+?What defines Tony Jaa’s legacy?
+Technology
+|Raw authenticity in action|
+Comedy
+Dialogue
+
+~Scott Adkins
+(1976– )
+Word Count: 510
+
+Scott Adkins was born in 1976 in Sutton Coldfield, England, a quiet suburban environment far removed from martial arts stardom. As a child, Adkins was athletic but unfocused, struggling to find direction. His life changed when he began training in martial arts, initially studying judo and later karate, taekwondo, and kickboxing. Unlike many actors, Adkins pursued martial mastery first, acting second.
+
+Adkins trained obsessively, developing exceptional flexibility, speed, and precision. He was deeply influenced by Bruce Lee, Jean-Claude Van Damme, and Hong Kong cinema. However, breaking into film proved difficult. Early roles were minor, and mainstream Hollywood offered limited opportunities for a British martial artist without celebrity backing.
+
+His career found momentum through direct-to-video action films, often overlooked by critics but embraced by martial arts fans. Adkins’ portrayal of Yuri Boyka in the Undisputed series transformed his career. Boyka was ruthless, disciplined, and emotionally complex — a villain turned anti-hero. Adkins’ physical performance elevated low-budget films into cult classics.
+
+What distinguishes Adkins is consistency. He performs nearly all of his own stunts and treats fight choreography as storytelling rather than spectacle. His respect for martial arts authenticity has earned admiration from peers and fans alike. While he occasionally appears in major productions like Doctor Strange and John Wick 4, Adkins remains committed to skill-driven cinema rather than celebrity status.
+
+Scott Adkins represents the modern martial artist-actor: technically elite, physically disciplined, and artistically committed. His career proves that mastery, not marketing, sustains legacy.~
+
+Quiz
+
+?Where was Scott Adkins born?
+USA
+|England|
+Australia
+Canada
+
+?Which role defined his career?
+Hero roles
+|Yuri Boyka|
+Police officer
+Comic relief
+
+?What made Adkins different from many actors?
+Height
+|Martial arts mastery first|
+Comedy
+Weapons
+
+?Which type of films built his fanbase?
+Blockbusters
+|Direct-to-video action|
+Romantic films
+Drama
+
+?What does Adkins emphasize in fight scenes?
+Flash
+|Storytelling|
+CGI
+Weapons
+
+?Which major franchises has he appeared in?
+Star Wars
+|John Wick|
+Harry Potter
+Avatar
+
+?Does Adkins use stunt doubles often?
+Always
+|Rarely|
+Never acts
+Only early
+
+?What style defines his fighting?
+Slow
+|Precise and technical|
+Improvised
+Comedic
+
+?What audience supports Adkins most?
+Critics
+|Martial arts fans|
+Children
+Romance viewers
+
+?What defines Adkins’ legacy?
+Fame
+|Consistency and skill|
+Awards
+Box office
+
+~Lonnie Johnson
+(1949– )
+Word Count: 502
+
+Lonnie Johnson was born in 1949 in Mobile, Alabama, in a segregated America where opportunity was limited and expectations were narrow. From a young age, Johnson showed extraordinary intelligence and curiosity. He built engines from scrap, disassembled electronics, and constantly experimented. While others saw obstacles, Johnson saw puzzles waiting to be solved.
+
+Johnson pursued education with determination, earning degrees in engineering and later working for the U.S. Air Force and NASA. He contributed to advanced military and space technologies, including stealth aircraft and space shuttle projects. Yet his most famous invention emerged not from a laboratory contract, but from personal curiosity.
+
+In the late 1980s, Johnson developed a new type of water-based heat pump. While experimenting, he created a prototype that shot a powerful stream of water. Recognizing its playful potential, Johnson refined the idea into what became the Super Soaker — one of the most successful toys in history. The invention transformed children’s play worldwide and generated billions in revenue.
+
+Despite its commercial success, Johnson faced challenges protecting his intellectual property and receiving fair compensation. Nevertheless, he used his earnings to fund further research in renewable energy and engineering education. Johnson has consistently emphasized the importance of curiosity, experimentation, and representation in science.
+
+Lonnie Johnson’s story is dramatic not because of fame, but because of impact. He bridged imagination and engineering, proving that invention can change culture in unexpected ways. His legacy reminds us that brilliance often begins quietly — and sometimes, it changes the world through play.~
+
+Quiz
+
+?Where was Lonnie Johnson born?
+Texas
+|Alabama|
+California
+New York
+
+?What field did Johnson study?
+Literature
+|Engineering|
+Medicine
+Law
+
+?Which organizations did Johnson work for?
+Apple
+|NASA and U.S. Air Force|
+Google
+Disney
+
+?What famous invention did Johnson create?
+Video game
+|Super Soaker|
+Robot
+Computer
+
+?What was the invention originally intended for?
+Toy design
+|Heat pump experiment|
+Weapon
+Vehicle
+
+?What challenge did Johnson face?
+Lack of ideas
+|Patent disputes|
+Poor education
+No funding
+
+?How did the Super Soaker impact culture?
+Minor
+|Global popularity|
+Local only
+Temporary
+
+?What does Johnson promote today?
+Entertainment
+|STEM education|
+Politics
+Fashion
+
+?What trait defines Johnson?
+Luck
+|Curiosity|
+Aggression
+Speed
+
+?What is Johnson’s legacy?
+Toy fame
+|Innovation through experimentation|
+Marketing success
+Celebrity status
+
+~Michael Jai White
+(1967– )
+Word Count: 527
+
+Michael Jai White was born in 1967 in Brooklyn, New York, a city defined by intensity, struggle, and ambition. Raised primarily by his mother, White grew up in environments where discipline was not optional — it was survival. From an early age, he showed an unusual focus and drive, channeling his energy into martial arts rather than chaos. While many future actors discover performance first, White discovered control, discipline, and combat long before stepping in front of a camera.
+
+White began training in martial arts at the age of seven and never stopped. Over time, he mastered an extraordinary range of disciplines, including Shotokan karate, Taekwondo, Kyokushin, Wushu, Brazilian Jiu-Jitsu, Muay Thai, and Kobudo. His training was not casual or performative; it was rooted in real-world combat philosophy and mental conditioning. Unlike many actors who learn choreography for roles, White built his acting career on top of genuine martial mastery.
+
+Before becoming a movie star, White served in the United States Air Force, where discipline and structure further refined his mindset. He also pursued education, earning degrees in education and later working as a teacher. This combination of warrior and educator would later define his screen presence — controlled, intelligent, and purposeful rather than reckless.
+
+White made history in 1997 when he became the first African American actor to portray a major comic book superhero in a feature film with Spawn. The role demanded not only physical power but emotional restraint, and White delivered both. Though the film faced production challenges, his performance became iconic and groundbreaking, opening doors for future Black superhero leads in Hollywood.
+
+Despite this milestone, White’s career did not follow a traditional blockbuster trajectory. Instead, he carved a path defined by authenticity. Films like Blood and Bone, Never Back Down 2, and Falcon Rising showcased his fighting ability in its purest form — clean technique, devastating efficiency, and realism. His martial arts on screen feel different because they are different; they are performed by someone who truly understands combat.
+
+White also revealed his range through comedy and satire, most famously in Black Dynamite. The role demonstrated his intelligence and self-awareness, proving that mastery includes humor as well as force. As a director and producer, White has worked to preserve martial arts cinema in an era dominated by digital effects.
+
+Michael Jai White’s legacy is one of quiet excellence. He is respected deeply by fighters, admired by fans, and often underestimated by the mainstream. Yet his influence is undeniable. He represents discipline over hype, mastery over marketing, and authenticity over illusion. In a cinematic world filled with imitation, Michael Jai White stands as the real thing.~
+
+Quiz
+
+?Where was Michael Jai White born?
+Chicago
+|Brooklyn, New York|
+Los Angeles
+Detroit
+
+?At what age did White begin martial arts training?
+12
+|7|
+15
+20
+
+?Which role made White a historic first?
+Blade
+|Spawn|
+Black Panther
+Steel
+
+?Which branch of the military did White serve in?
+Army
+|Air Force|
+Navy
+Marines
+
+?What makes White’s martial arts unique on screen?
+Special effects
+|Real mastery and technique|
+Speed only
+Weapons
+
+?Which film showed White’s comedic talent?
+Blood and Bone
+|Black Dynamite|
+Spawn
+Falcon Rising
+
+?Which martial art has White NOT studied?
+Karate
+Muay Thai
+Brazilian Jiu-Jitsu
+|None — he studied all|
+
+?What role does White also perform behind the camera?
+Composer
+|Director and producer|
+Stunt double
+Editor
+
+?What theme defines White’s career?
+Fame
+|Authenticity and discipline|
+Luck
+Marketing
+
+?How is Michael Jai White best described?
+Only an actor
+|A real martial artist and performer|
+Stuntman
+Comedian
+
+~Gladiators in Ancient Rome
+
+Gladiators were professional fighters in Ancient Rome who entertained the public with organized fights in large arenas. Today, the word “gladiator” is sometimes used to describe someone who fights bravely or competes fiercely in front of an audience. Popular films have increased interest in gladiators, but they also created some misconceptions about their lives.
+
+Gladiators came from many backgrounds. Many were slaves, convicted criminals, or prisoners of war, bought by managers called lanistae who trained them for combat. Some were freed men who chose to fight professionally, and in some cases, people sold themselves to a lanista because they had no other options. Women also fought as gladiators, though in smaller numbers than men.
+
+A gladiator fight was a major public event. Before the main combat, the audience often watched animal fights or public executions. Then, two trained gladiators would face each other, or confront exotic animals, using a variety of weapons. Despite the violent appearance of the fights, death was relatively rare because gladiators were expensive to train. Only those who showed cowardice or poor skill were likely to be killed.
+
+Gladiator matches began around the third century BCE, and by the second century CE they had become one of the biggest spectacles in Rome. Gladiators were trained in schools called ludi, and different types specialized in specific weapons and techniques. Fights were often balanced by matching opponents with different but roughly equal equipment. Some elite gladiators wore decorative armor for parades before the fight, including silver, gold, or carved designs, and even peacock-feather plumes. Functional armor for combat could also be elaborately decorated. Tassels on arms or legs may have shown the number of victories.
+
+Gladiators held an unusual position in Roman society. While many Romans looked down on them as slaves, they were also admired for skill and bravery. Successful gladiators were paid, could buy their freedom, and sometimes became celebrities or bodyguards. Roman women, in particular, were known to adulate them despite social taboos.
+
+Combat was accompanied by music, including trumpets, curved brass instruments, and water organs. Shows could also include comedy or animal performances, making gladiator games a complete public spectacle.~
+
+BLANK
+?BLANK
+
+~Thraex
+
+Name: Thraex (Thracian)
+
+Origin: Thrace, a region near modern Bulgaria and Turkey. Romans copied the Thracians’ fighting style. Thraex gladiators appeared after the Gauls made peace with Rome.
+
+Clothing/Armor: Wore a strong helmet covering the whole head. The front had a griffin design, a symbol of the goddess Nemesis. They had a small round or square shield called a parmula. They also wore greaves on both legs to protect themselves while moving. The armor was light enough to allow fast attacks.
+
+Weapons: Main weapon was a curved sword called a sica, about 34 cm long. It could reach around an opponent’s shield. They sometimes carried a small dagger for close fighting.
+
+Tactics: Thraex were quick and agile. They used the shield to block attacks and the sword to strike from the side. They tried to avoid heavy hits from stronger fighters. Thraex usually fought Murmillones or Hoplomachi. They relied on speed and clever moves to survive.
+
+Interesting facts: The griffin on the helmet represented Nemesis, the goddess of revenge. Thraex replaced the Gauls in the arena and were known for clever, fast attacks rather than heavy strikes. They were very popular with Roman audiences.~
+
+BLANK
+?BLANK
+
+~Samnite
+
+Name: Samnite
+
+Origin: Samnium, central Italy. The Samnites were a strong league of tribes that fought Rome in three major wars. Romans made a gladiator type named after them.
+
+Clothing/Armor: Wore a plumed helmet and a rectangular shield called a scutum. A greave protected the left leg. The armor was heavy, giving good protection but making movement slower.
+
+Weapons: Short sword used for close fighting. Sometimes a dagger for extra attack.
+
+Tactics: Samnites were strong fighters who used their shields for defense. They fought carefully, protecting themselves while looking for openings. They could push or stab opponents with their sword.
+
+Interesting facts: Samnites were considered lucky because they had large shields and strong swords. They disappeared in the early Imperial period. Romans liked them for their balance of attack and defense. Samnites were one of the first heavily armored gladiators.~
+
+BLANK
+?BLANK
+
+~Murmillo
+
+Name: Murmillo
+
+Origin: Roman Empire. Inspired by legionary soldiers. Popular in arenas from the early Imperial period.
+
+Clothing/Armor: Wore a helmet with a fish design called mormylos. Had an arm guard (manica), a belt, foot wrappings, and a greave on the right leg. Armor was heavy but allowed strong attacks.
+
+Weapons: Gladius (short sword, 64–81 cm long) and a tall rectangular shield in the legionary style.
+
+Tactics: Murmillones relied on strength and defense. They pushed opponents with their shield and attacked with their sword. Usually paired against Thraex, Hoplomachus, or Retiarius.
+
+Interesting facts: The fish symbol connected them to water. They were very popular for their strong and heavy fighting style. Murmillones often entertained the crowd with powerful attacks.~
+
+BLANK
+?BLANK
+
+~Provocator
+
+Name: Provocator
+
+Origin: Roman Empire, late Republican and early Imperial eras. Inspired by legionary soldiers.
+
+Clothing/Armor: Wore a breastplate, visored helmet with feathers, manica on the right arm, greave on the left leg, and a belt. Armor changed over time to follow fashion in arenas.
+
+Weapons: Gladius and a tall rectangular shield.
+
+Tactics: Provocatores fought only other provocatores. They relied on strong defense and careful attacks. Their breastplate gave extra protection.
+
+Interesting facts: Only gladiator type with a breastplate. Armor often changed to match arena trends. They were strong, defensive fighters, entertaining the crowd with careful sword and shield work.~
+
+BLANK
+?BLANK
+
+~Equites
+
+Name: Equites
+
+Origin: Roman Empire. Name means “horseman” in Latin. Early equites were cavalry soldiers.
+
+Clothing/Armor: Scale armor, medium round shield, helmet with two feathers, sometimes greaves on legs. Sleeveless tunic and belt.
+
+Weapons: Sword or spear.
+
+Tactics: Fought on foot or horseback. Usually fought other equites. Speed and mobility were important.
+
+Interesting facts: Early equites were lightly armed cavalrymen. Later, they mostly fought on foot in the arena. Crowds liked their quick and flexible fighting style.~
+
+BLANK
+?BLANK
+
+~Secutor
+
+Name: Secutor (“Pursuer”)
+
+Origin: Roman Empire. Developed to fight Retiarius.
+
+Clothing/Armor: Full-face smooth helmet with small eye-holes, tall rectangular shield, greave on leg, arm guard. Armor protected against nets.
+
+Weapons: Gladius (short sword).
+
+Tactics: Used shield and sword to close distance with net-fighting Retiarius. Helmet prevented nets from catching. Usually fought Retiarius.
+
+Interesting facts: Helmet design was smooth and round. Developed specifically to counter Retiarius’ net. Popular in Roman arenas for strategic fights.~
+
+BLANK
+?BLANK
+
+~Retiarius
+
+Name: Retiarius (“Net Fighter”)
+
+Origin: Roman Empire, early Augustan period.
+
+Clothing/Armor: Simple clothing, wide belt, arm guard (manica), sometimes shoulder guard (galerus). No helmet.
+
+Weapons: Net, trident, sometimes dagger.
+
+Tactics: Avoid direct attacks, trap opponent with net, strike with trident. Sometimes fought on a raised platform with stones. Usually fought Secutores or Myrmillones.
+
+Interesting facts: Did not wear a helmet to move quickly. Some fought two Secutores at once on a raised bridge. There was also a lower-class version called retiarius tunicatus, wearing a tunic instead of loincloth.~
+
+BLANK
+?BLANK
+
+~Bestiarius
+
+Name: Bestiarius
+
+Origin: Roman Empire. Specialized in fighting wild animals.
+
+Clothing/Armor: Light armor for fast movement. Sometimes wore protective arm or leg guards.
+
+Weapons: Spears, sword, traps.
+
+Tactics: Fought wild animals like lions, bears, and leopards. Sometimes worked in teams. Needed skill and bravery.
+
+Interesting facts: Also called “beast-fighters.” Their fights were very dangerous. Some Bestiarii became famous for surviving attacks from big animals.~
+
+BLANK
+?BLANK
+
+~Gladiatrix
+
+Name: Gladiatrix
+
+Origin: Roman Empire. Female gladiators appeared occasionally in arenas.
+
+Clothing/Armor: Similar to male gladiators, depending on type. Could wear helmets, shields, or arm guards. Sometimes wore only simple clothing.
+
+Weapons: Varied depending on type. Could use swords, tridents, or nets.
+
+Tactics: Fought like male gladiators. Some used fast attacks, some used heavy armor for defense.
+
+Interesting facts: Rare in Roman arenas. Women fighting gladiators were a novelty and drew crowds. Called “gladiatrix” in modern history, but Romans may have called them differently.~
+
+BLANK
+?BLANK
+
+~Noxii
+
+Name: Noxii
+
+Origin: Roman Empire. Lowest class of criminals or enemies of Rome.
+
+Clothing/Armor: Simple clothing. No armor.
+
+Weapons: Short sword or stick.
+
+Tactics: No tactics. Sent to die in the arena as punishment.
+
+Interesting facts: Included Christians, Jews, deserters, murderers, and traitors. Could die fighting animals, blindfolded, or against other gladiators. Showed Romans’ power and social order. Crowds enjoyed watching them die.~
+
+BLANK
+?BLANK
+
+~Gladiator Pairings
+
+In ancient Roman arenas, gladiators were usually paired in ways that made fights exciting, balanced, and visually interesting for the audience. Different types of gladiators had different weapons, armor, and fighting styles, so matchups were designed to create contrast in speed, skill, and strategy. Here are some of the most common pair-ups:
+
+1. Murmillo vs. Thraex
+
+• Murmillo: Heavy armor, tall rectangular shield, gladius (short sword)
+• Thraex (Thracian): Light armor, small shield, curved sword (sica)
+• Reason: Murmillo was slow but strong; Thraex was fast and agile. This matchup tested speed against power.
+
+2. Secutor vs. Retiarius
+
+• Secutor (“Pursuer”): Heavy armor, smooth full-face helmet, gladius, tall shield
+• Retiarius (“Net Fighter”): Light armor or simple clothing, net, trident, sometimes dagger
+• Reason: Retiarius used reach and speed to trap the heavily armored Secutor. The Secutor had to close the distance carefully. This was one of the most famous and dramatic matchups.
+3. Hoplomachus vs. Murmillo
+
+• Hoplomachus: Small shield, spear, short sword, light armor
+• Murmillo: Heavy shield, gladius, strong armor
+• Reason: Hoplomachus was a skilled spearman, using agility and distance; Murmillo was powerful in close combat.
+
+4. Equites vs. Equites
+
+• Equites (“Horsemen”): Sword or spear, medium shield, light armor
+• Reason: Sometimes gladiators of the same type fought each other to show individual skill, especially when mounted or on foot.
+
+5. Thraex vs. Hoplomachus
+
+• Thraex: Small shield, curved sword
+• Hoplomachus: Small shield, spear, short sword
+• Reason: Both were lightly armored and fast, which created a tactical, skill-based fight.
+
+6. Retiarius vs. Murmillo
+
+• Retiarius: Net and trident, light armor
+• Murmillo: Gladius, heavy armor
+• Reason: Similar to Secutor vs. Retiarius, but Murmillo had a slightly different fighting style. The contrast of speed vs. strength made it exciting.~
+
+BLANK
+?BLANK
+
+~Famous Gladiators
+
+While most gladiators are unknown by name, a few became famous in history or legend because of their skill, bravery, or celebrity status
+
+1. Spartacus
+
+• Background: Thracian soldier who became a gladiator
+• Type: Likely Thraex (Thracian), using a small shield and curved sword
+• Fame: Led a major slave revolt against Rome (73–71 BCE), known as the Third Servile War
+• Interesting fact: Spartacus was trained as a gladiator before escaping and leading thousands of slaves in battle.
+
+2. Crixus
+
+• Background: Gaul, trained as a gladiator
+• Type: Likely Gallus-type or Murmillo, heavily armed fighter
+• Fame: Second-in-command to Spartacus during the slave revolt
+• Interesting fact: Known for his strength and bravery in fighting both in the arena and during battles against Roman forces.
+
+3. Commodus
+
+• Background: Roman Emperor (177–192 CE) who personally fought as a gladiator
+• Type: Did not have a standard gladiator type; he fought mostly as a heavily armored Murmillo-style fighter for spectacle
+• Fame: Known for appearing in the arena for spectacle and to show off, though his fights were often staged for his safety
+• Interesting fact: Commodus liked to dress as Hercules and fight against weaker opponents for show, gaining celebrity status.
+
+4. Flamma
+
+• Background: Syrian gladiator
+• Type: Likely Murmillo, heavily armored with sword and shield
+• Fame: Won 21 fights in the arena and refused his freedom four times
+• Interesting fact: Flamma became famous for his loyalty to the gladiator life and his skill in combat.
+
+5. Priscus and Verus
+
+• Background: Famous pair of Roman gladiators
+
+• Type: Exact types unclear, but Priscus was likely Murmillo and Verus possibly Thraex
+• Fame: Known for a fight during the opening games of the Colosseum in 80 CE, which ended in a draw
+• Interesting fact: Emperor Titus awarded them both the rudis (wooden sword symbolizing freedom) for their skill.~
+
+BLANK
+?BLANK
+
+~The Colosseum
+
+The Colosseum is a large stadium in Rome, Italy. It is also called the Flavian Amphitheatre. It is one of the most famous buildings from Ancient Rome and is a symbol of Roman engineering and culture.
+
+When and by whom it was built:
+
+Construction began in 72 CE under Emperor Vespasian and was completed in 80 CE by his son, Emperor Titus. Later, Emperor Domitian added finishing touches and decorations.
+
+Construction:
+
+The Colosseum was built using stone, concrete, and bricks. Builders used arches and vaults to make it strong and stable. Thousands of workers, including slaves and skilled craftsmen, worked on it. The arena floor was made of wood and covered with sand. Under the floor was the hypogeum, a network of tunnels and cages for animals and gladiators waiting to enter the arena.
+
+Layout, capacity, and features:
+
+The Colosseum is oval, about 189 meters long and 156 meters wide, with four stories. It could hold 50,000 to 80,000 people. Spectators entered through many entrances and were seated according to their social class. The emperor and officials had special seats. A large awning (velarium) could cover part of the arena to protect people from the sun.
+
+Use:
+
+The Colosseum was used for gladiator fights, animal shows, executions, and mock naval battles. Gladiators fought with swords, nets, and spears. Animals like lions, elephants, and crocodiles were used in shows. Most gladiator fights did not end in death.
+
+Decline:
+
+After the fall of the Roman Empire, the Colosseum was damaged by earthquakes, fires, and stone robbers. It stopped being used for games and fell into ruin.
+
+Current state and heritage status:
+
+Today, the Colosseum is partially ruined but still very impressive. It is one of the most visited tourist sites in the world. In 1980, it was declared a UNESCO World Heritage Site. It is also used for cultural events and is a symbol of Rome’s history.
+
+Interesting facts:
+
+• The hypogeum had elevators and pulleys to lift animals and gladiators into the arena.
+• Peacock feathers and colored plumes were used for ceremonial entrances.
+• It took about 8 years to build the Colosseum.~
+
+BLANK
+?BLANK
+
+~Gladiators and Medicine
+
+Gladiators were professional fighters in Ancient Rome. They trained hard, fought often, and sometimes got badly hurt. Because they were injured so often, doctors and scientists had the chance to study the human body.
+
+One important early scientist was Galen, a Greek doctor who lived in Rome around 130–200 CE. He worked as a doctor for gladiators and watched how their bodies healed after injuries. This helped him learn a lot about muscles, bones, and blood. Galen wrote many books about medicine, and his work was used in Europe for more than 1,000 years.
+
+Gladiators also showed doctors how exercise and diet affected the body. They needed strong muscles, good health, and fast recovery. Doctors noticed how the body responded to training, injury, and rest. This helped them understand human anatomy (the study of the body) and physiology (how the body works).
+
+Because gladiators were well-fed and carefully cared for, they became like living patients for early medicine. Some injuries were treated with bandages, ointments, and sometimes surgery. Doctors learned which treatments worked best.
+
+Interesting facts:
+
+• Galen’s observations of gladiators helped him discover the differences between veins and arteries.
+• Gladiators were sometimes called “sporting doctors’ assistants” because they allowed doctors to study real injuries.
+• This knowledge later influenced medicine in the Middle Ages and Renaissance.
+
+Summary:
+
+Gladiators were not just fighters; they also helped early doctors learn about the human body. Their injuries and recovery gave scientists important information about anatomy, health, and treatment.~
+
+BLANK
+?BLANK
+
+~1. Nancy Wake
+
+Nancy Grace Augusta Wake, born on August 30, 1912, in Wellington, New Zealand, was the youngest of six children. Her father, a journalist, abandoned the family after relocating them to Sydney, Australia. At 16, Wake left home, worked briefly as a nurse, and, with a small inheritance, moved to London. She traveled extensively before settling in Paris, where she worked as a freelance journalist and embraced the city’s vibrant nightlife.
+
+In 1936, Wake married Henri Fiocca, an industrialist from Marseilles. When Germany invaded France, her wealth and social standing allowed her to assist local Resistance groups covertly. She became a courier, then an escort, helping Allied soldiers and refugees escape to safety. By 1943, with the occupation authorities aware of her activities, she fled France. Her husband was arrested and executed.
+
+In England, she joined the British Special Operations Executive (SOE) and in 1944 was parachuted into France to assist with preparations for D-Day. She coordinated weapon drops, set up communication lines, and harassed German forces. Known as “la souris blanche” (the white mouse) by the Germans for her ability to evade capture, Wake’s work was crucial to the success of the Allied invasion.
+
+After the war, Wake struggled to adjust to civilian life and sold her numerous medals, including the George Medal, the Medal of Freedom, and France's Legion d'Honneur. Wake passed away at 98 in London, remembered as one of World War II’s most remarkable heroines.~
+
+Quiz
+
+?What motivated Nancy Wake to fight against the Nazis?
+Her desire for adventure
+|Her hatred of Nazi actions she witnessed in Vienna|
+A personal loss during the war
+A family legacy of resistance
+
+?Where was Nancy Wake born?
+Sydney, Australia
+Paris, France
+|Wellington, New Zealand|
+London, England
+
+?How did Nancy Wake manage to evade German capture during the war?
+She disguised herself as a German soldier
+She used her wealth to bribe officials
+|Her ability to blend in and quick thinking earned her the nickname “la souris blanche”|
+She relied on British military protection
+
+?What was Nancy Wake’s role in the French Resistance?
+She worked as a spy for the Germans
+|She helped escort soldiers and downed airmen to safety|
+She led the main military campaign
+She provided medical assistance
+
+?Why was Nancy Wake’s identity altered during resistance work?
+To protect her family
+|To evade Nazi capture|
+To hide loyalty to France
+To infiltrate German units
+
+?Inference: What does the title “Proud Secret Agent and Nazi Foe” suggest?
+She avoided danger
+|She actively opposed the Nazis through secret work|
+She observed events quietly
+She worked only after the war
+
+?How did Nancy Wake contribute to D-Day preparations?
+She fought on the beaches
+|She set up communication lines and weapon drops|
+She acted as a decoy
+She led Allied troops
+
+?Inference: What was a key factor in her success?
+Military rank
+|Her charm and ability to adapt|
+Physical strength
+Official authority
+
+?What happened to Nancy Wake’s husband?
+He escaped to England
+|He was arrested and executed by the Nazis|
+He fought beside her
+He survived the war
+
+?Inference: How did Wake feel about life after the war?
+She felt fully satisfied
+|She struggled to adjust to civilian life|
+She returned to resistance work
+She became politically active
+
+?Why was Nancy Wake awarded many medals?
+For diplomacy
+|For extraordinary resistance efforts|
+For leading armies
+For peace negotiations
+
+?What role did the SOE play in her life?
+They evacuated her
+|They trained her for sabotage and intelligence|
+They funded her journalism
+They hid her identity
+
+?What happened to her medals later in life?
+They were donated
+They were displayed
+|She sold them|
+She hid them
+
+?Inference: What does “la souris blanche” symbolize?
+Her size
+|Her ability to escape unnoticed|
+Her underground status
+Her sabotage skills
+
+?Why did Wake say she was “too busy to be afraid”?
+She had protection
+|She focused on action over fear|
+She enjoyed danger
+She felt invincible
+
+?Inference: What does her post-war reflection suggest?
+She wanted more recognition
+|She found peace difficult after conflict|
+She regretted fighting
+She stayed in military life
+
+?How did her service affect views on women?
+It restricted roles
+|It helped expand women’s rights and recognition|
+It reduced participation
+It had no impact
+
+?Inference: What trait best defines Nancy Wake?
+Caution
+|Resourceful bravery|
+Obedience
+Silence
+
+?What is Wake remembered for most?
+Journalism
+|Resistance leadership and courage|
+Political leadership
+Scientific work
+
+?Inference: What broader message does her life convey?
+War brings glory
+|Individual courage can change history|
+Nations control outcomes
+Peace requires silence
+
+
+~2. Simone Segouin
+
+Simone Segouin was born in Chartres, France. As a teenager, she joined the French Resistance after witnessing German occupation firsthand. She adopted the name “Nicole Minet” to protect her identity and her family. Working as a courier and saboteur, she carried messages, stole weapons, and took part in armed attacks against German forces.
+
+Segouin became famous for stealing a German bicycle, which marked her early resistance activity. She later joined the Francs-tireurs et partisans (FTP) and worked closely with resistance leader Roland Boursier, who became her romantic partner.
+
+During the liberation of Chartres, Segouin played an active combat role, killing two German soldiers and helping capture twenty-five others. She was photographed during this time eating a baguette with jam while holding a machine gun, a powerful image that symbolized everyday courage.
+
+For her bravery, she was awarded the Croix de Guerre and promoted to lieutenant. Afterward, she joined the 2nd Armoured Division and participated in the liberation of Paris. Her actions helped reshape attitudes toward women in wartime France, contributing to women gaining the right to vote in 1944.~
+
+Quiz
+
+?Where was Simone Segouin born?
+Paris
+|Chartres|
+Dunkirk
+Marseilles
+
+?What motivated Segouin to join the Resistance?
+Adventure
+|Witnessing German occupation|
+Family tradition
+Personal tragedy
+
+?Why did she use the name “Nicole Minet”?
+To join another group
+|To protect herself and her family|
+To spy for Germans
+To leave her past behind
+
+?What was her main role in the Resistance?
+Nurse
+|Courier and saboteur|
+Strategist
+Spy leader
+
+?What did stealing a German bicycle represent?
+A joke
+|The start of her resistance activity|
+An act of revenge
+A travel need
+
+?Who was Roland Boursier?
+A German officer
+|Her resistance commander and partner|
+A government leader
+A childhood friend
+
+?How did Segouin help liberate Chartres?
+Medical aid
+|Combat and capturing German soldiers|
+Leading the assault
+Supplying food
+
+?Inference: Why was she called a “pure fighter”?
+Her family background
+|Her courage and dedication|
+Peaceful methods
+Large command role
+
+?What does the baguette photograph suggest?
+She was careless
+|She balanced normal life with danger|
+She ignored war
+She was resting
+
+?What did her actions during Chartres achieve?
+Negotiations
+|Weakened German control|
+Intelligence gathering only
+Supply transport
+
+?Why was she awarded the Croix de Guerre?
+Leadership
+|Bravery and direct action|
+Post-war service
+Medical aid
+
+?Inference: How did her actions affect women’s roles?
+Restricted them
+|Helped expand women’s rights|
+Discouraged activism
+Limited participation
+
+?Why was she described as “preparing the way for Liberation”?
+Government agent
+|Her actions disrupted German control|
+Military planning
+Diplomacy
+
+?Inference: What does her resistance work reveal about her character?
+Fearfulness
+|Determination and courage|
+Hesitation
+Avoidance
+
+?What role did she play in the liberation of Paris?
+Led attacks
+|Fought with the 2nd Armoured Division|
+Moved troops
+Handled supplies
+
+?What was her post-war reputation?
+Political leader
+|Local hero|
+Unknown
+Exile
+
+?Why was a street named after her?
+Birthplace
+|To honor her resistance service|
+First battle site
+End of war
+
+?Inference: What defines Segouin’s legacy?
+Medical service
+|Lasting symbol of bravery|
+Controversy
+Privacy
+
+?What challenges did she likely face?
+Prejudice
+Trust
+Emotional strain
+|All of the above|
+
+?Inference: What does her story reflect about France after the war?
+Military change
+|Women’s growing role and rights|
+Generational conflict
+Strategic shifts
+
+
+
+
+
+</div>
+
+
+<!-- ================= HARD-CODED TOC ================= -->
+<!-- <div id="layout">
+
+<h1 data-auto-title></h1>
+
+  <div class="container">
+    <div class="column">
+      <h2>Old Testament</h2>
+      <ul class="index">
+
+
+      </ul>
+    </div>
+
+    <div class="column">
+      <h2>New Testament</h2>
+      <ul class="index">
+
+
+      </ul>
+    </div>
+  </div>
+
+</div> -->
+<!-- END #layout -->
+
+
+<!-- ================= DYNAMIC TOC ================= -->
+<div id="dynamicTOC">
+  <div id="tocContainer">
+
+<h1 data-auto-title></h1>
+
+    <div id="tocButtons">
+      <div class="tocColumn" id="tocColLeft"></div>
+      <div class="tocColumn" id="tocColRight"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= QUIZ MODAL ================= -->
+<div id="modalRoot">
+  <div id="quizModal">
+
+<!--<div id="helloBar">Hello!</div> -->
+
+    <!-- CONTROL BARS LIVE HERE -->
+    <div id="chapterVerseControls">
+      <div class="controlRow">
+
+<button id="instructionsBtn">Instructions</button>
+<!-- <select id="chapterSelect"></select> -->
+
+<button id="strategiesBtn">Strategies</button>
+<!-- <select id="verseSelect"></select> -->
+
+<button id="signalwordsBtn">Signals</button>
+<!-- <button id="goBtn">Go</button> -->
+
+<button onclick="goToNextQuiz()">Go to Quiz</button>
+
+      </div>
+    </div>
+
+    <div id="readaloudControls">
+      <div class="controlRow">
+        <button id="highlightSelected">Highlight</button>
+        <button id="copySelected">Copy</button>
+        <button id="startBtn">Audio</button>
+        <button id="closeModalBtn">Close</button>
+      </div>
+    </div>
+
+    <!-- ACTUAL CONTENT -->
+    <div id="quizModalContent">
+      <div id="quizSections"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+(function(){
+
+
+  // [1] GET INPUT SOURCE
+  const src = document.getElementById("rawTextSource");
+  if (!src) return;
+
+  const raw = src.textContent.trim();
+  const lines = raw.split("\n");
+
+  // [2] REGEX RULES
+  const urlRegex = /^https?:\/\/\S+$/i;
+  const urlAnywhere = /(https?:\/\/\S+)/gi;
+
+  // [3] BUILD OUTPUT ARRAYS
+  const htmlResult = [];
+  const speechChunks = [];
+
+  // [4] PARSE LOOP (UNCHANGED LOGIC)
+  for (let i = 0; i < lines.length; i++) {
+
+    let line = lines[i].trim();
+    let next = (lines[i + 1] || "").trim();
+
+    // TITLE + URL HANDLING
+    if (line && !urlRegex.test(line) && urlRegex.test(next)) {
+
+      htmlResult.push(
+        `<a href="${next}" target="_blank" rel="noopener">${line}</a>`
+      );
+
+      speechChunks.push(line);
+
+      i++;
+      continue;
+    }
+
+    // INLINE URL HANDLING
+    const htmlLine = line.replace(urlAnywhere, url =>
+      `<a href="${url}" target="_blank" rel="noopener">${url}</a>`
+    );
+
+    htmlResult.push(htmlLine);
+
+    const cleanText = line.replace(urlAnywhere, "").trim();
+    if (cleanText) {
+      speechChunks.push(cleanText);
+    }
+  }
+
+  // [5] OUTPUT (UNCHANGED — SAFE FOR UI SYSTEM)
+  window.rawText = htmlResult.join("\n");
+
+// SIGNAL: parser is done
+window.parserReady = true;
+
+  // [6] READ-ALOUD HANDOFF (FIXED TO NOT BREAK UI)
+
+  // IMPORTANT:
+  // - no immediate execution
+  // - no blocking
+  // - no fallback globals
+  // - queued after UI thread
+
+  setTimeout(() => {
+    if (typeof window.onParsedTextReady === "function") {
+      window.onParsedTextReady(speechChunks);
+    }
+  }, 0);
+
+})();
+
+</script>
+
+<script>
+(function primeFemaleVoiceOnce() {
+  const synth = window.speechSynthesis;
+  if (!synth) return;
+
+  let primed = false;
+
+  function tryPrime() {
+    if (primed) return;
+
+    const voices = synth.getVoices();
+    if (!voices.length) return;
+
+    const femaleVoice =
+      voices.find(v => /Aria|Zira|Samantha|Victoria|Moira/i.test(v.name)) ||
+      voices.find(v => v.lang && v.lang.startsWith("en")) ||
+      voices[0];
+
+    if (!femaleVoice) return;
+
+    const u = new SpeechSynthesisUtterance(" ");
+    u.voice = femaleVoice;
+    u.volume = 0;
+    u.rate = 1;
+    u.pitch = 1;
+
+    synth.speak(u);
+    primed = true;
+  }
+
+  tryPrime();
+
+  synth.onvoiceschanged = tryPrime;
+
+  // Better Android + mobile coverage (replaces click + touchstart)
+  document.addEventListener("pointerdown", tryPrime, { once: true });
+})();
+</script>
+
+<script>
+(function () {
+
+  function cleanSpeechText(text) {
+    text = text.replace(/\b\d+:\d+\s*/g, '');
+    text = text.replace(/<br\s*\/?>/gi, ' ');
+    text = text.replace(/\n+/g, ' ');
+    text = text.replace(/\s+\./g, '.');
+    text = text.replace(/\.(\S)/g, '. $1');
+    text = text.replace(/\s+/g, ' ').trim();
+    return text;
+  }
+
+  const OriginalUtterance = window.SpeechSynthesisUtterance;
+
+  function PatchedUtterance(text) {
+    return new OriginalUtterance(cleanSpeechText(text));
+  }
+
+  // 🔧 preserve prototype for Android/WebView compatibility
+  PatchedUtterance.prototype = OriginalUtterance.prototype;
+
+  window.SpeechSynthesisUtterance = PatchedUtterance;
+
+})();
+</script>
+
+<script>
+(function() {
+  // ====== 2. Parse Sections ======
+const raw = window.rawText;
+
+if (!raw) return; // IMPORTANT: stop if parser not ready
+
+const segments = raw.split("~").map(s => s.trim()).filter(Boolean);
+  const sections = [];
+
+  for (let i = 0; i < segments.length; i += 2) {
+    const storyBlock = segments[i] || "";
+    const questionBlock = segments[i + 1] || '';
+
+    const lines = storyBlock.split("\n").map(l => l.trim()).filter(Boolean);
+
+    let titleLine = lines[0] || "Untitled Section";
+
+    sections.push({
+      title: titleLine,
+      content: lines.join("\n"),
+      questions: questionBlock
+    });
+  }
+
+window.sections = sections;
+
+
+  // ====== 3. Build TOC ======
+  const leftCol = document.getElementById('tocColLeft');
+  const rightCol = document.getElementById('tocColRight');
+  if (!leftCol || !rightCol) return;
+
+  leftCol.innerHTML = '';
+  rightCol.innerHTML = '';
+  const midpoint = Math.ceil(sections.length / 2);
+
+  sections.forEach((sec, idx) => {
+    const btn = document.createElement('button');
+    btn.textContent = sec.title;
+    btn.addEventListener('click', () => openQuizModal(idx));
+    if (idx < midpoint) leftCol.appendChild(btn);
+    else rightCol.appendChild(btn);
+  });
+
+// ====== 4. Modal Rendering ======
+window.openQuizModal = function(idx) {
+
+  const container = document.getElementById('quizSections');
+  container.innerHTML = '';
+
+  generateQuizSection(sections[idx], idx);
+
+  document.getElementById('modalRoot').classList.add('active');
+  document.body.classList.add('modal-open');
+
+  moveControlsIntoModal();
+
+  // 📌 Chapter/Verse system (navigation layer)
+  buildChapterVerseLogic();
+};
+
+document.addEventListener("click", function(e) {
+
+  const closeBtn = e.target.closest("[data-close-quiz]");
+  if (!closeBtn) return;
+
+  // 🔒 Stronger prevent auto-reopen
+  window.__quizJustClosed = Date.now();
+
+  const modalRoot = document.getElementById("modalRoot");
+  const container = document.getElementById("quizSections");
+
+  // 🔥 1. CLOSE FIRST
+  modalRoot?.classList.remove("active");
+  document.body.classList.remove("modal-open");
+
+  // 🔥 2. Clear content
+  if (container) container.innerHTML = "";
+
+  // 🔥 3. Kill smooth scroll
+  document.documentElement.style.scrollBehavior = "auto";
+
+  // 🔥 4. Immediate reset
+  window.scrollTo(0, 0);
+
+  const modal = document.getElementById("quizModal");
+  if (modal) modal.scrollTop = 0;
+
+  const modalContent = document.getElementById("quizModalContent");
+  if (modalContent) modalContent.scrollTop = 0;
+
+  // 🔥 5. Prevent browser restoring old position
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+
+  if (window.resetQuizScrollState) {
+    window.resetQuizScrollState();
+  }
+
+  // 🔥 FINAL OVERRIDE (critical)
+  setTimeout(() => {
+    window.scrollTo(0, 0);
+  }, 0);
+
+  requestAnimationFrame(() => {
+    window.scrollTo(0, 0);
+  });
+
+});
+
+function generateQuizSection(section, idx) {
+  const container = document.getElementById('quizSections');
+
+// ===== Paragraph numbering control =====
+// true  = number story paragraphs
+// false = never number story paragraphs
+const NUMBER_PARAGRAPHS = false;
+
+// Helper: render story paragraphs with optional numbering
+function renderNumberedLines(lines, sectionTitle) {
+  return lines
+    .filter((line, idx) => {
+      // ❌ Remove duplicate header (first line only)
+      if (
+        idx === 0 &&
+        sectionTitle &&
+        line.trim().toLowerCase() === sectionTitle.trim().toLowerCase()
+      ) {
+        return false;
+      }
+      return true;
+    })
+    .map((line, lineIdx) => {
+      // Never number if disabled
+      if (!NUMBER_PARAGRAPHS) {
+        return `<p>${line}</p>`;
+      }
+
+      // Defensive: do not double-number
+      if (/^\d+\.\s/.test(line)) {
+        return `<p>${line}</p>`;
+      }
+
+      return `<p>${lineIdx + 1}. ${line}</p>`;
+    })
+    .join("");
+}
+
+
+let sectionHTML = `
+  <div class="section" data-section-idx="${idx}">
+    <h2 class="parsedHeader">${section.title}</h2>
+    <div class="question-text" contenteditable="true">
+      ${renderNumberedLines(
+        section.content.split("\n").map(l => l.trim()).filter(Boolean),
+        section.title
+      )}
+    </div>
+`;
+
+    const SUBSECTION_MARKERS = [
+      "Quiz",
+      "Concept Quiz",
+      "Context Quiz",
+      "Comprehension Quiz",
+      "Grammar Quiz",
+      "Vocabulary Quiz"
+
+    ];
+
+    const lines = section.questions.split("\n").map(l => l.trim()).filter(Boolean);
+    const subsections = [];
+    let currentSub = null;
+
+let hasBlankLine = false;
+let hasNullBlankLine = false;
+
+lines.forEach(line => {
+  // Detect special lines
+  if (/^\s*blank\s*$/i.test(line)) hasBlankLine = true;
+  if (/^\s*\?blank\s*$/i.test(line)) hasNullBlankLine = true;
+
+  // If both are present, skip all subsections
+  if (hasBlankLine && hasNullBlankLine) {
+    currentSub = null; // do not create any subsection
+    return;
+  }
+
+  if (SUBSECTION_MARKERS.some(marker =>
+  line.toLowerCase().startsWith(marker.toLowerCase())
+)) {
+
+    currentSub = { title: line, questions: [] };
+    subsections.push(currentSub);
+  } else if (currentSub) {
+    currentSub.questions.push(line);
+  }
+});
+
+    subsections.forEach(sub => {
+      const slug = sub.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+      sub.slug = slug;
+
+      sectionHTML += `<h3 class="parsedSubheader">${sub.title}</h3>`;
+      sectionHTML += `<div class="quiz-subsection" data-subsection="${sub.title}" data-sub-slug="${slug}">`;
+
+sectionHTML += `
+  <div class="top-controls">
+    <input type="text" class="quiz-name" placeholder="Name">
+    <input type="text" class="quiz-id" placeholder="ID">
+    <button type="button" class="quiz-submit">Submit</button>
+    <button type="button" class="quiz-close">Close</button>
+  </div>
+
+        <div class="quiz-scoreboard"
+             style="display:none; width:100%; margin-bottom:12px;
+                    padding:6px; border:1px solid #9aaed1; border-radius:6px;
+                    background:#f9f9f9; font-family:monospace; font-size:12px;">
+          <pre class="scoreboard-data" style="margin:0; white-space:pre-wrap;"></pre>
+          <div class="scoreboard-buttons" style="margin-top:6px; display:flex; gap:6px;">
+            <button type="button" class="score-copy">Copy</button>
+            <button type="button" class="score-txt">TXT</button>
+            <button type="button" class="score-png">PNG</button>
+          </div>
+        </div>
+      `;
+
+      // ===== Question Parsing (supports ? at start + optional second line starting with -) =====
+      sub.questions = sub.questions.map(l => l.trim()).filter(Boolean);
+      let qIndex = 0;
+
+      for (let i = 0; i < sub.questions.length; i++) {
+        let line = sub.questions[i];
+
+        if (!line.startsWith('?')) continue;
+
+        // main question text
+        let question = line.replace(/^\?\s*/, '');
+
+        // optional second line
+        if (i + 1 < sub.questions.length && sub.questions[i + 1].startsWith('-')) {
+          question += ' ' + sub.questions[i + 1].replace(/^-+\s*/, '');
+          i++;
+        }
+
+        // collect options until next question
+        const options = [];
+        let j = i + 1;
+        while (j < sub.questions.length && !sub.questions[j].startsWith('?')) {
+          options.push(sub.questions[j]);
+          j++;
+        }
+
+        const correctPipe = options
+          .filter(o => /\|.*?\|/.test(o))
+          .map(o => o.replace(/\|/g, '').trim())
+          .join('|');
+
+        sectionHTML += `<div class="exercise" data-correct="${correctPipe}">`;
+        sectionHTML += `<p><strong>${qIndex + 1}. ${question}</strong></p>`;
+
+        options.forEach((opt, oi) => {
+          const clean = opt.replace(/\|/g, '').trim();
+          sectionHTML += `
+            <label>
+              <input type="radio" name="q${idx}_${sub.title}_${qIndex}" value="${clean}" data-correct="${correctPipe}">
+              ${String.fromCharCode(65 + oi)}) ${clean}
+            </label><br>
+          `;
+        });
+
+        sectionHTML += `</div>`;
+        qIndex++;
+        i = j - 1;
+      }
+
+      sectionHTML += `</div>`;
+    });
+
+    sectionHTML += `</div>`;
+    container.insertAdjacentHTML('beforeend', sectionHTML);
+  }
+
+  // ====== 5. Event Delegation ======
+  document.getElementById('quizSections').addEventListener('click', e => {
+    const sub = e.target.closest('.quiz-subsection');
+    if (!sub) return;
+
+    if (e.target.classList.contains('quiz-submit')) {
+      const sub = e.target.closest('.quiz-subsection');
+      if (!sub) return;
+
+      const name = sub.querySelector('.quiz-name')?.value || 'Anonymous';
+      const id   = sub.querySelector('.quiz-id')?.value || 'N/A';
+
+      const section = sub.closest('.section')?.querySelector('h2')?.textContent.trim() || 'Unknown Section';
+      const subsection = sub.dataset.subsection || 'Unknown Subsection';
+
+      const exercises = sub.querySelectorAll('.exercise');
+      let correctAnswers = 0;
+      exercises.forEach(ex => {
+correctAnswers += Number(ex.dataset.score || 0);
+
+
+      });
+      const totalExercises = exercises.length;
+      const percentage = totalExercises > 0 ? Math.round((correctAnswers / totalExercises) * 100) : 0;
+
+      const now = new Date();
+      const pad = n => n.toString().padStart(2,'0');
+      const dateString = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+      const filename = window.location.pathname.split('/').pop();
+      const resultText = `${filename}|${section}::${subsection}|${name}|${id}|${dateString}|${correctAnswers}/${totalExercises}|${percentage}%`;
+
+      const board = sub.querySelector('.quiz-scoreboard');
+      const dataEl = board.querySelector('.scoreboard-data');
+      if (dataEl) dataEl.textContent = resultText;
+      board.style.display = 'block';
+    }
+
+
+  });
+})();
+</script>
+
+
+
+
+
+
+
+
+<!-- ====== Consolidated Highlight + Read-Aloud + Emoji Speech + Active Highlight ====== -->
+<script>
+(function() {
+
+  /* =========================================================
+     GLOBALS
+  ========================================================= */
+  const highlightBtn = document.getElementById('highlightSelected');
+  const copyBtn = document.getElementById('copySelected');
+  const startBtn = document.getElementById('startBtn');
+  const pauseResumeBtn = document.getElementById('pauseResumeBtn');
+  const restartBtn = document.getElementById('restartBtn');
+
+  const synth = window.speechSynthesis;
+
+  let teacherVoice = null;
+  let studentVoice = null;
+
+  let narratorActive = false;
+  let lastContainer = null;
+  let lastOffset = 0;
+  let lastCharIndex = 0;
+  let utterance = null;
+
+  let activeParagraph = null;
+  let monitorInterval = null;
+
+
+  /* =========================================================
+     LOAD VOICES (Merged Logic — Nothing Removed)
+  ========================================================= */
+  function loadVoices() {
+    const voices = synth.getVoices();
+    if (!voices.length) return;
+
+    // First script preference logic
+    teacherVoice =
+      voices.find(v => v.name.includes("Zira")) ||
+      voices.find(v => v.name === "Microsoft Zira" && v.lang === "en-US") ||
+      voices.find(v => v.name.includes("Samantha")) ||
+      voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("female")) ||
+      voices[0];
+
+    studentVoice =
+      voices.find(v => v.name.includes("Aria")) ||
+      voices.find(v => v.name === "Microsoft Aria" && v.lang.startsWith("en-GB")) ||
+      voices.find(v => v.name.includes("Victoria")) ||
+      voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("female")) ||
+      voices[0];
+  }
+
+  synth.onvoiceschanged = loadVoices;
+  loadVoices();
+
+
+  /* =========================================================
+     HIGHLIGHT LOGIC (UNCHANGED)
+  ========================================================= */
+  highlightBtn?.addEventListener('click', () => {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) return;
+
+    const highlightClass = 'highlight';
+    const container = range.commonAncestorContainer.nodeType === 3
+      ? range.commonAncestorContainer.parentNode
+      : range.commonAncestorContainer;
+
+    const allNodes = Array.from(container.querySelectorAll('p, li, div, span'));
+    const intersectingNodes = allNodes.filter(node => range.intersectsNode(node));
+
+    if (!intersectingNodes.length && range.startContainer.nodeType === 3) {
+      const parentSpan = range.startContainer.parentNode;
+      if (parentSpan.classList?.contains(highlightClass)) {
+        parentSpan.replaceWith(...parentSpan.childNodes);
+      } else {
+        const span = document.createElement('span');
+        span.className = highlightClass;
+        range.surroundContents(span);
+      }
+      sel.removeAllRanges();
+      return;
+    }
+
+    const alreadyHighlighted = intersectingNodes.some(n => n.classList?.contains(highlightClass));
+    if (alreadyHighlighted) {
+      intersectingNodes.forEach(n => {
+        if (n.classList.contains(highlightClass)) {
+          n.replaceWith(...n.childNodes);
+        }
+      });
+      sel.removeAllRanges();
+      return;
+    }
+
+    intersectingNodes.forEach(node => {
+      const span = document.createElement('span');
+      span.className = highlightClass;
+      node.parentNode.insertBefore(span, node);
+      span.appendChild(node);
+    });
+
+    sel.removeAllRanges();
+  });
+
+
+  /* =========================================================
+     COPY SELECTED TEXT
+  ========================================================= */
+  copyBtn?.addEventListener('click', () => {
+    const sel = window.getSelection();
+    const text = sel.toString().trim();
+
+    if (!text) {
+      alert("Select text first.");
+      return;
+    }
+
+    navigator.clipboard.writeText(text)
+      .then(() => alert("Copied!"))
+      .catch(err => console.error(err));
+  });
+
+
+  /* =========================================================
+     READABLE CONTAINER LOGIC
+  ========================================================= */
+  function getReadableContainer() {
+    const sel = window.getSelection();
+    let node = sel?.anchorNode;
+
+    while (node) {
+      if (node.classList?.contains?.('question-text')) return node;
+      if (node.id === 'mvTextContainer') return node;
+      node = node.parentNode;
+    }
+    return null;
+  }
+
+  function getCursorOffset(container) {
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return 0;
+
+    const range = sel.getRangeAt(0);
+    const pre = document.createRange();
+    pre.setStart(container, 0);
+    pre.setEnd(range.startContainer, range.startOffset);
+    return pre.toString().length;
+  }
+
+/* =========================================================
+   MOBILE CHUNKING (ADD HERE)
+========================================================= */
+
+function buildChunks(text) {
+
+  const MAX = /Mobi|Android/i.test(navigator.userAgent) ? 120 : 180;
+
+  const sentences = text
+    .replace(/([.?!]+)\s+/g, "$1|")
+    .split("|")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const chunks = [];
+  let buffer = "";
+
+  for (let s of sentences) {
+
+    // 🔥 handle very long sentences safely
+    if (s.length > MAX) {
+      for (let i = 0; i < s.length; i += MAX) {
+        chunks.push(s.slice(i, i + MAX));
+      }
+      continue;
+    }
+
+    if ((buffer + s).length > MAX) {
+      if (buffer.trim()) chunks.push(buffer.trim());
+      buffer = s + " ";
+    } else {
+      buffer += s + " ";
+    }
+  }
+
+  if (buffer.trim()) chunks.push(buffer.trim());
+
+  return chunks;
+}
+
+
+
+
+
+
+  /* =========================================================
+     SPEAK FROM CURSOR
+  ========================================================= */
+function speakFrom(container, offset) {
+
+  const fullText = container.textContent || "";
+  const text = fullText.slice(offset);
+  if (!text.trim()) return;
+
+  const chunks = [];
+  const MAX = /Mobi|Android/i.test(navigator.userAgent) ? 120 : 180;
+
+  // --- sentence-based chunking ---
+  const sentences = text
+    .replace(/([.?!])\s+/g, "$1|")
+    .split("|")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  let buffer = "";
+  for (let s of sentences) {
+    if ((buffer + s).length > MAX) {
+      if (buffer) chunks.push(buffer);
+      buffer = s + " ";
+    } else {
+      buffer += s + " ";
+    }
+  }
+  if (buffer) chunks.push(buffer);
+
+  let chunkIndex = 0;
+  let globalOffset = offset;   // 🔥 CRITICAL
+
+  narratorActive = true;
+  lastContainer = container;
+  lastOffset = offset;
+
+  function speakChunk() {
+
+    if (chunkIndex >= chunks.length) {
+      narratorActive = false;
+      lastOffset = 0;
+      lastCharIndex = 0;
+      return;
+    }
+
+    const chunkText = chunks[chunkIndex];
+
+    utterance = new SpeechSynthesisUtterance(chunkText);
+    utterance.voice = teacherVoice;
+
+    utterance.onboundary = (e) => {
+      if (e.name === "word") {
+        // 🔥 maintain continuous index for your highlighter system
+        lastCharIndex = globalOffset + e.charIndex;
+      }
+    };
+
+    utterance.onend = () => {
+      // 🔥 advance global offset correctly
+      globalOffset += chunkText.length;
+      chunkIndex++;
+      speakChunk();
+    };
+
+    synth.speak(utterance);
+  }
+
+  speakChunk();
+}
+
+  /* =========================================================
+     START BUTTON
+  ========================================================= */
+  startBtn?.addEventListener('click', () => {
+
+    const container = getReadableContainer();
+    if (!container) {
+      alert("Place cursor inside readable text");
+      return;
+    }
+
+    const offset = getCursorOffset(container);
+
+if (synth.speaking || synth.paused) {
+  synth.cancel();
+  clearHighlight();   // ← ADD THIS LINE
+  narratorActive = false;
+  return;
+}
+
+    lastCharIndex = offset;
+    speakFrom(container, offset);
+  });
+
+
+  /* =========================================================
+     EMOJI SPEECH OVERLAYS
+  ========================================================= */
+  function addSpeechEmojis() {
+    const paragraphs = document.querySelectorAll('.question-text p, .sentence, #quizSections p');
+
+    paragraphs.forEach(p => {
+      if (p.dataset.speechOverlay) return;
+      p.dataset.speechOverlay = '1';
+
+      const text = p.textContent.trim();
+      let speaker = null;
+
+      if (/^teacher:/i.test(text)) speaker = 'teacher';
+      else if (/^student:/i.test(text)) speaker = 'student';
+      else return;
+
+      const emoji = speaker === 'teacher' ? '👩‍🦰' : '👧';
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.style.all = 'unset';
+      btn.style.cursor = 'pointer';
+      btn.style.fontSize = '14px';
+      btn.style.display = 'inline';
+      btn.style.margin = '0';
+      btn.style.padding = '0';
+      btn.style.lineHeight = '1';
+      btn.style.verticalAlign = 'baseline';
+      btn.title = speaker === 'teacher' ? 'Teacher Speech' : 'Student Speech';
+      btn.textContent = emoji + ' ';
+
+btn.addEventListener('click', () => {
+
+  // Stop current speech
+if (synth.speaking) {
+  synth.cancel();
+  clearHighlight();   // ← ADD THIS LINE
+}
+
+  // Remove any existing highlight
+  document.querySelectorAll(".reading-active")
+    .forEach(el => el.classList.remove("reading-active"));
+
+  // Highlight this paragraph (pale yellow)
+  p.classList.add("reading-active");
+
+  const lineText = text.replace(/^(teacher:|student:)\s*/i, '');
+  const utter = new SpeechSynthesisUtterance(lineText);
+
+  if (speaker === 'teacher') {
+    utter.voice = teacherVoice;
+    utter.rate = 0.88;
+    utter.pitch = 1.15;
+    utter.volume = 0.95;
+  } else {
+    utter.voice = studentVoice;
+    utter.rate = 0.98;
+    utter.pitch = 1.50;
+    utter.volume = 0.80;
+  }
+
+  utter.onend = () => {
+    p.classList.remove("reading-active");
+  };
+
+  synth.speak(utter);
+});      p.insertBefore(btn, p.firstChild);
+    });
+  }
+
+  addSpeechEmojis();
+  setInterval(addSpeechEmojis, 1000);
+
+
+  /* =========================================================
+     ACTIVE READING HIGHLIGHT
+  ========================================================= */
+
+  if (!document.getElementById("speechHighlightStyle")) {
+    const style = document.createElement("style");
+    style.id = "speechHighlightStyle";
+    style.textContent = `
+.reading-active {
+  background-color: #fff9c4 !important;
+  transition: background-color 0.4s ease;
+}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function clearHighlight() {
+    if (activeParagraph) {
+      activeParagraph.classList.remove("reading-active");
+      activeParagraph = null;
+    }
+  }
+
+  function startMonitoring() {
+    if (monitorInterval) return;
+
+    monitorInterval = setInterval(function(){
+      if (!synth.speaking) {
+        clearHighlight();
+        clearInterval(monitorInterval);
+        monitorInterval = null;
+      }
+    }, 100);
+  }
+
+  document.addEventListener("click", function(e){
+
+    const btn = e.target.closest("button");
+    if (!btn) return;
+
+    const p = btn.closest("p");
+    if (!p) return;
+
+    if (synth.speaking) {
+      clearHighlight();
+      return;
+    }
+
+    setTimeout(function(){
+      if (synth.speaking) {
+        clearHighlight();
+        activeParagraph = p;
+        p.classList.add("reading-active");
+        startMonitoring();
+      }
+    }, 50);
+
+  });
+
+})();
+</script>
+
+<!-- End-->
+
+<script>
+(function(){
+
+  const synth = window.speechSynthesis;
+
+  let paragraphs = [];
+  let paragraphRanges = [];
+  let currentIndex = -1;
+
+  let baseOffset = 0;          // where speech started in full text
+  let lastSpokenGlobal = 0;    // last spoken absolute character index
+  let lastStartContainer = null;
+  let lastStartOffset = 0;
+
+  /* ===============================
+     Pale Yellow Highlight CSS
+  =============================== */
+  if (!document.getElementById("autoParagraphHighlightStyle")) {
+    const style = document.createElement("style");
+    style.id = "autoParagraphHighlightStyle";
+    style.textContent = `
+      .auto-paragraph-active {
+        background-color: #fff9c4;
+        transition: background-color 0.4s ease;
+      }
+      .auto-paragraph-fade {
+        background-color: transparent;
+        transition: background-color 0.8s ease;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function clearAll() {
+    paragraphs.forEach(p => {
+      p.classList.remove("auto-paragraph-active");
+      p.classList.remove("auto-paragraph-fade");
+    });
+  }
+
+  function fadeParagraph(index) {
+    if (index < 0 || index >= paragraphs.length) return;
+    const p = paragraphs[index];
+    p.classList.remove("auto-paragraph-active");
+    p.classList.add("auto-paragraph-fade");
+    setTimeout(() => {
+      p.classList.remove("auto-paragraph-fade");
+    }, 800);
+  }
+
+  function highlightParagraph(index) {
+    if (index < 0 || index >= paragraphs.length) return;
+    paragraphs[index].classList.add("auto-paragraph-active");
+  }
+
+  function collectParagraphsFrom(root) {
+    paragraphs = Array.from(root.querySelectorAll("p"))
+      .filter(p => p.textContent.trim().length > 0);
+
+    paragraphRanges = [];
+    let runningLength = 0;
+
+    paragraphs.forEach(p => {
+      const len = p.textContent.length;
+      paragraphRanges.push({
+        start: runningLength,
+        end: runningLength + len
+      });
+      runningLength += len;
+    });
+  }
+
+function findParagraphIndex(globalCharIndex) {
+
+  const BUFFER = 8; // helps catch short dialogue lines
+
+  for (let i = 0; i < paragraphRanges.length; i++) {
+    const r = paragraphRanges[i];
+
+    if (
+      globalCharIndex >= (r.start - BUFFER) &&
+      globalCharIndex < (r.end + BUFFER)
+    ) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+  function getCursorInfo() {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return null;
+
+    const range = sel.getRangeAt(0);
+
+    let container = range.startContainer;
+    while (container && container.nodeType !== 1) {
+      container = container.parentNode;
+    }
+    if (!container) return null;
+
+    const root = container.closest("#mvTextContainer, .question-text") || document.body;
+
+    const preRange = document.createRange();
+    preRange.setStart(root, 0);
+    preRange.setEnd(range.startContainer, range.startOffset);
+
+    const offset = preRange.toString().length;
+
+    return { root, offset, container };
+  }
+
+/* ========================================== 
+   Hook safely into speech (NO AUTO-HIGHLIGHT)
+========================================== */
+const originalSpeak = synth.speak.bind(synth);
+
+synth.speak = function(utterance) {
+
+  const cursorInfo = getCursorInfo();
+  if (!cursorInfo) return originalSpeak(utterance);
+
+  const { offset, container } = cursorInfo;
+
+  // Detect if cursor moved
+  const cursorMoved =
+    container !== lastStartContainer ||
+    offset !== lastStartOffset;
+
+  if (cursorMoved) {
+    baseOffset = offset;
+    lastSpokenGlobal = offset;
+  }
+
+  lastStartContainer = container;
+  lastStartOffset = offset;
+
+  // Optional: still track position silently (no UI effects)
+  utterance.addEventListener("boundary", function(e){
+    if (e.name !== "word") return;
+    lastSpokenGlobal = baseOffset + e.charIndex;
+  });
+
+  utterance.addEventListener("end", function(){
+    if (!synth.speaking) {
+      lastSpokenGlobal = 0;
+      baseOffset = 0;
+    }
+  });
+
+  return originalSpeak(utterance);
+};</script>
+
+<!-- ====== 5. Emoji + Audio Feedback ====== -->
+<script>
+(function() {
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playCorrect() { 
+    audioCtx.resume().then(() => { 
+      const o = audioCtx.createOscillator(); 
+      const g = audioCtx.createGain(); 
+      o.type = "sine"; 
+      o.frequency.setValueAtTime(800, audioCtx.currentTime); 
+      g.gain.setValueAtTime(0.4, audioCtx.currentTime); 
+      o.connect(g); g.connect(audioCtx.destination); 
+      o.start(); o.stop(audioCtx.currentTime + 0.25); 
+    }); 
+  }
+
+  function playWrong() { 
+    audioCtx.resume().then(() => { 
+      const o = audioCtx.createOscillator(); 
+      const g = audioCtx.createGain(); 
+      o.type = "triangle"; 
+      o.frequency.setValueAtTime(450, audioCtx.currentTime); 
+      o.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.25); 
+      g.gain.setValueAtTime(0.4, audioCtx.currentTime); 
+      o.connect(g); g.connect(audioCtx.destination); 
+      o.start(); o.stop(audioCtx.currentTime + 0.25); 
+    }); 
+  }
+
+  function normalize(str){ 
+    return str.trim().toLowerCase().replace(/\s+/g," "); 
+  }
+
+  // ======================
+  // HANDLE ANSWER SELECTION
+  // ======================
+  document.body.addEventListener('change', e => {
+    const exercise = e.target.closest('.exercise');
+    if (!exercise) return;
+
+    // Emojis & sound (fire every change)
+    const textInputs = Array.from(exercise.querySelectorAll("input[type='text'], textarea"));
+    const selectedInputs = Array.from(exercise.querySelectorAll("input:checked"));
+
+    const userAnswers = textInputs.length 
+      ? textInputs.map(i => normalize(i.value)) 
+      : selectedInputs.map(i => normalize(i.value));
+
+    const correctAnswers = Array.from(exercise.querySelectorAll('[data-correct]'))
+      .map(i => normalize(i.dataset.correct));
+
+    const isCorrect = userAnswers.every(ans => correctAnswers.includes(ans));
+
+    // Remove previous emojis
+    exercise.querySelectorAll('.mc-emoji').forEach(span => span.remove());
+
+    // Add emojis
+    selectedInputs.forEach(inp => {
+      const lbl = inp.closest("label");
+      if (lbl) {
+        const span = document.createElement('span');
+        span.className = "mc-emoji";
+        span.style.marginLeft = "8px";
+        span.textContent = isCorrect ? "😊" : "😢";
+        lbl.appendChild(span);
+      }
+    });
+
+    textInputs.forEach(inp => {
+      const span = document.createElement('span');
+      span.className = "mc-emoji";
+      span.style.marginLeft = "8px";
+      span.textContent = isCorrect ? "😊" : "😢";
+      inp.parentNode.insertBefore(span, inp.nextSibling);
+    });
+
+    if (isCorrect) playCorrect(); else playWrong();
+
+// ======================
+// FIRST CLICK SCORING
+// ======================
+if (exercise.dataset.firstResponseLocked) return;
+exercise.dataset.firstResponseLocked = 'true';
+
+const totalExercises = 1; // each exercise counts as 1
+const correctCount = isCorrect ? 1 : 0;
+const percentage = correctCount * 100;
+
+// store score in the element so Submit can display later
+exercise.dataset.score = correctCount;
+exercise.dataset.percentage = percentage;
+});
+
+
+
+
+
+
+
+  // ======================
+  // SUBMIT BUTTON (DISPLAY SCOREBOARD ONLY)
+  // ======================
+  document.body.addEventListener('click', e => {
+    if (!e.target.classList.contains('quiz-submit')) return;
+    const sub = e.target.closest('.quiz-subsection');
+    if (!sub) return;
+
+    const exercises = sub.querySelectorAll('.exercise');
+
+    // Aggregate first-click scores
+    let correctCount = 0;
+    exercises.forEach(ex => {
+      const sc = Number(ex.dataset.score || 0);
+      correctCount += sc;
+    });
+
+    const totalExercises = exercises.length;
+    const percentage = totalExercises > 0 ? Math.round((correctCount / totalExercises) * 100) : 0;
+
+    // Display in scoreboard
+    const board = sub.querySelector('.quiz-scoreboard');
+    if (board) {
+      const dataEl = board.querySelector('.scoreboard-data');
+      const name = sub.querySelector('.quiz-name')?.value || 'Anonymous';
+      const id   = sub.querySelector('.quiz-id')?.value || 'N/A';
+      const section = sub.closest('.section')?.querySelector('h2')?.textContent || 'Unknown Section';
+      const subsection = sub.dataset.subsection || 'Unknown Subsection';
+      const now = new Date();
+      const pad = n => n.toString().padStart(2,'0');
+      const dateString = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      const filename = window.location.pathname.split('/').pop();
+
+const resultText = `${filename}|${section.replace(/:+$/, '').trim()}: ${subsection.replace(/^:+/, '').trim()}|${name}|${id}|${dateString}|${correctCount}/${totalExercises}|${percentage}%`;
+      if (dataEl) dataEl.textContent = resultText;
+
+if (window.saveResult) {
+  const finalResultText = board.querySelector('.scoreboard-data')?.textContent;
+if (finalResultText && window.saveResult) {
+  window.saveResult(finalResultText);
+}
+}
+
+      board.style.display = 'block';
+    }
+  });
+
+})();
+</script>
+
+
+<!--<script>
+(function () {
+
+  if (document.getElementById("global-green-border")) return;
+
+  const border = document.createElement("div");
+  border.id = "global-green-border";
+
+  Object.assign(border.style, {
+    position: "fixed",
+    inset: "0",
+    pointerEvents: "none",
+    zIndex: "2147483647",
+    boxShadow: "inset 0 0 0 10px #39FF14"
+  });
+
+  document.documentElement.appendChild(border);
+
+})();
+</script>-->
+
+<script>
+(function () {
+
+  if (document.getElementById("global-green-border")) return;
+
+  const border = document.createElement("div");
+  border.id = "global-green-border";
+
+  Object.assign(border.style, {
+    position: "fixed",
+    inset: "0",
+    pointerEvents: "none",
+    zIndex: "2147483647",
+    boxShadow: "inset 0 0 0 10px #39FF14",
+    willChange: "transform",
+    transition: "transform 0.12s ease-out"
+  });
+
+  document.documentElement.appendChild(border);
+
+  function adjustForKeyboard() {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const keyboardOffset =
+      window.innerHeight - vv.height - vv.offsetTop;
+
+    border.style.transform =
+      `translateY(-${Math.max(0, keyboardOffset)}px)`;
+  }
+
+  const vv = window.visualViewport;
+
+  if (vv) {
+    vv.addEventListener("resize", adjustForKeyboard);
+    vv.addEventListener("scroll", adjustForKeyboard);
+  }
+
+  adjustForKeyboard();
+
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script>
+(function() {
+  const quizSections = document.getElementById('quizSections');
+
+  // Event delegation for scoreboard buttons
+  quizSections.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+
+    const board = e.target.closest('.quiz-scoreboard');
+    if (!board) return;
+
+    const dataEl = board.querySelector('.scoreboard-data');
+    if (!dataEl) return;
+
+    const text = dataEl.textContent;
+
+    // ===== COPY =====
+    if (btn.classList.contains('score-copy')) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+      }).catch(err => console.error(err));
+    }
+
+    // ===== TXT =====
+    if (btn.classList.contains('score-txt')) {
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'quiz-score.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ===== PNG WITH 10px MARGIN =====
+    if (btn.classList.contains('score-png')) {
+      if (typeof html2canvas === 'undefined') {
+        alert('html2canvas library is required for PNG export.');
+        return;
+      }
+
+      // create temporary wrapper with 10px padding
+      const wrapper = document.createElement('div');
+      wrapper.style.padding = '10px';
+      wrapper.style.background = '#f9f9f9';
+      wrapper.style.display = 'inline-block';
+      wrapper.style.fontFamily = 'monospace';
+      wrapper.style.fontSize = '12px';
+      wrapper.style.whiteSpace = 'pre-wrap';
+      wrapper.style.lineHeight = '1.4';
+      wrapper.appendChild(dataEl.cloneNode(true));
+
+      document.body.appendChild(wrapper);
+
+      html2canvas(wrapper).then(canvas => {
+        canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'quiz-score.png';
+          a.click();
+          URL.revokeObjectURL(url);
+          document.body.removeChild(wrapper); // clean up
+        });
+      });
+    }
+
+
+  }); // <- this closes the quizSections click listener
+
+})(); // <- this closes the IIFE
+</script>
+
+
+
+<script>
+(function() {
+  // Enable/disable submit and radios based on inputs
+  function updateControls(subsection) {
+    const nameInput = subsection.querySelector('.quiz-name');
+    const idInput = subsection.querySelector('.quiz-id');
+    const submitBtn = subsection.querySelector('.quiz-submit');
+    const radios = subsection.querySelectorAll('input[type="radio"]');
+
+    const enabled = nameInput.value.trim() && idInput.value.trim();
+
+    // Enable/disable submit
+    submitBtn.disabled = !enabled;
+
+    // Enable/disable radios
+    radios.forEach(r => r.disabled = !enabled);
+  }
+
+  // Monitor input fields in all subsections
+  document.body.addEventListener('input', e => {
+    if (e.target.matches('.quiz-name, .quiz-id')) {
+      const subsection = e.target.closest('.quiz-subsection');
+      if (!subsection) return;
+      updateControls(subsection);
+    }
+  });
+
+  // Initialize all subsections on page load
+  document.querySelectorAll('.quiz-subsection').forEach(sub => updateControls(sub));
+})();
+</script>
+
+
+<script>
+(function() {
+  const normalize = str => str.trim().toLowerCase().replace(/\s+/g, " ");
+
+  document.body.addEventListener('change', e => {
+    const exercise = e.target.closest('.exercise');
+    if (!exercise) return;
+
+    // ----- Gather user answers -----
+    const textInputs = Array.from(exercise.querySelectorAll("input[type='text'], textarea"));
+    const selectedInputs = Array.from(exercise.querySelectorAll("input:checked"));
+
+    const userAnswers = textInputs.length 
+      ? textInputs.map(i => normalize(i.value))
+      : selectedInputs.map(i => normalize(i.value));
+
+    const correctAnswers = Array.from(exercise.querySelectorAll('[data-correct]'))
+      .map(i => normalize(i.dataset.correct));
+
+    const isCorrect = userAnswers.every(ans => correctAnswers.includes(ans));
+
+    // ----- Add emojis -----
+    const addEmoji = (element) => {
+      if (!element.nextSibling || !element.nextSibling.classList?.contains('mc-emoji')) {
+        const span = document.createElement('span');
+        span.className = 'mc-emoji';
+        span.style.marginLeft = '8px';
+        span.textContent = isCorrect ? '😊' : '😟';
+        element.parentNode.insertBefore(span, element.nextSibling);
+      }
+    };
+
+    textInputs.forEach(addEmoji);
+
+    selectedInputs.forEach(inp => {
+      const label = inp.closest('label');
+      if (label && !label.querySelector('.mc-emoji')) {
+        const span = document.createElement('span');
+        span.className = 'mc-emoji';
+        span.style.marginLeft = '8px';
+        span.textContent = isCorrect ? '😊' : '😟';
+        label.appendChild(span);
+      }
+    });
+
+  }); // close event listener
+})(); // close IIFE
+</script>
+
+<script>
+/* ==========================================================
+   GLOBAL PAGE TITLE ENGINE
+========================================================== */
+
+(function () {
+
+  function buildFormattedTitle() {
+
+    let filename = window.location.pathname.split("/").pop() || "";
+    filename = filename.replace(/\.[^/.]+$/, "");
+    filename = decodeURIComponent(filename);
+
+    const allowedPrefixes = [
+      "g_game_","v_game_","rr_","cdf_","cdr_",
+      "ws_","r_","a_","g_","v_"
+    ];
+
+    for (let prefix of allowedPrefixes) {
+      if (filename.startsWith(prefix)) {
+        filename = filename.substring(prefix.length);
+        break;
+      }
+    }
+
+    let rawTitle = filename.replace(/_/g," ").trim();
+    if (!rawTitle) rawTitle = "Untitled";
+
+    const minorWords = [
+      "a","an","the","and","but","or","nor",
+      "for","so","yet","at","by","in","of","on","to","up","as","off","out"
+    ];
+
+    // ✅ Acronyms to preserve in uppercase
+    const acronyms = ["ot", "nt"];
+
+    return rawTitle.split(/\s+/).map((word, i) => {
+
+      const lower = word.toLowerCase();
+
+      // preserve acronyms like OT / NT
+      if (acronyms.includes(lower)) {
+        return lower.toUpperCase();
+      }
+
+      // first word always capitalized
+      if (i === 0) {
+        return lower.charAt(0).toUpperCase() + lower.slice(1);
+      }
+
+      // minor words stay lowercase
+      if (minorWords.includes(lower)) {
+        return lower;
+      }
+
+      // default title case
+      return lower.charAt(0).toUpperCase() + lower.slice(1);
+
+    }).join(" ");
+  }
+
+  window.pageTitle = buildFormattedTitle();
+
+  window.applyPageTitle = function(root=document){
+    root.querySelectorAll("h1[data-auto-title]").forEach(h=>{
+      h.textContent = window.pageTitle;
+      h.style.textTransform = "none";
+      h.style.visibility = "visible";
+    });
+  };
+
+})();
+
+/* ==========================================================
+   PAGE INIT
+========================================================== */
+
+document.addEventListener("DOMContentLoaded",function(){
+
+  window.applyPageTitle();
+
+});
+
+
+/* ==========================================================
+   AUTO OPEN SINGLE SECTION
+========================================================== */
+
+(function(){
+
+  function tryAutoOpenSingleSection(){
+
+    if(!window.sections || !Array.isArray(window.sections)) return;
+    if(typeof window.openQuizModal !== "function") return;
+
+    const root=document.documentElement;
+
+    const hardOn=root.classList.contains("show-hard");
+    const dynamicOn=root.classList.contains("show-dynamic");
+
+const recentlyClosed =
+  window.__quizJustClosed &&
+  (Date.now() - window.__quizJustClosed < 1500);
+
+if (window.sections.length === 1 && !hardOn && !dynamicOn && !recentlyClosed) {
+  window.openQuizModal(0);
+}
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",tryAutoOpenSingleSection);
+  }else{
+    tryAutoOpenSingleSection();
+  }
+
+})();
+
+
+
+
+
+/* ==========================================================
+   MODAL CONTROL MOVEMENT + CHAPTER/VERSE SYSTEM (ROBUST)
+========================================================== */
+
+function moveControlsIntoModal(){
+
+  const modalContent=document.getElementById("quizModalContent");
+  if(!modalContent) return;
+
+  const chapterControls=document.getElementById("chapterVerseControls");
+  const readAloud=document.getElementById("readaloudControls");
+
+  if(chapterControls && !modalContent.contains(chapterControls)){
+    modalContent.insertBefore(chapterControls,modalContent.firstChild);
+  }
+
+  if(readAloud){
+    readAloud.style.display="block";
+
+    if(!modalContent.contains(readAloud)){
+      modalContent.insertBefore(
+        readAloud,
+        chapterControls?.nextSibling || modalContent.firstChild
+      );
+    }
+  }
+}
+
+
+function buildChapterVerseLogic(){
+
+  const modal=document.getElementById("quizModal");
+  if(!modal) return;
+
+  const readAloud=modal.querySelector("#readaloudControls");
+  const chapterControls=modal.querySelector("#chapterVerseControls");
+  const textContainer=modal.querySelector("#quizSections");
+
+  const chapterSelect=modal.querySelector("#chapterSelect");
+  const verseSelect=modal.querySelector("#verseSelect");
+  const goBtn=modal.querySelector("#goBtn");
+
+  if(!textContainer || !chapterSelect || !verseSelect || !goBtn){
+    console.warn("Chapter/Verse system missing required elements");
+    return;
+  }
+
+  if(chapterControls){
+    chapterControls.style.display="block";
+  }
+
+  const paragraphs=[...textContainer.querySelectorAll("p")];
+  if(!paragraphs.length){
+    console.warn("No paragraphs found for chapter/verse mapping");
+    return;
+  }
+
+  const structure={};
+  let currentChapter=null;
+
+  // ===== helper: normalize text =====
+  const clean = (t)=>t.trim().replace(/\s+/g,' ');
+
+  paragraphs.forEach(p=>{
+
+    const text=clean(p.textContent);
+
+    // ===== FLEXIBLE CHAPTER MATCHING =====
+    const chapMatch=
+      text.match(/^chapter\s*:?\s*(\d+)/i) ||
+      text.match(/^#?\s*chapter\s*(\d+)/i) ||
+      text.match(/^(\d+)\.\s*chapter/i);
+
+    // ===== FLEXIBLE VERSE MATCHING =====
+    const verseMatch=
+      text.match(/^verse\s*:?\s*(\d+)/i) ||
+      text.match(/^v\s*(\d+)/i);
+
+    const fullRefMatch=text.match(/^(\d+):(\d+)\s/);
+
+    // ===== chapter detection =====
+    if(chapMatch){
+      currentChapter=chapMatch[1];
+      if(!structure[currentChapter]) structure[currentChapter]={};
+      return;
+    }
+
+    // ===== verse detection (context-based) =====
+    if(currentChapter && verseMatch){
+      structure[currentChapter][verseMatch[1]]=p;
+      return;
+    }
+
+    // ===== inline chapter:verse detection =====
+    if(fullRefMatch){
+      const c=fullRefMatch[1];
+      const v=fullRefMatch[2];
+
+      if(!structure[c]) structure[c]={};
+      structure[c][v]=p;
+
+      currentChapter=c;
+    }
+
+  });
+
+  // ===== DEBUG SAFETY =====
+  if(Object.keys(structure).length===0){
+    console.warn("ChapterVerse structure is EMPTY. Check formatting.");
+  }
+
+  // ===== populate chapters =====
+  chapterSelect.innerHTML="";
+
+  Object.keys(structure).forEach(ch=>{
+    const opt=document.createElement("option");
+    opt.value=ch;
+    opt.textContent="Chapter "+ch;
+    chapterSelect.appendChild(opt);
+  });
+
+  function updateVerses(){
+
+    verseSelect.innerHTML="";
+    const ch=chapterSelect.value;
+    if(!structure[ch]) return;
+
+    Object.keys(structure[ch]).forEach(v=>{
+      const opt=document.createElement("option");
+      opt.value=v;
+      opt.textContent="Verse "+v;
+      verseSelect.appendChild(opt);
+    });
+
+  }
+
+  chapterSelect.onchange=updateVerses;
+  updateVerses();
+
+  function clearHighlights(){
+    paragraphs.forEach(p=>p.classList.remove("selected-verse"));
+  }
+
+  function getControlsOffset(extraPadding=0){
+
+    const readHeight=readAloud ? readAloud.offsetHeight : 0;
+
+    const chapterHeight=
+      chapterControls &&
+      chapterControls.style.display!=="none"
+      ? chapterControls.offsetHeight
+      : 0;
+
+    return readHeight + chapterHeight + extraPadding;
+  }
+
+  goBtn.onclick=function(){
+
+    const chapter=chapterSelect.value;
+    const verse=verseSelect.value;
+
+    if(!structure[chapter] || !structure[chapter][verse]){
+      console.warn("Verse not found:", chapter, verse);
+      return;
+    }
+
+    const target=structure[chapter][verse];
+
+    clearHighlights();
+    target.classList.add("selected-verse");
+
+    const offset=getControlsOffset(10);
+
+    modal.scrollTo({
+      top:target.offsetTop-offset,
+      behavior:"smooth"
+    });
+  };
+
+  window.chapterVerseStructure = structure; // debug access
+}
+
+/* ==========================================================
+   MODAL ARROW SCROLL
+========================================================== */
+
+(function(){
+
+  const modalRoot=document.getElementById("modalRoot");
+  const modal=document.getElementById("quizModal");
+  if(!modalRoot || !modal) return;
+
+  const SCROLL_AMOUNT=50;
+  let enabled=false;
+
+  function isTypingTarget(target){
+
+    return target.closest("input, textarea")
+      || target.isContentEditable
+      || target.closest("[contenteditable='true']");
+
+  }
+
+  function handleKeydown(e){
+
+    if(!enabled) return;
+    if(e.key!=="ArrowDown" && e.key!=="ArrowUp") return;
+    if(isTypingTarget(e.target)) return;
+
+    e.preventDefault();
+
+    modal.scrollBy({
+      top:e.key==="ArrowDown" ? SCROLL_AMOUNT : -SCROLL_AMOUNT,
+      behavior:"smooth"
+    });
+
+  }
+
+  function enable(){
+    if(enabled) return;
+    enabled=true;
+    document.addEventListener("keydown",handleKeydown);
+  }
+
+  function disable(){
+    enabled=false;
+    document.removeEventListener("keydown",handleKeydown);
+  }
+
+  const observer=new MutationObserver(()=>{
+    const active=modalRoot.classList.contains("active");
+    if(active) enable();
+    else disable();
+  });
+
+  observer.observe(modalRoot,{attributes:true,attributeFilter:["class"]});
+
+})();
+
+
+/* ==========================================================
+   STRICT SUBMIT LOCK
+========================================================== */
+
+(function(){
+
+  function updateSubsectionState(sub){
+
+    const name=sub.querySelector('.quiz-name');
+    const id=sub.querySelector('.quiz-id');
+    const submit=sub.querySelector('.quiz-submit');
+    const radios=sub.querySelectorAll('input[type="radio"]');
+
+    if(!name || !id || !submit) return;
+
+    const enabled=name.value.trim() && id.value.trim();
+
+    submit.disabled=!enabled;
+    radios.forEach(r=>r.disabled=!enabled);
+
+  }
+
+  function initSub(sub){
+
+    if(sub.dataset.lockInitialized) return;
+    sub.dataset.lockInitialized="1";
+
+    const name=sub.querySelector('.quiz-name');
+    const id=sub.querySelector('.quiz-id');
+    if(!name || !id) return;
+
+    updateSubsectionState(sub);
+
+    name.addEventListener("input",()=>updateSubsectionState(sub));
+    id.addEventListener("input",()=>updateSubsectionState(sub));
+
+  }
+
+  function scan(){
+    document.querySelectorAll('.quiz-subsection').forEach(initSub);
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",scan);
+  }else{
+    scan();
+  }
+
+  new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
+
+})();
+
+
+/* ==========================================================
+   GLOBAL LINK FADE
+========================================================== */
+
+document.addEventListener("click",function(e){
+
+  const link=e.target.closest("a");
+  if(!link) return;
+
+  e.preventDefault();
+
+  document.body.style.transition="opacity 80ms ease";
+  document.body.style.opacity="0";
+
+  setTimeout(()=>{
+    window.location.href=link.href;
+  },80);
+
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const targets = [
+    { parent:"#layout", content:"#layout", gap:-30 },
+    { parent:"#tocContainer", content:"#tocContainer", gap:-20 },
+    { parent:"#quizModal", content:"#quizModalContent", gap:-30 }
+  ];
+
+  const copyrightHTML = `
+    <section class="copyrightSection">
+      <div class="footer-note copyright">
+        © <span class="auto-year"></span> Perfectly Practical English™. All rights reserved.
+      </div>
+<div id="visitor-count">Visits: loading...</div>
+
+    </section>
+  `;
+
+  function insertCopyright(parent){
+    if (!parent.querySelector(":scope > .copyrightSection")) {
+      parent.insertAdjacentHTML("beforeend", copyrightHTML);
+    }
+  }
+
+  function adjust(parent, content, desiredGap){
+
+    const copyright = parent.querySelector(".copyrightSection");
+    const last = content.lastElementChild;
+
+    if (!copyright || !last) return;
+
+    const lastBottom = last.getBoundingClientRect().bottom;
+    const copyTop = copyright.getBoundingClientRect().top;
+
+    const currentGap = copyTop - lastBottom;
+    const adjust = currentGap - desiredGap;
+
+    copyright.style.marginTop = (-adjust - 5) + "px";
+  }
+
+  function update(){
+
+    targets.forEach(t => {
+
+      const parent = document.querySelector(t.parent);
+      const content = document.querySelector(t.content);
+
+      if (!parent || !content) return;
+
+      insertCopyright(parent);
+      adjust(parent, content, t.gap);
+
+    });
+
+  }
+
+  // set year
+  document.querySelectorAll(".auto-year").forEach(el=>{
+    el.textContent = new Date().getFullYear();
+  });
+
+  update();
+
+  window.addEventListener("resize", update);
+
+});
+</script>
+
+<script>
+(function(){
+
+  const startBtn = document.getElementById('startBtn');
+  let activeEl = null;
+
+  let startX = 0;
+  let startY = 0;
+  let isDragging = false;
+
+  const DRAG_THRESHOLD = 8;
+
+  const X_THRESHOLD = 60;
+  const Y_THRESHOLD = 30;
+
+  const synth = window.speechSynthesis;
+
+  /* =========================
+     STYLE (soft + fade out)
+  ========================= */
+  if (!document.getElementById("chunkHighlightStyle")) {
+    const style = document.createElement("style");
+    style.id = "chunkHighlightStyle";
+    style.textContent = `
+      .chunk-active {
+        background: #fff9c4;
+        transition: background 0.6s ease;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function fadeHighlight() {
+    if (!activeEl) return;
+
+    activeEl.style.background = "transparent";
+
+    setTimeout(() => {
+      if (activeEl) {
+        activeEl.classList.remove("chunk-active");
+        activeEl.style.background = "";
+        activeEl = null;
+      }
+    }, 600);
+  }
+
+  function setHighlight(el) {
+    if (activeEl) {
+      activeEl.classList.remove("chunk-active");
+    }
+    activeEl = el;
+    el.classList.add("chunk-active");
+  }
+
+  function placeCursorAtStart(el) {
+    const range = document.createRange();
+    const sel = window.getSelection();
+
+    range.selectNodeContents(el);
+    range.collapse(true);
+
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  /* =========================
+     POINTER TRACKING
+  ========================= */
+  document.addEventListener("pointerdown", (e) => {
+    startX = e.clientX;
+    startY = e.clientY;
+    isDragging = false;
+  });
+
+  document.addEventListener("pointermove", (e) => {
+    if (Math.abs(e.clientX - startX) > DRAG_THRESHOLD ||
+        Math.abs(e.clientY - startY) > DRAG_THRESHOLD) {
+      isDragging = true;
+    }
+  });
+
+  /* =========================
+     TAP → TOGGLE PLAY/STOP
+  ========================= */
+  document.addEventListener("pointerup", function(e){
+
+    if (isDragging) return;
+
+    const sel = window.getSelection();
+    if (sel && !sel.isCollapsed) return;
+
+    const p = e.target.closest(".question-text p, #quizSections p");
+    if (!p) return;
+
+    if (e.target.closest("button, input, label")) return;
+
+    const rect = p.getBoundingClientRect();
+
+    const isRightZone = e.clientX > rect.right - X_THRESHOLD;
+    const isBottomZone = e.clientY > rect.bottom - Y_THRESHOLD;
+
+    if (!(isRightZone && isBottomZone)) return;
+
+    // =========================
+    // 🔥 TOGGLE LOGIC
+    // =========================
+
+    if (synth.speaking) {
+      // STOP
+      synth.cancel();
+      fadeHighlight();
+      return;
+    }
+
+    // START (fresh)
+    setHighlight(p);
+    placeCursorAtStart(p);
+
+    setTimeout(() => {
+      if (startBtn) startBtn.click();
+    }, 40);
+
+  });
+
+  /* =========================
+     AUTO FADE WHEN SPEECH ENDS
+  ========================= */
+  const originalSpeak = synth.speak.bind(synth);
+
+  synth.speak = function(utterance) {
+
+    utterance.addEventListener("end", () => {
+      fadeHighlight();
+    });
+
+    return originalSpeak(utterance);
+  };
+
+})();
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<script>
+(function () {
+
+  const synth = window.speechSynthesis;
+  const startBtn = document.getElementById("startBtn");
+  if (!startBtn) return;
+
+  // -------------------------
+  // CREATE BOTTOM BUTTON
+  // -------------------------
+  const proxyBtn = document.createElement("button");
+  document.body.appendChild(proxyBtn);
+
+  // -------------------------
+  // DETECT VISIBILITY
+  // -------------------------
+  function isVisible(el) {
+    if (!el) return false;
+
+    const rect = el.getBoundingClientRect();
+
+    return (
+      rect.width > 0 &&
+      rect.height > 0 &&
+      rect.top < window.innerHeight &&
+      rect.bottom > 0
+    );
+  }
+
+  // -------------------------
+  // SYNC LABEL
+  // -------------------------
+  function syncLabel() {
+    const topLabel = startBtn.textContent?.trim() || "Start";
+    proxyBtn.textContent = topLabel;
+  }
+
+  // -------------------------
+  // 🔥 KEYBOARD-AWARE POSITIONING
+  // -------------------------
+  function adjustForKeyboard() {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const keyboardOffset =
+      window.innerHeight - vv.height - vv.offsetTop;
+
+    proxyBtn.style.transform =
+      `translateY(-${Math.max(0, keyboardOffset)}px)`;
+  }
+
+  // -------------------------
+  // 🔥 SYNC STYLES
+  // -------------------------
+  function syncStyles() {
+    const cs = window.getComputedStyle(startBtn);
+
+    Object.assign(proxyBtn.style, {
+      position: "fixed",
+      bottom: "20px",
+      left: "20px",
+      zIndex: 999999,
+      padding: "10px 14px",
+      borderRadius: "6px",
+      border: cs.border,
+      background: cs.backgroundColor,
+      color: cs.color,
+      fontSize: cs.fontSize,
+      fontFamily: cs.fontFamily,
+      fontWeight: cs.fontWeight,
+      cursor: "pointer",
+      boxShadow: "0 4px 8px rgba(0,0,0,0.5)",
+      userSelect: "none",
+
+      // 🔥 important for smooth movement
+      willChange: "transform",
+      transition: "transform 0.12s ease-out"
+    });
+  }
+
+  // -------------------------
+  // MAIN CLICK
+  // -------------------------
+  proxyBtn.addEventListener("click", () => {
+    startBtn.click();
+  });
+
+  // -------------------------
+  // KEEP IN SYNC
+  // -------------------------
+  const observer = new MutationObserver(() => {
+    syncLabel();
+    syncStyles();
+  });
+
+  observer.observe(startBtn, {
+    subtree: true,
+    childList: true,
+    characterData: true
+  });
+
+  setInterval(() => {
+    syncLabel();
+    syncStyles();
+  }, 300);
+
+  // -------------------------
+  // 🔥 KEYBOARD EVENTS
+  // -------------------------
+  const vv = window.visualViewport;
+
+  if (vv) {
+    vv.addEventListener("resize", adjustForKeyboard);
+    vv.addEventListener("scroll", adjustForKeyboard);
+  }
+
+  // -------------------------
+  // INIT
+  // -------------------------
+  syncLabel();
+  syncStyles();
+  adjustForKeyboard();
+
+})();
+</script>
+
+
+<script>
+(function(){
+
+const RAW_TEXT = `
+Open Section Content 
+1. Click blue buttons to open sections.
+
+---
+
+Reader Tools
+
+1. Highlight - Select text and click to highlight.
+2. Click again to remove highlight.
+3. Copy - Select text and click to copy.
+4. Click Close to exit.
+
+---
+
+Quiz
+
+1. Enter Name and ID.
+2. Select best answer.
+3. Click Submit to see score.
+4. Click Close to exit.
+`;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("instructionsBtn");
+  if (!btn) return;
+
+  // create isolated modal ONCE
+  let modal = document.getElementById("info-instructions-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "info-instructions-modal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      background: "rgba(0,0,0,0.6)",
+      display: "none",
+      zIndex: "999999",
+      padding: "40px",
+      boxSizing: "border-box"
+    });
+
+modal.innerHTML = `
+  <div style="
+    max-width:700px;
+    margin:0 auto;
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    position:relative;
+    max-height:80vh;
+    overflow:auto;
+    font-family:inherit;
+    box-sizing:border-box;
+  ">
+
+<button id="close-instructions-modal" class="modal-close-btn">✕</button>
+
+    <pre style="
+      white-space:pre-wrap;
+      margin:0;
+      padding-top:10px;
+      overflow-wrap:break-word;
+      word-break:break-word;
+    ">${RAW_TEXT}</pre>
+
+  </div>
+`;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#close-instructions-modal").onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+});
+
+})();
+</script>
+
+<script>
+(function(){
+
+const RAW_TEXT = `
+Comprehensive reading strategy checklist
+
+1. Cut texts into small pieces.
+2. Collect context clues.
+3. Reread when lost.
+4. Scan titles and images.
+5. Identify known/unknown words.
+6. Use background knowledge.
+7. Break down word parts.
+8. Look up vocabulary.
+9. Identify signal words.
+`;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("strategiesBtn");
+  if (!btn) return;
+
+  let modal = document.getElementById("info-strategies-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "info-strategies-modal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      background: "rgba(0,0,0,0.6)",
+      display: "none",
+      zIndex: "999999",
+      padding: "40px",
+      boxSizing: "border-box"
+    });
+
+    modal.innerHTML = `
+      <div style="
+        max-width:700px;
+        margin:0 auto;
+        background:#fff;
+        padding:20px;
+        border-radius:10px;
+        position:relative;
+        max-height:80vh;
+        overflow:auto;
+        font-family:inherit;
+      ">
+
+<button id="close-strategies-modal" class="modal-close-btn">✕</button>
+
+        <pre style="white-space:pre-wrap;margin:0;">${RAW_TEXT}</pre>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#close-strategies-modal").onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+});
+
+})();
+</script>
+
+<script>
+(function(){
+
+const RAW_TEXT = `
+Common Signal Word Categories and Examples
+
+• Time ⏰: words that tell when something happens
+
+on, at, in, before, after, since, until, during, for, now, yesterday, today, tomorrow, later, then, when, while, once
+
+• Addition ➕: words that add ideas together
+
+and, also, too, with, plus, as well as, not only...but also, both...and
+
+• Cause / Effect 🔗: words that show a reason or result
+
+because, so, since, because of, due to, as a result, therefore, that’s why
+
+• Comparison / Similarity / Difference ⚖️: words that compare things
+
+like, as, as...as, than, similar to, different from, more than, less than, the most, just as...so, whereas, in contrast to
+
+• Contrast / Opposition 🎭: words that show differences
+
+but, although, though, even though, however, yet, still, despite, instead, whereas, while, on the other hand
+
+• Frequency 〰️: words that tell how often something happens
+
+always, usually, often, sometimes, occasionally, rarely, never, every day, once a week, hardly ever, from time to time
+
+• Possibility / Certainty 🎲: words that show how possible or sure something is
+
+maybe, probably, possibly, must, might, may, could, can, definitely, certainly
+
+• Advice / Obligation / Permission ☝️: words that tell rules or give guidance
+
+must, must not, have to, don’t have to, should, ought to, had better, can, cannot, may, could
+
+• Manner 🎭: words that tell how something is done
+
+quickly, slowly, carefully, easily, well, badly, with, by, in a...way, as
+
+• Place / Location 📍: words that tell where something is
+
+in, on, at, under, above, between, near, next to, here, there, everywhere, anywhere
+
+• Condition 🌧️: words that show something depends on something else
+
+if, unless, in case, on condition that
+
+• Emphasis / Focus 🎯: words that make something stronger or more important
+
+only, just, even, especially, mainly, particularly
+
+• Questions (Interrogatives) ❓: words used to ask questions
+
+how, when, where, why
+
+• Relative Words 👨‍👩‍👧‍👦: words that connect ideas about time, place, reason, or manner
+
+when, where, why, how
+
+• Direction / Movement 🧭: words that show movement or direction
+
+to, from, toward, away from, up, down, forward, back
+
+• Affirmative and Negative ✔️❌: words that show yes or no
+
+yes, no
+`;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("signalwordsBtn");
+  if (!btn) return;
+
+  let modal = document.getElementById("info-signalwords-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "info-signalwords-modal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      background: "rgba(0,0,0,0.6)",
+      display: "none",
+      zIndex: "999999",
+      padding: "40px",
+      boxSizing: "border-box"
+    });
+
+    modal.innerHTML = `
+      <div style="
+        max-width:700px;
+        margin:0 auto;
+        background:#fff;
+        padding:20px;
+        border-radius:10px;
+        position:relative;
+        max-height:80vh;
+        overflow:auto;
+        font-family:inherit;
+      ">
+
+<button id="close-signalwords-modal" class="modal-close-btn">✕</button>
+
+        <pre style="white-space:pre-wrap;margin:0;">${RAW_TEXT}</pre>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#close-signalwords-modal").onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+});
+
+})();
+</script>
+
+
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<script>
+
+function goToNextQuiz(){
+
+  const modal = document.getElementById("quizModal");
+  const container = modal?.querySelector("#quizSections");
+
+  // ✔️ TARGET THE ACTUAL BUTTON (NOT THE FUNCTION)
+  const goBtn = document.querySelector('button[onclick="goToNextQuiz()"]');
+
+  if(!container) return;
+
+  const originalLabel = goBtn?.textContent || "Go to Quiz";
+
+  function showNoQuizEmoji(){
+
+    if(!goBtn) return;
+
+    goBtn.textContent = "🚫";
+
+    setTimeout(() => {
+      goBtn.textContent = originalLabel;
+    }, 900);
+
+  }
+
+  const firstQuiz = container.querySelector(".quiz-subsection");
+
+  // ===== NO QUIZ FOUND =====
+  if(!firstQuiz){
+    showNoQuizEmoji();
+    return;
+  }
+
+  const readAloud = modal?.querySelector("#readaloudControls");
+  const chapterControls = modal?.querySelector("#chapterVerseControls");
+
+  const offset =
+    (readAloud?.offsetHeight || 0) +
+    (chapterControls?.offsetHeight || 0) +
+    20;
+
+  modal.scrollTo({
+    top: firstQuiz.offsetTop - offset,
+    behavior: "smooth"
+  });
+
+}
+
+</script>
+
+<script>
+// ===== UNIVERSAL CLOSE HANDLER (safe + no blank bug) =====
+document.addEventListener("click", (e) => {
+
+  const closeBtn = e.target.closest(
+    ".quiz-close, .modal-close, #closeModalBtn"
+  );
+
+  if (!closeBtn) return;
+
+  e.preventDefault();
+
+  // Smooth fade instead of hard visibility kill
+  document.body.style.opacity = "0";
+
+  // Close modal immediately
+  const modalRoot = document.getElementById("modalRoot");
+  if (modalRoot) modalRoot.classList.remove("active");
+
+  document.body.classList.remove("modal-open");
+
+  // Force full reload
+  setTimeout(() => {
+    location.replace(window.location.pathname);
+  }, 80);
+
+});
+</script>
+
+
+<script>
+(function () {
+
+  function showPage() {
+    const root = document.documentElement;
+    const loader = document.getElementById("loader");
+
+    // Remove old gating (safe even if unused)
+    root.classList.remove("pre-auto-open", "show-hard", "show-dynamic");
+
+    // ✅ Reveal UI (controls title via CSS)
+    root.classList.add("ui-ready");
+
+    // Force key containers visible
+    const layout = document.getElementById("layout");
+    const toc = document.getElementById("dynamicTOC");
+
+    if (layout) layout.style.display = "block";
+    if (toc) toc.style.display = "block";
+
+    // Fallback: reveal hidden content if needed
+    if (!layout && !toc) {
+      document.body.style.visibility = "visible";
+      document.querySelectorAll(".visually-hidden").forEach(el => {
+        el.style.position = "static";
+        el.style.left = "0";
+      });
+    }
+
+    // Kill loader LAST
+    if (loader) loader.remove();
+  }
+
+  // Run immediately (prevents stuck loader)
+  showPage();
+
+  // Backup safety
+  document.addEventListener("DOMContentLoaded", showPage);
+  window.addEventListener("load", showPage);
+  setTimeout(showPage, 1500);
+
+})();
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const targets = [
+    { parent:"#layout", content:"#layout", gap:-30 },
+    { parent:"#tocContainer", content:"#tocContainer", gap:-20 },
+    { parent:"#quizModal", content:"#quizModalContent", gap:-30 }
+  ];
+
+  const copyrightHTML = `
+    <section class="copyrightSection">
+
+      <!-- 10px invisible space ABOVE copyright -->
+      <div class="spacer spacer-top"></div>
+
+      <div class="footer-note copyright">
+        © <span class="auto-year"></span> Perfectly Practical English™. All rights reserved.
+      </div>
+
+      <div id="visitor-count" class="visitor-count">
+        Visits: loading...
+      </div>
+
+      <!-- 30px invisible space BELOW visits -->
+      <div class="spacer spacer-bottom"></div>
+
+
+    </section>
+  `;
+
+  function insertCopyright(parent){
+    if (!parent.querySelector(":scope > .copyrightSection")) {
+      parent.insertAdjacentHTML("beforeend", copyrightHTML);
+    }
+  }
+
+  function adjust(parent, content, desiredGap){
+
+    const copyright = parent.querySelector(".copyrightSection");
+    const last = content.lastElementChild;
+
+    if (!copyright || !last) return;
+
+    const lastBottom = last.getBoundingClientRect().bottom;
+    const copyTop = copyright.getBoundingClientRect().top;
+
+    const currentGap = copyTop - lastBottom;
+    const adjust = currentGap - desiredGap;
+
+    const extraOffset = 5; // try 5–10px
+
+copyright.style.marginTop = (-adjust + extraOffset) + "px";
+  }
+
+  async function updateVisitorCount() {
+
+    const namespace = "PerfectlyPracticalEnglish";
+    const key = "homepage";
+
+    const isOwner =
+      localStorage.getItem("isOwner") === "true";
+
+    const isLocal =
+      location.hostname === "localhost" ||
+      location.hostname === "127.0.0.1";
+
+    const alreadyCounted =
+      sessionStorage.getItem("counted");
+
+    let data;
+
+    try {
+
+      if (!isOwner && !isLocal && !alreadyCounted) {
+
+        data = await fetch(
+          `https://api.countapi.xyz/hit/${namespace}/${key}`
+        ).then(r => r.json());
+
+        sessionStorage.setItem("counted", "true");
+
+      } else {
+
+        data = await fetch(
+          `https://api.countapi.xyz/get/${namespace}/${key}`
+        ).then(r => r.json());
+
+      }
+
+      document.querySelectorAll("#visitor-count").forEach(el => {
+        el.textContent = `Total: ${data.value} visits`;
+      });
+
+    } catch (err) {
+
+      console.error("Visitor counter failed:", err);
+
+      document.querySelectorAll("#visitor-count").forEach(el => {
+        el.textContent = "Visits unavailable";
+      });
+
+    }
+
+  }
+
+  function update(){
+
+    targets.forEach(t => {
+
+      const parent = document.querySelector(t.parent);
+      const content = document.querySelector(t.content);
+
+      if (!parent || !content) return;
+
+      insertCopyright(parent);
+      adjust(parent, content, t.gap);
+
+    });
+
+  }
+
+  // Set current year
+  document.querySelectorAll(".auto-year").forEach(el => {
+    el.textContent = new Date().getFullYear();
+  });
+
+  update();
+  updateVisitorCount();
+
+  window.addEventListener("resize", update);
+
+});
+</script>
+
+<script>
+function fixModalScrollRoom() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+
+  const keyboardHeight =
+    window.innerHeight - vv.height - vv.offsetTop;
+
+  const modal = document.getElementById("quizModal");
+  if (!modal) return;
+
+  modal.style.height =
+    `calc(100dvh - ${keyboardHeight}px)`;
+}
+
+window.visualViewport?.addEventListener("resize", fixModalScrollRoom);
+window.visualViewport?.addEventListener("scroll", fixModalScrollRoom);
+window.addEventListener("resize", fixModalScrollRoom);
+
+fixModalScrollRoom();
+
+</script>
+
+<!-- SUPABASE LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const supabaseClient = window.supabase?.createClient(
+  'https://etwwriloppklhhkmswpr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+);
+
+if (!supabaseClient) {
+  console.error("❌ Supabase failed to initialize");
+}
+
+let lastUploadedScore = null;
+
+window.saveResult = async function saveResult(text) {
+
+  if (!supabaseClient) {
+    console.error("❌ No Supabase client");
+    return;
+  }
+
+  // ======================
+  // NORMALIZE INPUT
+  // ======================
+  let cleaned;
+
+  try {
+    cleaned = (typeof text === "string")
+      ? text
+      : JSON.stringify(text);
+
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+
+  } catch (err) {
+    console.error("❌ Normalize error:", err);
+    return;
+  }
+
+  if (!cleaned) {
+    console.error("❌ Empty value blocked");
+    return;
+  }
+
+  if (cleaned === lastUploadedScore) {
+    console.log("⚠️ Duplicate blocked");
+    return;
+  }
+
+  lastUploadedScore = cleaned;
+
+  console.log("📤 INSERTING INTO scoreboard_raw:", cleaned);
+
+  const { data, error } = await supabaseClient
+    .from("scoreboard_raw")
+    .insert([
+      { result_text: cleaned }
+    ])
+    .select();
+
+  if (error) {
+    console.error("❌ INSERT FAILED FULL ERROR:", error);
+    return;
+  }
+
+  console.log("✅ INSERT SUCCESS:", data);
+};
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+

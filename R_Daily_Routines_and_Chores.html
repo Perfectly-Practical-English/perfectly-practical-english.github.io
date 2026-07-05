@@ -1,0 +1,5393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PerfectlyPracticalEnglish.netlify.app</title>
+
+<style>
+
+/* =====================
+   1. FIRST PAINT / MODE GATING
+===================== */
+
+#layout,
+#dynamicTOC {
+  display: none;
+}
+
+/* HARD enabled */
+html.show-hard #layout {
+  display: block;
+}
+
+/* DYNAMIC enabled */
+html.show-dynamic #dynamicTOC {
+  display: block;
+}
+
+/* =====================
+   2. GLOBAL BASE TYPOGRAPHY
+===================== */
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #222;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f6fa;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Hide page until auto-open logic finishes */
+html.pre-auto-open body > *:not(#loader) {
+  visibility: hidden;
+}
+
+h2 {
+  margin: 20px 0 10px 0;
+}
+
+h3 {
+  margin: 0 0 6px 0;
+  color: #1976d2;
+  font-size: 12px;
+}
+
+.word {
+  cursor: pointer;
+  color: inherit;
+}
+
+.word:hover {
+  background-color: rgba(26,115,232,0.2);
+}
+
+.sentence {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.highlight {
+  background-color: #ffff00;
+  color: #000000;
+}
+
+.visually-hidden {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+
+/* =====================
+   4. DYNAMIC TOC
+===================== */
+
+#tocButtons {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tocColumn button {
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+
+  display: block;
+  width: 100%;
+  background-color: #2b5d84;
+  color: #ffffff;
+
+  padding: 10px 10px 10px 15px;
+  border-radius: 6px;
+
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+
+  box-sizing: border-box;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tocColumn button:hover,
+.readAloudBtn:hover {
+  background-color: #1f4563;
+}
+
+#tocContainer h3 {
+  color: #2b5d84;
+  margin-left: 20px;
+}
+
+.parsedHeader {
+  color: #2b5d84;
+  font-weight: bold;
+  margin-left: -3px;
+
+}
+
+.parsedSubheader {
+  color: #2b5d84;
+  font-weight: bold;
+  margin-top: 14px;
+  margin-bottom: 8px;
+}
+
+/* =====================
+   6. MODAL ISOLATION
+===================== */
+
+body.modal-open {
+  overflow: hidden;
+}
+
+body.modal-open #tocRoot,
+body.modal-open #tocColLeft,
+body.modal-open #tocColRight {
+  display: none;
+}
+
+#modalRoot {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  display: none;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding-top: 20px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  overscroll-behavior: contain;
+
+  z-index: 20000;
+}
+
+#modalRoot.active {
+  display: flex;
+  flex-direction: column;  /* stack bars vertically */
+  gap: 0;                  /* remove the transparent strip */
+  background: #ffffff;     /* force pure white */
+}
+/* =====================
+   7. QUIZ MODAL LAYOUT
+===================== */
+
+#quizModal {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+
+  height: calc(100dvh - var(--kb-offset, 0px));
+
+  margin: 0 auto;
+
+  padding: 0 10px 120px 10px;
+
+  background: #ffffff;
+  box-sizing: border-box;
+
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  border-radius: 8px;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#quizModal h2 {
+  font-size: 12px;
+}
+
+#quizModalContent {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#quizSections {
+  width: 100%;
+  margin-left: 0;
+  padding-top: 10px;  /* Kill switch header spacing */
+  box-sizing: border-box;
+}
+
+#quizSections > * {
+  padding: 3px 0;
+  margin-bottom: 16px;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+#quizSections .section > h2 {
+  margin: 0 0 8px 0;
+  scroll-margin-top: 100px;
+}
+
+#quizSections .quiz-subsection {
+  margin: 10px 0;
+}
+
+#quizSections .quiz-subsection:first-of-type {
+  margin-top: 0;
+}
+
+#quizSections .quiz-subsection h3 {
+  margin: 0 0 8px 0;
+}
+
+#quizSections h3 {
+  scroll-margin-top: 10px;
+}
+
+.question-text {
+  margin-top: -5px;
+}
+
+.question-text h3 {
+  margin: 16px 0 8px;
+}
+
+.question-text:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.exercise-container {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.exercise p {
+  margin-bottom: 4px;
+}
+
+
+/* =====================
+   8. CONTROL BARS (Stacked Sticky Inside Scroll Container)
+===================== */
+
+/* Hidden by default */
+#chapterVerseControls,
+#readaloudControls {
+  display: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  box-sizing: border-box;
+
+  line-height: 0; /* kill inherited inline height */
+}
+
+/* Show when modal active */
+#modalRoot.active #chapterVerseControls,
+#modalRoot.active #readaloudControls {
+  display: block; /* block is safer than flex at container level */
+}
+
+/* --------------------------------------------------
+   BOTH BARS STICK (same scroll context)
+-------------------------------------------------- */
+
+#chapterVerseControls {
+  position: relative;
+  top: auto;
+  z-index: 40;
+}
+
+#readaloudControls {
+  position: relative;
+  top: auto;
+  z-index: 39;
+  border-top: 1px solid #eee;
+}
+
+/* REMOVE stacking math completely */
+#chapterVerseControls + #readaloudControls {
+  top: auto;
+}
+/* Keep layout behavior inside controlRow */
+#chapterVerseControls .controlRow,
+#readaloudControls .controlRow {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+#readaloudControls {
+  border-top: 1px solid #ffffff;
+  padding-top: 6px;
+}
+
+/* --------------------------------------------------
+   Buttons & Select Layout
+-------------------------------------------------- */
+
+#chapterVerseControls select,
+#chapterVerseControls button,
+#readaloudControls select,
+#readaloudControls button {
+  flex: 0 0 calc((100% - 18px) / 4);
+  max-width: calc((100% - 18px) / 4);
+  min-width: 0;
+
+  height: 36px;
+  line-height: 36px;
+
+  box-sizing: border-box;
+  font-size: 13px;
+  border-radius: 6px;
+
+  margin: 0;
+  padding: 0 10px;
+  vertical-align: middle;
+}
+
+/* Select normalization */
+#chapterVerseControls select,
+#readaloudControls select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+}
+
+/* Button alignment */
+#chapterVerseControls button,
+#readaloudControls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hide select scrollbar */
+#chapterVerseControls select::-webkit-scrollbar,
+#readaloudControls select::-webkit-scrollbar {
+  width: 0;
+}
+
+/* Readaloud wrapper safety */
+.readaloud-block,
+.readaloud-block .readaloud-buttons {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  box-sizing: border-box;
+}/* =====================
+   9. BUTTON SYSTEM
+===================== */
+
+#modalRoot button {
+  height: 36px;
+  font-size: 12px;
+  background: #2b5d84;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+#modalRoot button:hover:not(:disabled) {
+  background: #1f4563;
+}
+
+#modalRoot button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+#modalRoot button:disabled {
+  background: #8aa3b8;
+  cursor: not-allowed;
+}
+
+
+/* =====================
+   10. SCOREBOARD
+===================== */
+
+#scoreboard {
+  display: block;
+  position: sticky;
+  bottom: 0;
+
+  left: 2px;              /* ← actual visual shift (try 1px if too much) */
+
+  background: #fff;
+  padding: 10px;
+  border: 2px solid #add8e6;
+
+  width: calc(100% - 2px); /* compensate so it doesn’t overflow right */
+  box-sizing: border-box;
+
+  z-index: 10;
+}
+
+.scoreboard-main pre,
+#scoreOutput {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  display: block;
+}
+
+.scoreboard-buttons {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.scoreboard-buttons > * {
+  flex: 1 1 0;        /* equal width */
+  min-width: 0;
+  height: 36px;
+}
+
+
+
+/* =====================
+   11. SHARED TOC STRUCTURE CONTRACT
+===================== */
+
+#layout,
+#tocContainer {
+  width: 100%;
+  max-width: 360px;
+  margin: 20px auto;
+  padding: 5px 10px;
+  box-sizing: border-box;
+}
+
+.container,
+#tocButtons {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.column,
+.tocColumn {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+
+/* =====================
+   12. GLOBAL SCROLLBAR SUPPRESSION
+===================== */
+
+html,
+body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  /* 🔥 ADD THIS */
+  overflow-anchor: none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+#quizModal::-webkit-scrollbar,
+#mvWindow::-webkit-scrollbar {
+  display: none;
+}
+
+#quizModal,
+#mvWindow {
+  scrollbar-width: none;
+}
+
+
+/* Make all 4-item control rows identical */
+/* ========================
+   FLEXIBLE CONTROL ROW SYSTEM
+========================= */
+
+.controlRow {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+/* shared styling */
+.controlRow > * {
+  min-width: 0;
+  height: 36px;
+  box-sizing: border-box;
+  font-size: 13px;
+  border-radius: 6px;
+  padding: 0 10px;
+}
+
+/* Chapter + Verse selects wider */
+.controlRow select:nth-child(1),
+.controlRow select:nth-child(2) {
+  flex: 1.3 1 0;
+}
+
+/* Buttons slightly smaller */
+.controlRow button {
+  flex: 0.8 1 0;
+}
+/* ========================
+   NAME / ID / SUBMIT / CLOSE ROW
+========================= */
+
+/* each row */
+.top-controls {
+  display: flex;
+  gap: 6px;              /* horizontal spacing only */
+  margin: 0;             /* remove transparent margin */
+  width: 100%;
+}
+
+.top-controls > * {
+  flex: 1 1 0;        /* equal width for all 4 */
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 13px;
+}
+
+.top-controls input {
+  border: 1px solid #ccc;
+}
+
+.top-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copyrightSection {
+  font-size: 9px;
+  opacity: 0.7;
+
+  padding: 0 6px;
+  box-sizing: border-box;
+
+  margin-top: 15px;
+  padding-left: 1px;
+
+  text-align: left;
+
+  display: block;
+}
+
+/* enforce vertical stacking */
+.copyrightSection > div {
+  display: block;
+}
+
+.visitor-count {
+  font-size: 12px;
+  opacity: 0.75;
+  margin-top: 4px;
+}
+
+.quiz-scoreboard {
+  width: 100%;
+  box-sizing: border-box;
+
+  margin-bottom: 12px;
+  padding: 6px;
+
+  border: 1px solid #9aaed1;
+  border-radius: 6px;
+  background: #f9f9f9;
+
+  font-family: monospace;
+  font-size: 12px;
+}
+
+
+/* vertical stacking container */
+
+/* Make only Chapter & Verse text smaller */
+#chapterVerseControls select {
+  font-size: 10px;   /* adjust to 9px, 11px, etc. */
+}
+
+.reading-active {
+  background-color: yellow !important;
+  scroll-margin-top: 120px;
+}
+
+#loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #f5f6fa; /* match page background */
+  z-index: 9999;
+}
+
+/* Inner box matches your layout width */
+#loaderContent {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+
+  text-align: center;
+  padding: 20px;
+
+  font-size: 16px;
+  font-weight: bold;
+  color: #2b5d84; /* 🔵 your button blue */
+}
+
+#helloBar {
+  height: 40px;              /* acts as buffer */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12px;
+  color: #2b5d84;
+
+  background: #ffffff;
+  transition: opacity 0.15s ease, height 0.15s ease;
+}
+
+
+
+/* =========================
+   🔥 MOBILE KEYBOARD FIX LAYER
+   (SAFE OVERRIDE ZONE)
+========================= */
+
+html, body {
+  height: 100%;
+}
+
+/* Prevent layout jump caused by keyboard resize */
+#modalRoot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  height: 100dvh; /* modern mobile viewport fix */
+  min-height: 100vh;
+}
+
+/* Better behavior when keyboard opens */
+@supports (height: 100dvh) {
+  #modalRoot {
+    height: 100dvh;
+  }
+}
+
+/* fallback smooth behavior for older mobile browsers */
+@media (max-width: 768px) {
+  #modalRoot {
+    transition: transform 0.12s ease-out;
+  }
+}
+
+/* optional: stabilize bottom UI elements (your proxy button) */
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+.modal-close-btn {
+  width: 36px;
+  height: 36px;
+
+  padding: 0;
+  line-height: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 16px;
+
+  background: #2b5d84;
+  color: #fff;
+
+  border: none;
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  transition: background 0.15s, transform 0.1s;
+
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.modal-close-btn:hover {
+  background: #1f4563;
+}
+
+.modal-close-btn:active {
+  transform: scale(0.97);
+}
+
+
+h1[data-auto-title] {
+  visibility: hidden;
+}
+
+html.ui-ready h1[data-auto-title] {
+  visibility: visible;
+}
+
+#layout,
+#tocContainer {
+  padding-bottom: 30px;
+}
+
+
+.visits-bottom-space {
+  height: 140px; /* adjust this freely */
+  width: 100%;
+}
+
+
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div id="loaderContent">Loading...</div>
+</div>
+<div id="rawTextSource" class="visually-hidden">
+
+
+
+~Daily Routines
+500 words
+
+Daily Routines: An Overview
+
+A daily routine is the sequence of activities that people regularly follow from morning until night. These activities may include waking up, preparing for work or school, eating meals, completing responsibilities, relaxing, and going to sleep. While routines differ from person to person, most people follow a similar basic structure each day. Daily routines help organize time, create stability, and support both physical and mental well-being.
+
+One important role of daily routines is structure. When people know what to expect each day, they can plan their time more effectively. Routines reduce the need to make constant decisions, which can lower stress and mental fatigue. For example, having a regular morning routine can make it easier to start the day calmly rather than feeling rushed or confused. Structure also helps people manage responsibilities such as work, school, or family tasks.
+
+Daily routines also support healthy habits. Regular meal times encourage balanced eating, while consistent sleep schedules help maintain energy and focus. Including activities such as exercise, personal hygiene, and relaxation in a routine promotes long-term health. Over time, repeated actions become habits, making healthy choices easier and more automatic.
+
+Another benefit of routines is productivity. When tasks are done at predictable times, people are more likely to complete them efficiently. For example, setting aside specific hours for work, study, or housework helps prevent procrastination. Routines also make it easier to balance responsibilities with free time, allowing space for rest and enjoyment.
+
+Routines are especially important for children, as they provide a sense of security and help develop responsibility. However, adults also benefit from routines, particularly in managing busy schedules. While routines create stability, they should not be overly rigid. Life often requires flexibility, and healthy routines can adapt to changes such as weekends, holidays, or unexpected events.
+
+Modern life has changed daily routines in some ways. Technology allows people to work, communicate, and relax at different times and places. While this flexibility can be helpful, it can also blur boundaries between work and personal life. For this reason, intentional routines are becoming increasingly important for maintaining balance.
+
+In conclusion, daily routines play a key role in organizing life, supporting health, and reducing stress. They help people manage time, build habits, and maintain balance. Although routines should remain flexible, having a general daily structure is an important foundation for a productive and healthy life.~
+
+Quiz
+
+?What is a daily routine?
+A special event
+|A regular sequence of daily activities|
+A yearly plan
+A one-time schedule
+
+?Why do routines reduce stress?
+They remove responsibility
+|They reduce constant decision-making|
+They add pressure
+They limit free time
+
+?What does a regular morning routine help with?
+Avoiding sleep
+|Starting the day calmly and efficiently|
+Skipping responsibilities
+Working longer hours
+
+?How do routines support healthy habits?
+By forcing behavior
+|By turning repeated actions into habits|
+By limiting choices
+By removing flexibility
+
+?What can be inferred about productivity and routines?
+Routines slow work
+|Predictable schedules help tasks get done|
+Routines remove motivation
+Productivity requires chaos
+
+?Why are routines especially important for children?
+They increase control
+|They provide security and responsibility|
+They remove creativity
+They reduce independence
+
+?What is one risk of modern flexible schedules?
+Less technology
+|Blurred boundaries between work and personal life|
+Too much routine
+Too many holidays
+
+?Why should routines not be too rigid?
+They stop habits
+|Life requires flexibility and adjustment|
+They improve stress
+They remove balance
+
+?What does the text suggest about weekends and holidays?
+They should follow strict routines
+|Routines can adapt to different days|
+They are unimportant
+They remove structure
+
+?Why are daily routines considered important overall?
+They replace goals
+|They support balance, health, and organization|
+They limit enjoyment
+They remove freedom
+
+~Morning Routines
+500 words
+
+Morning Routines: Starting the Day
+
+Morning routines are the activities people follow after waking up and before beginning their main daily responsibilities. These routines often include personal hygiene, getting dressed, eating breakfast, and preparing mentally for the day. Although morning routines vary depending on lifestyle, they play an important role in setting the tone for the rest of the day.
+
+One key benefit of a morning routine is creating a smooth transition from sleep to activity. Waking up at a consistent time helps regulate the body’s internal clock, improving alertness and energy levels. Simple actions such as stretching, showering, or opening windows can help the body feel more awake. When mornings are rushed or disorganized, people may feel stressed before the day has truly begun.
+
+Breakfast is often considered an important part of the morning routine. Eating in the morning provides energy for physical and mental tasks. While not everyone eats a large breakfast, having some form of nourishment can improve concentration and mood. Drinking water in the morning also helps rehydrate the body after sleep.
+
+Morning routines also influence mental focus. Many people use this time to plan their day, check schedules, or review tasks. Some include quiet activities such as reading, journaling, or meditation to create a calm mindset. Others prefer listening to music or exercising to increase motivation. These choices reflect personal needs and personality.
+
+Preparation is another important function of the morning routine. Getting clothes ready, packing bags, and organizing materials ahead of time reduces stress later in the day. People who prepare in the morning are less likely to forget important items or feel overwhelmed. For students and workers, this preparation supports punctuality and responsibility.
+
+Technology has become part of many morning routines. Checking messages, emails, or news is common, but excessive screen time can create distraction or anxiety. For this reason, some people limit technology use in the morning to protect focus and emotional balance.
+
+In conclusion, morning routines help people start the day with structure, energy, and clarity. They support physical health, mental focus, and organization. While routines should match individual lifestyles, a thoughtful morning routine can greatly improve the quality of the entire day.~
+
+Quiz
+
+?What is the main purpose of a morning routine?
+To avoid responsibilities
+|To transition smoothly from sleep to activity|
+To increase workload
+To reduce sleep
+
+?Why is waking up at a consistent time helpful?
+It limits freedom
+|It regulates the body’s internal clock|
+It causes fatigue
+It removes choice
+
+?How can rushed mornings affect people?
+They increase energy
+|They create stress early in the day|
+They improve focus
+They save time
+
+?Why is breakfast often part of morning routines?
+It replaces lunch
+|It provides energy for mental and physical tasks|
+It delays work
+It increases stress
+
+?What does drinking water in the morning help with?
+Sleep quality
+|Rehydration after sleep|
+Weight gain
+Digestion only
+
+?Why do some people plan their day in the morning?
+To avoid thinking later
+|To improve focus and organization|
+To reduce tasks
+To waste time
+
+?What can be inferred about different morning activities?
+One routine fits everyone
+|People choose activities based on personal needs|
+Exercise is unnecessary
+Quiet routines are better
+
+?How does preparation in the morning reduce stress?
+By increasing pressure
+|By preventing forgetfulness and disorganization|
+By adding tasks
+By delaying departure
+
+?Why might limiting technology in the morning be helpful?
+It saves electricity
+|It protects focus and emotional balance|
+It increases boredom
+It avoids communication
+
+?Why are morning routines important overall?
+They replace goals
+|They set a positive tone for the entire day|
+They remove responsibility
+They reduce productivity
+
+~Midday Routines
+500 words
+
+Work, School, and Midday Routines
+
+Work, school, and midday routines make up the central part of most people’s daily lives. This period usually includes professional responsibilities, education, household tasks, meals, and short breaks. How people organize this part of the day strongly affects productivity, stress levels, and overall satisfaction.
+
+For students, school routines involve attending classes, completing assignments, and participating in learning activities. Having a structured study routine helps students manage time, stay focused, and reduce last-minute stress. Regular schedules also help students balance academic work with rest and social interaction. When study time is predictable, learning becomes more efficient.
+
+For adults, work routines often include commuting, meetings, task completion, and communication with colleagues. Consistent work routines improve efficiency because people know when and how tasks will be handled. Planning priorities at the start of the workday helps prevent overload and confusion. Short breaks during work hours are also important, as they improve concentration and reduce fatigue.
+
+Midday routines usually include meals and brief rest periods. Lunch provides energy for the second half of the day and offers a mental break from responsibilities. Eating regular meals helps maintain stable energy levels and prevents exhaustion. Some people also include light physical activity, such as walking, during midday breaks to refresh their mind and body.
+
+Balancing productivity and rest is an important aspect of midday routines. Working continuously without breaks can reduce performance and increase stress. Structured pauses, even short ones, allow the brain to reset. This balance helps people return to tasks with better focus and motivation.
+
+Technology plays a major role in modern work and school routines. Digital tools help people communicate, organize tasks, and access information quickly. However, constant notifications can interrupt concentration. For this reason, many people set specific times for checking messages or emails to maintain focus.
+
+In conclusion, work, school, and midday routines provide structure to the busiest part of the day. They help people stay productive while managing energy and stress. When balanced with regular breaks and healthy habits, these routines support long-term efficiency and well-being.~
+
+Quiz
+
+?What part of the day do work and school routines usually represent?
+The end of the day
+|The central and busiest period|
+Only leisure time
+Sleep hours
+
+?Why are structured study routines helpful for students?
+They reduce learning
+|They improve focus and time management|
+They remove responsibility
+They increase stress
+
+?What benefit do consistent work routines provide?
+Less communication
+|Greater efficiency and clarity|
+More confusion
+Less productivity
+
+?Why are short breaks important during work or study?
+They waste time
+|They improve concentration and reduce fatigue|
+They reduce focus
+They delay tasks
+
+?What role does lunch play in midday routines?
+It replaces dinner
+|It provides energy and mental rest|
+It causes distraction
+It increases stress
+
+?Why is balance important in midday routines?
+Work must be continuous
+|Too much work without rest reduces performance|
+Breaks reduce motivation
+Rest removes discipline
+
+?What can be inferred about working without breaks?
+It increases creativity
+|It may lead to stress and lower productivity|
+It saves energy
+It improves health
+
+?How does light physical activity help at midday?
+It reduces time
+|It refreshes both mind and body|
+It increases tiredness
+It avoids work
+
+?What challenge does technology create in routines?
+Limited access
+|Frequent interruptions and distractions|
+Lack of communication
+Reduced efficiency
+
+?Why are midday routines important overall?
+They replace mornings
+|They help manage energy and productivity|
+They avoid responsibility
+They reduce structure
+
+~Afternoon Routines
+500 words
+
+Afternoon Routines and Transitions
+
+Afternoon routines represent a transition period between the structured demands of work or school and the more personal activities of the evening. During this time, people often complete remaining tasks, attend appointments, manage household responsibilities, or prepare for the end of the workday. How this part of the day is organized can strongly influence energy levels and stress.
+
+For many people, the afternoon is a time when focus begins to decrease. Mental fatigue may appear after several hours of concentration. Effective afternoon routines take this into account by prioritizing important tasks earlier and leaving simpler activities for later. This approach helps maintain productivity while avoiding exhaustion.
+
+Household responsibilities often begin in the afternoon. Tasks such as grocery shopping, cleaning, helping children with homework, or preparing ingredients for dinner are commonly done during this time. Completing these tasks before evening allows people to relax more fully later. Afternoon routines that include small household tasks help prevent responsibilities from building up.
+
+Afternoon routines also support time management. Knowing when work or school ends and when personal time begins helps create clear boundaries. Without these boundaries, responsibilities may continue into the evening, increasing stress and reducing rest. Transition routines, such as reviewing completed tasks or planning the next day, help mentally close the work period.
+
+Physical movement can be especially helpful in the afternoon. Light exercise, stretching, or short walks help restore energy and improve mood. Physical activity increases circulation and reduces stiffness caused by long periods of sitting. Even brief movement can improve concentration for the remainder of the day.
+
+Technology continues to influence afternoon routines. Emails, messages, and notifications often increase toward the end of the workday. Managing these distractions is important for maintaining focus. Many people choose to limit digital interruptions to protect their energy and attention.
+
+In conclusion, afternoon routines help manage energy, responsibilities, and transitions. By organizing tasks carefully and including movement and preparation, people can reduce stress and improve balance. A well-structured afternoon creates a smoother shift into evening activities and personal time.~
+
+Quiz
+
+?What role do afternoon routines play in the daily schedule?
+They begin the day
+|They act as a transition between work and evening|
+They replace mornings
+They eliminate rest
+
+?Why does focus often decrease in the afternoon?
+It is a habit
+|Mental fatigue builds after long concentration|
+Tasks become easier
+People stop caring
+
+?Why are important tasks often done earlier in the afternoon?
+They require less effort
+|Energy and focus are higher earlier|
+They are more enjoyable
+They take longer
+
+?What household tasks are commonly done in the afternoon?
+Only cooking
+|Shopping, cleaning, and preparation|
+Sleeping and resting
+Entertainment
+
+?How do afternoon household tasks reduce stress?
+They increase workload
+|They prevent tasks from piling up|
+They delay rest
+They reduce organization
+
+?Why are clear boundaries important in the afternoon?
+They remove flexibility
+|They prevent work from extending into personal time|
+They increase pressure
+They limit productivity
+
+?What is the purpose of transition routines?
+To add tasks
+|To mentally close the work period|
+To extend work
+To avoid planning
+
+?How does physical movement help in the afternoon?
+It reduces circulation
+|It restores energy and improves mood|
+It causes fatigue
+It wastes time
+
+?What challenge does technology create in the afternoon?
+Limited access
+|Increased distractions from messages|
+Reduced communication
+Less productivity
+
+?Why are afternoon routines important overall?
+They replace evenings
+|They support balance and smoother transitions|
+They reduce responsibility
+They avoid planning
+
+~Prep for the Next Day
+500 words
+
+Household Responsibilities at Night and End-of-Day Organization
+
+End-of-day household responsibilities focus on restoring order and preparing the home for the next day. These routines are not meant to be exhausting but supportive. By completing small tasks in the evening, people reduce stress, save time in the morning, and create a calmer living environment.
+
+One common nighttime household task is tidying shared spaces. This may include putting away items left out during the day, organizing cushions, or clearing tables. A tidy space helps signal closure for the day and creates a more peaceful atmosphere. Even a few minutes of light cleaning can make a noticeable difference.
+
+Kitchen-related tasks are especially important at night. Washing dishes, wiping counters, and storing leftover food prevent unpleasant smells and hygiene problems. A clean kitchen in the morning reduces pressure and allows the day to start smoothly. Many people find that waking up to an organized kitchen improves their mood and motivation.
+
+Laundry preparation is another typical evening task. Sorting clothes, loading the washing machine, or folding clean laundry helps distribute work evenly across the week. These small steps prevent large piles from building up and reduce the feeling of being overwhelmed. Evening laundry routines are often quieter and less rushed.
+
+Preparing for the next day is a key part of end-of-day organization. This may include packing bags, laying out clothes, preparing lunches, or reviewing schedules. These actions reduce decision-making in the morning and lower stress levels. Planning ahead creates a sense of control and readiness.
+
+Household routines also encourage shared responsibility. In families or shared living situations, evening chores are often divided among members. This builds cooperation and fairness while teaching responsibility. When tasks are shared, they feel lighter and are completed more efficiently.
+
+Importantly, end-of-day chores should be balanced with rest. Overloading nighttime routines can lead to fatigue and frustration. Successful routines focus on essential tasks rather than perfection. Setting realistic expectations ensures consistency without burnout.
+
+In conclusion, nighttime household responsibilities support organization, cleanliness, and emotional well-being. By completing small tasks and preparing for the next day, people create smoother mornings and calmer homes. These routines contribute to long-term efficiency and a more balanced daily life.~
+
+Quiz
+
+?What is the main purpose of end-of-day household routines?
+To increase workload
+|To restore order and prepare for the next day|
+To delay sleep
+To replace morning routines
+
+?Why is tidying shared spaces at night helpful?
+It creates more mess
+|It promotes calm and closure for the day|
+It wastes time
+It increases stress
+
+?Why are kitchen tasks especially important in the evening?
+They reduce cooking time
+|They prevent hygiene issues and morning stress|
+They increase noise
+They delay rest
+
+?What benefit does preparing laundry at night provide?
+It increases effort
+|It prevents work from piling up|
+It wastes energy
+It delays sleep
+
+?How does planning for the next day reduce stress?
+It removes structure
+|It reduces morning decisions and pressure|
+It increases responsibility
+It causes anxiety
+
+?Why are shared chores important in households?
+They create competition
+|They encourage fairness and cooperation|
+They delay tasks
+They reduce responsibility
+
+?What can be inferred about small nightly tasks?
+They are unnecessary
+|They make routines more manageable and effective|
+They cause fatigue
+They replace weekly cleaning
+
+?Why should nighttime chores be balanced with rest?
+To avoid boredom
+|To prevent burnout and frustration|
+To increase productivity
+To remove routine
+
+?What does waking up to an organized home often improve?
+Physical strength
+|Mood and motivation|
+Sleep duration
+Workload
+
+?Why are end-of-day routines valuable overall?
+They replace weekends
+|They support smoother mornings and balanced living|
+
+~Evening Routines
+500 words
+
+Evening Routines and Personal Time
+
+Evening routines mark the shift from responsibility to relaxation. After work, school, or daytime obligations, people use the evening to unwind, connect with others, and prepare for rest. How evenings are structured can strongly affect mental health, sleep quality, and overall well-being.
+
+For many people, evenings include shared activities such as family meals or conversations. Eating together creates opportunities for connection and communication. These moments help strengthen relationships and provide emotional support. Even for individuals living alone, evening routines often include intentional relaxation or social interaction through calls or messages.
+
+Household chores are commonly completed in the evening. Tasks such as cooking dinner, washing dishes, tidying rooms, or preparing items for the next day help maintain order. When these chores are part of a regular routine, they feel more manageable and less stressful. Completing small tasks in the evening prevents clutter and saves time the following morning.
+
+Evenings are also an important time for personal interests. Reading, watching shows, listening to music, exercising lightly, or engaging in hobbies allows people to recharge. These activities provide enjoyment and help balance the demands of daily life. However, too much stimulation, especially from screens, can interfere with relaxation.
+
+Technology plays a major role in modern evening routines. Many people use phones, televisions, or computers to relax. While technology can be entertaining, excessive screen time may increase stress or delay sleep. Setting limits on device use, especially before bedtime, helps protect rest and mental health.
+
+Preparing for the next day is another key part of evening routines. Laying out clothes, organizing bags, or making plans reduces morning stress. These small actions create a sense of control and readiness. Evening preparation supports smoother mornings and more consistent daily routines.
+
+Emotional well-being is closely connected to how evenings are spent. Calm, predictable routines signal the body and mind to slow down. This makes it easier to relax and transition into sleep. Irregular or overly busy evenings can lead to restlessness and fatigue.
+
+In conclusion, evening routines provide balance between responsibility and rest. By combining light chores, relaxation, and preparation, people can improve sleep and reduce stress. Well-structured evenings support healthier daily rhythms and greater overall stability.~
+
+Quiz
+
+?What is the main purpose of evening routines?
+To increase productivity
+|To shift from responsibility to relaxation|
+To replace sleep
+To extend work
+
+?Why are shared evening meals important?
+They save time
+|They strengthen relationships and communication|
+They reduce nutrition
+They avoid routines
+
+?How do evening chores reduce stress?
+They increase pressure
+|They prevent disorder and save future time|
+They delay sleep
+They add responsibility
+
+?Why are hobbies important in the evening?
+They replace sleep
+|They help people recharge and enjoy themselves|
+They reduce focus
+They increase fatigue
+
+?What risk is linked to excessive screen use in the evening?
+Improved sleep
+|Delayed relaxation and poor sleep quality|
+Better focus
+Increased energy
+
+?Why is limiting technology before bed helpful?
+It removes entertainment
+|It supports mental calm and rest|
+It increases boredom
+It causes stress
+
+?What is the benefit of preparing for the next day in the evening?
+It adds pressure
+|It reduces morning stress|
+It wastes time
+It limits flexibility
+
+?How do calm evening routines affect sleep?
+They disrupt sleep
+|They signal the body to slow down|
+They increase alertness
+They remove rest
+
+?What happens when evenings are irregular or overly busy?
+Better rest
+|Increased fatigue and restlessness|
+Improved energy
+Reduced stress
+
+?Why are evening routines important overall?
+They replace work
+|They support rest, balance, and well-being|
+They avoid responsibility
+They reduce structure
+
+~Nighttime Routines
+500 words
+
+Nighttime Routines and Sleep Preparation
+
+Nighttime routines focus on preparing the body and mind for rest. Unlike daytime or evening routines, nighttime activities are meant to reduce stimulation and support healthy sleep. Consistent nighttime habits help regulate the body’s internal clock and improve sleep quality over time.
+
+One of the most important parts of nighttime routines is consistency. Going to bed at a similar time each night helps the body recognize when it is time to sleep. When sleep schedules change frequently, people may experience difficulty falling asleep or waking up feeling tired. A predictable routine creates a sense of security and calm.
+
+Personal hygiene is a common nighttime activity. Brushing teeth, washing the face, showering, or changing into sleepwear signals the transition from activity to rest. These habits are not only important for health but also act as mental cues that the day is ending. Repeating the same steps each night strengthens this association.
+
+Reducing stimulation is essential during nighttime routines. Bright lights, loud sounds, and intense mental activity can delay sleep. Many people dim lights, lower noise levels, and avoid stressful conversations late at night. Calm activities such as reading, stretching, or quiet reflection help the body relax.
+
+Screen use is a major challenge for modern sleep routines. Phones, tablets, and televisions emit blue light, which can interfere with the production of melatonin, a hormone that regulates sleep. Using screens too close to bedtime may make it harder to fall asleep. Creating screen-free time before bed supports deeper and more restful sleep.
+
+The sleep environment also plays an important role. A comfortable bed, clean sheets, and a quiet, dark room promote better rest. Temperature matters as well; cooler rooms are generally more suitable for sleeping. Small adjustments to the sleep environment can greatly improve sleep quality.
+
+Mental preparation is just as important as physical preparation. Some people use journaling, meditation, or deep breathing to clear their minds before sleep. These practices help release worries and reduce anxiety. When the mind is calm, falling asleep becomes easier.
+
+In conclusion, nighttime routines are essential for healthy sleep and overall well-being. By maintaining consistency, reducing stimulation, and creating a supportive sleep environment, people can improve both the quality and duration of their rest. Strong nighttime habits lead to better energy, focus, and mood during the day.~
+
+Quiz
+
+?What is the main goal of nighttime routines?
+To increase activity
+|To prepare the body and mind for sleep|
+To improve productivity
+To replace evening routines
+
+?Why is consistency important for sleep?
+It limits freedom
+|It helps regulate the body’s internal clock|
+It reduces rest
+It increases stress
+
+?How does personal hygiene support sleep?
+It delays bedtime
+|It signals the transition from day to night|
+It increases energy
+It disrupts routine
+
+?Why should stimulation be reduced at night?
+It causes boredom
+|It can delay relaxation and sleep|
+It improves alertness
+It increases motivation
+
+?What effect does blue light have on sleep?
+It improves rest
+|It interferes with melatonin production|
+It increases dreaming
+It causes relaxation
+
+?Why is screen-free time before bed recommended?
+It avoids entertainment
+|It supports faster and deeper sleep|
+It reduces learning
+It increases stress
+
+?How does the sleep environment affect rest?
+It has no effect
+|It influences comfort and sleep quality|
+It delays sleep
+It increases noise
+
+?Why are cooler rooms often better for sleep?
+They reduce oxygen
+|They help the body relax more easily|
+They increase alertness
+They cause discomfort
+
+?What is the purpose of mental relaxation practices at night?
+They increase worry
+|They reduce anxiety and clear the mind|
+They replace sleep
+They cause stimulation
+
+?Why are nighttime routines important overall?
+They replace exercise
+|They improve sleep, energy, and daily functioning|
+They remove structure
+They limit flexibility
+
+~Housework as Routine
+450 words
+
+Housework refers to all the regular tasks needed to keep a home clean, safe, and comfortable. These tasks include cleaning, organizing, maintenance, and caring for shared spaces. While housework is often seen as boring or tiring, it plays an essential role in daily life and personal well-being. When managed as a routine, housework becomes easier, faster, and less stressful.
+
+A housework routine means doing small tasks regularly instead of letting them build up. For example, washing dishes every day prevents large piles from forming. Making the bed each morning keeps the bedroom tidy with little effort. When tasks are spread over time, they require less energy and feel more manageable.
+
+Routines also improve time management. People who schedule housework know when tasks will be done and do not waste time deciding what to clean. This leaves more free time for rest or hobbies. Many people choose daily, weekly, and monthly tasks to balance effort and results.
+
+Housework routines support mental health. Living in a clean and organized space reduces stress and helps people feel more in control. Cluttered homes often create feelings of anxiety or distraction. Simple routines create order and calm in daily life.
+
+Sharing housework is another important part of managing routines. In households with more than one person, dividing tasks fairly prevents conflict and exhaustion. Children who participate in age-appropriate chores learn responsibility and independence. Clear routines help everyone understand their role.
+
+Flexibility is also important. Routines should fit individual lifestyles and schedules. Some people prefer short daily cleaning sessions, while others prefer longer weekly tasks. A good routine is realistic and consistent, not perfect.
+
+In conclusion, housework is not just about cleaning but about creating a healthy living environment. When managed as a routine, it saves time, reduces stress, and improves quality of life. Regular housework routines help homes stay clean and people feel more comfortable and organized.~
+
+Quiz
+
+?What does housework include?
+Only cooking
+|All tasks needed to keep a home clean and safe|
+Only cleaning floors
+Only outdoor work
+
+?Why is housework important?
+It wastes time
+|It supports comfort and well-being|
+It avoids responsibility
+It increases stress
+
+?What is the benefit of a housework routine?
+Tasks become harder
+|Work feels easier and more manageable|
+Homes get messier
+Time is wasted
+
+?Why is doing small tasks regularly helpful?
+It increases effort
+|It prevents tasks from building up|
+It avoids cleaning
+It replaces routines
+
+?How do routines improve time management?
+They reduce sleep
+|They reduce decision-making and save time|
+They add stress
+They avoid planning
+
+?How does a clean home affect mental health?
+It causes distraction
+|It reduces stress and anxiety|
+It creates pressure
+It avoids focus
+
+?Why is sharing housework important?
+It causes conflict
+|It prevents exhaustion and builds fairness|
+It avoids responsibility
+It reduces skills
+
+?What do children learn from chores?
+Confusion
+|Responsibility and independence|
+Disobedience
+Stress
+
+?Why should routines be flexible?
+To avoid effort
+|To fit different lifestyles and schedules|
+To delay tasks
+To ignore cleaning
+
+?What is the main idea of managing housework as a routine?
+Cleaning must be perfect
+|Regular habits improve daily life|
+Housework should be avoided
+Only adults should clean
+
+~Cleaning the House
+450 words
+
+Cleaning the house is one of the most common household chores worldwide. It includes tasks such as dusting, vacuuming, sweeping, mopping, and organizing living spaces. Although cleaning is often seen as a responsibility rather than a hobby, it plays an important role in daily life and overall well-being. A clean home is generally healthier, more comfortable, and more pleasant to live in.
+
+One important reason people clean their homes is hygiene. Dust, dirt, and bacteria can build up quickly, especially in areas like kitchens and bathrooms. Regular cleaning helps reduce germs and prevents unpleasant smells. This is especially important for families with children, pets, or people with allergies. Clean environments are linked to better physical health and fewer illnesses.
+
+Cleaning also affects mental well-being. Many people feel calmer and more relaxed in a tidy space. Clutter can cause stress and make it harder to focus, while a clean room often feels more organized and peaceful. For some people, cleaning itself can be calming because it provides structure and visible results.
+
+Common cleaning tools include brooms, vacuum cleaners, mops, cleaning cloths, and cleaning products such as soap and disinfectant. Modern technology has made cleaning easier through tools like robotic vacuums and eco-friendly products. However, even simple tools can be effective when used regularly.
+
+Although cleaning is necessary, many people find it tiring or boring. To manage this, some people create routines or divide tasks among family members. Others listen to music or podcasts while cleaning to make the task more enjoyable. Shared responsibility often makes cleaning feel less stressful.
+
+In conclusion, cleaning the house is an essential chore that supports both physical health and mental comfort. Even though it may not always be enjoyable, its benefits are clear. A clean home creates a better living environment and helps people feel more in control of their space.~
+
+Quiz
+
+?Why is house cleaning important for health?
+It saves time
+|It reduces germs and dirt|
+It improves decoration
+It replaces exercise
+
+?What can be inferred about clutter?
+It improves focus
+|It may increase stress|
+It saves space
+It improves hygiene
+
+?Why do people clean kitchens and bathrooms more often?
+They look better
+|They collect more germs|
+They are larger
+They are used less
+
+?What does regular cleaning help prevent?
+Creativity
+|Illness and bad smells|
+Organization
+Social interaction
+
+?How can cleaning affect mental health?
+It causes anxiety
+|It can create calm and order|
+It removes motivation
+It increases confusion
+
+?What role does technology play in cleaning?
+It replaces effort
+|It can make cleaning easier|
+It stops cleaning
+It increases mess
+
+?Why do some people dislike cleaning?
+It is dangerous
+|It can feel tiring or boring|
+It is unhealthy
+It takes no effort
+
+?How do people make cleaning more enjoyable?
+By avoiding it
+|By listening to music or sharing tasks|
+By rushing
+By ignoring results
+
+?What can be inferred about shared cleaning?
+It causes conflict
+|It reduces individual stress|
+It avoids responsibility
+It wastes time
+
+?Why is cleaning considered essential?
+It is optional
+|It improves living conditions|
+It replaces hobbies
+It avoids work
+
+~Doing the Laundry
+450 words
+
+Doing the laundry is a regular household chore that involves washing, drying, and folding clothes. It is necessary for cleanliness, comfort, and personal hygiene. Clean clothes help people feel confident and healthy, while dirty clothes can carry bacteria and unpleasant smells.
+
+Laundry begins with sorting clothes by color, fabric, or washing needs. This prevents damage and color mixing. Clothes are then washed using water, detergent, and sometimes fabric softener. After washing, clothes are dried either in a dryer or naturally on a line. Folding and storing clothes is the final step.
+
+Laundry habits vary between cultures and households. Some people do laundry daily, while others do it weekly. Technology has made laundry easier with modern washing machines and energy-efficient dryers. However, laundry still requires time and attention.
+
+Laundry also teaches responsibility. Children who help with laundry often learn organization and time management. Adults benefit from having clean, prepared clothing for work and social life.
+
+In conclusion, laundry is a basic but important task that supports hygiene, routine, and personal care.~
+
+Quiz
+
+?Why is laundry important?
+It improves furniture
+|It supports hygiene and comfort|
+It saves electricity
+It decorates rooms
+
+?What is the purpose of sorting clothes?
+To save time
+|To prevent damage or color mixing|
+To reduce washing
+To improve smell
+
+?What can be inferred about clean clothes?
+They are unnecessary
+|They improve confidence and health|
+They last less
+They waste water
+
+?How has technology affected laundry?
+It made it harder
+|It made it more efficient|
+It removed effort
+It replaced clothing
+
+?Why is folding clothes important?
+It cleans them again
+|It keeps them organized|
+It damages fabric
+It wastes time
+
+?Why do laundry habits differ?
+Rules are strict
+|Households have different routines|
+Machines are rare
+Clothes are optional
+
+?What skill can children learn from laundry?
+Creativity
+|Responsibility and organization|
+Speed
+Competition
+
+?What happens if laundry is ignored?
+Nothing
+|Clothes become dirty and uncomfortable|
+Clothes improve
+Health increases
+
+?Why is laundry considered routine?
+It is optional
+|It must be done regularly|
+It is seasonal
+It replaces hobbies
+
+?What is the main purpose of laundry?
+Decoration
+|Personal hygiene and cleanliness|
+Entertainment
+Exercise
+
+~Washing the Dishes
+450 words
+
+Washing the dishes is a common household chore that involves cleaning plates, glasses, cutlery, and cooking tools after meals. It can be done by hand or with a dishwasher, depending on the household. Although it is a simple task, washing dishes plays an important role in hygiene, organization, and daily routine.
+
+One of the main reasons dishes must be washed regularly is health. Leftover food can attract bacteria, insects, and unpleasant smells. Dirty dishes left for too long may spread germs and create an unhealthy kitchen environment. Clean dishes help ensure that food preparation and eating remain safe.
+
+Washing dishes also helps maintain order in the home. A sink full of dirty dishes can make the kitchen feel messy and stressful. In contrast, a clean kitchen often feels more welcoming and functional. Many people find that washing dishes immediately after meals prevents clutter and saves time later.
+
+There are two main methods of dishwashing. Hand-washing usually involves hot water, dish soap, and a sponge or brush. This method allows careful cleaning of delicate items. Dishwashers use high-temperature water and detergent to clean many dishes at once, saving time and effort. However, they require electricity and proper loading to work efficiently.
+
+Dishwashing is often shared among household members. In some families, it is part of a daily routine or chore schedule. Sharing this task can teach responsibility and cooperation, especially to children. When duties are divided fairly, the task feels less tiring.
+
+Although many people dislike washing dishes, others find it relaxing. The repeated actions and warm water can feel calming, especially after a busy day. Some people listen to music or podcasts while doing the dishes to make the chore more enjoyable.
+
+In conclusion, washing the dishes is a simple but essential household chore. It supports hygiene, organization, and shared responsibility. While it may not be exciting, it helps keep the home clean and comfortable.~
+
+Quiz
+
+?Why is washing dishes important for health?
+It saves money
+|It prevents bacteria and bad smells|
+It improves taste
+It reduces cooking
+
+?What can be inferred about dirty dishes left too long?
+They clean themselves
+|They may cause hygiene problems|
+They save water
+They improve organization
+
+?How does a clean kitchen affect people?
+It increases stress
+|It feels more organized and welcoming|
+It reduces appetite
+It causes confusion
+
+?Why do some people wash dishes immediately?
+They enjoy water
+|To avoid clutter and save time later|
+To waste soap
+To avoid cooking
+
+?What advantage does hand-washing offer?
+It is automatic
+|It allows careful cleaning of delicate items|
+It uses no water
+It is faster always
+
+?What must be done for dishwashers to work well?
+Nothing
+|They must be loaded correctly|
+They need cold water
+They need hand soap
+
+?Why is dishwashing often shared?
+It avoids responsibility
+|It teaches cooperation and fairness|
+It is optional
+It saves electricity
+
+?Why might dishwashing feel relaxing to some people?
+It is exciting
+|It involves repetitive, calming actions|
+It increases noise
+It causes stress
+
+?What can be inferred about disliked chores?
+They are useless
+|They are still necessary|
+They should be ignored
+They replace hobbies
+
+?Why is dishwashing essential?
+It decorates kitchens
+|It supports cleanliness and comfort|
+It replaces cooking
+It improves technology
+
+~Cooking Daily Meals
+450 words
+
+Cooking daily meals is one of the most important household chores. It involves planning, preparing, and cooking food for oneself or others. Although cooking can be enjoyable, daily meal preparation is often seen as a responsibility because it must be done regularly.
+
+One reason cooking is essential is nutrition. Home-cooked meals usually allow better control over ingredients, portion sizes, and cooking methods. This can lead to healthier eating habits compared to processed or restaurant food. Cooking at home also helps people become more aware of what they consume.
+
+Cooking daily meals requires organization and time management. Ingredients must be bought in advance, meals planned, and food prepared on schedule. For busy households, this can be challenging. Many people prepare simple meals during the week and more complex dishes on weekends.
+
+Cultural traditions strongly influence daily cooking. Many families prepare traditional dishes that reflect their background and values. These meals often carry emotional meaning and are connected to family identity. Cooking traditional food helps preserve culture across generations.
+
+Cooking is often shared among household members. In some homes, one person cooks regularly, while in others the task rotates. Shared cooking responsibilities can reduce stress and teach cooperation. Children who help with cooking often learn practical skills and independence.
+
+Despite its importance, cooking daily meals can feel tiring. Repeating the task every day may reduce enjoyment. To manage this, some people plan meals ahead or cook larger portions to save time. Using simple recipes also helps reduce pressure.
+
+In conclusion, cooking daily meals is a vital household chore that supports health, culture, and routine. Although it requires effort and planning, it provides long-term benefits for individuals and families.~
+
+Quiz
+
+?Why is cooking daily meals important for health?
+It avoids effort
+|It allows control over ingredients and nutrition|
+It replaces exercise
+It wastes time
+
+?What can be inferred about home-cooked meals?
+They are always expensive
+|They are often healthier than processed food|
+They require restaurants
+They reduce awareness
+
+?Why does cooking require organization?
+It is optional
+|It involves planning and timing|
+It avoids preparation
+It needs no tools
+
+?What challenge do busy households face?
+Too much food
+|Limited time for cooking|
+Too many recipes
+Too much equipment
+
+?How does cooking reflect culture?
+It removes identity
+|It preserves traditions and values|
+It avoids history
+It replaces language
+
+?Why is shared cooking helpful?
+It causes confusion
+|It reduces stress and builds cooperation|
+It wastes time
+It avoids learning
+
+?What can children learn from helping cook?
+Competition
+|Practical skills and independence|
+Speed
+Discipline only
+
+?Why can daily cooking feel tiring?
+It is unhealthy
+|It must be repeated every day|
+It requires travel
+It uses no creativity
+
+?How do people reduce cooking stress?
+By skipping meals
+|By planning or cooking in advance|
+By eating only out
+By avoiding recipes
+
+?Why is daily cooking considered essential?
+It decorates homes
+|It supports health and family routine|
+It replaces chores
+It avoids responsibility
+
+~Taking Out the Trash
+400 words
+
+Taking out the trash is a basic household chore that involves removing waste from the home and placing it in designated disposal areas. Although it is simple, this task is essential for hygiene, safety, and comfort. Trash removal prevents bad smells, pests, and clutter from building up indoors.
+
+Household trash includes food waste, packaging, paper, and other unwanted materials. If trash is not removed regularly, it can attract insects and animals and create unsanitary conditions. This is especially important in kitchens, where food waste can spoil quickly.
+
+Many households separate trash into different categories, such as recyclable, organic, and general waste. This practice supports environmental responsibility and waste reduction. Recycling helps reduce landfill use and conserves resources, making trash removal part of a larger environmental system.
+
+Taking out the trash is often assigned as a regular responsibility. In shared households, it may rotate between members. Because the task is simple, it is often given to children as an introduction to household responsibility. Completing this chore helps build routine and accountability.
+
+Although taking out the trash takes little time, people sometimes forget or delay it. This can lead to unpleasant smells or overflowing bins. Creating a regular schedule helps prevent these problems and keeps the home clean.
+
+In conclusion, taking out the trash is a small but important household chore. It supports cleanliness, health, and environmental care. Despite its simplicity, it plays a key role in maintaining a comfortable living space.~
+
+Quiz
+
+?Why is taking out the trash important?
+It improves decoration
+|It prevents bad smells and pests|
+It saves time
+It improves cooking
+
+?What can happen if trash is not removed?
+Nothing
+|Unsanitary conditions may develop|
+Food improves
+Homes become quieter
+
+?Why is trash removal important in kitchens?
+They are large
+|Food waste spoils quickly|
+They are private
+They are clean
+
+?What does separating trash support?
+Waste increase
+|Environmental responsibility|
+Higher cost
+More clutter
+
+?What can recycling help reduce?
+Cooking time
+|Landfill waste|
+Responsibility
+Effort
+
+?Why is trash duty often shared?
+It avoids fairness
+|It teaches routine and responsibility|
+It saves money
+It replaces chores
+
+?Why is trash duty often given to children?
+It is dangerous
+|It is simple and educational|
+It avoids learning
+It is optional
+
+?Why do people sometimes delay this chore?
+It is complex
+|It seems small or easy to forget|
+It takes hours
+It requires tools
+
+?How can trash problems be avoided?
+By ignoring them
+|By following a regular schedule|
+By cooking less
+By using more bags
+
+?Why is trash removal essential?
+It decorates homes
+|It maintains hygiene and comfort|
+It replaces recycling
+It avoids responsibility
+
+~Cleaning the Bathroom
+450 words
+
+Cleaning the bathroom is one of the most important household chores because it directly affects hygiene and health. Bathrooms are used daily and contain moisture, which creates an ideal environment for bacteria, mold, and unpleasant odors. Regular cleaning helps keep the space safe, comfortable, and pleasant to use.
+
+Bathroom cleaning usually includes washing sinks, toilets, showers, bathtubs, mirrors, and floors. Soap residue, hair, and dirt can build up quickly if these areas are ignored. Toilets and sinks require special attention because they come into contact with germs. Using appropriate cleaning products helps remove bacteria and prevents stains.
+
+One challenge of bathroom cleaning is that it is often disliked. Many people avoid the task because it feels unpleasant or time-consuming. However, delaying bathroom cleaning often makes the job harder later. Dirt becomes more difficult to remove, and smells can become stronger.
+
+Cleaning the bathroom also improves mental comfort. A clean bathroom makes people feel more relaxed and confident, especially when guests visit. In contrast, a dirty bathroom can cause embarrassment and stress. This shows that bathroom cleaning affects both physical and emotional well-being.
+
+In shared households, bathroom cleaning is usually divided among members. Some homes create schedules to ensure fairness. Sharing responsibility helps prevent conflict and ensures the task is done regularly. Children who help with bathroom cleaning often learn about hygiene and responsibility.
+
+Although bathroom cleaning requires effort, it does not need to be done every day. Regular weekly cleaning is usually enough if the bathroom is kept tidy between cleanings. Simple habits, such as wiping surfaces and ventilating the room, help reduce dirt buildup.
+
+In conclusion, cleaning the bathroom is an essential household chore. It protects health, improves comfort, and supports a clean living environment. Even though it may be unpleasant, it provides important long-term benefits.~
+
+Quiz
+
+?Why is bathroom cleaning especially important?
+It improves decoration
+|It prevents bacteria and mold|
+It saves money
+It reduces water use
+
+?What makes bathrooms prone to germs?
+Bright light
+|Moisture and frequent use|
+Furniture
+Noise
+
+?Why does delaying bathroom cleaning cause problems?
+It saves time
+|Dirt becomes harder to remove|
+It improves smell
+It reduces effort
+
+?Which areas need special attention?
+Windows
+|Toilets and sinks|
+Curtains
+Ceilings
+
+?How does a clean bathroom affect people emotionally?
+It increases fear
+|It makes them feel relaxed and confident|
+It causes stress
+It reduces comfort
+
+?Why can a dirty bathroom be stressful?
+It is noisy
+|It can cause embarrassment|
+It uses space
+It changes temperature
+
+?Why are schedules useful in shared homes?
+They avoid cleaning
+|They ensure fairness and regularity|
+They increase work
+They remove responsibility
+
+?What can children learn from this chore?
+Competition
+|Hygiene and responsibility|
+Speed
+Silence
+
+?How often is deep bathroom cleaning usually needed?
+Every day
+|About once a week|
+Once a year
+Never
+
+?Why is bathroom cleaning essential overall?
+It replaces repairs
+|It supports health and comfort|
+It improves cooking
+It saves electricity
+
+~Making the Bed
+400 words
+
+Making the bed is a simple daily household chore that involves arranging sheets, blankets, and pillows neatly after sleeping. Although it takes only a few minutes, it plays an important role in organization, routine, and mental well-being.
+
+One benefit of making the bed is that it creates a sense of order. A neatly made bed makes the bedroom look cleaner and more peaceful. Since the bed is usually the largest object in the room, its appearance strongly affects how tidy the space feels.
+
+Making the bed also helps establish a daily routine. For many people, it is the first task they complete each morning. This small achievement can create a feeling of productivity and motivation for the rest of the day. It encourages discipline and consistency.
+
+Some people believe making the bed improves sleep quality. While it does not directly affect sleep, returning to a clean and organized bed at night can feel comforting. Fresh sheets and a neat bed can help people relax more easily before sleeping.
+
+Others argue that making the bed is unnecessary. However, even those who dislike the task often admit that a messy bed makes the room feel chaotic. This suggests that the chore has psychological benefits beyond cleanliness.
+
+Making the bed is often assigned to children as an early household responsibility. Because it is easy to learn and quick to complete, it helps children develop independence and self-care habits. It also teaches attention to detail.
+
+In conclusion, making the bed is a small but meaningful household chore. It supports organization, routine, and mental comfort. While simple, it contributes to a more pleasant living environment.~
+
+Quiz
+
+?Why does making the bed affect the whole room?
+It changes lighting
+|The bed is the largest object|
+It improves air
+It adds furniture
+
+?What feeling can making the bed create in the morning?
+Frustration
+|Productivity and motivation|
+Confusion
+Fatigue
+
+?What can be inferred about routine?
+It limits freedom
+|It helps create discipline|
+It avoids responsibility
+It causes stress
+
+?Does making the bed directly improve sleep?
+Always
+|No, but it helps with comfort|
+Only for children
+Never
+
+?Why do some people dislike making the bed?
+It is dangerous
+|They see it as unnecessary|
+It costs money
+It uses tools
+
+?How does a messy bed affect a room?
+It improves energy
+|It makes the room feel chaotic|
+It saves space
+It reduces light
+
+?Why is this chore good for children?
+It is complex
+|It builds independence and habits|
+It avoids learning
+It is competitive
+
+?How long does making the bed usually take?
+An hour
+|Only a few minutes|
+Half a day
+All morning
+
+?What type of benefit does this chore mainly offer?
+Financial
+|Psychological and organizational|
+Technical
+Medical
+
+?Why is making the bed meaningful?
+It replaces cleaning
+|It improves daily structure and comfort|
+It saves electricity
+It improves diet
+
+~Grocery Shopping
+450 words
+
+Grocery shopping is an essential household chore that involves buying food and daily necessities. It connects planning, budgeting, and nutrition, making it one of the most influential tasks in daily life. Without regular grocery shopping, households cannot function smoothly.
+
+One important part of grocery shopping is planning. Many people make shopping lists before going to the store to avoid forgetting items and overspending. Planning meals in advance helps ensure balanced nutrition and reduces food waste. It also saves time during busy weeks.
+
+Budget management is another key aspect. Prices vary between stores and products, so shoppers must make choices based on cost and quality. Comparing prices, buying seasonal foods, and avoiding impulse purchases help control expenses. Grocery shopping therefore involves decision-making skills.
+
+Grocery shopping also influences health. The foods people buy determine what they eat. Choosing fresh vegetables, fruits, and whole foods supports better nutrition, while buying processed snacks may lead to unhealthy habits. This shows how shopping choices affect long-term well-being.
+
+In many households, grocery shopping is shared or rotated. Some families shop together, while others divide tasks. Children who participate often learn about money, food choices, and responsibility. This makes grocery shopping an educational experience.
+
+Although grocery shopping can be tiring, many people enjoy it. Exploring new products, choosing ingredients, and planning meals can be satisfying. Online grocery shopping has also become popular, offering convenience for busy households.
+
+In conclusion, grocery shopping is more than buying food. It supports health, budgeting, and household organization. When done thoughtfully, it improves daily life and long-term well-being.~
+
+Quiz
+
+?Why is grocery shopping essential?
+It improves decoration
+|It provides food and necessities|
+It replaces cooking
+It saves energy
+
+?Why do people make shopping lists?
+To waste time
+|To save money and avoid forgetting items|
+To buy more
+To avoid stores
+
+?How does meal planning help?
+It increases cost
+|It improves nutrition and reduces waste|
+It avoids cooking
+It limits choice
+
+?What skill is needed for budgeting?
+Speed
+|Decision-making|
+Strength
+Creativity only
+
+?How does grocery shopping affect health?
+It has no effect
+|It determines daily food choices|
+It replaces exercise
+It avoids nutrition
+
+?Why is impulse buying a problem?
+It saves time
+|It increases unnecessary spending|
+It improves quality
+It avoids planning
+
+?Why is shopping sometimes shared?
+It avoids effort
+|It teaches responsibility and cooperation|
+It costs more
+It removes learning
+
+?What can children learn from shopping?
+Silence
+|Money awareness and food choices|
+Competition
+Speed
+
+?Why do some people enjoy grocery shopping?
+It is stressful
+|It allows planning and exploration|
+It avoids routine
+It saves sleep
+
+?Why is grocery shopping more than a simple chore?
+It replaces hobbies
+|It supports health and organization|
+It avoids responsibility
+It improves decoration
+
+~Doing the Laundry
+450 words
+
+Doing the laundry is a regular household chore that involves washing, drying, and folding clothes and household fabrics. It plays a crucial role in hygiene, comfort, and personal appearance. Clean clothes help people feel confident and healthy in daily life.
+
+Laundry usually begins with sorting clothes by color, fabric type, or level of dirt. This prevents damage and color mixing. Washing machines use water and detergent to remove dirt, sweat, and bacteria. After washing, clothes are dried either by air or in a dryer, then folded or hung.
+
+One important reason for doing laundry regularly is hygiene. Clothes absorb sweat, skin oils, and environmental dirt. If not cleaned, they can develop unpleasant smells and bacteria. Clean clothing reduces skin irritation and helps maintain personal cleanliness.
+
+Laundry also affects organization. Piles of dirty clothes can make a home feel messy and stressful. A regular laundry routine prevents clutter and ensures that clean clothes are always available. Many people choose specific laundry days to manage the task efficiently.
+
+Although laundry is repetitive, it requires attention. Using the wrong detergent or temperature can damage clothes. This teaches responsibility and care, especially to young people learning household skills.
+
+Laundry is often shared in households. Some families divide tasks such as washing, drying, and folding. Sharing responsibilities reduces workload and promotes cooperation.
+
+In conclusion, doing the laundry is an essential household chore. It supports hygiene, organization, and comfort. While repetitive, it plays a key role in daily life.~
+
+Quiz
+
+?Why is laundry important for hygiene?
+It improves decoration
+|It removes dirt and bacteria from clothes|
+It saves water
+It improves lighting
+
+?Why are clothes sorted before washing?
+To save time
+|To prevent damage and color mixing|
+To avoid folding
+To use more detergent
+
+?What happens if clothes are not washed regularly?
+They improve
+|They may smell and carry bacteria|
+They last longer
+They need no care
+
+?How does laundry affect home organization?
+It increases clutter
+|It prevents piles of dirty clothes|
+It replaces cleaning
+It avoids routine
+
+?Why do many people choose specific laundry days?
+To waste time
+|To manage the task efficiently|
+To avoid washing
+To reduce water
+
+?What skill does laundry require?
+Speed
+|Attention and responsibility|
+Strength
+Creativity
+
+?How can laundry damage clothes?
+By folding
+|Using wrong temperature or detergent|
+By sorting
+By drying
+
+?Why is laundry often shared?
+It avoids learning
+|It reduces workload and builds cooperation|
+It increases stress
+It wastes energy
+
+?What feeling do clean clothes provide?
+Fear
+|Comfort and confidence|
+Confusion
+Anger
+
+?Why is laundry essential?
+It replaces shopping
+|It supports hygiene and daily comfort|
+It decorates homes
+It avoids responsibility
+
+~Cleaning the Floors
+450 words
+
+Vacuuming and floor cleaning are household chores that focus on removing dust, dirt, and debris from floors. Clean floors improve hygiene, appearance, and indoor air quality. Because floors are used constantly, they collect dirt quickly and require regular attention.
+
+Vacuuming is commonly used on carpets and rugs, while sweeping and mopping are used on hard floors. Vacuum cleaners remove dust, hair, and small particles that are difficult to see. Mopping removes stains and sticky dirt, leaving floors clean and fresh.
+
+One major benefit of floor cleaning is health. Dust and allergens can cause breathing problems, especially for people with allergies. Regular cleaning reduces these particles and improves air quality inside the home.
+
+Floor cleaning also affects appearance. Dirty floors make a room look neglected, even if other areas are clean. Clean floors create a sense of order and care. This is especially important when guests visit.
+
+Many households clean floors weekly or more often in high-traffic areas. Creating a schedule helps prevent dirt buildup. Some people prefer quick daily cleaning to reduce effort later.
+
+Vacuuming and mopping are often shared chores. Because the task is physical, dividing responsibility prevents exhaustion. Children who help learn cleanliness habits and teamwork.
+
+In conclusion, vacuuming and floor cleaning are essential household chores. They support health, cleanliness, and comfort. Regular floor care helps maintain a pleasant living space.~
+
+Quiz
+
+?Why do floors need regular cleaning?
+They stay clean naturally
+|They collect dirt from constant use|
+They improve air
+They change color
+
+?What tool is used for carpets?
+Mop
+|Vacuum cleaner|
+Brush
+Sponge
+
+?Why is mopping important?
+It adds noise
+|It removes stains and sticky dirt|
+It replaces sweeping
+It wastes water
+
+?How does floor cleaning affect health?
+It causes allergies
+|It reduces dust and allergens|
+It increases dirt
+It avoids hygiene
+
+?Why do dirty floors affect appearance?
+They smell
+|They make rooms look neglected|
+They reduce light
+They break furniture
+
+?Why do people follow cleaning schedules?
+To avoid work
+|To prevent dirt buildup|
+To waste time
+To avoid guests
+
+?Why is floor cleaning often shared?
+It avoids effort
+|It reduces physical strain|
+It increases mess
+It avoids learning
+
+?What can children learn from floor cleaning?
+Silence
+|Cleanliness and teamwork|
+Speed
+Competition
+
+?Which areas need more frequent cleaning?
+Bedrooms
+|High-traffic areas|
+Ceilings
+Walls
+
+?Why is floor cleaning essential?
+It decorates floors
+|It supports health and comfort|
+It replaces repairs
+It improves cooking
+
+~Yard Work
+400 words
+
+Yard work includes outdoor household chores such as mowing lawns, trimming plants, watering gardens, and removing leaves. Although it requires physical effort, yard work helps maintain a clean, safe, and attractive outdoor space.
+
+One main purpose of yard work is safety. Overgrown grass and plants can hide pests or create hazards. Fallen leaves and branches may cause slips. Regular maintenance prevents these risks.
+
+Yard work also improves appearance. A well-kept yard creates a positive impression and increases enjoyment of outdoor areas. Many people take pride in their gardens and lawns.
+
+Yard work provides physical activity. Tasks such as mowing and digging involve movement and strength. This makes yard work a form of exercise that benefits physical health.
+
+Because yard work depends on weather and seasons, it is usually done periodically rather than daily. Planning around weather conditions is important for efficiency.
+
+In conclusion, yard work is a valuable household chore. It supports safety, appearance, and physical health. While demanding, it improves outdoor living spaces.~
+
+Quiz
+
+?What does yard work include?
+Indoor cleaning
+|Outdoor maintenance tasks|
+Cooking
+Shopping
+
+?Why is yard work important for safety?
+It saves money
+|It removes hazards and pests|
+It increases plants
+It decorates
+
+?How does yard work affect appearance?
+It worsens it
+|It improves outdoor spaces|
+It hides homes
+It changes color
+
+?Why is yard work physically beneficial?
+It avoids movement
+|It provides exercise|
+It causes illness
+It reduces strength
+
+?Why is yard work not done daily?
+It is unnecessary
+|It depends on seasons and weather|
+It is illegal
+It costs money
+
+?What feeling do people often have about their yards?
+Fear
+|Pride|
+Confusion
+Anger
+
+?What risk do fallen leaves create?
+Noise
+|Slipping hazards|
+Lighting issues
+Decoration
+
+?Why must yard work be planned?
+To avoid effort
+|To match weather conditions|
+To reduce plants
+To avoid tools
+
+?What can be inferred about yard work?
+It is optional
+|It improves quality of life|
+It replaces exercise
+It avoids responsibility
+
+?Why is yard work important overall?
+It decorates kitchens
+|It supports safety and outdoor comfort|
+It replaces cleaning
+It saves energy
+
+~Home Maintenance
+450 words
+
+Basic home maintenance includes small repair and upkeep tasks such as fixing leaks, replacing light bulbs, checking appliances, and maintaining safety equipment. These tasks help prevent larger problems and protect the home.
+
+Regular maintenance saves money. Small issues, if ignored, can become expensive repairs. For example, a leaking pipe can cause water damage if not fixed early.
+
+Maintenance also improves safety. Checking smoke detectors, securing loose fixtures, and repairing electrical problems reduce the risk of accidents. This makes the home safer for all residents.
+
+Basic maintenance requires awareness and responsibility. Homeowners and renters must notice problems and act quickly. Learning basic repair skills increases independence.
+
+Although some tasks require professionals, many maintenance jobs are simple. Replacing filters or tightening screws can be done easily and regularly.
+
+In conclusion, basic home maintenance is an essential household responsibility. It supports safety, efficiency, and long-term comfort.~
+
+Quiz
+
+?What is basic home maintenance?
+Decoration
+|Small repair and upkeep tasks|
+Cooking
+Shopping
+
+?Why does maintenance save money?
+It increases bills
+|It prevents larger repairs|
+It wastes tools
+It avoids cleaning
+
+?How does maintenance improve safety?
+It causes noise
+|It reduces accident risks|
+It increases hazards
+It avoids responsibility
+
+?Why must problems be noticed early?
+To ignore them
+|To prevent damage|
+To delay action
+To reduce effort
+
+?What skill does maintenance build?
+Dependence
+|Independence|
+Fear
+Confusion
+
+?Which task is a maintenance example?
+Painting art
+|Replacing light bulbs|
+Cooking dinner
+Shopping
+
+?Why are smoke detectors important?
+They decorate
+|They protect from fire risks|
+They save energy
+They improve air
+
+?Why don’t all tasks need professionals?
+They are illegal
+|Many are simple to do|
+They are dangerous
+They save time
+
+?What happens if maintenance is ignored?
+Nothing
+|Problems can worsen|
+Homes improve
+Costs decrease
+
+?Why is maintenance essential?
+It replaces chores
+|It protects safety and comfort|
+It decorates homes
+It avoids responsibility
+
+
+
+</div>
+
+
+<!-- ================= HARD-CODED TOC ================= -->
+<!-- <div id="layout">
+
+<h1 data-auto-title></h1>
+
+  <div class="container">
+    <div class="column">
+      <h2>Old Testament</h2>
+      <ul class="index">
+
+
+      </ul>
+    </div>
+
+    <div class="column">
+      <h2>New Testament</h2>
+      <ul class="index">
+
+
+      </ul>
+    </div>
+  </div>
+
+</div> -->
+<!-- END #layout -->
+
+
+<!-- ================= DYNAMIC TOC ================= -->
+<div id="dynamicTOC">
+  <div id="tocContainer">
+
+<h1 data-auto-title></h1>
+
+    <div id="tocButtons">
+      <div class="tocColumn" id="tocColLeft"></div>
+      <div class="tocColumn" id="tocColRight"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= QUIZ MODAL ================= -->
+<div id="modalRoot">
+  <div id="quizModal">
+
+<!--<div id="helloBar">Hello!</div> -->
+
+    <!-- CONTROL BARS LIVE HERE -->
+    <div id="chapterVerseControls">
+      <div class="controlRow">
+
+<button id="instructionsBtn">Instructions</button>
+<!-- <select id="chapterSelect"></select> -->
+
+<button id="strategiesBtn">Strategies</button>
+<!-- <select id="verseSelect"></select> -->
+
+<button id="signalwordsBtn">Signals</button>
+<!-- <button id="goBtn">Go</button> -->
+
+<button onclick="goToNextQuiz()">Go to Quiz</button>
+
+      </div>
+    </div>
+
+    <div id="readaloudControls">
+      <div class="controlRow">
+        <button id="highlightSelected">Highlight</button>
+        <button id="copySelected">Copy</button>
+        <button id="startBtn">Audio</button>
+        <button id="closeModalBtn">Close</button>
+      </div>
+    </div>
+
+    <!-- ACTUAL CONTENT -->
+    <div id="quizModalContent">
+      <div id="quizSections"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+(function(){
+
+
+  // [1] GET INPUT SOURCE
+  const src = document.getElementById("rawTextSource");
+  if (!src) return;
+
+  const raw = src.textContent.trim();
+  const lines = raw.split("\n");
+
+  // [2] REGEX RULES
+  const urlRegex = /^https?:\/\/\S+$/i;
+  const urlAnywhere = /(https?:\/\/\S+)/gi;
+
+  // [3] BUILD OUTPUT ARRAYS
+  const htmlResult = [];
+  const speechChunks = [];
+
+  // [4] PARSE LOOP (UNCHANGED LOGIC)
+  for (let i = 0; i < lines.length; i++) {
+
+    let line = lines[i].trim();
+    let next = (lines[i + 1] || "").trim();
+
+    // TITLE + URL HANDLING
+    if (line && !urlRegex.test(line) && urlRegex.test(next)) {
+
+      htmlResult.push(
+        `<a href="${next}" target="_blank" rel="noopener">${line}</a>`
+      );
+
+      speechChunks.push(line);
+
+      i++;
+      continue;
+    }
+
+    // INLINE URL HANDLING
+    const htmlLine = line.replace(urlAnywhere, url =>
+      `<a href="${url}" target="_blank" rel="noopener">${url}</a>`
+    );
+
+    htmlResult.push(htmlLine);
+
+    const cleanText = line.replace(urlAnywhere, "").trim();
+    if (cleanText) {
+      speechChunks.push(cleanText);
+    }
+  }
+
+  // [5] OUTPUT (UNCHANGED — SAFE FOR UI SYSTEM)
+  window.rawText = htmlResult.join("\n");
+
+// SIGNAL: parser is done
+window.parserReady = true;
+
+  // [6] READ-ALOUD HANDOFF (FIXED TO NOT BREAK UI)
+
+  // IMPORTANT:
+  // - no immediate execution
+  // - no blocking
+  // - no fallback globals
+  // - queued after UI thread
+
+  setTimeout(() => {
+    if (typeof window.onParsedTextReady === "function") {
+      window.onParsedTextReady(speechChunks);
+    }
+  }, 0);
+
+})();
+
+</script>
+
+<script>
+(function primeFemaleVoiceOnce() {
+  const synth = window.speechSynthesis;
+  if (!synth) return;
+
+  let primed = false;
+
+  function tryPrime() {
+    if (primed) return;
+
+    const voices = synth.getVoices();
+    if (!voices.length) return;
+
+    const femaleVoice =
+      voices.find(v => /Aria|Zira|Samantha|Victoria|Moira/i.test(v.name)) ||
+      voices.find(v => v.lang && v.lang.startsWith("en")) ||
+      voices[0];
+
+    if (!femaleVoice) return;
+
+    const u = new SpeechSynthesisUtterance(" ");
+    u.voice = femaleVoice;
+    u.volume = 0;
+    u.rate = 1;
+    u.pitch = 1;
+
+    synth.speak(u);
+    primed = true;
+  }
+
+  tryPrime();
+
+  synth.onvoiceschanged = tryPrime;
+
+  // Better Android + mobile coverage (replaces click + touchstart)
+  document.addEventListener("pointerdown", tryPrime, { once: true });
+})();
+</script>
+
+<script>
+(function () {
+
+  function cleanSpeechText(text) {
+    text = text.replace(/\b\d+:\d+\s*/g, '');
+    text = text.replace(/<br\s*\/?>/gi, ' ');
+    text = text.replace(/\n+/g, ' ');
+    text = text.replace(/\s+\./g, '.');
+    text = text.replace(/\.(\S)/g, '. $1');
+    text = text.replace(/\s+/g, ' ').trim();
+    return text;
+  }
+
+  const OriginalUtterance = window.SpeechSynthesisUtterance;
+
+  function PatchedUtterance(text) {
+    return new OriginalUtterance(cleanSpeechText(text));
+  }
+
+  // 🔧 preserve prototype for Android/WebView compatibility
+  PatchedUtterance.prototype = OriginalUtterance.prototype;
+
+  window.SpeechSynthesisUtterance = PatchedUtterance;
+
+})();
+</script>
+
+<script>
+(function() {
+  // ====== 2. Parse Sections ======
+const raw = window.rawText;
+
+if (!raw) return; // IMPORTANT: stop if parser not ready
+
+const segments = raw.split("~").map(s => s.trim()).filter(Boolean);
+  const sections = [];
+
+  for (let i = 0; i < segments.length; i += 2) {
+    const storyBlock = segments[i] || "";
+    const questionBlock = segments[i + 1] || '';
+
+    const lines = storyBlock.split("\n").map(l => l.trim()).filter(Boolean);
+
+    let titleLine = lines[0] || "Untitled Section";
+
+    sections.push({
+      title: titleLine,
+      content: lines.join("\n"),
+      questions: questionBlock
+    });
+  }
+
+window.sections = sections;
+
+
+  // ====== 3. Build TOC ======
+  const leftCol = document.getElementById('tocColLeft');
+  const rightCol = document.getElementById('tocColRight');
+  if (!leftCol || !rightCol) return;
+
+  leftCol.innerHTML = '';
+  rightCol.innerHTML = '';
+  const midpoint = Math.ceil(sections.length / 2);
+
+  sections.forEach((sec, idx) => {
+    const btn = document.createElement('button');
+    btn.textContent = sec.title;
+    btn.addEventListener('click', () => openQuizModal(idx));
+    if (idx < midpoint) leftCol.appendChild(btn);
+    else rightCol.appendChild(btn);
+  });
+
+// ====== 4. Modal Rendering ======
+window.openQuizModal = function(idx) {
+
+  const container = document.getElementById('quizSections');
+  container.innerHTML = '';
+
+  generateQuizSection(sections[idx], idx);
+
+  document.getElementById('modalRoot').classList.add('active');
+  document.body.classList.add('modal-open');
+
+  moveControlsIntoModal();
+
+  // 📌 Chapter/Verse system (navigation layer)
+  buildChapterVerseLogic();
+};
+
+document.addEventListener("click", function(e) {
+
+  const closeBtn = e.target.closest("[data-close-quiz]");
+  if (!closeBtn) return;
+
+  // 🔒 Stronger prevent auto-reopen
+  window.__quizJustClosed = Date.now();
+
+  const modalRoot = document.getElementById("modalRoot");
+  const container = document.getElementById("quizSections");
+
+  // 🔥 1. CLOSE FIRST
+  modalRoot?.classList.remove("active");
+  document.body.classList.remove("modal-open");
+
+  // 🔥 2. Clear content
+  if (container) container.innerHTML = "";
+
+  // 🔥 3. Kill smooth scroll
+  document.documentElement.style.scrollBehavior = "auto";
+
+  // 🔥 4. Immediate reset
+  window.scrollTo(0, 0);
+
+  const modal = document.getElementById("quizModal");
+  if (modal) modal.scrollTop = 0;
+
+  const modalContent = document.getElementById("quizModalContent");
+  if (modalContent) modalContent.scrollTop = 0;
+
+  // 🔥 5. Prevent browser restoring old position
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+
+  if (window.resetQuizScrollState) {
+    window.resetQuizScrollState();
+  }
+
+  // 🔥 FINAL OVERRIDE (critical)
+  setTimeout(() => {
+    window.scrollTo(0, 0);
+  }, 0);
+
+  requestAnimationFrame(() => {
+    window.scrollTo(0, 0);
+  });
+
+});
+
+function generateQuizSection(section, idx) {
+  const container = document.getElementById('quizSections');
+
+// ===== Paragraph numbering control =====
+// true  = number story paragraphs
+// false = never number story paragraphs
+const NUMBER_PARAGRAPHS = false;
+
+// Helper: render story paragraphs with optional numbering
+function renderNumberedLines(lines, sectionTitle) {
+  return lines
+    .filter((line, idx) => {
+      // ❌ Remove duplicate header (first line only)
+      if (
+        idx === 0 &&
+        sectionTitle &&
+        line.trim().toLowerCase() === sectionTitle.trim().toLowerCase()
+      ) {
+        return false;
+      }
+      return true;
+    })
+    .map((line, lineIdx) => {
+      // Never number if disabled
+      if (!NUMBER_PARAGRAPHS) {
+        return `<p>${line}</p>`;
+      }
+
+      // Defensive: do not double-number
+      if (/^\d+\.\s/.test(line)) {
+        return `<p>${line}</p>`;
+      }
+
+      return `<p>${lineIdx + 1}. ${line}</p>`;
+    })
+    .join("");
+}
+
+
+let sectionHTML = `
+  <div class="section" data-section-idx="${idx}">
+    <h2 class="parsedHeader">${section.title}</h2>
+    <div class="question-text" contenteditable="true">
+      ${renderNumberedLines(
+        section.content.split("\n").map(l => l.trim()).filter(Boolean),
+        section.title
+      )}
+    </div>
+`;
+
+    const SUBSECTION_MARKERS = [
+      "Quiz",
+      "Concept Quiz",
+      "Context Quiz",
+      "Comprehension Quiz",
+      "Grammar Quiz",
+      "Vocabulary Quiz"
+
+    ];
+
+    const lines = section.questions.split("\n").map(l => l.trim()).filter(Boolean);
+    const subsections = [];
+    let currentSub = null;
+
+let hasBlankLine = false;
+let hasNullBlankLine = false;
+
+lines.forEach(line => {
+  // Detect special lines
+  if (/^\s*blank\s*$/i.test(line)) hasBlankLine = true;
+  if (/^\s*\?blank\s*$/i.test(line)) hasNullBlankLine = true;
+
+  // If both are present, skip all subsections
+  if (hasBlankLine && hasNullBlankLine) {
+    currentSub = null; // do not create any subsection
+    return;
+  }
+
+  if (SUBSECTION_MARKERS.some(marker =>
+  line.toLowerCase().startsWith(marker.toLowerCase())
+)) {
+
+    currentSub = { title: line, questions: [] };
+    subsections.push(currentSub);
+  } else if (currentSub) {
+    currentSub.questions.push(line);
+  }
+});
+
+    subsections.forEach(sub => {
+      const slug = sub.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+      sub.slug = slug;
+
+      sectionHTML += `<h3 class="parsedSubheader">${sub.title}</h3>`;
+      sectionHTML += `<div class="quiz-subsection" data-subsection="${sub.title}" data-sub-slug="${slug}">`;
+
+sectionHTML += `
+  <div class="top-controls">
+    <input type="text" class="quiz-name" placeholder="Name">
+    <input type="text" class="quiz-id" placeholder="ID">
+    <button type="button" class="quiz-submit">Submit</button>
+    <button type="button" class="quiz-close">Close</button>
+  </div>
+
+        <div class="quiz-scoreboard"
+             style="display:none; width:100%; margin-bottom:12px;
+                    padding:6px; border:1px solid #9aaed1; border-radius:6px;
+                    background:#f9f9f9; font-family:monospace; font-size:12px;">
+          <pre class="scoreboard-data" style="margin:0; white-space:pre-wrap;"></pre>
+          <div class="scoreboard-buttons" style="margin-top:6px; display:flex; gap:6px;">
+            <button type="button" class="score-copy">Copy</button>
+            <button type="button" class="score-txt">TXT</button>
+            <button type="button" class="score-png">PNG</button>
+          </div>
+        </div>
+      `;
+
+      // ===== Question Parsing (supports ? at start + optional second line starting with -) =====
+      sub.questions = sub.questions.map(l => l.trim()).filter(Boolean);
+      let qIndex = 0;
+
+      for (let i = 0; i < sub.questions.length; i++) {
+        let line = sub.questions[i];
+
+        if (!line.startsWith('?')) continue;
+
+        // main question text
+        let question = line.replace(/^\?\s*/, '');
+
+        // optional second line
+        if (i + 1 < sub.questions.length && sub.questions[i + 1].startsWith('-')) {
+          question += ' ' + sub.questions[i + 1].replace(/^-+\s*/, '');
+          i++;
+        }
+
+        // collect options until next question
+        const options = [];
+        let j = i + 1;
+        while (j < sub.questions.length && !sub.questions[j].startsWith('?')) {
+          options.push(sub.questions[j]);
+          j++;
+        }
+
+        const correctPipe = options
+          .filter(o => /\|.*?\|/.test(o))
+          .map(o => o.replace(/\|/g, '').trim())
+          .join('|');
+
+        sectionHTML += `<div class="exercise" data-correct="${correctPipe}">`;
+        sectionHTML += `<p><strong>${qIndex + 1}. ${question}</strong></p>`;
+
+        options.forEach((opt, oi) => {
+          const clean = opt.replace(/\|/g, '').trim();
+          sectionHTML += `
+            <label>
+              <input type="radio" name="q${idx}_${sub.title}_${qIndex}" value="${clean}" data-correct="${correctPipe}">
+              ${String.fromCharCode(65 + oi)}) ${clean}
+            </label><br>
+          `;
+        });
+
+        sectionHTML += `</div>`;
+        qIndex++;
+        i = j - 1;
+      }
+
+      sectionHTML += `</div>`;
+    });
+
+    sectionHTML += `</div>`;
+    container.insertAdjacentHTML('beforeend', sectionHTML);
+  }
+
+  // ====== 5. Event Delegation ======
+  document.getElementById('quizSections').addEventListener('click', e => {
+    const sub = e.target.closest('.quiz-subsection');
+    if (!sub) return;
+
+    if (e.target.classList.contains('quiz-submit')) {
+      const sub = e.target.closest('.quiz-subsection');
+      if (!sub) return;
+
+      const name = sub.querySelector('.quiz-name')?.value || 'Anonymous';
+      const id   = sub.querySelector('.quiz-id')?.value || 'N/A';
+
+      const section = sub.closest('.section')?.querySelector('h2')?.textContent.trim() || 'Unknown Section';
+      const subsection = sub.dataset.subsection || 'Unknown Subsection';
+
+      const exercises = sub.querySelectorAll('.exercise');
+      let correctAnswers = 0;
+      exercises.forEach(ex => {
+correctAnswers += Number(ex.dataset.score || 0);
+
+
+      });
+      const totalExercises = exercises.length;
+      const percentage = totalExercises > 0 ? Math.round((correctAnswers / totalExercises) * 100) : 0;
+
+      const now = new Date();
+      const pad = n => n.toString().padStart(2,'0');
+      const dateString = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+      const filename = window.location.pathname.split('/').pop();
+      const resultText = `${filename}|${section}::${subsection}|${name}|${id}|${dateString}|${correctAnswers}/${totalExercises}|${percentage}%`;
+
+      const board = sub.querySelector('.quiz-scoreboard');
+      const dataEl = board.querySelector('.scoreboard-data');
+      if (dataEl) dataEl.textContent = resultText;
+      board.style.display = 'block';
+    }
+
+
+  });
+})();
+</script>
+
+
+
+
+
+
+
+
+<!-- ====== Consolidated Highlight + Read-Aloud + Emoji Speech + Active Highlight ====== -->
+<script>
+(function() {
+
+  /* =========================================================
+     GLOBALS
+  ========================================================= */
+  const highlightBtn = document.getElementById('highlightSelected');
+  const copyBtn = document.getElementById('copySelected');
+  const startBtn = document.getElementById('startBtn');
+  const pauseResumeBtn = document.getElementById('pauseResumeBtn');
+  const restartBtn = document.getElementById('restartBtn');
+
+  const synth = window.speechSynthesis;
+
+  let teacherVoice = null;
+  let studentVoice = null;
+
+  let narratorActive = false;
+  let lastContainer = null;
+  let lastOffset = 0;
+  let lastCharIndex = 0;
+  let utterance = null;
+
+  let activeParagraph = null;
+  let monitorInterval = null;
+
+
+  /* =========================================================
+     LOAD VOICES (Merged Logic — Nothing Removed)
+  ========================================================= */
+  function loadVoices() {
+    const voices = synth.getVoices();
+    if (!voices.length) return;
+
+    // First script preference logic
+    teacherVoice =
+      voices.find(v => v.name.includes("Zira")) ||
+      voices.find(v => v.name === "Microsoft Zira" && v.lang === "en-US") ||
+      voices.find(v => v.name.includes("Samantha")) ||
+      voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("female")) ||
+      voices[0];
+
+    studentVoice =
+      voices.find(v => v.name.includes("Aria")) ||
+      voices.find(v => v.name === "Microsoft Aria" && v.lang.startsWith("en-GB")) ||
+      voices.find(v => v.name.includes("Victoria")) ||
+      voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("female")) ||
+      voices[0];
+  }
+
+  synth.onvoiceschanged = loadVoices;
+  loadVoices();
+
+
+  /* =========================================================
+     HIGHLIGHT LOGIC (UNCHANGED)
+  ========================================================= */
+  highlightBtn?.addEventListener('click', () => {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) return;
+
+    const highlightClass = 'highlight';
+    const container = range.commonAncestorContainer.nodeType === 3
+      ? range.commonAncestorContainer.parentNode
+      : range.commonAncestorContainer;
+
+    const allNodes = Array.from(container.querySelectorAll('p, li, div, span'));
+    const intersectingNodes = allNodes.filter(node => range.intersectsNode(node));
+
+    if (!intersectingNodes.length && range.startContainer.nodeType === 3) {
+      const parentSpan = range.startContainer.parentNode;
+      if (parentSpan.classList?.contains(highlightClass)) {
+        parentSpan.replaceWith(...parentSpan.childNodes);
+      } else {
+        const span = document.createElement('span');
+        span.className = highlightClass;
+        range.surroundContents(span);
+      }
+      sel.removeAllRanges();
+      return;
+    }
+
+    const alreadyHighlighted = intersectingNodes.some(n => n.classList?.contains(highlightClass));
+    if (alreadyHighlighted) {
+      intersectingNodes.forEach(n => {
+        if (n.classList.contains(highlightClass)) {
+          n.replaceWith(...n.childNodes);
+        }
+      });
+      sel.removeAllRanges();
+      return;
+    }
+
+    intersectingNodes.forEach(node => {
+      const span = document.createElement('span');
+      span.className = highlightClass;
+      node.parentNode.insertBefore(span, node);
+      span.appendChild(node);
+    });
+
+    sel.removeAllRanges();
+  });
+
+
+  /* =========================================================
+     COPY SELECTED TEXT
+  ========================================================= */
+  copyBtn?.addEventListener('click', () => {
+    const sel = window.getSelection();
+    const text = sel.toString().trim();
+
+    if (!text) {
+      alert("Select text first.");
+      return;
+    }
+
+    navigator.clipboard.writeText(text)
+      .then(() => alert("Copied!"))
+      .catch(err => console.error(err));
+  });
+
+
+  /* =========================================================
+     READABLE CONTAINER LOGIC
+  ========================================================= */
+  function getReadableContainer() {
+    const sel = window.getSelection();
+    let node = sel?.anchorNode;
+
+    while (node) {
+      if (node.classList?.contains?.('question-text')) return node;
+      if (node.id === 'mvTextContainer') return node;
+      node = node.parentNode;
+    }
+    return null;
+  }
+
+  function getCursorOffset(container) {
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return 0;
+
+    const range = sel.getRangeAt(0);
+    const pre = document.createRange();
+    pre.setStart(container, 0);
+    pre.setEnd(range.startContainer, range.startOffset);
+    return pre.toString().length;
+  }
+
+/* =========================================================
+   MOBILE CHUNKING (ADD HERE)
+========================================================= */
+
+function buildChunks(text) {
+
+  const MAX = /Mobi|Android/i.test(navigator.userAgent) ? 120 : 180;
+
+  const sentences = text
+    .replace(/([.?!]+)\s+/g, "$1|")
+    .split("|")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const chunks = [];
+  let buffer = "";
+
+  for (let s of sentences) {
+
+    // 🔥 handle very long sentences safely
+    if (s.length > MAX) {
+      for (let i = 0; i < s.length; i += MAX) {
+        chunks.push(s.slice(i, i + MAX));
+      }
+      continue;
+    }
+
+    if ((buffer + s).length > MAX) {
+      if (buffer.trim()) chunks.push(buffer.trim());
+      buffer = s + " ";
+    } else {
+      buffer += s + " ";
+    }
+  }
+
+  if (buffer.trim()) chunks.push(buffer.trim());
+
+  return chunks;
+}
+
+
+
+
+
+
+  /* =========================================================
+     SPEAK FROM CURSOR
+  ========================================================= */
+function speakFrom(container, offset) {
+
+  const fullText = container.textContent || "";
+  const text = fullText.slice(offset);
+  if (!text.trim()) return;
+
+  const chunks = [];
+  const MAX = /Mobi|Android/i.test(navigator.userAgent) ? 120 : 180;
+
+  // --- sentence-based chunking ---
+  const sentences = text
+    .replace(/([.?!])\s+/g, "$1|")
+    .split("|")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  let buffer = "";
+  for (let s of sentences) {
+    if ((buffer + s).length > MAX) {
+      if (buffer) chunks.push(buffer);
+      buffer = s + " ";
+    } else {
+      buffer += s + " ";
+    }
+  }
+  if (buffer) chunks.push(buffer);
+
+  let chunkIndex = 0;
+  let globalOffset = offset;   // 🔥 CRITICAL
+
+  narratorActive = true;
+  lastContainer = container;
+  lastOffset = offset;
+
+  function speakChunk() {
+
+    if (chunkIndex >= chunks.length) {
+      narratorActive = false;
+      lastOffset = 0;
+      lastCharIndex = 0;
+      return;
+    }
+
+    const chunkText = chunks[chunkIndex];
+
+    utterance = new SpeechSynthesisUtterance(chunkText);
+    utterance.voice = teacherVoice;
+
+    utterance.onboundary = (e) => {
+      if (e.name === "word") {
+        // 🔥 maintain continuous index for your highlighter system
+        lastCharIndex = globalOffset + e.charIndex;
+      }
+    };
+
+    utterance.onend = () => {
+      // 🔥 advance global offset correctly
+      globalOffset += chunkText.length;
+      chunkIndex++;
+      speakChunk();
+    };
+
+    synth.speak(utterance);
+  }
+
+  speakChunk();
+}
+
+  /* =========================================================
+     START BUTTON
+  ========================================================= */
+  startBtn?.addEventListener('click', () => {
+
+    const container = getReadableContainer();
+    if (!container) {
+      alert("Place cursor inside readable text");
+      return;
+    }
+
+    const offset = getCursorOffset(container);
+
+if (synth.speaking || synth.paused) {
+  synth.cancel();
+  clearHighlight();   // ← ADD THIS LINE
+  narratorActive = false;
+  return;
+}
+
+    lastCharIndex = offset;
+    speakFrom(container, offset);
+  });
+
+
+  /* =========================================================
+     EMOJI SPEECH OVERLAYS
+  ========================================================= */
+  function addSpeechEmojis() {
+    const paragraphs = document.querySelectorAll('.question-text p, .sentence, #quizSections p');
+
+    paragraphs.forEach(p => {
+      if (p.dataset.speechOverlay) return;
+      p.dataset.speechOverlay = '1';
+
+      const text = p.textContent.trim();
+      let speaker = null;
+
+      if (/^teacher:/i.test(text)) speaker = 'teacher';
+      else if (/^student:/i.test(text)) speaker = 'student';
+      else return;
+
+      const emoji = speaker === 'teacher' ? '👩‍🦰' : '👧';
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.style.all = 'unset';
+      btn.style.cursor = 'pointer';
+      btn.style.fontSize = '14px';
+      btn.style.display = 'inline';
+      btn.style.margin = '0';
+      btn.style.padding = '0';
+      btn.style.lineHeight = '1';
+      btn.style.verticalAlign = 'baseline';
+      btn.title = speaker === 'teacher' ? 'Teacher Speech' : 'Student Speech';
+      btn.textContent = emoji + ' ';
+
+btn.addEventListener('click', () => {
+
+  // Stop current speech
+if (synth.speaking) {
+  synth.cancel();
+  clearHighlight();   // ← ADD THIS LINE
+}
+
+  // Remove any existing highlight
+  document.querySelectorAll(".reading-active")
+    .forEach(el => el.classList.remove("reading-active"));
+
+  // Highlight this paragraph (pale yellow)
+  p.classList.add("reading-active");
+
+  const lineText = text.replace(/^(teacher:|student:)\s*/i, '');
+  const utter = new SpeechSynthesisUtterance(lineText);
+
+  if (speaker === 'teacher') {
+    utter.voice = teacherVoice;
+    utter.rate = 0.88;
+    utter.pitch = 1.15;
+    utter.volume = 0.95;
+  } else {
+    utter.voice = studentVoice;
+    utter.rate = 0.98;
+    utter.pitch = 1.50;
+    utter.volume = 0.80;
+  }
+
+  utter.onend = () => {
+    p.classList.remove("reading-active");
+  };
+
+  synth.speak(utter);
+});      p.insertBefore(btn, p.firstChild);
+    });
+  }
+
+  addSpeechEmojis();
+  setInterval(addSpeechEmojis, 1000);
+
+
+  /* =========================================================
+     ACTIVE READING HIGHLIGHT
+  ========================================================= */
+
+  if (!document.getElementById("speechHighlightStyle")) {
+    const style = document.createElement("style");
+    style.id = "speechHighlightStyle";
+    style.textContent = `
+.reading-active {
+  background-color: #fff9c4 !important;
+  transition: background-color 0.4s ease;
+}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function clearHighlight() {
+    if (activeParagraph) {
+      activeParagraph.classList.remove("reading-active");
+      activeParagraph = null;
+    }
+  }
+
+  function startMonitoring() {
+    if (monitorInterval) return;
+
+    monitorInterval = setInterval(function(){
+      if (!synth.speaking) {
+        clearHighlight();
+        clearInterval(monitorInterval);
+        monitorInterval = null;
+      }
+    }, 100);
+  }
+
+  document.addEventListener("click", function(e){
+
+    const btn = e.target.closest("button");
+    if (!btn) return;
+
+    const p = btn.closest("p");
+    if (!p) return;
+
+    if (synth.speaking) {
+      clearHighlight();
+      return;
+    }
+
+    setTimeout(function(){
+      if (synth.speaking) {
+        clearHighlight();
+        activeParagraph = p;
+        p.classList.add("reading-active");
+        startMonitoring();
+      }
+    }, 50);
+
+  });
+
+})();
+</script>
+
+<!-- End-->
+
+<script>
+(function(){
+
+  const synth = window.speechSynthesis;
+
+  let paragraphs = [];
+  let paragraphRanges = [];
+  let currentIndex = -1;
+
+  let baseOffset = 0;          // where speech started in full text
+  let lastSpokenGlobal = 0;    // last spoken absolute character index
+  let lastStartContainer = null;
+  let lastStartOffset = 0;
+
+  /* ===============================
+     Pale Yellow Highlight CSS
+  =============================== */
+  if (!document.getElementById("autoParagraphHighlightStyle")) {
+    const style = document.createElement("style");
+    style.id = "autoParagraphHighlightStyle";
+    style.textContent = `
+      .auto-paragraph-active {
+        background-color: #fff9c4;
+        transition: background-color 0.4s ease;
+      }
+      .auto-paragraph-fade {
+        background-color: transparent;
+        transition: background-color 0.8s ease;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function clearAll() {
+    paragraphs.forEach(p => {
+      p.classList.remove("auto-paragraph-active");
+      p.classList.remove("auto-paragraph-fade");
+    });
+  }
+
+  function fadeParagraph(index) {
+    if (index < 0 || index >= paragraphs.length) return;
+    const p = paragraphs[index];
+    p.classList.remove("auto-paragraph-active");
+    p.classList.add("auto-paragraph-fade");
+    setTimeout(() => {
+      p.classList.remove("auto-paragraph-fade");
+    }, 800);
+  }
+
+  function highlightParagraph(index) {
+    if (index < 0 || index >= paragraphs.length) return;
+    paragraphs[index].classList.add("auto-paragraph-active");
+  }
+
+  function collectParagraphsFrom(root) {
+    paragraphs = Array.from(root.querySelectorAll("p"))
+      .filter(p => p.textContent.trim().length > 0);
+
+    paragraphRanges = [];
+    let runningLength = 0;
+
+    paragraphs.forEach(p => {
+      const len = p.textContent.length;
+      paragraphRanges.push({
+        start: runningLength,
+        end: runningLength + len
+      });
+      runningLength += len;
+    });
+  }
+
+function findParagraphIndex(globalCharIndex) {
+
+  const BUFFER = 8; // helps catch short dialogue lines
+
+  for (let i = 0; i < paragraphRanges.length; i++) {
+    const r = paragraphRanges[i];
+
+    if (
+      globalCharIndex >= (r.start - BUFFER) &&
+      globalCharIndex < (r.end + BUFFER)
+    ) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+  function getCursorInfo() {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return null;
+
+    const range = sel.getRangeAt(0);
+
+    let container = range.startContainer;
+    while (container && container.nodeType !== 1) {
+      container = container.parentNode;
+    }
+    if (!container) return null;
+
+    const root = container.closest("#mvTextContainer, .question-text") || document.body;
+
+    const preRange = document.createRange();
+    preRange.setStart(root, 0);
+    preRange.setEnd(range.startContainer, range.startOffset);
+
+    const offset = preRange.toString().length;
+
+    return { root, offset, container };
+  }
+
+/* ========================================== 
+   Hook safely into speech (NO AUTO-HIGHLIGHT)
+========================================== */
+const originalSpeak = synth.speak.bind(synth);
+
+synth.speak = function(utterance) {
+
+  const cursorInfo = getCursorInfo();
+  if (!cursorInfo) return originalSpeak(utterance);
+
+  const { offset, container } = cursorInfo;
+
+  // Detect if cursor moved
+  const cursorMoved =
+    container !== lastStartContainer ||
+    offset !== lastStartOffset;
+
+  if (cursorMoved) {
+    baseOffset = offset;
+    lastSpokenGlobal = offset;
+  }
+
+  lastStartContainer = container;
+  lastStartOffset = offset;
+
+  // Optional: still track position silently (no UI effects)
+  utterance.addEventListener("boundary", function(e){
+    if (e.name !== "word") return;
+    lastSpokenGlobal = baseOffset + e.charIndex;
+  });
+
+  utterance.addEventListener("end", function(){
+    if (!synth.speaking) {
+      lastSpokenGlobal = 0;
+      baseOffset = 0;
+    }
+  });
+
+  return originalSpeak(utterance);
+};</script>
+
+<!-- ====== 5. Emoji + Audio Feedback ====== -->
+<script>
+(function() {
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playCorrect() { 
+    audioCtx.resume().then(() => { 
+      const o = audioCtx.createOscillator(); 
+      const g = audioCtx.createGain(); 
+      o.type = "sine"; 
+      o.frequency.setValueAtTime(800, audioCtx.currentTime); 
+      g.gain.setValueAtTime(0.4, audioCtx.currentTime); 
+      o.connect(g); g.connect(audioCtx.destination); 
+      o.start(); o.stop(audioCtx.currentTime + 0.25); 
+    }); 
+  }
+
+  function playWrong() { 
+    audioCtx.resume().then(() => { 
+      const o = audioCtx.createOscillator(); 
+      const g = audioCtx.createGain(); 
+      o.type = "triangle"; 
+      o.frequency.setValueAtTime(450, audioCtx.currentTime); 
+      o.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.25); 
+      g.gain.setValueAtTime(0.4, audioCtx.currentTime); 
+      o.connect(g); g.connect(audioCtx.destination); 
+      o.start(); o.stop(audioCtx.currentTime + 0.25); 
+    }); 
+  }
+
+  function normalize(str){ 
+    return str.trim().toLowerCase().replace(/\s+/g," "); 
+  }
+
+  // ======================
+  // HANDLE ANSWER SELECTION
+  // ======================
+  document.body.addEventListener('change', e => {
+    const exercise = e.target.closest('.exercise');
+    if (!exercise) return;
+
+    // Emojis & sound (fire every change)
+    const textInputs = Array.from(exercise.querySelectorAll("input[type='text'], textarea"));
+    const selectedInputs = Array.from(exercise.querySelectorAll("input:checked"));
+
+    const userAnswers = textInputs.length 
+      ? textInputs.map(i => normalize(i.value)) 
+      : selectedInputs.map(i => normalize(i.value));
+
+    const correctAnswers = Array.from(exercise.querySelectorAll('[data-correct]'))
+      .map(i => normalize(i.dataset.correct));
+
+    const isCorrect = userAnswers.every(ans => correctAnswers.includes(ans));
+
+    // Remove previous emojis
+    exercise.querySelectorAll('.mc-emoji').forEach(span => span.remove());
+
+    // Add emojis
+    selectedInputs.forEach(inp => {
+      const lbl = inp.closest("label");
+      if (lbl) {
+        const span = document.createElement('span');
+        span.className = "mc-emoji";
+        span.style.marginLeft = "8px";
+        span.textContent = isCorrect ? "😊" : "😢";
+        lbl.appendChild(span);
+      }
+    });
+
+    textInputs.forEach(inp => {
+      const span = document.createElement('span');
+      span.className = "mc-emoji";
+      span.style.marginLeft = "8px";
+      span.textContent = isCorrect ? "😊" : "😢";
+      inp.parentNode.insertBefore(span, inp.nextSibling);
+    });
+
+    if (isCorrect) playCorrect(); else playWrong();
+
+// ======================
+// FIRST CLICK SCORING
+// ======================
+if (exercise.dataset.firstResponseLocked) return;
+exercise.dataset.firstResponseLocked = 'true';
+
+const totalExercises = 1; // each exercise counts as 1
+const correctCount = isCorrect ? 1 : 0;
+const percentage = correctCount * 100;
+
+// store score in the element so Submit can display later
+exercise.dataset.score = correctCount;
+exercise.dataset.percentage = percentage;
+});
+
+
+
+
+
+
+
+  // ======================
+  // SUBMIT BUTTON (DISPLAY SCOREBOARD ONLY)
+  // ======================
+  document.body.addEventListener('click', e => {
+    if (!e.target.classList.contains('quiz-submit')) return;
+    const sub = e.target.closest('.quiz-subsection');
+    if (!sub) return;
+
+    const exercises = sub.querySelectorAll('.exercise');
+
+    // Aggregate first-click scores
+    let correctCount = 0;
+    exercises.forEach(ex => {
+      const sc = Number(ex.dataset.score || 0);
+      correctCount += sc;
+    });
+
+    const totalExercises = exercises.length;
+    const percentage = totalExercises > 0 ? Math.round((correctCount / totalExercises) * 100) : 0;
+
+    // Display in scoreboard
+    const board = sub.querySelector('.quiz-scoreboard');
+    if (board) {
+      const dataEl = board.querySelector('.scoreboard-data');
+      const name = sub.querySelector('.quiz-name')?.value || 'Anonymous';
+      const id   = sub.querySelector('.quiz-id')?.value || 'N/A';
+      const section = sub.closest('.section')?.querySelector('h2')?.textContent || 'Unknown Section';
+      const subsection = sub.dataset.subsection || 'Unknown Subsection';
+      const now = new Date();
+      const pad = n => n.toString().padStart(2,'0');
+      const dateString = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      const filename = window.location.pathname.split('/').pop();
+
+const resultText = `${filename}|${section.replace(/:+$/, '').trim()}: ${subsection.replace(/^:+/, '').trim()}|${name}|${id}|${dateString}|${correctCount}/${totalExercises}|${percentage}%`;
+      if (dataEl) dataEl.textContent = resultText;
+
+if (window.saveResult) {
+  const finalResultText = board.querySelector('.scoreboard-data')?.textContent;
+if (finalResultText && window.saveResult) {
+  window.saveResult(finalResultText);
+}
+}
+
+      board.style.display = 'block';
+    }
+  });
+
+})();
+</script>
+
+
+<!--<script>
+(function () {
+
+  if (document.getElementById("global-green-border")) return;
+
+  const border = document.createElement("div");
+  border.id = "global-green-border";
+
+  Object.assign(border.style, {
+    position: "fixed",
+    inset: "0",
+    pointerEvents: "none",
+    zIndex: "2147483647",
+    boxShadow: "inset 0 0 0 10px #39FF14"
+  });
+
+  document.documentElement.appendChild(border);
+
+})();
+</script>-->
+
+<script>
+(function () {
+
+  if (document.getElementById("global-green-border")) return;
+
+  const border = document.createElement("div");
+  border.id = "global-green-border";
+
+  Object.assign(border.style, {
+    position: "fixed",
+    inset: "0",
+    pointerEvents: "none",
+    zIndex: "2147483647",
+    boxShadow: "inset 0 0 0 10px #39FF14",
+    willChange: "transform",
+    transition: "transform 0.12s ease-out"
+  });
+
+  document.documentElement.appendChild(border);
+
+  function adjustForKeyboard() {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const keyboardOffset =
+      window.innerHeight - vv.height - vv.offsetTop;
+
+    border.style.transform =
+      `translateY(-${Math.max(0, keyboardOffset)}px)`;
+  }
+
+  const vv = window.visualViewport;
+
+  if (vv) {
+    vv.addEventListener("resize", adjustForKeyboard);
+    vv.addEventListener("scroll", adjustForKeyboard);
+  }
+
+  adjustForKeyboard();
+
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script>
+(function() {
+  const quizSections = document.getElementById('quizSections');
+
+  // Event delegation for scoreboard buttons
+  quizSections.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+
+    const board = e.target.closest('.quiz-scoreboard');
+    if (!board) return;
+
+    const dataEl = board.querySelector('.scoreboard-data');
+    if (!dataEl) return;
+
+    const text = dataEl.textContent;
+
+    // ===== COPY =====
+    if (btn.classList.contains('score-copy')) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+      }).catch(err => console.error(err));
+    }
+
+    // ===== TXT =====
+    if (btn.classList.contains('score-txt')) {
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'quiz-score.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ===== PNG WITH 10px MARGIN =====
+    if (btn.classList.contains('score-png')) {
+      if (typeof html2canvas === 'undefined') {
+        alert('html2canvas library is required for PNG export.');
+        return;
+      }
+
+      // create temporary wrapper with 10px padding
+      const wrapper = document.createElement('div');
+      wrapper.style.padding = '10px';
+      wrapper.style.background = '#f9f9f9';
+      wrapper.style.display = 'inline-block';
+      wrapper.style.fontFamily = 'monospace';
+      wrapper.style.fontSize = '12px';
+      wrapper.style.whiteSpace = 'pre-wrap';
+      wrapper.style.lineHeight = '1.4';
+      wrapper.appendChild(dataEl.cloneNode(true));
+
+      document.body.appendChild(wrapper);
+
+      html2canvas(wrapper).then(canvas => {
+        canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'quiz-score.png';
+          a.click();
+          URL.revokeObjectURL(url);
+          document.body.removeChild(wrapper); // clean up
+        });
+      });
+    }
+
+
+  }); // <- this closes the quizSections click listener
+
+})(); // <- this closes the IIFE
+</script>
+
+
+
+<script>
+(function() {
+  // Enable/disable submit and radios based on inputs
+  function updateControls(subsection) {
+    const nameInput = subsection.querySelector('.quiz-name');
+    const idInput = subsection.querySelector('.quiz-id');
+    const submitBtn = subsection.querySelector('.quiz-submit');
+    const radios = subsection.querySelectorAll('input[type="radio"]');
+
+    const enabled = nameInput.value.trim() && idInput.value.trim();
+
+    // Enable/disable submit
+    submitBtn.disabled = !enabled;
+
+    // Enable/disable radios
+    radios.forEach(r => r.disabled = !enabled);
+  }
+
+  // Monitor input fields in all subsections
+  document.body.addEventListener('input', e => {
+    if (e.target.matches('.quiz-name, .quiz-id')) {
+      const subsection = e.target.closest('.quiz-subsection');
+      if (!subsection) return;
+      updateControls(subsection);
+    }
+  });
+
+  // Initialize all subsections on page load
+  document.querySelectorAll('.quiz-subsection').forEach(sub => updateControls(sub));
+})();
+</script>
+
+
+<script>
+(function() {
+  const normalize = str => str.trim().toLowerCase().replace(/\s+/g, " ");
+
+  document.body.addEventListener('change', e => {
+    const exercise = e.target.closest('.exercise');
+    if (!exercise) return;
+
+    // ----- Gather user answers -----
+    const textInputs = Array.from(exercise.querySelectorAll("input[type='text'], textarea"));
+    const selectedInputs = Array.from(exercise.querySelectorAll("input:checked"));
+
+    const userAnswers = textInputs.length 
+      ? textInputs.map(i => normalize(i.value))
+      : selectedInputs.map(i => normalize(i.value));
+
+    const correctAnswers = Array.from(exercise.querySelectorAll('[data-correct]'))
+      .map(i => normalize(i.dataset.correct));
+
+    const isCorrect = userAnswers.every(ans => correctAnswers.includes(ans));
+
+    // ----- Add emojis -----
+    const addEmoji = (element) => {
+      if (!element.nextSibling || !element.nextSibling.classList?.contains('mc-emoji')) {
+        const span = document.createElement('span');
+        span.className = 'mc-emoji';
+        span.style.marginLeft = '8px';
+        span.textContent = isCorrect ? '😊' : '😟';
+        element.parentNode.insertBefore(span, element.nextSibling);
+      }
+    };
+
+    textInputs.forEach(addEmoji);
+
+    selectedInputs.forEach(inp => {
+      const label = inp.closest('label');
+      if (label && !label.querySelector('.mc-emoji')) {
+        const span = document.createElement('span');
+        span.className = 'mc-emoji';
+        span.style.marginLeft = '8px';
+        span.textContent = isCorrect ? '😊' : '😟';
+        label.appendChild(span);
+      }
+    });
+
+  }); // close event listener
+})(); // close IIFE
+</script>
+
+<script>
+/* ==========================================================
+   GLOBAL PAGE TITLE ENGINE
+========================================================== */
+
+(function () {
+
+  function buildFormattedTitle() {
+
+    let filename = window.location.pathname.split("/").pop() || "";
+    filename = filename.replace(/\.[^/.]+$/, "");
+    filename = decodeURIComponent(filename);
+
+    const allowedPrefixes = [
+      "g_game_","v_game_","rr_","cdf_","cdr_",
+      "ws_","r_","a_","g_","v_"
+    ];
+
+    for (let prefix of allowedPrefixes) {
+      if (filename.startsWith(prefix)) {
+        filename = filename.substring(prefix.length);
+        break;
+      }
+    }
+
+    let rawTitle = filename.replace(/_/g," ").trim();
+    if (!rawTitle) rawTitle = "Untitled";
+
+    const minorWords = [
+      "a","an","the","and","but","or","nor",
+      "for","so","yet","at","by","in","of","on","to","up","as","off","out"
+    ];
+
+    // ✅ Acronyms to preserve in uppercase
+    const acronyms = ["ot", "nt"];
+
+    return rawTitle.split(/\s+/).map((word, i) => {
+
+      const lower = word.toLowerCase();
+
+      // preserve acronyms like OT / NT
+      if (acronyms.includes(lower)) {
+        return lower.toUpperCase();
+      }
+
+      // first word always capitalized
+      if (i === 0) {
+        return lower.charAt(0).toUpperCase() + lower.slice(1);
+      }
+
+      // minor words stay lowercase
+      if (minorWords.includes(lower)) {
+        return lower;
+      }
+
+      // default title case
+      return lower.charAt(0).toUpperCase() + lower.slice(1);
+
+    }).join(" ");
+  }
+
+  window.pageTitle = buildFormattedTitle();
+
+  window.applyPageTitle = function(root=document){
+    root.querySelectorAll("h1[data-auto-title]").forEach(h=>{
+      h.textContent = window.pageTitle;
+      h.style.textTransform = "none";
+      h.style.visibility = "visible";
+    });
+  };
+
+})();
+
+/* ==========================================================
+   PAGE INIT
+========================================================== */
+
+document.addEventListener("DOMContentLoaded",function(){
+
+  window.applyPageTitle();
+
+});
+
+
+/* ==========================================================
+   AUTO OPEN SINGLE SECTION
+========================================================== */
+
+(function(){
+
+  function tryAutoOpenSingleSection(){
+
+    if(!window.sections || !Array.isArray(window.sections)) return;
+    if(typeof window.openQuizModal !== "function") return;
+
+    const root=document.documentElement;
+
+    const hardOn=root.classList.contains("show-hard");
+    const dynamicOn=root.classList.contains("show-dynamic");
+
+const recentlyClosed =
+  window.__quizJustClosed &&
+  (Date.now() - window.__quizJustClosed < 1500);
+
+if (window.sections.length === 1 && !hardOn && !dynamicOn && !recentlyClosed) {
+  window.openQuizModal(0);
+}
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",tryAutoOpenSingleSection);
+  }else{
+    tryAutoOpenSingleSection();
+  }
+
+})();
+
+
+
+
+
+/* ==========================================================
+   MODAL CONTROL MOVEMENT + CHAPTER/VERSE SYSTEM (ROBUST)
+========================================================== */
+
+function moveControlsIntoModal(){
+
+  const modalContent=document.getElementById("quizModalContent");
+  if(!modalContent) return;
+
+  const chapterControls=document.getElementById("chapterVerseControls");
+  const readAloud=document.getElementById("readaloudControls");
+
+  if(chapterControls && !modalContent.contains(chapterControls)){
+    modalContent.insertBefore(chapterControls,modalContent.firstChild);
+  }
+
+  if(readAloud){
+    readAloud.style.display="block";
+
+    if(!modalContent.contains(readAloud)){
+      modalContent.insertBefore(
+        readAloud,
+        chapterControls?.nextSibling || modalContent.firstChild
+      );
+    }
+  }
+}
+
+
+function buildChapterVerseLogic(){
+
+  const modal=document.getElementById("quizModal");
+  if(!modal) return;
+
+  const readAloud=modal.querySelector("#readaloudControls");
+  const chapterControls=modal.querySelector("#chapterVerseControls");
+  const textContainer=modal.querySelector("#quizSections");
+
+  const chapterSelect=modal.querySelector("#chapterSelect");
+  const verseSelect=modal.querySelector("#verseSelect");
+  const goBtn=modal.querySelector("#goBtn");
+
+  if(!textContainer || !chapterSelect || !verseSelect || !goBtn){
+    console.warn("Chapter/Verse system missing required elements");
+    return;
+  }
+
+  if(chapterControls){
+    chapterControls.style.display="block";
+  }
+
+  const paragraphs=[...textContainer.querySelectorAll("p")];
+  if(!paragraphs.length){
+    console.warn("No paragraphs found for chapter/verse mapping");
+    return;
+  }
+
+  const structure={};
+  let currentChapter=null;
+
+  // ===== helper: normalize text =====
+  const clean = (t)=>t.trim().replace(/\s+/g,' ');
+
+  paragraphs.forEach(p=>{
+
+    const text=clean(p.textContent);
+
+    // ===== FLEXIBLE CHAPTER MATCHING =====
+    const chapMatch=
+      text.match(/^chapter\s*:?\s*(\d+)/i) ||
+      text.match(/^#?\s*chapter\s*(\d+)/i) ||
+      text.match(/^(\d+)\.\s*chapter/i);
+
+    // ===== FLEXIBLE VERSE MATCHING =====
+    const verseMatch=
+      text.match(/^verse\s*:?\s*(\d+)/i) ||
+      text.match(/^v\s*(\d+)/i);
+
+    const fullRefMatch=text.match(/^(\d+):(\d+)\s/);
+
+    // ===== chapter detection =====
+    if(chapMatch){
+      currentChapter=chapMatch[1];
+      if(!structure[currentChapter]) structure[currentChapter]={};
+      return;
+    }
+
+    // ===== verse detection (context-based) =====
+    if(currentChapter && verseMatch){
+      structure[currentChapter][verseMatch[1]]=p;
+      return;
+    }
+
+    // ===== inline chapter:verse detection =====
+    if(fullRefMatch){
+      const c=fullRefMatch[1];
+      const v=fullRefMatch[2];
+
+      if(!structure[c]) structure[c]={};
+      structure[c][v]=p;
+
+      currentChapter=c;
+    }
+
+  });
+
+  // ===== DEBUG SAFETY =====
+  if(Object.keys(structure).length===0){
+    console.warn("ChapterVerse structure is EMPTY. Check formatting.");
+  }
+
+  // ===== populate chapters =====
+  chapterSelect.innerHTML="";
+
+  Object.keys(structure).forEach(ch=>{
+    const opt=document.createElement("option");
+    opt.value=ch;
+    opt.textContent="Chapter "+ch;
+    chapterSelect.appendChild(opt);
+  });
+
+  function updateVerses(){
+
+    verseSelect.innerHTML="";
+    const ch=chapterSelect.value;
+    if(!structure[ch]) return;
+
+    Object.keys(structure[ch]).forEach(v=>{
+      const opt=document.createElement("option");
+      opt.value=v;
+      opt.textContent="Verse "+v;
+      verseSelect.appendChild(opt);
+    });
+
+  }
+
+  chapterSelect.onchange=updateVerses;
+  updateVerses();
+
+  function clearHighlights(){
+    paragraphs.forEach(p=>p.classList.remove("selected-verse"));
+  }
+
+  function getControlsOffset(extraPadding=0){
+
+    const readHeight=readAloud ? readAloud.offsetHeight : 0;
+
+    const chapterHeight=
+      chapterControls &&
+      chapterControls.style.display!=="none"
+      ? chapterControls.offsetHeight
+      : 0;
+
+    return readHeight + chapterHeight + extraPadding;
+  }
+
+  goBtn.onclick=function(){
+
+    const chapter=chapterSelect.value;
+    const verse=verseSelect.value;
+
+    if(!structure[chapter] || !structure[chapter][verse]){
+      console.warn("Verse not found:", chapter, verse);
+      return;
+    }
+
+    const target=structure[chapter][verse];
+
+    clearHighlights();
+    target.classList.add("selected-verse");
+
+    const offset=getControlsOffset(10);
+
+    modal.scrollTo({
+      top:target.offsetTop-offset,
+      behavior:"smooth"
+    });
+  };
+
+  window.chapterVerseStructure = structure; // debug access
+}
+
+/* ==========================================================
+   MODAL ARROW SCROLL
+========================================================== */
+
+(function(){
+
+  const modalRoot=document.getElementById("modalRoot");
+  const modal=document.getElementById("quizModal");
+  if(!modalRoot || !modal) return;
+
+  const SCROLL_AMOUNT=50;
+  let enabled=false;
+
+  function isTypingTarget(target){
+
+    return target.closest("input, textarea")
+      || target.isContentEditable
+      || target.closest("[contenteditable='true']");
+
+  }
+
+  function handleKeydown(e){
+
+    if(!enabled) return;
+    if(e.key!=="ArrowDown" && e.key!=="ArrowUp") return;
+    if(isTypingTarget(e.target)) return;
+
+    e.preventDefault();
+
+    modal.scrollBy({
+      top:e.key==="ArrowDown" ? SCROLL_AMOUNT : -SCROLL_AMOUNT,
+      behavior:"smooth"
+    });
+
+  }
+
+  function enable(){
+    if(enabled) return;
+    enabled=true;
+    document.addEventListener("keydown",handleKeydown);
+  }
+
+  function disable(){
+    enabled=false;
+    document.removeEventListener("keydown",handleKeydown);
+  }
+
+  const observer=new MutationObserver(()=>{
+    const active=modalRoot.classList.contains("active");
+    if(active) enable();
+    else disable();
+  });
+
+  observer.observe(modalRoot,{attributes:true,attributeFilter:["class"]});
+
+})();
+
+
+/* ==========================================================
+   STRICT SUBMIT LOCK
+========================================================== */
+
+(function(){
+
+  function updateSubsectionState(sub){
+
+    const name=sub.querySelector('.quiz-name');
+    const id=sub.querySelector('.quiz-id');
+    const submit=sub.querySelector('.quiz-submit');
+    const radios=sub.querySelectorAll('input[type="radio"]');
+
+    if(!name || !id || !submit) return;
+
+    const enabled=name.value.trim() && id.value.trim();
+
+    submit.disabled=!enabled;
+    radios.forEach(r=>r.disabled=!enabled);
+
+  }
+
+  function initSub(sub){
+
+    if(sub.dataset.lockInitialized) return;
+    sub.dataset.lockInitialized="1";
+
+    const name=sub.querySelector('.quiz-name');
+    const id=sub.querySelector('.quiz-id');
+    if(!name || !id) return;
+
+    updateSubsectionState(sub);
+
+    name.addEventListener("input",()=>updateSubsectionState(sub));
+    id.addEventListener("input",()=>updateSubsectionState(sub));
+
+  }
+
+  function scan(){
+    document.querySelectorAll('.quiz-subsection').forEach(initSub);
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",scan);
+  }else{
+    scan();
+  }
+
+  new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
+
+})();
+
+
+/* ==========================================================
+   GLOBAL LINK FADE
+========================================================== */
+
+document.addEventListener("click",function(e){
+
+  const link=e.target.closest("a");
+  if(!link) return;
+
+  e.preventDefault();
+
+  document.body.style.transition="opacity 80ms ease";
+  document.body.style.opacity="0";
+
+  setTimeout(()=>{
+    window.location.href=link.href;
+  },80);
+
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const targets = [
+    { parent:"#layout", content:"#layout", gap:-30 },
+    { parent:"#tocContainer", content:"#tocContainer", gap:-20 },
+    { parent:"#quizModal", content:"#quizModalContent", gap:-30 }
+  ];
+
+  const copyrightHTML = `
+    <section class="copyrightSection">
+      <div class="footer-note copyright">
+        © <span class="auto-year"></span> Perfectly Practical English™. All rights reserved.
+      </div>
+<div id="visitor-count">Visits: loading...</div>
+
+    </section>
+  `;
+
+  function insertCopyright(parent){
+    if (!parent.querySelector(":scope > .copyrightSection")) {
+      parent.insertAdjacentHTML("beforeend", copyrightHTML);
+    }
+  }
+
+  function adjust(parent, content, desiredGap){
+
+    const copyright = parent.querySelector(".copyrightSection");
+    const last = content.lastElementChild;
+
+    if (!copyright || !last) return;
+
+    const lastBottom = last.getBoundingClientRect().bottom;
+    const copyTop = copyright.getBoundingClientRect().top;
+
+    const currentGap = copyTop - lastBottom;
+    const adjust = currentGap - desiredGap;
+
+    copyright.style.marginTop = (-adjust - 5) + "px";
+  }
+
+  function update(){
+
+    targets.forEach(t => {
+
+      const parent = document.querySelector(t.parent);
+      const content = document.querySelector(t.content);
+
+      if (!parent || !content) return;
+
+      insertCopyright(parent);
+      adjust(parent, content, t.gap);
+
+    });
+
+  }
+
+  // set year
+  document.querySelectorAll(".auto-year").forEach(el=>{
+    el.textContent = new Date().getFullYear();
+  });
+
+  update();
+
+  window.addEventListener("resize", update);
+
+});
+</script>
+
+<script>
+(function(){
+
+  const startBtn = document.getElementById('startBtn');
+  let activeEl = null;
+
+  let startX = 0;
+  let startY = 0;
+  let isDragging = false;
+
+  const DRAG_THRESHOLD = 8;
+
+  const X_THRESHOLD = 60;
+  const Y_THRESHOLD = 30;
+
+  const synth = window.speechSynthesis;
+
+  /* =========================
+     STYLE (soft + fade out)
+  ========================= */
+  if (!document.getElementById("chunkHighlightStyle")) {
+    const style = document.createElement("style");
+    style.id = "chunkHighlightStyle";
+    style.textContent = `
+      .chunk-active {
+        background: #fff9c4;
+        transition: background 0.6s ease;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function fadeHighlight() {
+    if (!activeEl) return;
+
+    activeEl.style.background = "transparent";
+
+    setTimeout(() => {
+      if (activeEl) {
+        activeEl.classList.remove("chunk-active");
+        activeEl.style.background = "";
+        activeEl = null;
+      }
+    }, 600);
+  }
+
+  function setHighlight(el) {
+    if (activeEl) {
+      activeEl.classList.remove("chunk-active");
+    }
+    activeEl = el;
+    el.classList.add("chunk-active");
+  }
+
+  function placeCursorAtStart(el) {
+    const range = document.createRange();
+    const sel = window.getSelection();
+
+    range.selectNodeContents(el);
+    range.collapse(true);
+
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  /* =========================
+     POINTER TRACKING
+  ========================= */
+  document.addEventListener("pointerdown", (e) => {
+    startX = e.clientX;
+    startY = e.clientY;
+    isDragging = false;
+  });
+
+  document.addEventListener("pointermove", (e) => {
+    if (Math.abs(e.clientX - startX) > DRAG_THRESHOLD ||
+        Math.abs(e.clientY - startY) > DRAG_THRESHOLD) {
+      isDragging = true;
+    }
+  });
+
+  /* =========================
+     TAP → TOGGLE PLAY/STOP
+  ========================= */
+  document.addEventListener("pointerup", function(e){
+
+    if (isDragging) return;
+
+    const sel = window.getSelection();
+    if (sel && !sel.isCollapsed) return;
+
+    const p = e.target.closest(".question-text p, #quizSections p");
+    if (!p) return;
+
+    if (e.target.closest("button, input, label")) return;
+
+    const rect = p.getBoundingClientRect();
+
+    const isRightZone = e.clientX > rect.right - X_THRESHOLD;
+    const isBottomZone = e.clientY > rect.bottom - Y_THRESHOLD;
+
+    if (!(isRightZone && isBottomZone)) return;
+
+    // =========================
+    // 🔥 TOGGLE LOGIC
+    // =========================
+
+    if (synth.speaking) {
+      // STOP
+      synth.cancel();
+      fadeHighlight();
+      return;
+    }
+
+    // START (fresh)
+    setHighlight(p);
+    placeCursorAtStart(p);
+
+    setTimeout(() => {
+      if (startBtn) startBtn.click();
+    }, 40);
+
+  });
+
+  /* =========================
+     AUTO FADE WHEN SPEECH ENDS
+  ========================= */
+  const originalSpeak = synth.speak.bind(synth);
+
+  synth.speak = function(utterance) {
+
+    utterance.addEventListener("end", () => {
+      fadeHighlight();
+    });
+
+    return originalSpeak(utterance);
+  };
+
+})();
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<script>
+(function () {
+
+  const synth = window.speechSynthesis;
+  const startBtn = document.getElementById("startBtn");
+  if (!startBtn) return;
+
+  // -------------------------
+  // CREATE BOTTOM BUTTON
+  // -------------------------
+  const proxyBtn = document.createElement("button");
+  document.body.appendChild(proxyBtn);
+
+  // -------------------------
+  // DETECT VISIBILITY
+  // -------------------------
+  function isVisible(el) {
+    if (!el) return false;
+
+    const rect = el.getBoundingClientRect();
+
+    return (
+      rect.width > 0 &&
+      rect.height > 0 &&
+      rect.top < window.innerHeight &&
+      rect.bottom > 0
+    );
+  }
+
+  // -------------------------
+  // SYNC LABEL
+  // -------------------------
+  function syncLabel() {
+    const topLabel = startBtn.textContent?.trim() || "Start";
+    proxyBtn.textContent = topLabel;
+  }
+
+  // -------------------------
+  // 🔥 KEYBOARD-AWARE POSITIONING
+  // -------------------------
+  function adjustForKeyboard() {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const keyboardOffset =
+      window.innerHeight - vv.height - vv.offsetTop;
+
+    proxyBtn.style.transform =
+      `translateY(-${Math.max(0, keyboardOffset)}px)`;
+  }
+
+  // -------------------------
+  // 🔥 SYNC STYLES
+  // -------------------------
+  function syncStyles() {
+    const cs = window.getComputedStyle(startBtn);
+
+    Object.assign(proxyBtn.style, {
+      position: "fixed",
+      bottom: "20px",
+      left: "20px",
+      zIndex: 999999,
+      padding: "10px 14px",
+      borderRadius: "6px",
+      border: cs.border,
+      background: cs.backgroundColor,
+      color: cs.color,
+      fontSize: cs.fontSize,
+      fontFamily: cs.fontFamily,
+      fontWeight: cs.fontWeight,
+      cursor: "pointer",
+      boxShadow: "0 4px 8px rgba(0,0,0,0.5)",
+      userSelect: "none",
+
+      // 🔥 important for smooth movement
+      willChange: "transform",
+      transition: "transform 0.12s ease-out"
+    });
+  }
+
+  // -------------------------
+  // MAIN CLICK
+  // -------------------------
+  proxyBtn.addEventListener("click", () => {
+    startBtn.click();
+  });
+
+  // -------------------------
+  // KEEP IN SYNC
+  // -------------------------
+  const observer = new MutationObserver(() => {
+    syncLabel();
+    syncStyles();
+  });
+
+  observer.observe(startBtn, {
+    subtree: true,
+    childList: true,
+    characterData: true
+  });
+
+  setInterval(() => {
+    syncLabel();
+    syncStyles();
+  }, 300);
+
+  // -------------------------
+  // 🔥 KEYBOARD EVENTS
+  // -------------------------
+  const vv = window.visualViewport;
+
+  if (vv) {
+    vv.addEventListener("resize", adjustForKeyboard);
+    vv.addEventListener("scroll", adjustForKeyboard);
+  }
+
+  // -------------------------
+  // INIT
+  // -------------------------
+  syncLabel();
+  syncStyles();
+  adjustForKeyboard();
+
+})();
+</script>
+
+
+<script>
+(function(){
+
+const RAW_TEXT = `
+Open Section Content 
+1. Click blue buttons to open sections.
+
+---
+
+Reader Tools
+
+1. Highlight - Select text and click to highlight.
+2. Click again to remove highlight.
+3. Copy - Select text and click to copy.
+4. Click Close to exit.
+
+---
+
+Quiz
+
+1. Enter Name and ID.
+2. Select best answer.
+3. Click Submit to see score.
+4. Click Close to exit.
+`;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("instructionsBtn");
+  if (!btn) return;
+
+  // create isolated modal ONCE
+  let modal = document.getElementById("info-instructions-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "info-instructions-modal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      background: "rgba(0,0,0,0.6)",
+      display: "none",
+      zIndex: "999999",
+      padding: "40px",
+      boxSizing: "border-box"
+    });
+
+modal.innerHTML = `
+  <div style="
+    max-width:700px;
+    margin:0 auto;
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    position:relative;
+    max-height:80vh;
+    overflow:auto;
+    font-family:inherit;
+    box-sizing:border-box;
+  ">
+
+<button id="close-instructions-modal" class="modal-close-btn">✕</button>
+
+    <pre style="
+      white-space:pre-wrap;
+      margin:0;
+      padding-top:10px;
+      overflow-wrap:break-word;
+      word-break:break-word;
+    ">${RAW_TEXT}</pre>
+
+  </div>
+`;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#close-instructions-modal").onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+});
+
+})();
+</script>
+
+<script>
+(function(){
+
+const RAW_TEXT = `
+Comprehensive reading strategy checklist
+
+1. Cut texts into small pieces.
+2. Collect context clues.
+3. Reread when lost.
+4. Scan titles and images.
+5. Identify known/unknown words.
+6. Use background knowledge.
+7. Break down word parts.
+8. Look up vocabulary.
+9. Identify signal words.
+`;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("strategiesBtn");
+  if (!btn) return;
+
+  let modal = document.getElementById("info-strategies-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "info-strategies-modal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      background: "rgba(0,0,0,0.6)",
+      display: "none",
+      zIndex: "999999",
+      padding: "40px",
+      boxSizing: "border-box"
+    });
+
+    modal.innerHTML = `
+      <div style="
+        max-width:700px;
+        margin:0 auto;
+        background:#fff;
+        padding:20px;
+        border-radius:10px;
+        position:relative;
+        max-height:80vh;
+        overflow:auto;
+        font-family:inherit;
+      ">
+
+<button id="close-strategies-modal" class="modal-close-btn">✕</button>
+
+        <pre style="white-space:pre-wrap;margin:0;">${RAW_TEXT}</pre>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#close-strategies-modal").onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+});
+
+})();
+</script>
+
+<script>
+(function(){
+
+const RAW_TEXT = `
+Common Signal Word Categories and Examples
+
+• Time ⏰: words that tell when something happens
+
+on, at, in, before, after, since, until, during, for, now, yesterday, today, tomorrow, later, then, when, while, once
+
+• Addition ➕: words that add ideas together
+
+and, also, too, with, plus, as well as, not only...but also, both...and
+
+• Cause / Effect 🔗: words that show a reason or result
+
+because, so, since, because of, due to, as a result, therefore, that’s why
+
+• Comparison / Similarity / Difference ⚖️: words that compare things
+
+like, as, as...as, than, similar to, different from, more than, less than, the most, just as...so, whereas, in contrast to
+
+• Contrast / Opposition 🎭: words that show differences
+
+but, although, though, even though, however, yet, still, despite, instead, whereas, while, on the other hand
+
+• Frequency 〰️: words that tell how often something happens
+
+always, usually, often, sometimes, occasionally, rarely, never, every day, once a week, hardly ever, from time to time
+
+• Possibility / Certainty 🎲: words that show how possible or sure something is
+
+maybe, probably, possibly, must, might, may, could, can, definitely, certainly
+
+• Advice / Obligation / Permission ☝️: words that tell rules or give guidance
+
+must, must not, have to, don’t have to, should, ought to, had better, can, cannot, may, could
+
+• Manner 🎭: words that tell how something is done
+
+quickly, slowly, carefully, easily, well, badly, with, by, in a...way, as
+
+• Place / Location 📍: words that tell where something is
+
+in, on, at, under, above, between, near, next to, here, there, everywhere, anywhere
+
+• Condition 🌧️: words that show something depends on something else
+
+if, unless, in case, on condition that
+
+• Emphasis / Focus 🎯: words that make something stronger or more important
+
+only, just, even, especially, mainly, particularly
+
+• Questions (Interrogatives) ❓: words used to ask questions
+
+how, when, where, why
+
+• Relative Words 👨‍👩‍👧‍👦: words that connect ideas about time, place, reason, or manner
+
+when, where, why, how
+
+• Direction / Movement 🧭: words that show movement or direction
+
+to, from, toward, away from, up, down, forward, back
+
+• Affirmative and Negative ✔️❌: words that show yes or no
+
+yes, no
+`;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("signalwordsBtn");
+  if (!btn) return;
+
+  let modal = document.getElementById("info-signalwords-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "info-signalwords-modal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      background: "rgba(0,0,0,0.6)",
+      display: "none",
+      zIndex: "999999",
+      padding: "40px",
+      boxSizing: "border-box"
+    });
+
+    modal.innerHTML = `
+      <div style="
+        max-width:700px;
+        margin:0 auto;
+        background:#fff;
+        padding:20px;
+        border-radius:10px;
+        position:relative;
+        max-height:80vh;
+        overflow:auto;
+        font-family:inherit;
+      ">
+
+<button id="close-signalwords-modal" class="modal-close-btn">✕</button>
+
+        <pre style="white-space:pre-wrap;margin:0;">${RAW_TEXT}</pre>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#close-signalwords-modal").onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+});
+
+})();
+</script>
+
+
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<script>
+
+function goToNextQuiz(){
+
+  const modal = document.getElementById("quizModal");
+  const container = modal?.querySelector("#quizSections");
+
+  // ✔️ TARGET THE ACTUAL BUTTON (NOT THE FUNCTION)
+  const goBtn = document.querySelector('button[onclick="goToNextQuiz()"]');
+
+  if(!container) return;
+
+  const originalLabel = goBtn?.textContent || "Go to Quiz";
+
+  function showNoQuizEmoji(){
+
+    if(!goBtn) return;
+
+    goBtn.textContent = "🚫";
+
+    setTimeout(() => {
+      goBtn.textContent = originalLabel;
+    }, 900);
+
+  }
+
+  const firstQuiz = container.querySelector(".quiz-subsection");
+
+  // ===== NO QUIZ FOUND =====
+  if(!firstQuiz){
+    showNoQuizEmoji();
+    return;
+  }
+
+  const readAloud = modal?.querySelector("#readaloudControls");
+  const chapterControls = modal?.querySelector("#chapterVerseControls");
+
+  const offset =
+    (readAloud?.offsetHeight || 0) +
+    (chapterControls?.offsetHeight || 0) +
+    20;
+
+  modal.scrollTo({
+    top: firstQuiz.offsetTop - offset,
+    behavior: "smooth"
+  });
+
+}
+
+</script>
+
+<script>
+// ===== UNIVERSAL CLOSE HANDLER (safe + no blank bug) =====
+document.addEventListener("click", (e) => {
+
+  const closeBtn = e.target.closest(
+    ".quiz-close, .modal-close, #closeModalBtn"
+  );
+
+  if (!closeBtn) return;
+
+  e.preventDefault();
+
+  // Smooth fade instead of hard visibility kill
+  document.body.style.opacity = "0";
+
+  // Close modal immediately
+  const modalRoot = document.getElementById("modalRoot");
+  if (modalRoot) modalRoot.classList.remove("active");
+
+  document.body.classList.remove("modal-open");
+
+  // Force full reload
+  setTimeout(() => {
+    location.replace(window.location.pathname);
+  }, 80);
+
+});
+</script>
+
+
+<script>
+(function () {
+
+  function showPage() {
+    const root = document.documentElement;
+    const loader = document.getElementById("loader");
+
+    // Remove old gating (safe even if unused)
+    root.classList.remove("pre-auto-open", "show-hard", "show-dynamic");
+
+    // ✅ Reveal UI (controls title via CSS)
+    root.classList.add("ui-ready");
+
+    // Force key containers visible
+    const layout = document.getElementById("layout");
+    const toc = document.getElementById("dynamicTOC");
+
+    if (layout) layout.style.display = "block";
+    if (toc) toc.style.display = "block";
+
+    // Fallback: reveal hidden content if needed
+    if (!layout && !toc) {
+      document.body.style.visibility = "visible";
+      document.querySelectorAll(".visually-hidden").forEach(el => {
+        el.style.position = "static";
+        el.style.left = "0";
+      });
+    }
+
+    // Kill loader LAST
+    if (loader) loader.remove();
+  }
+
+  // Run immediately (prevents stuck loader)
+  showPage();
+
+  // Backup safety
+  document.addEventListener("DOMContentLoaded", showPage);
+  window.addEventListener("load", showPage);
+  setTimeout(showPage, 1500);
+
+})();
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const targets = [
+    { parent:"#layout", content:"#layout", gap:-30 },
+    { parent:"#tocContainer", content:"#tocContainer", gap:-20 },
+    { parent:"#quizModal", content:"#quizModalContent", gap:-30 }
+  ];
+
+  const copyrightHTML = `
+    <section class="copyrightSection">
+
+      <!-- 10px invisible space ABOVE copyright -->
+      <div class="spacer spacer-top"></div>
+
+      <div class="footer-note copyright">
+        © <span class="auto-year"></span> Perfectly Practical English™. All rights reserved.
+      </div>
+
+      <div id="visitor-count" class="visitor-count">
+        Visits: loading...
+      </div>
+
+      <!-- 30px invisible space BELOW visits -->
+      <div class="spacer spacer-bottom"></div>
+
+
+    </section>
+  `;
+
+  function insertCopyright(parent){
+    if (!parent.querySelector(":scope > .copyrightSection")) {
+      parent.insertAdjacentHTML("beforeend", copyrightHTML);
+    }
+  }
+
+  function adjust(parent, content, desiredGap){
+
+    const copyright = parent.querySelector(".copyrightSection");
+    const last = content.lastElementChild;
+
+    if (!copyright || !last) return;
+
+    const lastBottom = last.getBoundingClientRect().bottom;
+    const copyTop = copyright.getBoundingClientRect().top;
+
+    const currentGap = copyTop - lastBottom;
+    const adjust = currentGap - desiredGap;
+
+    const extraOffset = 5; // try 5–10px
+
+copyright.style.marginTop = (-adjust + extraOffset) + "px";
+  }
+
+  async function updateVisitorCount() {
+
+    const namespace = "PerfectlyPracticalEnglish";
+    const key = "homepage";
+
+    const isOwner =
+      localStorage.getItem("isOwner") === "true";
+
+    const isLocal =
+      location.hostname === "localhost" ||
+      location.hostname === "127.0.0.1";
+
+    const alreadyCounted =
+      sessionStorage.getItem("counted");
+
+    let data;
+
+    try {
+
+      if (!isOwner && !isLocal && !alreadyCounted) {
+
+        data = await fetch(
+          `https://api.countapi.xyz/hit/${namespace}/${key}`
+        ).then(r => r.json());
+
+        sessionStorage.setItem("counted", "true");
+
+      } else {
+
+        data = await fetch(
+          `https://api.countapi.xyz/get/${namespace}/${key}`
+        ).then(r => r.json());
+
+      }
+
+      document.querySelectorAll("#visitor-count").forEach(el => {
+        el.textContent = `Total: ${data.value} visits`;
+      });
+
+    } catch (err) {
+
+      console.error("Visitor counter failed:", err);
+
+      document.querySelectorAll("#visitor-count").forEach(el => {
+        el.textContent = "Visits unavailable";
+      });
+
+    }
+
+  }
+
+  function update(){
+
+    targets.forEach(t => {
+
+      const parent = document.querySelector(t.parent);
+      const content = document.querySelector(t.content);
+
+      if (!parent || !content) return;
+
+      insertCopyright(parent);
+      adjust(parent, content, t.gap);
+
+    });
+
+  }
+
+  // Set current year
+  document.querySelectorAll(".auto-year").forEach(el => {
+    el.textContent = new Date().getFullYear();
+  });
+
+  update();
+  updateVisitorCount();
+
+  window.addEventListener("resize", update);
+
+});
+</script>
+
+<script>
+function fixModalScrollRoom() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+
+  const keyboardHeight =
+    window.innerHeight - vv.height - vv.offsetTop;
+
+  const modal = document.getElementById("quizModal");
+  if (!modal) return;
+
+  modal.style.height =
+    `calc(100dvh - ${keyboardHeight}px)`;
+}
+
+window.visualViewport?.addEventListener("resize", fixModalScrollRoom);
+window.visualViewport?.addEventListener("scroll", fixModalScrollRoom);
+window.addEventListener("resize", fixModalScrollRoom);
+
+fixModalScrollRoom();
+
+</script>
+
+<!-- SUPABASE LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const supabaseClient = window.supabase?.createClient(
+  'https://etwwriloppklhhkmswpr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+);
+
+if (!supabaseClient) {
+  console.error("❌ Supabase failed to initialize");
+}
+
+let lastUploadedScore = null;
+
+window.saveResult = async function saveResult(text) {
+
+  if (!supabaseClient) {
+    console.error("❌ No Supabase client");
+    return;
+  }
+
+  // ======================
+  // NORMALIZE INPUT
+  // ======================
+  let cleaned;
+
+  try {
+    cleaned = (typeof text === "string")
+      ? text
+      : JSON.stringify(text);
+
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+
+  } catch (err) {
+    console.error("❌ Normalize error:", err);
+    return;
+  }
+
+  if (!cleaned) {
+    console.error("❌ Empty value blocked");
+    return;
+  }
+
+  if (cleaned === lastUploadedScore) {
+    console.log("⚠️ Duplicate blocked");
+    return;
+  }
+
+  lastUploadedScore = cleaned;
+
+  console.log("📤 INSERTING INTO scoreboard_raw:", cleaned);
+
+  const { data, error } = await supabaseClient
+    .from("scoreboard_raw")
+    .insert([
+      { result_text: cleaned }
+    ])
+    .select();
+
+  if (error) {
+    console.error("❌ INSERT FAILED FULL ERROR:", error);
+    return;
+  }
+
+  console.log("✅ INSERT SUCCESS:", data);
+};
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+

@@ -1,0 +1,6395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PerfectlyPracticalEnglish.netlify.app</title>
+
+<style>
+
+/* =====================
+   1. FIRST PAINT / MODE GATING
+===================== */
+
+#layout,
+#dynamicTOC {
+  display: none;
+}
+
+/* HARD enabled */
+html.show-hard #layout {
+  display: block;
+}
+
+/* DYNAMIC enabled */
+html.show-dynamic #dynamicTOC {
+  display: block;
+}
+
+/* =====================
+   2. GLOBAL BASE TYPOGRAPHY
+===================== */
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #222;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f6fa;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Hide page until auto-open logic finishes */
+html.pre-auto-open body > *:not(#loader) {
+  visibility: hidden;
+}
+
+h2 {
+  margin: 20px 0 10px 0;
+}
+
+h3 {
+  margin: 0 0 6px 0;
+  color: #1976d2;
+  font-size: 12px;
+}
+
+.word {
+  cursor: pointer;
+  color: inherit;
+}
+
+.word:hover {
+  background-color: rgba(26,115,232,0.2);
+}
+
+.sentence {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.highlight {
+  background-color: #ffff00;
+  color: #000000;
+}
+
+.visually-hidden {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+
+/* =====================
+   4. DYNAMIC TOC
+===================== */
+
+#tocButtons {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tocColumn button {
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+
+  display: block;
+  width: 100%;
+  background-color: #2b5d84;
+  color: #ffffff;
+
+  padding: 10px 10px 10px 15px;
+  border-radius: 6px;
+
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+
+  box-sizing: border-box;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tocColumn button:hover,
+.readAloudBtn:hover {
+  background-color: #1f4563;
+}
+
+#tocContainer h3 {
+  color: #2b5d84;
+  margin-left: 20px;
+}
+
+.parsedHeader {
+  color: #2b5d84;
+  font-weight: bold;
+  margin-left: -3px;
+
+}
+
+.parsedSubheader {
+  color: #2b5d84;
+  font-weight: bold;
+  margin-top: 14px;
+  margin-bottom: 8px;
+}
+
+/* =====================
+   6. MODAL ISOLATION
+===================== */
+
+body.modal-open {
+  overflow: hidden;
+}
+
+body.modal-open #tocRoot,
+body.modal-open #tocColLeft,
+body.modal-open #tocColRight {
+  display: none;
+}
+
+#modalRoot {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  display: none;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding-top: 20px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  overscroll-behavior: contain;
+
+  z-index: 20000;
+}
+
+#modalRoot.active {
+  display: flex;
+  flex-direction: column;  /* stack bars vertically */
+  gap: 0;                  /* remove the transparent strip */
+  background: #ffffff;     /* force pure white */
+}
+/* =====================
+   7. QUIZ MODAL LAYOUT
+===================== */
+
+#quizModal {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+
+  height: calc(100dvh - var(--kb-offset, 0px));
+
+  margin: 0 auto;
+
+  padding: 0 10px 120px 10px;
+
+  background: #ffffff;
+  box-sizing: border-box;
+
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+
+  border-radius: 8px;
+
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#quizModal h2 {
+  font-size: 12px;
+}
+
+#quizModalContent {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#quizSections {
+  width: 100%;
+  margin-left: 0;
+  padding-top: 10px;  /* Kill switch header spacing */
+  box-sizing: border-box;
+}
+
+#quizSections > * {
+  padding: 3px 0;
+  margin-bottom: 16px;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+#quizSections .section > h2 {
+  margin: 0 0 8px 0;
+  scroll-margin-top: 100px;
+}
+
+#quizSections .quiz-subsection {
+  margin: 10px 0;
+}
+
+#quizSections .quiz-subsection:first-of-type {
+  margin-top: 0;
+}
+
+#quizSections .quiz-subsection h3 {
+  margin: 0 0 8px 0;
+}
+
+#quizSections h3 {
+  scroll-margin-top: 10px;
+}
+
+.question-text {
+  margin-top: -5px;
+}
+
+.question-text h3 {
+  margin: 16px 0 8px;
+}
+
+.question-text:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.exercise-container {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.exercise p {
+  margin-bottom: 4px;
+}
+
+
+/* =====================
+   8. CONTROL BARS (Stacked Sticky Inside Scroll Container)
+===================== */
+
+/* Hidden by default */
+#chapterVerseControls,
+#readaloudControls {
+  display: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  box-sizing: border-box;
+
+  line-height: 0; /* kill inherited inline height */
+}
+
+/* Show when modal active */
+#modalRoot.active #chapterVerseControls,
+#modalRoot.active #readaloudControls {
+  display: block; /* block is safer than flex at container level */
+}
+
+/* --------------------------------------------------
+   BOTH BARS STICK (same scroll context)
+-------------------------------------------------- */
+
+#chapterVerseControls {
+  position: relative;
+  top: auto;
+  z-index: 40;
+}
+
+#readaloudControls {
+  position: relative;
+  top: auto;
+  z-index: 39;
+  border-top: 1px solid #eee;
+}
+
+/* REMOVE stacking math completely */
+#chapterVerseControls + #readaloudControls {
+  top: auto;
+}
+/* Keep layout behavior inside controlRow */
+#chapterVerseControls .controlRow,
+#readaloudControls .controlRow {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+#readaloudControls {
+  border-top: 1px solid #ffffff;
+  padding-top: 6px;
+}
+
+/* --------------------------------------------------
+   Buttons & Select Layout
+-------------------------------------------------- */
+
+#chapterVerseControls select,
+#chapterVerseControls button,
+#readaloudControls select,
+#readaloudControls button {
+  flex: 0 0 calc((100% - 18px) / 4);
+  max-width: calc((100% - 18px) / 4);
+  min-width: 0;
+
+  height: 36px;
+  line-height: 36px;
+
+  box-sizing: border-box;
+  font-size: 13px;
+  border-radius: 6px;
+
+  margin: 0;
+  padding: 0 10px;
+  vertical-align: middle;
+}
+
+/* Select normalization */
+#chapterVerseControls select,
+#readaloudControls select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+}
+
+/* Button alignment */
+#chapterVerseControls button,
+#readaloudControls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hide select scrollbar */
+#chapterVerseControls select::-webkit-scrollbar,
+#readaloudControls select::-webkit-scrollbar {
+  width: 0;
+}
+
+/* Readaloud wrapper safety */
+.readaloud-block,
+.readaloud-block .readaloud-buttons {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  box-sizing: border-box;
+}/* =====================
+   9. BUTTON SYSTEM
+===================== */
+
+#modalRoot button {
+  height: 36px;
+  font-size: 12px;
+  background: #2b5d84;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+#modalRoot button:hover:not(:disabled) {
+  background: #1f4563;
+}
+
+#modalRoot button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+#modalRoot button:disabled {
+  background: #8aa3b8;
+  cursor: not-allowed;
+}
+
+
+/* =====================
+   10. SCOREBOARD
+===================== */
+
+#scoreboard {
+  display: block;
+  position: sticky;
+  bottom: 0;
+
+  left: 2px;              /* ← actual visual shift (try 1px if too much) */
+
+  background: #fff;
+  padding: 10px;
+  border: 2px solid #add8e6;
+
+  width: calc(100% - 2px); /* compensate so it doesn’t overflow right */
+  box-sizing: border-box;
+
+  z-index: 10;
+}
+
+.scoreboard-main pre,
+#scoreOutput {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  display: block;
+}
+
+.scoreboard-buttons {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.scoreboard-buttons > * {
+  flex: 1 1 0;        /* equal width */
+  min-width: 0;
+  height: 36px;
+}
+
+
+
+/* =====================
+   11. SHARED TOC STRUCTURE CONTRACT
+===================== */
+
+#layout,
+#tocContainer {
+  width: 100%;
+  max-width: 360px;
+  margin: 20px auto;
+  padding: 5px 10px;
+  box-sizing: border-box;
+}
+
+.container,
+#tocButtons {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.column,
+.tocColumn {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+
+/* =====================
+   12. GLOBAL SCROLLBAR SUPPRESSION
+===================== */
+
+html,
+body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  /* 🔥 ADD THIS */
+  overflow-anchor: none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+#quizModal::-webkit-scrollbar,
+#mvWindow::-webkit-scrollbar {
+  display: none;
+}
+
+#quizModal,
+#mvWindow {
+  scrollbar-width: none;
+}
+
+
+/* Make all 4-item control rows identical */
+/* ========================
+   FLEXIBLE CONTROL ROW SYSTEM
+========================= */
+
+.controlRow {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+/* shared styling */
+.controlRow > * {
+  min-width: 0;
+  height: 36px;
+  box-sizing: border-box;
+  font-size: 13px;
+  border-radius: 6px;
+  padding: 0 10px;
+}
+
+/* Chapter + Verse selects wider */
+.controlRow select:nth-child(1),
+.controlRow select:nth-child(2) {
+  flex: 1.3 1 0;
+}
+
+/* Buttons slightly smaller */
+.controlRow button {
+  flex: 0.8 1 0;
+}
+/* ========================
+   NAME / ID / SUBMIT / CLOSE ROW
+========================= */
+
+/* each row */
+.top-controls {
+  display: flex;
+  gap: 6px;              /* horizontal spacing only */
+  margin: 0;             /* remove transparent margin */
+  width: 100%;
+}
+
+.top-controls > * {
+  flex: 1 1 0;        /* equal width for all 4 */
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 13px;
+}
+
+.top-controls input {
+  border: 1px solid #ccc;
+}
+
+.top-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copyrightSection {
+  font-size: 9px;
+  opacity: 0.7;
+
+  padding: 0 6px;
+  box-sizing: border-box;
+
+  margin-top: 15px;
+  padding-left: 1px;
+
+  text-align: left;
+
+  display: block;
+}
+
+/* enforce vertical stacking */
+.copyrightSection > div {
+  display: block;
+}
+
+.visitor-count {
+  font-size: 12px;
+  opacity: 0.75;
+  margin-top: 4px;
+}
+
+.quiz-scoreboard {
+  width: 100%;
+  box-sizing: border-box;
+
+  margin-bottom: 12px;
+  padding: 6px;
+
+  border: 1px solid #9aaed1;
+  border-radius: 6px;
+  background: #f9f9f9;
+
+  font-family: monospace;
+  font-size: 12px;
+}
+
+
+/* vertical stacking container */
+
+/* Make only Chapter & Verse text smaller */
+#chapterVerseControls select {
+  font-size: 10px;   /* adjust to 9px, 11px, etc. */
+}
+
+.reading-active {
+  background-color: yellow !important;
+  scroll-margin-top: 120px;
+}
+
+#loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #f5f6fa; /* match page background */
+  z-index: 9999;
+}
+
+/* Inner box matches your layout width */
+#loaderContent {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+
+  text-align: center;
+  padding: 20px;
+
+  font-size: 16px;
+  font-weight: bold;
+  color: #2b5d84; /* 🔵 your button blue */
+}
+
+#helloBar {
+  height: 40px;              /* acts as buffer */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12px;
+  color: #2b5d84;
+
+  background: #ffffff;
+  transition: opacity 0.15s ease, height 0.15s ease;
+}
+
+
+
+/* =========================
+   🔥 MOBILE KEYBOARD FIX LAYER
+   (SAFE OVERRIDE ZONE)
+========================= */
+
+html, body {
+  height: 100%;
+}
+
+/* Prevent layout jump caused by keyboard resize */
+#modalRoot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  height: 100dvh; /* modern mobile viewport fix */
+  min-height: 100vh;
+}
+
+/* Better behavior when keyboard opens */
+@supports (height: 100dvh) {
+  #modalRoot {
+    height: 100dvh;
+  }
+}
+
+/* fallback smooth behavior for older mobile browsers */
+@media (max-width: 768px) {
+  #modalRoot {
+    transition: transform 0.12s ease-out;
+  }
+}
+
+/* optional: stabilize bottom UI elements (your proxy button) */
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+.modal-close-btn {
+  width: 36px;
+  height: 36px;
+
+  padding: 0;
+  line-height: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 16px;
+
+  background: #2b5d84;
+  color: #fff;
+
+  border: none;
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  transition: background 0.15s, transform 0.1s;
+
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.modal-close-btn:hover {
+  background: #1f4563;
+}
+
+.modal-close-btn:active {
+  transform: scale(0.97);
+}
+
+
+h1[data-auto-title] {
+  visibility: hidden;
+}
+
+html.ui-ready h1[data-auto-title] {
+  visibility: visible;
+}
+
+#layout,
+#tocContainer {
+  padding-bottom: 30px;
+}
+
+
+.visits-bottom-space {
+  height: 140px; /* adjust this freely */
+  width: 100%;
+}
+
+
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div id="loaderContent">Loading...</div>
+</div>
+<div id="rawTextSource" class="visually-hidden">
+
+
+~Intro
+
+These athletes have not only achieved remarkable success in their respective sports but have also become global icons, inspiring fans from every corner of the world. Whether it’s their dedication, skills, or personalities, they’ve left a lasting impact both within and beyond the sporting world.~
+
+BLANK
+?BLANK
+
+~1. Michael Jordan (Basketball)
+
+• Why is he famous?
+
+Michael Jordan is widely regarded as the greatest basketball player of all time, playing most notably for the Chicago Bulls in the NBA.
+
+• What did he do to reach success?
+
+He led the Bulls to six NBA championships and won five MVP awards. His competitive drive, scoring ability, and leadership set him apart.
+
+• Do they eat healthy foods?
+
+Jordan was known for being disciplined in his training and diet, especially later in his career. While he had a famous fondness for fast food, his meals generally consisted of lean proteins, vegetables, and fruits during the offseason.
+
+• Why is this person a good role model?
+
+Jordan represents excellence in his field, the embodiment of hard work and determination. He pushed boundaries and became an icon both on and off the court.~
+
+BLANK
+?BLANK
+
+~2. Serena Williams (Tennis)
+
+• Why is she famous?
+
+Serena Williams is one of the greatest female tennis players of all time, with 23 Grand Slam singles titles, the most by any player in the Open Era.
+
+• What did she do to reach success?
+
+Serena's relentless training, mental toughness, and aggressive playing style helped her dominate women’s tennis for over two decades.
+
+• Do they eat healthy foods?
+
+Yes, Serena focuses on a balanced diet, rich in whole foods like lean meats, vegetables, and fruits. She’s also known for staying hydrated and eating protein-rich foods to fuel her intense workouts.
+
+• Why is this person a good role model?
+
+Serena has inspired millions with her strength, resilience, and ability to break barriers in a sport historically dominated by white athletes.~
+
+BLANK
+?BLANK
+
+~3. Cristiano Ronaldo (Football/Soccer)
+
+• Why is he famous?
+
+Ronaldo is considered one of the greatest soccer players of all time, known for his incredible goal-scoring ability and athleticism.
+
+• What did he do to reach success?
+
+Ronaldo’s relentless work ethic, commitment to training, and versatility on the field led him to numerous championships, including multiple Ballon d'Or awards.
+
+• Do they eat healthy foods?
+
+Yes, Ronaldo follows a strict diet, including lean meats, vegetables, and whole grains. He avoids processed foods and limits his sugar intake, focusing on staying in top physical condition.
+
+• Why is this person a good role model?
+
+Ronaldo’s commitment to excellence, his mental toughness, and his success on both the club and international level make him a symbol of dedication and athleticism.~
+
+BLANK
+?BLANK
+
+~4. Usain Bolt (Track and Field)
+
+• Why is he famous?
+
+Bolt is the fastest man in history, holding world records for both the 100 meters and 200 meters.
+
+• What did he do to reach success?
+
+Bolt’s combination of speed, strength, and technical skill made him nearly unbeatable in sprinting for almost a decade.
+
+• Do they eat healthy foods?
+
+Bolt has been known to indulge in fast food occasionally, but he also focuses on a balanced diet to maintain his strength and speed.
+
+• Why is this person a good role model?
+
+Bolt represents the power of speed and fun in sports. His personality and dominance in track and field make him an iconic athlete.~
+
+BLANK
+?BLANK
+
+~5. LeBron James (Basketball)
+
+• Why is he famous?
+
+LeBron is a four-time NBA champion and one of the most well-known and accomplished basketball players in history.
+
+• What did he do to reach success?
+
+LeBron’s combination of skill, basketball IQ, and leadership has made him a top player throughout his career, as well as an advocate for social change.
+
+• Do they eat healthy foods?
+
+Yes, LeBron follows a very structured diet and is known to be a huge fan of plant-based meals. His meals are focused on lean proteins, complex carbs, and vegetables.
+
+• Why is this person a good role model?
+
+LeBron is admired for his basketball skills, versatility, and leadership, both on and off the court. His philanthropic work and social advocacy further elevate his status.~
+
+BLANK
+?BLANK
+
+~6. Tiger Woods (Golf)
+
+• Why is he famous?
+
+Tiger Woods is one of the most dominant and successful golfers in history, with 15 major championships to his name.
+
+• What did he do to reach success?
+
+Tiger revolutionized golf with his athleticism, focus, and mental toughness, winning numerous championships and changing how the game was played.
+
+• Do they eat healthy foods?
+
+Yes, Woods has adopted a more plant-based diet in recent years, along with maintaining a balance of lean proteins and complex carbs to fuel his training and competition.
+
+• Why is this person a good role model?
+
+Tiger represents overcoming personal and professional challenges to achieve greatness. His influence on golf and sports culture is undeniable.~
+
+BLANK
+?BLANK
+
+~7. Simone Biles (Gymnastics)
+
+• Why is she famous?
+
+Simone Biles is considered the greatest gymnast of all time, with a record number of world championship titles and Olympic medals.
+
+• What did she do to reach success?
+
+Biles has an unmatched combination of strength, flexibility, and mental focus, which allowed her to dominate the sport for years.
+
+• Do they eat healthy foods?
+
+Simone focuses on a balanced diet that supports her intense training regime, including lean proteins, vegetables, and whole grains.
+
+• Why is this person a good role model?
+
+Biles is a symbol of resilience, grace, and mental strength. Her groundbreaking achievements in gymnastics have made her an inspiration worldwide.~
+
+BLANK
+?BLANK
+
+~8. Muhammad Ali (Boxing)
+
+• Why is he famous?
+
+Ali is regarded as one of the greatest boxers in history, known for his skill, charisma, and social activism.
+
+• What did he do to reach success?
+
+Ali’s combination of speed, footwork, and power allowed him to defeat some of the best fighters of his time, including George Foreman and Joe Frazier.
+
+• Do they eat healthy foods?
+
+While training, Ali followed a high-protein diet with minimal sugars, although his diet wasn’t as structured as modern athletes' diets.
+
+• Why is this person a good role model?
+
+Ali is an icon not only in sports but also in culture. His bravery inside and outside the ring, along with his fight for civil rights, make him a legend.~
+
+BLANK
+?BLANK
+
+~9. Megan Rapinoe (Soccer)
+
+• Why is she famous?
+
+Rapinoe is known for her leadership on the U.S. Women's National Soccer Team, including winning the 2019 FIFA Women's World Cup and earning the Golden Boot and Golden Ball.
+
+• What did she do to reach success?
+
+Megan used her skill and vision on the field to dominate the international soccer scene, while also being a vocal advocate for LGBTQ+ rights and gender equality.
+
+• Do they eat healthy foods?
+
+Megan follows a balanced diet that supports her athleticism, focusing on organic foods, proteins, and complex carbs.
+
+• Why is this person a good role model?
+
+Rapinoe's combination of skill, advocacy, and leadership makes her an inspirational figure for many.~
+
+BLANK
+?BLANK
+
+~10. Kobe Bryant (Basketball)
+
+• Why is he famous?
+
+Kobe Bryant was an NBA superstar with five NBA championships and a legendary career with the Los Angeles Lakers.
+
+• What did he do to reach success?
+
+Bryant’s relentless work ethic, competitive fire, and attention to detail led him to become one of the most accomplished players in NBA history.
+
+• Do they eat healthy foods?
+
+Kobe was known for his meticulous approach to fitness and nutrition, including a well-balanced diet rich in whole foods, lean proteins, and vegetables.
+
+• Why is this person a good role model?
+
+Kobe’s "Mamba Mentality" of perseverance and excellence, coupled with his basketball success, makes him a beloved figure in sports culture.
+
+These athletes have each contributed something extraordinary to their sports and have inspired millions worldwide. Whether it’s their achievements, mindset, or personal stories, they all exemplify what it means to be great in their respective fields.~
+
+BLANK
+?BLANK
+
+~11. Mike Tyson (Boxing)
+
+• Why is he famous?
+
+Mike Tyson was the youngest heavyweight champion in boxing history and is known for his ferocious fighting style and knockout power.
+
+• What did he do to reach success?
+
+Tyson dominated the heavyweight division in the late 1980s, famously becoming the youngest fighter to win a world title at 20 years old. His combination of speed and power made him nearly unbeatable early in his career.
+
+• Do they eat healthy foods?
+
+Tyson has had a rocky relationship with diet and health, but in recent years, he's adopted a healthier lifestyle, focusing on plant-based meals, lean proteins, and more balanced nutrition.
+
+• Why is this person a good role model?
+
+Tyson's resilience, both in and out of the ring, his comeback after personal and professional struggles, and his sheer dominance in his prime make him a fascinating figure in sports history.~
+
+BLANK
+?BLANK
+
+~12. Pele (Football/Soccer)
+
+• Why is he famous?
+
+Pele is often regarded as the greatest soccer player of all time, winning three FIFA World Cups with Brazil and scoring over 1,000 goals in his career.
+
+• What did he do to reach success?
+
+Pele’s vision, skill, and ability to perform under pressure were key to his success, helping him lead Brazil to three World Cup victories (1958, 1962, 1970).
+
+• Do they eat healthy foods?
+
+While Pele didn’t follow a strict modern diet, his diet in the later years of his career was more disciplined, focusing on proteins, fruits, and vegetables to maintain his fitness.
+
+• Why is this person a good role model?
+
+Pele is a living legend who transcended football, becoming a global ambassador for the sport and a symbol of excellence and humility.~
+
+BLANK
+?BLANK
+
+~13. Rafael Nadal (Tennis)
+
+• Why is he famous?
+
+Nadal is known as the "King of Clay" for his dominance on clay courts, winning a record 14 French Open titles.
+
+• What did he do to reach success?
+
+Nadal’s combination of physicality, endurance, and mental toughness made him one of the most successful tennis players in history, with 22 Grand Slam singles titles.
+
+• Do they eat healthy foods?
+
+Nadal follows a balanced, Mediterranean-style diet that includes whole grains, lean meats, vegetables, and fruits, helping to fuel his intense training and matches.
+
+• Why is this person a good role model?
+
+Nadal’s perseverance, humility, and loyalty to his craft have made him a beloved figure in tennis and sports in general. His consistent excellence is a testament to his work ethic.~
+
+BLANK
+?BLANK
+
+~14. Tom Brady (American Football)
+
+• Why is he famous?
+
+Tom Brady is the greatest quarterback in NFL history, with seven Super Bowl championships, the most of any player.
+
+• What did he do to reach success?
+
+Brady’s longevity, tactical intelligence, and ability to perform in clutch moments led him to an unprecedented career. He is also known for his meticulous approach to training and recovery.
+
+• Do they eat healthy foods?
+
+Yes, Brady follows a strict diet, focusing on whole, anti-inflammatory foods like vegetables, lean proteins, and avoiding processed sugars and foods.
+
+• Why is this person a good role model?
+
+Brady’s success, mental toughness, and dedication to his craft, as well as his ability to maintain top physical condition well into his 40s, make him a role model for perseverance.~
+
+BLANK
+?BLANK
+
+~15. Novak Djokovic (Tennis)
+
+• Why is he famous?
+
+Djokovic is one of the most successful tennis players of all time, holding the record for most Grand Slam titles in men's singles (24) as of 2023.
+
+• What did he do to reach success?
+
+Djokovic’s combination of physical endurance, mental fortitude, and adaptability to different playing surfaces allowed him to dominate the tennis world for over a decade.
+
+• Do they eat healthy foods?
+
+Djokovic follows a gluten-free, dairy-free diet, focusing on nutrient-dense, whole foods to improve his performance and recovery.
+
+• Why is this person a good role model?
+
+Djokovic’s mental and physical discipline, along with his dominance on the court, make him an inspiration for athletes seeking excellence and longevity.~
+
+BLANK
+?BLANK
+
+~16. Virat Kohli (Cricket)
+
+• Why is he famous?
+
+Virat Kohli is one of the best cricketers in the world, particularly known for his batting prowess and leadership of the Indian national team.
+
+• What did he do to reach success?
+
+Kohli’s aggression, consistency, and exceptional fitness regime have helped him become one of the most successful and respected cricketers, with numerous records in both formats of the game.
+
+• Do they eat healthy foods?
+
+Kohli follows a strict vegetarian diet, focusing on whole, plant-based foods to enhance his performance and maintain his energy levels.
+
+• Why is this person a good role model?
+
+Kohli's work ethic, passion for the game, and transformation into a fitness icon make him a standout figure in the world of cricket.~
+
+BLANK
+?BLANK
+
+~17. Babe Ruth (Baseball)
+
+• Why is he famous?
+
+Babe Ruth is considered one of the greatest baseball players in history, known for his incredible hitting ability and charisma, which revolutionized the sport.
+
+• What did he do to reach success?
+
+Ruth's power and batting technique led him to hit over 700 home runs, and he became a symbol of the American "Roaring Twenties" era.
+
+• Do they eat healthy foods?
+
+Ruth had a reputation for indulgence, often enjoying large meals and excess. However, his natural talent allowed him to perform despite his less-than-ideal lifestyle choices.
+
+• Why is this person a good role model?
+
+Babe Ruth's larger-than-life personality and impact on the game of baseball made him a legendary figure, symbolizing the joy and excitement of sports.~
+
+BLANK
+?BLANK
+
+~18. Simone Manuel (Swimming)
+
+• Why is she famous?
+
+Simone Manuel is an Olympic gold medalist and the first African American woman to win an Olympic gold in an individual swimming event.
+
+• What did she do to reach success?
+
+Simone broke barriers in swimming with her breakthrough performance in the 2016 Olympics, dominating in the 100-meter freestyle and becoming a trailblazer for diversity in the sport.
+
+• Do they eat healthy foods?
+
+Yes, Simone maintains a balanced diet rich in proteins, vegetables, and whole grains to fuel her rigorous swimming training.
+
+• Why is this person a good role model?
+
+Simone's pioneering achievement, breaking racial barriers, and her inspiring journey to Olympic gold make her a role model for swimmers and athletes alike.~
+
+BLANK
+?BLANK
+
+~19. Shaquille O'Neal (Basketball)
+
+• Why is he famous?
+
+Shaquille O'Neal is one of the most dominant centers in NBA history, known for his size, strength, and basketball IQ.
+
+• What did he do to reach success?
+
+Shaq led his teams to four NBA championships and became a force in the paint, earning three Finals MVPs.
+
+• Do they eat healthy foods?
+
+Shaq has made efforts in recent years to eat healthier, focusing on portion control, more balanced meals, and increasing his vegetable intake.
+
+• Why is this person a good role model?
+
+Shaq’s larger-than-life personality, coupled with his dominance on the court, make him an iconic and lovable figure in the world of basketball.~
+
+BLANK
+?BLANK
+
+~20. Lewis Hamilton (Formula 1)
+
+• Why is he famous?
+
+Lewis Hamilton is one of the most successful Formula 1 drivers of all time, with seven World Championships tied with Michael Schumacher.
+
+• What did he do to reach success?
+
+Hamilton’s speed, precision, and strategic mind have made him a dominant force in F1, breaking multiple records throughout his career.
+
+• Do they eat healthy foods?
+
+Yes, Hamilton follows a plant-based diet to improve his performance and reduce his carbon footprint, focusing on nutrient-dense foods.
+
+• Why is this person a good role model?
+
+Hamilton is admired for his athleticism, race strategy, and commitment to environmental causes, making him not only a champion driver but a social advocate.~
+
+BLANK
+?BLANK
+
+~21. Lionel Messi (Football/Soccer)
+
+• Why is he famous?
+
+Messi is widely regarded as one of the greatest soccer players in history, known for his exceptional dribbling, playmaking, and goal-scoring ability.
+
+• What did he do to reach success?
+
+Messi has won multiple Ballon d'Or awards and has led Barcelona and Argentina to numerous titles, including a Copa América and a World Cup in 2022.
+
+• Do they eat healthy foods?
+
+Messi follows a balanced diet, avoiding excessive sugars and focusing on healthy foods, such as vegetables, lean proteins, and carbohydrates.
+
+• Why is this person a good role model?
+
+Messi’s consistency, humility, and extraordinary talent have made him an inspiration for millions of soccer fans around the world.~
+
+BLANK
+?BLANK
+
+~22. Cristiano Ronaldo (Football/Soccer)
+
+• Why is he famous?
+
+Ronaldo is a football legend, known for his goal-scoring record, athleticism, and leadership, playing for clubs like Manchester United, Real Madrid, and Juventus.
+
+• What did he do to reach success?
+
+Ronaldo’s discipline in training, versatility on the field, and relentless drive have earned him five Ballon d'Or awards and numerous championships.
+
+• Do they eat healthy foods?
+
+Yes, Ronaldo follows a strict diet with lean meats, vegetables, whole grains, and minimal sugar to keep his body in peak condition.
+
+• Why is this person a good role model?
+
+Ronaldo’s incredible work ethic, resilience, and success at the highest level of football make him a symbol of dedication and excellence.~
+
+BLANK
+?BLANK
+
+~23. Manny Pacquiao (Boxing)
+
+• Why is he famous?
+
+Manny Pacquiao is a legendary boxer, known for being the only fighter in history to win world titles in eight different weight divisions.
+
+• What did he do to reach success?
+
+Pacquiao’s relentless training, speed, and power allowed him to defeat some of the biggest names in boxing, including Oscar De La Hoya and Floyd Mayweather.
+
+• Do they eat healthy foods?
+
+Manny focuses on a balanced diet, including high-protein meals and vegetables, to support his intense training routine.
+
+• Why is this person a good role model?
+
+Pacquiao's success across multiple weight divisions, his humble beginnings, and his contributions to his home country of the Philippines make him an inspirational figure.~
+
+BLANK
+?BLANK
+
+~24. Kylian Mbappé (Football/Soccer)
+
+• Why is he famous?
+
+Mbappé is one of the brightest stars in world football, known for his speed, skill, and goal-scoring ability, particularly with Paris Saint-Germain (PSG) and the French national team.
+
+• What did he do to reach success?
+
+Mbappé’s breakthrough performance at the 2018 FIFA World Cup, where he helped France win the tournament, cemented his place among football’s elite.
+
+• Do they eat healthy foods?
+
+Kylian Mbappé is known for having a disciplined diet to maintain his physical fitness, including a focus on protein and nutrient-dense meals.
+
+• Why is this person a good role model?
+
+Mbappé's dazzling talent, focus on self-improvement, and leadership at a young age have made him a fan favorite and role model for aspiring athletes.~
+
+BLANK
+?BLANK
+
+~25. Zinedine Zidane (Football/Soccer)
+
+• Why is he famous?
+
+Zidane is one of the most iconic footballers of his generation, known for his elegance on the ball and leadership, especially for France and Real Madrid.
+
+• What did he do to reach success?
+
+Zidane led France to victory in the 1998 FIFA World Cup and UEFA Euro 2000, while also enjoying a successful club career with Juventus and Real Madrid.
+
+• Do they eat healthy foods?
+
+Zidane followed a relatively simple diet to maintain his fitness, focusing on lean proteins, vegetables, and avoiding overly processed foods.
+
+• Why is this person a good role model?
+
+Zidane’s skill, vision, and ability to perform under pressure have made him an icon in world football, with a legacy that extends into his career as a coach.~
+
+BLANK
+?BLANK
+
+~26. Usain Bolt (Track and Field)
+
+• Why is he famous?
+
+Bolt is the world record holder in both the 100m and 200m sprints, and he’s considered the fastest man ever to live.
+
+• What did he do to reach success?
+
+Bolt's combination of raw speed, technique, and charisma led him to dominate the sprinting world, winning 8 Olympic gold medals.
+
+• Do they eat healthy foods?
+
+Bolt has been known to indulge in fast food, but he also eats a balanced diet consisting of lean meats, vegetables, and carbs to fuel his body for peak performance.
+
+• Why is this person a good role model?
+
+Bolt’s charm, speed, and dominance on the track made him an international sensation, and his personality made him relatable and inspirational to many.~
+
+BLANK
+?BLANK
+
+~27. Roger Federer (Tennis)
+
+• Why is he famous?
+
+Federer is often considered the greatest tennis player of all time, known for his grace on the court and his incredible consistency.
+
+• What did he do to reach success?
+
+Federer has won 20 Grand Slam singles titles and remains a dominant force in tennis, known for his technique, sportsmanship, and mental strength.
+
+• Do they eat healthy foods?
+
+Federer follows a balanced diet that supports his performance, with a focus on nutrition and healthy, whole foods like vegetables and lean proteins.
+
+• Why is this person a good role model?
+
+Federer’s elegance, longevity in the game, and consistency at the top level make him a role model for athletes across all sports.~
+
+BLANK
+?BLANK
+
+~28. Jackie Chan (Martial Arts/Acting)
+
+• Why is he famous?
+
+Jackie Chan is one of the most famous martial artists and actors in the world, known for his acrobatic fighting style and comedic timing.
+
+• What did he do to reach success?
+
+Chan rose to global fame through his roles in action-comedy films like Drunken Master and Rush Hour, combining martial arts with slapstick humor.
+
+• Do they eat healthy foods?
+
+Chan has emphasized fitness and health throughout his career. He maintains a disciplined diet, focusing on whole foods and often eating smaller, balanced meals.
+
+• Why is this person a good role model?
+
+Jackie Chan's combination of martial arts mastery, unique acting style, and dedication to physical fitness make him a cultural icon.~
+
+BLANK
+?BLANK
+
+~29. Pau Gasol (Basketball)
+
+• Why is he famous?
+
+Pau Gasol is a two-time NBA champion and one of the most skilled international basketball players, known for his versatility and basketball IQ.
+
+• What did he do to reach success?
+
+Gasol became a key player for the Los Angeles Lakers, winning two NBA championships alongside Kobe Bryant and solidifying his reputation as one of Europe's greatest exports to the NBA.
+
+• Do they eat healthy foods?
+
+Gasol follows a healthy diet, focusing on clean eating, including lean proteins, whole grains, and vegetables to keep his body in top condition.
+
+• Why is this person a good role model?
+
+Gasol’s professionalism, humility, and dedication to both basketball and philanthropy make him a respected figure worldwide.~
+
+BLANK
+?BLANK
+
+~30. Sebastian Vettel (Formula 1)
+
+• Why is he famous?
+
+Vettel is a four-time Formula 1 World Champion, known for his dominance during his time with Red Bull Racing.
+
+• What did he do to reach success?
+
+Vettel's exceptional driving and tactical intelligence led him to four consecutive World Championships between 2010 and 2013.
+
+• Do they eat healthy foods?
+
+Vettel maintains a balanced diet that fuels his physical performance, including a focus on plant-based foods, lean proteins, and hydration.
+
+• Why is this person a good role model?
+
+Vettel’s precision on the track, combined with his calm demeanor and commitment to sustainability off the track, make him an admired figure in the world of motorsport.~
+
+BLANK
+?BLANK
+
+~Fact File: Takeru Kobayashi
+
+• Takeru Kobayashi is a famous Japanese competitive eater.
+• Born on March 15, 1978 in Japan.
+• Best known for eating hot dogs at Nathan's Hot Dog Eating Contest in the USA.
+
+________________________________________
+
+Major Achievement
+
+• In 2001, he broke the world record at Nathan’s contest.
+• Old record: 25 hot dogs in 12 minutes.
+• Kobayashi: 50 hot dogs in 12 minutes!
+• Surprised everyone with his speed and skill.
+
+________________________________________
+
+Eating Technique
+
+• Uses a special method:
+• Dunks hot dogs in water to make them soft.
+• Easier to swallow quickly.
+• Other competitors copied his method.
+• He also exercises to increase hunger.
+
+________________________________________
+
+Famous Competitions
+
+• Appeared on TV shows.
+• In 2003, competed on "Man vs. Beast":
+• Faced a 1,000-pound Alaskan brown bear.
+• Bear ate 50 hot dogs in 2 minutes.
+• Kobayashi ate 31 hot dogs.
+• Biggest rival: Joey Chestnut (broke some of Kobayashi’s records).
+
+________________________________________
+
+Impact
+
+• Changed the sport of competitive eating.
+• Made eating contests more popular worldwide.
+• Known for his hard work and determination.
+
+________________________________________
+
+Personal Admiration (from the writer)
+
+• Kobayashi never gives up, even when it’s hard.
+• The writer likes hot dogs and dreams of being a competitive eater.
+• Kobayashi is the writer’s favorite athlete.
+
+
+Full Essay: Takeru Kobayashi
+
+Takeru Kobayashi: The Hot Dog Eating Champion
+
+Takeru Kobayashi is a famous Japanese competitive eater. He was born on March 15, 1978, in Japan. Kobayashi is best known for his incredible skills in eating hot dogs at the Nathan's Hot Dog Eating Contest in the USA.
+
+Kobayashi made history at Nathan's Hot Dog Eating Contest in 2001. The world record was 25 hot dogs in 12 minutes. But Kobayashi ate 50 hot dogs in the same time! This shocked everyone. He became famous because he was faster and ate more than anyone before him. One time, he ate so many hot dogs that he almost vomited.
+
+Kobayashi used a special method to eat. He would dunk the hot dogs in water to make them easier to swallow. This technique helped him eat so many hot dogs quickly. After this, other competitors started using his method. He also works out because he says exercising makes him hungrier.
+
+Over the years, Kobayashi won many eating contests and appeared on TV shows. In 2003, on a TV show called "Man vs. Beast," he competed against a 1,000-pound Alaskan brown bear. The bear ate 50 hot dogs in about 2 minutes, much faster than Kobayashi, who ate only 31. Kobayashi's biggest human rival was an American eater named Joey Chestnut, who later broke some of Kobayashi’s records.
+
+Takeru Kobayashi changed competitive eating. He showed people how to eat more and faster, and he made eating contests popular worldwide.
+
+I admire Takeru Kobayashi because he works hard to be the best, and he doesn't give up, even if he almost vomits. Also, I like hot dogs too! Being a competitive eater is my dream, so Takeru Kobayashi is my favorite athlete.~
+
+BLANK
+?BLANK
+
+~1. Luis Suárez
+
+(500 words)
+
+Luis Suárez is one of the most famous football strikers of his generation. Born in Uruguay in 1987, he began his professional career at Nacional before moving to Europe, where he played for Groningen and Ajax in the Netherlands. His goal-scoring ability quickly attracted attention, leading to major transfers to Liverpool in England and later FC Barcelona in Spain. Over his career, Suárez scored more than 600 goals and won numerous trophies, including league titles and continental competitions. His talent, work rate, and instinct in front of goal made him one of the most dangerous attackers in world football.
+
+However, despite his exceptional ability, Suárez’s career has been repeatedly affected by his behavior on the pitch. He is often remembered not only for goals, but also for actions that showed poor sportsmanship and lack of emotional control. Suárez was known for being overly aggressive, reckless in physical challenges, and confrontational with opponents and referees. These behaviors created frequent conflict during matches and damaged his reputation among fans and football authorities.
+
+The most infamous incidents involved biting opponents. In 2010, while playing for Ajax, Suárez bit Otman Bakkal during a match and received a suspension. In 2013, he bit Branislav Ivanović while playing for Liverpool, leading to another lengthy ban. The most shocking moment came during the 2014 World Cup, when he bit Italian defender Giorgio Chiellini. This incident was broadcast worldwide and caused outrage across the football community. FIFA responded with a severe punishment, banning Suárez for several matches and competitions.
+
+Suárez’s problems were not limited to physical aggression. In 2011, he was banned for racially abusing Patrice Evra, an incident that seriously harmed his image and offended players and fans. These actions led many people to question his professionalism and respect for others. Clubs had to deal with suspensions at crucial moments, sometimes weakening team performance in important matches.
+
+Fans remain divided about Suárez. Some admire his passion and commitment, while others feel his repeated misconduct overshadows his achievements. Media coverage often focuses on controversy rather than success, showing how behavior can influence how a player is remembered. Suárez’s career clearly demonstrates that even extraordinary talent cannot protect a player from consequences when professionalism and sportsmanship are ignored.~
+
+Quiz
+
+?What is Luis Suárez best known for as a player?
+Defending
+|Goal scoring|
+Goalkeeping
+Coaching
+
+?Where did Suárez begin his professional career?
+Ajax
+|Nacional|
+Barcelona
+Liverpool
+
+?What type of behavior caused most controversy?
+Poor passing
+|Aggressive and reckless actions|
+Lack of fitness
+Tactical mistakes
+
+?Which action made Suárez internationally infamous?
+Diving
+|Biting opponents|
+Time-wasting
+Arguing in interviews
+
+?What major tournament featured his most shocking incident?
+Champions League
+|World Cup|
+Copa América
+Europa League
+
+?What was a common consequence of his actions?
+Captaincy
+|Suspensions and bans|
+Awards
+Praise
+
+?How did his behavior affect his teams?
+Improved chemistry
+|Weakened teams during key matches|
+Guaranteed victories
+Increased morale
+
+?How did fans react to Suárez?
+Everyone supported him
+|Opinions were divided|
+Fans ignored him
+Fans were unaware
+
+?What lesson does Suárez’s career show?
+Talent excuses behavior
+|Behavior affects reputation and success|
+Aggression is necessary
+Rules do not matter
+
+?How is Suárez often remembered?
+Only as a role model
+|Brilliant but controversial|
+Defensive leader
+Quiet professional
+
+~2. Kevin De Bruyne
+
+(500 words)
+
+Kevin De Bruyne, born in Belgium in 1991, is widely regarded as one of the most complete midfielders in modern football. He began his professional career in Belgium before moving to England, where he became a key player for Manchester City. Known for his vision, precise passing, and intelligence, De Bruyne has helped his team win multiple Premier League titles and major domestic trophies. His ability to control the pace of a match and create chances for teammates makes him one of the most influential players in the game.
+
+Beyond his technical skill, De Bruyne is respected for his professionalism and exemplary sportsmanship. Unlike many high-profile players, he rarely argues with referees or reacts emotionally to mistakes or fouls. When decisions go against him, he focuses on continuing the game rather than creating conflict. This calm approach helps maintain team discipline and reduces unnecessary penalties or suspensions.
+
+De Bruyne consistently puts team success above personal recognition. He is known for choosing the correct pass instead of attempting to score himself, even when personal awards are within reach. His unselfish style strengthens team unity and earns the trust of teammates and coaches. As a result, he is often seen as a natural leader, even without dramatic gestures or aggressive behavior.
+
+His conduct has also earned respect from fans and opponents. Supporters admire not only his football intelligence but also his humility and work ethic. Media coverage usually highlights his performances rather than controversy, showing how positive behavior can shape public perception. Clubs value him not only for goals and assists but also for his reliability and professionalism.
+
+De Bruyne’s career demonstrates that elite performance does not require arrogance or conflict. By combining talent with respect, discipline, and emotional control, he has built a reputation as a role model for young players. His example shows that professionalism strengthens careers, improves team performance, and earns long-term respect within the football community.~
+
+Quiz
+
+?What position does Kevin De Bruyne play?
+Defender
+|Midfielder|
+Goalkeeper
+Striker
+
+?Which club is he most associated with?
+Arsenal
+|Manchester City|
+Liverpool
+Chelsea
+
+?What skill is De Bruyne especially known for?
+Tackling
+|Vision and passing|
+Diving
+Heading
+
+?How does he usually react to referees’ decisions?
+Argues loudly
+|Remains calm and focused|
+Leaves the pitch
+Provokes opponents
+
+?What does De Bruyne prioritize during matches?
+Personal awards
+|Team success|
+Media attention
+Individual statistics
+
+?How do teammates view him?
+Selfish
+|Trustworthy leader|
+Unreliable
+Aggressive
+
+?What consequence does his behavior help avoid?
+Goals
+|Unnecessary penalties and suspensions|
+Training
+Transfers
+
+?How do fans generally see De Bruyne?
+Controversial
+|Respectful and professional|
+Reckless
+Emotional
+
+?What lesson does his career teach young players?
+Skill is enough
+|Professionalism builds long-term respect|
+Conflict creates leadership
+Ego improves performance
+
+?Why is De Bruyne a strong role model?
+He scores often
+|He combines talent with sportsmanship|
+He avoids responsibility
+He seeks attention
+
+~3. Neymar Jr.
+
+(500 words)
+
+Neymar da Silva Santos Júnior, born in Brazil in 1992, is one of the most skilled footballers in the world. He began his career at Santos FC, where his dribbling, acceleration, and creativity made him a standout player. Later, he joined FC Barcelona, forming a legendary attacking trio, before moving to Paris Saint-Germain in France. Neymar has scored over 400 goals for clubs and Brazil’s national team and has won multiple league titles and the UEFA Champions League.
+
+Despite his exceptional talent, Neymar has often been criticized for his behavior both on and off the pitch. He is frequently described as overly dramatic, impatient, and emotionally reactive. These traits sometimes disturb the flow of the game, frustrate teammates, and create tension in high-pressure matches. Critics note that Neymar occasionally prioritizes individual glory over team success, choosing to take risky shots rather than passing to open teammates.
+
+One of the most persistent complaints is Neymar’s tendency to exaggerate fouls or dive to win penalties. While clever in some situations, repeated theatrical behavior has led to yellow cards and damaged the perception of his professionalism. He has also clashed with referees, opposing players, and sometimes even teammates when matches become tense. These emotional reactions can undermine team morale and strategy.
+
+The media and fans have amplified his controversial reputation. Rival supporters often mock his theatrics, while some of his own fans feel frustration when his emotional displays cost opportunities or disrupt matches. Even with his brilliance, Neymar’s behavior has led to fines, warnings from clubs, and occasional suspensions, highlighting the impact of poor sportsmanship on a player’s career.
+
+Despite these issues, Neymar remains one of the most talented footballers of his generation. However, his career serves as a cautionary tale~
+
+Quiz
+
+?What is Neymar most known for on the field?
+Defensive skill
+|Dribbling and scoring|
+Goalkeeping
+Coaching
+
+?Which clubs did Neymar play for in Europe?
+Manchester United and Chelsea
+|Barcelona and Paris Saint-Germain|
+Real Madrid and Atletico
+Liverpool and Arsenal
+
+?What behavior often draws criticism?
+Poor fitness
+|Dramatic reactions and diving|
+Passing mistakes
+Lack of talent
+
+?How do referees usually respond to Neymar’s theatrics?
+Praise him
+|Issue yellow cards|
+Ignore him
+Give free kicks
+
+?What effect can Neymar’s selfish decisions have on the team?
+Improve morale
+|Disrupt team strategy|
+Guarantee victories
+Help referees
+
+?How have fans reacted to Neymar’s behavior?
+Everyone ignores it
+|Mixed feelings—some frustrated, some supportive|
+Completely supportive
+Unaware
+
+?What has Neymar received because of misconduct?
+Extra awards
+|Fines and suspensions|
+Promotions
+Increased salary
+
+?What lesson does Neymar’s career show?
+Talent excuses drama
+|Professionalism and teamwork are essential|
+Emotional reactions help teams
+Theatrics improve reputation
+
+?How do opponents view Neymar?
+Admire his humility
+|Often frustrated by his dramatics|
+Consider him unskilled
+See him as a defender
+
+?Why is Neymar considered a cautionary example?
+He is slow
+|His behavior can overshadow his talent|
+He lacks goals
+He never wins matches
+
+~4. Son Heung-min
+
+(500 words)
+
+Son Heung-min, born in South Korea in 1992, is a forward for Tottenham Hotspur and one of the most admired players in the Premier League. He is known for his pace, finishing, teamwork, and ability to change games with intelligence rather than conflict. Son’s consistency, humility, and positive attitude make him a respected role model for players and fans alike.
+
+Unlike some top stars, Son demonstrates excellent sportsmanship on and off the field. He respects referees’ decisions, apologizes when committing fouls, and avoids unnecessary confrontations with opponents. His calm demeanor helps maintain team focus and reduces penalties or disputes during matches. This professionalism has earned him trust from teammates and confidence from coaches.
+
+Son is also highly team-oriented. He frequently prioritizes creating opportunities for teammates over taking personal shots, contributing to both goals and assists. His unselfish play strengthens team cohesion and ensures better performance in high-pressure matches. Teammates appreciate his reliability, and his leadership is recognized without any need for aggression or theatrical behavior.
+
+Fans around the world admire Son not only for his skill but also for his character. He is widely respected for combining technical ability with humility and respect. Media coverage focuses on his achievements rather than controversy, highlighting the importance of consistent positive behavior. Clubs value players like Son because they provide both exceptional skill and a model of conduct for younger players.
+
+Son’s story shows that elite performance does not require ego or drama. By balancing talent with emotional control, respect, and professionalism, he demonstrates how athletes can earn long-term admiration and trust. Young footballers can learn from his example that skill alone is insufficient; teamwork, discipline, and good character are essential for success on and off the pitch.~
+
+Quiz
+
+?Which club does Son play for?
+Arsenal
+|Tottenham Hotspur|
+Chelsea
+Manchester City
+
+?What is Son especially admired for?
+Aggression
+|Sportsmanship and teamwork|
+Trash talking
+Physicality
+
+?How does Son treat referees?
+Argues frequently
+|Shows respect and calmness|
+Ignores them
+Provokes them
+
+?What does Son prioritize during matches?
+Personal awards
+|Team success|
+Media attention
+Ego
+
+?How do teammates feel about Son?
+Distrustful
+|Respect and trust him|
+Fearful
+Frustrated
+
+?How has Son earned fan admiration?
+Aggressive behavior
+|Humility and positive attitude|
+Diving
+Arguing
+
+?What lesson does Son’s career teach young players?
+Talent is enough
+|Combining skill with professionalism is essential|
+Drama builds reputation
+Ego inspires teams
+
+?What effect does Son’s behavior have on the team?
+Reduces cohesion
+|Strengthens teamwork|
+Distracts coaches
+Increases penalties
+
+?How is Son viewed in the Premier League?
+Problematic
+|Highly respected role model|
+Reckless
+Controversial
+
+?Why is Son considered a positive example?
+Scores frequently only
+|Combines skill with sportsmanship and character|
+Avoids responsibility
+Seeks attention
+
+~5. Vinícius Júnior
+
+(500 words)
+
+Vinícius José Paixão de Oliveira Júnior, commonly known as Vinícius Júnior, was born in 2000 in Brazil and quickly rose to prominence at Flamengo before transferring to Real Madrid in Spain. Known for his lightning speed, dribbling ability, and flair, he became one of the most exciting young talents in world football. By 2025, he had scored over 60 goals for Real Madrid and helped the team secure multiple Champions League and La Liga titles.
+
+Despite his talent, Vinícius has often drawn criticism for his behavior on the field. Observers and opponents frequently describe him as dramatic, impulsive, and emotionally reactive, which can disrupt both his performance and the flow of the game. He occasionally exaggerates contact with defenders, attempting to win penalties or influence refereeing decisions. While sometimes effective, these actions have caused frustration among referees, teammates, and opponents alike.
+
+Vinícius’s impatience in critical moments can also lead to mistakes. Rather than passing or maintaining possession, he sometimes takes risks with solo dribbles or long-range shots that reduce team effectiveness. Coaches have occasionally highlighted that, despite his skill, his decision-making under pressure needs improvement. His theatrical behavior, combined with occasional recklessness, has occasionally overshadowed his real talent, leading to negative media coverage.
+
+Fans have mixed reactions. Supporters admire his ability to change games and produce decisive moments, while critics argue that his emotional displays and impulsive decisions make him a less reliable teammate. Referees have issued yellow cards for simulation or dissent, showing that poor emotional control has tangible consequences. While still young, Vinícius’s career illustrates how exceptional skill can be affected by immaturity and lack of discipline.
+
+Vinícius Júnior’s story is a reminder that talent alone is not enough to succeed at the highest level. Professionalism, self-control, and respect for teammates and opponents are essential for maintaining a strong reputation. Young players can learn from his example.~
+
+Quiz
+
+?Where did Vinícius Júnior begin his professional career?
+Real Madrid
+|Flamengo|
+Barcelona
+Santos
+
+?What is Vinícius known for on the field?
+Defensive skills
+|Speed and dribbling|
+Goalkeeping
+Heading
+
+?What behavior often causes criticism?
+Tactical awareness
+|Dramatic reactions and impulsive play|
+Passing
+Training attendance
+
+?What can Vinícius do that reduces team effectiveness?
+Defend well
+|Take risky solo shots or dribbles|
+Communicate
+Pass accurately
+
+?How do referees sometimes respond to his theatrics?
+Praise him
+|Issue yellow cards|
+Ignore him
+Give extra penalties
+
+?How do fans view Vinícius’s behavior?
+Fully supportive
+|Mixed—some admire, some frustrated|
+Unaware
+Always critical
+
+?What lesson does his career show?
+Talent is sufficient
+|Emotional control and professionalism are essential|
+Ego improves performance
+Recklessness is acceptable
+
+?How does his impulsive behavior affect teammates?
+Builds trust
+|Causes frustration and disrupts team flow|
+Improves performance
+Encourages discipline
+
+?How is Vinícius Júnior often described in media coverage?
+Quiet and professional
+|Brilliant but overshadowed by drama|
+Defensive leader
+Predictable
+
+?What can help Vinícius improve his reputation?
+More goals
+|Better decision-making and self-control|
+Faster running
+Ignoring teammates
+
+~6. N’Golo Kanté
+
+(500 words)
+
+N’Golo Kanté, born in France in 1991, is one of the most respected midfielders in the Premier League and world football. Known for his tireless work rate, tactical intelligence, and humility, Kanté has played a central role in top clubs like Leicester City and Chelsea. He helped Leicester win the 2015–16 Premier League in an improbable season and later won multiple league titles and the Champions League with Chelsea.
+
+Kanté is widely admired not only for his football skill but also for his exceptional sportsmanship. He consistently demonstrates respect for referees, opponents, and teammates, avoiding confrontational behavior or dramatics. Even in high-pressure situations, Kanté maintains composure, allowing his focus to remain on team success rather than personal glory.
+
+His teamwork and unselfishness are central to his style. Kanté frequently covers vast areas of the pitch, breaks up opposition attacks, and supports both defensive and offensive plays. He prioritizes passing and positioning to maximize team performance, rather than seeking personal awards. Coaches and teammates trust him implicitly, knowing he will contribute effectively without creating conflict.
+
+Fans and media praise Kanté for his humility, professionalism, and consistency. Despite being one of the world’s best midfielders, he remains grounded, approachable, and courteous, showing that elite players can combine excellence with integrity. His reputation has made him a role model for young footballers around the world, illustrating that character and attitude are just as important as skill.
+
+Kanté’s career teaches important lessons about leadership and influence. By leading through example rather than drama or ego, he strengthens team cohesion and ensures that his talent translates into consistent results. Young players can look to Kanté to see how professionalism, respect, and dedication can shape both a successful career and a positive reputation within the football community.~
+
+Quiz
+
+?What position does Kanté play?
+Striker
+|Midfielder|
+Goalkeeper
+Defender
+
+?Which club did Kanté first achieve Premier League fame with?
+Chelsea
+|Leicester City|
+Manchester United
+Arsenal
+
+?What is Kanté especially admired for?
+Ego and theatrics
+|Work rate and humility|
+Diving
+Arguing with referees
+
+?How does Kanté treat referees and opponents?
+Aggressively
+|Respectfully and professionally|
+With sarcasm
+Avoids the game
+
+?What is central to Kanté’s playing style?
+Personal goals
+|Teamwork and positioning|
+Dribbling only
+Individual awards
+
+?How do teammates view him?
+Distrustful
+|Trustworthy and reliable|
+Frustrated
+Distant
+
+?How does Kanté handle pressure?
+Reacts emotionally
+|Stays composed and focused|
+Argues with opponents
+Leaves the pitch
+
+?How has Kanté been perceived by fans and media?
+Controversial
+|Humble and professional|
+Unskilled
+Reckless
+
+?What lesson does Kanté’s career teach young players?
+Talent alone is enough
+|Professionalism and respect matter|
+Ego leads to success
+Drama improves influence
+
+?Why is Kanté considered a positive role model?
+Scores the most goals
+|Combines elite skill with humility and integrity|
+Wins trophies only
+Avoids hard work
+
+~7. Diego Costa
+
+(500 words)
+
+Diego da Silva Costa, born in Brazil in 1988, became one of the most feared strikers in European football due to his physical strength, aggressive style, and goal-scoring ability. He played for Atlético Madrid in Spain and Chelsea in England, scoring over 150 career goals and winning major league titles, including La Liga and the Premier League. Costa’s talent and determination made him a standout forward, but his career has been overshadowed by repeated issues with behavior and sportsmanship.
+
+Costa is often remembered for his confrontational personality on the pitch. He frequently engages in aggressive tackles, clashes with opponents, and argues with referees, sometimes provoking violence or disciplinary action. His physical approach, combined with emotional reactions, has led to multiple yellow and red cards, hurting his teams during crucial matches. Coaches have noted that his behavior can distract teammates and create unnecessary tension in high-pressure situations.
+
+His confrontational style extends off the field as well. Costa has occasionally had heated disagreements with teammates and coaches, demonstrating stubbornness and resistance to management. While his intensity can inspire some players, it sometimes causes friction in the locker room. Clubs have had to weigh his talent against the risks of his temper when negotiating contracts or transfers.
+
+Fans are divided over Costa. Some admire his determination, fearlessness, and commitment to winning, while others are frustrated by his violent tendencies and unpredictability. Media coverage frequently emphasizes his aggressive actions rather than his achievements, portraying him as a player whose career is often overshadowed by controversy. Repeated suspensions and fines have not only affected his team’s performance but also limited his earning potential and reputation.
+
+Diego Costa’s story highlights the importance of emotional control and professionalism. Even exceptional talent can be undermined by impulsive behavior, and repeated conflict can overshadow a player’s achievements. For young players, Costa is a cautionary example~
+
+Quiz
+
+?Which clubs did Diego Costa play for?
+Real Madrid and Barcelona
+|Atlético Madrid and Chelsea|
+Liverpool and Manchester City
+PSG and Lyon
+
+?What made Costa a standout striker?
+Defensive work
+|Physical strength and goal-scoring|
+Goalkeeping
+Passing
+
+?What behavior caused problems for his teams?
+Late training
+|Aggressive and confrontational actions|
+Over-passing
+Poor fitness
+
+?How did referees respond to his on-field aggression?
+Encouraged it
+|Issued yellow and red cards|
+Ignored it
+Praised him
+
+?What off-field behavior created tension?
+Media interviews
+|Heated arguments with teammates and coaches|
+Charity work
+Fitness routines
+
+?How did fans react to Costa’s behavior?
+Fully supportive
+|Divided—some admired, some frustrated|
+Ignored him
+Only praised his goals
+
+?How did repeated misconduct affect his career?
+Increased sponsorships
+|Limited team performance and reputation|
+Guaranteed trophies
+Improved popularity
+
+?What lesson does Costa’s career teach?
+Talent always wins
+|Emotional control and professionalism are essential|
+Conflict inspires leadership
+Aggression is acceptable
+
+?What does media coverage emphasize about him?
+Only his goals
+|Aggressive actions and controversies|
+Coaching skills
+Charity work
+
+?Why is Costa a cautionary example for young players?
+He never wins matches
+|Skill alone is insufficient without discipline|
+He scores few goals
+Fans dislike all strikers
+
+~8. Virgil van Dijk
+
+(500 words)
+
+Virgil van Dijk, born in the Netherlands in 1991, is one of the most respected defenders in modern football. Playing for Liverpool in the Premier League, he has earned acclaim for his leadership, composure, and tactical intelligence. Van Dijk’s ability to read the game, win aerial duels, and organize the defense has made him a cornerstone of one of the most successful Liverpool teams in history.
+
+Van Dijk is widely admired for his professionalism and sportsmanship. He maintains composure under pressure, avoids unnecessary confrontations, and treats referees, opponents, and teammates with respect. Unlike some defenders who rely on intimidation or aggression, Van Dijk leads by example, showing that skill, intelligence, and discipline can be as effective as physicality on the pitch.
+
+His leadership extends beyond technical ability. Teammates trust him to make decisions calmly and effectively, whether positioning in defense or starting attacks from the back. Van Dijk’s reliability allows the team to operate efficiently even under high-pressure situations. Coaches value him not only for his defensive prowess but also for his influence on team culture and morale.
+
+Fans admire Van Dijk for his calm demeanor and consistency. Media coverage emphasizes his ability to dominate matches without resorting to reckless challenges or drama. His reputation demonstrates that professionalism, humility, and consistent effort earn respect at the highest levels of football. He is often cited as a role model for young players, highlighting the importance of character alongside talent.
+
+Van Dijk’s career illustrates that elite performance is most sustainable when combined with emotional control, respect, and teamwork. Young athletes can learn from his example that leadership and influence are built through discipline, reliability, and ethical behavior. By combining skill with exemplary sportsmanship, Van Dijk has set a standard for defenders worldwide.~
+
+Quiz
+
+?What position does Virgil van Dijk play?
+Striker
+Midfielder
+|Defender|
+Goalkeeper
+
+?Which club is he most associated with?
+Manchester United
+Chelsea
+|Liverpool|
+Arsenal
+
+?What is Van Dijk known for defensively?
+Dribbling past players
+Diving
+|Aerial duels and reading the game|
+Taking penalties
+
+?How does Van Dijk treat referees and opponents?
+Aggressively
+Mocking
+|Respectfully and professionally|
+Disrespectfully
+
+?How does he demonstrate leadership?
+By arguing
+By scoring goals only
+|By calm decision-making and reliability|
+By theatrics
+
+?How do teammates view Van Dijk?
+Distrustful
+|Trustworthy and reliable|
+Frustrated
+Ignoring him
+
+?How does Van Dijk handle high-pressure situations?
+Panics
+Argues with opponents
+|Stays calm and organized|
+Leaves the field
+
+?How do fans and media perceive him?
+Controversial
+Reckless
+|Professional and respected|
+Dramatic
+
+?What lesson does Van Dijk’s career teach young players?
+Aggression is key
+Talent alone is enough
+|Discipline, teamwork, and professionalism matter|
+Ego earns respect
+
+?Why is Van Dijk considered a role model?
+He scores the most goals
+Avoids leadership
+|Combines elite skill with professionalism and sportsmanship|
+Wins matches through conflict
+
+~9. Ricardo Centurión
+
+(500 words)
+
+Ricardo Centurión, born in 1993 in Argentina, is a talented footballer known for his creativity, speed, and ability to change the course of a game. He began his professional career at Racing Club and later played for several clubs in Argentina and Mexico. His flair and technical skill have often impressed fans, highlighting the potential of a promising career.
+
+Despite his abilities, Centurión is frequently remembered for his volatile behavior and lack of discipline. On the field, he has been described as impulsive, aggressive, and unpredictable. He sometimes engages in physical confrontations with opponents or loses his temper in situations that could be handled calmly. These actions have caused frustration among teammates, coaches, and referees, leading to disciplinary issues and disruptions during matches.
+
+Off the field, Centurión has faced controversies involving public disputes and personal issues. His behavior has sometimes drawn media attention, which negatively affected his clubs and team morale. Coaches have noted that his inconsistency and impulsiveness made it challenging to build a reliable lineup, and teams have occasionally been weakened during crucial matches due to his suspensions.
+
+Fans are often divided. Some admire his natural talent and brilliant moments of skill, while others are frustrated by repeated misconduct and lack of professionalism. Media coverage frequently highlights controversies rather than his performances, showing how behavior can overshadow talent. Fines, disciplinary actions, and missed matches have affected his career trajectory and financial opportunities, as clubs are cautious about investing fully in a player with a volatile reputation.
+
+Centurión’s story is a cautionary tale for young athletes. Even extraordinary skill cannot guarantee a successful career without control, professionalism, and respect for others. Impulsiveness, aggression, and unpredictability can damage relationships, team performance, and personal reputation. His experiences underline the importance of character in addition to natural talent for long-term success in football.~
+
+Quiz
+
+?Where did Centurión start his professional career?
+Boca Juniors
+|Racing Club|
+River Plate
+Flamengo
+
+?What is Centurión best known for on the field?
+Defensive leadership
+|Creativity and dribbling|
+Goalkeeping
+Passing accuracy
+
+?What behavior causes criticism?
+Consistent passing
+|Impulsiveness and aggression|
+Scoring goals
+Teamwork
+
+?How does his behavior affect teammates?
+Builds trust
+|Causes frustration and disruption|
+Improves performance
+Encourages discipline
+
+?What consequences has he faced for misconduct?
+Increased sponsorships
+|Fines, suspensions, and missed matches|
+Awards
+Media praise
+
+?How do fans view Centurión?
+Fully supportive
+|Divided—some admire, some frustrated|
+Ignore him
+Always critical
+
+?How does media coverage usually portray him?
+Only his skill
+|Controversies and misconduct|
+Training habits
+Fitness levels
+
+?What lesson does Centurión’s career teach young players?
+Talent is enough
+|Professionalism and self-control are essential|
+Aggression improves performance
+Media attention is most important
+
+?How has Centurión’s off-field behavior affected clubs?
+Strengthened finances
+|Distracted teams and reduced investment opportunities|
+Built fan trust
+Created stability
+
+?Why is Centurión a cautionary example?
+He never scores
+|Volatile behavior can overshadow talent and limit success|
+Avoids responsibility
+Rarely plays
+
+~10. Alisson Becker
+
+(500 words)
+
+Alisson Becker, born in 1992 in Brazil, is one of the most respected goalkeepers in world football. Playing for Liverpool in the Premier League, he has earned praise for his exceptional shot-stopping, positioning, and calm leadership. Alisson’s presence in goal has been a key factor in Liverpool’s domestic and international success, including Premier League and Champions League victories.
+
+Beyond his technical skill, Alisson is admired for his professionalism and sportsmanship. He consistently treats teammates, referees, and opponents with respect, even under high-pressure situations. Unlike some players who react emotionally or aggressively, Alisson remains composed, helping his team stay organized and confident. His calm demeanor sets a positive example on and off the field.
+
+Alisson’s leadership is central to his role as a goalkeeper. He communicates clearly with defenders, anticipates threats, and makes decisions that benefit the team. His reliability and focus reduce mistakes and ensure consistent performance. Coaches value him not only for his abilities but also for his attitude and influence on team culture.
+
+Fans and media respect Alisson for combining elite talent with humility and integrity. Coverage highlights his key saves, leadership, and contributions to team success rather than controversy. Young players can learn from his example that professionalism, emotional control, and dedication are as important as technical skills for a lasting career.
+
+Alisson’s story demonstrates that football success requires both talent and character. His focus, respect for others, and consistent effort help maintain team performance, strengthen morale, and build long-term respect in the football community. He is widely recognized as a role model for aspiring athletes worldwide.~
+
+Quiz
+
+?What position does Alisson play?
+Defender
+Midfielder
+Striker
+|D) Goalkeeper|
+
+?Which club is he most associated with?
+Manchester City
+Chelsea
+PSG
+|D) Liverpool|
+
+?What skill is Alisson especially known for?
+Free kicks
+Dribbling
+Passing long balls only
+|D) Shot-stopping and positioning|
+
+?How does Alisson behave under pressure?
+Argues with referees
+Acts emotionally
+|Remains calm and organized|
+Provokes opponents
+
+?How does Alisson contribute to team performance?
+Scores goals
+Diverts attention
+|Communicates and organizes defense|
+Ignores teammates
+
+?How do teammates view him?
+Distrustful
+Frustrated
+|Reliable and focused|
+Unaware
+
+?How do fans and media perceive Alisson?
+Controversial
+Reckless
+|Professional and respected|
+Dramatic
+
+?What lesson does Alisson’s career teach young players?
+Talent alone is enough
+Ego improves performance
+|Professionalism, respect, and dedication matter|
+Drama gains attention
+
+?How does Alisson lead his team?
+Through theatrics
+By yelling aggressively
+|With calm guidance and clear communication|
+Ignoring defense
+
+?Why is Alisson considered a role model?
+Only saves penalties
+Avoids responsibility
+|Combines elite skill with professionalism and sportsmanship|
+Focuses solely on individual awards
+
+~11. Edinson Cavani
+
+(500 words)
+
+Edinson Cavani, born in 1987 in Uruguay, is a striker celebrated for his speed, work rate, and goal-scoring ability. He began his career at Danubio in Uruguay and later played for Palermo, Napoli, Paris Saint-Germain, and Manchester United. With over 400 career goals, domestic league titles, and Champions League success, Cavani is widely recognized as one of the most talented forwards of his generation.
+
+Despite his skill, Cavani has sometimes been criticized for controversial behavior. Observers have noted that he can be blunt, emotionally reactive, or rigid in his interactions with referees, coaches, and opponents. One incident involved a social media post that was interpreted as insensitive, causing public backlash. While Cavani is generally disciplined on the field, his occasional emotional reactions have drawn criticism and media attention, sometimes overshadowing his achievements.
+
+Cavani’s on-field reactions can also create tension. Although he works hard and plays with determination, there have been moments of confrontation with referees and opponents. These actions, even if infrequent, have led to fines, short suspensions, and criticism, affecting team performance in important matches. His emotional responses have sometimes distracted teammates and created unnecessary stress during high-stakes situations.
+
+Fans have shown mixed reactions. Many admire Cavani’s dedication and goal-scoring talent, while others are frustrated when off-field or on-field controversies overshadow his performance. Media outlets have focused on these incidents, portraying him as a player whose career is occasionally affected by emotional choices rather than skill.
+
+Cavani’s experiences highlight the importance of emotional control, professionalism, and respect in football. Even world-class talent cannot fully protect a player from the consequences of reactive behavior. Young players can learn from Cavani that while dedication and skill are crucial, maintaining composure and professionalism is equally important for career longevity and reputation.~
+
+Quiz
+
+?Where did Cavani begin his professional career?
+Napoli
+Paris Saint-Germain
+Manchester United
+|D) Danubio|
+
+?What position does Cavani play?
+Midfielder
+Defender
+Goalkeeper
+|D) Striker|
+
+?What behavior has drawn criticism?
+Poor fitness
+|Emotional reactions and occasional controversy|
+Lack of skill
+Over-passing
+
+?How can his reactions affect teammates?
+Increase morale
+|Create tension and distraction|
+Improve strategy
+Guarantee wins
+
+?What were consequences of some controversial incidents?
+Extra trophies
+|Fines and suspensions|
+Media praise
+Increased salary
+
+?How have fans responded to Cavani’s controversies?
+Fully supportive
+|Mixed—some admire, some frustrated|
+Ignored him
+Always critical
+
+?How has media coverage portrayed him?
+Only for skill
+|Focused on controversies|
+For leadership
+For humility
+
+?What lesson does Cavani’s career show?
+Talent alone ensures success
+|Emotional control and professionalism are essential|
+Controversy increases popularity
+Ego ensures respect
+
+?How did social media incidents affect him?
+Improved fan loyalty
+|Caused public backlash|
+Increased trophies
+Built team trust
+
+?Why is Cavani a cautionary example for young players?
+He scores rarely
+|Emotional reactions can overshadow talent|
+Avoids responsibility
+Plays slowly
+
+~12. Harry Kane
+
+(500 words)
+
+Harry Kane, born in 1993 in England, is one of the most respected strikers in world football. Playing for Tottenham Hotspur in the Premier League, Kane is known for his goal-scoring ability, vision, leadership, and professionalism. He consistently combines technical skill with a strong work ethic, making him a role model both on and off the pitch.
+
+Kane is widely admired for his sportsmanship. He respects referees, avoids unnecessary confrontations with opponents, and encourages teamwork. His composure under pressure allows him to make smart decisions, whether finishing a goal or creating opportunities for teammates. Kane’s professionalism has earned him the respect of coaches, teammates, and fans alike.
+
+His leadership extends beyond scoring. Kane communicates effectively with teammates, contributes to team organization, and leads by example through consistent effort and discipline. Unlike some players who rely on theatrics or aggression, Kane emphasizes reliability, humility, and accountability, building trust within his squad.
+
+Fans appreciate Kane for his consistency and integrity. Media coverage emphasizes his goals, leadership, and positive attitude rather than controversy. His approach demonstrates that top players can combine elite talent with exemplary character, inspiring young athletes worldwide.
+
+Kane’s career illustrates that skill alone is not enough to achieve long-term success. Combining talent with professionalism, emotional control, and respect for others ensures sustained performance and a strong reputation. Young footballers can learn from Kane that leadership, integrity, and dedication are essential alongside technical ability.~
+
+Quiz
+
+?What position does Kane play?
+Midfielder
+Defender
+Goalkeeper
+|D) Striker|
+
+?Which club is Kane most associated with?
+Chelsea
+Manchester United
+Liverpool
+|D) Tottenham Hotspur|
+
+?What is Kane especially admired for?
+Ego and theatrics
+|Goal-scoring, leadership, and professionalism|
+Diving
+Aggression
+
+?How does Kane behave toward referees and opponents?
+Aggressively
+Mocking
+|Respectfully and calmly|
+Disrespectfully
+
+?How does Kane contribute to team performance?
+Only scoring
+Ignoring defense
+|Leadership, communication, and smart decisions|
+Personal glory
+
+?How do teammates view Kane?
+Distrustful
+Frustrated
+|Respectful and trusting|
+Ignoring him
+
+?How does Kane handle pressure situations?
+Reacts emotionally
+Argues
+|Stays composed and focused|
+Leaves the pitch
+
+?How do fans and media perceive Kane?
+Controversial
+Reckless
+|Professional and respected|
+Dramatic
+
+?What lesson does Kane’s career teach young players?
+Talent alone is enough
+Ego is key
+|Professionalism, leadership, and discipline are essential|
+Drama improves reputation
+
+?Why is Kane a positive role model?
+Scores goals only
+Avoids responsibility
+|Combines elite skill with integrity and leadership|
+Seeks personal glory
+
+~13. Raheem Sterling
+
+(500 words)
+
+Raheem Sterling, born in 1994 in Jamaica and raised in England, is a forward celebrated for his speed, technical skill, and goal-scoring ability. He began his professional career at Queens Park Rangers before moving to Liverpool and later Manchester City. Sterling has won multiple Premier League titles, domestic cups, and played over 90 matches for the England national team, scoring crucial goals in major tournaments.
+
+Despite his undeniable talent, Sterling has often been criticized for selfish and dramatic behavior. Coaches, teammates, and fans have noted that he can be too individualistic, impatient, or emotionally reactive during matches. On the field, Sterling occasionally prioritizes personal glory over team play, taking shots or making decisions that may not benefit overall team strategy. These actions can be frustrating for both teammates and coaches.
+
+Sterling’s behavior can extend to confrontations with referees and opponents. He has been involved in arguments, reacted aggressively to minor fouls, or displayed theatrics to influence decisions. Such incidents have led to yellow and red cards, fines, and disrupted team performance. Media coverage often emphasizes these controversial moments, portraying Sterling as a talented player whose career is sometimes overshadowed by impatience and drama.
+
+Fans have mixed reactions. While supporters appreciate his speed, skill, and ability to score decisive goals, rival fans and even some of his own supporters have been frustrated when his individualistic choices negatively impact team performance. Coaches sometimes need to spend extra time managing his reactions, which can reduce attention to tactics and training.
+
+Sterling’s career illustrates the importance of professionalism, teamwork, and emotional control. Talent alone cannot guarantee consistent success or positive influence on teammates. Young players can learn from Sterling that even highly skilled athletes need to combine ability with discipline, respect, and composure to maintain reputation, team cohesion, and long-term success.~
+
+Quiz
+
+?Where did Sterling start his professional career?
+|Queens Park Rangers|
+Liverpool
+Manchester City
+Chelsea
+
+?What is Sterling known for on the field?
+Defensive skills
+Goalkeeping
+|Speed and scoring ability|
+Heading
+
+?What behavior has caused criticism?
+Consistent teamwork
+Passing accuracy
+|Selfish and dramatic play|
+Training dedication
+
+?How can Sterling’s choices affect his team?
+Build cohesion
+Improve tactics
+|Reduce team effectiveness and frustrate teammates|
+Strengthen defense
+
+?How has Sterling interacted with referees?
+Always respectfully
+Avoids referees
+|Sometimes aggressively or theatrically|
+Only politely
+
+?How do fans react to his behavior?
+Fully supportive
+|Mixed—some admire, some frustrated|
+Unaware
+Only critical
+
+?What consequences has Sterling faced for his behavior?
+Extra goals
+Increased sponsorships
+|Yellow/red cards and fines|
+Praise
+
+?How do coaches sometimes manage Sterling?
+Ignore behavior
+|Spend extra time controlling reactions|
+Encourage selfish play
+Focus on media
+
+?What lesson does Sterling’s career illustrate?
+Talent alone guarantees success
+|Discipline, teamwork, and emotional control are necessary|
+Drama increases reputation
+Ego improves team performance
+
+?Why can Sterling be a cautionary example?
+Rarely scores
+|Individualistic behavior can harm team success|
+Ignores training
+Avoids playing
+
+~14. Kevin De Bruyne
+
+(500 words)
+
+Kevin De Bruyne, born in 1991 in Belgium, is one of the most respected midfielders in the Premier League and world football. Playing for Manchester City, he is widely known for his vision, passing, work rate, and leadership. De Bruyne consistently combines technical brilliance with professionalism, making him a role model for players and fans alike.
+
+De Bruyne is admired for his sportsmanship and composure. He treats teammates, opponents, and referees with respect and avoids unnecessary confrontations. His calm demeanor under pressure allows him to make intelligent decisions, control the rhythm of the game, and maximize opportunities for his team. Coaches value his reliability, discipline, and ability to influence matches positively.
+
+Leadership is central to De Bruyne’s playing style. He communicates effectively, organizes play, and inspires teammates by example rather than through aggression or theatrics. His unselfish play and focus on teamwork make him a stabilizing presence, enabling Manchester City to execute complex strategies efficiently.
+
+Fans and media recognize De Bruyne for his consistency, humility, and professionalism. Coverage emphasizes his assists, leadership, and positive impact rather than controversies. Young players can learn from his example that combining talent with discipline, respect, and teamwork leads to sustainable success and influence.
+
+De Bruyne’s career demonstrates that elite performance is most effective when paired with character and professionalism. Leadership, integrity, and dedication allow a player to have a lasting positive impact on teammates, clubs, and the football community. He sets a standard for aspiring athletes, showing that excellence in skill and behavior go hand in hand.~
+
+Quiz
+
+?What position does De Bruyne play?
+Striker
+Defender
+Goalkeeper
+|D) Midfielder|
+
+?Which club is he most associated with?
+Liverpool
+Chelsea
+Manchester United
+|D) Manchester City|
+
+?What is De Bruyne especially known for?
+Ego and theatrics
+|Vision, passing, and work rate|
+Diving
+Aggression
+
+?How does De Bruyne behave toward referees and opponents?
+Aggressively
+Mocking
+|Respectfully and professionally|
+Disrespectfully
+
+?How does De Bruyne contribute to his team?
+Only scoring
+Ignoring defense
+|Leadership, communication, and unselfish play|
+Personal glory
+
+?How do teammates view him?
+Distrustful
+Frustrated
+|Respectful and inspired|
+Ignoring him
+
+?How does De Bruyne handle pressure situations?
+Reacts emotionally
+Argues
+|Remains calm and focused|
+Leaves the pitch
+
+?How do fans and media perceive De Bruyne?
+Controversial
+Reckless
+|Professional and respected|
+Dramatic
+
+?What lesson does De Bruyne’s career teach young players?
+Talent alone is enough
+Ego is key
+|Professionalism, teamwork, and integrity are essential|
+Drama improves reputation
+
+?Why is De Bruyne a positive role model?
+Only scores goals
+Avoids responsibility
+|Combines elite skill with professionalism and leadership|
+Focuses on individual awards
+
+~15. Mario Balotelli
+
+(500 words)
+
+Mario Balotelli Barwuah, born in 1990 in Italy, is a footballer known for his skill, physical strength, and powerful shot. He began his professional career at Inter Milan and later played for Manchester City, AC Milan, Liverpool, and several other European clubs. Balotelli has won major trophies including Serie A, the Premier League, and domestic cups, and scored important goals for the Italy national team.
+
+Despite his talent, Balotelli is often remembered for his chaotic and unpredictable behavior. Fans, coaches, and teammates describe him as reckless, impulsive, and emotionally unstable, which has sometimes overshadowed his on-field brilliance. His career has been marked by incidents of aggression, confrontations, and off-field controversies, making his behavior a recurring issue.
+
+On the field, Balotelli has been involved in confrontations with opponents, teammates, and referees. He has kicked teammates during training, reacted aggressively in matches, and caused property damage, including a famous fireworks incident at his home. Such behavior has led to multiple fines, suspensions, and media attention, impacting both his career and team performance.
+
+Balotelli’s personal life has also contributed to his controversial reputation. Public disputes and turbulent relationships have sometimes distracted his clubs, affecting team morale and cohesion. His unpredictability has made it challenging for coaches to rely on him consistently, and clubs have had to weigh his talent against the potential for disruption.
+
+Fans are divided in their opinions. While some admire his undeniable skill and moments of brilliance, many are frustrated or disappointed by repeated misconduct. Media coverage has often emphasized his controversies more than his achievements, portraying a career frequently overshadowed by chaos and poor discipline.
+
+Balotelli’s story serves as a cautionary tale for young players. Talent alone is insufficient for success. Without discipline, professionalism, and emotional control, even the most gifted footballers can face setbacks, reduced opportunities, and a tarnished reputation. His experiences highlight the importance of combining skill with character for long-term success in football.~
+
+Quiz
+
+?Where did Balotelli begin his professional career?
+|Inter Milan|
+AC Milan
+Manchester City
+Liverpool
+
+?What is Balotelli known for on the field?
+Defensive leadership
+Midfield passing
+|Skill, strength, and powerful shots|
+Goalkeeping
+
+?What type of behavior has caused criticism?
+Consistent passing
+|Recklessness and impulsiveness|
+Scoring goals
+Teamwork
+
+?How has his behavior affected teams?
+Strengthened morale
+|Caused disruption and fines|
+Guaranteed victories
+Improved cohesion
+
+?What off-field incident is he famous for?
+Charity work
+Fitness routines
+|Fireworks incident at his home|
+Sponsorship deals
+
+?How do fans generally react to Balotelli?
+Fully supportive
+|Divided—some admire, some frustrated|
+Unaware
+Always critical
+
+?How has media coverage portrayed him?
+Only for goals
+|Focused on controversies and poor discipline|
+Only fitness
+Leadership
+
+?What lesson does Balotelli’s career teach young players?
+Talent alone ensures success
+|Discipline and professionalism are essential|
+Chaos improves popularity
+Ego guarantees respect
+
+?How have clubs managed his unpredictability?
+Ignored behavior
+|Balanced talent against potential disruption|
+Praised chaos
+Encouraged theatrics
+
+?Why is Balotelli a cautionary example?
+Rarely scores
+|Talent can be overshadowed by lack of control and discipline|
+Avoids training
+Plays defensively
+
+~16. Trent Alexander-Arnold
+
+(500 words)
+
+Trent Alexander-Arnold, born in 1998 in England, is one of the Premier League’s most respected right-backs. Playing for Liverpool, he is renowned for his exceptional crossing, vision, passing, and technical ability. Beyond skill, he is admired for his professionalism, leadership, and sportsmanship on and off the pitch.
+
+Alexander-Arnold consistently demonstrates respect toward teammates, referees, and opponents. He avoids unnecessary confrontations and maintains composure under pressure, helping his team stay organized and confident. His work ethic and focus set a positive example for younger players and peers alike.
+
+Leadership is central to Alexander-Arnold’s style. He communicates effectively with teammates, contributes to defensive organization, and inspires others through consistent effort and discipline. Unlike players who rely on aggression or theatrics, he leads by example, showing that professionalism and skill can achieve results while maintaining respect for the game.
+
+Fans and media admire Alexander-Arnold for his combination of talent and character. Coverage often highlights his assists, accurate passing, and role in team success rather than controversies. He demonstrates that elite footballers can excel while maintaining humility, composure, and integrity.
+
+Alexander-Arnold’s career illustrates that football success is maximized when technical ability is paired with professionalism, teamwork, and respect. Young players can learn from him that discipline, emotional control, and dedication are essential alongside natural talent. His example shows how a player can influence team culture positively and sustain a respected reputation at the highest level.~
+
+Quiz
+
+?What position does Alexander-Arnold play?
+Striker
+Midfielder
+Goalkeeper
+|D) Right-back|
+
+?Which club is he most associated with?
+Manchester United
+Chelsea
+Arsenal
+|D) Liverpool|
+
+?What is Alexander-Arnold especially known for?
+Diving
+Aggression
+|Crossing, passing, and vision|
+Ego
+
+?How does he behave toward referees and opponents?
+Aggressively
+Mocking
+|Respectfully and professionally|
+Disrespectfully
+
+?How does he contribute to the team?
+Only scoring
+Ignoring defense
+|Leadership, organization, and assists|
+Personal glory
+
+?How do teammates view him?
+Distrustful
+Frustrated
+|Respectful and inspired|
+Ignoring him
+
+?How does he handle pressure situations?
+Reacts emotionally
+Argues
+|Stays composed and focused|
+Leaves the pitch
+
+?How do fans and media perceive Alexander-Arnold?
+Controversial
+Reckless
+|Professional and respected|
+Dramatic
+
+?What lesson does Alexander-Arnold’s career teach young players?
+Talent alone is enough
+Ego is key
+|Professionalism, teamwork, and integrity are essential|
+Drama improves reputation
+
+?Why is Alexander-Arnold a positive role model?
+Only scores goals
+Avoids responsibility
+|Combines elite skill with professionalism and leadership|
+Focuses on individual awards
+
+~17. Serge Aurier
+
+(500 words)
+
+Serge Aurier, born in 1992 in Ivory Coast, is a right-back known for his pace, strength, and attacking abilities. He began his career in France with Lens and Toulouse, later playing for Paris Saint-Germain, Tottenham Hotspur, and Nottingham Forest. Aurier has won multiple domestic league titles with PSG and represented the Ivory Coast national team in international tournaments.
+
+Despite his talent, Aurier has often been criticized for controversial behavior and aggression. Fans, teammates, and coaches describe him as confrontational, reckless, and outspoken. His public comments, especially on social media, have sometimes been provocative and disrespectful, attracting negative attention and criticism.
+
+On the field, Aurier’s emotional reactions have occasionally caused problems. He has clashed with opponents and referees, and his volatile behavior has sometimes affected team performance. Even though he is a skilled defender capable of changing games, his confrontational tendencies have overshadowed his achievements.
+
+These actions have led to tangible consequences. Aurier has received fines and suspensions, which occasionally left his teams weakened in critical matches. Media coverage has frequently highlighted his controversies, portraying him as a talented player whose career is often clouded by poor judgment and misconduct. Fans have been divided—while some appreciate his defensive contributions, others are frustrated or disappointed by his reckless behavior.
+
+Aurier’s relationships with teammates and coaches have also been affected. Locker-room morale can be negatively impacted when a player’s actions or comments create tension. Coaches often have to manage his emotional reactions carefully, balancing his talent with the potential disruption he might cause.
+
+Financially, Aurier’s reputation has sometimes limited endorsement opportunities. Sponsors are cautious about associating with players whose behavior is unpredictable or publicly controversial. Clubs also consider personality when negotiating contracts or transfers, weighing skill against potential disruptions.
+
+Aurier’s career serves as a cautionary lesson for young players. Even elite skill cannot fully protect a player from the consequences of poor conduct. Professionalism, emotional control, and respect for others are essential for sustained success and a positive reputation in football. His story demonstrates that talent alone is not enough to guarantee a smooth career.~
+
+Quiz
+
+?Where did Aurier begin his professional career?
+|Lens|
+Paris Saint-Germain
+Tottenham Hotspur
+Nottingham Forest
+
+?What position does Aurier play?
+Striker
+Midfielder
+Goalkeeper
+|D) Right-back|
+
+?What type of behavior has caused criticism?
+Teamwork
+Passing accuracy
+|Confrontational and reckless behavior|
+Goal-scoring
+
+?How has Aurier’s behavior affected teams?
+Strengthened morale
+|Left teams weakened and distracted|
+Guaranteed wins
+Improved cohesion
+
+?How do fans react to Aurier?
+Fully supportive
+|Divided—some admire, some frustrated|
+Ignore him
+Always critical
+
+?How has media coverage portrayed him?
+Only for skill
+|Focused on controversies and misconduct|
+Only leadership
+Only teamwork
+
+?What consequences has Aurier faced for misconduct?
+Increased endorsements
+Awards
+|Fines and suspensions|
+Praise
+
+?How have relationships with teammates been affected?
+Strengthened trust
+|Negatively impacted by tension|
+Always improved
+Unchanged
+
+?What lesson does Aurier’s career illustrate?
+Talent guarantees success
+|Emotional control and professionalism are essential|
+Controversy increases popularity
+Ego ensures respect
+
+?Why is Aurier a cautionary example?
+Rarely plays
+|Reckless behavior can overshadow skill|
+Avoids responsibility
+Plays slowly
+
+~18. Virgil van Dijk
+
+(500 words)
+
+Virgil van Dijk, born in 1991 in the Netherlands, is one of the world’s most respected central defenders. Playing for Liverpool in the Premier League, he is admired for his strength, leadership, defensive intelligence, and professionalism. Van Dijk combines technical skill with calm authority on and off the pitch, making him a role model for young footballers.
+
+Van Dijk consistently demonstrates sportsmanship and respect. He treats referees, opponents, and teammates professionally, avoiding unnecessary confrontations or emotional outbursts. His composure under pressure allows him to make intelligent decisions, organize the defense, and reduce mistakes during high-stakes games.
+
+Leadership is a hallmark of Van Dijk’s career. He communicates clearly with teammates, inspires confidence, and leads by example through work ethic, discipline, and consistency. Unlike players who rely on aggression or theatrics, Van Dijk influences team performance positively, setting standards for professionalism and dedication.
+
+Fans and media recognize Van Dijk for both skill and character. Coverage emphasizes his defensive contributions, leadership, and influence on team success rather than controversy. Young players can learn from Van Dijk that elite performance is most effective when paired with integrity, teamwork, and emotional control.
+
+Van Dijk’s story illustrates that top-level football success requires a balance of technical ability, professionalism, and respect for others. His consistent behavior, calm demeanor, and leadership help maintain team cohesion, strengthen morale, and foster respect across the football community. He provides a clear example that skill and character are inseparable for lasting success in sport.~
+
+Quiz
+
+?What position does Van Dijk play?
+Striker
+Midfielder
+Goalkeeper
+|D) Central defender|
+
+?Which club is he most associated with?
+Manchester City
+Chelsea
+Arsenal
+|D) Liverpool|
+
+?What is Van Dijk especially known for?
+Diving
+Ego
+|Defensive intelligence, strength, and leadership|
+Dribbling
+
+?How does he behave toward referees and opponents?
+Aggressively
+Mocking
+|Respectfully and professionally|
+Disrespectfully
+
+?How does Van Dijk contribute to his team?
+Only scoring
+Ignoring defense
+|Organizing defense, leading, and stabilizing the team|
+Personal glory
+
+?How do teammates view him?
+Distrustful
+Frustrated
+|Respectful and inspired|
+Ignoring him
+
+?How does he handle pressure situations?
+Reacts emotionally
+Argues
+|Stays calm and focused|
+Leaves the pitch
+
+?How do fans and media perceive Van Dijk?
+Controversial
+Reckless
+|Professional and respected|
+Dramatic
+
+?What lesson does Van Dijk’s career teach young players?
+Talent alone is enough
+Ego is key
+|Professionalism, teamwork, and integrity are essential|
+Drama improves reputation
+
+?Why is Van Dijk a positive role model?
+Only scores goals
+Avoids responsibility
+|Combines elite skill with professionalism and leadership|
+Focuses on individual awards
+
+~19. Zlatan Ibrahimović
+
+(500 words)
+
+Zlatan Ibrahimović, born in 1981 in Sweden, is one of the most iconic footballers of his generation. Known for his height, strength, technical skill, and goal-scoring ability, Zlatan has played for many top clubs, including Ajax, Juventus, Inter Milan, Barcelona, AC Milan, Paris Saint-Germain, Manchester United, and LA Galaxy. Over a career spanning more than two decades, he has scored over 500 goals, won league titles in multiple countries, and become Sweden’s all-time top scorer.
+
+Despite his brilliance, Zlatan is often remembered for ego-driven and confrontational behavior. Fans, teammates, and media have described him as arrogant, outspoken, and provocative, creating tension wherever he plays. His confidence, while part of his skill, can sometimes be extreme, overshadowing his contributions on the pitch.
+
+On the field, Zlatan has clashed with opponents and referees, occasionally reacting aggressively or theatrically. He sometimes prioritizes personal performance over teamwork, which can create friction with teammates and coaches. While his goals and skill are undeniable, his behavior has often complicated collaboration and affected team dynamics.
+
+Off the field, Zlatan’s interviews and public statements have drawn worldwide attention for their bluntness and provocation. He has openly criticized teammates, coaches, and clubs, making headlines for being outspoken and controversial. These incidents can influence public perception and sponsorship opportunities, showing that behavior outside the stadium matters for a professional athlete.
+
+The consequences of Zlatan’s ego-driven behavior are clear. Clubs have had to manage locker-room tension, and media scrutiny has sometimes been relentless. Fans admire his skill and confidence but are occasionally frustrated by his confrontational personality. Even top players with remarkable talent must combine ability with professionalism, respect, and teamwork to ensure long-term success.
+
+Zlatan’s story is a cautionary tale for young players. Exceptional talent alone does not guarantee a smooth career. Emotional intelligence, humility, and respect are as important as technical ability. Young athletes can learn from his example that ego, arrogance, or confrontational behavior can overshadow natural talent and limit career opportunities.~
+
+Quiz
+
+?Where is Zlatan from?
+|Sweden|
+Italy
+Brazil
+France
+
+?What position does Zlatan play?
+Midfielder
+Defender
+Goalkeeper
+|D) Striker|
+
+?What behavior has drawn criticism?
+Teamwork
+Humility
+|Arrogance and confrontational behavior|
+Fitness
+
+?How has Zlatan’s behavior affected teammates?
+Strengthened cohesion
+Always improved tactics
+|Caused friction and tension|
+Motivated all players equally
+
+?How has Zlatan acted off the field?
+Avoided media
+Always cooperative
+|Blunt, provocative interviews and statements|
+Charitable work only
+
+?How do fans react to Zlatan?
+Fully supportive
+Unaware
+|Mixed admiration for skill, frustration for personality|
+Only critical
+
+?How have clubs managed Zlatan?
+Ignored behavior
+Always praised ego
+|Balanced talent against confrontational personality|
+Avoided leadership roles
+
+?What lesson does Zlatan’s career teach young players?
+Talent alone ensures success
+|Professionalism, humility, and teamwork are essential|
+Drama increases popularity
+Ego guarantees respect
+
+?What is a consequence of his behavior?
+Only increased trophies
+Only more sponsorships
+|Media scrutiny, tension, and potential missed opportunities|
+Ignored by teammates
+
+?Why is Zlatan a cautionary example?
+Rarely scores
+|Ego and confrontational behavior can overshadow skill|
+Avoids responsibility
+Plays slowly
+
+~20. Jordan Henderson
+
+(500 words)
+
+Jordan Henderson, born in 1990 in England, is a central midfielder and captain for Liverpool in the Premier League. Known for his leadership, work rate, technical skill, and professionalism, Henderson is widely respected for his sportsmanship on and off the field. His career combines talent with character, making him a role model for players of all ages.
+
+Henderson demonstrates respect for teammates, opponents, and referees, maintaining composure and professionalism even under pressure. His consistent behavior and discipline provide a positive example, helping teams remain organized, focused, and confident during matches.
+
+Leadership is central to Henderson’s playing style. He communicates effectively, motivates teammates, and inspires by example through hard work, dedication, and accountability. Henderson’s approach emphasizes teamwork and humility, showing that a captain can influence team culture positively without relying on aggression or theatrics.
+
+Fans and media recognize Henderson for his consistent performance, leadership, and professionalism. Coverage highlights his contributions to team success, defensive work, passing accuracy, and influence on squad morale rather than controversies. His approach demonstrates that high-level skill paired with character maximizes positive impact in football.
+
+Henderson’s career illustrates that success in football depends not only on talent but also on emotional intelligence, respect, and dedication. Young players can learn from his example that professionalism, leadership, and teamwork are as important as technical ability. By combining skill with integrity, players can maintain a respected reputation, positively influence teammates, and achieve long-term success.
+
+Henderson is celebrated as a captain who leads through example, demonstrating that elite footballers can achieve excellence while maintaining sportsmanship, humility, and commitment. His story is an inspiration for aspiring athletes, showing that character and professionalism are key components of lasting success in sport.~
+
+Quiz
+
+?What position does Henderson play?
+Striker
+Defender
+Goalkeeper
+|D) Midfielder|
+
+?Which club is he most associated with?
+Chelsea
+Manchester United
+Arsenal
+|D) Liverpool|
+
+?What is Henderson especially known for?
+Ego and theatrics
+|Leadership, work rate, and professionalism|
+Diving
+Aggression
+
+?How does he behave toward referees and opponents?
+Aggressively
+Mocking
+|Respectfully and professionally|
+Disrespectfully
+
+?How does he contribute to his team?
+Only scoring
+Ignores teammates
+|Leadership, organization, and motivating others|
+Personal glory
+
+?How do teammates view him?
+Distrustful
+Frustrated
+|Respectful and inspired|
+Ignoring him
+
+?How does he handle pressure situations?
+Reacts emotionally
+Argues
+|Stays composed and focused|
+Leaves the pitch
+
+?How do fans and media perceive Henderson?
+Controversial
+Reckless
+|Professional and respected|
+Dramatic
+
+?What does Henderson’s career teach young players?
+Talent alone is enough
+Ego is key
+|Professionalism, and teamwork are essential|
+Drama improves reputation
+
+?Why is Henderson a positive role model?
+Only scores goals
+Avoids responsibility
+|Combines elite skill with leadership, integrity, and professionalism|
+Focuses on individual awards
+
+
+~Intro
+
+These Thai athletes have gained international recognition across various sports, from boxing and Muay Thai to badminton and golf. Their talent, dedication, and hard work have earned them a place in the global sports community.~
+
+BLANK
+?BLANK
+
+~1. Nong Toom (Parinya Charoenphol) (Muay Thai)
+
+• Why is she famous?
+
+Nong Toom is a pioneering transgender Muay Thai fighter who gained international fame for breaking gender norms in the sport. Her story was made into the 2003 film Beautiful Boxer.
+
+• What did she do to reach success?
+
+Nong Toom became a Muay Thai champion, defeating male fighters and showcasing her skills on the international stage.
+
+• Do they eat healthy foods?
+
+Like most Muay Thai fighters, she follows a strict diet for weight management and peak performance, focusing on lean proteins, fruits, and vegetables.~
+
+BLANK
+?BLANK
+
+~2. Somsak Sithchatchawal (Boxing)
+
+• Why is he famous?
+
+Somsak is a former world champion in the super flyweight division and a well-respected figure in international boxing.
+
+• What did he do to reach success?
+
+He held the WBC super flyweight title, earning recognition for his speed, power, and technical ability.
+
+• Do they eat healthy foods?
+
+Boxers like Somsak focus on a high-protein, low-carb diet to stay in peak condition during training camps.~
+
+BLANK
+?BLANK
+
+~3. Thongchai Jaidee (Golf)
+
+• Why is he famous?
+
+Thongchai Jaidee is one of Asia's most successful golfers, with multiple wins on the European Tour and the Asian Tour.
+
+• What did he do to reach success?
+
+Thongchai rose to prominence with his strong performances in international tournaments, becoming the first Thai golfer to qualify for the European Tour.
+
+• Do they eat healthy foods?
+
+Thongchai follows a balanced diet that includes lean meats, vegetables, and healthy carbs to maintain his strength and endurance.~
+
+BLANK
+?BLANK
+
+~4. Ratchanok Intanon (Badminton)
+
+• Why is she famous?
+
+Ratchanok Intanon is a world-class badminton player and former World Champion, known for her speed and agility on the court.
+
+• What did she do to reach success?
+
+She won the 2013 BWF World Championships and has been consistently ranked among the top players globally.
+
+• Do they eat healthy foods?
+
+Ratchanok follows a healthy diet with a balance of proteins, carbs, and vegetables to maintain her energy levels during intense training.~
+
+BLANK
+?BLANK
+
+~5. Apinya (Pinky) Srisuwan (Muay Thai)
+
+• Why is she famous?
+
+Apinya is one of the leading female Muay Thai fighters in Thailand and has competed in various international events.
+
+• What did she do to reach success?
+
+She has won multiple titles in Muay Thai and is known for her aggressive and technical fighting style.
+
+• Do they eat healthy foods?
+
+Like most Muay Thai athletes, she adheres to a strict diet, focusing on lean meats, rice, and vegetables to maintain her physique.~
+
+BLANK
+?BLANK
+
+~6. Dustin Brown (Tennis)
+
+• Why is he famous?
+
+Dustin Brown, a Jamaican-born Thai tennis player, is known for his exciting playing style and his victory over Rafael Nadal at the 2015 Wimbledon.
+
+• What did he do to reach success?
+
+Brown’s unorthodox style and high-energy play led to notable victories on the ATP tour, earning him recognition globally.
+
+• Do they eat healthy foods?
+
+Brown follows a well-balanced diet, focusing on healthy proteins, fruits, and vegetables to fuel his athletic performance.~
+
+BLANK
+?BLANK
+
+~7. Kirsten Neuschäfer (Sailing)
+
+• Why is she famous?
+
+Kirsten Neuschäfer is a Thai-German sailor who gained fame for being the first woman to win the Golden Globe Sailing Race in 2022.
+
+• What did she do to reach success?
+
+She competed in numerous solo sailing races, earning admiration for her perseverance and navigational skills.
+
+• Do they eat healthy foods?
+
+While on long solo journeys, Neuschäfer relies on freeze-dried meals and protein-rich snacks to maintain energy.~
+
+BLANK
+?BLANK
+
+~8. Virachai Virakitti (Judo)
+
+• Why is he famous?
+
+Virachai Virakitti is a prominent Thai judoka who represented Thailand in multiple international competitions.
+
+• What did he do to reach success?
+
+He competed in the 1996 Summer Olympics and has earned medals in the Asian Judo Championships.
+
+• Do they eat healthy foods?
+
+Judokas focus on high-protein meals with a balance of carbohydrates to maintain strength and endurance during training.~
+
+BLANK
+?BLANK
+
+~9. Kobkit Singsomboon (Taekwondo)
+
+• Why is he famous?
+
+Kobkit Singsomboon is a decorated Thai taekwondo athlete who has won multiple international championships and represented Thailand at the Olympics.
+
+• What did he do to reach success?
+
+He won gold medals in multiple taekwondo events, solidifying his place as one of the top athletes in his discipline.
+
+• Do they eat healthy foods?
+
+Taekwondo athletes like Kobkit follow a disciplined diet, focusing on lean proteins and vegetables to fuel their rigorous training sessions.~
+
+BLANK
+?BLANK
+
+~10. Preecha Charoenrith (Boxing)
+
+• Why is he famous?
+
+Preecha is a Thai boxer who became a WBA world champion in the flyweight division.
+
+• What did he do to reach success?
+
+Preecha’s power and agility made him a formidable competitor in the international boxing scene.
+
+• Do they eat healthy foods?
+
+Like other professional boxers, Preecha maintains a strict diet plan, focusing on lean proteins and low-fat foods for energy.~
+
+BLANK
+?BLANK
+
+~11. Somluck Kamsing (Boxing)
+
+• Why is he famous?
+
+Somluck Kamsing is a gold medalist in boxing at the 1996 Olympics, the first Thai boxer to win an Olympic gold.
+
+• What did he do to reach success?
+
+His Olympic win put him on the map, and he became a successful professional boxer afterward, fighting at the highest levels.
+
+• Do they eat healthy foods?
+
+As a professional boxer, Somluck adhered to a strict diet, focusing on lean proteins and minimizing fat intake for optimal performance.~
+
+BLANK
+?BLANK
+
+~12. Nattapong Boonserm (Football/Soccer)
+
+• Why is he famous?
+
+Nattapong Boonserm is a well-known Thai footballer who has played for both the Thai national team and clubs in domestic leagues.
+
+• What did he do to reach success?
+
+He gained recognition for his contributions to the national team and his club performances.
+
+• Do they eat healthy foods?
+
+Footballers like Nattapong follow a healthy diet, focusing on lean proteins, carbs for energy, and vegetables for overall health.~
+
+BLANK
+?BLANK
+
+~13. Kritsada Yuthasriphong (Boxing)
+
+• Why is he famous?
+
+Kritsada is a well-known Thai boxer who made his mark in the international boxing scene with impressive performances and a world title.
+
+• What did he do to reach success?
+
+Kritsada won the WBC World Flyweight title, showcasing his power and skill in the ring.
+
+• Do they eat healthy foods?
+
+His diet focuses on lean meats, vegetables, and maintaining his weight for peak boxing performance.~
+
+BLANK
+?BLANK
+
+~14. Suthasini Sawettabut (Badminton)
+
+• Why is she famous?
+
+Suthasini is a prominent figure in international badminton, representing Thailand in major tournaments like the Thomas Cup.
+
+• What did she do to reach success?
+
+Her speed and agility have led to numerous victories, particularly in doubles competitions, both regionally and globally.
+
+• Do they eat healthy foods?
+
+As a professional badminton player, Suthasini focuses on a balanced diet that supports her training intensity.~
+
+BLANK
+?BLANK
+
+~15. Tawatchai Pankasiri (Cycling)
+
+• Why is he famous?
+
+Tawatchai Pankasiri is a Thai professional cyclist who has represented Thailand in major international cycling events like the Asian Games.
+
+• What did he do to reach success?
+
+He has competed in road racing and track cycling events, earning medals for Thailand and establishing himself in the cycling world.
+
+• Do they eat healthy foods?
+
+Tawatchai maintains a diet rich in complex carbohydrates and lean proteins to sustain his energy during long rides and races.~
+
+BLANK
+?BLANK
+
+~16. Sanipong Kongthong (Badminton)
+
+• Why is he famous?
+
+Sanipong Kongthong is known for his impressive performances in international badminton, especially in doubles events.
+
+• What did he do to reach success?
+
+Kongthong has secured multiple international titles and is recognized for his consistency and skill on the court.
+
+• Do they eat healthy foods?
+
+Like most badminton athletes, he follows a balanced diet with a focus on performance-enhancing nutrients.~
+
+BLANK
+?BLANK
+
+~17. Pichaya Saisa-ard (Football)
+
+• Why is he famous?
+
+Pichaya is a notable Thai footballer who has represented the national team in multiple tournaments and has played for major domestic clubs.
+
+• What did he do to reach success?
+
+Pichaya’s technical skills and leadership qualities have earned him recognition in the Thai football scene.
+
+• Do they eat healthy foods?
+
+As a professional athlete, he maintains a healthy, balanced diet to fuel his football performances.~
+
+BLANK
+?BLANK
+
+~18. Chatchai Sasakul (Boxing)
+
+• Why is he famous?
+
+Chatchai is a former WBA World Bantamweight Champion and is considered one of Thailand's boxing greats.
+
+• What did he do to reach success?
+
+Sasakul’s sharp technical boxing and discipline helped him win the world title.
+
+• Do they eat healthy foods?
+
+As a professional boxer, Sasakul adhered to a strict diet plan to maintain weight and strength.~
+
+BLANK
+?BLANK
+
+~19. Siriwan Chaiyachinda (Diving)
+
+• Why is she famous?
+
+Siriwan is a Thai diver who gained recognition for her performances in Southeast Asian Games and world diving championships.
+
+• What did she do to reach success?
+
+Siriwan won multiple medals in regional competitions and has been a key figure in Thai diving.
+
+• Do they eat healthy foods?
+
+As a diver, she consumes a nutrient-rich diet to support her training and maintain her performance levels.~
+
+BLANK
+?BLANK
+
+~20. Bunyodchai Bunyod (Weightlifting)
+
+• Why is he famous?
+
+Bunyodchai is a Thai weightlifter who has earned multiple gold medals at the SEA Games and represented Thailand internationally.
+
+• What did he do to reach success?
+
+He dominated regional competitions, especially in the men’s weightlifting categories.
+
+• Do they eat healthy foods?
+
+Weightlifters like Bunyodchai follow high-protein diets to fuel their intense strength training routines and build muscle mass.~
+
+BLANK
+?BLANK
+
+
+
+</div>
+
+
+<!-- ================= HARD-CODED TOC ================= -->
+<!-- <div id="layout">
+
+<h1 data-auto-title></h1>
+
+  <div class="container">
+    <div class="column">
+      <h2>Old Testament</h2>
+      <ul class="index">
+
+
+      </ul>
+    </div>
+
+    <div class="column">
+      <h2>New Testament</h2>
+      <ul class="index">
+
+
+      </ul>
+    </div>
+  </div>
+
+</div> -->
+<!-- END #layout -->
+
+
+<!-- ================= DYNAMIC TOC ================= -->
+<div id="dynamicTOC">
+  <div id="tocContainer">
+
+<h1 data-auto-title></h1>
+
+    <div id="tocButtons">
+      <div class="tocColumn" id="tocColLeft"></div>
+      <div class="tocColumn" id="tocColRight"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= QUIZ MODAL ================= -->
+<div id="modalRoot">
+  <div id="quizModal">
+
+<!--<div id="helloBar">Hello!</div> -->
+
+    <!-- CONTROL BARS LIVE HERE -->
+    <div id="chapterVerseControls">
+      <div class="controlRow">
+
+<button id="instructionsBtn">Instructions</button>
+<!-- <select id="chapterSelect"></select> -->
+
+<button id="strategiesBtn">Strategies</button>
+<!-- <select id="verseSelect"></select> -->
+
+<button id="signalwordsBtn">Signals</button>
+<!-- <button id="goBtn">Go</button> -->
+
+<button onclick="goToNextQuiz()">Go to Quiz</button>
+
+      </div>
+    </div>
+
+    <div id="readaloudControls">
+      <div class="controlRow">
+        <button id="highlightSelected">Highlight</button>
+        <button id="copySelected">Copy</button>
+        <button id="startBtn">Audio</button>
+        <button id="closeModalBtn">Close</button>
+      </div>
+    </div>
+
+    <!-- ACTUAL CONTENT -->
+    <div id="quizModalContent">
+      <div id="quizSections"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+(function(){
+
+
+  // [1] GET INPUT SOURCE
+  const src = document.getElementById("rawTextSource");
+  if (!src) return;
+
+  const raw = src.textContent.trim();
+  const lines = raw.split("\n");
+
+  // [2] REGEX RULES
+  const urlRegex = /^https?:\/\/\S+$/i;
+  const urlAnywhere = /(https?:\/\/\S+)/gi;
+
+  // [3] BUILD OUTPUT ARRAYS
+  const htmlResult = [];
+  const speechChunks = [];
+
+  // [4] PARSE LOOP (UNCHANGED LOGIC)
+  for (let i = 0; i < lines.length; i++) {
+
+    let line = lines[i].trim();
+    let next = (lines[i + 1] || "").trim();
+
+    // TITLE + URL HANDLING
+    if (line && !urlRegex.test(line) && urlRegex.test(next)) {
+
+      htmlResult.push(
+        `<a href="${next}" target="_blank" rel="noopener">${line}</a>`
+      );
+
+      speechChunks.push(line);
+
+      i++;
+      continue;
+    }
+
+    // INLINE URL HANDLING
+    const htmlLine = line.replace(urlAnywhere, url =>
+      `<a href="${url}" target="_blank" rel="noopener">${url}</a>`
+    );
+
+    htmlResult.push(htmlLine);
+
+    const cleanText = line.replace(urlAnywhere, "").trim();
+    if (cleanText) {
+      speechChunks.push(cleanText);
+    }
+  }
+
+  // [5] OUTPUT (UNCHANGED — SAFE FOR UI SYSTEM)
+  window.rawText = htmlResult.join("\n");
+
+// SIGNAL: parser is done
+window.parserReady = true;
+
+  // [6] READ-ALOUD HANDOFF (FIXED TO NOT BREAK UI)
+
+  // IMPORTANT:
+  // - no immediate execution
+  // - no blocking
+  // - no fallback globals
+  // - queued after UI thread
+
+  setTimeout(() => {
+    if (typeof window.onParsedTextReady === "function") {
+      window.onParsedTextReady(speechChunks);
+    }
+  }, 0);
+
+})();
+
+</script>
+
+<script>
+(function primeFemaleVoiceOnce() {
+  const synth = window.speechSynthesis;
+  if (!synth) return;
+
+  let primed = false;
+
+  function tryPrime() {
+    if (primed) return;
+
+    const voices = synth.getVoices();
+    if (!voices.length) return;
+
+    const femaleVoice =
+      voices.find(v => /Aria|Zira|Samantha|Victoria|Moira/i.test(v.name)) ||
+      voices.find(v => v.lang && v.lang.startsWith("en")) ||
+      voices[0];
+
+    if (!femaleVoice) return;
+
+    const u = new SpeechSynthesisUtterance(" ");
+    u.voice = femaleVoice;
+    u.volume = 0;
+    u.rate = 1;
+    u.pitch = 1;
+
+    synth.speak(u);
+    primed = true;
+  }
+
+  tryPrime();
+
+  synth.onvoiceschanged = tryPrime;
+
+  // Better Android + mobile coverage (replaces click + touchstart)
+  document.addEventListener("pointerdown", tryPrime, { once: true });
+})();
+</script>
+
+<script>
+(function () {
+
+  function cleanSpeechText(text) {
+    text = text.replace(/\b\d+:\d+\s*/g, '');
+    text = text.replace(/<br\s*\/?>/gi, ' ');
+    text = text.replace(/\n+/g, ' ');
+    text = text.replace(/\s+\./g, '.');
+    text = text.replace(/\.(\S)/g, '. $1');
+    text = text.replace(/\s+/g, ' ').trim();
+    return text;
+  }
+
+  const OriginalUtterance = window.SpeechSynthesisUtterance;
+
+  function PatchedUtterance(text) {
+    return new OriginalUtterance(cleanSpeechText(text));
+  }
+
+  // 🔧 preserve prototype for Android/WebView compatibility
+  PatchedUtterance.prototype = OriginalUtterance.prototype;
+
+  window.SpeechSynthesisUtterance = PatchedUtterance;
+
+})();
+</script>
+
+<script>
+(function() {
+  // ====== 2. Parse Sections ======
+const raw = window.rawText;
+
+if (!raw) return; // IMPORTANT: stop if parser not ready
+
+const segments = raw.split("~").map(s => s.trim()).filter(Boolean);
+  const sections = [];
+
+  for (let i = 0; i < segments.length; i += 2) {
+    const storyBlock = segments[i] || "";
+    const questionBlock = segments[i + 1] || '';
+
+    const lines = storyBlock.split("\n").map(l => l.trim()).filter(Boolean);
+
+    let titleLine = lines[0] || "Untitled Section";
+
+    sections.push({
+      title: titleLine,
+      content: lines.join("\n"),
+      questions: questionBlock
+    });
+  }
+
+window.sections = sections;
+
+
+  // ====== 3. Build TOC ======
+  const leftCol = document.getElementById('tocColLeft');
+  const rightCol = document.getElementById('tocColRight');
+  if (!leftCol || !rightCol) return;
+
+  leftCol.innerHTML = '';
+  rightCol.innerHTML = '';
+  const midpoint = Math.ceil(sections.length / 2);
+
+  sections.forEach((sec, idx) => {
+    const btn = document.createElement('button');
+    btn.textContent = sec.title;
+    btn.addEventListener('click', () => openQuizModal(idx));
+    if (idx < midpoint) leftCol.appendChild(btn);
+    else rightCol.appendChild(btn);
+  });
+
+// ====== 4. Modal Rendering ======
+window.openQuizModal = function(idx) {
+
+  const container = document.getElementById('quizSections');
+  container.innerHTML = '';
+
+  generateQuizSection(sections[idx], idx);
+
+  document.getElementById('modalRoot').classList.add('active');
+  document.body.classList.add('modal-open');
+
+  moveControlsIntoModal();
+
+  // 📌 Chapter/Verse system (navigation layer)
+  buildChapterVerseLogic();
+};
+
+document.addEventListener("click", function(e) {
+
+  const closeBtn = e.target.closest("[data-close-quiz]");
+  if (!closeBtn) return;
+
+  // 🔒 Stronger prevent auto-reopen
+  window.__quizJustClosed = Date.now();
+
+  const modalRoot = document.getElementById("modalRoot");
+  const container = document.getElementById("quizSections");
+
+  // 🔥 1. CLOSE FIRST
+  modalRoot?.classList.remove("active");
+  document.body.classList.remove("modal-open");
+
+  // 🔥 2. Clear content
+  if (container) container.innerHTML = "";
+
+  // 🔥 3. Kill smooth scroll
+  document.documentElement.style.scrollBehavior = "auto";
+
+  // 🔥 4. Immediate reset
+  window.scrollTo(0, 0);
+
+  const modal = document.getElementById("quizModal");
+  if (modal) modal.scrollTop = 0;
+
+  const modalContent = document.getElementById("quizModalContent");
+  if (modalContent) modalContent.scrollTop = 0;
+
+  // 🔥 5. Prevent browser restoring old position
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+
+  if (window.resetQuizScrollState) {
+    window.resetQuizScrollState();
+  }
+
+  // 🔥 FINAL OVERRIDE (critical)
+  setTimeout(() => {
+    window.scrollTo(0, 0);
+  }, 0);
+
+  requestAnimationFrame(() => {
+    window.scrollTo(0, 0);
+  });
+
+});
+
+function generateQuizSection(section, idx) {
+  const container = document.getElementById('quizSections');
+
+// ===== Paragraph numbering control =====
+// true  = number story paragraphs
+// false = never number story paragraphs
+const NUMBER_PARAGRAPHS = false;
+
+// Helper: render story paragraphs with optional numbering
+function renderNumberedLines(lines, sectionTitle) {
+  return lines
+    .filter((line, idx) => {
+      // ❌ Remove duplicate header (first line only)
+      if (
+        idx === 0 &&
+        sectionTitle &&
+        line.trim().toLowerCase() === sectionTitle.trim().toLowerCase()
+      ) {
+        return false;
+      }
+      return true;
+    })
+    .map((line, lineIdx) => {
+      // Never number if disabled
+      if (!NUMBER_PARAGRAPHS) {
+        return `<p>${line}</p>`;
+      }
+
+      // Defensive: do not double-number
+      if (/^\d+\.\s/.test(line)) {
+        return `<p>${line}</p>`;
+      }
+
+      return `<p>${lineIdx + 1}. ${line}</p>`;
+    })
+    .join("");
+}
+
+
+let sectionHTML = `
+  <div class="section" data-section-idx="${idx}">
+    <h2 class="parsedHeader">${section.title}</h2>
+    <div class="question-text" contenteditable="true">
+      ${renderNumberedLines(
+        section.content.split("\n").map(l => l.trim()).filter(Boolean),
+        section.title
+      )}
+    </div>
+`;
+
+    const SUBSECTION_MARKERS = [
+      "Quiz",
+      "Concept Quiz",
+      "Context Quiz",
+      "Comprehension Quiz",
+      "Grammar Quiz",
+      "Vocabulary Quiz"
+
+    ];
+
+    const lines = section.questions.split("\n").map(l => l.trim()).filter(Boolean);
+    const subsections = [];
+    let currentSub = null;
+
+let hasBlankLine = false;
+let hasNullBlankLine = false;
+
+lines.forEach(line => {
+  // Detect special lines
+  if (/^\s*blank\s*$/i.test(line)) hasBlankLine = true;
+  if (/^\s*\?blank\s*$/i.test(line)) hasNullBlankLine = true;
+
+  // If both are present, skip all subsections
+  if (hasBlankLine && hasNullBlankLine) {
+    currentSub = null; // do not create any subsection
+    return;
+  }
+
+  if (SUBSECTION_MARKERS.some(marker =>
+  line.toLowerCase().startsWith(marker.toLowerCase())
+)) {
+
+    currentSub = { title: line, questions: [] };
+    subsections.push(currentSub);
+  } else if (currentSub) {
+    currentSub.questions.push(line);
+  }
+});
+
+    subsections.forEach(sub => {
+      const slug = sub.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+      sub.slug = slug;
+
+      sectionHTML += `<h3 class="parsedSubheader">${sub.title}</h3>`;
+      sectionHTML += `<div class="quiz-subsection" data-subsection="${sub.title}" data-sub-slug="${slug}">`;
+
+sectionHTML += `
+  <div class="top-controls">
+    <input type="text" class="quiz-name" placeholder="Name">
+    <input type="text" class="quiz-id" placeholder="ID">
+    <button type="button" class="quiz-submit">Submit</button>
+    <button type="button" class="quiz-close">Close</button>
+  </div>
+
+        <div class="quiz-scoreboard"
+             style="display:none; width:100%; margin-bottom:12px;
+                    padding:6px; border:1px solid #9aaed1; border-radius:6px;
+                    background:#f9f9f9; font-family:monospace; font-size:12px;">
+          <pre class="scoreboard-data" style="margin:0; white-space:pre-wrap;"></pre>
+          <div class="scoreboard-buttons" style="margin-top:6px; display:flex; gap:6px;">
+            <button type="button" class="score-copy">Copy</button>
+            <button type="button" class="score-txt">TXT</button>
+            <button type="button" class="score-png">PNG</button>
+          </div>
+        </div>
+      `;
+
+      // ===== Question Parsing (supports ? at start + optional second line starting with -) =====
+      sub.questions = sub.questions.map(l => l.trim()).filter(Boolean);
+      let qIndex = 0;
+
+      for (let i = 0; i < sub.questions.length; i++) {
+        let line = sub.questions[i];
+
+        if (!line.startsWith('?')) continue;
+
+        // main question text
+        let question = line.replace(/^\?\s*/, '');
+
+        // optional second line
+        if (i + 1 < sub.questions.length && sub.questions[i + 1].startsWith('-')) {
+          question += ' ' + sub.questions[i + 1].replace(/^-+\s*/, '');
+          i++;
+        }
+
+        // collect options until next question
+        const options = [];
+        let j = i + 1;
+        while (j < sub.questions.length && !sub.questions[j].startsWith('?')) {
+          options.push(sub.questions[j]);
+          j++;
+        }
+
+        const correctPipe = options
+          .filter(o => /\|.*?\|/.test(o))
+          .map(o => o.replace(/\|/g, '').trim())
+          .join('|');
+
+        sectionHTML += `<div class="exercise" data-correct="${correctPipe}">`;
+        sectionHTML += `<p><strong>${qIndex + 1}. ${question}</strong></p>`;
+
+        options.forEach((opt, oi) => {
+          const clean = opt.replace(/\|/g, '').trim();
+          sectionHTML += `
+            <label>
+              <input type="radio" name="q${idx}_${sub.title}_${qIndex}" value="${clean}" data-correct="${correctPipe}">
+              ${String.fromCharCode(65 + oi)}) ${clean}
+            </label><br>
+          `;
+        });
+
+        sectionHTML += `</div>`;
+        qIndex++;
+        i = j - 1;
+      }
+
+      sectionHTML += `</div>`;
+    });
+
+    sectionHTML += `</div>`;
+    container.insertAdjacentHTML('beforeend', sectionHTML);
+  }
+
+  // ====== 5. Event Delegation ======
+  document.getElementById('quizSections').addEventListener('click', e => {
+    const sub = e.target.closest('.quiz-subsection');
+    if (!sub) return;
+
+    if (e.target.classList.contains('quiz-submit')) {
+      const sub = e.target.closest('.quiz-subsection');
+      if (!sub) return;
+
+      const name = sub.querySelector('.quiz-name')?.value || 'Anonymous';
+      const id   = sub.querySelector('.quiz-id')?.value || 'N/A';
+
+      const section = sub.closest('.section')?.querySelector('h2')?.textContent.trim() || 'Unknown Section';
+      const subsection = sub.dataset.subsection || 'Unknown Subsection';
+
+      const exercises = sub.querySelectorAll('.exercise');
+      let correctAnswers = 0;
+      exercises.forEach(ex => {
+correctAnswers += Number(ex.dataset.score || 0);
+
+
+      });
+      const totalExercises = exercises.length;
+      const percentage = totalExercises > 0 ? Math.round((correctAnswers / totalExercises) * 100) : 0;
+
+      const now = new Date();
+      const pad = n => n.toString().padStart(2,'0');
+      const dateString = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+      const filename = window.location.pathname.split('/').pop();
+      const resultText = `${filename}|${section}::${subsection}|${name}|${id}|${dateString}|${correctAnswers}/${totalExercises}|${percentage}%`;
+
+      const board = sub.querySelector('.quiz-scoreboard');
+      const dataEl = board.querySelector('.scoreboard-data');
+      if (dataEl) dataEl.textContent = resultText;
+      board.style.display = 'block';
+    }
+
+
+  });
+})();
+</script>
+
+
+
+
+
+
+
+
+<!-- ====== Consolidated Highlight + Read-Aloud + Emoji Speech + Active Highlight ====== -->
+<script>
+(function() {
+
+  /* =========================================================
+     GLOBALS
+  ========================================================= */
+  const highlightBtn = document.getElementById('highlightSelected');
+  const copyBtn = document.getElementById('copySelected');
+  const startBtn = document.getElementById('startBtn');
+  const pauseResumeBtn = document.getElementById('pauseResumeBtn');
+  const restartBtn = document.getElementById('restartBtn');
+
+  const synth = window.speechSynthesis;
+
+  let teacherVoice = null;
+  let studentVoice = null;
+
+  let narratorActive = false;
+  let lastContainer = null;
+  let lastOffset = 0;
+  let lastCharIndex = 0;
+  let utterance = null;
+
+  let activeParagraph = null;
+  let monitorInterval = null;
+
+
+  /* =========================================================
+     LOAD VOICES (Merged Logic — Nothing Removed)
+  ========================================================= */
+  function loadVoices() {
+    const voices = synth.getVoices();
+    if (!voices.length) return;
+
+    // First script preference logic
+    teacherVoice =
+      voices.find(v => v.name.includes("Zira")) ||
+      voices.find(v => v.name === "Microsoft Zira" && v.lang === "en-US") ||
+      voices.find(v => v.name.includes("Samantha")) ||
+      voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("female")) ||
+      voices[0];
+
+    studentVoice =
+      voices.find(v => v.name.includes("Aria")) ||
+      voices.find(v => v.name === "Microsoft Aria" && v.lang.startsWith("en-GB")) ||
+      voices.find(v => v.name.includes("Victoria")) ||
+      voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("female")) ||
+      voices[0];
+  }
+
+  synth.onvoiceschanged = loadVoices;
+  loadVoices();
+
+
+  /* =========================================================
+     HIGHLIGHT LOGIC (UNCHANGED)
+  ========================================================= */
+  highlightBtn?.addEventListener('click', () => {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) return;
+
+    const highlightClass = 'highlight';
+    const container = range.commonAncestorContainer.nodeType === 3
+      ? range.commonAncestorContainer.parentNode
+      : range.commonAncestorContainer;
+
+    const allNodes = Array.from(container.querySelectorAll('p, li, div, span'));
+    const intersectingNodes = allNodes.filter(node => range.intersectsNode(node));
+
+    if (!intersectingNodes.length && range.startContainer.nodeType === 3) {
+      const parentSpan = range.startContainer.parentNode;
+      if (parentSpan.classList?.contains(highlightClass)) {
+        parentSpan.replaceWith(...parentSpan.childNodes);
+      } else {
+        const span = document.createElement('span');
+        span.className = highlightClass;
+        range.surroundContents(span);
+      }
+      sel.removeAllRanges();
+      return;
+    }
+
+    const alreadyHighlighted = intersectingNodes.some(n => n.classList?.contains(highlightClass));
+    if (alreadyHighlighted) {
+      intersectingNodes.forEach(n => {
+        if (n.classList.contains(highlightClass)) {
+          n.replaceWith(...n.childNodes);
+        }
+      });
+      sel.removeAllRanges();
+      return;
+    }
+
+    intersectingNodes.forEach(node => {
+      const span = document.createElement('span');
+      span.className = highlightClass;
+      node.parentNode.insertBefore(span, node);
+      span.appendChild(node);
+    });
+
+    sel.removeAllRanges();
+  });
+
+
+  /* =========================================================
+     COPY SELECTED TEXT
+  ========================================================= */
+  copyBtn?.addEventListener('click', () => {
+    const sel = window.getSelection();
+    const text = sel.toString().trim();
+
+    if (!text) {
+      alert("Select text first.");
+      return;
+    }
+
+    navigator.clipboard.writeText(text)
+      .then(() => alert("Copied!"))
+      .catch(err => console.error(err));
+  });
+
+
+  /* =========================================================
+     READABLE CONTAINER LOGIC
+  ========================================================= */
+  function getReadableContainer() {
+    const sel = window.getSelection();
+    let node = sel?.anchorNode;
+
+    while (node) {
+      if (node.classList?.contains?.('question-text')) return node;
+      if (node.id === 'mvTextContainer') return node;
+      node = node.parentNode;
+    }
+    return null;
+  }
+
+  function getCursorOffset(container) {
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return 0;
+
+    const range = sel.getRangeAt(0);
+    const pre = document.createRange();
+    pre.setStart(container, 0);
+    pre.setEnd(range.startContainer, range.startOffset);
+    return pre.toString().length;
+  }
+
+/* =========================================================
+   MOBILE CHUNKING (ADD HERE)
+========================================================= */
+
+function buildChunks(text) {
+
+  const MAX = /Mobi|Android/i.test(navigator.userAgent) ? 120 : 180;
+
+  const sentences = text
+    .replace(/([.?!]+)\s+/g, "$1|")
+    .split("|")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const chunks = [];
+  let buffer = "";
+
+  for (let s of sentences) {
+
+    // 🔥 handle very long sentences safely
+    if (s.length > MAX) {
+      for (let i = 0; i < s.length; i += MAX) {
+        chunks.push(s.slice(i, i + MAX));
+      }
+      continue;
+    }
+
+    if ((buffer + s).length > MAX) {
+      if (buffer.trim()) chunks.push(buffer.trim());
+      buffer = s + " ";
+    } else {
+      buffer += s + " ";
+    }
+  }
+
+  if (buffer.trim()) chunks.push(buffer.trim());
+
+  return chunks;
+}
+
+
+
+
+
+
+  /* =========================================================
+     SPEAK FROM CURSOR
+  ========================================================= */
+function speakFrom(container, offset) {
+
+  const fullText = container.textContent || "";
+  const text = fullText.slice(offset);
+  if (!text.trim()) return;
+
+  const chunks = [];
+  const MAX = /Mobi|Android/i.test(navigator.userAgent) ? 120 : 180;
+
+  // --- sentence-based chunking ---
+  const sentences = text
+    .replace(/([.?!])\s+/g, "$1|")
+    .split("|")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  let buffer = "";
+  for (let s of sentences) {
+    if ((buffer + s).length > MAX) {
+      if (buffer) chunks.push(buffer);
+      buffer = s + " ";
+    } else {
+      buffer += s + " ";
+    }
+  }
+  if (buffer) chunks.push(buffer);
+
+  let chunkIndex = 0;
+  let globalOffset = offset;   // 🔥 CRITICAL
+
+  narratorActive = true;
+  lastContainer = container;
+  lastOffset = offset;
+
+  function speakChunk() {
+
+    if (chunkIndex >= chunks.length) {
+      narratorActive = false;
+      lastOffset = 0;
+      lastCharIndex = 0;
+      return;
+    }
+
+    const chunkText = chunks[chunkIndex];
+
+    utterance = new SpeechSynthesisUtterance(chunkText);
+    utterance.voice = teacherVoice;
+
+    utterance.onboundary = (e) => {
+      if (e.name === "word") {
+        // 🔥 maintain continuous index for your highlighter system
+        lastCharIndex = globalOffset + e.charIndex;
+      }
+    };
+
+    utterance.onend = () => {
+      // 🔥 advance global offset correctly
+      globalOffset += chunkText.length;
+      chunkIndex++;
+      speakChunk();
+    };
+
+    synth.speak(utterance);
+  }
+
+  speakChunk();
+}
+
+  /* =========================================================
+     START BUTTON
+  ========================================================= */
+  startBtn?.addEventListener('click', () => {
+
+    const container = getReadableContainer();
+    if (!container) {
+      alert("Place cursor inside readable text");
+      return;
+    }
+
+    const offset = getCursorOffset(container);
+
+if (synth.speaking || synth.paused) {
+  synth.cancel();
+  clearHighlight();   // ← ADD THIS LINE
+  narratorActive = false;
+  return;
+}
+
+    lastCharIndex = offset;
+    speakFrom(container, offset);
+  });
+
+
+  /* =========================================================
+     EMOJI SPEECH OVERLAYS
+  ========================================================= */
+  function addSpeechEmojis() {
+    const paragraphs = document.querySelectorAll('.question-text p, .sentence, #quizSections p');
+
+    paragraphs.forEach(p => {
+      if (p.dataset.speechOverlay) return;
+      p.dataset.speechOverlay = '1';
+
+      const text = p.textContent.trim();
+      let speaker = null;
+
+      if (/^teacher:/i.test(text)) speaker = 'teacher';
+      else if (/^student:/i.test(text)) speaker = 'student';
+      else return;
+
+      const emoji = speaker === 'teacher' ? '👩‍🦰' : '👧';
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.style.all = 'unset';
+      btn.style.cursor = 'pointer';
+      btn.style.fontSize = '14px';
+      btn.style.display = 'inline';
+      btn.style.margin = '0';
+      btn.style.padding = '0';
+      btn.style.lineHeight = '1';
+      btn.style.verticalAlign = 'baseline';
+      btn.title = speaker === 'teacher' ? 'Teacher Speech' : 'Student Speech';
+      btn.textContent = emoji + ' ';
+
+btn.addEventListener('click', () => {
+
+  // Stop current speech
+if (synth.speaking) {
+  synth.cancel();
+  clearHighlight();   // ← ADD THIS LINE
+}
+
+  // Remove any existing highlight
+  document.querySelectorAll(".reading-active")
+    .forEach(el => el.classList.remove("reading-active"));
+
+  // Highlight this paragraph (pale yellow)
+  p.classList.add("reading-active");
+
+  const lineText = text.replace(/^(teacher:|student:)\s*/i, '');
+  const utter = new SpeechSynthesisUtterance(lineText);
+
+  if (speaker === 'teacher') {
+    utter.voice = teacherVoice;
+    utter.rate = 0.88;
+    utter.pitch = 1.15;
+    utter.volume = 0.95;
+  } else {
+    utter.voice = studentVoice;
+    utter.rate = 0.98;
+    utter.pitch = 1.50;
+    utter.volume = 0.80;
+  }
+
+  utter.onend = () => {
+    p.classList.remove("reading-active");
+  };
+
+  synth.speak(utter);
+});      p.insertBefore(btn, p.firstChild);
+    });
+  }
+
+  addSpeechEmojis();
+  setInterval(addSpeechEmojis, 1000);
+
+
+  /* =========================================================
+     ACTIVE READING HIGHLIGHT
+  ========================================================= */
+
+  if (!document.getElementById("speechHighlightStyle")) {
+    const style = document.createElement("style");
+    style.id = "speechHighlightStyle";
+    style.textContent = `
+.reading-active {
+  background-color: #fff9c4 !important;
+  transition: background-color 0.4s ease;
+}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function clearHighlight() {
+    if (activeParagraph) {
+      activeParagraph.classList.remove("reading-active");
+      activeParagraph = null;
+    }
+  }
+
+  function startMonitoring() {
+    if (monitorInterval) return;
+
+    monitorInterval = setInterval(function(){
+      if (!synth.speaking) {
+        clearHighlight();
+        clearInterval(monitorInterval);
+        monitorInterval = null;
+      }
+    }, 100);
+  }
+
+  document.addEventListener("click", function(e){
+
+    const btn = e.target.closest("button");
+    if (!btn) return;
+
+    const p = btn.closest("p");
+    if (!p) return;
+
+    if (synth.speaking) {
+      clearHighlight();
+      return;
+    }
+
+    setTimeout(function(){
+      if (synth.speaking) {
+        clearHighlight();
+        activeParagraph = p;
+        p.classList.add("reading-active");
+        startMonitoring();
+      }
+    }, 50);
+
+  });
+
+})();
+</script>
+
+<!-- End-->
+
+<script>
+(function(){
+
+  const synth = window.speechSynthesis;
+
+  let paragraphs = [];
+  let paragraphRanges = [];
+  let currentIndex = -1;
+
+  let baseOffset = 0;          // where speech started in full text
+  let lastSpokenGlobal = 0;    // last spoken absolute character index
+  let lastStartContainer = null;
+  let lastStartOffset = 0;
+
+  /* ===============================
+     Pale Yellow Highlight CSS
+  =============================== */
+  if (!document.getElementById("autoParagraphHighlightStyle")) {
+    const style = document.createElement("style");
+    style.id = "autoParagraphHighlightStyle";
+    style.textContent = `
+      .auto-paragraph-active {
+        background-color: #fff9c4;
+        transition: background-color 0.4s ease;
+      }
+      .auto-paragraph-fade {
+        background-color: transparent;
+        transition: background-color 0.8s ease;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function clearAll() {
+    paragraphs.forEach(p => {
+      p.classList.remove("auto-paragraph-active");
+      p.classList.remove("auto-paragraph-fade");
+    });
+  }
+
+  function fadeParagraph(index) {
+    if (index < 0 || index >= paragraphs.length) return;
+    const p = paragraphs[index];
+    p.classList.remove("auto-paragraph-active");
+    p.classList.add("auto-paragraph-fade");
+    setTimeout(() => {
+      p.classList.remove("auto-paragraph-fade");
+    }, 800);
+  }
+
+  function highlightParagraph(index) {
+    if (index < 0 || index >= paragraphs.length) return;
+    paragraphs[index].classList.add("auto-paragraph-active");
+  }
+
+  function collectParagraphsFrom(root) {
+    paragraphs = Array.from(root.querySelectorAll("p"))
+      .filter(p => p.textContent.trim().length > 0);
+
+    paragraphRanges = [];
+    let runningLength = 0;
+
+    paragraphs.forEach(p => {
+      const len = p.textContent.length;
+      paragraphRanges.push({
+        start: runningLength,
+        end: runningLength + len
+      });
+      runningLength += len;
+    });
+  }
+
+function findParagraphIndex(globalCharIndex) {
+
+  const BUFFER = 8; // helps catch short dialogue lines
+
+  for (let i = 0; i < paragraphRanges.length; i++) {
+    const r = paragraphRanges[i];
+
+    if (
+      globalCharIndex >= (r.start - BUFFER) &&
+      globalCharIndex < (r.end + BUFFER)
+    ) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+  function getCursorInfo() {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return null;
+
+    const range = sel.getRangeAt(0);
+
+    let container = range.startContainer;
+    while (container && container.nodeType !== 1) {
+      container = container.parentNode;
+    }
+    if (!container) return null;
+
+    const root = container.closest("#mvTextContainer, .question-text") || document.body;
+
+    const preRange = document.createRange();
+    preRange.setStart(root, 0);
+    preRange.setEnd(range.startContainer, range.startOffset);
+
+    const offset = preRange.toString().length;
+
+    return { root, offset, container };
+  }
+
+/* ========================================== 
+   Hook safely into speech (NO AUTO-HIGHLIGHT)
+========================================== */
+const originalSpeak = synth.speak.bind(synth);
+
+synth.speak = function(utterance) {
+
+  const cursorInfo = getCursorInfo();
+  if (!cursorInfo) return originalSpeak(utterance);
+
+  const { offset, container } = cursorInfo;
+
+  // Detect if cursor moved
+  const cursorMoved =
+    container !== lastStartContainer ||
+    offset !== lastStartOffset;
+
+  if (cursorMoved) {
+    baseOffset = offset;
+    lastSpokenGlobal = offset;
+  }
+
+  lastStartContainer = container;
+  lastStartOffset = offset;
+
+  // Optional: still track position silently (no UI effects)
+  utterance.addEventListener("boundary", function(e){
+    if (e.name !== "word") return;
+    lastSpokenGlobal = baseOffset + e.charIndex;
+  });
+
+  utterance.addEventListener("end", function(){
+    if (!synth.speaking) {
+      lastSpokenGlobal = 0;
+      baseOffset = 0;
+    }
+  });
+
+  return originalSpeak(utterance);
+};</script>
+
+<!-- ====== 5. Emoji + Audio Feedback ====== -->
+<script>
+(function() {
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playCorrect() { 
+    audioCtx.resume().then(() => { 
+      const o = audioCtx.createOscillator(); 
+      const g = audioCtx.createGain(); 
+      o.type = "sine"; 
+      o.frequency.setValueAtTime(800, audioCtx.currentTime); 
+      g.gain.setValueAtTime(0.4, audioCtx.currentTime); 
+      o.connect(g); g.connect(audioCtx.destination); 
+      o.start(); o.stop(audioCtx.currentTime + 0.25); 
+    }); 
+  }
+
+  function playWrong() { 
+    audioCtx.resume().then(() => { 
+      const o = audioCtx.createOscillator(); 
+      const g = audioCtx.createGain(); 
+      o.type = "triangle"; 
+      o.frequency.setValueAtTime(450, audioCtx.currentTime); 
+      o.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.25); 
+      g.gain.setValueAtTime(0.4, audioCtx.currentTime); 
+      o.connect(g); g.connect(audioCtx.destination); 
+      o.start(); o.stop(audioCtx.currentTime + 0.25); 
+    }); 
+  }
+
+  function normalize(str){ 
+    return str.trim().toLowerCase().replace(/\s+/g," "); 
+  }
+
+  // ======================
+  // HANDLE ANSWER SELECTION
+  // ======================
+  document.body.addEventListener('change', e => {
+    const exercise = e.target.closest('.exercise');
+    if (!exercise) return;
+
+    // Emojis & sound (fire every change)
+    const textInputs = Array.from(exercise.querySelectorAll("input[type='text'], textarea"));
+    const selectedInputs = Array.from(exercise.querySelectorAll("input:checked"));
+
+    const userAnswers = textInputs.length 
+      ? textInputs.map(i => normalize(i.value)) 
+      : selectedInputs.map(i => normalize(i.value));
+
+    const correctAnswers = Array.from(exercise.querySelectorAll('[data-correct]'))
+      .map(i => normalize(i.dataset.correct));
+
+    const isCorrect = userAnswers.every(ans => correctAnswers.includes(ans));
+
+    // Remove previous emojis
+    exercise.querySelectorAll('.mc-emoji').forEach(span => span.remove());
+
+    // Add emojis
+    selectedInputs.forEach(inp => {
+      const lbl = inp.closest("label");
+      if (lbl) {
+        const span = document.createElement('span');
+        span.className = "mc-emoji";
+        span.style.marginLeft = "8px";
+        span.textContent = isCorrect ? "😊" : "😢";
+        lbl.appendChild(span);
+      }
+    });
+
+    textInputs.forEach(inp => {
+      const span = document.createElement('span');
+      span.className = "mc-emoji";
+      span.style.marginLeft = "8px";
+      span.textContent = isCorrect ? "😊" : "😢";
+      inp.parentNode.insertBefore(span, inp.nextSibling);
+    });
+
+    if (isCorrect) playCorrect(); else playWrong();
+
+// ======================
+// FIRST CLICK SCORING
+// ======================
+if (exercise.dataset.firstResponseLocked) return;
+exercise.dataset.firstResponseLocked = 'true';
+
+const totalExercises = 1; // each exercise counts as 1
+const correctCount = isCorrect ? 1 : 0;
+const percentage = correctCount * 100;
+
+// store score in the element so Submit can display later
+exercise.dataset.score = correctCount;
+exercise.dataset.percentage = percentage;
+});
+
+
+
+
+
+
+
+  // ======================
+  // SUBMIT BUTTON (DISPLAY SCOREBOARD ONLY)
+  // ======================
+  document.body.addEventListener('click', e => {
+    if (!e.target.classList.contains('quiz-submit')) return;
+    const sub = e.target.closest('.quiz-subsection');
+    if (!sub) return;
+
+    const exercises = sub.querySelectorAll('.exercise');
+
+    // Aggregate first-click scores
+    let correctCount = 0;
+    exercises.forEach(ex => {
+      const sc = Number(ex.dataset.score || 0);
+      correctCount += sc;
+    });
+
+    const totalExercises = exercises.length;
+    const percentage = totalExercises > 0 ? Math.round((correctCount / totalExercises) * 100) : 0;
+
+    // Display in scoreboard
+    const board = sub.querySelector('.quiz-scoreboard');
+    if (board) {
+      const dataEl = board.querySelector('.scoreboard-data');
+      const name = sub.querySelector('.quiz-name')?.value || 'Anonymous';
+      const id   = sub.querySelector('.quiz-id')?.value || 'N/A';
+      const section = sub.closest('.section')?.querySelector('h2')?.textContent || 'Unknown Section';
+      const subsection = sub.dataset.subsection || 'Unknown Subsection';
+      const now = new Date();
+      const pad = n => n.toString().padStart(2,'0');
+      const dateString = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      const filename = window.location.pathname.split('/').pop();
+
+const resultText = `${filename}|${section.replace(/:+$/, '').trim()}: ${subsection.replace(/^:+/, '').trim()}|${name}|${id}|${dateString}|${correctCount}/${totalExercises}|${percentage}%`;
+      if (dataEl) dataEl.textContent = resultText;
+
+if (window.saveResult) {
+  const finalResultText = board.querySelector('.scoreboard-data')?.textContent;
+if (finalResultText && window.saveResult) {
+  window.saveResult(finalResultText);
+}
+}
+
+      board.style.display = 'block';
+    }
+  });
+
+})();
+</script>
+
+
+<!--<script>
+(function () {
+
+  if (document.getElementById("global-green-border")) return;
+
+  const border = document.createElement("div");
+  border.id = "global-green-border";
+
+  Object.assign(border.style, {
+    position: "fixed",
+    inset: "0",
+    pointerEvents: "none",
+    zIndex: "2147483647",
+    boxShadow: "inset 0 0 0 10px #39FF14"
+  });
+
+  document.documentElement.appendChild(border);
+
+})();
+</script>-->
+
+<script>
+(function () {
+
+  if (document.getElementById("global-green-border")) return;
+
+  const border = document.createElement("div");
+  border.id = "global-green-border";
+
+  Object.assign(border.style, {
+    position: "fixed",
+    inset: "0",
+    pointerEvents: "none",
+    zIndex: "2147483647",
+    boxShadow: "inset 0 0 0 10px #39FF14",
+    willChange: "transform",
+    transition: "transform 0.12s ease-out"
+  });
+
+  document.documentElement.appendChild(border);
+
+  function adjustForKeyboard() {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const keyboardOffset =
+      window.innerHeight - vv.height - vv.offsetTop;
+
+    border.style.transform =
+      `translateY(-${Math.max(0, keyboardOffset)}px)`;
+  }
+
+  const vv = window.visualViewport;
+
+  if (vv) {
+    vv.addEventListener("resize", adjustForKeyboard);
+    vv.addEventListener("scroll", adjustForKeyboard);
+  }
+
+  adjustForKeyboard();
+
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script>
+(function() {
+  const quizSections = document.getElementById('quizSections');
+
+  // Event delegation for scoreboard buttons
+  quizSections.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+
+    const board = e.target.closest('.quiz-scoreboard');
+    if (!board) return;
+
+    const dataEl = board.querySelector('.scoreboard-data');
+    if (!dataEl) return;
+
+    const text = dataEl.textContent;
+
+    // ===== COPY =====
+    if (btn.classList.contains('score-copy')) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+      }).catch(err => console.error(err));
+    }
+
+    // ===== TXT =====
+    if (btn.classList.contains('score-txt')) {
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'quiz-score.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ===== PNG WITH 10px MARGIN =====
+    if (btn.classList.contains('score-png')) {
+      if (typeof html2canvas === 'undefined') {
+        alert('html2canvas library is required for PNG export.');
+        return;
+      }
+
+      // create temporary wrapper with 10px padding
+      const wrapper = document.createElement('div');
+      wrapper.style.padding = '10px';
+      wrapper.style.background = '#f9f9f9';
+      wrapper.style.display = 'inline-block';
+      wrapper.style.fontFamily = 'monospace';
+      wrapper.style.fontSize = '12px';
+      wrapper.style.whiteSpace = 'pre-wrap';
+      wrapper.style.lineHeight = '1.4';
+      wrapper.appendChild(dataEl.cloneNode(true));
+
+      document.body.appendChild(wrapper);
+
+      html2canvas(wrapper).then(canvas => {
+        canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'quiz-score.png';
+          a.click();
+          URL.revokeObjectURL(url);
+          document.body.removeChild(wrapper); // clean up
+        });
+      });
+    }
+
+
+  }); // <- this closes the quizSections click listener
+
+})(); // <- this closes the IIFE
+</script>
+
+
+
+<script>
+(function() {
+  // Enable/disable submit and radios based on inputs
+  function updateControls(subsection) {
+    const nameInput = subsection.querySelector('.quiz-name');
+    const idInput = subsection.querySelector('.quiz-id');
+    const submitBtn = subsection.querySelector('.quiz-submit');
+    const radios = subsection.querySelectorAll('input[type="radio"]');
+
+    const enabled = nameInput.value.trim() && idInput.value.trim();
+
+    // Enable/disable submit
+    submitBtn.disabled = !enabled;
+
+    // Enable/disable radios
+    radios.forEach(r => r.disabled = !enabled);
+  }
+
+  // Monitor input fields in all subsections
+  document.body.addEventListener('input', e => {
+    if (e.target.matches('.quiz-name, .quiz-id')) {
+      const subsection = e.target.closest('.quiz-subsection');
+      if (!subsection) return;
+      updateControls(subsection);
+    }
+  });
+
+  // Initialize all subsections on page load
+  document.querySelectorAll('.quiz-subsection').forEach(sub => updateControls(sub));
+})();
+</script>
+
+
+<script>
+(function() {
+  const normalize = str => str.trim().toLowerCase().replace(/\s+/g, " ");
+
+  document.body.addEventListener('change', e => {
+    const exercise = e.target.closest('.exercise');
+    if (!exercise) return;
+
+    // ----- Gather user answers -----
+    const textInputs = Array.from(exercise.querySelectorAll("input[type='text'], textarea"));
+    const selectedInputs = Array.from(exercise.querySelectorAll("input:checked"));
+
+    const userAnswers = textInputs.length 
+      ? textInputs.map(i => normalize(i.value))
+      : selectedInputs.map(i => normalize(i.value));
+
+    const correctAnswers = Array.from(exercise.querySelectorAll('[data-correct]'))
+      .map(i => normalize(i.dataset.correct));
+
+    const isCorrect = userAnswers.every(ans => correctAnswers.includes(ans));
+
+    // ----- Add emojis -----
+    const addEmoji = (element) => {
+      if (!element.nextSibling || !element.nextSibling.classList?.contains('mc-emoji')) {
+        const span = document.createElement('span');
+        span.className = 'mc-emoji';
+        span.style.marginLeft = '8px';
+        span.textContent = isCorrect ? '😊' : '😟';
+        element.parentNode.insertBefore(span, element.nextSibling);
+      }
+    };
+
+    textInputs.forEach(addEmoji);
+
+    selectedInputs.forEach(inp => {
+      const label = inp.closest('label');
+      if (label && !label.querySelector('.mc-emoji')) {
+        const span = document.createElement('span');
+        span.className = 'mc-emoji';
+        span.style.marginLeft = '8px';
+        span.textContent = isCorrect ? '😊' : '😟';
+        label.appendChild(span);
+      }
+    });
+
+  }); // close event listener
+})(); // close IIFE
+</script>
+
+<script>
+/* ==========================================================
+   GLOBAL PAGE TITLE ENGINE
+========================================================== */
+
+(function () {
+
+  function buildFormattedTitle() {
+
+    let filename = window.location.pathname.split("/").pop() || "";
+    filename = filename.replace(/\.[^/.]+$/, "");
+    filename = decodeURIComponent(filename);
+
+    const allowedPrefixes = [
+      "g_game_","v_game_","rr_","cdf_","cdr_",
+      "ws_","r_","a_","g_","v_"
+    ];
+
+    for (let prefix of allowedPrefixes) {
+      if (filename.startsWith(prefix)) {
+        filename = filename.substring(prefix.length);
+        break;
+      }
+    }
+
+    let rawTitle = filename.replace(/_/g," ").trim();
+    if (!rawTitle) rawTitle = "Untitled";
+
+    const minorWords = [
+      "a","an","the","and","but","or","nor",
+      "for","so","yet","at","by","in","of","on","to","up","as","off","out"
+    ];
+
+    // ✅ Acronyms to preserve in uppercase
+    const acronyms = ["ot", "nt"];
+
+    return rawTitle.split(/\s+/).map((word, i) => {
+
+      const lower = word.toLowerCase();
+
+      // preserve acronyms like OT / NT
+      if (acronyms.includes(lower)) {
+        return lower.toUpperCase();
+      }
+
+      // first word always capitalized
+      if (i === 0) {
+        return lower.charAt(0).toUpperCase() + lower.slice(1);
+      }
+
+      // minor words stay lowercase
+      if (minorWords.includes(lower)) {
+        return lower;
+      }
+
+      // default title case
+      return lower.charAt(0).toUpperCase() + lower.slice(1);
+
+    }).join(" ");
+  }
+
+  window.pageTitle = buildFormattedTitle();
+
+  window.applyPageTitle = function(root=document){
+    root.querySelectorAll("h1[data-auto-title]").forEach(h=>{
+      h.textContent = window.pageTitle;
+      h.style.textTransform = "none";
+      h.style.visibility = "visible";
+    });
+  };
+
+})();
+
+/* ==========================================================
+   PAGE INIT
+========================================================== */
+
+document.addEventListener("DOMContentLoaded",function(){
+
+  window.applyPageTitle();
+
+});
+
+
+/* ==========================================================
+   AUTO OPEN SINGLE SECTION
+========================================================== */
+
+(function(){
+
+  function tryAutoOpenSingleSection(){
+
+    if(!window.sections || !Array.isArray(window.sections)) return;
+    if(typeof window.openQuizModal !== "function") return;
+
+    const root=document.documentElement;
+
+    const hardOn=root.classList.contains("show-hard");
+    const dynamicOn=root.classList.contains("show-dynamic");
+
+const recentlyClosed =
+  window.__quizJustClosed &&
+  (Date.now() - window.__quizJustClosed < 1500);
+
+if (window.sections.length === 1 && !hardOn && !dynamicOn && !recentlyClosed) {
+  window.openQuizModal(0);
+}
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",tryAutoOpenSingleSection);
+  }else{
+    tryAutoOpenSingleSection();
+  }
+
+})();
+
+
+
+
+
+/* ==========================================================
+   MODAL CONTROL MOVEMENT + CHAPTER/VERSE SYSTEM (ROBUST)
+========================================================== */
+
+function moveControlsIntoModal(){
+
+  const modalContent=document.getElementById("quizModalContent");
+  if(!modalContent) return;
+
+  const chapterControls=document.getElementById("chapterVerseControls");
+  const readAloud=document.getElementById("readaloudControls");
+
+  if(chapterControls && !modalContent.contains(chapterControls)){
+    modalContent.insertBefore(chapterControls,modalContent.firstChild);
+  }
+
+  if(readAloud){
+    readAloud.style.display="block";
+
+    if(!modalContent.contains(readAloud)){
+      modalContent.insertBefore(
+        readAloud,
+        chapterControls?.nextSibling || modalContent.firstChild
+      );
+    }
+  }
+}
+
+
+function buildChapterVerseLogic(){
+
+  const modal=document.getElementById("quizModal");
+  if(!modal) return;
+
+  const readAloud=modal.querySelector("#readaloudControls");
+  const chapterControls=modal.querySelector("#chapterVerseControls");
+  const textContainer=modal.querySelector("#quizSections");
+
+  const chapterSelect=modal.querySelector("#chapterSelect");
+  const verseSelect=modal.querySelector("#verseSelect");
+  const goBtn=modal.querySelector("#goBtn");
+
+  if(!textContainer || !chapterSelect || !verseSelect || !goBtn){
+    console.warn("Chapter/Verse system missing required elements");
+    return;
+  }
+
+  if(chapterControls){
+    chapterControls.style.display="block";
+  }
+
+  const paragraphs=[...textContainer.querySelectorAll("p")];
+  if(!paragraphs.length){
+    console.warn("No paragraphs found for chapter/verse mapping");
+    return;
+  }
+
+  const structure={};
+  let currentChapter=null;
+
+  // ===== helper: normalize text =====
+  const clean = (t)=>t.trim().replace(/\s+/g,' ');
+
+  paragraphs.forEach(p=>{
+
+    const text=clean(p.textContent);
+
+    // ===== FLEXIBLE CHAPTER MATCHING =====
+    const chapMatch=
+      text.match(/^chapter\s*:?\s*(\d+)/i) ||
+      text.match(/^#?\s*chapter\s*(\d+)/i) ||
+      text.match(/^(\d+)\.\s*chapter/i);
+
+    // ===== FLEXIBLE VERSE MATCHING =====
+    const verseMatch=
+      text.match(/^verse\s*:?\s*(\d+)/i) ||
+      text.match(/^v\s*(\d+)/i);
+
+    const fullRefMatch=text.match(/^(\d+):(\d+)\s/);
+
+    // ===== chapter detection =====
+    if(chapMatch){
+      currentChapter=chapMatch[1];
+      if(!structure[currentChapter]) structure[currentChapter]={};
+      return;
+    }
+
+    // ===== verse detection (context-based) =====
+    if(currentChapter && verseMatch){
+      structure[currentChapter][verseMatch[1]]=p;
+      return;
+    }
+
+    // ===== inline chapter:verse detection =====
+    if(fullRefMatch){
+      const c=fullRefMatch[1];
+      const v=fullRefMatch[2];
+
+      if(!structure[c]) structure[c]={};
+      structure[c][v]=p;
+
+      currentChapter=c;
+    }
+
+  });
+
+  // ===== DEBUG SAFETY =====
+  if(Object.keys(structure).length===0){
+    console.warn("ChapterVerse structure is EMPTY. Check formatting.");
+  }
+
+  // ===== populate chapters =====
+  chapterSelect.innerHTML="";
+
+  Object.keys(structure).forEach(ch=>{
+    const opt=document.createElement("option");
+    opt.value=ch;
+    opt.textContent="Chapter "+ch;
+    chapterSelect.appendChild(opt);
+  });
+
+  function updateVerses(){
+
+    verseSelect.innerHTML="";
+    const ch=chapterSelect.value;
+    if(!structure[ch]) return;
+
+    Object.keys(structure[ch]).forEach(v=>{
+      const opt=document.createElement("option");
+      opt.value=v;
+      opt.textContent="Verse "+v;
+      verseSelect.appendChild(opt);
+    });
+
+  }
+
+  chapterSelect.onchange=updateVerses;
+  updateVerses();
+
+  function clearHighlights(){
+    paragraphs.forEach(p=>p.classList.remove("selected-verse"));
+  }
+
+  function getControlsOffset(extraPadding=0){
+
+    const readHeight=readAloud ? readAloud.offsetHeight : 0;
+
+    const chapterHeight=
+      chapterControls &&
+      chapterControls.style.display!=="none"
+      ? chapterControls.offsetHeight
+      : 0;
+
+    return readHeight + chapterHeight + extraPadding;
+  }
+
+  goBtn.onclick=function(){
+
+    const chapter=chapterSelect.value;
+    const verse=verseSelect.value;
+
+    if(!structure[chapter] || !structure[chapter][verse]){
+      console.warn("Verse not found:", chapter, verse);
+      return;
+    }
+
+    const target=structure[chapter][verse];
+
+    clearHighlights();
+    target.classList.add("selected-verse");
+
+    const offset=getControlsOffset(10);
+
+    modal.scrollTo({
+      top:target.offsetTop-offset,
+      behavior:"smooth"
+    });
+  };
+
+  window.chapterVerseStructure = structure; // debug access
+}
+
+/* ==========================================================
+   MODAL ARROW SCROLL
+========================================================== */
+
+(function(){
+
+  const modalRoot=document.getElementById("modalRoot");
+  const modal=document.getElementById("quizModal");
+  if(!modalRoot || !modal) return;
+
+  const SCROLL_AMOUNT=50;
+  let enabled=false;
+
+  function isTypingTarget(target){
+
+    return target.closest("input, textarea")
+      || target.isContentEditable
+      || target.closest("[contenteditable='true']");
+
+  }
+
+  function handleKeydown(e){
+
+    if(!enabled) return;
+    if(e.key!=="ArrowDown" && e.key!=="ArrowUp") return;
+    if(isTypingTarget(e.target)) return;
+
+    e.preventDefault();
+
+    modal.scrollBy({
+      top:e.key==="ArrowDown" ? SCROLL_AMOUNT : -SCROLL_AMOUNT,
+      behavior:"smooth"
+    });
+
+  }
+
+  function enable(){
+    if(enabled) return;
+    enabled=true;
+    document.addEventListener("keydown",handleKeydown);
+  }
+
+  function disable(){
+    enabled=false;
+    document.removeEventListener("keydown",handleKeydown);
+  }
+
+  const observer=new MutationObserver(()=>{
+    const active=modalRoot.classList.contains("active");
+    if(active) enable();
+    else disable();
+  });
+
+  observer.observe(modalRoot,{attributes:true,attributeFilter:["class"]});
+
+})();
+
+
+/* ==========================================================
+   STRICT SUBMIT LOCK
+========================================================== */
+
+(function(){
+
+  function updateSubsectionState(sub){
+
+    const name=sub.querySelector('.quiz-name');
+    const id=sub.querySelector('.quiz-id');
+    const submit=sub.querySelector('.quiz-submit');
+    const radios=sub.querySelectorAll('input[type="radio"]');
+
+    if(!name || !id || !submit) return;
+
+    const enabled=name.value.trim() && id.value.trim();
+
+    submit.disabled=!enabled;
+    radios.forEach(r=>r.disabled=!enabled);
+
+  }
+
+  function initSub(sub){
+
+    if(sub.dataset.lockInitialized) return;
+    sub.dataset.lockInitialized="1";
+
+    const name=sub.querySelector('.quiz-name');
+    const id=sub.querySelector('.quiz-id');
+    if(!name || !id) return;
+
+    updateSubsectionState(sub);
+
+    name.addEventListener("input",()=>updateSubsectionState(sub));
+    id.addEventListener("input",()=>updateSubsectionState(sub));
+
+  }
+
+  function scan(){
+    document.querySelectorAll('.quiz-subsection').forEach(initSub);
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",scan);
+  }else{
+    scan();
+  }
+
+  new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
+
+})();
+
+
+/* ==========================================================
+   GLOBAL LINK FADE
+========================================================== */
+
+document.addEventListener("click",function(e){
+
+  const link=e.target.closest("a");
+  if(!link) return;
+
+  e.preventDefault();
+
+  document.body.style.transition="opacity 80ms ease";
+  document.body.style.opacity="0";
+
+  setTimeout(()=>{
+    window.location.href=link.href;
+  },80);
+
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const targets = [
+    { parent:"#layout", content:"#layout", gap:-30 },
+    { parent:"#tocContainer", content:"#tocContainer", gap:-20 },
+    { parent:"#quizModal", content:"#quizModalContent", gap:-30 }
+  ];
+
+  const copyrightHTML = `
+    <section class="copyrightSection">
+      <div class="footer-note copyright">
+        © <span class="auto-year"></span> Perfectly Practical English™. All rights reserved.
+      </div>
+<div id="visitor-count">Visits: loading...</div>
+
+    </section>
+  `;
+
+  function insertCopyright(parent){
+    if (!parent.querySelector(":scope > .copyrightSection")) {
+      parent.insertAdjacentHTML("beforeend", copyrightHTML);
+    }
+  }
+
+  function adjust(parent, content, desiredGap){
+
+    const copyright = parent.querySelector(".copyrightSection");
+    const last = content.lastElementChild;
+
+    if (!copyright || !last) return;
+
+    const lastBottom = last.getBoundingClientRect().bottom;
+    const copyTop = copyright.getBoundingClientRect().top;
+
+    const currentGap = copyTop - lastBottom;
+    const adjust = currentGap - desiredGap;
+
+    copyright.style.marginTop = (-adjust - 5) + "px";
+  }
+
+  function update(){
+
+    targets.forEach(t => {
+
+      const parent = document.querySelector(t.parent);
+      const content = document.querySelector(t.content);
+
+      if (!parent || !content) return;
+
+      insertCopyright(parent);
+      adjust(parent, content, t.gap);
+
+    });
+
+  }
+
+  // set year
+  document.querySelectorAll(".auto-year").forEach(el=>{
+    el.textContent = new Date().getFullYear();
+  });
+
+  update();
+
+  window.addEventListener("resize", update);
+
+});
+</script>
+
+<script>
+(function(){
+
+  const startBtn = document.getElementById('startBtn');
+  let activeEl = null;
+
+  let startX = 0;
+  let startY = 0;
+  let isDragging = false;
+
+  const DRAG_THRESHOLD = 8;
+
+  const X_THRESHOLD = 60;
+  const Y_THRESHOLD = 30;
+
+  const synth = window.speechSynthesis;
+
+  /* =========================
+     STYLE (soft + fade out)
+  ========================= */
+  if (!document.getElementById("chunkHighlightStyle")) {
+    const style = document.createElement("style");
+    style.id = "chunkHighlightStyle";
+    style.textContent = `
+      .chunk-active {
+        background: #fff9c4;
+        transition: background 0.6s ease;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function fadeHighlight() {
+    if (!activeEl) return;
+
+    activeEl.style.background = "transparent";
+
+    setTimeout(() => {
+      if (activeEl) {
+        activeEl.classList.remove("chunk-active");
+        activeEl.style.background = "";
+        activeEl = null;
+      }
+    }, 600);
+  }
+
+  function setHighlight(el) {
+    if (activeEl) {
+      activeEl.classList.remove("chunk-active");
+    }
+    activeEl = el;
+    el.classList.add("chunk-active");
+  }
+
+  function placeCursorAtStart(el) {
+    const range = document.createRange();
+    const sel = window.getSelection();
+
+    range.selectNodeContents(el);
+    range.collapse(true);
+
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  /* =========================
+     POINTER TRACKING
+  ========================= */
+  document.addEventListener("pointerdown", (e) => {
+    startX = e.clientX;
+    startY = e.clientY;
+    isDragging = false;
+  });
+
+  document.addEventListener("pointermove", (e) => {
+    if (Math.abs(e.clientX - startX) > DRAG_THRESHOLD ||
+        Math.abs(e.clientY - startY) > DRAG_THRESHOLD) {
+      isDragging = true;
+    }
+  });
+
+  /* =========================
+     TAP → TOGGLE PLAY/STOP
+  ========================= */
+  document.addEventListener("pointerup", function(e){
+
+    if (isDragging) return;
+
+    const sel = window.getSelection();
+    if (sel && !sel.isCollapsed) return;
+
+    const p = e.target.closest(".question-text p, #quizSections p");
+    if (!p) return;
+
+    if (e.target.closest("button, input, label")) return;
+
+    const rect = p.getBoundingClientRect();
+
+    const isRightZone = e.clientX > rect.right - X_THRESHOLD;
+    const isBottomZone = e.clientY > rect.bottom - Y_THRESHOLD;
+
+    if (!(isRightZone && isBottomZone)) return;
+
+    // =========================
+    // 🔥 TOGGLE LOGIC
+    // =========================
+
+    if (synth.speaking) {
+      // STOP
+      synth.cancel();
+      fadeHighlight();
+      return;
+    }
+
+    // START (fresh)
+    setHighlight(p);
+    placeCursorAtStart(p);
+
+    setTimeout(() => {
+      if (startBtn) startBtn.click();
+    }, 40);
+
+  });
+
+  /* =========================
+     AUTO FADE WHEN SPEECH ENDS
+  ========================= */
+  const originalSpeak = synth.speak.bind(synth);
+
+  synth.speak = function(utterance) {
+
+    utterance.addEventListener("end", () => {
+      fadeHighlight();
+    });
+
+    return originalSpeak(utterance);
+  };
+
+})();
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<script>
+(function () {
+
+  const synth = window.speechSynthesis;
+  const startBtn = document.getElementById("startBtn");
+  if (!startBtn) return;
+
+  // -------------------------
+  // CREATE BOTTOM BUTTON
+  // -------------------------
+  const proxyBtn = document.createElement("button");
+  document.body.appendChild(proxyBtn);
+
+  // -------------------------
+  // DETECT VISIBILITY
+  // -------------------------
+  function isVisible(el) {
+    if (!el) return false;
+
+    const rect = el.getBoundingClientRect();
+
+    return (
+      rect.width > 0 &&
+      rect.height > 0 &&
+      rect.top < window.innerHeight &&
+      rect.bottom > 0
+    );
+  }
+
+  // -------------------------
+  // SYNC LABEL
+  // -------------------------
+  function syncLabel() {
+    const topLabel = startBtn.textContent?.trim() || "Start";
+    proxyBtn.textContent = topLabel;
+  }
+
+  // -------------------------
+  // 🔥 KEYBOARD-AWARE POSITIONING
+  // -------------------------
+  function adjustForKeyboard() {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const keyboardOffset =
+      window.innerHeight - vv.height - vv.offsetTop;
+
+    proxyBtn.style.transform =
+      `translateY(-${Math.max(0, keyboardOffset)}px)`;
+  }
+
+  // -------------------------
+  // 🔥 SYNC STYLES
+  // -------------------------
+  function syncStyles() {
+    const cs = window.getComputedStyle(startBtn);
+
+    Object.assign(proxyBtn.style, {
+      position: "fixed",
+      bottom: "20px",
+      left: "20px",
+      zIndex: 999999,
+      padding: "10px 14px",
+      borderRadius: "6px",
+      border: cs.border,
+      background: cs.backgroundColor,
+      color: cs.color,
+      fontSize: cs.fontSize,
+      fontFamily: cs.fontFamily,
+      fontWeight: cs.fontWeight,
+      cursor: "pointer",
+      boxShadow: "0 4px 8px rgba(0,0,0,0.5)",
+      userSelect: "none",
+
+      // 🔥 important for smooth movement
+      willChange: "transform",
+      transition: "transform 0.12s ease-out"
+    });
+  }
+
+  // -------------------------
+  // MAIN CLICK
+  // -------------------------
+  proxyBtn.addEventListener("click", () => {
+    startBtn.click();
+  });
+
+  // -------------------------
+  // KEEP IN SYNC
+  // -------------------------
+  const observer = new MutationObserver(() => {
+    syncLabel();
+    syncStyles();
+  });
+
+  observer.observe(startBtn, {
+    subtree: true,
+    childList: true,
+    characterData: true
+  });
+
+  setInterval(() => {
+    syncLabel();
+    syncStyles();
+  }, 300);
+
+  // -------------------------
+  // 🔥 KEYBOARD EVENTS
+  // -------------------------
+  const vv = window.visualViewport;
+
+  if (vv) {
+    vv.addEventListener("resize", adjustForKeyboard);
+    vv.addEventListener("scroll", adjustForKeyboard);
+  }
+
+  // -------------------------
+  // INIT
+  // -------------------------
+  syncLabel();
+  syncStyles();
+  adjustForKeyboard();
+
+})();
+</script>
+
+
+<script>
+(function(){
+
+const RAW_TEXT = `
+Open Section Content 
+1. Click blue buttons to open sections.
+
+---
+
+Reader Tools
+
+1. Highlight - Select text and click to highlight.
+2. Click again to remove highlight.
+3. Copy - Select text and click to copy.
+4. Click Close to exit.
+
+---
+
+Quiz
+
+1. Enter Name and ID.
+2. Select best answer.
+3. Click Submit to see score.
+4. Click Close to exit.
+`;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("instructionsBtn");
+  if (!btn) return;
+
+  // create isolated modal ONCE
+  let modal = document.getElementById("info-instructions-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "info-instructions-modal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      background: "rgba(0,0,0,0.6)",
+      display: "none",
+      zIndex: "999999",
+      padding: "40px",
+      boxSizing: "border-box"
+    });
+
+modal.innerHTML = `
+  <div style="
+    max-width:700px;
+    margin:0 auto;
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    position:relative;
+    max-height:80vh;
+    overflow:auto;
+    font-family:inherit;
+    box-sizing:border-box;
+  ">
+
+<button id="close-instructions-modal" class="modal-close-btn">✕</button>
+
+    <pre style="
+      white-space:pre-wrap;
+      margin:0;
+      padding-top:10px;
+      overflow-wrap:break-word;
+      word-break:break-word;
+    ">${RAW_TEXT}</pre>
+
+  </div>
+`;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#close-instructions-modal").onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+});
+
+})();
+</script>
+
+<script>
+(function(){
+
+const RAW_TEXT = `
+Comprehensive reading strategy checklist
+
+1. Cut texts into small pieces.
+2. Collect context clues.
+3. Reread when lost.
+4. Scan titles and images.
+5. Identify known/unknown words.
+6. Use background knowledge.
+7. Break down word parts.
+8. Look up vocabulary.
+9. Identify signal words.
+`;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("strategiesBtn");
+  if (!btn) return;
+
+  let modal = document.getElementById("info-strategies-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "info-strategies-modal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      background: "rgba(0,0,0,0.6)",
+      display: "none",
+      zIndex: "999999",
+      padding: "40px",
+      boxSizing: "border-box"
+    });
+
+    modal.innerHTML = `
+      <div style="
+        max-width:700px;
+        margin:0 auto;
+        background:#fff;
+        padding:20px;
+        border-radius:10px;
+        position:relative;
+        max-height:80vh;
+        overflow:auto;
+        font-family:inherit;
+      ">
+
+<button id="close-strategies-modal" class="modal-close-btn">✕</button>
+
+        <pre style="white-space:pre-wrap;margin:0;">${RAW_TEXT}</pre>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#close-strategies-modal").onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+});
+
+})();
+</script>
+
+<script>
+(function(){
+
+const RAW_TEXT = `
+Common Signal Word Categories and Examples
+
+• Time ⏰: words that tell when something happens
+
+on, at, in, before, after, since, until, during, for, now, yesterday, today, tomorrow, later, then, when, while, once
+
+• Addition ➕: words that add ideas together
+
+and, also, too, with, plus, as well as, not only...but also, both...and
+
+• Cause / Effect 🔗: words that show a reason or result
+
+because, so, since, because of, due to, as a result, therefore, that’s why
+
+• Comparison / Similarity / Difference ⚖️: words that compare things
+
+like, as, as...as, than, similar to, different from, more than, less than, the most, just as...so, whereas, in contrast to
+
+• Contrast / Opposition 🎭: words that show differences
+
+but, although, though, even though, however, yet, still, despite, instead, whereas, while, on the other hand
+
+• Frequency 〰️: words that tell how often something happens
+
+always, usually, often, sometimes, occasionally, rarely, never, every day, once a week, hardly ever, from time to time
+
+• Possibility / Certainty 🎲: words that show how possible or sure something is
+
+maybe, probably, possibly, must, might, may, could, can, definitely, certainly
+
+• Advice / Obligation / Permission ☝️: words that tell rules or give guidance
+
+must, must not, have to, don’t have to, should, ought to, had better, can, cannot, may, could
+
+• Manner 🎭: words that tell how something is done
+
+quickly, slowly, carefully, easily, well, badly, with, by, in a...way, as
+
+• Place / Location 📍: words that tell where something is
+
+in, on, at, under, above, between, near, next to, here, there, everywhere, anywhere
+
+• Condition 🌧️: words that show something depends on something else
+
+if, unless, in case, on condition that
+
+• Emphasis / Focus 🎯: words that make something stronger or more important
+
+only, just, even, especially, mainly, particularly
+
+• Questions (Interrogatives) ❓: words used to ask questions
+
+how, when, where, why
+
+• Relative Words 👨‍👩‍👧‍👦: words that connect ideas about time, place, reason, or manner
+
+when, where, why, how
+
+• Direction / Movement 🧭: words that show movement or direction
+
+to, from, toward, away from, up, down, forward, back
+
+• Affirmative and Negative ✔️❌: words that show yes or no
+
+yes, no
+`;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("signalwordsBtn");
+  if (!btn) return;
+
+  let modal = document.getElementById("info-signalwords-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "info-signalwords-modal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      background: "rgba(0,0,0,0.6)",
+      display: "none",
+      zIndex: "999999",
+      padding: "40px",
+      boxSizing: "border-box"
+    });
+
+    modal.innerHTML = `
+      <div style="
+        max-width:700px;
+        margin:0 auto;
+        background:#fff;
+        padding:20px;
+        border-radius:10px;
+        position:relative;
+        max-height:80vh;
+        overflow:auto;
+        font-family:inherit;
+      ">
+
+<button id="close-signalwords-modal" class="modal-close-btn">✕</button>
+
+        <pre style="white-space:pre-wrap;margin:0;">${RAW_TEXT}</pre>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#close-signalwords-modal").onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+});
+
+})();
+</script>
+
+
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<script>
+
+function goToNextQuiz(){
+
+  const modal = document.getElementById("quizModal");
+  const container = modal?.querySelector("#quizSections");
+
+  // ✔️ TARGET THE ACTUAL BUTTON (NOT THE FUNCTION)
+  const goBtn = document.querySelector('button[onclick="goToNextQuiz()"]');
+
+  if(!container) return;
+
+  const originalLabel = goBtn?.textContent || "Go to Quiz";
+
+  function showNoQuizEmoji(){
+
+    if(!goBtn) return;
+
+    goBtn.textContent = "🚫";
+
+    setTimeout(() => {
+      goBtn.textContent = originalLabel;
+    }, 900);
+
+  }
+
+  const firstQuiz = container.querySelector(".quiz-subsection");
+
+  // ===== NO QUIZ FOUND =====
+  if(!firstQuiz){
+    showNoQuizEmoji();
+    return;
+  }
+
+  const readAloud = modal?.querySelector("#readaloudControls");
+  const chapterControls = modal?.querySelector("#chapterVerseControls");
+
+  const offset =
+    (readAloud?.offsetHeight || 0) +
+    (chapterControls?.offsetHeight || 0) +
+    20;
+
+  modal.scrollTo({
+    top: firstQuiz.offsetTop - offset,
+    behavior: "smooth"
+  });
+
+}
+
+</script>
+
+<script>
+// ===== UNIVERSAL CLOSE HANDLER (safe + no blank bug) =====
+document.addEventListener("click", (e) => {
+
+  const closeBtn = e.target.closest(
+    ".quiz-close, .modal-close, #closeModalBtn"
+  );
+
+  if (!closeBtn) return;
+
+  e.preventDefault();
+
+  // Smooth fade instead of hard visibility kill
+  document.body.style.opacity = "0";
+
+  // Close modal immediately
+  const modalRoot = document.getElementById("modalRoot");
+  if (modalRoot) modalRoot.classList.remove("active");
+
+  document.body.classList.remove("modal-open");
+
+  // Force full reload
+  setTimeout(() => {
+    location.replace(window.location.pathname);
+  }, 80);
+
+});
+</script>
+
+
+<script>
+(function () {
+
+  function showPage() {
+    const root = document.documentElement;
+    const loader = document.getElementById("loader");
+
+    // Remove old gating (safe even if unused)
+    root.classList.remove("pre-auto-open", "show-hard", "show-dynamic");
+
+    // ✅ Reveal UI (controls title via CSS)
+    root.classList.add("ui-ready");
+
+    // Force key containers visible
+    const layout = document.getElementById("layout");
+    const toc = document.getElementById("dynamicTOC");
+
+    if (layout) layout.style.display = "block";
+    if (toc) toc.style.display = "block";
+
+    // Fallback: reveal hidden content if needed
+    if (!layout && !toc) {
+      document.body.style.visibility = "visible";
+      document.querySelectorAll(".visually-hidden").forEach(el => {
+        el.style.position = "static";
+        el.style.left = "0";
+      });
+    }
+
+    // Kill loader LAST
+    if (loader) loader.remove();
+  }
+
+  // Run immediately (prevents stuck loader)
+  showPage();
+
+  // Backup safety
+  document.addEventListener("DOMContentLoaded", showPage);
+  window.addEventListener("load", showPage);
+  setTimeout(showPage, 1500);
+
+})();
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const targets = [
+    { parent:"#layout", content:"#layout", gap:-30 },
+    { parent:"#tocContainer", content:"#tocContainer", gap:-20 },
+    { parent:"#quizModal", content:"#quizModalContent", gap:-30 }
+  ];
+
+  const copyrightHTML = `
+    <section class="copyrightSection">
+
+      <!-- 10px invisible space ABOVE copyright -->
+      <div class="spacer spacer-top"></div>
+
+      <div class="footer-note copyright">
+        © <span class="auto-year"></span> Perfectly Practical English™. All rights reserved.
+      </div>
+
+      <div id="visitor-count" class="visitor-count">
+        Visits: loading...
+      </div>
+
+      <!-- 30px invisible space BELOW visits -->
+      <div class="spacer spacer-bottom"></div>
+
+
+    </section>
+  `;
+
+  function insertCopyright(parent){
+    if (!parent.querySelector(":scope > .copyrightSection")) {
+      parent.insertAdjacentHTML("beforeend", copyrightHTML);
+    }
+  }
+
+  function adjust(parent, content, desiredGap){
+
+    const copyright = parent.querySelector(".copyrightSection");
+    const last = content.lastElementChild;
+
+    if (!copyright || !last) return;
+
+    const lastBottom = last.getBoundingClientRect().bottom;
+    const copyTop = copyright.getBoundingClientRect().top;
+
+    const currentGap = copyTop - lastBottom;
+    const adjust = currentGap - desiredGap;
+
+    const extraOffset = 5; // try 5–10px
+
+copyright.style.marginTop = (-adjust + extraOffset) + "px";
+  }
+
+  async function updateVisitorCount() {
+
+    const namespace = "PerfectlyPracticalEnglish";
+    const key = "homepage";
+
+    const isOwner =
+      localStorage.getItem("isOwner") === "true";
+
+    const isLocal =
+      location.hostname === "localhost" ||
+      location.hostname === "127.0.0.1";
+
+    const alreadyCounted =
+      sessionStorage.getItem("counted");
+
+    let data;
+
+    try {
+
+      if (!isOwner && !isLocal && !alreadyCounted) {
+
+        data = await fetch(
+          `https://api.countapi.xyz/hit/${namespace}/${key}`
+        ).then(r => r.json());
+
+        sessionStorage.setItem("counted", "true");
+
+      } else {
+
+        data = await fetch(
+          `https://api.countapi.xyz/get/${namespace}/${key}`
+        ).then(r => r.json());
+
+      }
+
+      document.querySelectorAll("#visitor-count").forEach(el => {
+        el.textContent = `Total: ${data.value} visits`;
+      });
+
+    } catch (err) {
+
+      console.error("Visitor counter failed:", err);
+
+      document.querySelectorAll("#visitor-count").forEach(el => {
+        el.textContent = "Visits unavailable";
+      });
+
+    }
+
+  }
+
+  function update(){
+
+    targets.forEach(t => {
+
+      const parent = document.querySelector(t.parent);
+      const content = document.querySelector(t.content);
+
+      if (!parent || !content) return;
+
+      insertCopyright(parent);
+      adjust(parent, content, t.gap);
+
+    });
+
+  }
+
+  // Set current year
+  document.querySelectorAll(".auto-year").forEach(el => {
+    el.textContent = new Date().getFullYear();
+  });
+
+  update();
+  updateVisitorCount();
+
+  window.addEventListener("resize", update);
+
+});
+</script>
+
+<script>
+function fixModalScrollRoom() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+
+  const keyboardHeight =
+    window.innerHeight - vv.height - vv.offsetTop;
+
+  const modal = document.getElementById("quizModal");
+  if (!modal) return;
+
+  modal.style.height =
+    `calc(100dvh - ${keyboardHeight}px)`;
+}
+
+window.visualViewport?.addEventListener("resize", fixModalScrollRoom);
+window.visualViewport?.addEventListener("scroll", fixModalScrollRoom);
+window.addEventListener("resize", fixModalScrollRoom);
+
+fixModalScrollRoom();
+
+</script>
+
+<!-- SUPABASE LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const supabaseClient = window.supabase?.createClient(
+  'https://etwwriloppklhhkmswpr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+);
+
+if (!supabaseClient) {
+  console.error("❌ Supabase failed to initialize");
+}
+
+let lastUploadedScore = null;
+
+window.saveResult = async function saveResult(text) {
+
+  if (!supabaseClient) {
+    console.error("❌ No Supabase client");
+    return;
+  }
+
+  // ======================
+  // NORMALIZE INPUT
+  // ======================
+  let cleaned;
+
+  try {
+    cleaned = (typeof text === "string")
+      ? text
+      : JSON.stringify(text);
+
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+
+  } catch (err) {
+    console.error("❌ Normalize error:", err);
+    return;
+  }
+
+  if (!cleaned) {
+    console.error("❌ Empty value blocked");
+    return;
+  }
+
+  if (cleaned === lastUploadedScore) {
+    console.log("⚠️ Duplicate blocked");
+    return;
+  }
+
+  lastUploadedScore = cleaned;
+
+  console.log("📤 INSERTING INTO scoreboard_raw:", cleaned);
+
+  const { data, error } = await supabaseClient
+    .from("scoreboard_raw")
+    .insert([
+      { result_text: cleaned }
+    ])
+    .select();
+
+  if (error) {
+    console.error("❌ INSERT FAILED FULL ERROR:", error);
+    return;
+  }
+
+  console.log("✅ INSERT SUCCESS:", data);
+};
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+

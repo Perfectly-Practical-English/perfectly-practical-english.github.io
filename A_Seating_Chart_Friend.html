@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Seating Chart</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #dbeafe;
+
+  /* keeps whole thing centered, but does NOT affect internal width */
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* =========================
+   FIX: HARD LOCK LAYOUT WIDTH
+   row = 792px + container padding (14*2)
+   total = 820px
+========================= */
+
+.container {
+  width: fit-content;
+  display: inline-block;
+
+  background: #eef6ff;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+
+  margin: 0 auto;
+}
+
+/* TOP BAR MATCHES FULL WIDTH */
+.top-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  width: 100%;
+}
+
+/* selection box fills full width */
+.class-box {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border: 1px solid #c7ddff;
+  border-radius: 10px;
+  padding: 6px 10px;
+  background: white;
+  font-weight: 600;
+  box-sizing: border-box;
+}
+
+.class-box button {
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 8px;
+  background: #e0ecff;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.class-box button:hover {
+  background: #cfe3ff;
+}
+
+/* seating block locks to container */
+.seating {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+}
+
+/* each row is EXACT same width */
+.row {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+
+  width: 100%;
+  flex-wrap: nowrap;
+}
+
+/* left/right blocks fixed */
+.side {
+  display: grid;
+  grid-template-columns: repeat(5, 70px);
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+/* aisle fixed */
+.aisle {
+  width: 24px;
+  flex: 0 0 auto;
+}
+
+/* seat locked */
+.seat {
+  width: 70px;
+  height: 44px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  text-align: center;
+  padding: 3px;
+  overflow: hidden;
+  line-height: 1.05;
+  cursor: grab;
+  user-select: none;
+  transition: background 0.2s;
+
+  flex: 0 0 auto;
+  box-sizing: border-box;
+}
+
+/* empty seat */
+.seat.empty {
+  background: transparent;
+  border: 1px dashed #b6c7dd;
+}
+
+/* COLORS */
+.l0 { background: #cfe3ff; }
+.l1 { background: #b9d6ff; }
+.l2 { background: #9fc6ff; }
+.l3 { background: #7fb2ff; }
+.l4 { background: #5f9bff; }
+.l5 { background: #3f82ff; }
+
+/* FLOOR MATCHES WIDTH EXACTLY */
+.floor {
+  margin-top: 14px;
+  min-height: 90px;
+  border: 1px dashed #b6c7dd;
+  border-radius: 10px;
+  padding: 10px;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: flex-start;
+
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+#randomizeBtn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 12px;
+
+  padding: 12px 16px;
+  font-weight: 700;
+  cursor: pointer;
+
+  box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+  z-index: 9999;
+}
+
+#randomizeBtn:hover {
+  background: #dc2626;
+}
+
+.button-bar {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+
+  display: flex;
+  gap: 10px;
+
+  z-index: 9999;
+}
+
+.button-bar a,
+.button-bar button {
+  background: #ef4444;
+  color: white;
+  border: none;
+  border-radius: 12px;
+
+  padding: 12px 16px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+
+  box-shadow: 0 6px 14px rgba(0,0,0,0.2);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.button-bar a:hover,
+.button-bar button:hover {
+  background: #dc2626;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="top-bar">
+    <div class="class-box">
+      <button onclick="prevClass()">▲</button>
+      <div id="classLabel">Loading...</div>
+      <button onclick="nextClass()">▼</button>
+    </div>
+  </div>
+
+  <div class="seating" id="seating"></div>
+
+</div>
+
+<script src="FocusOverlay.js"></script>
+
+<script>
+
+/* =========================
+   RAW DATA
+========================= */
+
+const RAW_TEXT = `
+
+~ Select a Class
+
+~ 11.1 
+Seat 1. 11.1 
+Seat 2. 11.1 43220 Pannawit Jaroenkiattrai Ongsa
+Seat 3. 11.1 42956 !Warawut Virunchaichot Uma
+Seat 4. 11.1 43163 Theerapith Asanasen Prin
+Seat 5. 11.1 55555 Teacher David 
+Seat 6. 11.1 43173 Thannakorn Sakunee Bose
+Seat 7. 11.1 42979 !Kallapapruek Eiamrattanachai Akio
+Seat 8. 11.1 42995 Soraphat Pumavong Neua
+Seat 9. 11.1 
+Seat 10. 11.1 
+Seat 11. 11.1 42978 Suphajak Karnchanasai Jinan
+Seat 12. 11.1 43015 Nacharot Srisinlapaudom Beta
+Seat 13. 11.1 42889 Thanawat Thawatchaimongkol Brook
+Seat 14. 11.1 43226 Chatchanok Low Gun
+Seat 15. 11.1 55556 Teacher David 
+Seat 16. 11.1 43150 !Pattaradorn Nattapobpak Barry
+Seat 17. 11.1 43017 Paphawin Liu Forwin
+Seat 18. 11.1 42974 Phawat Chartprakarn Concept
+Seat 19. 11.1 43217 Khemmanat Manosittisak Phuping
+~ 13.2 
+Seat 1. 13.2 
+Seat 2. 13.2 42970 Suthimont Arunsawatwong Share
+Seat 3. 13.2 43049 Ingkrit Tipwataksorn lngkrit
+Seat 4. 13.2 43427 !Pawarut Praneeprachacho Paul
+Seat 5. 13.2 55555 Teacher David 
+Seat 6. 13.2 43251 Natthapakorn Parksuk Marwin
+Seat 7. 13.2 42929 Katanyu Pengsomya Eden
+Seat 8. 13.2 42981 Korravit Vithayasai Judge
+Seat 9. 13.2 
+Seat 10. 13.2 
+Seat 11. 13.2 43071 Khanaphot Pongpaisarnsri Data
+Seat 12. 13.2 43255 Phurit Phatiwet Phu
+Seat 13. 13.2 43061 Pachara Wongwaivisan Seppe
+Seat 14. 13.2 43038 Phoomipat Natkhaew Phoom
+Seat 15. 13.2 55555 Teacher David 
+Seat 16. 13.2 43224 Kannaphat Mengamphan Khun
+Seat 17. 13.2 42997 Machat Thanacharoenpipat Oun
+Seat 18. 13.2 42888 Patiphan Khakhlong Nano
+Seat 19. 13.2 43182 Napol Uachoktaweewat Nop
+~ 14.1 
+Seat 1. 14.1 
+Seat 2. 14.1  44563 Chayangkoon Champati Bm
+Seat 3. 14.1  45165 Yuttanin Wongprapairoj OD
+Seat 4. 14.1  45875 !Photsawee Tarapoom Pheem
+Seat 5. 14.1  55555 Teacher David 
+Seat 6. 14.1  44589 !Punyawee Jitracha Owen
+Seat 7. 14.1  42998 Naruchote
+Seat 8. 14.1  44558 Nonthapat Phuangla-Ong Bush
+Seat 9. 14.1  
+Seat 10. 14.1  
+Seat 11. 14.1  46491 !Phurarit Raktontrakoon Phu
+Seat 12. 14.1  43032 Kronpanod Eiamaramsi Puri
+Seat 13. 14.1  42973 !Krittanart Khwanmimit Namwan…
+Seat 14. 14.1  42999 !Phutthiphat Amatavet Winning
+Seat 15. 14.1  55555 Teacher David 
+Seat 16. 14.1  45892 !Jommanut Thongprajuk Wayu Wayu
+Seat 17. 14.1  43056 !Dhatsawitt Bantivorat Al Ing
+Seat 18. 14.1  43023 Boonraksa Kaosaiyanun Boon
+Seat 19. 14.1 42983 Natthanan Yingrugchai Tim
+Seat 20. 14.1 43034 !Phudit Pairojkulmanee Daso
+~ 15.3 
+Seat 1. 15.3 
+Seat 2. 15.3 43162 !Akkravich Maiphet Shin
+Seat 3. 15.3 47086 !Worawit Suwanapichon Plakao
+Seat 4. 15.3 47035 !Naravich Segkhaphant Neo
+Seat 5. 15.3 55554 Teacher David 
+Seat 6. 15.3 43172 Thanakorn Taychathanyakul JayJay
+Seat 7. 15.3 47074 !Archawin Piriyapinyophong Namo
+Seat 8. 15.3 43261 !Panyarat Boonteekul Pam mer
+Seat 9. 15.3 46948 Thanakrit Yeesoonpan PJ
+Seat 10. 15.3 
+Seat 11. 15.3 43225 !Punnawat Maisopha PunPun
+Seat 12. 15.3 43245 !Puri Kharuehapornpong Puki
+Seat 13. 15.3 46958 Phumiphat Thaweeangkap Pume
+Seat 14. 15.3 43265 Chananon Kumueang Mono
+Seat 15. 15.3 55554 Teacher David 
+Seat 16. 15.3 43249 Api Cha Sombatpinyo Smile
+Seat 17. 15.3 47064 !Preedipat Niyomcharoenpian Thank
+Seat 18. 15.3 43262 Nakarin Kongsoontorn Kin
+Seat 19. 15.3 42998 Nanaruchote Kittithanawat Frank
+Seat 20. 15.3 46953 Rachchavich Duangchai Great
+~ 16.2 
+Seat 1.	16.2	
+Seat 2.	16.2 43144 Setthawut Kittiudom Refill
+Seat 3.	 16.2 43045 Vachirasak Choktaweesit Get
+Seat 4.	 16.2 43113 !Koonwich Kitjanawanchai Cooper
+Seat 5.	 16.2 46939 !Warat Pattanapanichakul Putter
+Seat 6.	 16.2 43063 Pakornpat Phongraksa Captain
+Seat 7.	 16.2 46930 !Nakhun Prukboonyaprat Nakhun
+Seat 8.	 16.2 46923 Pannatat Akkarayaphakphon Meen
+Seat 9.	  16.2 47124 Jadechula Pattanaphechakun Nae-Non
+Seat 10. 16.2 
+Seat 11. 16.2 43093 
+Seat 12. 16.2 
+Seat 13. 16.2 46496 !Theeraphat Chunphonehisan Tata
+Seat 14. 16.2 46923 Panpuris Teankamonsupachod Tee
+Seat 15. 16.2 55555 Teacher David
+Seat 16. 16.2 43128 Nutphalod
+Seat 17. 16.2 46934 Boonpipob Mojanakul Nava
+Seat 18. 16.2 43055 Chutipan Sanguanraksak Pun
+Seat 19. 16.2 46924 Thanakrit Jongrak Toon
+Seat 20. 16.2 43143 !Jirayu Chivamavin Paul
+
+`;
+
+/* =========================
+   PARSE (UNCHANGED)
+========================= */
+
+function parse(raw) {
+  const blocks = raw.split(/(?=~)/g);
+  const data = {};
+
+  for (let b of blocks) {
+    b = b.trim();
+    if (!b.startsWith("~")) continue;
+
+    const lines = b.split("\n");
+    const className = lines[0].replace("~", "");
+
+    const students = [];
+
+    for (let i = 1; i < lines.length; i++) {
+      const line = lines[i].trim();
+
+      if (!line) {
+        students.push(null);
+        continue;
+      }
+
+      const match = line.match(/^Seat\s+\d+\.\s+\S+\s+(\d+)\s+(.+)$/);
+      if (!match) {
+        students.push(null);
+        continue;
+      }
+
+      students.push({
+        shirtNumber: match[1],
+        name: match[2].replace(".jpg", "").trim()
+      });
+    }
+
+    data[className] = students;
+  }
+
+  return data;
+}
+
+const classData = parse(RAW_TEXT);
+const classList = Object.keys(classData);
+let currentIndex = 0;
+
+const seatState = {};
+
+function keyOf(cls, index) {
+  return `${cls}:${index}`;
+}
+
+function getLevel(cls, index) {
+  return seatState[keyOf(cls, index)]?.level ?? 0;
+}
+
+function setLevel(cls, index) {
+  const k = keyOf(cls, index);
+  if (!seatState[k]) seatState[k] = { level: 0 };
+  seatState[k].level = (seatState[k].level + 1) % 6;
+}
+
+let dragItem = null;
+
+function getFloor(cls) {
+  if (!classData[cls]._floor) classData[cls]._floor = [];
+  return classData[cls]._floor;
+}
+
+function updateLabel() {
+  document.getElementById("classLabel").textContent =
+    classList[currentIndex] || "No class";
+}
+
+function prevClass() {
+  currentIndex = (currentIndex - 1 + classList.length) % classList.length;
+  render();
+}
+
+function nextClass() {
+  currentIndex = (currentIndex + 1) % classList.length;
+  render();
+}
+
+function render() {
+  updateLabel();
+
+  const seating = document.getElementById("seating");
+  seating.innerHTML = "";
+
+  const cls = classList[currentIndex];
+  const students = classData[cls] || [];
+
+  seating.appendChild(buildRow(students, cls, 0));
+  seating.appendChild(buildRow(students, cls, 10));
+  seating.appendChild(buildFloor(cls));
+}
+
+function buildRow(students, cls, startIndex) {
+  const row = document.createElement("div");
+  row.className = "row";
+
+  const left = document.createElement("div");
+  left.className = "side";
+
+  const right = document.createElement("div");
+  right.className = "side";
+
+  const aisle = document.createElement("div");
+  aisle.className = "aisle";
+
+  for (let i = 4; i >= 0; i--) {
+    const idx = startIndex + i;
+    right.appendChild(makeSeat(students[idx], cls, idx));
+  }
+
+  for (let i = 9; i >= 5; i--) {
+    const idx = startIndex + i;
+    left.appendChild(makeSeat(students[idx], cls, idx));
+  }
+
+  row.appendChild(left);
+  row.appendChild(aisle);
+  row.appendChild(right);
+
+  return row;
+}
+
+function buildFloor(cls) {
+  const floor = document.createElement("div");
+  floor.className = "floor";
+
+  floor.addEventListener("dragover", e => e.preventDefault());
+
+  floor.addEventListener("drop", e => {
+    e.preventDefault();
+
+    const students = classData[cls];
+    const f = getFloor(cls);
+
+    if (!dragItem) return;
+
+    if (dragItem.type === "seat") {
+      const moved = students[dragItem.index];
+      if (!moved) return;
+
+      students[dragItem.index] = null;
+      f.push(moved);
+    }
+
+    render();
+  });
+
+  const f = getFloor(cls);
+
+  f.forEach((s, i) => {
+    floor.appendChild(makeFloorSeat(s, cls, i));
+  });
+
+  return floor;
+}
+
+function makeSeat(student, cls, index) {
+  const div = document.createElement("div");
+  div.className = "seat";
+
+  const level = getLevel(cls, index);
+  div.classList.add("l" + level);
+
+  div.draggable = true;
+
+  div.addEventListener("click", () => {
+    setLevel(cls, index);
+    render();
+  });
+
+  div.addEventListener("dragstart", () => {
+    dragItem = { type: "seat", index, cls };
+  });
+
+  div.addEventListener("dragover", e => e.preventDefault());
+
+  div.addEventListener("drop", e => {
+    e.preventDefault();
+
+    const currentCls = classList[currentIndex];
+    const students = classData[currentCls];
+
+    if (!dragItem) return;
+
+    if (dragItem.type === "floor") {
+      const floorList = getFloor(dragItem.cls);
+      const moved = floorList[dragItem.floorIndex];
+      if (!moved) return;
+
+      floorList.splice(dragItem.floorIndex, 1);
+
+      const target = students[index];
+
+      if (target) {
+        getFloor(currentCls).push(target);
+      }
+
+      students[index] = moved;
+      dragItem = null;
+      render();
+      return;
+    }
+
+    const a = dragItem.index;
+    const b = index;
+
+    const temp = students[a];
+    students[a] = students[b];
+    students[b] = temp;
+
+    render();
+  });
+
+  if (!student) {
+    div.classList.add("empty");
+    return div;
+  }
+
+  div.innerHTML = `
+    <div style="font-weight:700">${student.shirtNumber}</div>
+    <div>${student.name}</div>
+  `;
+
+  return div;
+}
+
+function makeFloorSeat(student, cls, floorIndex) {
+  const div = document.createElement("div");
+  div.className = "seat l0";
+
+  div.draggable = true;
+
+  div.addEventListener("dragstart", () => {
+    dragItem = { type: "floor", floorIndex, cls };
+  });
+
+  div.addEventListener("dragover", e => e.preventDefault());
+
+  div.addEventListener("drop", e => {
+    e.preventDefault();
+
+    const students = classData[cls];
+    const f = getFloor(cls);
+
+    if (!dragItem) return;
+
+    if (dragItem.type === "floor") {
+      [f[dragItem.floorIndex], f[floorIndex]] =
+      [f[floorIndex], f[dragItem.floorIndex]];
+    }
+
+    render();
+  });
+
+  div.innerHTML = `
+    <div style="font-weight:700">${student.shirtNumber}</div>
+    <div>${student.name}</div>
+  `;
+
+  return div;
+}
+
+updateLabel();
+render();
+
+</script>
+
+<script>
+
+function randomizeSeats() {
+  const cls = classList[currentIndex];
+  const students = classData[cls];
+
+  if (!students) return;
+
+  const LOCK_5 = 4;
+  const LOCK_15 = 14;
+
+  // keep locked seats
+  const locked5 = students[LOCK_5];
+  const locked15 = students[LOCK_15];
+
+  // collect all movable students
+  const pool = [];
+
+  for (let i = 0; i < students.length; i++) {
+    if (i === LOCK_5 || i === LOCK_15) continue;
+    if (students[i]) pool.push(students[i]);
+  }
+
+  // shuffle pool
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+
+  // rebuild array
+  const rebuilt = new Array(students.length).fill(null);
+
+  let p = 0;
+
+  for (let i = 0; i < rebuilt.length; i++) {
+    if (i === LOCK_5) {
+      rebuilt[i] = locked5;
+    } else if (i === LOCK_15) {
+      rebuilt[i] = locked15;
+    } else {
+      rebuilt[i] = pool[p++] || null;
+    }
+  }
+
+  // replace + force render
+  classData[cls] = rebuilt;
+  delete classData[cls]._floor;
+  dragItem = null;
+
+  render();
+}
+</script>
+
+
+<div class="button-bar">
+
+  <a href="A_Seating_Chart_Optimum.html">
+    OPTIMUM
+  </a>
+
+  <a href="A_Seating_Chart_Friend.html">
+    FRIEND
+  </a>
+
+  <a href="A_Seating_Chart_Group.html">
+    GROUP
+  </a>
+
+  <a href="A_Seating_Chart_Roll_Sheet_Order.html">
+    ROLL SHEET ORDER
+  </a>
+
+  <button onclick="randomizeSeats()">
+    RANDOMIZE
+  </button>
+
+</div>
+
+</body>
+</html>

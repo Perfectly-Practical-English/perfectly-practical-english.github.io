@@ -1,0 +1,8575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PerfectlyPracticalEnglish.netlify.app</title>
+
+<!-- Prevent flash before mode decision -->
+<script>
+document.documentElement.classList.add("pre-auto-open");
+</script>
+
+<script>
+
+  // ===== CORE SITE SETTINGS =====
+
+  // TOC MODE: "hard" | "dynamic"
+  window.TOC_MODE = "dynamic";
+
+  // Where all close buttons return
+  window.HOME_PAGE = "Bible_WEB_Version.html";
+
+  // always defined
+  window.IS_SINGLE_SECTION = false;
+
+  const root = document.documentElement;
+
+  // ===== APPLY TOC MODE =====
+
+  function applyTOCMode() {
+
+    root.classList.remove("show-hard", "show-dynamic");
+
+    if (window.TOC_MODE === "hard") {
+      root.classList.add("show-hard");
+    }
+
+    if (window.TOC_MODE === "dynamic") {
+      root.classList.add("show-dynamic");
+    }
+
+  }
+
+  applyTOCMode();
+
+
+  // ===== PAGE INITIALIZATION =====
+
+  window.addEventListener("load", function () {
+
+    if (
+      window.sections &&
+      Array.isArray(window.sections) &&
+      typeof window.openQuizModal === "function"
+    ) {
+
+      const sectionCount = window.sections.length;
+
+      window.IS_SINGLE_SECTION = (sectionCount === 1);
+
+      if (window.IS_SINGLE_SECTION) {
+
+        // Hide TOCs
+        root.classList.remove("show-hard", "show-dynamic");
+
+        // Auto open first section
+        if (!root.dataset.autoOpened) {
+          root.dataset.autoOpened = "1";
+          window.openQuizModal(0);
+        }
+
+      } else {
+
+        // Restore chosen TOC mode
+        applyTOCMode();
+
+      }
+
+    }
+
+    root.classList.remove("pre-auto-open");
+
+  });
+
+
+  // ===== UNIVERSAL CLOSE HANDLER =====
+
+  document.addEventListener("click", function (e) {
+
+    const closeBtn = e.target.closest(
+      ".quiz-close, .modal-close, #closeModalBtn"
+    );
+
+    if (!closeBtn) return;
+
+    e.preventDefault();
+
+    const modalRoot = document.getElementById("modalRoot");
+
+    if (modalRoot) modalRoot.classList.remove("active");
+
+    document.body.classList.remove("modal-open");
+
+    // Single-section pages return to HOME
+    if (window.IS_SINGLE_SECTION) {
+      window.location.href = window.HOME_PAGE;
+      return;
+    }
+
+    // Otherwise restore TOC state
+    applyTOCMode();
+
+  });
+
+</script>
+
+<style>
+
+/* ============================================================
+   1. FIRST PAINT / MODE GATING
+============================================================ */
+
+#layout,
+#dynamicTOC {
+  display: none;
+}
+
+/* HARD enabled */
+html.show-hard #layout {
+  display: block;
+}
+
+/* DYNAMIC enabled */
+html.show-dynamic #dynamicTOC {
+  display: block;
+}
+
+/* ============================================================
+   2. GLOBAL BASE TYPOGRAPHY
+============================================================ */
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #222;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f6fa;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Hide page until auto-open logic finishes */
+html.pre-auto-open body {
+  visibility: hidden;
+}
+
+
+h2 {
+  margin: 20px 0 10px 0;
+}
+
+h3 {
+  margin: 0 0 6px 0;
+  color: #1976d2;
+  font-size: 12px;
+}
+
+.word {
+  cursor: pointer;
+  color: inherit;
+}
+
+.word:hover {
+  background-color: rgba(26,115,232,0.2);
+}
+
+.sentence {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.highlight {
+  background-color: #ffff00;
+  color: #000000;
+}
+
+.visually-hidden {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+
+/* ============================================================
+   3. HARD TOC
+============================================================ */
+
+#layout h2 {
+  color: #2b5d84;
+  margin: 0 0 -5px 0;
+}
+
+#layout h1,
+#dynamicTOC h1 {
+  margin: 0 0 0px 0;
+  color: #2b5d84;
+}
+
+body > h1 {
+  text-align: center;
+  color: #2b5d84;
+}
+
+.index {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.index li {
+  position: relative;
+  margin-bottom: 10px;
+}
+
+.index a {
+  display: block;
+  background-color: #2b5d84;
+  color: white;
+  padding: 10px 10px 10px 15px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-size: 14px;
+  position: relative;
+}
+
+.index a:hover {
+  background-color: #1f4563;
+}
+
+.mvButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 10px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #00c000;
+  color: white;
+  font-size: 10px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 28px;
+  border: none;
+  cursor: pointer;
+  z-index: 2;
+  padding: 0;
+}
+
+.mvButton:hover {
+  background-color: #00a000;
+}
+
+.web-info1 {
+  text-align: left;
+  font-size: 10px;
+  max-width: 800px;
+  margin: 0 auto 10px auto;
+  color: #333;
+}
+
+.web-info {
+  font-size: 8px;
+  max-width: 800px;
+  margin: 0 auto 10px auto;
+  color: #333;
+}
+
+
+/* ============================================================
+   4. DYNAMIC TOC
+============================================================ */
+
+#tocButtons {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tocColumn button {
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+
+  display: block;
+  width: 100%;
+  background-color: #2b5d84;
+  color: #ffffff;
+
+  padding: 10px 10px 10px 15px;
+  border-radius: 6px;
+
+  font-size: 12px;
+  font-family: inherit;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+
+  box-sizing: border-box;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tocColumn button:hover,
+.readAloudBtn:hover {
+  background-color: #1f4563;
+}
+
+#tocContainer h3 {
+  color: #2b5d84;
+  margin-left: 20px;
+}
+
+.parsedHeader {
+  color: #2b5d84;
+  font-weight: bold;
+  margin-left: -3px;
+
+}
+
+.parsedSubheader {
+  color: #2b5d84;
+  font-weight: bold;
+  margin-top: 14px;
+  margin-bottom: 8px;
+}
+
+/* ============================================================
+   5. MV WINDOW
+============================================================ */
+
+#mvWindow {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: white;
+  z-index: 9999;
+  padding: 20px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+#mvBookName {
+  font-weight: bold;
+  margin-top: 10px;
+  margin-left: 14px;
+}
+
+#mvTextContainer {
+  padding: 8px 14px 60px;
+  box-sizing: border-box;
+}
+
+h2.chapter {
+  font-size: 16px;
+  margin-top: 1em;
+  color: #005A9E;
+}
+
+p.verse {
+  margin: 0.5em 0;
+}
+
+p.verse span.verseNum {
+  font-weight: bold;
+  margin-right: 6px;
+  color: #003B70;
+}
+
+
+/* ============================================================
+   6. MODAL ISOLATION
+============================================================ */
+
+body.modal-open {
+  overflow: hidden;
+}
+
+body.modal-open #tocRoot,
+body.modal-open #tocColLeft,
+body.modal-open #tocColRight {
+  display: none;
+}
+
+body.modal-open {
+  position: fixed;
+  width: 100%;
+}
+
+#modalRoot {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  display: none;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding-top: 20px;
+  overflow: hidden;
+  z-index: 20000;
+}
+
+#modalRoot.active {
+  display: flex;
+  flex-direction: column;  /* stack bars vertically */
+  gap: 0;                  /* remove the transparent strip */
+  background: #ffffff;     /* force pure white */
+}
+
+
+/* ============================================================
+   7. QUIZ MODAL LAYOUT
+============================================================ */
+
+#quizModal {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  max-height: 90vh;
+  margin: 0 auto;
+  padding: 0 10px 10px 10px;
+  background: #ffffff;
+  box-sizing: border-box;
+  overflow-y: auto;
+  border-radius: 8px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#quizModal h2 {
+  font-size: 12px;
+}
+
+#quizModalContent {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#quizSections {
+  width: 100%;
+  margin-left: 0;
+  padding-top: 10px;  /* Kill switch header spacing */
+  box-sizing: border-box;
+}
+
+#quizSections > * {
+  padding: 3px 0;
+  margin-bottom: 16px;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+#quizSections .section > h2 {
+  margin: 0 0 8px 0;
+  scroll-margin-top: 100px;
+}
+
+#quizSections .quiz-subsection {
+  margin: 10px 0;
+}
+
+#quizSections .quiz-subsection:first-of-type {
+  margin-top: 0;
+}
+
+#quizSections .quiz-subsection h3 {
+  margin: 0 0 8px 0;
+}
+
+#quizSections h3 {
+  scroll-margin-top: 10px;
+}
+
+.question-text {
+  margin-top: -5px;
+}
+
+.question-text h3 {
+  margin: 16px 0 8px;
+}
+
+.question-text:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.exercise-container {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.exercise p {
+  margin-bottom: 4px;
+}
+
+
+/* ============================================================
+   8. CONTROL BARS (Stacked Sticky Inside Scroll Container)
+============================================================ */
+
+/* Hidden by default */
+#chapterVerseControls,
+#readaloudControls {
+  display: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  box-sizing: border-box;
+
+  line-height: 0; /* kill inherited inline height */
+}
+
+/* Show when modal active */
+#modalRoot.active #chapterVerseControls,
+#modalRoot.active #readaloudControls {
+  display: block; /* block is safer than flex at container level */
+}
+
+/* --------------------------------------------------
+   BOTH BARS STICK (same scroll context)
+-------------------------------------------------- */
+
+#chapterVerseControls {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+#readaloudControls {
+  position: sticky;
+  top: 0;                 /* default when chapter bar hidden */
+  z-index: 39;
+  border-top: 1px solid #eee;  /* optional divider */
+}
+
+/* When chapter bar exists above it */
+#chapterVerseControls + #readaloudControls {
+  top: 36px;              /* height of chapter bar */
+}
+
+/* Keep layout behavior inside controlRow */
+#chapterVerseControls .controlRow,
+#readaloudControls .controlRow {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+#readaloudControls {
+  border-top: 1px solid #ffffff;
+  padding-top: 6px;
+}
+
+/* --------------------------------------------------
+   Buttons & Select Layout
+-------------------------------------------------- */
+
+#chapterVerseControls select,
+#chapterVerseControls button,
+#readaloudControls select,
+#readaloudControls button {
+  flex: 0 0 calc((100% - 18px) / 4);
+  max-width: calc((100% - 18px) / 4);
+  min-width: 0;
+
+  height: 36px;
+  line-height: 36px;
+
+  box-sizing: border-box;
+  font-size: 13px;
+  border-radius: 6px;
+
+  margin: 0;
+  padding: 0 10px;
+  vertical-align: middle;
+}
+
+/* Select normalization */
+#chapterVerseControls select,
+#readaloudControls select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+}
+
+/* Button alignment */
+#chapterVerseControls button,
+#readaloudControls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hide select scrollbar */
+#chapterVerseControls select::-webkit-scrollbar,
+#readaloudControls select::-webkit-scrollbar {
+  width: 0;
+}
+
+/* Readaloud wrapper safety */
+.readaloud-block,
+.readaloud-block .readaloud-buttons {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  box-sizing: border-box;
+}/* ============================================================
+   9. BUTTON SYSTEM
+============================================================ */
+
+#modalRoot button {
+  height: 36px;
+  font-size: 12px;
+  background: #2b5d84;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+#modalRoot button:hover:not(:disabled) {
+  background: #1f4563;
+}
+
+#modalRoot button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+#modalRoot button:disabled {
+  background: #8aa3b8;
+  cursor: not-allowed;
+}
+
+
+/* ============================================================
+   10. SCOREBOARD
+============================================================ */
+
+#scoreboard {
+  display: block;
+  position: sticky;
+  bottom: 0;
+
+  left: 2px;              /* ← actual visual shift (try 1px if too much) */
+
+  background: #fff;
+  padding: 10px;
+  border: 2px solid #add8e6;
+
+  width: calc(100% - 2px); /* compensate so it doesn’t overflow right */
+  box-sizing: border-box;
+
+  z-index: 10;
+}
+
+.scoreboard-main pre,
+#scoreOutput {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  display: block;
+}
+
+.scoreboard-buttons {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.scoreboard-buttons > * {
+  flex: 1 1 0;        /* equal width */
+  min-width: 0;
+  height: 36px;
+}
+
+
+
+/* ============================================================
+   11. SHARED TOC STRUCTURE CONTRACT
+============================================================ */
+
+#layout,
+#tocContainer {
+  width: 100%;
+  max-width: 360px;
+  margin: 20px auto;
+  padding: 5px 10px;
+  box-sizing: border-box;
+}
+
+.container,
+#tocButtons {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.column,
+.tocColumn {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+
+/* ============================================================
+   12. GLOBAL SCROLLBAR SUPPRESSION
+============================================================ */
+
+html,
+body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+#quizModal::-webkit-scrollbar,
+#mvWindow::-webkit-scrollbar {
+  display: none;
+}
+
+#quizModal,
+#mvWindow {
+  scrollbar-width: none;
+}
+
+
+/* Make all 4-item control rows identical */
+/* ===============================
+   FLEXIBLE CONTROL ROW SYSTEM
+================================ */
+
+.controlRow {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+/* shared styling */
+.controlRow > * {
+  min-width: 0;
+  height: 36px;
+  box-sizing: border-box;
+  font-size: 13px;
+  border-radius: 6px;
+  padding: 0 10px;
+}
+
+/* Chapter + Verse selects wider */
+.controlRow select:nth-child(1),
+.controlRow select:nth-child(2) {
+  flex: 1.3 1 0;
+}
+
+/* Buttons slightly smaller */
+.controlRow button {
+  flex: 0.8 1 0;
+}
+/* ===============================
+   NAME / ID / SUBMIT / CLOSE ROW
+================================ */
+
+/* each row */
+.top-controls {
+  display: flex;
+  gap: 6px;              /* horizontal spacing only */
+  margin: 0;             /* remove transparent margin */
+  width: 100%;
+}
+
+.top-controls > * {
+  flex: 1 1 0;        /* equal width for all 4 */
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 13px;
+}
+
+.top-controls input {
+  border: 1px solid #ccc;
+}
+
+.top-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copyrightSection {
+  font-size: 9px;
+  opacity: 0.7;
+
+  height: 26px;          /* slightly smaller to raise it */
+  padding: 0 6px;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;   /* vertical centering */
+  justify-content: flex-start;
+
+  margin-top: 5px;     /* moves it UP 10px */
+  padding-left: 1px;    /* moves it RIGHT 5px (6 + 5) */
+}
+
+
+.quiz-scoreboard {
+  width: 100%;
+  box-sizing: border-box;
+
+  margin-bottom: 12px;
+  padding: 6px;
+
+  border: 1px solid #9aaed1;
+  border-radius: 6px;
+  background: #f9f9f9;
+
+  font-family: monospace;
+  font-size: 12px;
+}
+
+
+/* vertical stacking container */
+
+/* Make only Chapter & Verse text smaller */
+#chapterVerseControls select {
+  font-size: 10px;   /* adjust to 9px, 11px, etc. */
+}
+
+.reading-active {
+  background-color: yellow !important;
+}
+
+
+</style>
+</head>
+<body>
+
+
+<div id="rawTextSource" class="visually-hidden">
+
+
+~ET Grammar 1~
+
+Quiz
+
+?120-0320-Q10: Oh dear, I can see ........ That must be the book
+I haven't given back.
+them
+it
+him
+
+?108-0308-Q8: You like milk in your tea .......
+can you?
+have you?
+don't you?
+did you?
+
+?48-0068-Q8: She always said that when she grew up she
+wanted to be ........
+doctor
+a doctor
+the doctor
+
+?68-0088-Q8: ....... by air because the cost of flying is very high.
+I don't often travel
+I'm not often travelling
+I'll not often travelling
+
+?105-0305-Q5: You wouldn't want me to do that .......
+would you?
+will you?
+did you?
+do you?
+
+?135-0335-Q5: Icarus shocked his father with an idea that he
+was going to try out on ........
+himself
+themselves
+herself
+
+?164-0404-Q4: The milk goes ....... the refrigerator.
+on
+in
+of
+at
+
+?47-0067-Q7: The most interesting thing about ....... is all the
+roads that they built in Britain.
+Romans
+a Romans
+the Romans
+
+?38-0058-Q8: I ....... help you with your shopping because you
+have a lot of bags.
+ought
+ought to
+thought
+
+?12-0032-Q2: They wanted their daughter to improve her
+social skills, so they sent her to Switzerland to ............ school.
+ends
+ending
+finish
+finishing
+
+?39-0059-Q9: When will you ....... come and see us in our new
+house?
+can
+be able to
+must
+
+?132-0332-Q2: His father always wanted his children to look
+after ....... and do what they wanted.
+themselves
+ourselves
+herself
+
+?42-0062-Q2: In ....... end we decided not to go to the cinema
+but to watch television.
+the
+this
+an
+
+?197-0457-Q7: He is the heaviest and I am the ........
+lightest
+lighter
+light
+heavier
+
+?126-0326-Q6: The car to ....... you are referring happens to be
+mine!
+that
+whom
+which
+
+?63-0083-Q3: ....... to see that film that is on at the cinema next
+week?
+Do you go
+Is you going
+Are you going
+
+?25-0045-Q5: I can't ....... to understand why anyone would
+want to be cruel to animals.
+start
+begin
+starts
+begins
+
+?178-0418-Q8: ....... I ride with you to work?
+Does
+Haven't
+Allow
+May
+
+?94-0294-Q4: Sarah: 'I can't take any more.' Paul: '.......'
+Oh you can, can you?
+Oh you could, could you?
+Oh, you can't, can you?
+Oh you could, could you?
+
+?45-0065-Q5: I want to go to the cinema to see a film about
+....... and the French.
+France
+a France
+the France
+
+?14-0034-Q4: Sadly their marriage of 25 years ....... in divorce.
+ends
+ended
+finishes
+finished
+
+?67-0087-Q7: Why ....... late every time we arrange to meet?
+is he
+he is
+is he being
+
+?172-0412-Q2: ....... you please bring me my notebook?
+Did
+Would
+Have
+Might
+
+?103-0303-Q3: He has his lunch at the office .......
+had he?
+did he?
+hadn't he?
+doesn't he?
+
+?188-0448-Q8: I have ....... of friends.
+much
+very
+lots
+many
+
+?61-0081-Q1: I ....... her every day and she never says hello to
+me.
+see
+am seeing
+will see
+
+?70-0090-Q10: I ....... to remember your name but I'm afraid I
+can't remember it.
+try
+am trying
+will trying
+
+?84-0284-Q4: It won't hurt .......
+does it?
+will it?
+can it?
+did it?
+
+?117-0317-Q7: Well you and your wife have borrowed things
+sometimes and not given ....... back.
+they
+theirs
+them
+
+?93-0293-Q3: Sarah: 'I've torn up your homework essay!' Paul:
+'.......'
+That'll be nice, will it?
+That's nice, is it?
+That would be nice, wouldn't it?
+That's nice, isn't it?
+
+?75-0095-Q5: Will you come to dinner with us if we ....... a
+babysitter for you?
+had found
+will find
+find
+
+?193-0453-Q3: The car is not ......., it is slow.
+speed
+unhurried
+fast
+powerful
+
+?138-0338-Q8: Icarus said he would try and he promised his
+father: I will not injure ........
+yourself
+myself
+ourselves
+
+?167-0407-Q7: Please put the plates ....... the table.
+over
+for
+to
+on
+
+?77-0097-Q7: If I ....... you, I would work very hard so that I
+could earn more money.
+am
+were
+are
+
+?161-0401-Q1: I live in the big house ....... the corner.
+on
+in
+of
+to
+
+?51-0071-Q1: ....... is that sitting over there in the corner?
+Who
+Whom
+Which
+
+?27-0047-Q7: I won a lot of money by betting on that horse
+but it was simply a case of ....... luck.
+start's
+starter's
+beginner's
+beginning's
+
+?130-0330-Q10: Oh no! It's a traffic warden putting a parking
+ticket on my car and I haven't any money to pay the fine .......
+I'll have to pay.
+whose
+which
+who
+
+?159-0399-Q9: My mother is the one ....... sings on TV every
+morning.
+whom
+which
+who
+whose
+
+?133-0333-Q3: The trouble was that Icarus always wanted to
+put ....... into danger.
+herself
+itself
+himself
+
+?32-0052-Q2: I could ....... bought that car but I didn't have
+enough money to pay for the petrol.
+had
+have
+have to
+
+?30-0050-Q10: I would greatly appreciate it if you didn't ....... up
+that old argument again.
+start
+begun
+starts
+begins
+
+?102-0302-Q2: He used to work in the city .......
+had he?
+does he?
+has he?
+didn't he?
+
+?54-0074-Q4: I'm looking at the photograph ....... you sent me
+with your letter.
+which
+who
+whom
+
+?57-0077-Q7: The police want to find out ....... drove the red car
+into the shop window.
+who
+who's
+whose
+
+?113-0313-Q3: Well, he says that he doesn't trust ........
+yours
+you
+them
+
+?11-0031-Q1: The brothers will ....... school at the end of this
+year.
+end
+ending
+finish
+finishes
+
+?5-0025-Q5: I ....... to the concert every Monday on the radio
+and I imagine I am there listening to it in person.
+listen
+am listening
+hear
+am hearing
+
+?73-0093-Q3: If you ....... got that job, would you have been
+able to move to a new house?
+have
+had
+will have
+
+?166-0406-Q6: My car will not start because it is ....... gas.
+full of
+out with
+out of
+with no
+
+?20-0040-Q10: To most people it seemed like a long and
+successful relationship and so it was a great surprise to learn
+that they had ....... it.
+ends
+ended
+finishes
+finished
+
+?163-0403-Q3: My friend Anna lives ....... England.
+from
+at
+on
+in
+
+?125-0325-Q5: Well, I should say someone for ....... money is no
+object.
+whom
+who
+that
+
+?90-0290-Q10: No-one understood that word .......
+does he?
+did you?
+didn't they?
+did they?
+
+?6-0026-Q6: I should explain that he finds it very difficult to
+follow your conversation because he is very hard of ........
+listen to
+listening
+to hear
+hearing
+
+?43-0063-Q3: It is important sometimes to stop and look
+around you at all the wonderful things ........
+nature
+in nature
+in the nature
+
+?16-0036-Q6: He thought they would all share the cost of the
+meal but unfortunately he ....... up paying for everybody.
+end
+ended
+finish
+finished
+
+?187-0447-Q7: You are ....... smart.
+much
+many
+very
+lots
+
+?17-0037-Q7: After the children had ....... doing their
+homework, the whole family watched television.
+ends
+ended
+fInishes
+finished
+
+?41-0061-Q1: I only want ....... little sugar in my tea, please.
+a
+the
+such
+
+?139-0339-Q9: The last words his father said before Icarus left
+were: Look after ........
+yourself
+himself
+myself
+
+?69-0089-Q9: Next time you ....... to my house, you must bring
+that book.
+come
+is coming
+are coming
+
+?50-0070-Q10: Are you studying foreign languages at school,
+like .......?
+French
+a French
+the French
+
+?46-0066-Q6: Can anyone give me ....... please because I have
+just fallen over?
+hand
+a hand
+the hand
+
+?24-0044-Q4: I read the ....... of that book but I couldn't
+possibly read the whole story.
+starting
+start
+beginning
+begin
+
+?124-0324-Q4: ....... do you think would have a car like that?
+Whom
+That
+Who
+
+?53-0073-Q3: They have a very large, round house  ....... has a  
+lovely garden.
+that
+which
+whose
+
+?198-0458-Q8: What goes up must come ........
+over
+down
+nice
+left
+
+?59-0079-Q9: The person in the house next to mine knows
+someone ....... met the Queen.
+who
+whom
+which
+
+?142-0352-Q2: ....... do you like to do on the weekends?
+How
+What
+Who
+Where
+
+?147-0357-Q7: Do you ....... time to go to the store for me?
+like
+go
+have
+give
+
+?119-0319-Q9: In that case just look at the table and tell .......
+what you see.
+my
+I
+me
+
+?23-0043-Q3: We ....... off early on the first day of summer so
+that we could see the sun rise.
+began
+started
+starting
+beginning
+
+?40-0060-Q10: I may ....... go to Paris next week because there
+is a very big exhibition there.
+have
+have to
+had
+
+?35-0055-Q5: Do you ....... clean the house every day or every
+week?
+must
+have
+have to
+
+?122-0322-Q2: Excuse me but shouldn't you say to ....... does
+that car belong?
+which
+that
+whom
+
+?131-0331-Q1: Once there was a young man who called .......
+Icarus.
+myself
+himself
+herself
+
+?33-0053-Q3: I ....... go now because I am already late for my
+class.
+must
+had
+have
+
+?56-0076-Q6: I think you will see that this is the best museum
+....... you can find in the town.
+that
+which
+who
+
+?196-0456-Q6: I do not get up ......., I get up early.
+night
+day
+late
+first
+
+?143-0353-Q3: My sister is ....... home today.
+at
+in
+the
+on
+
+?2-0022-Q2: I ....... attentively to the lecture on philosophy but I
+still didn't understand much of it.
+heard
+listened
+was hearing
+was listen
+
+?87-0287-Q7: It happened yesterday .......
+had it?
+has it?
+didn't it?
+did it?
+
+?116-0316-Q6: I find that difficult to believe. Do you trust .......?
+his
+me
+my
+
+?72-0092-Q2: ....... I bought you a new car, would you be very
+happy?
+When
+If
+As
+
+?76-0096-Q6: I will try very hard to come and have dinner at
+your house if I ....... able to.
+am
+was
+were
+
+?1-0021-Q1: I'm terribly sorry but I ....... what you said just now
+and I wonder if you could repeat it.
+wasn't listen to
+wasn't hearing
+didn't hear
+didn't hearing
+
+?92-0292-Q2: Sarah: 'You're being very rude!' Paul: '.......'
+Oh I have, have I?
+I am, you think?
+Oh I am, am I?
+Oh it is, is it?
+
+?112-0312-Q2: Of course I did. I gave ....... back on Tuesday.
+them
+its
+it
+
+?83-0283-Q3: It drives you mad .......
+is it?
+does it?
+doesn't it?
+won't it?
+
+?52-0072-Q2: I don't understand a word ....... you are talking
+about.
+what
+that
+who
+
+?121-0321-Q1: ....... does that car belong to?
+Who
+Which
+Whose
+
+?13-0033-Q3: You can't miss it, it's that tall building right at the
+....... of the road.
+end
+ends
+finish
+finishes
+
+?66-0086-Q6: Later tonight I ....... my uncle, who is ill in hospital.
+visit
+am visiting
+are visiting
+
+?106-0306-Q6: He really didn't need to speak to me like that
+.......
+does he?
+has he?
+will he?
+did he?
+
+?191-0451-Q1: If I am not right I am ........
+wrong
+certain
+correct
+un-right
+
+?29-0049-Q9: Who would like to ....... off the debate?
+begin
+start
+begins
+starting
+
+?100. 10-0030-Q10: I have been ....... strange stories about you
+recently but I do hope that there is no substance in them.
+listened to
+listening to
+heard
+hearing
+
+?101. 95-0295-Q5: Sarah: 'She hates the sight of him.' Paul: '.......'
+She did, did she?
+She does, does she?
+She hates, does she?
+She doesn't hate, does she?
+
+?102. 82-0282-Q2: She's definitely not coming .......
+will she?
+isn't she?
+is she?
+can she?
+
+?103. 177-0417-Q7: ....... I ride with you to work?
+Would
+Can
+Let
+Have
+
+?104.  145-0355-Q5: The bathroom is ....... to the front door.
+next
+far
+opposite
+away
+
+?105. 176-0416-Q6: ....... you like some water?
+Can
+May
+Would
+Do
+
+?106. 58-0078-Q8: Did you meet the lady .......  works in the library?
+who
+whose
+who's
+
+?107. 110-0310-Q10: You shouldn't have done that .......
+could you?
+should you?
+couldn't you?
+didn't you?
+
+?108. 79-0099-Q9: If you really want to be helpful, then you ....... to
+tell me the truth.
+have
+had
+will have
+
+?109. 185-0445-Q5: I have ....... of homework to do before
+tomorrow.
+a ton
+a tan
+a million
+a much
+
+?110. 88-0288-Q8: She's always late .......
+is it?
+isn't she?
+isn't it?
+was she?
+
+?111. 162-0402-Q2: My son goes ....... English classes 5 days a week.
+with
+by
+to
+from
+
+?112. 149-0359-Q9: There are 12 ....... in a year.
+days
+weeks
+months
+hours
+
+?113. 156-0396-Q6: ....... would you like on your hamburger?
+How
+What
+When
+Which
+
+?114. 98-0298-Q8: Paul: 'I spent thousands on that car.' Sarah: '.......'
+Oh, you have, have you?
+Oh you did, did you?
+Oh you do, do you?
+Oh you do, don't you?
+
+?115. 158-0398-Q8: This is ....... I want to be when I grow up.
+why
+when
+which
+what
+
+?116. 173-0413-Q3: ....... you please bring me my notebook?
+Should
+Do
+Can
+Haven't
+
+?117. How many exercises did you attempt? *
+
+?118. 104-0304-Q4: In that case he'll have to look for a new job .......
+shall he?
+won't he?
+isn't he?
+does he?
+
+?119. 183-0443-Q3: Do you need ....... milk for this recipe?
+many
+big
+much
+much of
+
+?120. 192-0452-Q2: If you are not taller you are ........
+the short
+shorter
+shortest
+short
+
+?121. 137-0337-Q7: His sister said she would like to push ....... into
+the air and fly but she was too frightened.
+itself
+himself
+herself
+
+?122. 96-0296-Q6: Sarah: 'I would prefer to go by air.' Paul: '.......'
+Oh you would, would you?
+Oh you did, did you?
+Oh you prefer, don't you?
+Oh, you wouldn't will you?
+
+?123. 31-0051-Q1: I ....... go to see the doctor last week because I
+was very ill.
+must
+must to
+had to
+
+?124. 85-0285-Q5: I think you ought to go .......
+ought you?
+do I?
+don't you?
+do you?
+
+?125. 175-0415-Q5: ....... you want some water?
+Can
+Have
+May
+Do
+
+?126. 134-0334-Q4: His father said again and again if we don't take
+care, we'd hurt ........
+themselves
+yourselves
+ourselves
+
+?127. 18-0038-Q8: You could tell the time by him because he always
+....... work at exactly the same time every day.
+ends
+ended
+finish
+finished
+
+?128. 44-0064-Q4: It is ....... book that I have ever read.
+funniest
+a funniest
+the funniest
+
+?129. 60-0080-Q10: The grass, ....... I cut every week, seems to grow
+very quickly.
+who
+who's
+which
+
+?130. 107-0307-Q7: Come back in the morning .......
+do you?
+have you?
+will you?
+don't you?
+
+?131. 170-0410-Q10: I am ....... work right now.
+with
+at
+of
+on
+
+?132. 26-0046-Q6: He ....... off at me again simply because I had
+forgotten to lock the back door after I came home.
+started
+began
+begun
+starts
+
+?133. 151-0391-Q1: ....... one of you is coming to my house later?
+Who
+Which
+Why
+How
+
+?134. 141-0351-Q1: The pencils and paper ....... on your desk.
+to be
+is
+are
+be
+
+?135. 64-0084-Q4: ....... every single thing which that man says?
+Do you believe
+Is you believing
+Are you believing
+
+?136. 36-0056-Q6: I ....... speak French without a problem now
+because I have had many lessons.
+may
+can
+have
+
+?137. 37-0057-Q7: They ....... do their homework today because it is
+a holiday at the school.
+must not
+don't have
+don't have to
+
+?138. 174-0414-Q4: ....... you please bring me my notebook?
+Shall
+Could
+May
+Must
+
+?139. 184-0444-Q4: I need to practice piano ....... before the concert.
+much
+very
+many
+a lot
+
+?140. 8-0028-Q8: You've been making so much noise with your
+music that people at the far end of the road can ....... you.
+listen to
+listening to
+hear
+hearing
+
+?141. 140-0340-Q10: Unfortunately Icarus went too near to the sun
+and the wax on his wings melted and the feathers worked .......
+free and he fell on the ground and died.
+itself
+yourselves
+themselves
+
+?142. 168-0408-Q8: I like to eat ice cream ....... chocolate sauce on
+top.
+at
+with
+in
+to
+
+?143. 81-0281-Q1: You said you would .......
+would you?
+did you?
+had you?
+didn't you?
+
+?144. 153-0393-Q3: ....... is that guy talking to your sister?
+Which
+Whose
+Who
+Whom
+
+?145. 169-0409-Q9: Were you ....... church yesterday?
+at
+to
+on
+for
+
+?146. 179-0419-Q9: ....... I could ride with you to work?
+Is there any way
+Ain't there no way
+Might there some way
+Aren't there some ways
+
+?147. 97-0297-Q7: Sarah: 'I won't listen to you any more.' Paul: '.......'
+So you will, will you?
+So you don't, do you?
+So you won't, will you?
+So you do, don't you?
+
+?148. 80-0100-Q10: If I ....... very hard, I would have been able to
+stop smoking.
+try
+would have tried
+had tried
+
+?149. 127-0327-Q7: That's interesting. We are talking about the car
+....... has a red roof.
+that
+who
+that's
+
+?150. 182-0442-Q2: How ....... does the book cost?
+much
+many
+lots
+a lot
+
+?151. 91-0291-Q1: Sarah: 'I want you to give me some more
+money.' Paul: '.......'
+Oh you want, do you?
+Oh you'd like, would you?
+Oh you do, do you?
+Oh you give, do you?
+
+?152. 19-0039-Q9: I've written practically the whole book except for
+the last part and I just don't know how to ....... the story.
+end
+ending
+finish
+finishing
+
+?153. 150-0360-Q10: Driving to work in a car is much ....... than
+riding a bicycle.
+faster
+fast
+fastest
+more faster
+
+?154. 28-0048-Q8: As far as I was concerned when the accident
+happened, it was the ....... of the end.
+start
+begin
+starting
+beginning
+
+?155. 74-0094-Q4: I would want very much to move to a new house
+if I ....... that job.
+have
+having
+had
+
+?156. 189-0449-Q9: You are a ....... honest person.
+ton
+very
+many
+much
+
+?157. 99-0299-Q9: Sarah: 'You mustn't eat with your mouth full.'
+Paul: '.......'
+Oh I must, must I?
+Oh I can't, can I?
+Oh I have to, have I?
+Oh I mustn't, must I?
+
+?158. 89-0289-Q9: They're selling their house .......
+will they?
+haven't they?
+aren't they?
+have they?
+
+?159. 109-0309-Q9: You are just the sort of person who would say
+that .......
+would you?
+wouldn't you?
+don't you?
+aren't you?
+
+?160. 9-0029-Q9: He sometimes pretends he can't ....... a single word
+you are saying but all the time he's taking it all in.
+listen to
+listening to
+hear
+hearing
+
+?161. 22-0042-Q2: My car very rarely ....... first time when the
+weather is really cold.
+begins
+beginning
+starting
+starts
+
+?162. 118-0318-Q8: Well I think you're being very unfair to ........
+our
+us
+ours
+
+?163. 49-0069-Q9: I have left my book in ....... and I would like you
+to get it for me.
+kitchen
+a kitchen
+the kitchen
+
+?164. 186-0446-Q6: How ....... water do you drink every day?
+many
+much
+lots of
+very
+
+?165. 62-0082-Q2: What is the name of that picture which you .......
+on the wall.
+look at
+is looking at
+are looking at
+
+?166. 129-0329-Q9: Well, I think you ought to speak to that man
+....... standing with a notebook in front of the car.
+which
+whom
+who's
+
+?167. 136-0336-Q6: He had watched birds fly by throwing ....... into
+the air.
+yourselves
+themselves
+ourselves
+
+?168. 146-0356-Q6: He always works ....... hard.
+much
+very
+great
+quietly
+
+?169. 100-0300-Q10: Sarah: 'That's not allowed you know.' Paul:
+'.......'
+Oh you do, don't you?
+Oh it is, isn't it?
+Oh it isn't, is it?
+Oh it won't, will it?
+
+?170. 21-0041-Q1: I ....... my car to make sure it worked about ten
+minutes before I drove to work.
+began
+started
+begin
+start
+
+?171. 180-0420-Q10: ....... I ride with you to work?
+Will you mind if
+Could you mind if
+Would you mind if
+Can you mind if
+
+?172. 181-0441-Q1: How ....... people are coming?
+lots
+much
+a lot
+many
+
+?173. 15-0035-Q5: It didn't take long for the children to ....... off the
+cakes and pastries that had not been eaten at the party.
+end
+ending
+finish
+finishing
+
+?174. 165-0405-Q5: Will you come ....... me to the store?
+with
+along
+to
+by
+
+?175. 114-0314-Q4: He doesn't trust .......?
+I
+it
+me
+
+?176. 101-0301-Q1: You'd rather I kept quiet about it .......
+did you?
+had you?
+wouldn't you?
+do you?
+
+?177. 128-0328-Q8: Yes, it's the best car ....... I've ever had. Why do
+you ask?
+which
+that
+who
+
+?178. 3-0023-Q3: Can you ....... me all right over there because you
+are rather a long way away?
+listening
+hearing
+listen
+hear
+
+?179. 148-0358-Q8: She is ....... athlete.good
+well
+a
+an
+
+?180. 4-0024-Q4: I ....... what you are saying but that still doesn't
+make me want to change my mind one little bit.
+listen
+hear
+am listing
+am hearing
+
+?181. 155-0395-Q5: Let me know ....... you hear from your mother.
+who
+which
+whose
+when
+
+?182. 195-0455-Q5: If I am not weak I am ........
+weaker
+pretty
+bright
+strong
+
+?183. 7-0027-Q7: Now will you please ....... me and pay attention to
+what I'm saying because it's very important.
+hear
+listen to
+hearing
+listening to
+
+?184. 78-0098-Q8: ....... you able to lend me some money if I
+promise you that you will get it back very soon?
+Are
+Was
+Were
+
+?185. 171-0411-Q1: ....... you please bring me my notebook?
+Will
+May
+Do
+Should
+
+?186. 86-0286-Q6: You must go .......
+mustn't you?
+have you?
+had you?
+must I?
+
+?187. 71-0091-Q1: If I win the lottery, I ....... buy you a very big car as
+a present.
+should
+will
+am
+
+?188. 152-0392-Q2: ....... are you going to get home from work?
+Which
+Who
+How
+What
+
+?189. 190-0450-Q10: Do you have ....... ants in your house?
+much
+many
+a lot
+very
+
+?190. 55-0075-Q5: There is a new television programme called: '.......
+wants to be a millionaire?'.
+Which
+What
+Who
+
+?191. 194-0454-Q4: Today it is not hot, it is ........
+cold
+un-hot
+hotter
+colder
+
+?192. 154-0394-Q4: She wants to know ....... you like your coffee.
+how
+what
+which
+who
+
+?193. 111-0311-Q1: So did you give the book to .......?
+his
+him
+he
+
+?194. 34-0054-Q4: I may ....... able to come to your party if I have the
+time.
+be
+being
+being to
+
+?195. 157-0397-Q7: ....... dog is that?
+Who
+When
+Whose
+Where
+
+?196. 65-0085-Q5: Sometimes I ....... what the teacher says to me.
+don't understand
+am not understanding
+understand not
+
+?197. 144-0354-Q4: ....... am an engineer.
+You
+He
+We
+I
+
+?198. 115-0315-Q5: That's exactly what he said about ........
+you
+yours
+me
+
+?199. 160-0400-Q10: ....... shoes are those?
+Why
+Whose
+Whom
+Who
+
+?200. 123-0323-Q3: That's another way of saying it. I'm talking
+about the car ....... parked over there.
+who's
+that's
+who
+
+~ET Grammar 2~
+
+Quiz
+
+?182-0842-Q2: My wife hates it if I leave the lid off the ....... after I have finished brushing my
+teeth.
+toothbrush
+toothpaste
+toothache
+
+?115-0745-Q5: ....... it raining when you left your office this afternoon?
+Was
+Were
+Did
+Had
+
+?57-0637-Q7: Mr. and Mrs. Jarrett must be making a fortune. They're clearly raking ....... over
+$1,000,000 a year.
+up
+in
+on
+out
+
+?41-0621-Q1: Had I been able to go to school as a child, I would have ....... how to read.
+learned
+learn
+learning
+had learn
+
+?127-0757-Q7: We always eat a roast dinner ....... Christmas day.
+in
+on
+at
+since
+
+?2-0562-Q2: My son is afraid ....... the dark.
+from
+on
+of
+by
+
+?97-0727-Q7: ....... did William Jefferson Clinton become President of the United States?
+When
+What
+Where
+Who
+
+?34-0614-Q4: Suzanne who lives ....... that coffee shop place, came over to visit you this
+morning.
+on
+by
+at
+in
+
+?150-0800-Q10: To ....... should the check be made payable?
+who
+who's
+whom
+which
+
+?11-0591-Q1: This is the teacher ....... told me my son has been misbehaving in class.
+which
+whose
+whom
+who
+
+?62-0692-Q2: She ....... him a solemn promise that she would never steal again.
+make
+do
+made
+did
+
+?111-0741-Q1: The flight ....... delayed because of bad weather.
+was
+were
+did
+had
+
+?56-0636-Q6: Low consumer demand has forced the retailer to mark ....... a wide range of
+goods by as much as 40%.
+up
+down
+back
+off
+
+?172-0832-Q2: My teeth were hurting ....... I made an appointment to go the dentist.
+or
+so
+but
+
+?153-0803-Q3: The proud parents brought home ....... new baby girl.
+his
+her
+their
+
+?103-0733-Q3: I have lived in Denpasar ....... several years.
+while
+during
+for
+
+?169-0819-Q9: Our teacher told us to ....... our work quietly.
+get on with
+put up with
+run out of
+come up with
+
+?114-0744-Q4: I ....... forgotten to set my alarm clock, so I was late for my train.
+was
+were
+did
+had
+
+?139-0789-Q9: I need ....... money to go shopping.
+a
+any
+some
+
+?113-0743-Q3: They ....... leaving for the airport when I last saw them.
+was
+were
+did
+had
+
+?79-0709-Q9: He was very angry ....... his mother because she grounded him yesterday.
+with
+to
+about
+on
+
+?66-0696-Q6: The university research department stumbled upon something new and ....... a
+big discovery because of it.
+make
+did
+made
+do
+
+?156-0806-Q6: These warm chocolate chip cookies melt in ....... mouth.
+its
+your
+yours
+
+?23-0603-Q3: How ....... money do you have?
+much
+more
+many
+often
+
+?107-0737-Q7: I hurt my leg ....... the third quarter of the basketball match.
+while
+during
+for
+
+?87-0717-Q7: No one knows why he ....... those terrible things in the past.
+make
+do
+made
+did
+
+?112-0742-Q2: ....... you do much sightseeing when you were on vacation in Madrid?
+Was
+Were
+Did
+had
+
+?148-0798-Q8: To ....... did Mark lend his video game?
+who
+who's
+whom
+what
+
+?157-0807-Q7: Is ....... seat belt always fastened?
+your
+mine
+its
+
+?36-0616-Q6: My house is ....... the grocery store and the gas station.
+under
+off
+among
+between
+
+?121-0751-Q1: I graduated from college ....... 2002.
+since
+on
+in
+at
+
+?47-0627-Q7: I'm glad to know that you have ....... me for what I have done.
+forgive
+forgives
+forgiven
+forgave
+
+?162-0812-Q2: We've run ....... of sugar. Could you please buy some more?
+down on
+away from
+on with
+out of
+
+?95-0725-Q5: ....... does NATO stand for?
+What
+Which
+Where
+who
+
+?50-0630-Q10: When he finally arrived, his date had already ........
+going
+go
+went
+gone
+
+?29-0609-Q9: Jessica spent a lot of money on her car. Now she only has ....... money left to pay
+for her living expenses.
+many
+a few
+a little
+much
+
+?67-0697-Q7: His mother forced him to ....... his homework every night after supper.
+make
+do
+made
+did
+
+?72-0702-Q2: Naomi is keen ....... working in Africa this coming year.
+of
+for
+on
+at
+
+?6-0566-Q6: I'm tired ....... waiting for the bus. Let's take a taxi.
+to
+on
+of
+from
+
+?1-0561-Q1: Venice is famous ....... its canals.
+about
+in
+with
+for
+
+?125-0755-Q5: Shakespeare was born ....... 23 April, 1564.
+since
+on
+in
+at
+
+?185-0845-Q5: "Mum, can you please buy me a new ....... when you go the supermarket this
+afternoon?"
+toothpaste
+toothache
+toothbrush
+
+?74-0704-Q4: All of Chris' teachers agree that he is very good ....... math.
+with
+for
+at
+on
+
+?155-0805-Q5: The computer quickly stores information on ....... huge memory.
+yours
+theirs
+its
+
+?58-0638-Q8: The clothing manufacturer recently branched ....... into sport's wear.
+out
+in
+off
+back
+
+?149-0799-Q9: ....... of the cars is parked in the driveway?
+Which
+Who's
+What
+Whom
+
+?27-0607-Q7: There are ....... people trying to go to the U2 concert this weekend.
+many
+much
+a little
+any
+
+?92-0722-Q2: ....... is measured by the Richter Scale?
+What
+Which
+Where
+Who
+
+?30-0610-Q10: How ....... time do you have left before you have to go to school?
+some
+much
+many
+any
+
+?126-0756-Q6: In Europe Autumn begins ....... March.
+in
+on
+at
+since
+
+?163-0813-Q3: I don't know how you ....... with such noisy brothers. It would drive me crazy.
+put up
+put away
+clear up
+bring up
+
+?193-0873-Q3: They ....... him for his brave actions.
+praised
+worshipped
+flattered
+congratulated
+
+?38-0618-Q8: The cat is sitting ....... the wall.
+on
+over
+above
+underneath
+
+?49-0629-Q9: I would have ....... pictures from my trip, if I had a camera.
+took
+take
+taken
+had took
+
+?195-0875-Q5: They ....... from the fire unhurt.
+evaded
+escaped
+avoided
+abstained
+
+?35-0615-Q5: I don't know how many times I have told my daughter to look at both sides
+before running ....... the street.
+across
+alongside
+beside
+around
+
+?151-0801-Q1: Mia left ....... notebook on the bus.
+her
+yours
+his
+
+?13-0593-Q3: This is the girl ....... car hit that tree down last week.
+who
+which
+whose
+whom
+
+?135-0785-Q5: I haven't got ....... tea. Can you go to the corner store and buy some more?
+a
+some
+any
+
+?78-0708-Q8: Mary is so pleased ....... her students' grades this past year.
+for
+with
+at
+along
+
+?175-0835-Q5: I wanted to eat sushi for dinner ....... I went to a Japanese restaurant.
+but
+so
+or
+
+?117-0747-Q7: The police located the art work which ....... been stolen from the gallery.
+was
+were
+did
+had
+
+?71-0701-Q1: Ralph was late ....... work again. He may be fired.
+on
+at
+for
+to
+
+?17-0597-Q7: I asked you ....... one of these shoes you think would go with my outfit.
+whose
+who
+whom
+which
+
+?141-0791-Q1: ....... is the girl in the blue dress?
+Who
+Whom
+What
+Which
+
+?48-0628-Q8: After looking for him all day, Jeremy finally found his dog ....... under a cave.
+hid
+hide
+hidden
+hit
+
+?145-0795-Q5: ....... of the names did you choose for the puppy?
+What
+Which
+Who
+Whom
+
+?39-0619-Q9: As soon as Bob heard his boss coming, he jumped ....... his chair and pretended
+he was working.
+inside
+under
+for
+down
+
+?194-0874-Q4: He is very lucky to have got himself a ....... job.
+pear
+banana
+lemon
+plumming
+
+?44-0624-Q4: Perhaps she would have been ....... by that dog if its owner hadn't caught him
+right on time.
+bit
+bite
+bitted
+bitten
+
+?131-0781-Q1: We need ....... kilo of apples.
+a
+some
+any
+
+?196-0876-Q6: After two rings of the bell she suddenly ....... in the doorway.
+seemed
+looked
+appeared
+viewed
+
+?16-0596-Q6: ....... shall I fear, but the ones who hurt me?
+Whose
+Whom
+Who
+Which
+
+?197-0877-Q7: She never spoke about herself and was always very ....... about the good things
+she had done.
+modest
+meek
+humble
+simple
+
+?85-0715-Q5: I'm not quite ready yet — I have to ....... my hair.
+make
+do
+made
+did
+
+?170-0820-Q10: The government wants to ....... a new scheme to encourage people to start
+their own businesses.
+work out
+try out
+find out
+run out
+
+?188-0848-Q8: Nora asked the waiter to bring her a ....... after she had finished eating her
+dessert.
+toothbrush
+toothpick
+toothache
+
+?144-0794-Q4: For ....... did Shelia make these cookies.
+who
+whom
+which
+what
+
+?12-0592-Q2: My husband, ....... I love, sent me flowers at work last night.
+who
+whom
+which
+whose
+
+?59-0639-Q9: Distributors will probably bump ....... the price of the software when the next
+version is released.
+up
+on
+off
+out
+
+?45-0625-Q5: If it wasn't for that medicine you gave me, I would have ....... a lot worse.
+gotten
+gone
+get
+gutted
+
+?159-0809-Q9: ....... hand shot up when the teacher asked for volunteers.
+Their
+Her
+Mine
+
+?158-0808-Q8: The fluffy brown puppy is ........
+its
+my
+theirs
+
+?105-0735-Q5: Last week I was held up ....... four hours because of the traffic.
+while
+during
+for
+
+?40-0620-Q10: Frederick lives ....... of the hill, where all the mansions are.
+above
+unto
+on top
+up
+
+?80-0710-Q10: Karen is very jealous ....... Kim and it's very obvious to others.
+of
+about
+at
+with
+
+?118-0748-Q8: The fire ....... caused by an electrical problem.
+was
+were
+did
+had
+
+?180-0840-Q10: I wanted to visit my grandmother last week ....... she had an accident and had
+to be taken to hospital.
+but
+or
+so
+
+?161-0811-Q1: I'm sorry, James isn't ....... at the moment. Can I take a message?
+in
+away
+up
+off
+
+?173-0833-Q3: Have you seen ....... heard the latest musical by Andrew Lloyd Webber?
+but
+so
+or
+
+?129-0759-Q9: I've been studying Italian ....... I was five years old.
+for
+since
+ago
+on
+
+?69-0699-Q9: The teacher suggested they ....... another exercise to understand the problem
+better.
+make
+do
+made
+did
+
+?61-0691-Q1: The manager was surprised at how many things Ron could ....... at once.
+make
+do
+made
+did
+
+?37-0617-Q7: The temperature in Washington D.C today is eight degrees ....... zero.
+beside
+below
+behind
+between
+
+?18-0598-Q8: ....... house is it, anyway? Are we allowed to stay in here?
+Who's
+Whom
+Whose
+Which
+
+?84-0714-Q4: She suddenly realized that she only had a few days left on her vacation so she
+decided to ....... the most of it.
+make
+do
+made
+did
+
+?88-0718-Q8: He was confused and couldn't ....... up his mind about what to do next.
+make
+do
+made
+did
+
+?100. 76-0706-Q6: Due to his new shift, he has to wake up ....... 3 a.m. every day.
+in
+at
+on
+from
+
+?101. 134-0784-Q4: I've got ....... salad sandwiches for my lunch today.
+a
+some
+any
+
+?102. 110-0740-Q10: I was traveling through Mumbai ....... six weeks last summer.
+while
+during
+for
+
+?103. 130-0760-Q10: The chairman of the board has been employed in the finance industry .......
+1984
+in
+on
+since
+at
+
+?104. 147-0797-Q7: ....... is the highest ranking official in the United States?
+Who's
+Whom
+Who
+What
+
+?105. 122-0752-Q2: I like to go to bed ....... midnight on Saturdays.
+since
+on
+during
+at
+
+?106. 25-0605-Q5: I want to make orange juice. Have you got ....... oranges?
+much
+many
+any
+few
+
+?107. 100-0730-Q10: ....... year did the first commercial aviation flight take place?
+When
+What
+Where
+Which
+
+?108. 9-0569-Q9: Why are you angry ....... him?
+of
+from
+on
+with
+
+?109. 46-0626-Q6: Last night, I ....... I was calling the police and really did it.
+dream
+dreaming
+dreamed
+have dreamed
+
+?110. 15-0595-Q5: ....... is going to take the dog for a walk?
+Which
+Whose
+Who
+Whom
+
+?111. 98-0728-Q8: ....... Caribbean island does Sir Vivian Richards come from?
+Which
+What
+Where
+Who
+
+?112. 32-0612-Q2: Barbara, your boyfriend is waiting for you .......
+around
+outside
+above
+against
+
+?113. 146-0796-Q6: ....... has completed the assignment?
+Who's
+Who
+Whom
+Which
+
+?114. 198-0878-Q8: He has lots of money and ....... two houses in the city.
+holds
+owns
+occupies
+possesses
+
+?115. 86-0716-Q6: His mother was late because she ....... the beds before she left the house.
+make
+do
+made
+did
+
+?116. 22-0602-Q2: Would you like ....... juice?
+a
+an
+some
+much
+
+?117. 5-0565-Q5: Lucas is very good ....... drawing.
+at
+on
+to
+with
+
+?118. 8-0568-Q8: I didn't know you were interested ....... science.
+in
+for
+on
+to
+
+?119. 77-0707-Q7: Such bad behavior is typical ....... the spoiled child.
+for
+with
+about
+of
+
+?120. 171-0831-Q1: We will visit Australia ....... New Zealand during our next vacation.
+and
+but
+so
+
+?121. 24-0604-Q4: I only have ....... dollars.
+some
+any
+a little
+a few
+
+?122. 83-0713-Q3: He was so proud of his car yesterday because during the race it ....... 260 km/hr.
+make
+do
+made
+did
+
+?123. 128-0758-Q8: His pet anaconda died five months ....... and he still misses it.
+for
+since
+ago
+on
+
+?124. 168-0818-Q8: I'm broke. I have to ....... an idea for making money.
+get on with
+put up with
+run out of
+come up with
+
+?125. 7-0567-Q7: George was worried ....... his father's health.
+since
+about
+on
+at
+
+?126. 138-0788-Q8: Is there ....... orange juice left in the fridge?
+a
+some
+any
+
+?127. 132-0782-Q2: Have you got ....... water?
+a
+some
+any
+
+?128. 154-0804-Q4: Will strummed ....... guitar and invited everyone to sing.
+his
+its
+her
+
+?129. 190-0850-Q10: My old ....... is looking very shaggy. I think it's about time to buy a new one.
+toothpick
+toothpaste
+toothbrush
+
+?130. 133-0783-Q3: There's ....... newspaper on the table.
+a
+some
+any
+
+?131. 119-0749-Q9: She was surprised that he knew her name. She ....... never met him before.
+was
+were
+did
+had
+
+?132. 108-0738-Q8: A game of rugby usually lasts ....... eighty minutes.
+while
+during
+for
+
+?133. 26-0606-Q6: No, I don't have any. But I have ....... apples, if you'd like to make apple juice
+instead.
+a little
+some
+any
+few
+
+?134. 181-0841-Q1: I usually take a ....... to work so I can clean my teeth thoroughly after I have
+eaten my lunch.
+toothbrush
+toothpick
+toothpaste
+
+?135. 54-0634-Q4: The finance director has come in ....... a lot of criticism over his unsuccessful
+handling of the company's investments.
+back
+for
+to
+on
+
+?136. 178-0838-Q8: My father wanted to watch a soccer match on television ....... my mother was
+already watching another program.
+but
+so
+or
+
+?137. 19-0599-Q9: I have friends ....... love me so much, they made a surprise birthday party for me
+last night.
+who
+whom
+which
+whose
+
+?138. 63-0693-Q3: His teacher begged him to ....... more of an effort in class.
+make
+do
+made
+did
+
+?139. 33-0613-Q3: I heard a glass breaking noise in the living room and ran to see what happened.
+A pigeon flew ....... the window and broke it.
+for
+from
+into
+against
+
+?140. 53-0633-Q3: I have some material from which I could knock ....... an article if you want me to.
+up
+down
+together
+off
+
+?141. 21-0601-Q1: Wow! Look at that! How ....... books do you have on your shelf? I have to tell you,
+it's quite a great collection!
+much
+many
+any
+some
+
+?142. 99-0729-Q9: ....... was the youngest person to be elected as President of the United States?
+Which
+What
+Where
+Who
+
+?143. 94-0724-Q4: ....... was the first man in space?
+When
+Where
+Which
+Who
+
+?144. 75-0705-Q5: To get a job as a secretary, you must be good ....... typing and answering phones.
+for
+at
+with
+about
+
+?145. 167-0817-Q7: I don't mind helping you bake a cake, but just make sure you ....... everything
+when you've finished.
+put out
+put away
+sort out
+bring up
+
+?146. 177-0837-Q7: I am going to do my homework ....... take a shower when I get home from
+school.
+and
+but
+so
+
+?147. 90-0720-Q10: They ....... up quickly after the silly argument.
+make
+do
+made
+did
+
+?148. 73-0703-Q3: He's been suffering ....... migraine headaches again.
+with
+from
+of
+about
+
+?149. 10-0570-Q10: We were very pleased ....... the service.
+with
+on
+at
+from
+
+?150. 4-0564-Q4: The second hotel was different ....... the first.
+to
+for
+with
+from
+
+?151. 165-0815-Q5: Can you ....... the time of the next train to Munich?
+sort out
+put out
+find out
+try out
+
+?152. 120-0750-Q10: How many times ....... your travel documents checked before you boarded the
+airplane?
+was
+were
+did
+had
+
+?153. 137-0787-Q7: There are ....... grapes in the fridge.
+a
+some
+any
+
+?154. 106-0736-Q6: A salesman knocked on our door ....... we were watching a movie.
+while
+during
+for
+
+?155. 136-0786-Q6: How about ....... cup of coffee?
+a
+some
+any
+
+?156. 51-0631-Q1: The board meeting was called ....... due to the sudden demise of the chief
+executive office.
+for
+off
+to
+out
+
+?157. 14-0594-Q4: Those were the boxes ....... were sent to you last month, but never made it here.
+which
+who
+whose
+whom
+
+?158. 179-0839-Q9: My brother wanted to buy a novel ....... I went to the book store after I finished
+work.
+so
+or
+but
+
+?159. 109-0739-Q9: ....... my stay in hospital, the nurses looked after me very well.
+While
+During
+For
+
+?160. 164-0814-Q4: You've borrowed such a great deal of money from me lately. I need to .......
+exactly how much you owe me.
+make up
+put out
+work out
+clear up
+
+?161. 42-0622-Q2: I would have ....... all night if I could but we all had to leave early because
+Carmen didn't feel good.
+sing
+sung
+sang
+singed
+
+?162. 43-0623-Q3: Adrian should have never ....... home. If he hadn't, he'd be in a better situation
+right now.
+leave
+leaved
+left
+leaving
+
+?163. 123-0753-Q3: He migrated to Istanbul five years ........
+since
+ago
+for
+at
+
+?164. 81-0711-Q1: Even though the situation was not ideal, they decided to ....... a go of things.
+make
+do
+made
+did
+
+?165. 116-0746-Q6: The employees ....... informed last night that their company was going into
+receivership.
+was
+were
+did
+had
+
+?166. 52-0632-Q2: My father put $1,000 ....... as a deposit to help my sister purchase a new car.
+in
+out
+down
+on
+
+?167. 68-0698-Q8: No matter how hard he pushed him, he couldn't ....... his son do the job properly.
+make
+do
+made
+did
+
+?168. 152-0802-Q2: The colorful picture of the flowers is ........
+their
+your
+mine
+
+?169. 104-0734-Q4: ....... I was in Geneva I made lots of friends.
+While
+During
+For
+
+?170. 186-0846-Q6: Tomorrow I must go the pharmacy and buy some more ........
+toothpaste
+toothpick
+toothbrush
+
+?171. 82-0712-Q2: She finally begged him to ....... a move in the very long and tiresome chess
+game.
+make
+do
+made
+did
+
+?172. 31-0611-Q1: I was jogging in the park this morning and saw this dog coming ....... me. It
+looked like he was going to attack me, but he was just trying to reach out for his owner who
+was running right behind me.
+onto
+after
+toward
+below
+
+?173. 89-0719-Q9: The teacher had to ....... up a new syllabus because her old was outdated.
+make
+do
+made
+did
+
+?174. 160-0810-Q10: I didn't get a cheeseburger, so I tasted ........
+mine
+its
+hers
+
+?175. 187-0847-Q7: My daughter woke up screaming in the middle of the night because she had a
+terrible ........
+toothpick
+toothbrush
+toothache
+
+?176. 93-0723-Q3: ....... does the word "alphabet" come from?
+What
+Which
+Where
+When
+
+?177. 174-0834-Q4: I wanted to go to the rock concert ....... all the tickets were already sold out.
+so
+but
+and
+
+?178. 28-0608-Q8: How many gallons of water did you bring for the trip? — I didn't bring  .......
+much
+any
+a little
+a few
+
+?179. 70-0700-Q10: We only have one more pot of stew — will it .......?
+make
+do
+made
+did
+
+?180. 64-0694-Q4: We had so much fun in Chicago — we ....... it in three days.
+make
+do
+made
+did
+
+?181. 3-0563-Q3: Maria is married ....... my cousin.
+with
+for
+to
+into
+
+?182. 166-0816-Q6: That maths exam was incredibly difficult. It took me ages to ....... some of the
+answers.
+sort out
+put out
+work out
+find out
+
+?183. 102-0732-Q2: The phone rang ....... I was eating brunch.
+while
+during
+for
+
+?184. 140-0790-Q10: We need to buy ....... bread rolls if you want to make hotdogs for your lunch.
+a
+some
+any
+
+?185. 20-0600-Q10: That young man to ....... we owe some thanks, saved our mom's life on that car
+accident.
+which
+whom
+who
+whose
+
+?186. 143-0793-Q3: ....... likes to play pinball at the arcade?
+Who
+Whom
+What
+Which
+
+?187. 60-0640-Q10: The director was drummed ....... of office for life when it was discovered that
+she had been involved in insider trading.
+up
+in
+on
+out
+
+?188. 96-0726-Q6: ....... year did Prince Charles of England marry?
+What
+Which
+Where
+Who
+
+?189. 55-0635-Q5: The factory churns ....... thousands of pairs of low cost shoes every day.
+out
+off
+in
+into
+
+?190. 183-0843-Q3: It is very dangerous for small children to play with ........
+toothbrushes
+toothpicks
+toothaches
+
+?191. 142-0792-Q2: ....... is the name of the team in red?
+What
+Which
+Who
+Whom
+
+?192. 176-0836-Q6: I wanted to eat fish for lunch ....... the fish and chip shop had closed for the day.
+or
+but
+so
+
+?193. 65-0695-Q5: The business ....... a lot of money this year.
+make
+do
+made
+did
+
+?194. 189-0849-Q9: "I can't seem to find the new tube of ....... that I purchased from the
+supermarket yesterday."
+toothbrush
+toothpick
+toothpaste
+
+?195. 101-0731-Q1: My uncle died ....... the war.
+while
+during
+for
+
+?196. 91-0721-Q1: ....... countries have a coastline on the Mediterranean Sea?
+What
+Which
+Where
+Who
+
+?197. 184-0844-Q4: My father told me that I will get a ....... if I eat too much chocolate.
+toothpaste
+toothache
+toothpick
+
+?198. 124-0754-Q4: The artist had been painting ....... two decades before he sold his first painting.
+during
+for
+since
+on
+
+?199. 192-0872-Q2: Are you going ....... for your holidays this year?
+outside
+absent
+abroad
+external
+
+?200. 191-0871-Q1: There are no problems for me because I find those questions very ........
+easy
+facile
+soft
+straight
+
+~ET Grammar 3~
+
+Quiz
+
+?148-2048-Q8: Rachel Carson put on a diver's helmet and explored the reefs of the Florida
+Keys for ........
+myself
+himself
+herself
+ourself
+
+?107-1987-Q7: No one at the office expected him to lose his temper and ....... the way he did.
+blow away
+blow over
+blow up
+
+?44-1574-Q4: After the storm ....... finished, many people were found lying in the street.
+has
+had
+were
+did
+
+?150-2050-Q10: A diver must supply ....... with a mixture of oxygen and different gasses.
+himself
+itself
+yourself
+myself
+
+?147-2047-Q7: Rachel Carson's life was marked with conservation efforts that we ....... can learn
+from.
+ourselves
+yourselves
+themselves
+herself
+
+?138-2038-Q8: You will receive extra credit ....... you turn in your project early.
+although
+than
+if
+unless
+
+?26-0936-Q6: Everything in that shop is now very cheap because they are having a ....... down
+sale.
+shuts
+shutting
+closes
+closing
+
+?164-2094-Q4: "Don't forget to post the letter!" He ....... me to post the letter.
+reminded
+ordered
+begged
+asked
+
+?42-1572-Q2: This time tomorrow you ....... sitting in a deck chair on the beach.
+are
+were
+will
+will be
+
+?36-1016-Q6: I want you to imagine that a man is walking ........
+in the country
+on the countryside
+by the countryside
+over the country
+
+?178-2228-Q8: Lisa was ....... her friends to help her move.
+counting down
+counting about
+counting on
+
+?6-0886-Q6: The firm has expanded and they want to ....... on extra staff.
+do
+get
+make
+take
+
+?21-0931-Q1: In the interest of safety the main valve on the machine had to be ....... off.
+shutting
+closing
+closed
+shut
+
+?96-1866-Q6: I will accept your marriage proposal ....... you promise to love me and take care
+of me forever.
+as good as
+as long as
+as soon as
+as much as
+
+?109-1989-Q9: Kathy felt a little uneasy when she found out her neighbours had a ........
+break-in
+breakout
+break
+
+?132-2032-Q2: I haven't spoken with Jane ....... she moved.
+unless
+while
+since
+although
+
+?122-2022-Q2: Miriam told ....... same joke yesterday.
+these
+this
+that
+those
+
+?152-2052-Q2: My father still ....... heating oil from a company in Chicago.
+buys
+bought
+will buy
+
+?173-2223-Q3: Most of the kids at school thought he was scared and that he would ....... of the
+race.
+chicken out
+chicken
+chicken in
+
+?169-2099-Q9: "I won't lend you any more money." Matthew ....... to lend me any more money.
+offered
+asked
+refused
+invited
+
+?176-2226-Q6: He wants to ....... as a mean boss so his employees will work hard for him.
+come in
+come across
+come about
+
+?13-0923-Q3: That ......., they walked out of the room in total silence.
+told
+said
+telling
+saying
+
+?180-2230-Q10: Lawrence is trying to ....... on fatty foods.
+cut down
+cut up
+cut about
+
+?163-2093-Q3: "Go to bed immediately!" Mary's mother ....... her to go to bed immediately.
+advised
+begged
+asked
+ordered
+
+?172-2222-Q2: Randy always tried to ....... on rainy days.
+cheer everyone on
+cheer everyone up
+cheer everyone
+
+?71-1691-Q1: If I ....... you, I wouldn't risk it.
+had been
+am
+would be
+were
+
+?189-2239-Q9: Karen had to ....... for Dave while he was away on vacation.
+fill up
+fill
+fill in
+
+?22-0932-Q2: In the ....... moments of the symphony someone's mobile phone started ringing.
+close
+closing
+shut
+shutting
+
+?141-2041-Q1: One person who made ....... a career based on the sea was Rachel Carson.
+himself
+herself
+itself
+myself
+
+?166-2096-Q6: "Please, please, turn down the radio!" Mark's sister ....... him to turn the radio
+down.
+reminded
+ordered
+asked
+begged
+
+?175-2225-Q5: He ....... when the police officers started to question him about the robbery.
+clammed
+clammed up
+clammed about
+
+?100-1870-Q10: A wise man once said that a change is almost ....... a holiday.
+as good as
+as long as
+as soon as
+as much as
+
+?196-2246-Q6: The criminal tried to ....... the evidence quickly.
+get rid of
+get rid about
+get rid on
+
+?56-1586-Q6: I've just been ....... here that man has been released.
+reads
+reading
+read
+have read
+
+?66-1596-Q6: Don't worry even if you make a mistake because if you ......., it doesn't matter.
+were doing
+had done
+do
+will do
+
+?8-0888-Q8: As we don't have much money at the moment, we've decided to ....... without
+certain luxuries.
+do
+get
+make
+take
+
+?51-1581-Q1: It's time we ........
+go
+went
+are going
+going
+
+?57-1587-Q7: If you were stopped by the police for speeding, what ....... you do?
+will
+shall
+do
+would
+
+?11-0921-Q1: I dare ....... you're right.
+tell
+told
+tells
+say
+
+?58-1588-Q8: Long ....... the King!
+live
+lives
+living
+lived
+
+?111-1991-Q1: Marty often ....... important issues at the meetings.
+brought down
+brought up
+brought over
+
+?89-1779-Q9: When are you going to the party? ........
+Cindy is coming with me
+We arrived at 7 pm
+We're going right after work
+
+?161-2091-Q1: "Would you like to spend the weekend with us?" They ....... her to spend the
+weekend with them.
+advised
+ordered
+invited
+begged
+
+?61-1591-Q1: Ah there you .......! I wondered where you were.
+be
+were
+are
+have been
+
+?48-1578-Q8: Sometimes I wonder if I ....... ever succeed.
+do
+shall
+am
+were
+
+?116-1996-Q6: The guard had to ....... the dogs when Henry approached the locked gate.
+call on
+call down
+call off
+
+?72-1692-Q2: If they had waited another month, they could probably ....... a better price for
+their house.
+would get
+had got
+have got
+could get
+
+?133-2033-Q3: Airplanes sometimes fly to unscheduled cities ....... the weather is bad.
+when
+where
+wherever
+whereas
+
+?195-2245-Q5: He worked hard to ....... Berkeley this past year.
+get with
+get into
+get by
+
+?134-2034-Q4: Please read the book ....... it's still available from the library.
+before
+although
+since
+while
+
+?125-2025-Q5: ....... elephants are sleeping under the shade of the elm tree over there.
+These
+Those
+This
+That
+
+?30-0940-Q10: I'm afraid that tree will have to come down as it ....... out the light in the sitting
+room.
+close
+closes
+shut
+shuts
+
+?199-2249-Q9: Beth's father is too proud to ask for ........
+hand-ins
+hand-overs
+hand-outs
+
+?68-1598-Q8: The man who ....... walking down the road just then, lives next door.
+is
+will be
+was
+has been
+
+?38-1018-Q8: There is a man in the river fully clothed who is ........
+in problems
+in hardships
+in difficulties
+in hazards
+
+?120-2000-Q10: Due to his illness, he worked hard to ....... with his missed schoolwork.
+catch on
+catch up
+catch
+
+?187-2237-Q7: The manager was so afraid the multi-million dollar deal would ........
+fall up
+fall down
+fall through
+
+?60-1590-Q10: When I'm in town, I ....... listening to the birds.
+missing
+miss
+misses
+missed
+
+?82-1772-Q2: What are you going to buy your wife for Christmas? ........
+I picked it up yesterday
+A bottle of perfume
+She received jewelry from her mother
+
+?139-2039-Q9: The concert will end at 10.30 p.m. ....... the audience insists on several encores.
+while
+unless
+though
+as
+
+?52-1582-Q2: I honestly couldn't follow a word you ........
+are saying
+will say
+were saying
+did say
+
+?93-1863-Q3: You need to go to the hospital ....... possible. An erratic heartbeart can be very
+dangerous.
+as good as
+as long as
+as soon as
+as much as
+
+?185-2235-Q5: Bruce ....... of school when he was only fifteen years old and then took on a job.
+dropped
+dropped out
+dropped by
+
+?121-2021-Q1: Look over there. ....... is the biggest pumpkin I've ever seen.
+That
+Those
+These
+This
+
+?23-0933-Q3: The detectives had no problems in solving the crimes as it was clearly an open
+and ....... case.
+closed
+closing
+shut
+shutting
+
+?49-1579-Q9: How many times ....... you been there?
+has
+will
+have
+did
+
+?168-2098-Q8: "I'll give you a lift to the airport." Michelle ....... to give her husband a lift to the
+airport.
+refused
+offered
+asked
+begged
+
+?80-1700-Q10: If only I'd invested in that company, I'd ....... a millionaire by now.
+became
+have become
+had become
+would become
+
+?73-1693-Q3: It's quite simple really. When it's cold, water ........
+froze
+has frozen
+freezes
+had frozen
+
+?55-1585-Q5: She was annoyed that she ....... spoken to like that.
+had been
+has been
+was been
+will have been
+
+?137-2037-Q7: Elena will groom the horse in the morning ....... she can ride it in the afternoon.
+until
+unless
+so that
+when
+
+?110-1990-Q10: No one in the group could believe that Sally and Steve ........
+broke over
+broke up
+broke apart
+
+?158-2058-Q8: Her best friend ....... in that apartment building over there.
+live
+lives
+lived
+
+?129-2029-Q9: ....... film that dad saw last week seems like an interesting movie to watch.
+These
+That
+This
+Those
+
+?83-1773-Q3: How many people are coming to the birthday party? ........
+There were about 70 people at the restaurant
+around the corner
+We're expecting about 25 people
+Fifty people were there
+
+?45-1575-Q5: Tomorrow we ....... taking the day off.
+will
+have
+were
+are
+
+?47-1577-Q7: I must admit you ....... tried but I'm afraid the answer is still no.
+did
+will
+do
+have
+
+?4-0884-Q4: After they had shouted at each other, they decided to ....... up.
+do
+get
+make
+take
+
+?41-1571-Q1: I ....... come if I had had time.
+have
+had
+would have
+did
+
+?124-2024-Q4: Her eyes shining, the little girl pointed to ....... piece of candy.
+that
+this
+these
+those
+
+?128-2028-Q8: The pilot calmly steered us through ....... big cloud.
+this
+that
+these
+those
+
+?159-2059-Q9: Last week we ....... 150 newspapers.
+delivers
+delivered
+will deliver
+
+?2-0882-Q2: What time do you ....... up in the morning?
+do
+get
+make
+take
+
+?156-2056-Q6: The relative humidity usually ....... when the temperature goes down.
+falls
+fell
+will fall
+
+?117-1997-Q7: Everyone could see by the grimace on his face that he didn't ....... the meal in
+front of him.
+care on
+care for
+care of
+
+?103-1983-Q3: Ken really likes Kirstie but he's too nervous to ........
+ask her out
+ask her on
+ask out
+
+?145-2045-Q5: Decompression sickness manifests ....... with joint pain, and it can be fatal.
+myself
+herself
+itself
+himself
+
+?130-2030-Q10: May I buy five of ....... pictures hanging over there, please?
+this
+that
+these
+those
+
+?34-1014-Q4: The main difference is that 'I will' ........
+means 'I want to'
+signifies 'I want to'
+shows 'I want to'
+says 'I want to'
+
+?19-0929-Q9: ....... us that story again!
+Say
+Tell
+Tells
+Says
+
+?192-2242-Q2: They rented a car so it would be easier to ....... in the new city.
+get on
+get around
+get
+
+?183-2233-Q3: I ....... on my friend yesterday to surprise her.
+dropped
+dropped over
+dropped in
+
+?20-0930-Q10: I'm afraid I can't ....... for sure but I think it's safe.
+said
+says
+say
+telling
+
+?33-1013-Q3: I think the best way is to tell you a story that ........
+clears the difference
+explains the difference
+expounds the difference
+exposes the difference
+
+?86-1776-Q6: What is your favorite kind of food? ........
+I ate Mexican food yesterday
+I like Italian food
+Korean cuisine is very spicy
+
+?191-2241-Q1: Rick's father and mother didn't ....... with his grandparents and were always
+having disagreements.
+get about
+get along
+get
+
+?114-1994-Q4: Candace has a bad habit of ....... front of others.
+butting in
+butting
+butting into
+
+?17-0927-Q7: It's no good trying to persuade me because I'm not ....... a word.
+tells
+saying
+telling
+told
+
+?100. 54-1584-Q4: I've just ....... that the price has gone up again.
+am told
+have told
+been told
+was told
+
+?101. 27-0937-Q7: After a number of years as a monk he decided to leave because he felt very .......
+in.
+shut
+shutting
+closes
+closed
+
+?102. 88-1778-Q8: What are your thoughts on yesterday's meeting? ........
+I think the president will be there
+I'm glad we covered the human resources' issue
+We should bring up the workers' concerns
+
+?103. 154-2054-Q4: When she was younger, my grandmother ....... in a mortuary.
+works
+will work
+worked
+
+?104. 105-1985-Q5: Norman is really aggressive and sometimes he should know when to ........
+back up
+back off
+back over
+
+?105. 194-2244-Q4: His salary is low so he's just ....... right now.
+getting in
+getting about
+getting by
+
+?106. 63-1593-Q3: He told them he ....... starting work the next day.
+will be
+will have been
+would be
+would have been
+
+?107. 85-1775-Q5: How was your honeymoon? ........
+It was great
+We went by plane
+We went to Mexico
+
+?108. 69-1599-Q9: It doesn't make sense. I can't understand why he ....... at you last night.
+had shouted
+is shouting
+has should
+shouted
+
+?109. 108-1988-Q8: After the tragic accident, Lauren's mother had a nervous ........
+breakup
+breakdown
+breakthrough
+
+?110. 101-1981-Q1: Sherri tries to ....... Marcie all the time.
+act up
+act like
+seeming like
+
+?111. 53-1583-Q3: He asked me what I ....... doing there.
+am
+did
+will be
+was
+
+?112. 74-1694-Q4: If he decides to accept that job, he ....... it for the rest of his life.
+has regretted
+had regretted
+is regretting
+will regret
+
+?113. 106-1986-Q6: Sandy wants to learn how to drive but she must also learn how to ....... so she
+can get in and out of parking spots easily.
+back up
+back behind
+back off
+
+?114. 104-1984-Q4: Lenny didn't ....... when his superior reprimanded him.
+back up
+back down
+back over
+
+?115. 12-0922-Q2: I've ....... you not to do that many times before.
+told
+saying
+says
+said
+
+?116. 188-2238-Q8: The children tried to ....... a way of getting to the concert on their own.
+figure out
+figure about
+figure up
+
+?117. 94-1864-Q4: Oh no! I failed all my exams last week. I'm ....... dead when my parents see my
+final report card.
+as good as
+as long as
+as soon as
+as much as
+
+?118. 95-1865-Q5: I bet you don't love me ....... I love you. That would be impossible!
+as good as
+as long as
+as soon as
+as much as
+
+?119. 167-2097-Q7: "Don't play with the matches. They're very dangerous." The teacher ....... the
+children not to play with the matches.
+ordered
+asked
+warned
+begged
+
+?120. 102-1982-Q2: When he tried to balance his checkbook, he found that things just didn't ........
+add on
+add right
+add up
+
+?121. 15-0925-Q5: That's what people are always ........
+say
+said
+telling
+saying
+
+?122. 3-0883-Q3: At the moment we are trying to ....... money for the town centre.
+do
+get
+make
+take
+
+?123. 9-0889-Q9: We mustn't be late this morning because today is when the new boss is going to
+....... over.
+do
+get
+make
+take
+
+?124. 62-1592-Q2: She said she'd help him if she ........
+could
+can
+can't
+have been able
+
+?125. 181-2231-Q1: The custody battle ....... for many months.
+dragged down
+dragged on
+dragged in
+
+?126. 90-1780-Q10: Where is the best place to go for a drink? ........
+I'll meet you there after work
+The little pub around the corner has great beer on
+La Cantina has some great food tap
+
+?127. 1-0881-Q1: You must decide and ....... up your mind.
+do
+get
+make
+take
+
+?128. 5-0885-Q5: They are very good friends and ....... on well with each other.
+do
+get
+make
+take
+
+?129. 14-0924-Q4: You shouldn't take any notice of that because it's only hear........
+telling
+says
+tells
+say
+
+?130. 146-2046-Q6: Rachel Carson's first book, Under the Sea-Wind, described struggles sea
+creatures find ....... facing.ourselves
+yourselves
+themselves
+itself
+
+?131. 91-1861-Q1: Teenage girls smoke almost ....... boys in many of the villages in West Java.
+as good as
+as long as
+as soon as
+as much as
+
+?132. 98-1868-Q8: Many British housewives cannot understand why many British men love
+watching football twice ....... their women.
+as good as
+as soon as
+as long as
+as much as
+
+?133. 190-2240-Q10: The couple ....... many forms before they could immigrate to England.
+filled
+filled about
+filled out
+
+?134. 18-0928-Q8: Now that would be ....... but my lips are sealed.
+told
+saying
+telling
+said
+
+?135. 78-1698-Q8: If she goes on passing her exams, ....... soon be qualified to practise as a lawyer.
+she's
+she had
+she has
+she'll
+
+?136. 126-2026-Q6: ....... are the best days of our lives.
+These
+This
+Those
+That
+
+?137. 135-2035-Q5: Everybody had dessert ....... they finished eating the main course.
+while
+because
+until
+after
+
+?138. 118-1998-Q8: He didn't ....... to new concepts easily.
+catch on
+catch up
+catch with
+
+?139. 65-1595-Q5: He refused to go until he ....... seen all the paintings.
+had
+was
+is
+has
+
+?140. 140-2040-Q10: ....... they feel threatened, dogs sometimes display aggressive behavior.
+Until
+Where
+When
+Before
+
+?141. 155-2055-Q5: The athlete ....... with the college track team next month.
+trains
+trained
+will train
+
+?142. 59-1589-Q9: If I get there early enough, I ....... you a seat.
+did save
+do save
+am saving
+shall save
+
+?143. 198-2248-Q8: You'll need to ....... your assignments by Friday.
+hand by
+hand
+hand in
+
+?144. 131-2031-Q1: Builders use plywood in the construction of small boats ....... it is easy to shape.
+although
+because
+after
+while
+
+?145. 10-0890-Q10: Most of the telephone lines were destroyed in the storm last night and so it's
+almost impossible to ....... through to anybody today.
+do
+get
+make
+take
+
+?146. 24-0934-Q4: The police officer warned us that the road ahead was ........
+shut
+shutting
+closing
+closed
+
+?147. 84-1774-Q4: What are you doing tonight? ........
+We had a great time
+I went to that new Asian restaurant
+I think I'm going to a movie with Susan
+
+?148. 136-2036-Q6: The pep rally won't begin ....... the last class of the day has ended.
+until
+so that
+since
+than
+
+?149. 25-0935-Q5: In view of the limited amount of information and evidence the case was now
+considered to be ........
+closing
+closed
+shutting
+shut
+
+?150. 165-2095-Q5: "Park the car behind the van." The instructor ....... him to park the car behind
+the van.
+offered
+told
+asked
+ordered
+
+?151. 171-2221-Q1: The couple ....... of the hotel early this morning.
+checked out
+checked in
+checked about
+
+?152. 70-1600-Q10: Come on tell me honestly what you ....... to do now.
+wanted
+want
+are wanting
+will want
+
+?153. 115-1995-Q5: Ken tried to ....... his teachers in order to get a good report card.
+butter up
+butter over
+butter in
+
+?154. 67-1597-Q7: He ....... silly things like this. Take no notice now.
+always did
+will always do
+had always done
+is always doing
+
+?155. 113-1993-Q3: He could feel the back of his neck ....... when they started talking about the
+tragedy.
+burn on
+burn in
+burn up
+
+?156. 151-2051-Q1: The candidate ....... many voters when she ran for governor last year.
+impress
+impressed
+will impress
+
+?157. 99-1869-Q9: Many anti-war protesters think that the President of the United States should
+withdraw his troops from Iraq ....... possible.
+as long as
+as soon as
+as good as
+as much as
+
+?158. 177-2227-Q7: Rick ....... a terrible cold this week.
+came up with
+came about with
+came down with
+
+?159. 79-1699-Q9: If I pay you twice as much, will you ....... to finish by Tuesday?
+are able
+is able
+be able
+can be able
+
+?160. 174-2224-Q4: The supervisor asked everyone to ....... for the manager's birthday present.
+chip
+chip over
+chip in
+
+?161. 179-2229-Q9: The new police chief is trying to ....... on the current drug problem in the city.
+crack down
+crack over
+crack
+
+?162. 50-1580-Q10: She's ....... working there since she left school.
+had
+done
+have
+been
+
+?163. 81-1771-Q1: When do you have to pick John up at the airport? ........
+He flew into the international airport
+I don't think she's coming
+I should be there at about five o'clock
+
+?164. 170-2100-Q10: The teacher said to her student: "You need to study harder." She ....... him to
+study harder.
+asked
+advised
+ordered
+begged
+
+?165. 28-0938-Q8: After the terrible experiences that they had been through, the couple .......
+themselves away from the community.
+shut
+shuts
+closes
+closing
+
+?166. 46-1576-Q6: Where did you ....... for your holiday in the end?
+went
+gone
+go
+going
+
+?167. 7-0887-Q7: She's good at writing stories for children and is always keen to ....... up new plots.
+do
+get
+make
+take
+
+?168. 127-2027-Q7: ....... students at the administration office want to transfer to our school.
+Those
+That
+This
+These
+
+?169. 97-1867-Q7: Rampant corruption in Indonesia will continue to happen ....... the government
+continues to deny that the problem exists.
+as good as
+as long as
+as soon as
+as much as
+
+?170. 144-2044-Q4: Divers use external air supplies to enable ....... to breathe under water.
+ourselves
+yourselves
+himself
+themselves
+
+?171. 162-2092-Q2: "Could you open the window please?" She ....... him to open the window.
+reminded
+ordered
+asked
+warned
+
+?172. 16-0926-Q6: What I ....... and what I do are not necessarily the same.
+said
+saying
+say
+tell
+
+?173. 123-2023-Q3: Matthew, take ....... and put it over there.
+this
+that
+these
+those
+
+?174. 32-1012-Q2: I can see from the expression on your face that you haven't ........
+got a thought
+got a view
+got a clue
+got a suggestion
+
+?175. 76-1696-Q6: If he hadn't been driving so fast, he ....... have hit the motorcyclist.
+didn't
+hadn't
+wouldn't
+hasn't
+
+?176. 75-1695-Q5: If you ....... of applying for that job, my advice is: forget it.
+are thinking
+will think
+will be thinking
+would think
+
+?177. 77-1697-Q7: ....... he been more careful, he would have spotted the mistake.
+Were
+Had
+Has
+Is
+
+?178. 29-0939-Q9: The new musical that has had such bad reviews will ....... at the end of this week.
+close
+closed
+shut
+shuts
+
+?179. 40-1020-Q10: The man on the river bank, who is good at grammar, thinks the man really
+wants to drown, walks on and ........
+allows him drown
+permits him drown
+lets him drown
+lets him to drown
+
+?180. 186-2236-Q6: After a lot of fuss, Rose ....... liking the new dish very much.
+ended up
+ended
+ended in
+
+?181. 142-2042-Q2: Deep-sea divers wear wetsuits to protect ....... under the water.
+ourselves
+yourselves
+themselves
+itself
+
+?182. 153-2053-Q3: Janelle ....... for the neighbours next Saturday night.
+baby-sat
+baby-sit
+will baby-sit
+
+?183. 143-2043-Q3: If you were a diver, you would buy ....... a JIM suit or helmet.
+myself
+himself
+yourself
+herself
+
+?184. 182-2232-Q2: The architect ....... some blueprints for you last week.
+drew on
+drew up
+drew down
+
+?185. 87-1777-Q7: Who is coming to the business conference? ........
+The management team and the personnel
+department are coming for sure
+Fifty members attended the conference
+The assembly line workers were there
+
+?186. 35-1015-Q5: If you say 'I shall' then you are talking ........
+on the future
+about the future
+to the future
+for the future
+
+?187. 193-2243-Q3: Lucy was so busy that she didn't ....... fixing the stereo.
+get around
+get around to
+get with
+
+?188. 37-1017-Q7: After a few minutes he ........
+attains a river
+acquires a river
+nears a river
+reaches a river
+
+?189. 31-1011-Q1: Do you know the difference .......?
+between will and shall
+of will and shall
+from will and shall
+by will and shall
+
+?190. 39-1019-Q9: The man in the river keeps ........
+calling off 'I will drown, I will drown'
+calling out 'I will drown, I will drown'
+calling to 'I will drown, I will drown'
+calling from 'I will drown, I will drown'
+
+?191. 149-2049-Q9: The bends occurs when divers raise ....... to the top too quickly.
+ourselves
+themselves
+yourselves
+itself
+
+?192. 197-2247-Q7: The students ....... when the teacher left the room.
+goofed up
+goofed off
+goofed on
+
+?193. 184-2234-Q4: Cathy ....... her mother's house for a visit this past week.
+dropped
+dropped in
+dropped by
+
+?194. 43-1573-Q3: Before you telephoned, I ....... watching television.
+was
+will be
+am
+have
+
+?195. 160-2060-Q10: Yesterday you ....... you would like to learn how to knit a sweater.
+said
+say
+will say
+
+?196. 112-1992-Q2: Sue felt she should ....... on her math skills before she started school.
+brush on
+brush over
+brush up
+
+?197. 64-1594-Q4: I had instructions that I ....... to leave the door unlocked when I came home.
+will being
+were
+am
+was
+
+?198. 119-1999-Q9: They ....... the hotel late last night.
+checked into
+checked on
+checked
+
+?199. 92-1862-Q2: I told my son that I would take me to the circus next week ....... he keeps his
+promise not to fight with his sister.
+as good as
+as long as
+as soon as
+as much as
+
+?200. 157-2057-Q7: Next year we ....... in the eighth grade.
+are
+will be
+were
+
+~ET Grammar 4~
+
+Quiz
+
+?32-2282-Q2: Ken ....... the best fruit at the supermarket.
+picked in
+picked down
+picked out
+
+?5-2255-Q5: Even though he was exhausted, he ........
+kept going
+kept out
+kept in
+
+?92-2362-Q2: We're going to the Botanical Gardens and ....... tomorrow, we're planning to see
+some more aspects this city has to offer.
+in
+(none)
+on
+
+?134-2474-Q4: You can tell just looking at their out of date equipment that the company is
+well ....... the times.
+behind
+across
+under
+outside
+
+?8-2258-Q8: When I hit my head on the cupboard, I almost ........
+knocked myself out
+knocked myself in
+knocked myself
+
+?176-3076-Q6: The children ....... taken to school by bus every day.
+are
+have
+was
+had
+
+?63-2313-Q3: Krista ....... her ill husband all day long.
+waited on
+waited in
+waited down
+
+?50-2300-Q10: Leslie decided to ....... early from the party.
+take in
+take off
+take on
+
+?141-3041-Q1: No sooner ....... I shut the door, when the telephone rang.
+have
+did
+will
+had
+
+?161-3061-Q1: I told them I ....... just going out for a short walk.
+would
+am
+was
+will
+
+?121-2461-Q1: There's no need to worry we shall get to the station long before the train
+leaves as we have ....... of time.
+sacks
+packets
+parcels
+bags
+
+?115-2455-Q5: I need to find some kind of chemical that will ....... the weeds in the garden.
+keep off
+keep out
+keep down
+keep on
+
+?20-2270-Q10: Ray hadn't seen his friend in years but he decided to ....... anyway.
+look him up
+look him down
+look him in
+
+?164-3064-Q4: I wonder what ....... happened while I was away.
+will have
+has
+was
+had
+
+?56-2306-Q6: Bryan tapped Pauline on her shoulder so she would ....... and see the parade
+approaching behind them.
+turn in
+turn over
+turn around
+
+?100-2370-Q10: We're going for dinner at a great Italian restaurant ....... tonight. It's not far
+from here.
+(none)
+on
+about
+
+?44-2294-Q4: The assembly line problem was a minor ....... for the company last week.
+set about
+set down
+set back
+
+?184-3084-Q4: And at other times I'm glad I ....... know what the future holds.
+didn't
+doesn't
+hadn't
+don't
+
+?110-2380-Q10: ....... 2005, I finished my degree and now I'm working with a small accounting
+firm.
+On
+In
+At
+
+?148-3048-Q8: I'd had scarcely any time to think about it before they ....... me for my opinion.
+had asked
+did ask
+asked
+have asked
+
+?151-3051-Q1: What ....... be doing this time tomorrow?
+were you
+did you
+have you
+will you
+
+?34-2284-Q4: The kids ....... Trent because he is different.
+pick on
+pick over
+pick down
+
+?158-3058-Q8: ....... be buying the house or haven't you decided yet?
+Did you
+Have you
+Were you
+Will you
+
+?31-2281-Q1: Emily ....... when she suddenly saw the burglar enter her home.
+passed out
+passed in
+passed over
+
+?142-3042-Q2: By the time I had reached the bottom of the mountain, I ....... extremely tired.
+feel
+have felt
+felt
+am feeling
+
+?21-2271-Q1: I hardly ever gamble but I was ....... at the casino yesterday.
+lucky
+lucked
+lucked out
+
+?114-2454-Q4: What you have to do is to ....... a new idea that will enable us to make a lot of
+money.
+think over
+think out
+think about
+think up
+
+?87-2357-Q7: ....... three weeks, I'm going on a camping trip. We're going to a really scenic
+spot.
+On
+In
+(none)
+
+?192-3092-Q2: That programme is so boring that it's like watching paint ........
+dries
+dried
+dry
+has dried
+
+?117-2457-Q7: The time has now come when it will be necessary to ....... making a plan.
+see about
+see over
+see through
+see into
+
+?109-2379-Q9: ....... midnight, the tradition is to sing a traditional song to ring in the New Year.
+On
+At
+In
+
+?98-2368-Q8: I'm going to finish reading this great book ....... today — it's really captivating.
+in
+on
+(none)
+
+?111-2451-Q1: If you want to join that club, you have to ....... a form and send it to your
+secretary.
+fill up
+fill out
+fill into
+fill over
+
+?156-3056-Q6: I really hope I ....... see you again.
+did
+shall
+should
+would
+
+?179-3079-Q9: How many times have you ....... your house broken into?
+been
+had
+be
+have
+
+?28-2278-Q8: Everyone laughed at the ....... between the twin brothers at the party.
+mix in
+mix up
+mix over
+
+?27-2277-Q7: The items are ....... because the manager wants to make more room for the
+incoming spring line.
+marked under
+marked down
+marked over
+
+?159-3059-Q9: I'm sure they ....... get married and live happily ever afterwards.
+did
+have
+will
+would
+
+?16-2266-Q6: Norma promised she would ....... Cara's children while she was away on a
+business trip.
+look in over
+look in on
+look down on
+
+?181-3081-Q1: ....... me if I've told you this before.
+Stopping
+Stopped
+Stops
+Stop
+
+?172-3072-Q2: Is he ....... arrested as we speak?
+be
+been
+being
+will be
+
+?116-2456-Q6: When spring comes, people often feel inclined to ....... their houses.
+do over
+do through
+do up
+do in
+
+?14-2264-Q4: The rich family ....... poor people in this area.
+looks down in
+looks down on
+looks down back
+
+?62-2312-Q2: Ethan asked his girlfriend to ....... the music so he could clearly hear the music
+they were listening to in the car.
+turn over
+turn up
+turn in
+
+?23-2273-Q3: The couple decided to kiss and ....... after the day long argument.
+make out
+make on
+make up
+
+?106-2376-Q6: ....... Independence Day, we always go to the fair and watch the fireworks at 11
+pm.
+About
+On
+(none)
+
+?123-2463-Q3: The station isn't far away and the train leaves in about ten minutes so there is
+no need to worry — we have time to ........
+save
+store
+spare
+place
+
+?26-2276-Q6: The department store has ....... its prices since the last time I was here.
+marked over
+marked up
+marked about
+
+?136-2476-Q6: You can tell she has hit the ....... time because of the huge car she drives.
+high
+massive
+large
+big
+
+?83-2353-Q3: My birthday is ....... April. Can you come to my birthday party?
+on
+(none)
+in
+
+?3-2253-Q3: Most of the service stations decided to ....... their gas prices after the gas war
+between them.
+jack in
+jack out
+jack up
+
+?147-3047-Q7: I must admit I ....... thought how the story would finish before I read the book.
+haven't
+hadn't
+aren't
+couldn't
+
+?29-2279-Q9: Billy was so tired that he was ....... in class.
+nodding in
+nodding on
+nodding off
+
+?12-2262-Q2: At long last the storm is starting to look like it's going to ........
+let in
+let down
+let up
+
+?174-3074-Q4: There's no question that they ....... delighted when they see her tomorrow.have been
+will be
+had been
+will have been
+
+?11-2261-Q1: Jeff felt as if he had been ....... when he lost his job.
+let on
+let down
+let over
+
+?95-2365-Q5: My vacation starts ....... July 3. Wendy will fill in for me while I'm gone.
+on
+at
+in
+
+?4-2254-Q4: Kevin ....... the great opportunity to be the floor manager.jumped all over
+jumped all over
+jumped in
+jumped over
+
+?37-2287-Q7: Jeremy didn't want to ....... the wedding any longer.
+put over
+put by
+put off
+
+?68-2318-Q8: Rob looks ....... because he's working two jobs at the moment.
+worn on
+worn in
+worn out
+
+?185-3085-Q5: Let's ....... there tomorrow if it's fine.
+going
+gone
+go
+goes
+
+?150-3050-Q10: It ....... a great shock to everyone because he hadn't said a word for 10 years.
+is
+will be
+was
+are
+
+?187-3087-Q7: Try ....... these irregular verbs by next week.
+learned
+to learn
+learns
+learning
+
+?36-2286-Q6: After weeks of planning the escape, Sue finally started to believe they could ........
+pull it off
+pull it forward
+pull it up
+
+?168-3068-Q8: I was asking myself what in all honesty she ....... do next.
+will
+would
+shall
+had
+
+?125-2465-Q5: I told him time and ....... not to do it but he takes no notice.
+often
+already
+again
+frequently
+
+?78-2348-Q8: I'm meeting an old friend for lunch ....... noon. I haven't seen her for a long time.
+on
+in
+at
+
+?177-3077-Q7: I can assure you that this box ....... never been opened before I opened this
+morning.
+was
+will
+is
+had
+
+?137-2477-Q7: If you really want to send that letter off today, it's ....... time you went to the
+post office.
+high
+quick
+proper
+right
+
+?54-2304-Q4: Leila was feeling blue so she went shopping to ....... some new outfits.
+try at
+try on
+try in
+
+?139-2479-Q9: If you want to grow as a business and attract new customers you must ....... up
+with the times.
+move
+follow
+keep
+hold
+
+?17-2267-Q7: The sheriff said he would ....... the crime a bit more thoroughly.
+look down
+look on
+look into
+
+?80-2350-Q10: I'm going to my parents' house in Maine. What are you doing ....... Christmas
+Day?
+on
+in
+with
+
+?65-2315-Q5: Rayleen ....... her little brother all the time.
+watched out for
+watched out about
+watched out
+
+?118-2458-Q8: It's easy to see from the way the garden is looking that winter has ........
+set out
+set in
+set up
+set off
+
+?42-2292-Q2: The corner store often ....... bread near the end of the week.
+runs out over
+runs out of
+runs down on
+
+?105-2375-Q5: ....... Saturday night, we went to a great movie and then had supper with the
+Johnsons.
+For
+On
+In
+
+?165-3065-Q5: She wonders why I never ....... abroad by plane.
+travel
+have been travelling
+has travelled
+will have travelled
+
+?43-2293-Q3: The night before the play, the crew ....... the stage.
+set up
+set down
+set in
+
+?49-2299-Q9: Kelly ....... her mother. They have many of the same interests.
+takes after
+takes over
+takes on
+
+?193-3093-Q3:  I realize the by the end of this year I ....... writing tests for three years now.
+have been
+will have been
+will be
+will have
+
+?59-2309-Q9: Keira can't bear people who can't make up their minds and is ....... by
+procrastinators.
+turned in
+turned up
+turned off
+
+?127-2467-Q7: It's ....... time she learnt to look after herself.
+of
+in
+about
+through
+
+?183-3083-Q3: Sometimes I wish I ....... what the future holds.
+know
+known
+knew
+knows
+
+?61-2311-Q1: Kevin ....... all of the information and then gave the note to his wife so she could
+put it into a computer file.
+took on
+took down
+took over
+
+?72-2342-Q2: Mandy can't wait for snow because she wants to go skiing ....... the winter.
+in
+at
+(none)
+
+?190-3090-Q10: Please come back soon and ....... the work you started two weeks ago.
+finished
+finishing
+finish
+finishes
+
+?122-2462-Q2: The concert doesn't start at least an hour and so we have time to ........
+kill
+murder
+remove
+destroy
+
+?66-2316-Q6: Chris was afraid the inexpensive tires would ....... quickly.
+wear on
+wear over
+wear out
+
+?91-2361-Q1: ....... yesterday, we went to the Royal Alberta Museum they had some really
+interesting exhibits.
+On
+For
+(none)
+
+?52-2302-Q2: Kristie was ....... at Matt because of the things he said to her last week.
+ticked on
+ticked about
+ticked off
+
+?166-3066-Q6: Quite honestly all I was doing was simply ....... polite conversation.
+made
+making
+having made
+makes
+
+?155-3055-Q5: If they ....... arrive late, they will have to get their own meal.
+do
+had
+would
+will
+
+?18-2268-Q8: You can't tell them apart — Elena ....... her mother.
+looks just alike
+looks just like
+looks just over
+
+?198-3098-Q8: That stupid dog ....... all day long.
+does always bark
+always is barking
+had always barked
+is always barking
+
+?75-2345-Q5: ....... last year, the weather was really bad. This year, the forecast is better.
+In
+(none)
+About
+
+?79-2349-Q9: I don't have any plans ....... Thanksgiving Day because my entire family lives
+overseas.for
+|for|
+in
+about
+
+?163-3063-Q3: She told me ....... carefully on the icy roads.
+to be driven
+to have driven
+to drive
+to be driven
+
+?100. 51-2301-Q1: I decided to ....... organic cooking.
+take up
+take over
+take about
+
+?101. 197-3097-Q7: ....... ever heard of this writer before?
+Did you
+Have you
+Do you
+Will you
+
+?102. 39-2289-Q9: That store is really expensive. It's a ........
+rip down
+rip off
+rip over
+
+?103. 15-2265-Q5: She started to ....... the upcoming trip.
+look forward to
+look forward about
+look forward over
+
+?104. 128-2468-Q8: We're not living here for good but just for the time ........
+seeing
+trying
+going
+being
+
+?105. 101-2371-Q1: ....... the seventeenth century, artwork in Europe was quite different from what
+you see today.
+(none)
+In
+On
+
+?106. 96-2366-Q6: I like to eat breakfast ....... the morning but today I had to skip it because I had
+an early meeting with the Board of Directors.
+on
+in
+about
+
+?107. 189-3089-Q9: I'll finish now and I look forward to ....... you again soon.
+seeing
+see
+seen
+having seen
+
+?108. 170-3070-Q10: He came into the room and demanded ....... what was happening.
+to know
+knowing
+know
+having known
+
+?109. 90-2360-Q10: Someday, ....... the future, we're going to build the house of our dreams.
+on
+about
+in
+
+?110. 154-3054-Q4: He was quite definite about it and assured me he ....... come.
+will
+shall
+should
+would
+
+?111. 9-2259-Q9: The company was experiencing financial problems so they had to ....... fifty
+employees.
+lay on
+lay off
+lay out
+
+?112. 191-3091-Q1: Many people ....... tried but no-one has succeeded so far.
+did
+have been
+were
+have
+
+?113. 120-2460-Q10: You can tell by the way she talks and behaves that she ....... her mother.
+takes to
+takes in
+takes back
+takes after
+
+?114. 70-2320-Q10: Jim didn't have much time to ....... the contract.
+write about
+write over
+write up
+
+?115. 162-3062-Q2: He asked me what I ....... with the paint brush.
+did do
+had done
+will do
+have done
+
+?116. 85-2355-Q5: I'm going hiking ....... the weekend. Do you want to come?
+in
+on
+about
+
+?117. 25-2275-Q5: He decided to ....... his past mistakes by doing some good in his community.
+make up about
+make up for
+make up over
+
+?118. 199-3099-Q9: They were eating dinner when the lights ....... out.
+go
+are going
+went
+goes
+
+?119. 186-3086-Q6: Try ....... the door really hard if you want to open it.
+pushing
+push
+pushes
+pushed
+
+?120. 126-2466-Q6: I always like to get to an appointment in ....... time.
+good
+best
+fine
+clear
+
+?121. 67-2317-Q7: Lilly likes to ....... early in the morning so that she's fit for work.
+work on
+work over
+work out
+
+?122. 7-2257-Q7: Just look at that gorgeous girl — She's a ........knock in
+knock in
+knock over
+knock out
+
+?123. 99-2369-Q9: ....... 2004, I'm getting a raise so we'll be able to afford more things like tropical
+vacations.
+On
+(none)
+In
+
+?124. 89-2359-Q9: ....... 2002, I got a promotion and I'm hoping for another one this year.
+On
+(none)
+In
+
+?125. 88-2358-Q8: ....... the day after tomorrow, I'm going to Bora Bora. I can't wait!
+In
+On
+(none)
+
+?126. 173-3073-Q3: All these houses ....... neglected for decades.
+will be
+are being
+has been
+have been
+
+?127. 144-3044-Q4: The witness ....... everyone that he hadn't had anything to do with the crime.
+convinces
+is convincing
+convinced
+has convinced
+
+?128. 33-2283-Q3: Steve was always trying to ....... girls at the nightclub.
+pick down
+pick up
+pick by
+
+?129. 182-3082-Q2: All I can say at the moment is: Long ....... the company!
+live
+lives
+lived
+living
+
+?130. 102-2372-Q2: ....... Valentine's Day, I'm taking my girlfriend to a wonderful spot it's really
+remote and romantic. I hope she likes it.
+On
+In
+About
+
+?131. 69-2319-Q9: We are getting close to ....... the meeting so are there any final questions or
+concerns?
+wrapping down
+wrapping over
+wrapping up
+
+?132. 104-2374-Q4: ....... next month, I'm expecting my family to visit from the Virgin Islands.
+On
+(none)
+In
+
+?133. 13-2263-Q3: He started to ....... his life and then decided to take another trip.
+look back on
+look back in
+look back down
+
+?134. 93-2363-Q3: ....... two weeks, the project should be complete. I hope our clients approve of
+the new format.
+On
+In
+About
+
+?135. 143-3043-Q3: When he was only thirty years old, he ....... already experienced what most
+people only experience when they are much older.
+has
+had
+is
+was
+
+?136. 108-2378-Q8: ....... tomorrow evening, we're going to have a surprise birthday party for Mitch.
+(none)
+About
+In
+
+?137. 149-3049-Q9: He realized he ....... left it in the car before he reported it lost.
+has
+didn't
+wouldn't
+had
+
+?138. 35-2285-Q5: The whole community ....... to make the playground safe and aesthetic.
+pitched on
+pitched in
+pitched over
+
+?139. 46-2296-Q6: Bob's father taught him to be firm and to ....... for what he believes.
+stand down
+stand up
+stand in
+
+?140. 97-2367-Q7: I love going for walks ....... the spring everything is so fresh and beautiful.
+about
+(none)
+in
+
+?141. 180-3080-Q10: I'm sorry you can't come in at the moment because we ....... the house
+decorated right now.
+have had
+will have
+had
+are having
+
+?142. 57-2307-Q7: The teacher asked her students to ....... the assignments by Friday at noon.
+turn on
+turn in
+turn with
+
+?143. 41-2291-Q1: Heidi ....... an old friend while she was shopping last week.
+ran over
+ran down
+ran into
+
+?144. 76-2346-Q6: I have to go for a check-up ....... next week. I go for a check-up once a year.
+about
+on
+(none)
+
+?145. 145-3045-Q5: We asked him why he ....... telephoned earlier.
+hadn't
+hasn't
+didn't
+wouldn't
+
+?146. 48-2298-Q8: The "T" in the acronym ....... Time.
+stands about
+stands over
+stands for
+
+?147. 169-3069-Q9: He actually denied ....... anything of the sort.
+to do
+done
+did
+doing
+
+?148. 47-2297-Q7: People are getting tired of Seth because he always ....... late.
+shows
+shows up
+shows over
+
+?149. 133-2473-Q3: My opinion is that they don't know what to do and are merely playing .......
+time.
+to
+for
+at
+in
+
+?150. 171-3071-Q1: The castle ....... built in the 15th century.
+was
+is
+has been
+will be
+
+?151. 107-2377-Q7: ....... Wednesday night, I'm going to take the staff out for dinner.
+About
+In
+On
+
+?152. 167-3067-Q7: He was wondering what ....... prompted him to take no notice at all.
+has
+have
+had
+having
+
+?153. 10-2260-Q10: Karen didn't want to ....... she she went over the wedding list one more time.
+leave anyone in
+leave anyone out
+leave anyone over
+
+?154. 132-2472-Q2: The railways system is very efficient as the trains always arrive ....... time.
+up
+at
+for
+on
+
+?155. 130-2470-Q10: Time will ....... whether we have made the right decision.
+say
+know
+tell
+find
+
+?156. 1-2251-Q1: Two men staged a ....... at the bank across the street from us yesterday afternoon.
+hold-up
+hold-in
+hold-on
+
+?157. 53-2303-Q3: Marg wanted to ....... the old sofa but her husband couldn't part with it.
+throw out
+throw up
+throw down
+
+?158. 113-2453-Q3: Last week I ....... that book you wanted in a small shop.
+came up
+came into
+came across
+came by
+
+?159. 103-2373-Q3: ....... one week ago, she was told she couldn't have any more time off.
+For
+(none)
+In
+
+?160. 73-2343-Q3: I don't know what time they'll be back ....... this evening, if at all. It all depends
+on the road conditions today.
+for
+in
+(none)
+
+?161. 2-2252-Q2: We still have to ....... the finer details about our upcoming trip to Scotland.
+iron in
+iron on
+iron out
+
+?162. 64-2314-Q4: Neil liked to ....... early on Saturdays.
+wake on
+wake up
+wake over
+
+?163. 58-2308-Q8: John tried to ask Cara out on a date but she ........
+turned him over
+turned him through
+turned him down
+
+?164. 140-2480-Q10: The parcel eventually arrived six weeks later, and not ....... time!
+after
+before
+since
+for
+
+?165. 94-2364-Q4: I finished a very important project ....... two months ago. It was really intense
+because of the cutting edge technology we used.
+on
+(none)
+in
+
+?166. 71-2341-Q1: I wouldn't want his shift — he has to wake up ....... 3 am everyday.
+(none)
+on
+at
+
+?167. 131-2471-Q1: The business has lost a lot of orders recently and is going through a ....... time.
+slender
+poor
+thin
+rough
+
+?168. 82-2352-Q2: The meeting is ....... Monday morning at 9:30 am sharp. Don't be late.
+in
+with
+on
+
+?169. 38-2288-Q8: Kathleen felt like she had to ....... with a lot from her family.
+put up
+put over
+put
+
+?170. 30-2280-Q10: Her father ....... when she was just a kid.
+passed over
+passed away
+passed down
+
+?171. 24-2274-Q4: Even though she squinted, she couldn't ....... what he had written.
+make out
+make over
+make about
+
+?172. 112-2452-Q2: Don't worry we'll have to wait a little longer because I'm sure he'll ....... soon.
+turn up
+turn in
+turn into
+turn down
+
+?173. 124-2464-Q4: The problem is he has no work to do and with time on his ....... he is likely to
+get into trouble.
+hands
+fingers
+feet
+legs
+
+?174. 119-2459-Q9: You need not worry that you'll be left on your own because I'll always ....... you.
+stand for
+stand to
+stand by
+stand from
+
+?175. 153-3053-Q3: I ....... simply wait until she comes back.
+was
+am
+shall
+do
+
+?176. 194-3094-Q4: Do you mind ....... the door as I find it very hot in here?
+to open
+opened
+opens
+opening
+
+?177. 135-2475-Q5: His invention showed that he understood what was going to happen in the
+future and proved he was ....... of his time.
+in front
+before
+ahead
+forward
+
+?178. 81-2351-Q1: ....... yesterday, I went shopping and found some great outfits for spring.
+On
+In
+(none)
+
+?179. 188-3088-Q8: I really appreciate your ....... me at this difficult time.
+helps
+help
+helped
+helping
+
+?180. 178-3078-Q8: That ceremony ....... enacted on Tuesday next.
+has been
+is
+is being
+have
+
+?181. 55-2305-Q5: Samantha was late for the basketball ........
+try out
+try in
+try up
+
+?182. 19-2269-Q9: Before Sheila died from a long cancer battle, she asked her sister to ....... her
+children.
+look down
+look over
+look after
+
+?183. 22-2272-Q2: He is different so many children ....... him.
+made fun at
+made fun over
+make fun of
+
+?184. 77-2347-Q7: I called in to make an appointment and I can see the doctor ....... 3 pm. Can you
+come with me?
+(none)
+on
+at
+
+?185. 196-3096-Q6: How anyone ....... to live in those conditions in the 18th century is difficult to
+imagine.
+manages
+will manage
+managed
+is managing
+
+?186. 175-3075-Q5: That building ....... left unoccupied since 1950.
+would be
+would being
+has been
+will be
+
+?187. 60-2310-Q10: Chris thinks dark hair is a real ........
+turn on
+turn in
+turn up
+
+?188. 146-3046-Q6: Actually I had ....... it to her before we set out.
+mention
+mentions
+mentioning
+mentioned
+
+?189. 157-3057-Q7: What ....... happen to the family if he loses all his money?
+does
+did
+will
+is
+
+?190. 45-2295-Q5: The girl with the purple hair wants to ....... from the group.
+stand out
+stand in
+stand over
+
+?191. 40-2290-Q10: If you ....... the numbers, it will be easier to calculate the estimate.
+round with
+round over
+round off
+
+?192. 86-2356-Q6: After our hiking trip, I'm going to be really sore ....... Monday morning.
+about
+in
+on
+
+?193. 84-2354-Q4: I love swimming ....... the summer months I usually swim at outdoor pool as
+much as I can and sometimes we go the lake.
+about
+(none)
+in
+
+?194. 195-3095-Q5: I honestly think that the time ....... come when we should celebrate our success.
+has
+had
+will
+having
+
+?195. 138-2478-Q8: The orchestra are meant to ....... time with the conductor.
+hold
+keep
+take
+show
+
+?196. 74-2344-Q4: We hope there won't be much snow ....... this year but you never know.
+about
+(none)
+on
+
+?197. 129-2469-Q9: Time ......., it's difficult to believe that we've been here all day.
+flows
+flies
+flees
+files
+
+?198. 152-3052-Q2: ....... go if you like because I have to do some shopping.
+I'm
+I'd
+I'll
+I've
+
+?199. 160-3060-Q10: What do you ....... to do when you leave school?
+wanted
+wanting
+wants
+want
+
+?200. 6-2256-Q6: Trent was ....... of school for bad behavior.
+kicked in
+kicked over
+kicked out
+
+
+
+</div>
+
+
+<!-- ================= HARD-CODED TOC ================= -->
+  <!-- <div id="layout">
+
+<h1 data-auto-title></h1>
+
+<div class="container">
+    <div class="column">
+      <h2>Old Testament</h2>
+      <ul class="index">
+
+
+      </ul>
+    </div>
+
+    <div class="column">
+      <h2>New Testament</h2>
+      <ul class="index">
+
+
+      </ul>
+    </div>
+  </div>
+
+</div>-->
+<!-- END #layout -->
+
+
+<!-- ================= DYNAMIC TOC ================= -->
+<div id="dynamicTOC">
+  <div id="tocContainer">
+
+<h1 data-auto-title></h1>
+
+    <div id="tocButtons">
+      <div class="tocColumn" id="tocColLeft"></div>
+      <div class="tocColumn" id="tocColRight"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= QUIZ MODAL ================= -->
+<div id="modalRoot">
+  <div id="quizModal">
+
+<!--<div id="helloBar">Hello!</div> -->
+
+    <!-- CONTROL BARS LIVE HERE -->
+    <div id="chapterVerseControls">
+      <div class="controlRow">
+
+<button id="instructionsBtn">Instructions</button>
+<!-- <select id="chapterSelect"></select> -->
+
+<button id="strategiesBtn">Strategies</button>
+<!-- <select id="verseSelect"></select> -->
+
+<button id="signalwordsBtn">Signals</button>
+<!-- <button id="goBtn">Go</button> -->
+
+<button onclick="goToNextQuiz()">Go to Quiz</button>
+
+      </div>
+    </div>
+
+    <div id="readaloudControls">
+      <div class="controlRow">
+        <button id="highlightSelected">Highlight</button>
+        <button id="copySelected">Copy</button>
+        <button id="startBtn">Audio</button>
+        <button id="closeModalBtn">Close</button>
+      </div>
+    </div>
+
+    <!-- ACTUAL CONTENT -->
+    <div id="quizModalContent">
+      <div id="quizSections"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+
+(function(){
+
+
+  // [1] GET INPUT SOURCE
+  const src = document.getElementById("rawTextSource");
+  if (!src) return;
+
+  const raw = src.textContent.trim();
+  const lines = raw.split("\n");
+
+  // [2] REGEX RULES
+  const urlRegex = /^https?:\/\/\S+$/i;
+  const urlAnywhere = /(https?:\/\/\S+)/gi;
+
+  // [3] BUILD OUTPUT ARRAYS
+  const htmlResult = [];
+  const speechChunks = [];
+
+  // [4] PARSE LOOP (UNCHANGED LOGIC)
+  for (let i = 0; i < lines.length; i++) {
+
+    let line = lines[i].trim();
+    let next = (lines[i + 1] || "").trim();
+
+    // TITLE + URL HANDLING
+    if (line && !urlRegex.test(line) && urlRegex.test(next)) {
+
+      htmlResult.push(
+        `<a href="${next}" target="_blank" rel="noopener">${line}</a>`
+      );
+
+      speechChunks.push(line);
+
+      i++;
+      continue;
+    }
+
+    // INLINE URL HANDLING
+    const htmlLine = line.replace(urlAnywhere, url =>
+      `<a href="${url}" target="_blank" rel="noopener">${url}</a>`
+    );
+
+    htmlResult.push(htmlLine);
+
+    const cleanText = line.replace(urlAnywhere, "").trim();
+    if (cleanText) {
+      speechChunks.push(cleanText);
+    }
+  }
+
+  // [5] OUTPUT (UNCHANGED — SAFE FOR UI SYSTEM)
+  window.rawText = htmlResult.join("\n");
+
+// SIGNAL: parser is done
+window.parserReady = true;
+
+  // [6] READ-ALOUD HANDOFF (FIXED TO NOT BREAK UI)
+
+  // IMPORTANT:
+  // - no immediate execution
+  // - no blocking
+  // - no fallback globals
+  // - queued after UI thread
+
+  setTimeout(() => {
+    if (typeof window.onParsedTextReady === "function") {
+      window.onParsedTextReady(speechChunks);
+    }
+  }, 0);
+
+})();
+
+</script>
+
+<script>
+(function primeFemaleVoiceOnce() {
+  const synth = window.speechSynthesis;
+  if (!synth) return;
+
+  let primed = false;
+
+  function tryPrime() {
+    if (primed) return;
+
+    const voices = synth.getVoices();
+    if (!voices.length) return;
+
+    const femaleVoice =
+      voices.find(v => /Aria|Zira|Samantha|Victoria|Moira/i.test(v.name)) ||
+      voices.find(v => v.lang && v.lang.startsWith("en")) ||
+      voices[0];
+
+    if (!femaleVoice) return;
+
+    const u = new SpeechSynthesisUtterance(" ");
+    u.voice = femaleVoice;
+    u.volume = 0;
+    u.rate = 1;
+    u.pitch = 1;
+
+    synth.speak(u);
+    primed = true;
+  }
+
+  tryPrime();
+
+  synth.onvoiceschanged = tryPrime;
+
+  // Better Android + mobile coverage (replaces click + touchstart)
+  document.addEventListener("pointerdown", tryPrime, { once: true });
+})();
+</script>
+
+<script>
+(function () {
+
+  function cleanSpeechText(text) {
+    text = text.replace(/\b\d+:\d+\s*/g, '');
+    text = text.replace(/<br\s*\/?>/gi, ' ');
+    text = text.replace(/\n+/g, ' ');
+    text = text.replace(/\s+\./g, '.');
+    text = text.replace(/\.(\S)/g, '. $1');
+    text = text.replace(/\s+/g, ' ').trim();
+    return text;
+  }
+
+  const OriginalUtterance = window.SpeechSynthesisUtterance;
+
+  function PatchedUtterance(text) {
+    return new OriginalUtterance(cleanSpeechText(text));
+  }
+
+  // 🔧 preserve prototype for Android/WebView compatibility
+  PatchedUtterance.prototype = OriginalUtterance.prototype;
+
+  window.SpeechSynthesisUtterance = PatchedUtterance;
+
+})();
+</script>
+
+<script>
+(function() {
+  // ====== 2. Parse Sections ======
+const raw = window.rawText;
+
+if (!raw) return; // IMPORTANT: stop if parser not ready
+
+const segments = raw.split("~").map(s => s.trim()).filter(Boolean);
+  const sections = [];
+
+  for (let i = 0; i < segments.length; i += 2) {
+    const storyBlock = segments[i] || "";
+    const questionBlock = segments[i + 1] || '';
+
+    const lines = storyBlock.split("\n").map(l => l.trim()).filter(Boolean);
+
+    let titleLine = lines[0] || "Untitled Section";
+
+    sections.push({
+      title: titleLine,
+      content: lines.join("\n"),
+      questions: questionBlock
+    });
+  }
+
+window.sections = sections;
+
+
+  // ====== 3. Build TOC ======
+  const leftCol = document.getElementById('tocColLeft');
+  const rightCol = document.getElementById('tocColRight');
+  if (!leftCol || !rightCol) return;
+
+  leftCol.innerHTML = '';
+  rightCol.innerHTML = '';
+  const midpoint = Math.ceil(sections.length / 2);
+
+  sections.forEach((sec, idx) => {
+    const btn = document.createElement('button');
+    btn.textContent = sec.title;
+    btn.addEventListener('click', () => openQuizModal(idx));
+    if (idx < midpoint) leftCol.appendChild(btn);
+    else rightCol.appendChild(btn);
+  });
+
+// ====== 4. Modal Rendering ======
+window.openQuizModal = function(idx) {
+
+  const container = document.getElementById('quizSections');
+  container.innerHTML = '';
+
+  generateQuizSection(sections[idx], idx);
+
+  document.getElementById('modalRoot').classList.add('active');
+  document.body.classList.add('modal-open');
+
+  moveControlsIntoModal();
+
+  // 📌 Chapter/Verse system (navigation layer)
+  buildChapterVerseLogic();
+};
+
+document.addEventListener("click", function(e) {
+
+  const closeBtn = e.target.closest("[data-close-quiz]");
+  if (!closeBtn) return;
+
+  // 🔒 Stronger prevent auto-reopen
+  window.__quizJustClosed = Date.now();
+
+  const modalRoot = document.getElementById("modalRoot");
+  const container = document.getElementById("quizSections");
+
+  // 🔥 1. CLOSE FIRST
+  modalRoot?.classList.remove("active");
+  document.body.classList.remove("modal-open");
+
+  // 🔥 2. Clear content
+  if (container) container.innerHTML = "";
+
+  // 🔥 3. Kill smooth scroll
+  document.documentElement.style.scrollBehavior = "auto";
+
+  // 🔥 4. Immediate reset
+  window.scrollTo(0, 0);
+
+  const modal = document.getElementById("quizModal");
+  if (modal) modal.scrollTop = 0;
+
+  const modalContent = document.getElementById("quizModalContent");
+  if (modalContent) modalContent.scrollTop = 0;
+
+  // 🔥 5. Prevent browser restoring old position
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+
+  if (window.resetQuizScrollState) {
+    window.resetQuizScrollState();
+  }
+
+  // 🔥 FINAL OVERRIDE (critical)
+  setTimeout(() => {
+    window.scrollTo(0, 0);
+  }, 0);
+
+  requestAnimationFrame(() => {
+    window.scrollTo(0, 0);
+  });
+
+});
+
+function generateQuizSection(section, idx) {
+  const container = document.getElementById('quizSections');
+
+// ===== Paragraph numbering control =====
+// true  = number story paragraphs
+// false = never number story paragraphs
+const NUMBER_PARAGRAPHS = false;
+
+// Helper: render story paragraphs with optional numbering
+function renderNumberedLines(lines, sectionTitle) {
+  return lines
+    .filter((line, idx) => {
+      // ❌ Remove duplicate header (first line only)
+      if (
+        idx === 0 &&
+        sectionTitle &&
+        line.trim().toLowerCase() === sectionTitle.trim().toLowerCase()
+      ) {
+        return false;
+      }
+      return true;
+    })
+    .map((line, lineIdx) => {
+      // Never number if disabled
+      if (!NUMBER_PARAGRAPHS) {
+        return `<p>${line}</p>`;
+      }
+
+      // Defensive: do not double-number
+      if (/^\d+\.\s/.test(line)) {
+        return `<p>${line}</p>`;
+      }
+
+      return `<p>${lineIdx + 1}. ${line}</p>`;
+    })
+    .join("");
+}
+
+
+let sectionHTML = `
+  <div class="section" data-section-idx="${idx}">
+    <h2 class="parsedHeader">${section.title}</h2>
+    <div class="question-text" contenteditable="true">
+      ${renderNumberedLines(
+        section.content.split("\n").map(l => l.trim()).filter(Boolean),
+        section.title
+      )}
+    </div>
+`;
+
+    const SUBSECTION_MARKERS = [
+      "Quiz",
+      "Concept Quiz",
+      "Context Quiz",
+      "Comprehension Quiz",
+      "Grammar Quiz",
+      "Vocabulary Quiz"
+
+    ];
+
+    const lines = section.questions.split("\n").map(l => l.trim()).filter(Boolean);
+    const subsections = [];
+    let currentSub = null;
+
+let hasBlankLine = false;
+let hasNullBlankLine = false;
+
+lines.forEach(line => {
+  // Detect special lines
+  if (/^\s*blank\s*$/i.test(line)) hasBlankLine = true;
+  if (/^\s*\?blank\s*$/i.test(line)) hasNullBlankLine = true;
+
+  // If both are present, skip all subsections
+  if (hasBlankLine && hasNullBlankLine) {
+    currentSub = null; // do not create any subsection
+    return;
+  }
+
+  if (SUBSECTION_MARKERS.some(marker =>
+  line.toLowerCase().startsWith(marker.toLowerCase())
+)) {
+
+    currentSub = { title: line, questions: [] };
+    subsections.push(currentSub);
+  } else if (currentSub) {
+    currentSub.questions.push(line);
+  }
+});
+
+    subsections.forEach(sub => {
+      const slug = sub.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+      sub.slug = slug;
+
+      sectionHTML += `<h3 class="parsedSubheader">${sub.title}</h3>`;
+      sectionHTML += `<div class="quiz-subsection" data-subsection="${sub.title}" data-sub-slug="${slug}">`;
+
+sectionHTML += `
+  <div class="top-controls">
+    <input type="text" class="quiz-name" placeholder="Name">
+    <input type="text" class="quiz-id" placeholder="ID">
+    <button type="button" class="quiz-submit">Submit</button>
+    <button type="button" class="quiz-close">Close</button>
+  </div>
+
+        <div class="quiz-scoreboard"
+             style="display:none; width:100%; margin-bottom:12px;
+                    padding:6px; border:1px solid #9aaed1; border-radius:6px;
+                    background:#f9f9f9; font-family:monospace; font-size:12px;">
+          <pre class="scoreboard-data" style="margin:0; white-space:pre-wrap;"></pre>
+          <div class="scoreboard-buttons" style="margin-top:6px; display:flex; gap:6px;">
+            <button type="button" class="score-copy">Copy</button>
+            <button type="button" class="score-txt">TXT</button>
+            <button type="button" class="score-png">PNG</button>
+          </div>
+        </div>
+      `;
+
+      // ===== Question Parsing (supports ? at start + optional second line starting with -) =====
+      sub.questions = sub.questions.map(l => l.trim()).filter(Boolean);
+      let qIndex = 0;
+
+      for (let i = 0; i < sub.questions.length; i++) {
+        let line = sub.questions[i];
+
+        if (!line.startsWith('?')) continue;
+
+        // main question text
+        let question = line.replace(/^\?\s*/, '');
+
+        // optional second line
+        if (i + 1 < sub.questions.length && sub.questions[i + 1].startsWith('-')) {
+          question += ' ' + sub.questions[i + 1].replace(/^-+\s*/, '');
+          i++;
+        }
+
+        // collect options until next question
+        const options = [];
+        let j = i + 1;
+        while (j < sub.questions.length && !sub.questions[j].startsWith('?')) {
+          options.push(sub.questions[j]);
+          j++;
+        }
+
+        const correctPipe = options
+          .filter(o => /\|.*?\|/.test(o))
+          .map(o => o.replace(/\|/g, '').trim())
+          .join('|');
+
+        sectionHTML += `<div class="exercise" data-correct="${correctPipe}">`;
+        sectionHTML += `<p><strong>${qIndex + 1}. ${question}</strong></p>`;
+
+        options.forEach((opt, oi) => {
+          const clean = opt.replace(/\|/g, '').trim();
+          sectionHTML += `
+            <label>
+              <input type="radio" name="q${idx}_${sub.title}_${qIndex}" value="${clean}" data-correct="${correctPipe}">
+              ${String.fromCharCode(65 + oi)}) ${clean}
+            </label><br>
+          `;
+        });
+
+        sectionHTML += `</div>`;
+        qIndex++;
+        i = j - 1;
+      }
+
+      sectionHTML += `</div>`;
+    });
+
+    sectionHTML += `</div>`;
+    container.insertAdjacentHTML('beforeend', sectionHTML);
+  }
+
+  // ====== 5. Event Delegation ======
+  document.getElementById('quizSections').addEventListener('click', e => {
+    const sub = e.target.closest('.quiz-subsection');
+    if (!sub) return;
+
+    if (e.target.classList.contains('quiz-submit')) {
+      const sub = e.target.closest('.quiz-subsection');
+      if (!sub) return;
+
+      const name = sub.querySelector('.quiz-name')?.value || 'Anonymous';
+      const id   = sub.querySelector('.quiz-id')?.value || 'N/A';
+
+      const section = sub.closest('.section')?.querySelector('h2')?.textContent.trim() || 'Unknown Section';
+      const subsection = sub.dataset.subsection || 'Unknown Subsection';
+
+      const exercises = sub.querySelectorAll('.exercise');
+      let correctAnswers = 0;
+      exercises.forEach(ex => {
+correctAnswers += Number(ex.dataset.score || 0);
+
+
+      });
+      const totalExercises = exercises.length;
+      const percentage = totalExercises > 0 ? Math.round((correctAnswers / totalExercises) * 100) : 0;
+
+      const now = new Date();
+      const pad = n => n.toString().padStart(2,'0');
+      const dateString = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+      const filename = window.location.pathname.split('/').pop();
+      const resultText = `${filename}|${section}::${subsection}|${name}|${id}|${dateString}|${correctAnswers}/${totalExercises}|${percentage}%`;
+
+      const board = sub.querySelector('.quiz-scoreboard');
+      const dataEl = board.querySelector('.scoreboard-data');
+      if (dataEl) dataEl.textContent = resultText;
+      board.style.display = 'block';
+    }
+
+
+  });
+})();
+</script>
+
+
+
+
+
+
+
+
+<!-- ====== Consolidated Highlight + Read-Aloud + Emoji Speech + Active Highlight ====== -->
+<script>
+(function() {
+
+  /* =========================================================
+     GLOBALS
+  ========================================================= */
+  const highlightBtn = document.getElementById('highlightSelected');
+  const copyBtn = document.getElementById('copySelected');
+  const startBtn = document.getElementById('startBtn');
+  const pauseResumeBtn = document.getElementById('pauseResumeBtn');
+  const restartBtn = document.getElementById('restartBtn');
+
+  const synth = window.speechSynthesis;
+
+  let teacherVoice = null;
+  let studentVoice = null;
+
+  let narratorActive = false;
+  let lastContainer = null;
+  let lastOffset = 0;
+  let lastCharIndex = 0;
+  let utterance = null;
+
+  let activeParagraph = null;
+  let monitorInterval = null;
+
+
+  /* =========================================================
+     LOAD VOICES (Merged Logic — Nothing Removed)
+  ========================================================= */
+  function loadVoices() {
+    const voices = synth.getVoices();
+    if (!voices.length) return;
+
+    // First script preference logic
+    teacherVoice =
+      voices.find(v => v.name.includes("Zira")) ||
+      voices.find(v => v.name === "Microsoft Zira" && v.lang === "en-US") ||
+      voices.find(v => v.name.includes("Samantha")) ||
+      voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("female")) ||
+      voices[0];
+
+    studentVoice =
+      voices.find(v => v.name.includes("Aria")) ||
+      voices.find(v => v.name === "Microsoft Aria" && v.lang.startsWith("en-GB")) ||
+      voices.find(v => v.name.includes("Victoria")) ||
+      voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("female")) ||
+      voices[0];
+  }
+
+  synth.onvoiceschanged = loadVoices;
+  loadVoices();
+
+
+  /* =========================================================
+     HIGHLIGHT LOGIC (UNCHANGED)
+  ========================================================= */
+  highlightBtn?.addEventListener('click', () => {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) return;
+
+    const highlightClass = 'highlight';
+    const container = range.commonAncestorContainer.nodeType === 3
+      ? range.commonAncestorContainer.parentNode
+      : range.commonAncestorContainer;
+
+    const allNodes = Array.from(container.querySelectorAll('p, li, div, span'));
+    const intersectingNodes = allNodes.filter(node => range.intersectsNode(node));
+
+    if (!intersectingNodes.length && range.startContainer.nodeType === 3) {
+      const parentSpan = range.startContainer.parentNode;
+      if (parentSpan.classList?.contains(highlightClass)) {
+        parentSpan.replaceWith(...parentSpan.childNodes);
+      } else {
+        const span = document.createElement('span');
+        span.className = highlightClass;
+        range.surroundContents(span);
+      }
+      sel.removeAllRanges();
+      return;
+    }
+
+    const alreadyHighlighted = intersectingNodes.some(n => n.classList?.contains(highlightClass));
+    if (alreadyHighlighted) {
+      intersectingNodes.forEach(n => {
+        if (n.classList.contains(highlightClass)) {
+          n.replaceWith(...n.childNodes);
+        }
+      });
+      sel.removeAllRanges();
+      return;
+    }
+
+    intersectingNodes.forEach(node => {
+      const span = document.createElement('span');
+      span.className = highlightClass;
+      node.parentNode.insertBefore(span, node);
+      span.appendChild(node);
+    });
+
+    sel.removeAllRanges();
+  });
+
+
+  /* =========================================================
+     COPY SELECTED TEXT
+  ========================================================= */
+  copyBtn?.addEventListener('click', () => {
+    const sel = window.getSelection();
+    const text = sel.toString().trim();
+
+    if (!text) {
+      alert("Select text first.");
+      return;
+    }
+
+    navigator.clipboard.writeText(text)
+      .then(() => alert("Copied!"))
+      .catch(err => console.error(err));
+  });
+
+
+  /* =========================================================
+     READABLE CONTAINER LOGIC
+  ========================================================= */
+  function getReadableContainer() {
+    const sel = window.getSelection();
+    let node = sel?.anchorNode;
+
+    while (node) {
+      if (node.classList?.contains?.('question-text')) return node;
+      if (node.id === 'mvTextContainer') return node;
+      node = node.parentNode;
+    }
+    return null;
+  }
+
+  function getCursorOffset(container) {
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return 0;
+
+    const range = sel.getRangeAt(0);
+    const pre = document.createRange();
+    pre.setStart(container, 0);
+    pre.setEnd(range.startContainer, range.startOffset);
+    return pre.toString().length;
+  }
+
+/* =========================================================
+   MOBILE CHUNKING (ADD HERE)
+========================================================= */
+
+function buildChunks(text) {
+
+  const MAX = /Mobi|Android/i.test(navigator.userAgent) ? 120 : 180;
+
+  const sentences = text
+    .replace(/([.?!]+)\s+/g, "$1|")
+    .split("|")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const chunks = [];
+  let buffer = "";
+
+  for (let s of sentences) {
+
+    // 🔥 handle very long sentences safely
+    if (s.length > MAX) {
+      for (let i = 0; i < s.length; i += MAX) {
+        chunks.push(s.slice(i, i + MAX));
+      }
+      continue;
+    }
+
+    if ((buffer + s).length > MAX) {
+      if (buffer.trim()) chunks.push(buffer.trim());
+      buffer = s + " ";
+    } else {
+      buffer += s + " ";
+    }
+  }
+
+  if (buffer.trim()) chunks.push(buffer.trim());
+
+  return chunks;
+}
+
+
+
+
+
+
+  /* =========================================================
+     SPEAK FROM CURSOR
+  ========================================================= */
+function speakFrom(container, offset) {
+
+  const fullText = container.textContent || "";
+  const text = fullText.slice(offset);
+  if (!text.trim()) return;
+
+  const chunks = [];
+  const MAX = /Mobi|Android/i.test(navigator.userAgent) ? 120 : 180;
+
+  // --- sentence-based chunking ---
+  const sentences = text
+    .replace(/([.?!])\s+/g, "$1|")
+    .split("|")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  let buffer = "";
+  for (let s of sentences) {
+    if ((buffer + s).length > MAX) {
+      if (buffer) chunks.push(buffer);
+      buffer = s + " ";
+    } else {
+      buffer += s + " ";
+    }
+  }
+  if (buffer) chunks.push(buffer);
+
+  let chunkIndex = 0;
+  let globalOffset = offset;   // 🔥 CRITICAL
+
+  narratorActive = true;
+  lastContainer = container;
+  lastOffset = offset;
+
+  function speakChunk() {
+
+    if (chunkIndex >= chunks.length) {
+      narratorActive = false;
+      lastOffset = 0;
+      lastCharIndex = 0;
+      return;
+    }
+
+    const chunkText = chunks[chunkIndex];
+
+    utterance = new SpeechSynthesisUtterance(chunkText);
+    utterance.voice = teacherVoice;
+
+    utterance.onboundary = (e) => {
+      if (e.name === "word") {
+        // 🔥 maintain continuous index for your highlighter system
+        lastCharIndex = globalOffset + e.charIndex;
+      }
+    };
+
+    utterance.onend = () => {
+      // 🔥 advance global offset correctly
+      globalOffset += chunkText.length;
+      chunkIndex++;
+      speakChunk();
+    };
+
+    synth.speak(utterance);
+  }
+
+  speakChunk();
+}
+
+  /* =========================================================
+     START BUTTON
+  ========================================================= */
+  startBtn?.addEventListener('click', () => {
+
+    const container = getReadableContainer();
+    if (!container) {
+      alert("Place cursor inside readable text");
+      return;
+    }
+
+    const offset = getCursorOffset(container);
+
+if (synth.speaking || synth.paused) {
+  synth.cancel();
+  clearHighlight();   // ← ADD THIS LINE
+  narratorActive = false;
+  return;
+}
+
+    lastCharIndex = offset;
+    speakFrom(container, offset);
+  });
+
+
+  /* =========================================================
+     EMOJI SPEECH OVERLAYS
+  ========================================================= */
+  function addSpeechEmojis() {
+    const paragraphs = document.querySelectorAll('.question-text p, .sentence, #quizSections p');
+
+    paragraphs.forEach(p => {
+      if (p.dataset.speechOverlay) return;
+      p.dataset.speechOverlay = '1';
+
+      const text = p.textContent.trim();
+      let speaker = null;
+
+      if (/^teacher:/i.test(text)) speaker = 'teacher';
+      else if (/^student:/i.test(text)) speaker = 'student';
+      else return;
+
+      const emoji = speaker === 'teacher' ? '👩‍🦰' : '👧';
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.style.all = 'unset';
+      btn.style.cursor = 'pointer';
+      btn.style.fontSize = '14px';
+      btn.style.display = 'inline';
+      btn.style.margin = '0';
+      btn.style.padding = '0';
+      btn.style.lineHeight = '1';
+      btn.style.verticalAlign = 'baseline';
+      btn.title = speaker === 'teacher' ? 'Teacher Speech' : 'Student Speech';
+      btn.textContent = emoji + ' ';
+
+btn.addEventListener('click', () => {
+
+  // Stop current speech
+if (synth.speaking) {
+  synth.cancel();
+  clearHighlight();   // ← ADD THIS LINE
+}
+
+  // Remove any existing highlight
+  document.querySelectorAll(".reading-active")
+    .forEach(el => el.classList.remove("reading-active"));
+
+  // Highlight this paragraph (pale yellow)
+  p.classList.add("reading-active");
+
+  const lineText = text.replace(/^(teacher:|student:)\s*/i, '');
+  const utter = new SpeechSynthesisUtterance(lineText);
+
+  if (speaker === 'teacher') {
+    utter.voice = teacherVoice;
+    utter.rate = 0.88;
+    utter.pitch = 1.15;
+    utter.volume = 0.95;
+  } else {
+    utter.voice = studentVoice;
+    utter.rate = 0.98;
+    utter.pitch = 1.50;
+    utter.volume = 0.80;
+  }
+
+  utter.onend = () => {
+    p.classList.remove("reading-active");
+  };
+
+  synth.speak(utter);
+});      p.insertBefore(btn, p.firstChild);
+    });
+  }
+
+  addSpeechEmojis();
+  setInterval(addSpeechEmojis, 1000);
+
+
+  /* =========================================================
+     ACTIVE READING HIGHLIGHT
+  ========================================================= */
+
+  if (!document.getElementById("speechHighlightStyle")) {
+    const style = document.createElement("style");
+    style.id = "speechHighlightStyle";
+    style.textContent = `
+.reading-active {
+  background-color: #fff9c4 !important;
+  transition: background-color 0.4s ease;
+}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function clearHighlight() {
+    if (activeParagraph) {
+      activeParagraph.classList.remove("reading-active");
+      activeParagraph = null;
+    }
+  }
+
+  function startMonitoring() {
+    if (monitorInterval) return;
+
+    monitorInterval = setInterval(function(){
+      if (!synth.speaking) {
+        clearHighlight();
+        clearInterval(monitorInterval);
+        monitorInterval = null;
+      }
+    }, 100);
+  }
+
+  document.addEventListener("click", function(e){
+
+    const btn = e.target.closest("button");
+    if (!btn) return;
+
+    const p = btn.closest("p");
+    if (!p) return;
+
+    if (synth.speaking) {
+      clearHighlight();
+      return;
+    }
+
+    setTimeout(function(){
+      if (synth.speaking) {
+        clearHighlight();
+        activeParagraph = p;
+        p.classList.add("reading-active");
+        startMonitoring();
+      }
+    }, 50);
+
+  });
+
+})();
+</script>
+
+<!-- End-->
+
+<script>
+(function(){
+
+  const synth = window.speechSynthesis;
+
+  let paragraphs = [];
+  let paragraphRanges = [];
+  let currentIndex = -1;
+
+  let baseOffset = 0;          // where speech started in full text
+  let lastSpokenGlobal = 0;    // last spoken absolute character index
+  let lastStartContainer = null;
+  let lastStartOffset = 0;
+
+  /* ===============================
+     Pale Yellow Highlight CSS
+  =============================== */
+  if (!document.getElementById("autoParagraphHighlightStyle")) {
+    const style = document.createElement("style");
+    style.id = "autoParagraphHighlightStyle";
+    style.textContent = `
+      .auto-paragraph-active {
+        background-color: #fff9c4;
+        transition: background-color 0.4s ease;
+      }
+      .auto-paragraph-fade {
+        background-color: transparent;
+        transition: background-color 0.8s ease;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function clearAll() {
+    paragraphs.forEach(p => {
+      p.classList.remove("auto-paragraph-active");
+      p.classList.remove("auto-paragraph-fade");
+    });
+  }
+
+  function fadeParagraph(index) {
+    if (index < 0 || index >= paragraphs.length) return;
+    const p = paragraphs[index];
+    p.classList.remove("auto-paragraph-active");
+    p.classList.add("auto-paragraph-fade");
+    setTimeout(() => {
+      p.classList.remove("auto-paragraph-fade");
+    }, 800);
+  }
+
+  function highlightParagraph(index) {
+    if (index < 0 || index >= paragraphs.length) return;
+    paragraphs[index].classList.add("auto-paragraph-active");
+  }
+
+  function collectParagraphsFrom(root) {
+    paragraphs = Array.from(root.querySelectorAll("p"))
+      .filter(p => p.textContent.trim().length > 0);
+
+    paragraphRanges = [];
+    let runningLength = 0;
+
+    paragraphs.forEach(p => {
+      const len = p.textContent.length;
+      paragraphRanges.push({
+        start: runningLength,
+        end: runningLength + len
+      });
+      runningLength += len;
+    });
+  }
+
+function findParagraphIndex(globalCharIndex) {
+
+  const BUFFER = 8; // helps catch short dialogue lines
+
+  for (let i = 0; i < paragraphRanges.length; i++) {
+    const r = paragraphRanges[i];
+
+    if (
+      globalCharIndex >= (r.start - BUFFER) &&
+      globalCharIndex < (r.end + BUFFER)
+    ) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+  function getCursorInfo() {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return null;
+
+    const range = sel.getRangeAt(0);
+
+    let container = range.startContainer;
+    while (container && container.nodeType !== 1) {
+      container = container.parentNode;
+    }
+    if (!container) return null;
+
+    const root = container.closest("#mvTextContainer, .question-text") || document.body;
+
+    const preRange = document.createRange();
+    preRange.setStart(root, 0);
+    preRange.setEnd(range.startContainer, range.startOffset);
+
+    const offset = preRange.toString().length;
+
+    return { root, offset, container };
+  }
+
+/* ========================================== 
+   Hook safely into speech (NO AUTO-HIGHLIGHT)
+========================================== */
+const originalSpeak = synth.speak.bind(synth);
+
+synth.speak = function(utterance) {
+
+  const cursorInfo = getCursorInfo();
+  if (!cursorInfo) return originalSpeak(utterance);
+
+  const { offset, container } = cursorInfo;
+
+  // Detect if cursor moved
+  const cursorMoved =
+    container !== lastStartContainer ||
+    offset !== lastStartOffset;
+
+  if (cursorMoved) {
+    baseOffset = offset;
+    lastSpokenGlobal = offset;
+  }
+
+  lastStartContainer = container;
+  lastStartOffset = offset;
+
+  // Optional: still track position silently (no UI effects)
+  utterance.addEventListener("boundary", function(e){
+    if (e.name !== "word") return;
+    lastSpokenGlobal = baseOffset + e.charIndex;
+  });
+
+  utterance.addEventListener("end", function(){
+    if (!synth.speaking) {
+      lastSpokenGlobal = 0;
+      baseOffset = 0;
+    }
+  });
+
+  return originalSpeak(utterance);
+};</script>
+
+<!-- ====== 5. Emoji + Audio Feedback ====== -->
+<script>
+(function() {
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playCorrect() { 
+    audioCtx.resume().then(() => { 
+      const o = audioCtx.createOscillator(); 
+      const g = audioCtx.createGain(); 
+      o.type = "sine"; 
+      o.frequency.setValueAtTime(800, audioCtx.currentTime); 
+      g.gain.setValueAtTime(0.4, audioCtx.currentTime); 
+      o.connect(g); g.connect(audioCtx.destination); 
+      o.start(); o.stop(audioCtx.currentTime + 0.25); 
+    }); 
+  }
+
+  function playWrong() { 
+    audioCtx.resume().then(() => { 
+      const o = audioCtx.createOscillator(); 
+      const g = audioCtx.createGain(); 
+      o.type = "triangle"; 
+      o.frequency.setValueAtTime(450, audioCtx.currentTime); 
+      o.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.25); 
+      g.gain.setValueAtTime(0.4, audioCtx.currentTime); 
+      o.connect(g); g.connect(audioCtx.destination); 
+      o.start(); o.stop(audioCtx.currentTime + 0.25); 
+    }); 
+  }
+
+  function normalize(str){ 
+    return str.trim().toLowerCase().replace(/\s+/g," "); 
+  }
+
+  // ======================
+  // HANDLE ANSWER SELECTION
+  // ======================
+  document.body.addEventListener('change', e => {
+    const exercise = e.target.closest('.exercise');
+    if (!exercise) return;
+
+    // Emojis & sound (fire every change)
+    const textInputs = Array.from(exercise.querySelectorAll("input[type='text'], textarea"));
+    const selectedInputs = Array.from(exercise.querySelectorAll("input:checked"));
+
+    const userAnswers = textInputs.length 
+      ? textInputs.map(i => normalize(i.value)) 
+      : selectedInputs.map(i => normalize(i.value));
+
+    const correctAnswers = Array.from(exercise.querySelectorAll('[data-correct]'))
+      .map(i => normalize(i.dataset.correct));
+
+    const isCorrect = userAnswers.every(ans => correctAnswers.includes(ans));
+
+    // Remove previous emojis
+    exercise.querySelectorAll('.mc-emoji').forEach(span => span.remove());
+
+    // Add emojis
+    selectedInputs.forEach(inp => {
+      const lbl = inp.closest("label");
+      if (lbl) {
+        const span = document.createElement('span');
+        span.className = "mc-emoji";
+        span.style.marginLeft = "8px";
+        span.textContent = isCorrect ? "😊" : "😢";
+        lbl.appendChild(span);
+      }
+    });
+
+    textInputs.forEach(inp => {
+      const span = document.createElement('span');
+      span.className = "mc-emoji";
+      span.style.marginLeft = "8px";
+      span.textContent = isCorrect ? "😊" : "😢";
+      inp.parentNode.insertBefore(span, inp.nextSibling);
+    });
+
+    if (isCorrect) playCorrect(); else playWrong();
+
+// ======================
+// FIRST CLICK SCORING
+// ======================
+if (exercise.dataset.firstResponseLocked) return;
+exercise.dataset.firstResponseLocked = 'true';
+
+const totalExercises = 1; // each exercise counts as 1
+const correctCount = isCorrect ? 1 : 0;
+const percentage = correctCount * 100;
+
+// store score in the element so Submit can display later
+exercise.dataset.score = correctCount;
+exercise.dataset.percentage = percentage;
+});
+
+
+
+
+
+
+
+  // ======================
+  // SUBMIT BUTTON (DISPLAY SCOREBOARD ONLY)
+  // ======================
+  document.body.addEventListener('click', e => {
+    if (!e.target.classList.contains('quiz-submit')) return;
+    const sub = e.target.closest('.quiz-subsection');
+    if (!sub) return;
+
+    const exercises = sub.querySelectorAll('.exercise');
+
+    // Aggregate first-click scores
+    let correctCount = 0;
+    exercises.forEach(ex => {
+      const sc = Number(ex.dataset.score || 0);
+      correctCount += sc;
+    });
+
+    const totalExercises = exercises.length;
+    const percentage = totalExercises > 0 ? Math.round((correctCount / totalExercises) * 100) : 0;
+
+    // Display in scoreboard
+    const board = sub.querySelector('.quiz-scoreboard');
+    if (board) {
+      const dataEl = board.querySelector('.scoreboard-data');
+      const name = sub.querySelector('.quiz-name')?.value || 'Anonymous';
+      const id   = sub.querySelector('.quiz-id')?.value || 'N/A';
+      const section = sub.closest('.section')?.querySelector('h2')?.textContent || 'Unknown Section';
+      const subsection = sub.dataset.subsection || 'Unknown Subsection';
+      const now = new Date();
+      const pad = n => n.toString().padStart(2,'0');
+      const dateString = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      const filename = window.location.pathname.split('/').pop();
+
+const resultText = `${filename}|${section.replace(/:+$/, '').trim()}: ${subsection.replace(/^:+/, '').trim()}|${name}|${id}|${dateString}|${correctCount}/${totalExercises}|${percentage}%`;
+      if (dataEl) dataEl.textContent = resultText;
+
+if (window.saveResult) {
+  const finalResultText = board.querySelector('.scoreboard-data')?.textContent;
+if (finalResultText && window.saveResult) {
+  window.saveResult(finalResultText);
+}
+}
+
+      board.style.display = 'block';
+    }
+  });
+
+})();
+</script>
+
+
+<!--<script>
+(function () {
+
+  if (document.getElementById("global-green-border")) return;
+
+  const border = document.createElement("div");
+  border.id = "global-green-border";
+
+  Object.assign(border.style, {
+    position: "fixed",
+    inset: "0",
+    pointerEvents: "none",
+    zIndex: "2147483647",
+    boxShadow: "inset 0 0 0 10px #39FF14"
+  });
+
+  document.documentElement.appendChild(border);
+
+})();
+</script>-->
+
+<script>
+(function () {
+
+  if (document.getElementById("global-green-border")) return;
+
+  const border = document.createElement("div");
+  border.id = "global-green-border";
+
+  Object.assign(border.style, {
+    position: "fixed",
+    inset: "0",
+    pointerEvents: "none",
+    zIndex: "2147483647",
+    boxShadow: "inset 0 0 0 10px #39FF14",
+    willChange: "transform",
+    transition: "transform 0.12s ease-out"
+  });
+
+  document.documentElement.appendChild(border);
+
+  function adjustForKeyboard() {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const keyboardOffset =
+      window.innerHeight - vv.height - vv.offsetTop;
+
+    border.style.transform =
+      `translateY(-${Math.max(0, keyboardOffset)}px)`;
+  }
+
+  const vv = window.visualViewport;
+
+  if (vv) {
+    vv.addEventListener("resize", adjustForKeyboard);
+    vv.addEventListener("scroll", adjustForKeyboard);
+  }
+
+  adjustForKeyboard();
+
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script>
+(function() {
+  const quizSections = document.getElementById('quizSections');
+
+  // Event delegation for scoreboard buttons
+  quizSections.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+
+    const board = e.target.closest('.quiz-scoreboard');
+    if (!board) return;
+
+    const dataEl = board.querySelector('.scoreboard-data');
+    if (!dataEl) return;
+
+    const text = dataEl.textContent;
+
+    // ===== COPY =====
+    if (btn.classList.contains('score-copy')) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+      }).catch(err => console.error(err));
+    }
+
+    // ===== TXT =====
+    if (btn.classList.contains('score-txt')) {
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'quiz-score.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ===== PNG WITH 10px MARGIN =====
+    if (btn.classList.contains('score-png')) {
+      if (typeof html2canvas === 'undefined') {
+        alert('html2canvas library is required for PNG export.');
+        return;
+      }
+
+      // create temporary wrapper with 10px padding
+      const wrapper = document.createElement('div');
+      wrapper.style.padding = '10px';
+      wrapper.style.background = '#f9f9f9';
+      wrapper.style.display = 'inline-block';
+      wrapper.style.fontFamily = 'monospace';
+      wrapper.style.fontSize = '12px';
+      wrapper.style.whiteSpace = 'pre-wrap';
+      wrapper.style.lineHeight = '1.4';
+      wrapper.appendChild(dataEl.cloneNode(true));
+
+      document.body.appendChild(wrapper);
+
+      html2canvas(wrapper).then(canvas => {
+        canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'quiz-score.png';
+          a.click();
+          URL.revokeObjectURL(url);
+          document.body.removeChild(wrapper); // clean up
+        });
+      });
+    }
+
+
+  }); // <- this closes the quizSections click listener
+
+})(); // <- this closes the IIFE
+</script>
+
+
+
+<script>
+(function() {
+  // Enable/disable submit and radios based on inputs
+  function updateControls(subsection) {
+    const nameInput = subsection.querySelector('.quiz-name');
+    const idInput = subsection.querySelector('.quiz-id');
+    const submitBtn = subsection.querySelector('.quiz-submit');
+    const radios = subsection.querySelectorAll('input[type="radio"]');
+
+    const enabled = nameInput.value.trim() && idInput.value.trim();
+
+    // Enable/disable submit
+    submitBtn.disabled = !enabled;
+
+    // Enable/disable radios
+    radios.forEach(r => r.disabled = !enabled);
+  }
+
+  // Monitor input fields in all subsections
+  document.body.addEventListener('input', e => {
+    if (e.target.matches('.quiz-name, .quiz-id')) {
+      const subsection = e.target.closest('.quiz-subsection');
+      if (!subsection) return;
+      updateControls(subsection);
+    }
+  });
+
+  // Initialize all subsections on page load
+  document.querySelectorAll('.quiz-subsection').forEach(sub => updateControls(sub));
+})();
+</script>
+
+
+<script>
+(function() {
+  const normalize = str => str.trim().toLowerCase().replace(/\s+/g, " ");
+
+  document.body.addEventListener('change', e => {
+    const exercise = e.target.closest('.exercise');
+    if (!exercise) return;
+
+    // ----- Gather user answers -----
+    const textInputs = Array.from(exercise.querySelectorAll("input[type='text'], textarea"));
+    const selectedInputs = Array.from(exercise.querySelectorAll("input:checked"));
+
+    const userAnswers = textInputs.length 
+      ? textInputs.map(i => normalize(i.value))
+      : selectedInputs.map(i => normalize(i.value));
+
+    const correctAnswers = Array.from(exercise.querySelectorAll('[data-correct]'))
+      .map(i => normalize(i.dataset.correct));
+
+    const isCorrect = userAnswers.every(ans => correctAnswers.includes(ans));
+
+    // ----- Add emojis -----
+    const addEmoji = (element) => {
+      if (!element.nextSibling || !element.nextSibling.classList?.contains('mc-emoji')) {
+        const span = document.createElement('span');
+        span.className = 'mc-emoji';
+        span.style.marginLeft = '8px';
+        span.textContent = isCorrect ? '😊' : '😟';
+        element.parentNode.insertBefore(span, element.nextSibling);
+      }
+    };
+
+    textInputs.forEach(addEmoji);
+
+    selectedInputs.forEach(inp => {
+      const label = inp.closest('label');
+      if (label && !label.querySelector('.mc-emoji')) {
+        const span = document.createElement('span');
+        span.className = 'mc-emoji';
+        span.style.marginLeft = '8px';
+        span.textContent = isCorrect ? '😊' : '😟';
+        label.appendChild(span);
+      }
+    });
+
+  }); // close event listener
+})(); // close IIFE
+</script>
+
+<script>
+/* ==========================================================
+   GLOBAL PAGE TITLE ENGINE
+========================================================== */
+
+(function () {
+
+  function buildFormattedTitle() {
+
+    let filename = window.location.pathname.split("/").pop() || "";
+    filename = filename.replace(/\.[^/.]+$/, "");
+    filename = decodeURIComponent(filename);
+
+    const allowedPrefixes = [
+      "g_game_","v_game_","rr_","cdf_","cdr_",
+      "ws_","r_","a_","g_","v_"
+    ];
+
+    for (let prefix of allowedPrefixes) {
+      if (filename.startsWith(prefix)) {
+        filename = filename.substring(prefix.length);
+        break;
+      }
+    }
+
+    let rawTitle = filename.replace(/_/g," ").trim();
+    if (!rawTitle) rawTitle = "Untitled";
+
+    const minorWords = [
+      "a","an","the","and","but","or","nor",
+      "for","so","yet","at","by","in","of","on","to","up","as","off","out"
+    ];
+
+    // ✅ Acronyms to preserve in uppercase
+    const acronyms = ["ot", "nt"];
+
+    return rawTitle.split(/\s+/).map((word, i) => {
+
+      const lower = word.toLowerCase();
+
+      // preserve acronyms like OT / NT
+      if (acronyms.includes(lower)) {
+        return lower.toUpperCase();
+      }
+
+      // first word always capitalized
+      if (i === 0) {
+        return lower.charAt(0).toUpperCase() + lower.slice(1);
+      }
+
+      // minor words stay lowercase
+      if (minorWords.includes(lower)) {
+        return lower;
+      }
+
+      // default title case
+      return lower.charAt(0).toUpperCase() + lower.slice(1);
+
+    }).join(" ");
+  }
+
+  window.pageTitle = buildFormattedTitle();
+
+  window.applyPageTitle = function(root=document){
+    root.querySelectorAll("h1[data-auto-title]").forEach(h=>{
+      h.textContent = window.pageTitle;
+      h.style.textTransform = "none";
+      h.style.visibility = "visible";
+    });
+  };
+
+})();
+
+/* ==========================================================
+   PAGE INIT
+========================================================== */
+
+document.addEventListener("DOMContentLoaded",function(){
+
+  window.applyPageTitle();
+
+});
+
+
+/* ==========================================================
+   AUTO OPEN SINGLE SECTION
+========================================================== */
+
+(function(){
+
+  function tryAutoOpenSingleSection(){
+
+    if(!window.sections || !Array.isArray(window.sections)) return;
+    if(typeof window.openQuizModal !== "function") return;
+
+    const root=document.documentElement;
+
+    const hardOn=root.classList.contains("show-hard");
+    const dynamicOn=root.classList.contains("show-dynamic");
+
+const recentlyClosed =
+  window.__quizJustClosed &&
+  (Date.now() - window.__quizJustClosed < 1500);
+
+if (window.sections.length === 1 && !hardOn && !dynamicOn && !recentlyClosed) {
+  window.openQuizModal(0);
+}
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",tryAutoOpenSingleSection);
+  }else{
+    tryAutoOpenSingleSection();
+  }
+
+})();
+
+
+
+
+
+/* ==========================================================
+   MODAL CONTROL MOVEMENT + CHAPTER/VERSE SYSTEM (ROBUST)
+========================================================== */
+
+function moveControlsIntoModal(){
+
+  const modalContent=document.getElementById("quizModalContent");
+  if(!modalContent) return;
+
+  const chapterControls=document.getElementById("chapterVerseControls");
+  const readAloud=document.getElementById("readaloudControls");
+
+  if(chapterControls && !modalContent.contains(chapterControls)){
+    modalContent.insertBefore(chapterControls,modalContent.firstChild);
+  }
+
+  if(readAloud){
+    readAloud.style.display="block";
+
+    if(!modalContent.contains(readAloud)){
+      modalContent.insertBefore(
+        readAloud,
+        chapterControls?.nextSibling || modalContent.firstChild
+      );
+    }
+  }
+}
+
+
+function buildChapterVerseLogic(){
+
+  const modal=document.getElementById("quizModal");
+  if(!modal) return;
+
+  const readAloud=modal.querySelector("#readaloudControls");
+  const chapterControls=modal.querySelector("#chapterVerseControls");
+  const textContainer=modal.querySelector("#quizSections");
+
+  const chapterSelect=modal.querySelector("#chapterSelect");
+  const verseSelect=modal.querySelector("#verseSelect");
+  const goBtn=modal.querySelector("#goBtn");
+
+  if(!textContainer || !chapterSelect || !verseSelect || !goBtn){
+    console.warn("Chapter/Verse system missing required elements");
+    return;
+  }
+
+  if(chapterControls){
+    chapterControls.style.display="block";
+  }
+
+  const paragraphs=[...textContainer.querySelectorAll("p")];
+  if(!paragraphs.length){
+    console.warn("No paragraphs found for chapter/verse mapping");
+    return;
+  }
+
+  const structure={};
+  let currentChapter=null;
+
+  // ===== helper: normalize text =====
+  const clean = (t)=>t.trim().replace(/\s+/g,' ');
+
+  paragraphs.forEach(p=>{
+
+    const text=clean(p.textContent);
+
+    // ===== FLEXIBLE CHAPTER MATCHING =====
+    const chapMatch=
+      text.match(/^chapter\s*:?\s*(\d+)/i) ||
+      text.match(/^#?\s*chapter\s*(\d+)/i) ||
+      text.match(/^(\d+)\.\s*chapter/i);
+
+    // ===== FLEXIBLE VERSE MATCHING =====
+    const verseMatch=
+      text.match(/^verse\s*:?\s*(\d+)/i) ||
+      text.match(/^v\s*(\d+)/i);
+
+    const fullRefMatch=text.match(/^(\d+):(\d+)\s/);
+
+    // ===== chapter detection =====
+    if(chapMatch){
+      currentChapter=chapMatch[1];
+      if(!structure[currentChapter]) structure[currentChapter]={};
+      return;
+    }
+
+    // ===== verse detection (context-based) =====
+    if(currentChapter && verseMatch){
+      structure[currentChapter][verseMatch[1]]=p;
+      return;
+    }
+
+    // ===== inline chapter:verse detection =====
+    if(fullRefMatch){
+      const c=fullRefMatch[1];
+      const v=fullRefMatch[2];
+
+      if(!structure[c]) structure[c]={};
+      structure[c][v]=p;
+
+      currentChapter=c;
+    }
+
+  });
+
+  // ===== DEBUG SAFETY =====
+  if(Object.keys(structure).length===0){
+    console.warn("ChapterVerse structure is EMPTY. Check formatting.");
+  }
+
+  // ===== populate chapters =====
+  chapterSelect.innerHTML="";
+
+  Object.keys(structure).forEach(ch=>{
+    const opt=document.createElement("option");
+    opt.value=ch;
+    opt.textContent="Chapter "+ch;
+    chapterSelect.appendChild(opt);
+  });
+
+  function updateVerses(){
+
+    verseSelect.innerHTML="";
+    const ch=chapterSelect.value;
+    if(!structure[ch]) return;
+
+    Object.keys(structure[ch]).forEach(v=>{
+      const opt=document.createElement("option");
+      opt.value=v;
+      opt.textContent="Verse "+v;
+      verseSelect.appendChild(opt);
+    });
+
+  }
+
+  chapterSelect.onchange=updateVerses;
+  updateVerses();
+
+  function clearHighlights(){
+    paragraphs.forEach(p=>p.classList.remove("selected-verse"));
+  }
+
+  function getControlsOffset(extraPadding=0){
+
+    const readHeight=readAloud ? readAloud.offsetHeight : 0;
+
+    const chapterHeight=
+      chapterControls &&
+      chapterControls.style.display!=="none"
+      ? chapterControls.offsetHeight
+      : 0;
+
+    return readHeight + chapterHeight + extraPadding;
+  }
+
+  goBtn.onclick=function(){
+
+    const chapter=chapterSelect.value;
+    const verse=verseSelect.value;
+
+    if(!structure[chapter] || !structure[chapter][verse]){
+      console.warn("Verse not found:", chapter, verse);
+      return;
+    }
+
+    const target=structure[chapter][verse];
+
+    clearHighlights();
+    target.classList.add("selected-verse");
+
+    const offset=getControlsOffset(10);
+
+    modal.scrollTo({
+      top:target.offsetTop-offset,
+      behavior:"smooth"
+    });
+  };
+
+  window.chapterVerseStructure = structure; // debug access
+}
+
+/* ==========================================================
+   MODAL ARROW SCROLL
+========================================================== */
+
+(function(){
+
+  const modalRoot=document.getElementById("modalRoot");
+  const modal=document.getElementById("quizModal");
+  if(!modalRoot || !modal) return;
+
+  const SCROLL_AMOUNT=50;
+  let enabled=false;
+
+  function isTypingTarget(target){
+
+    return target.closest("input, textarea")
+      || target.isContentEditable
+      || target.closest("[contenteditable='true']");
+
+  }
+
+  function handleKeydown(e){
+
+    if(!enabled) return;
+    if(e.key!=="ArrowDown" && e.key!=="ArrowUp") return;
+    if(isTypingTarget(e.target)) return;
+
+    e.preventDefault();
+
+    modal.scrollBy({
+      top:e.key==="ArrowDown" ? SCROLL_AMOUNT : -SCROLL_AMOUNT,
+      behavior:"smooth"
+    });
+
+  }
+
+  function enable(){
+    if(enabled) return;
+    enabled=true;
+    document.addEventListener("keydown",handleKeydown);
+  }
+
+  function disable(){
+    enabled=false;
+    document.removeEventListener("keydown",handleKeydown);
+  }
+
+  const observer=new MutationObserver(()=>{
+    const active=modalRoot.classList.contains("active");
+    if(active) enable();
+    else disable();
+  });
+
+  observer.observe(modalRoot,{attributes:true,attributeFilter:["class"]});
+
+})();
+
+
+/* ==========================================================
+   STRICT SUBMIT LOCK
+========================================================== */
+
+(function(){
+
+  function updateSubsectionState(sub){
+
+    const name=sub.querySelector('.quiz-name');
+    const id=sub.querySelector('.quiz-id');
+    const submit=sub.querySelector('.quiz-submit');
+    const radios=sub.querySelectorAll('input[type="radio"]');
+
+    if(!name || !id || !submit) return;
+
+    const enabled=name.value.trim() && id.value.trim();
+
+    submit.disabled=!enabled;
+    radios.forEach(r=>r.disabled=!enabled);
+
+  }
+
+  function initSub(sub){
+
+    if(sub.dataset.lockInitialized) return;
+    sub.dataset.lockInitialized="1";
+
+    const name=sub.querySelector('.quiz-name');
+    const id=sub.querySelector('.quiz-id');
+    if(!name || !id) return;
+
+    updateSubsectionState(sub);
+
+    name.addEventListener("input",()=>updateSubsectionState(sub));
+    id.addEventListener("input",()=>updateSubsectionState(sub));
+
+  }
+
+  function scan(){
+    document.querySelectorAll('.quiz-subsection').forEach(initSub);
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",scan);
+  }else{
+    scan();
+  }
+
+  new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
+
+})();
+
+
+/* ==========================================================
+   GLOBAL LINK FADE
+========================================================== */
+
+document.addEventListener("click",function(e){
+
+  const link=e.target.closest("a");
+  if(!link) return;
+
+  e.preventDefault();
+
+  document.body.style.transition="opacity 80ms ease";
+  document.body.style.opacity="0";
+
+  setTimeout(()=>{
+    window.location.href=link.href;
+  },80);
+
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const targets = [
+    { parent:"#layout", content:"#layout", gap:-30 },
+    { parent:"#tocContainer", content:"#tocContainer", gap:-20 },
+    { parent:"#quizModal", content:"#quizModalContent", gap:-30 }
+  ];
+
+  const copyrightHTML = `
+    <section class="copyrightSection">
+      <div class="footer-note copyright">
+        © <span class="auto-year"></span> Perfectly Practical English™. All rights reserved.
+      </div>
+<div id="visitor-count">Visits: loading...</div>
+
+    </section>
+  `;
+
+  function insertCopyright(parent){
+    if (!parent.querySelector(":scope > .copyrightSection")) {
+      parent.insertAdjacentHTML("beforeend", copyrightHTML);
+    }
+  }
+
+  function adjust(parent, content, desiredGap){
+
+    const copyright = parent.querySelector(".copyrightSection");
+    const last = content.lastElementChild;
+
+    if (!copyright || !last) return;
+
+    const lastBottom = last.getBoundingClientRect().bottom;
+    const copyTop = copyright.getBoundingClientRect().top;
+
+    const currentGap = copyTop - lastBottom;
+    const adjust = currentGap - desiredGap;
+
+    copyright.style.marginTop = (-adjust - 5) + "px";
+  }
+
+  function update(){
+
+    targets.forEach(t => {
+
+      const parent = document.querySelector(t.parent);
+      const content = document.querySelector(t.content);
+
+      if (!parent || !content) return;
+
+      insertCopyright(parent);
+      adjust(parent, content, t.gap);
+
+    });
+
+  }
+
+  // set year
+  document.querySelectorAll(".auto-year").forEach(el=>{
+    el.textContent = new Date().getFullYear();
+  });
+
+  update();
+
+  window.addEventListener("resize", update);
+
+});
+</script>
+
+<script>
+(function(){
+
+  const startBtn = document.getElementById('startBtn');
+  let activeEl = null;
+
+  let startX = 0;
+  let startY = 0;
+  let isDragging = false;
+
+  const DRAG_THRESHOLD = 8;
+
+  const X_THRESHOLD = 60;
+  const Y_THRESHOLD = 30;
+
+  const synth = window.speechSynthesis;
+
+  /* =========================
+     STYLE (soft + fade out)
+  ========================= */
+  if (!document.getElementById("chunkHighlightStyle")) {
+    const style = document.createElement("style");
+    style.id = "chunkHighlightStyle";
+    style.textContent = `
+      .chunk-active {
+        background: #fff9c4;
+        transition: background 0.6s ease;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function fadeHighlight() {
+    if (!activeEl) return;
+
+    activeEl.style.background = "transparent";
+
+    setTimeout(() => {
+      if (activeEl) {
+        activeEl.classList.remove("chunk-active");
+        activeEl.style.background = "";
+        activeEl = null;
+      }
+    }, 600);
+  }
+
+  function setHighlight(el) {
+    if (activeEl) {
+      activeEl.classList.remove("chunk-active");
+    }
+    activeEl = el;
+    el.classList.add("chunk-active");
+  }
+
+  function placeCursorAtStart(el) {
+    const range = document.createRange();
+    const sel = window.getSelection();
+
+    range.selectNodeContents(el);
+    range.collapse(true);
+
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  /* =========================
+     POINTER TRACKING
+  ========================= */
+  document.addEventListener("pointerdown", (e) => {
+    startX = e.clientX;
+    startY = e.clientY;
+    isDragging = false;
+  });
+
+  document.addEventListener("pointermove", (e) => {
+    if (Math.abs(e.clientX - startX) > DRAG_THRESHOLD ||
+        Math.abs(e.clientY - startY) > DRAG_THRESHOLD) {
+      isDragging = true;
+    }
+  });
+
+  /* =========================
+     TAP → TOGGLE PLAY/STOP
+  ========================= */
+  document.addEventListener("pointerup", function(e){
+
+    if (isDragging) return;
+
+    const sel = window.getSelection();
+    if (sel && !sel.isCollapsed) return;
+
+    const p = e.target.closest(".question-text p, #quizSections p");
+    if (!p) return;
+
+    if (e.target.closest("button, input, label")) return;
+
+    const rect = p.getBoundingClientRect();
+
+    const isRightZone = e.clientX > rect.right - X_THRESHOLD;
+    const isBottomZone = e.clientY > rect.bottom - Y_THRESHOLD;
+
+    if (!(isRightZone && isBottomZone)) return;
+
+    // =========================
+    // 🔥 TOGGLE LOGIC
+    // =========================
+
+    if (synth.speaking) {
+      // STOP
+      synth.cancel();
+      fadeHighlight();
+      return;
+    }
+
+    // START (fresh)
+    setHighlight(p);
+    placeCursorAtStart(p);
+
+    setTimeout(() => {
+      if (startBtn) startBtn.click();
+    }, 40);
+
+  });
+
+  /* =========================
+     AUTO FADE WHEN SPEECH ENDS
+  ========================= */
+  const originalSpeak = synth.speak.bind(synth);
+
+  synth.speak = function(utterance) {
+
+    utterance.addEventListener("end", () => {
+      fadeHighlight();
+    });
+
+    return originalSpeak(utterance);
+  };
+
+})();
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<script>
+(function () {
+
+  const synth = window.speechSynthesis;
+  const startBtn = document.getElementById("startBtn");
+  if (!startBtn) return;
+
+  // -------------------------
+  // CREATE BOTTOM BUTTON
+  // -------------------------
+  const proxyBtn = document.createElement("button");
+  document.body.appendChild(proxyBtn);
+
+  // -------------------------
+  // DETECT VISIBILITY
+  // -------------------------
+  function isVisible(el) {
+    if (!el) return false;
+
+    const rect = el.getBoundingClientRect();
+
+    return (
+      rect.width > 0 &&
+      rect.height > 0 &&
+      rect.top < window.innerHeight &&
+      rect.bottom > 0
+    );
+  }
+
+  // -------------------------
+  // SYNC LABEL
+  // -------------------------
+  function syncLabel() {
+    const topLabel = startBtn.textContent?.trim() || "Start";
+    proxyBtn.textContent = topLabel;
+  }
+
+  // -------------------------
+  // 🔥 KEYBOARD-AWARE POSITIONING
+  // -------------------------
+  function adjustForKeyboard() {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const keyboardOffset =
+      window.innerHeight - vv.height - vv.offsetTop;
+
+    proxyBtn.style.transform =
+      `translateY(-${Math.max(0, keyboardOffset)}px)`;
+  }
+
+  // -------------------------
+  // 🔥 SYNC STYLES
+  // -------------------------
+  function syncStyles() {
+    const cs = window.getComputedStyle(startBtn);
+
+    Object.assign(proxyBtn.style, {
+      position: "fixed",
+      bottom: "20px",
+      left: "20px",
+      zIndex: 999999,
+      padding: "10px 14px",
+      borderRadius: "6px",
+      border: cs.border,
+      background: cs.backgroundColor,
+      color: cs.color,
+      fontSize: cs.fontSize,
+      fontFamily: cs.fontFamily,
+      fontWeight: cs.fontWeight,
+      cursor: "pointer",
+      boxShadow: "0 4px 8px rgba(0,0,0,0.5)",
+      userSelect: "none",
+
+      // 🔥 important for smooth movement
+      willChange: "transform",
+      transition: "transform 0.12s ease-out"
+    });
+  }
+
+  // -------------------------
+  // MAIN CLICK
+  // -------------------------
+  proxyBtn.addEventListener("click", () => {
+    startBtn.click();
+  });
+
+  // -------------------------
+  // KEEP IN SYNC
+  // -------------------------
+  const observer = new MutationObserver(() => {
+    syncLabel();
+    syncStyles();
+  });
+
+  observer.observe(startBtn, {
+    subtree: true,
+    childList: true,
+    characterData: true
+  });
+
+  setInterval(() => {
+    syncLabel();
+    syncStyles();
+  }, 300);
+
+  // -------------------------
+  // 🔥 KEYBOARD EVENTS
+  // -------------------------
+  const vv = window.visualViewport;
+
+  if (vv) {
+    vv.addEventListener("resize", adjustForKeyboard);
+    vv.addEventListener("scroll", adjustForKeyboard);
+  }
+
+  // -------------------------
+  // INIT
+  // -------------------------
+  syncLabel();
+  syncStyles();
+  adjustForKeyboard();
+
+})();
+</script>
+
+
+<script>
+(function(){
+
+const RAW_TEXT = `
+Open Section Content 
+1. Click blue buttons to open sections.
+
+---
+
+Reader Tools
+
+1. Highlight - Select text and click to highlight.
+2. Click again to remove highlight.
+3. Copy - Select text and click to copy.
+4. Click Close to exit.
+
+---
+
+Quiz
+
+1. Enter Name and ID.
+2. Select best answer.
+3. Click Submit to see score.
+4. Click Close to exit.
+`;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("instructionsBtn");
+  if (!btn) return;
+
+  // create isolated modal ONCE
+  let modal = document.getElementById("info-instructions-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "info-instructions-modal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      background: "rgba(0,0,0,0.6)",
+      display: "none",
+      zIndex: "999999",
+      padding: "40px",
+      boxSizing: "border-box"
+    });
+
+modal.innerHTML = `
+  <div style="
+    max-width:700px;
+    margin:0 auto;
+    background:#fff;
+    padding:20px;
+    border-radius:10px;
+    position:relative;
+    max-height:80vh;
+    overflow:auto;
+    font-family:inherit;
+    box-sizing:border-box;
+  ">
+
+<button id="close-instructions-modal" class="modal-close-btn">✕</button>
+
+    <pre style="
+      white-space:pre-wrap;
+      margin:0;
+      padding-top:10px;
+      overflow-wrap:break-word;
+      word-break:break-word;
+    ">${RAW_TEXT}</pre>
+
+  </div>
+`;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#close-instructions-modal").onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+});
+
+})();
+</script>
+
+<script>
+(function(){
+
+const RAW_TEXT = `
+Comprehensive reading strategy checklist
+
+1. Cut texts into small pieces.
+2. Collect context clues.
+3. Reread when lost.
+4. Scan titles and images.
+5. Identify known/unknown words.
+6. Use background knowledge.
+7. Break down word parts.
+8. Look up vocabulary.
+9. Identify signal words.
+`;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("strategiesBtn");
+  if (!btn) return;
+
+  let modal = document.getElementById("info-strategies-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "info-strategies-modal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      background: "rgba(0,0,0,0.6)",
+      display: "none",
+      zIndex: "999999",
+      padding: "40px",
+      boxSizing: "border-box"
+    });
+
+    modal.innerHTML = `
+      <div style="
+        max-width:700px;
+        margin:0 auto;
+        background:#fff;
+        padding:20px;
+        border-radius:10px;
+        position:relative;
+        max-height:80vh;
+        overflow:auto;
+        font-family:inherit;
+      ">
+
+<button id="close-strategies-modal" class="modal-close-btn">✕</button>
+
+        <pre style="white-space:pre-wrap;margin:0;">${RAW_TEXT}</pre>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#close-strategies-modal").onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+});
+
+})();
+</script>
+
+<script>
+(function(){
+
+const RAW_TEXT = `
+Common Signal Word Categories and Examples
+
+• Time ⏰: words that tell when something happens
+
+on, at, in, before, after, since, until, during, for, now, yesterday, today, tomorrow, later, then, when, while, once
+
+• Addition ➕: words that add ideas together
+
+and, also, too, with, plus, as well as, not only...but also, both...and
+
+• Cause / Effect 🔗: words that show a reason or result
+
+because, so, since, because of, due to, as a result, therefore, that’s why
+
+• Comparison / Similarity / Difference ⚖️: words that compare things
+
+like, as, as...as, than, similar to, different from, more than, less than, the most, just as...so, whereas, in contrast to
+
+• Contrast / Opposition 🎭: words that show differences
+
+but, although, though, even though, however, yet, still, despite, instead, whereas, while, on the other hand
+
+• Frequency 〰️: words that tell how often something happens
+
+always, usually, often, sometimes, occasionally, rarely, never, every day, once a week, hardly ever, from time to time
+
+• Possibility / Certainty 🎲: words that show how possible or sure something is
+
+maybe, probably, possibly, must, might, may, could, can, definitely, certainly
+
+• Advice / Obligation / Permission ☝️: words that tell rules or give guidance
+
+must, must not, have to, don’t have to, should, ought to, had better, can, cannot, may, could
+
+• Manner 🎭: words that tell how something is done
+
+quickly, slowly, carefully, easily, well, badly, with, by, in a...way, as
+
+• Place / Location 📍: words that tell where something is
+
+in, on, at, under, above, between, near, next to, here, there, everywhere, anywhere
+
+• Condition 🌧️: words that show something depends on something else
+
+if, unless, in case, on condition that
+
+• Emphasis / Focus 🎯: words that make something stronger or more important
+
+only, just, even, especially, mainly, particularly
+
+• Questions (Interrogatives) ❓: words used to ask questions
+
+how, when, where, why
+
+• Relative Words 👨‍👩‍👧‍👦: words that connect ideas about time, place, reason, or manner
+
+when, where, why, how
+
+• Direction / Movement 🧭: words that show movement or direction
+
+to, from, toward, away from, up, down, forward, back
+
+• Affirmative and Negative ✔️❌: words that show yes or no
+
+yes, no
+`;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("signalwordsBtn");
+  if (!btn) return;
+
+  let modal = document.getElementById("info-signalwords-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "info-signalwords-modal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      background: "rgba(0,0,0,0.6)",
+      display: "none",
+      zIndex: "999999",
+      padding: "40px",
+      boxSizing: "border-box"
+    });
+
+    modal.innerHTML = `
+      <div style="
+        max-width:700px;
+        margin:0 auto;
+        background:#fff;
+        padding:20px;
+        border-radius:10px;
+        position:relative;
+        max-height:80vh;
+        overflow:auto;
+        font-family:inherit;
+      ">
+
+<button id="close-signalwords-modal" class="modal-close-btn">✕</button>
+
+        <pre style="white-space:pre-wrap;margin:0;">${RAW_TEXT}</pre>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#close-signalwords-modal").onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+});
+
+})();
+</script>
+
+
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<script>
+
+function goToNextQuiz(){
+
+  const modal = document.getElementById("quizModal");
+  const container = modal?.querySelector("#quizSections");
+
+  // ✔️ TARGET THE ACTUAL BUTTON (NOT THE FUNCTION)
+  const goBtn = document.querySelector('button[onclick="goToNextQuiz()"]');
+
+  if(!container) return;
+
+  const originalLabel = goBtn?.textContent || "Go to Quiz";
+
+  function showNoQuizEmoji(){
+
+    if(!goBtn) return;
+
+    goBtn.textContent = "🚫";
+
+    setTimeout(() => {
+      goBtn.textContent = originalLabel;
+    }, 900);
+
+  }
+
+  const firstQuiz = container.querySelector(".quiz-subsection");
+
+  // ===== NO QUIZ FOUND =====
+  if(!firstQuiz){
+    showNoQuizEmoji();
+    return;
+  }
+
+  const readAloud = modal?.querySelector("#readaloudControls");
+  const chapterControls = modal?.querySelector("#chapterVerseControls");
+
+  const offset =
+    (readAloud?.offsetHeight || 0) +
+    (chapterControls?.offsetHeight || 0) +
+    20;
+
+  modal.scrollTo({
+    top: firstQuiz.offsetTop - offset,
+    behavior: "smooth"
+  });
+
+}
+
+</script>
+
+<script>
+// ===== UNIVERSAL CLOSE HANDLER (safe + no blank bug) =====
+document.addEventListener("click", (e) => {
+
+  const closeBtn = e.target.closest(
+    ".quiz-close, .modal-close, #closeModalBtn"
+  );
+
+  if (!closeBtn) return;
+
+  e.preventDefault();
+
+  // Smooth fade instead of hard visibility kill
+  document.body.style.opacity = "0";
+
+  // Close modal immediately
+  const modalRoot = document.getElementById("modalRoot");
+  if (modalRoot) modalRoot.classList.remove("active");
+
+  document.body.classList.remove("modal-open");
+
+  // Force full reload
+  setTimeout(() => {
+    location.replace(window.location.pathname);
+  }, 80);
+
+});
+</script>
+
+
+<script>
+(function () {
+
+  function showPage() {
+    const root = document.documentElement;
+    const loader = document.getElementById("loader");
+
+    // Remove old gating (safe even if unused)
+    root.classList.remove("pre-auto-open", "show-hard", "show-dynamic");
+
+    // ✅ Reveal UI (controls title via CSS)
+    root.classList.add("ui-ready");
+
+    // Force key containers visible
+    const layout = document.getElementById("layout");
+    const toc = document.getElementById("dynamicTOC");
+
+    if (layout) layout.style.display = "block";
+    if (toc) toc.style.display = "block";
+
+    // Fallback: reveal hidden content if needed
+    if (!layout && !toc) {
+      document.body.style.visibility = "visible";
+      document.querySelectorAll(".visually-hidden").forEach(el => {
+        el.style.position = "static";
+        el.style.left = "0";
+      });
+    }
+
+    // Kill loader LAST
+    if (loader) loader.remove();
+  }
+
+  // Run immediately (prevents stuck loader)
+  showPage();
+
+  // Backup safety
+  document.addEventListener("DOMContentLoaded", showPage);
+  window.addEventListener("load", showPage);
+  setTimeout(showPage, 1500);
+
+})();
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const targets = [
+    { parent:"#layout", content:"#layout", gap:-30 },
+    { parent:"#tocContainer", content:"#tocContainer", gap:-20 },
+    { parent:"#quizModal", content:"#quizModalContent", gap:-30 }
+  ];
+
+  const copyrightHTML = `
+    <section class="copyrightSection">
+
+      <!-- 10px invisible space ABOVE copyright -->
+      <div class="spacer spacer-top"></div>
+
+      <div class="footer-note copyright">
+        © <span class="auto-year"></span> Perfectly Practical English™. All rights reserved.
+      </div>
+
+      <div id="visitor-count" class="visitor-count">
+        Visits: loading...
+      </div>
+
+      <!-- 30px invisible space BELOW visits -->
+      <div class="spacer spacer-bottom"></div>
+
+
+    </section>
+  `;
+
+  function insertCopyright(parent){
+    if (!parent.querySelector(":scope > .copyrightSection")) {
+      parent.insertAdjacentHTML("beforeend", copyrightHTML);
+    }
+  }
+
+  function adjust(parent, content, desiredGap){
+
+    const copyright = parent.querySelector(".copyrightSection");
+    const last = content.lastElementChild;
+
+    if (!copyright || !last) return;
+
+    const lastBottom = last.getBoundingClientRect().bottom;
+    const copyTop = copyright.getBoundingClientRect().top;
+
+    const currentGap = copyTop - lastBottom;
+    const adjust = currentGap - desiredGap;
+
+    const extraOffset = 5; // try 5–10px
+
+copyright.style.marginTop = (-adjust + extraOffset) + "px";
+  }
+
+  async function updateVisitorCount() {
+
+    const namespace = "PerfectlyPracticalEnglish";
+    const key = "homepage";
+
+    const isOwner =
+      localStorage.getItem("isOwner") === "true";
+
+    const isLocal =
+      location.hostname === "localhost" ||
+      location.hostname === "127.0.0.1";
+
+    const alreadyCounted =
+      sessionStorage.getItem("counted");
+
+    let data;
+
+    try {
+
+      if (!isOwner && !isLocal && !alreadyCounted) {
+
+        data = await fetch(
+          `https://api.countapi.xyz/hit/${namespace}/${key}`
+        ).then(r => r.json());
+
+        sessionStorage.setItem("counted", "true");
+
+      } else {
+
+        data = await fetch(
+          `https://api.countapi.xyz/get/${namespace}/${key}`
+        ).then(r => r.json());
+
+      }
+
+      document.querySelectorAll("#visitor-count").forEach(el => {
+        el.textContent = `Total: ${data.value} visits`;
+      });
+
+    } catch (err) {
+
+      console.error("Visitor counter failed:", err);
+
+      document.querySelectorAll("#visitor-count").forEach(el => {
+        el.textContent = "Visits unavailable";
+      });
+
+    }
+
+  }
+
+  function update(){
+
+    targets.forEach(t => {
+
+      const parent = document.querySelector(t.parent);
+      const content = document.querySelector(t.content);
+
+      if (!parent || !content) return;
+
+      insertCopyright(parent);
+      adjust(parent, content, t.gap);
+
+    });
+
+  }
+
+  // Set current year
+  document.querySelectorAll(".auto-year").forEach(el => {
+    el.textContent = new Date().getFullYear();
+  });
+
+  update();
+  updateVisitorCount();
+
+  window.addEventListener("resize", update);
+
+});
+</script>
+
+<script>
+function fixModalScrollRoom() {
+  const vv = window.visualViewport;
+  if (!vv) return;
+
+  const keyboardHeight =
+    window.innerHeight - vv.height - vv.offsetTop;
+
+  const modal = document.getElementById("quizModal");
+  if (!modal) return;
+
+  modal.style.height =
+    `calc(100dvh - ${keyboardHeight}px)`;
+}
+
+window.visualViewport?.addEventListener("resize", fixModalScrollRoom);
+window.visualViewport?.addEventListener("scroll", fixModalScrollRoom);
+window.addEventListener("resize", fixModalScrollRoom);
+
+fixModalScrollRoom();
+
+</script>
+
+<!-- SUPABASE LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const supabaseClient = window.supabase?.createClient(
+  'https://etwwriloppklhhkmswpr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+);
+
+if (!supabaseClient) {
+  console.error("❌ Supabase failed to initialize");
+}
+
+let lastUploadedScore = null;
+
+window.saveResult = async function saveResult(text) {
+
+  if (!supabaseClient) {
+    console.error("❌ No Supabase client");
+    return;
+  }
+
+  // ======================
+  // NORMALIZE INPUT
+  // ======================
+  let cleaned;
+
+  try {
+    cleaned = (typeof text === "string")
+      ? text
+      : JSON.stringify(text);
+
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+
+  } catch (err) {
+    console.error("❌ Normalize error:", err);
+    return;
+  }
+
+  if (!cleaned) {
+    console.error("❌ Empty value blocked");
+    return;
+  }
+
+  if (cleaned === lastUploadedScore) {
+    console.log("⚠️ Duplicate blocked");
+    return;
+  }
+
+  lastUploadedScore = cleaned;
+
+  console.log("📤 INSERTING INTO scoreboard_raw:", cleaned);
+
+  const { data, error } = await supabaseClient
+    .from("scoreboard_raw")
+    .insert([
+      { result_text: cleaned }
+    ])
+    .select();
+
+  if (error) {
+    console.error("❌ INSERT FAILED FULL ERROR:", error);
+    return;
+  }
+
+  console.log("✅ INSERT SUCCESS:", data);
+};
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
