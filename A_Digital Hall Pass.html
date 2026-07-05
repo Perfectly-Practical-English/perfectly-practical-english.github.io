@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Digital Hall Pass</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #f4f6f8;
+  display: flex;
+  justify-content: center;
+}
+
+.phone {
+  width: 390px;
+  min-height: 100vh;
+  background: white;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+h1 {
+  font-size: 18px;
+  text-align: center;
+}
+
+.pass {
+  margin-top: 20px;
+  padding: 16px;
+  border-radius: 14px;
+  background: #eaf2ff;
+  border: 1px solid #cfe0ff;
+}
+
+.row {
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.label {
+  font-weight: bold;
+}
+
+.blank {
+  color: #888;
+}
+
+.buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 10px;
+  background: #2d6cdf;
+  color: white;
+  font-size: 14px;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="phone">
+
+<h1>Digital Hall Pass</h1>
+
+<div id="pass" class="pass">
+
+  <div class="row"><span class="label">Date:</span> <span id="date"></span></div>
+  <div class="row"><span class="label">Time:</span> <span id="time"></span></div>
+
+  <div class="row"><span class="label">Period:</span> <span id="period" class="blank">No class currently</span></div>
+  <div class="row"><span class="label">Class:</span> <span id="class" class="blank">—</span></div>
+
+  <div class="row"><span class="label">Location:</span> <span contenteditable="true">Video Location</span></div>
+  <div class="row"><span class="label">Reason:</span> <span contenteditable="true">Group Project</span></div>
+
+</div>
+
+<div class="buttons">
+  <button onclick="copyPass()">Copy</button>
+  <button onclick="downloadPNG()">PNG</button>
+</div>
+
+</div>
+
+<!-- PNG export library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+
+/* =========================
+   1. TIME (Bangkok)
+========================= */
+function updateClock() {
+  const now = new Date();
+
+  const options = {
+    timeZone: "Asia/Bangkok",
+    weekday: "short",
+    year: "numeric",
+    month: "short",
+    day: "numeric"
+  };
+
+  document.getElementById("date").innerText =
+    new Intl.DateTimeFormat("en-GB", options).format(now);
+
+  document.getElementById("time").innerText =
+    now.toLocaleTimeString("en-GB", { timeZone: "Asia/Bangkok" });
+}
+
+/* =========================
+   2. SCHEDULE DATA
+   (derived from your table)
+========================= */
+
+const schedule = [
+  { period: 1, start: "08:10", end: "08:40", Mon:"13.2", Tue:"15.3", Wed:"13.2", Thu:"", Fri:"16.2" },
+  { period: 2, start: "08:40", end: "09:10", Mon:"13.2", Tue:"15.3", Wed:"13.2", Thu:"", Fri:"16.2" },
+  { period: 3, start: "10:10", end: "10:50", Mon:"14.1", Tue:"", Wed:"16.2", Thu:"14.1", Fri:"15.3" },
+  { period: 4, start: "10:50", end: "11:30", Mon:"14.1", Tue:"", Wed:"15.3", Thu:"", Fri:"" },
+  { period: 5, start: "11:30", end: "12:10", Mon:"", Tue:"", Wed:"15.3", Thu:"11.1", Fri:"" },
+  { period: 6, start: "13:00", end: "13:40", Mon:"", Tue:"14.1", Wed:"", Thu:"", Fri:"11.1" },
+  { period: 7, start: "13:40", end: "14:20", Mon:"11.1", Tue:"14.1", Wed:"", Thu:"16.2", Fri:"11.1" },
+  { period: 8, start: "14:20", end: "15:00", Mon:"11.1", Tue:"13.2", Wed:"", Thu:"16.2", Fri:"" }
+];
+
+/* =========================
+   3. FIND CURRENT CLASS
+========================= */
+
+function timeToMinutes(t) {
+  const [h,m] = t.split(":").map(Number);
+  return h*60 + m;
+}
+
+function getCurrentClass() {
+  const now = new Date();
+  const bangkok = new Date(now.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }));
+  const minutes = bangkok.getHours()*60 + bangkok.getMinutes();
+
+  const dayIndex = bangkok.getDay(); 
+  const days = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  const today = days[dayIndex];
+
+  for (let row of schedule) {
+    if (!row.start || !row.end) continue;
+
+    const start = timeToMinutes(row.start);
+    const end = timeToMinutes(row.end);
+
+    if (minutes >= start && minutes < end) {
+return {
+  period: row.period,
+  start: row.start,
+  end: row.end,
+  className: row[today] || "—"
+};
+    }
+  }
+
+  return null;
+}
+
+/* =========================
+   4. UPDATE DISPLAY
+========================= */
+
+function updatePass() {
+  const current = getCurrentClass();
+
+  if (current) {
+    document.getElementById("period").innerText =
+  `${current.period} (${current.start} – ${current.end})`;
+    document.getElementById("period").classList.remove("blank");
+
+    document.getElementById("class").innerText = current.className;
+    document.getElementById("class").classList.remove("blank");
+  } else {
+    document.getElementById("period").innerText = "No class currently";
+    document.getElementById("class").innerText = "—";
+  }
+}
+
+/* =========================
+   5. COPY BUTTON
+========================= */
+
+function copyPass() {
+  const text =
+`DIGITAL HALL PASS
+
+Date: ${document.getElementById("date").innerText}
+Time: ${document.getElementById("time").innerText}
+Period: ${document.getElementById("period").innerText}
+Class: ${document.getElementById("class").innerText}`;
+
+  navigator.clipboard.writeText(text);
+  alert("Copied to clipboard");
+}
+
+/* =========================
+   6. PNG EXPORT
+========================= */
+
+function downloadPNG() {
+  html2canvas(document.querySelector(".pass")).then(canvas => {
+    const link = document.createElement("a");
+    link.download = "hallpass.png";
+    link.href = canvas.toDataURL();
+    link.click();
+  });
+}
+
+/* =========================
+   INIT LOOP
+========================= */
+
+setInterval(() => {
+  updateClock();
+  updatePass();
+}, 1000);
+
+updateClock();
+updatePass();
+
+</script>
+
+</body>
+</html>

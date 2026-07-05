@@ -1,0 +1,4208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<!-- Prevent flash before mode decision -->
+<script>
+document.documentElement.classList.add("pre-auto-open");
+</script>
+
+<script>
+(function () {
+
+  // ===== CORE SITE SETTINGS =====
+
+  window.TOC_MODE = "dynamic";
+  window.HOME_PAGE = "Bible_WEB_Version.html";
+  window.IS_SINGLE_SECTION = false;
+
+  const root = document.documentElement;
+
+  // ===== APPLY TOC MODE =====
+
+  function applyTOCMode() {
+    root.classList.remove("show-hard", "show-dynamic");
+
+    if (window.TOC_MODE === "hard") {
+      root.classList.add("show-hard");
+    }
+
+    if (window.TOC_MODE === "dynamic") {
+      root.classList.add("show-dynamic");
+    }
+  }
+
+  // Make available globally (since you use it elsewhere)
+  window.applyTOCMode = applyTOCMode;
+
+  applyTOCMode();
+
+  // ===== SINGLE LOAD HANDLER (MERGED) =====
+
+window.addEventListener("load", function () {
+
+  if (
+    window.sections &&
+    Array.isArray(window.sections) &&
+    typeof window.openQuizModal === "function"
+  ) {
+    const sectionCount = window.sections.length;
+    window.IS_SINGLE_SECTION = (sectionCount === 1);
+
+    if (window.IS_SINGLE_SECTION) {
+
+      root.classList.remove("show-hard", "show-dynamic");
+
+      if (!root.dataset.autoOpened) {
+        root.dataset.autoOpened = "1";
+        setTimeout(() => {
+          window.openQuizModal(0);
+        }, 0);
+
+      } else {
+        applyTOCMode();
+      }
+
+    } else {
+      applyTOCMode();
+    }
+  }
+
+  root.classList.remove("pre-auto-open");
+
+  // ===== HIDE LOADER =====
+  const loader = document.getElementById("loader");
+  if (loader) loader.style.display = "none";
+
+});
+  // ===== UNIVERSAL CLOSE HANDLER =====
+
+  document.addEventListener("click", function (e) {
+
+    const closeBtn = e.target.closest(
+      ".quiz-close, .modal-close, #closeModalBtn"
+    );
+
+    if (!closeBtn) return;
+
+    e.preventDefault();
+
+    const modalRoot = document.getElementById("modalRoot");
+
+    if (modalRoot) modalRoot.classList.remove("active");
+
+document.body.classList.remove("modal-open");
+
+// ✅ ONLY keep this logic here (no scroll handling here)
+
+if (window.IS_SINGLE_SECTION) {
+  // prevent browser from restoring old scroll position
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+
+window.location.replace(window.location.pathname + "?reload=" + Date.now());
+  return;
+}
+
+applyTOCMode();
+  });
+
+})();
+</script>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>XRG-1</title>
+
+<style>
+
+/* =====================
+   1. FIRST PAINT / MODE GATING
+===================== */
+
+#layout,
+#dynamicTOC {
+  display: none;
+}
+
+/* HARD enabled */
+html.show-hard #layout {
+  display: block;
+}
+
+/* DYNAMIC enabled */
+html.show-dynamic #dynamicTOC {
+  display: block;
+}
+
+/* =====================
+   2. GLOBAL BASE TYPOGRAPHY
+===================== */
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #222;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f6fa;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Hide page until auto-open logic finishes */
+html.pre-auto-open body > *:not(#loader) {
+  visibility: hidden;
+}
+
+h2 {
+  margin: 20px 0 10px 0;
+}
+
+h3 {
+  margin: 0 0 6px 0;
+  color: #1976d2;
+  font-size: 12px;
+}
+
+.word {
+  cursor: pointer;
+  color: inherit;
+}
+
+.word:hover {
+  background-color: rgba(26,115,232,0.2);
+}
+
+.sentence {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.highlight {
+  background-color: #ffff00;
+  color: #000000;
+}
+
+.visually-hidden {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+
+/* =====================
+   4. DYNAMIC TOC
+===================== */
+
+#tocButtons {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tocColumn button {
+  background: none;
+  border: none;
+  outline: none;
+  padding: 0;
+
+  display: block;
+  width: 100%;
+  background-color: #2b5d84;
+  color: #ffffff;
+
+  padding: 10px 10px 10px 15px;
+  border-radius: 6px;
+
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+
+  box-sizing: border-box;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tocColumn button:hover,
+.readAloudBtn:hover {
+  background-color: #1f4563;
+}
+
+#tocContainer h3 {
+  color: #2b5d84;
+  margin-left: 20px;
+}
+
+.parsedHeader {
+  color: #2b5d84;
+  font-weight: bold;
+  margin-left: -3px;
+
+}
+
+.parsedSubheader {
+  color: #2b5d84;
+  font-weight: bold;
+  margin-top: 14px;
+  margin-bottom: 8px;
+}
+
+/* =====================
+   6. MODAL ISOLATION
+===================== */
+
+body.modal-open {
+  overflow: hidden;
+}
+
+body.modal-open #tocRoot,
+body.modal-open #tocColLeft,
+body.modal-open #tocColRight {
+  display: none;
+}
+
+#modalRoot {
+  position: fixed;
+  inset: 0;
+  background: #ffffff;
+  display: none;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  padding-top: 20px;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  overscroll-behavior: contain;
+
+  z-index: 20000;
+}
+
+#modalRoot.active {
+  display: flex;
+  flex-direction: column;  /* stack bars vertically */
+  gap: 0;                  /* remove the transparent strip */
+  background: #ffffff;     /* force pure white */
+}
+/* =====================
+   7. QUIZ MODAL LAYOUT
+===================== */
+
+#quizModal {
+  position: relative;
+  width: 100%;
+  max-width: 360px;
+  height: auto;
+  max-height: 90vh;
+  margin: 0 auto;
+  padding: 0 10px 10px 10px;
+  background: #ffffff;
+  box-sizing: border-box;
+  overflow-y: auto;
+  border-radius: 8px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#quizModal h2 {
+  font-size: 12px;
+}
+
+#quizModalContent {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#quizSections {
+  width: 100%;
+  margin-left: 0;
+  padding-top: 10px;  /* Kill switch header spacing */
+  box-sizing: border-box;
+}
+
+#quizSections > * {
+  padding: 3px 0;
+  margin-bottom: 16px;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+#quizSections .section > h2 {
+  margin: 0 0 8px 0;
+  scroll-margin-top: 100px;
+}
+
+#quizSections .quiz-subsection {
+  margin: 10px 0;
+}
+
+#quizSections .quiz-subsection:first-of-type {
+  margin-top: 0;
+}
+
+#quizSections .quiz-subsection h3 {
+  margin: 0 0 8px 0;
+}
+
+#quizSections h3 {
+  scroll-margin-top: 10px;
+}
+
+.question-text {
+  margin-top: -5px;
+}
+
+.question-text h3 {
+  margin: 16px 0 8px;
+}
+
+.question-text:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.exercise-container {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.exercise p {
+  margin-bottom: 4px;
+}
+
+
+/* =====================
+   8. CONTROL BARS (Stacked Sticky Inside Scroll Container)
+===================== */
+
+/* Hidden by default */
+#chapterVerseControls,
+#readaloudControls {
+  display: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  box-sizing: border-box;
+
+  line-height: 0; /* kill inherited inline height */
+}
+
+/* Show when modal active */
+#modalRoot.active #chapterVerseControls,
+#modalRoot.active #readaloudControls {
+  display: block; /* block is safer than flex at container level */
+}
+
+/* --------------------------------------------------
+   BOTH BARS STICK (same scroll context)
+-------------------------------------------------- */
+
+#chapterVerseControls {
+  position: relative;
+  top: auto;
+  z-index: 40;
+}
+
+#readaloudControls {
+  position: relative;
+  top: auto;
+  z-index: 39;
+  border-top: 1px solid #eee;
+}
+
+/* REMOVE stacking math completely */
+#chapterVerseControls + #readaloudControls {
+  top: auto;
+}
+/* Keep layout behavior inside controlRow */
+#chapterVerseControls .controlRow,
+#readaloudControls .controlRow {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+#readaloudControls {
+  border-top: 1px solid #ffffff;
+  padding-top: 6px;
+}
+
+/* --------------------------------------------------
+   Buttons & Select Layout
+-------------------------------------------------- */
+
+#chapterVerseControls select,
+#chapterVerseControls button,
+#readaloudControls select,
+#readaloudControls button {
+  flex: 0 0 calc((100% - 18px) / 4);
+  max-width: calc((100% - 18px) / 4);
+  min-width: 0;
+
+  height: 36px;
+  line-height: 36px;
+
+  box-sizing: border-box;
+  font-size: 13px;
+  border-radius: 6px;
+
+  margin: 0;
+  padding: 0 10px;
+  vertical-align: middle;
+}
+
+/* Select normalization */
+#chapterVerseControls select,
+#readaloudControls select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  width: 100%;
+}
+
+/* Button alignment */
+#chapterVerseControls button,
+#readaloudControls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hide select scrollbar */
+#chapterVerseControls select::-webkit-scrollbar,
+#readaloudControls select::-webkit-scrollbar {
+  width: 0;
+}
+
+/* Readaloud wrapper safety */
+.readaloud-block,
+.readaloud-block .readaloud-buttons {
+  margin: 0;
+  padding: 0;
+  background: #ffffff;
+  box-sizing: border-box;
+}/* =====================
+   9. BUTTON SYSTEM
+===================== */
+
+#modalRoot button {
+  height: 36px;
+  font-size: 12px;
+  background: #2b5d84;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+#modalRoot button:hover:not(:disabled) {
+  background: #1f4563;
+}
+
+#modalRoot button:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+#modalRoot button:disabled {
+  background: #8aa3b8;
+  cursor: not-allowed;
+}
+
+
+/* =====================
+   10. SCOREBOARD
+===================== */
+
+#scoreboard {
+  display: block;
+  position: sticky;
+  bottom: 0;
+
+  left: 2px;              /* ← actual visual shift (try 1px if too much) */
+
+  background: #fff;
+  padding: 10px;
+  border: 2px solid #add8e6;
+
+  width: calc(100% - 2px); /* compensate so it doesn’t overflow right */
+  box-sizing: border-box;
+
+  z-index: 10;
+}
+
+.scoreboard-main pre,
+#scoreOutput {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+  display: block;
+}
+
+.scoreboard-buttons {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+.scoreboard-buttons > * {
+  flex: 1 1 0;        /* equal width */
+  min-width: 0;
+  height: 36px;
+}
+
+
+
+/* =====================
+   11. SHARED TOC STRUCTURE CONTRACT
+===================== */
+
+#layout,
+#tocContainer {
+  width: 100%;
+  max-width: 360px;
+  margin: 20px auto;
+  padding: 5px 10px;
+  box-sizing: border-box;
+}
+
+.container,
+#tocButtons {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.column,
+.tocColumn {
+  flex: 1 1 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+
+/* =====================
+   12. GLOBAL SCROLLBAR SUPPRESSION
+===================== */
+
+html,
+body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+
+  /* 🔥 ADD THIS */
+  overflow-anchor: none;
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+#quizModal::-webkit-scrollbar,
+#mvWindow::-webkit-scrollbar {
+  display: none;
+}
+
+#quizModal,
+#mvWindow {
+  scrollbar-width: none;
+}
+
+
+/* Make all 4-item control rows identical */
+/* ========================
+   FLEXIBLE CONTROL ROW SYSTEM
+========================= */
+
+.controlRow {
+  display: flex;
+  gap: 6px;
+  width: 100%;
+}
+
+/* shared styling */
+.controlRow > * {
+  min-width: 0;
+  height: 36px;
+  box-sizing: border-box;
+  font-size: 13px;
+  border-radius: 6px;
+  padding: 0 10px;
+}
+
+/* Chapter + Verse selects wider */
+.controlRow select:nth-child(1),
+.controlRow select:nth-child(2) {
+  flex: 1.3 1 0;
+}
+
+/* Buttons slightly smaller */
+.controlRow button {
+  flex: 0.8 1 0;
+}
+/* ========================
+   NAME / ID / SUBMIT / CLOSE ROW
+========================= */
+
+/* each row */
+.top-controls {
+  display: flex;
+  gap: 6px;              /* horizontal spacing only */
+  margin: 0;             /* remove transparent margin */
+  width: 100%;
+}
+
+.top-controls > * {
+  flex: 1 1 0;        /* equal width for all 4 */
+  min-width: 0;
+  height: 36px;
+  padding: 0 10px;
+  border-radius: 6px;
+  box-sizing: border-box;
+  font-size: 13px;
+}
+
+.top-controls input {
+  border: 1px solid #ccc;
+}
+
+.top-controls button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.copyrightSection {
+  font-size: 9px;
+  opacity: 0.7;
+
+  height: 26px;          /* slightly smaller to raise it */
+  padding: 0 6px;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;   /* vertical centering */
+  justify-content: flex-start;
+
+  margin-top: 5px;     /* moves it UP 10px */
+  padding-left: 1px;    /* moves it RIGHT 5px (6 + 5) */
+}
+
+
+.quiz-scoreboard {
+  width: 100%;
+  box-sizing: border-box;
+
+  margin-bottom: 12px;
+  padding: 6px;
+
+  border: 1px solid #9aaed1;
+  border-radius: 6px;
+  background: #f9f9f9;
+
+  font-family: monospace;
+  font-size: 12px;
+}
+
+
+/* vertical stacking container */
+
+/* Make only Chapter & Verse text smaller */
+#chapterVerseControls select {
+  font-size: 10px;   /* adjust to 9px, 11px, etc. */
+}
+
+.reading-active {
+  background-color: yellow !important;
+  scroll-margin-top: 120px;
+}
+
+#loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #f5f6fa; /* match page background */
+  z-index: 9999;
+}
+
+/* Inner box matches your layout width */
+#loaderContent {
+  width: 100%;
+  max-width: 360px;
+  margin: 0 auto;
+
+  text-align: center;
+  padding: 20px;
+
+  font-size: 16px;
+  font-weight: bold;
+  color: #2b5d84; /* 🔵 your button blue */
+}
+
+#helloBar {
+  height: 40px;              /* acts as buffer */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12px;
+  color: #2b5d84;
+
+  background: #ffffff;
+  transition: opacity 0.15s ease, height 0.15s ease;
+}
+
+
+
+/* =========================
+   🔥 MOBILE KEYBOARD FIX LAYER
+   (SAFE OVERRIDE ZONE)
+========================= */
+
+html, body {
+  height: 100%;
+}
+
+/* Prevent layout jump caused by keyboard resize */
+#modalRoot {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  height: 100dvh; /* modern mobile viewport fix */
+  min-height: 100vh;
+}
+
+/* Better behavior when keyboard opens */
+@supports (height: 100dvh) {
+  #modalRoot {
+    height: 100dvh;
+  }
+}
+
+/* fallback smooth behavior for older mobile browsers */
+@media (max-width: 768px) {
+  #modalRoot {
+    transition: transform 0.12s ease-out;
+  }
+}
+
+/* optional: stabilize bottom UI elements (your proxy button) */
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+
+.modal-close-btn {
+  width: 36px;
+  height: 36px;
+
+  padding: 0;
+  line-height: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 16px;
+
+  background: #2b5d84;
+  color: #fff;
+
+  border: none;
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  transition: background 0.15s, transform 0.1s;
+
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}
+
+.modal-close-btn:hover {
+  background: #1f4563;
+}
+
+.modal-close-btn:active {
+  transform: scale(0.97);
+}
+</style>
+</head>
+<body>
+
+<div id="loader">
+  <div id="loaderContent">Loading...</div>
+</div>
+<div id="rawTextSource" class="visually-hidden">
+
+~60. 1 Peter
+Peter’s First Letter
+Chapter 1
+Verse 1
+Peter, an apostle of Jesus Christ, to the chosen ones who are living as foreigners in the Dispersion in Pontus, Galatia, Cappadocia, Asia, and Bithynia,
+Verse 2
+according to the foreknowledge of God the Father, in sanctification of the Spirit, that you may obey Jesus Christ and be sprinkled with his blood: Grace to you and peace be multiplied
+Verse 3
+Blessed be the God and Father of our Lord Jesus Christ, who according to his great mercy caused us to be born again to a living hope through the resurrection of Jesus Christ from the dead,
+Verse 4
+to an incorruptible and undefiled inheritance that doesn’t fade away, reserved in Heaven for you,
+Verse 5
+who by the power of God are guarded through faith for a salvation ready to be revealed in the last time
+Verse 6
+In this you greatly rejoice, though now for a little while, if need be, you have been grieved in various trials,
+Verse 7
+that the proof of your faith, which is more precious than gold that perishes, even though it is tested by fire, may be found to result in praise, glory, and honor at the revelation of Jesus Christ—
+Verse 8
+whom, not having known, you love In him, though now you don’t see him, yet believing, you rejoice greatly with joy that is unspeakable and full of glory,
+Verse 9
+receiving the result of your faith, the salvation of your souls
+Verse 10
+Concerning this salvation, the prophets sought and searched diligently They prophesied of the grace that would come to you,
+Verse 11
+searching for who or what kind of time the Spirit of Christ which was in them pointed to when he predicted the sufferings of Christ and the glories that would follow them
+Verse 12
+To them it was revealed that they served not themselves, but you, in these things, which now have been announced to you through those who preached the Good News to you by the Holy Spirit sent out from heaven; which things angels desire to look into
+Verse 13
+Therefore prepare your minds for action Be sober, and set your hope fully on the grace that will be brought to you at the revelation of Jesus Christ—
+Verse 14
+as children of obedience, not conforming yourselves according to your former lusts as in your ignorance,
+Verse 15
+but just as he who called you is holy, you yourselves also be holy in all of your behavior,
+Verse 16
+because it is written, “You shall be holy, for I am holy”
+Verse 17
+If you call on him as Father, who without respect of persons judges according to each man’s work, pass the time of your living as foreigners here in reverent fear,
+Verse 18
+knowing that you were redeemed, not with corruptible things like silver or gold, from the useless way of life handed down from your fathers,
+Verse 19
+but with precious blood, as of a lamb without blemish or spot, the blood of Christ,
+Verse 20
+who was foreknown indeed before the foundation of the world, but was revealed in this last age for your sake,
+Verse 21
+who through him are believers in God, who raised him from the dead and gave him glory, so that your faith and hope might be in God
+Verse 22
+Seeing you have purified your souls in your obedience to the truth through the Spirit in sincere brotherly affection, love one another from the heart fervently,
+Verse 23
+having been born again, not of corruptible seed, but of incorruptible, through the word of God, which lives and remains forever
+Verse 24
+For, “All flesh is like grass, and all of man’s glory like the flower in the grass The grass withers, and its flower falls;
+Verse 25
+but the Lord’s word endures forever” This is the word of Good News which was preached to you
+1 Peter
+Chapter 2
+Verse 1
+Putting away therefore all wickedness, all deceit, hypocrisies, envies, and all evil speaking,
+Verse 2
+as newborn babies, long for the pure spiritual milk, that with it you may grow,
+Verse 3
+if indeed you have tasted that the Lord is gracious
+Verse 4
+Come to him, a living stone, rejected indeed by men, but chosen by God, precious
+Verse 5
+You also as living stones are built up as a spiritual house, to be a holy priesthood, to offer up spiritual sacrifices, acceptable to God through Jesus Christ
+Verse 6
+Because it is contained in Scripture, “Behold, I lay in Zion a chief cornerstone, chosen and precious He who believes in him will not be disappointed”
+Verse 7
+For you who believe therefore is the honor, but for those who are disobedient, “The stone which the builders rejected has become the chief cornerstone,”
+Verse 8
+and, “a stumbling stone and a rock of offense” For they stumble at the word, being disobedient, to which also they were appointed
+Verse 9
+But you are a chosen race, a royal priesthood, a holy nation, a people for God’s own possession, that you may proclaim the excellence of him who called you out of darkness into his marvelous light
+Verse 10
+In the past, you were not a people, but now are God’s people, who had not obtained mercy, but now have obtained mercy
+Verse 11
+Beloved, I beg you as foreigners and pilgrims to abstain from fleshly lusts which war against the soul,
+Verse 12
+having good behavior among the nations, so in that of which they speak against you as evildoers, they may see your good works and glorify God in the day of visitation
+Verse 13
+Therefore subject yourselves to every ordinance of man for the Lord’s sake: whether to the king, as supreme,
+Verse 14
+or to governors, as sent by him for vengeance on evildoers and for praise to those who do well
+Verse 15
+For this is the will of God, that by well-doing you should put to silence the ignorance of foolish men
+Verse 16
+Live as free people, yet not using your freedom for a cloak of wickedness, but as bondservants of God
+Verse 17
+Honor all men Love the brotherhood Fear God Honor the king
+Verse 18
+Servants, be in subjection to your masters with all respect, not only to the good and gentle, but also to the wicked
+Verse 19
+For it is commendable if someone endures pain, suffering unjustly, because of conscience toward God
+Verse 20
+For what glory is it if, when you sin, you patiently endure beating? But if when you do well, you patiently endure suffering, this is commendable with God
+Verse 21
+For you were called to this, because Christ also suffered for us, leaving you an example, that you should follow his steps,
+Verse 22
+who didn’t sin, “neither was deceit found in his mouth”
+Verse 23
+When he was cursed, he didn’t curse back When he suffered, he didn’t threaten, but committed himself to him who judges righteously
+Verse 24
+He himself bore our sins in his body on the tree, that we, having died to sins, might live to righteousness You were healed by his wounds
+Verse 25
+For you were going astray like sheep; but now you have returned to the Shepherd and Overseer of your souls
+1 Peter
+Chapter 3
+Verse 1
+In the same way, wives, be in subjection to your own husbands, so that, even if any don’t obey the Word, they may be won by the behavior of their wives without a word,
+Verse 2
+seeing your pure behavior in fear
+Verse 3
+Let your beauty come not from the outward adorning of braiding your hair, and of wearing gold ornaments or of putting on fine clothing,
+Verse 4
+but from the hidden person of the heart, in the incorruptible adornment of a gentle and quiet spirit, which is very precious in God’s sight
+Verse 5
+For this is how in the past the holy women who hoped in God also adorned themselves, being in subjection to their own husbands
+Verse 6
+So Sarah obeyed Abraham, calling him lord, whose children you now are if you do well and are not put in fear by any terror
+Verse 7
+You husbands, in the same way, live with your wives according to knowledge, giving honor to the woman as to the weaker vessel, as also being joint heirs of the grace of life, that your prayers may not be hindered
+Verse 8
+Finally, all of you be like-minded, compassionate, loving as brothers, tenderhearted, courteous,
+Verse 9
+not rendering evil for evil or insult for insult; but instead blessing, knowing that you were called to this, that you may inherit a blessing
+Verse 10
+For, “He who would love life and see good days, let him keep his tongue from evil and his lips from speaking deceit
+Verse 11
+Let him turn away from evil and do good Let him seek peace and pursue it
+Verse 12
+For the eyes of the Lord are on the righteous, and his ears open to their prayer; but the face of the Lord is against those who do evil”
+Verse 13
+Now who will harm you if you become imitators of that which is good?
+Verse 14
+But even if you should suffer for righteousness’ sake, you are blessed “Don’t fear what they fear, neither be troubled”
+Verse 15
+But sanctify the Lord God in your hearts Always be ready to give an answer to everyone who asks you a reason concerning the hope that is in you, with humility and fear,
+Verse 16
+having a good conscience Thus, while you are spoken against as evildoers, they may be disappointed who curse your good way of life in Christ
+Verse 17
+For it is better, if it is God’s will, that you suffer for doing what is right than for doing evil
+Verse 18
+Because Christ also suffered for sins once, the righteous for the unrighteous, that he might bring you to God, being put to death in the flesh, but made alive in the Spirit,
+Verse 19
+in whom he also went and preached to the spirits in prison,
+Verse 20
+who before were disobedient when God waited patiently in the days of Noah while the ship was being built In it, few, that is, eight souls, were saved through water
+Verse 21
+This is a symbol of baptism, which now saves you—not the putting away of the filth of the flesh, but the answer of a good conscience toward God—through the resurrection of Jesus Christ,
+Verse 22
+who is at the right hand of God, having gone into heaven, angels and authorities and powers being made subject to him
+1 Peter
+Chapter 4
+Verse 1
+Therefore, since Christ suffered for us in the flesh, arm yourselves also with the same mind; for he who has suffered in the flesh has ceased from sin,
+Verse 2
+that you no longer should live the rest of your time in the flesh for the lusts of men, but for the will of God
+Verse 3
+For we have spent enough of our past time doing the desire of the Gentiles, and having walked in lewdness, lusts, drunken binges, orgies, carousings, and abominable idolatries
+Verse 4
+They think it is strange that you don’t run with them into the same excess of riot, speaking evil of you
+Verse 5
+They will give account to him who is ready to judge the living and the dead
+Verse 6
+For to this end the Good News was preached even to the dead, that they might be judged indeed as men in the flesh, but live as to God in the spirit
+Verse 7
+But the end of all things is near Therefore be of sound mind, self-controlled, and sober in prayer
+Verse 8
+And above all things be earnest in your love among yourselves, for love covers a multitude of sins
+Verse 9
+Be hospitable to one another without grumbling
+Verse 10
+As each has received a gift, employ it in serving one another, as good managers of the grace of God in its various forms
+Verse 11
+If anyone speaks, let it be as it were the very words of God If anyone serves, let it be as of the strength which God supplies, that in all things God may be glorified through Jesus Christ, to whom belong the glory and the dominion forever and ever Amen
+Verse 12
+Beloved, don’t be astonished at the fiery trial which has come upon you to test you, as though a strange thing happened to you
+Verse 13
+But because you are partakers of Christ’s sufferings, rejoice, that at the revelation of his glory you also may rejoice with exceeding joy
+Verse 14
+If you are insulted for the name of Christ, you are blessed, because the Spirit of glory and of God rests on you On their part he is blasphemed, but on your part he is glorified
+Verse 15
+But let none of you suffer as a murderer, or a thief, or an evil doer, or a meddler in other men’s matters
+Verse 16
+But if one of you suffers for being a Christian, let him not be ashamed; but let him glorify God in this matter
+Verse 17
+For the time has come for judgment to begin with the household of God If it begins first with us, what will happen to those who don’t obey the Good News of God?
+Verse 18
+“If it is hard for the righteous to be saved, what will happen to the ungodly and the sinner?”
+Verse 19
+Therefore let them also who suffer according to the will of God in doing good entrust their souls to him, as to a faithful Creator
+1 Peter
+Chapter 5
+Verse 1
+Therefore I exhort the elders among you, as a fellow elder and a witness of the sufferings of Christ, and who will also share in the glory that will be revealed:
+Verse 2
+shepherd the flock of God which is among you, exercising the oversight, not under compulsion, but voluntarily; not for dishonest gain, but willingly;
+Verse 3
+not as lording it over those entrusted to you, but making yourselves examples to the flock
+Verse 4
+When the chief Shepherd is revealed, you will receive the crown of glory that doesn’t fade away
+Verse 5
+Likewise, you younger ones, be subject to the elder Yes, all of you clothe yourselves with humility and subject yourselves to one another; for “God resists the proud, but gives grace to the humble”
+Verse 6
+Humble yourselves therefore under the mighty hand of God, that he may exalt you in due time,
+Verse 7
+casting all your worries on him, because he cares for you
+Verse 8
+Be sober and self-controlled Be watchful Your adversary, the devil, walks around like a roaring lion, seeking whom he may devour
+Verse 9
+Withstand him steadfast in your faith, knowing that your brothers who are in the world are undergoing the same sufferings
+Verse 10
+But may the God of all grace, who called you to his eternal glory by Christ Jesus, after you have suffered a little while, perfect, establish, strengthen, and settle you
+Verse 11
+To him be the glory and the power forever and ever Amen
+Verse 12
+Through Silvanus, our faithful brother, as I consider him, I have written to you briefly, exhorting and testifying that this is the true grace of God in which you stand
+Verse 13
+She who is in Babylon, chosen together with you, greets you So does Mark, my son
+Verse 14
+Greet one another with a kiss of love Peace be to all of you who are in Christ Jesus Amen.~
+
+BLANK
+?BLANK
+
+
+~65. Jude Part 1
+The Letter from Jude
+Chapter 1
+Verse 1
+Jude, a servant of Jesus Christ, and brother of James, to those who are called, sanctified by God the Father, and kept for Jesus Christ:
+Verse 2
+May mercy, peace, and love be multiplied to you
+Verse 3
+Beloved, while I was very eager to write to you about our common salvation, I was constrained to write to you exhorting you to contend earnestly for the faith which was once for all delivered to the saints
+Verse 4
+For there are certain men who crept in secretly, even those who were long ago written about for this condemnation: ungodly men, turning the grace of our God into indecency, and denying our only Master, God, and Lord, Jesus Christ
+Verse 5
+Now I desire to remind you, though you already know this, that the Lord, having saved a people out of the land of Egypt, afterward destroyed those who didn’t believe
+Verse 6
+Angels who didn’t keep their first domain, but deserted their own dwelling place, he has kept in everlasting bonds under darkness for the judgment of the great day
+Verse 7
+Even as Sodom and Gomorrah and the cities around them, having in the same way as these given themselves over to sexual immorality and gone after strange flesh, are shown as an example, suffering the punishment of eternal fire
+Verse 8
+Yet in the same way, these also in their dreaming defile the flesh, despise authority, and slander celestial beings
+Verse 9
+But Michael, the archangel, when contending with the devil and arguing about the body of Moses, dared not bring against him an abusive condemnation, but said, “May the Lord rebuke you!”
+Verse 10
+But these speak evil of whatever things they don’t know They are destroyed in these things that they understand naturally, like the creatures without reason
+Verse 11
+Woe to them! For they went in the way of Cain, and ran riotously in the error of Balaam for hire, and perished in Korah’s rebellion
+Verse 12
+These are hidden rocky reefs in your love feasts when they feast with you, shepherds who without fear feed themselves; clouds without water, carried along by winds; autumn trees without fruit, twice dead, plucked up by the roots;
+Verse 13
+wild waves of the sea, foaming out their own shame; wandering stars, for whom the blackness of darkness has been reserved forever
+Verse 14
+About these also Enoch, the seventh from Adam, prophesied, saying, “Behold, the Lord came with ten thousands of his holy ones,
+Verse 15
+to execute judgment on all, and to convict all the ungodly of all their works of ungodliness which they have done in an ungodly way, and of all the hard things which ungodly sinners have spoken against him”
+Verse 16
+These are murmurers and complainers, walking after their lusts—and their mouth speaks proud things—showing respect of persons to gain advantage
+Verse 17
+But you, beloved, remember the words which have been spoken before by the apostles of our Lord Jesus Christ
+Verse 18
+They said to you, “In the last time there will be mockers, walking after their own ungodly lusts”
+Verse 19
+These are those who cause divisions and are sensual, not having the Spirit
+Verse 20
+But you, beloved, keep building up yourselves on your most holy faith, praying in the Holy Spirit
+Verse 21
+Keep yourselves in God’s love, looking for the mercy of our Lord Jesus Christ to eternal life
+Verse 22
+On some have compassion, making a distinction,
+Verse 23
+and some save, snatching them out of the fire with fear, hating even the clothing stained by the flesh
+Verse 24
+Now to him who is able to keep them from stumbling, and to present you faultless before the presence of his glory in great joy,
+Verse 25
+to God our Savior, who alone is wise, be glory and majesty, dominion and power, both now and forever Amen.~
+
+BLANK
+?BLANK
+
+~Section 1 – Bigfoot – Pacific Northwest
+“Good morning, everyone. Today, we are starting our Bigfoot search deep in the Pacific Northwest forest, where people often report some huge footprints and some strange sounds. Right now, we are moving toward a trail that is usually quiet, and we are listening carefully for any movement. We don’t have much daylight, so we will continue until late afternoon, and we won’t stop unless the weather gets bad.
+
+Maybe we will see a broken branch or a fresh print. If we find some real evidence, we will definitely follow it. Bigfoot is as mysterious as the Yeti, but the trees here are thicker, so the creature could hide more easily. Because of the dense forest, sightings are rare, yet locals still tell some exciting stories. Once we reach the river, we will rest, and later, we are going to use night-vision cameras.
+
+You should stay close to the group, and you must not wander away, because the forest is huge. I think we will probably hear some unusual sounds tonight, even if they come from animals we already know. Still, this place feels different from anywhere else, and that’s why our search is so thrilling.”~
+
+Quiz
+
+?Why do sightings of Bigfoot happen only sometimes in this forest?
+People walk too fast
+The river is too wide
+|The trees are thick and it is easy to hide|
+The forest has no animals
+
+?What will the group do if they find real evidence?
+Leave the forest
+|Follow it|
+Stop the search
+Ask locals for help
+
+?When will they rest during the day?
+As soon as the trail becomes noisy
+After lunch
+Before they reach the trail
+|When they arrive at the river|
+
+?Why must students stay close to the group?
+The guide walks slowly
+It might rain
+|The forest is very large|
+They need to take many photos
+
+?What makes the search feel “thrilling,” according to the speaker?
+The weather is dangerous
+|The forest feels different from other places|
+The group is very big
+They have new shoes
+
+~Section 2 – Nessie – Scotland
+“Welcome, everyone. Today, we are taking a small boat onto Loch Ness, where countless visitors often report long shapes rising and sinking again. Right now, we are using sonar equipment because there isn’t much light in the deep water, and we need some help to see any movement below us. We will travel slowly toward the center, and we won’t go too close to the shore until later.
+
+Once we stop the engine, listen carefully. Maybe we will see a wave, a shadow, or some bubbles. If Nessie is active today, we will definitely record some unusual shapes. Nessie is similar to a giant reptile, yet very different from Bigfoot because she lives entirely in water. Because of old stories and famous photos, many people believe she may still be here.
+
+This afternoon, we are going to visit the castle area, and you can take photos, but you must not leave the marked path. You should watch the surface carefully, because the loch changes quickly when the wind arrives. I think we will probably capture some interesting sonar images tomorrow, even if they belong to big fish. Still, the mystery here feels stronger than almost anywhere else.”~
+
+Quiz
+
+?Why are they using sonar equipment?
+The boat is very old
+They want to find the shore
+|The deep water is dark and hard to see into|
+They are measuring the weather
+
+?What might show that something is moving under the water?
+Birds overhead
+|A wave, a shadow, or bubbles|
+A noisy engine
+A rock on the shore
+
+?How is Nessie described compared to Bigfoot?
+Faster and smaller
+|She lives only in water, unlike Bigfoot|
+She likes warm weather
+She uses sonar too
+
+?Why must they not leave the marked path near the castle?
+It is too crowded
+|It could be unsafe|
+Cameras don’t work there
+The wind is too strong
+
+?What does the speaker expect to capture tomorrow?
+Photos of the castle
+|Interesting sonar shapes|
+Voices under the water
+Bright lights in the sky
+
+~Section 3 – Megalodon – Australia
+“Alright, team. Today, we are heading down to the Australian coast, where we are preparing for an ocean search unlike any other. Right now, we are loading cameras and lights, because the water becomes dark quickly, and we need some strong equipment to spot any movement. There isn’t much proof that Megalodon survives, but there are some unexplained sightings far from the shore.
+
+We will begin our search soon, and we won’t stay in shallow water for long. Once we reach the deeper area, we are going to drop cameras beneath the boat. Maybe we will see a large shadow or some powerful movement. If anything huge appears, we will definitely record it. Megalodon is more than ten times larger than most sharks, so even a small sign could be exciting.
+
+Tomorrow morning, we will travel farther out, and you can help check some samples, but you must not touch sharp objects. Because the ocean is unpredictable, you should hold the ropes carefully and move slowly. I think we will probably find some unusual shapes later this week, even if they belong to whales. Still, the deep sea feels mysterious, and that’s why our search is amazing.”~
+
+Quiz
+
+?Why do they need strong equipment for the search?
+They will stay near the beach
+It is difficult to see through the boat windows
+|The water becomes dark very quickly|
+They want to film birds
+
+?Why could even a small sign be exciting?
+Megalodon swims near rivers
+|Megalodon is extremely large|
+They have never seen a shark
+The cameras are very slow
+
+?What will they do when they reach deeper water?
+Eat lunch
+Swim together
+|Drop cameras under the boat|
+Turn around
+
+?What safety rule must the group follow tomorrow?
+Wear bright colors
+|Do not touch sharp objects|
+Stand at the front of the boat
+Talk loudly
+
+?What do they hope to find later in the week?
+A new island
+|Unusual shapes in the deep water|
+A second boat
+Clear weather
+
+~Determiners
+
+Teacher: Today, we’ll review determiners. These are words that modify or limit nouns. There are seven main categories. Let’s go over them quickly.
+
+Student: Okay, I’m ready!
+
+Teacher: First, quantifiers. These show amounts. For example, "much," "many," "several." They describe how much or how many of something. Can you give an example?
+
+Student: "Many books."
+
+Teacher: Perfect! Now, possessives. These show ownership. Example
+
+Student: "my," "your," "their." Can you try one?
+
+Student: "Her pen."
+
+Teacher: Great! Next, demonstratives. These point to something specific: "this," "that," "these," "those." Example?
+
+Student: "This chair."
+
+Teacher: Exactly. Now, articles. These identify or introduce noun
+
+Student: "a," "an," "the." Example?
+
+Student: "A dog."
+
+Teacher: Correct. Now, distributives. These refer to individuals in a group: "each," "every," "either," "neither." Example?
+
+Student: "Each person."
+
+Teacher: Great. Interrogatives are used for questions about noun
+
+Student: "which," "what," "whose." Example?
+
+Student: "Whose book?"
+
+Teacher: Good! Finally, numbers. These express specific order or quantity: "first," "second," "three." Example?
+
+Student: "She finished first."
+
+Teacher: Excellent! Remember: quantifiers for amounts, possessives for ownership, demonstratives for location, articles to introduce nouns, distributives for groups, interrogatives for questions, and numbers for order.
+
+Student: Got it! Thanks for the quick review!
+
+Teacher: You’re ready for the quiz!~
+
+Concept Quiz
+
+?Which category is used to show the quantity or amount of something, like in "much," "many," or "several"?
+Possessives
+|Quantifiers|
+Demonstratives
+Articles
+
+?Which category is used to express ownership or relationship between nouns, like "my," "your," or "their"?
+Demonstratives
+|Possessives|
+Articles
+Interrogatives
+
+</div>
+
+
+<!-- ================= DYNAMIC TOC ================= -->
+<div id="dynamicTOC">
+  <div id="tocContainer">
+
+<h1 data-auto-title></h1>
+
+    <div id="tocButtons">
+      <div class="tocColumn" id="tocColLeft"></div>
+      <div class="tocColumn" id="tocColRight"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ================= QUIZ MODAL ================= -->
+<div id="modalRoot">
+  <div id="quizModal">
+
+<!--<div id="helloBar">Hello!</div> -->
+
+    <!-- CONTROL BARS LIVE HERE -->
+    <div id="chapterVerseControls">
+      <div class="controlRow">
+
+<button id="instructionsBtn">Instructions</button>
+<!-- <select id="chapterSelect"></select> -->
+
+<button id="strategiesBtn">Strategies</button>
+<!-- <select id="verseSelect"></select> -->
+
+<button id="signalwordsBtn">Signals</button>
+<!-- <button id="goBtn">Go</button> -->
+
+<button onclick="goToNextQuiz()">Go to Quiz</button>
+
+      </div>
+    </div>
+
+    <div id="readaloudControls">
+      <div class="controlRow">
+        <button id="highlightSelected">Highlight</button>
+        <button id="copySelected">Copy</button>
+        <button id="startBtn">Audio</button>
+        <button id="closeModalBtn">Close</button>
+      </div>
+    </div>
+
+    <!-- ACTUAL CONTENT -->
+    <div id="quizModalContent">
+      <div id="quizSections"></div>
+    </div>
+
+  </div>
+</div>
+
+
+
+
+
+
+
+<script>
+
+(function(){
+
+
+  // [1] GET INPUT SOURCE
+  const src = document.getElementById("rawTextSource");
+  if (!src) return;
+
+  const raw = src.textContent.trim();
+  const lines = raw.split("\n");
+
+  // [2] REGEX RULES
+  const urlRegex = /^https?:\/\/\S+$/i;
+  const urlAnywhere = /(https?:\/\/\S+)/gi;
+
+  // [3] BUILD OUTPUT ARRAYS
+  const htmlResult = [];
+  const speechChunks = [];
+
+  // [4] PARSE LOOP (UNCHANGED LOGIC)
+  for (let i = 0; i < lines.length; i++) {
+
+    let line = lines[i].trim();
+    let next = (lines[i + 1] || "").trim();
+
+    // TITLE + URL HANDLING
+    if (line && !urlRegex.test(line) && urlRegex.test(next)) {
+
+      htmlResult.push(
+        `<a href="${next}" target="_blank" rel="noopener">${line}</a>`
+      );
+
+      speechChunks.push(line);
+
+      i++;
+      continue;
+    }
+
+    // INLINE URL HANDLING
+    const htmlLine = line.replace(urlAnywhere, url =>
+      `<a href="${url}" target="_blank" rel="noopener">${url}</a>`
+    );
+
+    htmlResult.push(htmlLine);
+
+    const cleanText = line.replace(urlAnywhere, "").trim();
+    if (cleanText) {
+      speechChunks.push(cleanText);
+    }
+  }
+
+  // [5] OUTPUT (UNCHANGED — SAFE FOR UI SYSTEM)
+  window.rawText = htmlResult.join("\n");
+
+// SIGNAL: parser is done
+window.parserReady = true;
+
+  // [6] READ-ALOUD HANDOFF (FIXED TO NOT BREAK UI)
+
+  // IMPORTANT:
+  // - no immediate execution
+  // - no blocking
+  // - no fallback globals
+  // - queued after UI thread
+
+  setTimeout(() => {
+    if (typeof window.onParsedTextReady === "function") {
+      window.onParsedTextReady(speechChunks);
+    }
+  }, 0);
+
+})();
+
+</script>
+
+<script>
+(function primeFemaleVoiceOnce() {
+  const synth = window.speechSynthesis;
+  if (!synth) return;
+
+  let primed = false;
+
+  function tryPrime() {
+    if (primed) return;
+
+    const voices = synth.getVoices();
+    if (!voices.length) return;
+
+    const femaleVoice =
+      voices.find(v => /Aria|Zira|Samantha|Victoria|Moira/i.test(v.name)) ||
+      voices.find(v => v.lang && v.lang.startsWith("en")) ||
+      voices[0];
+
+    if (!femaleVoice) return;
+
+    const u = new SpeechSynthesisUtterance(" ");
+    u.voice = femaleVoice;
+    u.volume = 0;
+    u.rate = 1;
+    u.pitch = 1;
+
+    synth.speak(u);
+    primed = true;
+  }
+
+  tryPrime();
+
+  synth.onvoiceschanged = tryPrime;
+
+  // Better Android + mobile coverage (replaces click + touchstart)
+  document.addEventListener("pointerdown", tryPrime, { once: true });
+})();
+</script>
+
+<script>
+(function () {
+
+  function cleanSpeechText(text) {
+    text = text.replace(/\b\d+:\d+\s*/g, '');
+    text = text.replace(/<br\s*\/?>/gi, ' ');
+    text = text.replace(/\n+/g, ' ');
+    text = text.replace(/\s+\./g, '.');
+    text = text.replace(/\.(\S)/g, '. $1');
+    text = text.replace(/\s+/g, ' ').trim();
+    return text;
+  }
+
+  const OriginalUtterance = window.SpeechSynthesisUtterance;
+
+  function PatchedUtterance(text) {
+    return new OriginalUtterance(cleanSpeechText(text));
+  }
+
+  // 🔧 preserve prototype for Android/WebView compatibility
+  PatchedUtterance.prototype = OriginalUtterance.prototype;
+
+  window.SpeechSynthesisUtterance = PatchedUtterance;
+
+})();
+</script>
+
+<script>
+(function() {
+  // ====== 2. Parse Sections ======
+const raw = window.rawText;
+
+if (!raw) return; // IMPORTANT: stop if parser not ready
+
+const segments = raw.split("~").map(s => s.trim()).filter(Boolean);
+  const sections = [];
+
+  for (let i = 0; i < segments.length; i += 2) {
+    const storyBlock = segments[i] || "";
+    const questionBlock = segments[i + 1] || '';
+
+    const lines = storyBlock.split("\n").map(l => l.trim()).filter(Boolean);
+
+    let titleLine = lines[0] || "Untitled Section";
+
+    sections.push({
+      title: titleLine,
+      content: lines.join("\n"),
+      questions: questionBlock
+    });
+  }
+
+window.sections = sections;
+
+
+  // ====== 3. Build TOC ======
+  const leftCol = document.getElementById('tocColLeft');
+  const rightCol = document.getElementById('tocColRight');
+  if (!leftCol || !rightCol) return;
+
+  leftCol.innerHTML = '';
+  rightCol.innerHTML = '';
+  const midpoint = Math.ceil(sections.length / 2);
+
+  sections.forEach((sec, idx) => {
+    const btn = document.createElement('button');
+    btn.textContent = sec.title;
+    btn.addEventListener('click', () => openQuizModal(idx));
+    if (idx < midpoint) leftCol.appendChild(btn);
+    else rightCol.appendChild(btn);
+  });
+
+// ====== 4. Modal Rendering ======
+window.openQuizModal = function(idx) {
+
+  const container = document.getElementById('quizSections');
+  container.innerHTML = '';
+
+  generateQuizSection(sections[idx], idx);
+
+  document.getElementById('modalRoot').classList.add('active');
+  document.body.classList.add('modal-open');
+
+  moveControlsIntoModal();
+
+  // 📌 Chapter/Verse system (navigation layer)
+  buildChapterVerseLogic();
+};
+
+document.addEventListener("click", function(e) {
+
+  const closeBtn = e.target.closest("[data-close-quiz]");
+  if (!closeBtn) return;
+
+  // 🔒 Stronger prevent auto-reopen
+  window.__quizJustClosed = Date.now();
+
+  const modalRoot = document.getElementById("modalRoot");
+  const container = document.getElementById("quizSections");
+
+  // 🔥 1. CLOSE FIRST
+  modalRoot?.classList.remove("active");
+  document.body.classList.remove("modal-open");
+
+  // 🔥 2. Clear content
+  if (container) container.innerHTML = "";
+
+  // 🔥 3. Kill smooth scroll
+  document.documentElement.style.scrollBehavior = "auto";
+
+  // 🔥 4. Immediate reset
+  window.scrollTo(0, 0);
+
+  const modal = document.getElementById("quizModal");
+  if (modal) modal.scrollTop = 0;
+
+  const modalContent = document.getElementById("quizModalContent");
+  if (modalContent) modalContent.scrollTop = 0;
+
+  // 🔥 5. Prevent browser restoring old position
+  if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+  }
+
+  if (window.resetQuizScrollState) {
+    window.resetQuizScrollState();
+  }
+
+  // 🔥 FINAL OVERRIDE (critical)
+  setTimeout(() => {
+    window.scrollTo(0, 0);
+  }, 0);
+
+  requestAnimationFrame(() => {
+    window.scrollTo(0, 0);
+  });
+
+});
+
+function generateQuizSection(section, idx) {
+  const container = document.getElementById('quizSections');
+
+// ===== Paragraph numbering control =====
+// true  = number story paragraphs
+// false = never number story paragraphs
+const NUMBER_PARAGRAPHS = false;
+
+// Helper: render story paragraphs with optional numbering
+function renderNumberedLines(lines, sectionTitle) {
+  return lines
+    .filter((line, idx) => {
+      // ❌ Remove duplicate header (first line only)
+      if (
+        idx === 0 &&
+        sectionTitle &&
+        line.trim().toLowerCase() === sectionTitle.trim().toLowerCase()
+      ) {
+        return false;
+      }
+      return true;
+    })
+    .map((line, lineIdx) => {
+      // Never number if disabled
+      if (!NUMBER_PARAGRAPHS) {
+        return `<p>${line}</p>`;
+      }
+
+      // Defensive: do not double-number
+      if (/^\d+\.\s/.test(line)) {
+        return `<p>${line}</p>`;
+      }
+
+      return `<p>${lineIdx + 1}. ${line}</p>`;
+    })
+    .join("");
+}
+
+
+let sectionHTML = `
+  <div class="section" data-section-idx="${idx}">
+    <h2 class="parsedHeader">${section.title}</h2>
+    <div class="question-text" contenteditable="true">
+      ${renderNumberedLines(
+        section.content.split("\n").map(l => l.trim()).filter(Boolean),
+        section.title
+      )}
+    </div>
+`;
+
+    const SUBSECTION_MARKERS = [
+      "Quiz",
+      "Concept Quiz",
+      "Context Quiz",
+      "Comprehension Quiz",
+      "Grammar Quiz",
+      "Vocabulary Quiz"
+
+    ];
+
+    const lines = section.questions.split("\n").map(l => l.trim()).filter(Boolean);
+    const subsections = [];
+    let currentSub = null;
+
+let hasBlankLine = false;
+let hasNullBlankLine = false;
+
+lines.forEach(line => {
+  // Detect special lines
+  if (/^\s*blank\s*$/i.test(line)) hasBlankLine = true;
+  if (/^\s*\?blank\s*$/i.test(line)) hasNullBlankLine = true;
+
+  // If both are present, skip all subsections
+  if (hasBlankLine && hasNullBlankLine) {
+    currentSub = null; // do not create any subsection
+    return;
+  }
+
+  if (SUBSECTION_MARKERS.some(marker =>
+  line.toLowerCase().startsWith(marker.toLowerCase())
+)) {
+
+    currentSub = { title: line, questions: [] };
+    subsections.push(currentSub);
+  } else if (currentSub) {
+    currentSub.questions.push(line);
+  }
+});
+
+    subsections.forEach(sub => {
+      const slug = sub.title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+      sub.slug = slug;
+
+      sectionHTML += `<h3 class="parsedSubheader">${sub.title}</h3>`;
+      sectionHTML += `<div class="quiz-subsection" data-subsection="${sub.title}" data-sub-slug="${slug}">`;
+
+sectionHTML += `
+  <div class="top-controls">
+    <input type="text" class="quiz-name" placeholder="Name">
+    <input type="text" class="quiz-id" placeholder="ID">
+    <button type="button" class="quiz-submit">Submit</button>
+    <button type="button" class="quiz-close">Close</button>
+  </div>
+
+        <div class="quiz-scoreboard"
+             style="display:none; width:100%; margin-bottom:12px;
+                    padding:6px; border:1px solid #9aaed1; border-radius:6px;
+                    background:#f9f9f9; font-family:monospace; font-size:12px;">
+          <pre class="scoreboard-data" style="margin:0; white-space:pre-wrap;"></pre>
+          <div class="scoreboard-buttons" style="margin-top:6px; display:flex; gap:6px;">
+            <button type="button" class="score-copy">Copy</button>
+            <button type="button" class="score-txt">TXT</button>
+            <button type="button" class="score-png">PNG</button>
+          </div>
+        </div>
+      `;
+
+      // ===== Question Parsing (supports ? at start + optional second line starting with -) =====
+      sub.questions = sub.questions.map(l => l.trim()).filter(Boolean);
+      let qIndex = 0;
+
+      for (let i = 0; i < sub.questions.length; i++) {
+        let line = sub.questions[i];
+
+        if (!line.startsWith('?')) continue;
+
+        // main question text
+        let question = line.replace(/^\?\s*/, '');
+
+        // optional second line
+        if (i + 1 < sub.questions.length && sub.questions[i + 1].startsWith('-')) {
+          question += ' ' + sub.questions[i + 1].replace(/^-+\s*/, '');
+          i++;
+        }
+
+        // collect options until next question
+        const options = [];
+        let j = i + 1;
+        while (j < sub.questions.length && !sub.questions[j].startsWith('?')) {
+          options.push(sub.questions[j]);
+          j++;
+        }
+
+        const correctPipe = options
+          .filter(o => /\|.*?\|/.test(o))
+          .map(o => o.replace(/\|/g, '').trim())
+          .join('|');
+
+        sectionHTML += `<div class="exercise" data-correct="${correctPipe}">`;
+        sectionHTML += `<p><strong>${qIndex + 1}. ${question}</strong></p>`;
+
+        options.forEach((opt, oi) => {
+          const clean = opt.replace(/\|/g, '').trim();
+          sectionHTML += `
+            <label>
+              <input type="radio" name="q${idx}_${sub.title}_${qIndex}" value="${clean}" data-correct="${correctPipe}">
+              ${String.fromCharCode(65 + oi)}) ${clean}
+            </label><br>
+          `;
+        });
+
+        sectionHTML += `</div>`;
+        qIndex++;
+        i = j - 1;
+      }
+
+      sectionHTML += `</div>`;
+    });
+
+    sectionHTML += `</div>`;
+    container.insertAdjacentHTML('beforeend', sectionHTML);
+  }
+
+  // ====== 5. Event Delegation ======
+  document.getElementById('quizSections').addEventListener('click', e => {
+    const sub = e.target.closest('.quiz-subsection');
+    if (!sub) return;
+
+    if (e.target.classList.contains('quiz-submit')) {
+      const sub = e.target.closest('.quiz-subsection');
+      if (!sub) return;
+
+      const name = sub.querySelector('.quiz-name')?.value || 'Anonymous';
+      const id   = sub.querySelector('.quiz-id')?.value || 'N/A';
+
+      const section = sub.closest('.section')?.querySelector('h2')?.textContent.trim() || 'Unknown Section';
+      const subsection = sub.dataset.subsection || 'Unknown Subsection';
+
+      const exercises = sub.querySelectorAll('.exercise');
+      let correctAnswers = 0;
+      exercises.forEach(ex => {
+correctAnswers += Number(ex.dataset.score || 0);
+
+
+      });
+      const totalExercises = exercises.length;
+      const percentage = totalExercises > 0 ? Math.round((correctAnswers / totalExercises) * 100) : 0;
+
+      const now = new Date();
+      const pad = n => n.toString().padStart(2,'0');
+      const dateString = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+      const filename = window.location.pathname.split('/').pop();
+      const resultText = `${filename}|${section}::${subsection}|${name}|${id}|${dateString}|${correctAnswers}/${totalExercises}|${percentage}%`;
+
+      const board = sub.querySelector('.quiz-scoreboard');
+      const dataEl = board.querySelector('.scoreboard-data');
+      if (dataEl) dataEl.textContent = resultText;
+      board.style.display = 'block';
+    }
+
+
+  });
+})();
+</script>
+
+
+
+
+
+
+
+
+<!-- ====== Consolidated Highlight + Read-Aloud + Emoji Speech + Active Highlight ====== -->
+<script>
+(function() {
+
+  /* =========================================================
+     GLOBALS
+  ========================================================= */
+  const highlightBtn = document.getElementById('highlightSelected');
+  const copyBtn = document.getElementById('copySelected');
+  const startBtn = document.getElementById('startBtn');
+  const pauseResumeBtn = document.getElementById('pauseResumeBtn');
+  const restartBtn = document.getElementById('restartBtn');
+
+  const synth = window.speechSynthesis;
+
+  let teacherVoice = null;
+  let studentVoice = null;
+
+  let narratorActive = false;
+  let lastContainer = null;
+  let lastOffset = 0;
+  let lastCharIndex = 0;
+  let utterance = null;
+
+  let activeParagraph = null;
+  let monitorInterval = null;
+
+
+  /* =========================================================
+     LOAD VOICES (Merged Logic — Nothing Removed)
+  ========================================================= */
+  function loadVoices() {
+    const voices = synth.getVoices();
+    if (!voices.length) return;
+
+    // First script preference logic
+    teacherVoice =
+      voices.find(v => v.name.includes("Zira")) ||
+      voices.find(v => v.name === "Microsoft Zira" && v.lang === "en-US") ||
+      voices.find(v => v.name.includes("Samantha")) ||
+      voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("female")) ||
+      voices[0];
+
+    studentVoice =
+      voices.find(v => v.name.includes("Aria")) ||
+      voices.find(v => v.name === "Microsoft Aria" && v.lang.startsWith("en-GB")) ||
+      voices.find(v => v.name.includes("Victoria")) ||
+      voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("female")) ||
+      voices[0];
+  }
+
+  synth.onvoiceschanged = loadVoices;
+  loadVoices();
+
+
+  /* =========================================================
+     HIGHLIGHT LOGIC (UNCHANGED)
+  ========================================================= */
+  highlightBtn?.addEventListener('click', () => {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return;
+
+    const range = sel.getRangeAt(0);
+    if (range.collapsed) return;
+
+    const highlightClass = 'highlight';
+    const container = range.commonAncestorContainer.nodeType === 3
+      ? range.commonAncestorContainer.parentNode
+      : range.commonAncestorContainer;
+
+    const allNodes = Array.from(container.querySelectorAll('p, li, div, span'));
+    const intersectingNodes = allNodes.filter(node => range.intersectsNode(node));
+
+    if (!intersectingNodes.length && range.startContainer.nodeType === 3) {
+      const parentSpan = range.startContainer.parentNode;
+      if (parentSpan.classList?.contains(highlightClass)) {
+        parentSpan.replaceWith(...parentSpan.childNodes);
+      } else {
+        const span = document.createElement('span');
+        span.className = highlightClass;
+        range.surroundContents(span);
+      }
+      sel.removeAllRanges();
+      return;
+    }
+
+    const alreadyHighlighted = intersectingNodes.some(n => n.classList?.contains(highlightClass));
+    if (alreadyHighlighted) {
+      intersectingNodes.forEach(n => {
+        if (n.classList.contains(highlightClass)) {
+          n.replaceWith(...n.childNodes);
+        }
+      });
+      sel.removeAllRanges();
+      return;
+    }
+
+    intersectingNodes.forEach(node => {
+      const span = document.createElement('span');
+      span.className = highlightClass;
+      node.parentNode.insertBefore(span, node);
+      span.appendChild(node);
+    });
+
+    sel.removeAllRanges();
+  });
+
+
+  /* =========================================================
+     COPY SELECTED TEXT
+  ========================================================= */
+  copyBtn?.addEventListener('click', () => {
+    const sel = window.getSelection();
+    const text = sel.toString().trim();
+
+    if (!text) {
+      alert("Select text first.");
+      return;
+    }
+
+    navigator.clipboard.writeText(text)
+      .then(() => alert("Copied!"))
+      .catch(err => console.error(err));
+  });
+
+
+  /* =========================================================
+     READABLE CONTAINER LOGIC
+  ========================================================= */
+  function getReadableContainer() {
+    const sel = window.getSelection();
+    let node = sel?.anchorNode;
+
+    while (node) {
+      if (node.classList?.contains?.('question-text')) return node;
+      if (node.id === 'mvTextContainer') return node;
+      node = node.parentNode;
+    }
+    return null;
+  }
+
+  function getCursorOffset(container) {
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) return 0;
+
+    const range = sel.getRangeAt(0);
+    const pre = document.createRange();
+    pre.setStart(container, 0);
+    pre.setEnd(range.startContainer, range.startOffset);
+    return pre.toString().length;
+  }
+
+/* =========================================================
+   MOBILE CHUNKING (ADD HERE)
+========================================================= */
+
+function buildChunks(text) {
+
+  const MAX = /Mobi|Android/i.test(navigator.userAgent) ? 120 : 180;
+
+  const sentences = text
+    .replace(/([.?!]+)\s+/g, "$1|")
+    .split("|")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  const chunks = [];
+  let buffer = "";
+
+  for (let s of sentences) {
+
+    // 🔥 handle very long sentences safely
+    if (s.length > MAX) {
+      for (let i = 0; i < s.length; i += MAX) {
+        chunks.push(s.slice(i, i + MAX));
+      }
+      continue;
+    }
+
+    if ((buffer + s).length > MAX) {
+      if (buffer.trim()) chunks.push(buffer.trim());
+      buffer = s + " ";
+    } else {
+      buffer += s + " ";
+    }
+  }
+
+  if (buffer.trim()) chunks.push(buffer.trim());
+
+  return chunks;
+}
+
+
+
+
+
+
+  /* =========================================================
+     SPEAK FROM CURSOR
+  ========================================================= */
+function speakFrom(container, offset) {
+
+  const fullText = container.textContent || "";
+  const text = fullText.slice(offset);
+  if (!text.trim()) return;
+
+  const chunks = [];
+  const MAX = /Mobi|Android/i.test(navigator.userAgent) ? 120 : 180;
+
+  // --- sentence-based chunking ---
+  const sentences = text
+    .replace(/([.?!])\s+/g, "$1|")
+    .split("|")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  let buffer = "";
+  for (let s of sentences) {
+    if ((buffer + s).length > MAX) {
+      if (buffer) chunks.push(buffer);
+      buffer = s + " ";
+    } else {
+      buffer += s + " ";
+    }
+  }
+  if (buffer) chunks.push(buffer);
+
+  let chunkIndex = 0;
+  let globalOffset = offset;   // 🔥 CRITICAL
+
+  narratorActive = true;
+  lastContainer = container;
+  lastOffset = offset;
+
+  function speakChunk() {
+
+    if (chunkIndex >= chunks.length) {
+      narratorActive = false;
+      lastOffset = 0;
+      lastCharIndex = 0;
+      return;
+    }
+
+    const chunkText = chunks[chunkIndex];
+
+    utterance = new SpeechSynthesisUtterance(chunkText);
+    utterance.voice = teacherVoice;
+
+    utterance.onboundary = (e) => {
+      if (e.name === "word") {
+        // 🔥 maintain continuous index for your highlighter system
+        lastCharIndex = globalOffset + e.charIndex;
+      }
+    };
+
+    utterance.onend = () => {
+      // 🔥 advance global offset correctly
+      globalOffset += chunkText.length;
+      chunkIndex++;
+      speakChunk();
+    };
+
+    synth.speak(utterance);
+  }
+
+  speakChunk();
+}
+
+  /* =========================================================
+     START BUTTON
+  ========================================================= */
+  startBtn?.addEventListener('click', () => {
+
+    const container = getReadableContainer();
+    if (!container) {
+      alert("Place cursor inside readable text");
+      return;
+    }
+
+    const offset = getCursorOffset(container);
+
+if (synth.speaking || synth.paused) {
+  synth.cancel();
+  clearHighlight();   // ← ADD THIS LINE
+  narratorActive = false;
+  return;
+}
+
+    lastCharIndex = offset;
+    speakFrom(container, offset);
+  });
+
+
+  /* =========================================================
+     EMOJI SPEECH OVERLAYS
+  ========================================================= */
+  function addSpeechEmojis() {
+    const paragraphs = document.querySelectorAll('.question-text p, .sentence, #quizSections p');
+
+    paragraphs.forEach(p => {
+      if (p.dataset.speechOverlay) return;
+      p.dataset.speechOverlay = '1';
+
+      const text = p.textContent.trim();
+      let speaker = null;
+
+      if (/^teacher:/i.test(text)) speaker = 'teacher';
+      else if (/^student:/i.test(text)) speaker = 'student';
+      else return;
+
+      const emoji = speaker === 'teacher' ? '👩‍🦰' : '👧';
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.style.all = 'unset';
+      btn.style.cursor = 'pointer';
+      btn.style.fontSize = '14px';
+      btn.style.display = 'inline';
+      btn.style.margin = '0';
+      btn.style.padding = '0';
+      btn.style.lineHeight = '1';
+      btn.style.verticalAlign = 'baseline';
+      btn.title = speaker === 'teacher' ? 'Teacher Speech' : 'Student Speech';
+      btn.textContent = emoji + ' ';
+
+btn.addEventListener('click', () => {
+
+  // Stop current speech
+if (synth.speaking) {
+  synth.cancel();
+  clearHighlight();   // ← ADD THIS LINE
+}
+
+  // Remove any existing highlight
+  document.querySelectorAll(".reading-active")
+    .forEach(el => el.classList.remove("reading-active"));
+
+  // Highlight this paragraph (pale yellow)
+  p.classList.add("reading-active");
+
+  const lineText = text.replace(/^(teacher:|student:)\s*/i, '');
+  const utter = new SpeechSynthesisUtterance(lineText);
+
+  if (speaker === 'teacher') {
+    utter.voice = teacherVoice;
+    utter.rate = 0.88;
+    utter.pitch = 1.15;
+    utter.volume = 0.95;
+  } else {
+    utter.voice = studentVoice;
+    utter.rate = 0.98;
+    utter.pitch = 1.50;
+    utter.volume = 0.80;
+  }
+
+  utter.onend = () => {
+    p.classList.remove("reading-active");
+  };
+
+  synth.speak(utter);
+});      p.insertBefore(btn, p.firstChild);
+    });
+  }
+
+  addSpeechEmojis();
+  setInterval(addSpeechEmojis, 1000);
+
+
+  /* =========================================================
+     ACTIVE READING HIGHLIGHT
+  ========================================================= */
+
+  if (!document.getElementById("speechHighlightStyle")) {
+    const style = document.createElement("style");
+    style.id = "speechHighlightStyle";
+    style.textContent = `
+.reading-active {
+  background-color: #fff9c4 !important;
+  transition: background-color 0.4s ease;
+}
+    `;
+    document.head.appendChild(style);
+  }
+
+  function clearHighlight() {
+    if (activeParagraph) {
+      activeParagraph.classList.remove("reading-active");
+      activeParagraph = null;
+    }
+  }
+
+  function startMonitoring() {
+    if (monitorInterval) return;
+
+    monitorInterval = setInterval(function(){
+      if (!synth.speaking) {
+        clearHighlight();
+        clearInterval(monitorInterval);
+        monitorInterval = null;
+      }
+    }, 100);
+  }
+
+  document.addEventListener("click", function(e){
+
+    const btn = e.target.closest("button");
+    if (!btn) return;
+
+    const p = btn.closest("p");
+    if (!p) return;
+
+    if (synth.speaking) {
+      clearHighlight();
+      return;
+    }
+
+    setTimeout(function(){
+      if (synth.speaking) {
+        clearHighlight();
+        activeParagraph = p;
+        p.classList.add("reading-active");
+        startMonitoring();
+      }
+    }, 50);
+
+  });
+
+})();
+</script>
+
+<!-- End-->
+
+<script>
+(function(){
+
+  const synth = window.speechSynthesis;
+
+  let paragraphs = [];
+  let paragraphRanges = [];
+  let currentIndex = -1;
+
+  let baseOffset = 0;          // where speech started in full text
+  let lastSpokenGlobal = 0;    // last spoken absolute character index
+  let lastStartContainer = null;
+  let lastStartOffset = 0;
+
+  /* ===============================
+     Pale Yellow Highlight CSS
+  =============================== */
+  if (!document.getElementById("autoParagraphHighlightStyle")) {
+    const style = document.createElement("style");
+    style.id = "autoParagraphHighlightStyle";
+    style.textContent = `
+      .auto-paragraph-active {
+        background-color: #fff9c4;
+        transition: background-color 0.4s ease;
+      }
+      .auto-paragraph-fade {
+        background-color: transparent;
+        transition: background-color 0.8s ease;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function clearAll() {
+    paragraphs.forEach(p => {
+      p.classList.remove("auto-paragraph-active");
+      p.classList.remove("auto-paragraph-fade");
+    });
+  }
+
+  function fadeParagraph(index) {
+    if (index < 0 || index >= paragraphs.length) return;
+    const p = paragraphs[index];
+    p.classList.remove("auto-paragraph-active");
+    p.classList.add("auto-paragraph-fade");
+    setTimeout(() => {
+      p.classList.remove("auto-paragraph-fade");
+    }, 800);
+  }
+
+  function highlightParagraph(index) {
+    if (index < 0 || index >= paragraphs.length) return;
+    paragraphs[index].classList.add("auto-paragraph-active");
+  }
+
+  function collectParagraphsFrom(root) {
+    paragraphs = Array.from(root.querySelectorAll("p"))
+      .filter(p => p.textContent.trim().length > 0);
+
+    paragraphRanges = [];
+    let runningLength = 0;
+
+    paragraphs.forEach(p => {
+      const len = p.textContent.length;
+      paragraphRanges.push({
+        start: runningLength,
+        end: runningLength + len
+      });
+      runningLength += len;
+    });
+  }
+
+function findParagraphIndex(globalCharIndex) {
+
+  const BUFFER = 8; // helps catch short dialogue lines
+
+  for (let i = 0; i < paragraphRanges.length; i++) {
+    const r = paragraphRanges[i];
+
+    if (
+      globalCharIndex >= (r.start - BUFFER) &&
+      globalCharIndex < (r.end + BUFFER)
+    ) {
+      return i;
+    }
+  }
+
+  return -1;
+}
+
+  function getCursorInfo() {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return null;
+
+    const range = sel.getRangeAt(0);
+
+    let container = range.startContainer;
+    while (container && container.nodeType !== 1) {
+      container = container.parentNode;
+    }
+    if (!container) return null;
+
+    const root = container.closest("#mvTextContainer, .question-text") || document.body;
+
+    const preRange = document.createRange();
+    preRange.setStart(root, 0);
+    preRange.setEnd(range.startContainer, range.startOffset);
+
+    const offset = preRange.toString().length;
+
+    return { root, offset, container };
+  }
+
+/* ========================================== 
+   Hook safely into speech (NO AUTO-HIGHLIGHT)
+========================================== */
+const originalSpeak = synth.speak.bind(synth);
+
+synth.speak = function(utterance) {
+
+  const cursorInfo = getCursorInfo();
+  if (!cursorInfo) return originalSpeak(utterance);
+
+  const { offset, container } = cursorInfo;
+
+  // Detect if cursor moved
+  const cursorMoved =
+    container !== lastStartContainer ||
+    offset !== lastStartOffset;
+
+  if (cursorMoved) {
+    baseOffset = offset;
+    lastSpokenGlobal = offset;
+  }
+
+  lastStartContainer = container;
+  lastStartOffset = offset;
+
+  // Optional: still track position silently (no UI effects)
+  utterance.addEventListener("boundary", function(e){
+    if (e.name !== "word") return;
+    lastSpokenGlobal = baseOffset + e.charIndex;
+  });
+
+  utterance.addEventListener("end", function(){
+    if (!synth.speaking) {
+      lastSpokenGlobal = 0;
+      baseOffset = 0;
+    }
+  });
+
+  return originalSpeak(utterance);
+};</script>
+
+<!-- ====== 5. Emoji + Audio Feedback ====== -->
+<script>
+(function() {
+  const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playCorrect() { 
+    audioCtx.resume().then(() => { 
+      const o = audioCtx.createOscillator(); 
+      const g = audioCtx.createGain(); 
+      o.type = "sine"; 
+      o.frequency.setValueAtTime(800, audioCtx.currentTime); 
+      g.gain.setValueAtTime(0.4, audioCtx.currentTime); 
+      o.connect(g); g.connect(audioCtx.destination); 
+      o.start(); o.stop(audioCtx.currentTime + 0.25); 
+    }); 
+  }
+
+  function playWrong() { 
+    audioCtx.resume().then(() => { 
+      const o = audioCtx.createOscillator(); 
+      const g = audioCtx.createGain(); 
+      o.type = "triangle"; 
+      o.frequency.setValueAtTime(450, audioCtx.currentTime); 
+      o.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.25); 
+      g.gain.setValueAtTime(0.4, audioCtx.currentTime); 
+      o.connect(g); g.connect(audioCtx.destination); 
+      o.start(); o.stop(audioCtx.currentTime + 0.25); 
+    }); 
+  }
+
+  function normalize(str){ 
+    return str.trim().toLowerCase().replace(/\s+/g," "); 
+  }
+
+  // ======================
+  // HANDLE ANSWER SELECTION
+  // ======================
+  document.body.addEventListener('change', e => {
+    const exercise = e.target.closest('.exercise');
+    if (!exercise) return;
+
+    // Emojis & sound (fire every change)
+    const textInputs = Array.from(exercise.querySelectorAll("input[type='text'], textarea"));
+    const selectedInputs = Array.from(exercise.querySelectorAll("input:checked"));
+
+    const userAnswers = textInputs.length 
+      ? textInputs.map(i => normalize(i.value)) 
+      : selectedInputs.map(i => normalize(i.value));
+
+    const correctAnswers = Array.from(exercise.querySelectorAll('[data-correct]'))
+      .map(i => normalize(i.dataset.correct));
+
+    const isCorrect = userAnswers.every(ans => correctAnswers.includes(ans));
+
+    // Remove previous emojis
+    exercise.querySelectorAll('.mc-emoji').forEach(span => span.remove());
+
+    // Add emojis
+    selectedInputs.forEach(inp => {
+      const lbl = inp.closest("label");
+      if (lbl) {
+        const span = document.createElement('span');
+        span.className = "mc-emoji";
+        span.style.marginLeft = "8px";
+        span.textContent = isCorrect ? "😊" : "😢";
+        lbl.appendChild(span);
+      }
+    });
+
+    textInputs.forEach(inp => {
+      const span = document.createElement('span');
+      span.className = "mc-emoji";
+      span.style.marginLeft = "8px";
+      span.textContent = isCorrect ? "😊" : "😢";
+      inp.parentNode.insertBefore(span, inp.nextSibling);
+    });
+
+    if (isCorrect) playCorrect(); else playWrong();
+
+// ======================
+// FIRST CLICK SCORING
+// ======================
+if (exercise.dataset.firstResponseLocked) return;
+exercise.dataset.firstResponseLocked = 'true';
+
+const totalExercises = 1; // each exercise counts as 1
+const correctCount = isCorrect ? 1 : 0;
+const percentage = correctCount * 100;
+
+// store score in the element so Submit can display later
+exercise.dataset.score = correctCount;
+exercise.dataset.percentage = percentage;
+});
+
+
+
+
+
+
+
+  // ======================
+  // SUBMIT BUTTON (DISPLAY SCOREBOARD ONLY)
+  // ======================
+  document.body.addEventListener('click', e => {
+    if (!e.target.classList.contains('quiz-submit')) return;
+    const sub = e.target.closest('.quiz-subsection');
+    if (!sub) return;
+
+    const exercises = sub.querySelectorAll('.exercise');
+
+    // Aggregate first-click scores
+    let correctCount = 0;
+    exercises.forEach(ex => {
+      const sc = Number(ex.dataset.score || 0);
+      correctCount += sc;
+    });
+
+    const totalExercises = exercises.length;
+    const percentage = totalExercises > 0 ? Math.round((correctCount / totalExercises) * 100) : 0;
+
+    // Display in scoreboard
+    const board = sub.querySelector('.quiz-scoreboard');
+    if (board) {
+      const dataEl = board.querySelector('.scoreboard-data');
+      const name = sub.querySelector('.quiz-name')?.value || 'Anonymous';
+      const id   = sub.querySelector('.quiz-id')?.value || 'N/A';
+      const section = sub.closest('.section')?.querySelector('h2')?.textContent || 'Unknown Section';
+      const subsection = sub.dataset.subsection || 'Unknown Subsection';
+      const now = new Date();
+      const pad = n => n.toString().padStart(2,'0');
+      const dateString = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      const filename = window.location.pathname.split('/').pop();
+
+const resultText = `${filename}|${section.replace(/:+$/, '').trim()}: ${subsection.replace(/^:+/, '').trim()}|${name}|${id}|${dateString}|${correctCount}/${totalExercises}|${percentage}%`;
+      if (dataEl) dataEl.textContent = resultText;
+
+      board.style.display = 'block';
+    }
+  });
+
+})();
+</script>
+
+
+<script>
+(function () {
+
+  if (document.getElementById("global-green-border")) return;
+
+  const border = document.createElement("div");
+  border.id = "global-green-border";
+
+  Object.assign(border.style, {
+    position: "fixed",
+    inset: "0",
+    pointerEvents: "none",
+    zIndex: "2147483647",
+    boxShadow: "inset 0 0 0 10px #39FF14"
+  });
+
+  document.documentElement.appendChild(border);
+
+})();
+</script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script>
+(function() {
+  const quizSections = document.getElementById('quizSections');
+
+  // Event delegation for scoreboard buttons
+  quizSections.addEventListener('click', e => {
+    const btn = e.target.closest('button');
+    if (!btn) return;
+
+    const board = e.target.closest('.quiz-scoreboard');
+    if (!board) return;
+
+    const dataEl = board.querySelector('.scoreboard-data');
+    if (!dataEl) return;
+
+    const text = dataEl.textContent;
+
+    // ===== COPY =====
+    if (btn.classList.contains('score-copy')) {
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Copied to clipboard!');
+      }).catch(err => console.error(err));
+    }
+
+    // ===== TXT =====
+    if (btn.classList.contains('score-txt')) {
+      const blob = new Blob([text], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'quiz-score.txt';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    // ===== PNG WITH 10px MARGIN =====
+    if (btn.classList.contains('score-png')) {
+      if (typeof html2canvas === 'undefined') {
+        alert('html2canvas library is required for PNG export.');
+        return;
+      }
+
+      // create temporary wrapper with 10px padding
+      const wrapper = document.createElement('div');
+      wrapper.style.padding = '10px';
+      wrapper.style.background = '#f9f9f9';
+      wrapper.style.display = 'inline-block';
+      wrapper.style.fontFamily = 'monospace';
+      wrapper.style.fontSize = '12px';
+      wrapper.style.whiteSpace = 'pre-wrap';
+      wrapper.style.lineHeight = '1.4';
+      wrapper.appendChild(dataEl.cloneNode(true));
+
+      document.body.appendChild(wrapper);
+
+      html2canvas(wrapper).then(canvas => {
+        canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'quiz-score.png';
+          a.click();
+          URL.revokeObjectURL(url);
+          document.body.removeChild(wrapper); // clean up
+        });
+      });
+    }
+
+
+  }); // <- this closes the quizSections click listener
+
+})(); // <- this closes the IIFE
+</script>
+
+
+
+<script>
+(function() {
+  // Enable/disable submit and radios based on inputs
+  function updateControls(subsection) {
+    const nameInput = subsection.querySelector('.quiz-name');
+    const idInput = subsection.querySelector('.quiz-id');
+    const submitBtn = subsection.querySelector('.quiz-submit');
+    const radios = subsection.querySelectorAll('input[type="radio"]');
+
+    const enabled = nameInput.value.trim() && idInput.value.trim();
+
+    // Enable/disable submit
+    submitBtn.disabled = !enabled;
+
+    // Enable/disable radios
+    radios.forEach(r => r.disabled = !enabled);
+  }
+
+  // Monitor input fields in all subsections
+  document.body.addEventListener('input', e => {
+    if (e.target.matches('.quiz-name, .quiz-id')) {
+      const subsection = e.target.closest('.quiz-subsection');
+      if (!subsection) return;
+      updateControls(subsection);
+    }
+  });
+
+  // Initialize all subsections on page load
+  document.querySelectorAll('.quiz-subsection').forEach(sub => updateControls(sub));
+})();
+</script>
+
+
+<script>
+(function() {
+  const normalize = str => str.trim().toLowerCase().replace(/\s+/g, " ");
+
+  document.body.addEventListener('change', e => {
+    const exercise = e.target.closest('.exercise');
+    if (!exercise) return;
+
+    // ----- Gather user answers -----
+    const textInputs = Array.from(exercise.querySelectorAll("input[type='text'], textarea"));
+    const selectedInputs = Array.from(exercise.querySelectorAll("input:checked"));
+
+    const userAnswers = textInputs.length 
+      ? textInputs.map(i => normalize(i.value))
+      : selectedInputs.map(i => normalize(i.value));
+
+    const correctAnswers = Array.from(exercise.querySelectorAll('[data-correct]'))
+      .map(i => normalize(i.dataset.correct));
+
+    const isCorrect = userAnswers.every(ans => correctAnswers.includes(ans));
+
+    // ----- Add emojis -----
+    const addEmoji = (element) => {
+      if (!element.nextSibling || !element.nextSibling.classList?.contains('mc-emoji')) {
+        const span = document.createElement('span');
+        span.className = 'mc-emoji';
+        span.style.marginLeft = '8px';
+        span.textContent = isCorrect ? '😊' : '😟';
+        element.parentNode.insertBefore(span, element.nextSibling);
+      }
+    };
+
+    textInputs.forEach(addEmoji);
+
+    selectedInputs.forEach(inp => {
+      const label = inp.closest('label');
+      if (label && !label.querySelector('.mc-emoji')) {
+        const span = document.createElement('span');
+        span.className = 'mc-emoji';
+        span.style.marginLeft = '8px';
+        span.textContent = isCorrect ? '😊' : '😟';
+        label.appendChild(span);
+      }
+    });
+
+  }); // close event listener
+})(); // close IIFE
+</script>
+
+<script>
+/* ==========================================================
+   GLOBAL PAGE TITLE ENGINE
+========================================================== */
+
+(function () {
+
+  function buildFormattedTitle() {
+
+    let filename = window.location.pathname.split("/").pop() || "";
+    filename = filename.replace(/\.[^/.]+$/, "");
+    filename = decodeURIComponent(filename);
+
+    const allowedPrefixes = [
+      "g_game_","v_game_","rr_","cdf_","cdr_",
+      "ws_","r_","a_","g_","v_"
+    ];
+
+    for (let prefix of allowedPrefixes) {
+      if (filename.startsWith(prefix)) {
+        filename = filename.substring(prefix.length);
+        break;
+      }
+    }
+
+    let rawTitle = filename.replace(/_/g," ").trim();
+    if (!rawTitle) rawTitle = "Untitled";
+
+    const minorWords = [
+      "a","an","the","and","but","or","nor",
+      "for","so","yet","at","by","in","of","on","to","up","as","off","out"
+    ];
+
+    return rawTitle.split(/\s+/).map((word,i)=>{
+      const lower = word.toLowerCase();
+      if(i===0) return lower.charAt(0).toUpperCase()+lower.slice(1);
+      if(minorWords.includes(lower)) return lower;
+      return lower.charAt(0).toUpperCase()+lower.slice(1);
+    }).join(" ");
+  }
+
+  window.pageTitle = buildFormattedTitle();
+
+  window.applyPageTitle = function(root=document){
+    root.querySelectorAll("h1[data-auto-title]").forEach(h=>{
+      h.textContent = window.pageTitle;
+      h.style.textTransform = "none";
+      h.style.visibility = "visible";
+    });
+  };
+
+})();
+
+
+/* ==========================================================
+   PAGE INIT
+========================================================== */
+
+document.addEventListener("DOMContentLoaded",function(){
+
+  window.applyPageTitle();
+
+  document.documentElement.classList.add("ui-ready");
+
+});
+
+
+/* ==========================================================
+   AUTO OPEN SINGLE SECTION
+========================================================== */
+
+(function(){
+
+  function tryAutoOpenSingleSection(){
+
+    if(!window.sections || !Array.isArray(window.sections)) return;
+    if(typeof window.openQuizModal !== "function") return;
+
+    const root=document.documentElement;
+
+    const hardOn=root.classList.contains("show-hard");
+    const dynamicOn=root.classList.contains("show-dynamic");
+
+const recentlyClosed =
+  window.__quizJustClosed &&
+  (Date.now() - window.__quizJustClosed < 1500);
+
+if (window.sections.length === 1 && !hardOn && !dynamicOn && !recentlyClosed) {
+  window.openQuizModal(0);
+}
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",tryAutoOpenSingleSection);
+  }else{
+    tryAutoOpenSingleSection();
+  }
+
+})();
+
+
+
+
+
+/* ==========================================================
+   MODAL CONTROL MOVEMENT + CHAPTER/VERSE SYSTEM (ROBUST)
+========================================================== */
+
+function moveControlsIntoModal(){
+
+  const modalContent=document.getElementById("quizModalContent");
+  if(!modalContent) return;
+
+  const chapterControls=document.getElementById("chapterVerseControls");
+  const readAloud=document.getElementById("readaloudControls");
+
+  if(chapterControls && !modalContent.contains(chapterControls)){
+    modalContent.insertBefore(chapterControls,modalContent.firstChild);
+  }
+
+  if(readAloud){
+    readAloud.style.display="block";
+
+    if(!modalContent.contains(readAloud)){
+      modalContent.insertBefore(
+        readAloud,
+        chapterControls?.nextSibling || modalContent.firstChild
+      );
+    }
+  }
+}
+
+
+function buildChapterVerseLogic(){
+
+  const modal=document.getElementById("quizModal");
+  if(!modal) return;
+
+  const readAloud=modal.querySelector("#readaloudControls");
+  const chapterControls=modal.querySelector("#chapterVerseControls");
+  const textContainer=modal.querySelector("#quizSections");
+
+  const chapterSelect=modal.querySelector("#chapterSelect");
+  const verseSelect=modal.querySelector("#verseSelect");
+  const goBtn=modal.querySelector("#goBtn");
+
+  if(!textContainer || !chapterSelect || !verseSelect || !goBtn){
+    console.warn("Chapter/Verse system missing required elements");
+    return;
+  }
+
+  if(chapterControls){
+    chapterControls.style.display="block";
+  }
+
+  const paragraphs=[...textContainer.querySelectorAll("p")];
+  if(!paragraphs.length){
+    console.warn("No paragraphs found for chapter/verse mapping");
+    return;
+  }
+
+  const structure={};
+  let currentChapter=null;
+
+  // ===== helper: normalize text =====
+  const clean = (t)=>t.trim().replace(/\s+/g,' ');
+
+  paragraphs.forEach(p=>{
+
+    const text=clean(p.textContent);
+
+    // ===== FLEXIBLE CHAPTER MATCHING =====
+    const chapMatch=
+      text.match(/^chapter\s*:?\s*(\d+)/i) ||
+      text.match(/^#?\s*chapter\s*(\d+)/i) ||
+      text.match(/^(\d+)\.\s*chapter/i);
+
+    // ===== FLEXIBLE VERSE MATCHING =====
+    const verseMatch=
+      text.match(/^verse\s*:?\s*(\d+)/i) ||
+      text.match(/^v\s*(\d+)/i);
+
+    const fullRefMatch=text.match(/^(\d+):(\d+)\s/);
+
+    // ===== chapter detection =====
+    if(chapMatch){
+      currentChapter=chapMatch[1];
+      if(!structure[currentChapter]) structure[currentChapter]={};
+      return;
+    }
+
+    // ===== verse detection (context-based) =====
+    if(currentChapter && verseMatch){
+      structure[currentChapter][verseMatch[1]]=p;
+      return;
+    }
+
+    // ===== inline chapter:verse detection =====
+    if(fullRefMatch){
+      const c=fullRefMatch[1];
+      const v=fullRefMatch[2];
+
+      if(!structure[c]) structure[c]={};
+      structure[c][v]=p;
+
+      currentChapter=c;
+    }
+
+  });
+
+  // ===== DEBUG SAFETY =====
+  if(Object.keys(structure).length===0){
+    console.warn("ChapterVerse structure is EMPTY. Check formatting.");
+  }
+
+  // ===== populate chapters =====
+  chapterSelect.innerHTML="";
+
+  Object.keys(structure).forEach(ch=>{
+    const opt=document.createElement("option");
+    opt.value=ch;
+    opt.textContent="Chapter "+ch;
+    chapterSelect.appendChild(opt);
+  });
+
+  function updateVerses(){
+
+    verseSelect.innerHTML="";
+    const ch=chapterSelect.value;
+    if(!structure[ch]) return;
+
+    Object.keys(structure[ch]).forEach(v=>{
+      const opt=document.createElement("option");
+      opt.value=v;
+      opt.textContent="Verse "+v;
+      verseSelect.appendChild(opt);
+    });
+
+  }
+
+  chapterSelect.onchange=updateVerses;
+  updateVerses();
+
+  function clearHighlights(){
+    paragraphs.forEach(p=>p.classList.remove("selected-verse"));
+  }
+
+  function getControlsOffset(extraPadding=0){
+
+    const readHeight=readAloud ? readAloud.offsetHeight : 0;
+
+    const chapterHeight=
+      chapterControls &&
+      chapterControls.style.display!=="none"
+      ? chapterControls.offsetHeight
+      : 0;
+
+    return readHeight + chapterHeight + extraPadding;
+  }
+
+  goBtn.onclick=function(){
+
+    const chapter=chapterSelect.value;
+    const verse=verseSelect.value;
+
+    if(!structure[chapter] || !structure[chapter][verse]){
+      console.warn("Verse not found:", chapter, verse);
+      return;
+    }
+
+    const target=structure[chapter][verse];
+
+    clearHighlights();
+    target.classList.add("selected-verse");
+
+    const offset=getControlsOffset(10);
+
+    modal.scrollTo({
+      top:target.offsetTop-offset,
+      behavior:"smooth"
+    });
+  };
+
+  window.chapterVerseStructure = structure; // debug access
+}
+
+/* ==========================================================
+   MODAL ARROW SCROLL
+========================================================== */
+
+(function(){
+
+  const modalRoot=document.getElementById("modalRoot");
+  const modal=document.getElementById("quizModal");
+  if(!modalRoot || !modal) return;
+
+  const SCROLL_AMOUNT=50;
+  let enabled=false;
+
+  function isTypingTarget(target){
+
+    return target.closest("input, textarea")
+      || target.isContentEditable
+      || target.closest("[contenteditable='true']");
+
+  }
+
+  function handleKeydown(e){
+
+    if(!enabled) return;
+    if(e.key!=="ArrowDown" && e.key!=="ArrowUp") return;
+    if(isTypingTarget(e.target)) return;
+
+    e.preventDefault();
+
+    modal.scrollBy({
+      top:e.key==="ArrowDown" ? SCROLL_AMOUNT : -SCROLL_AMOUNT,
+      behavior:"smooth"
+    });
+
+  }
+
+  function enable(){
+    if(enabled) return;
+    enabled=true;
+    document.addEventListener("keydown",handleKeydown);
+  }
+
+  function disable(){
+    enabled=false;
+    document.removeEventListener("keydown",handleKeydown);
+  }
+
+  const observer=new MutationObserver(()=>{
+    const active=modalRoot.classList.contains("active");
+    if(active) enable();
+    else disable();
+  });
+
+  observer.observe(modalRoot,{attributes:true,attributeFilter:["class"]});
+
+})();
+
+
+/* ==========================================================
+   STRICT SUBMIT LOCK
+========================================================== */
+
+(function(){
+
+  function updateSubsectionState(sub){
+
+    const name=sub.querySelector('.quiz-name');
+    const id=sub.querySelector('.quiz-id');
+    const submit=sub.querySelector('.quiz-submit');
+    const radios=sub.querySelectorAll('input[type="radio"]');
+
+    if(!name || !id || !submit) return;
+
+    const enabled=name.value.trim() && id.value.trim();
+
+    submit.disabled=!enabled;
+    radios.forEach(r=>r.disabled=!enabled);
+
+  }
+
+  function initSub(sub){
+
+    if(sub.dataset.lockInitialized) return;
+    sub.dataset.lockInitialized="1";
+
+    const name=sub.querySelector('.quiz-name');
+    const id=sub.querySelector('.quiz-id');
+    if(!name || !id) return;
+
+    updateSubsectionState(sub);
+
+    name.addEventListener("input",()=>updateSubsectionState(sub));
+    id.addEventListener("input",()=>updateSubsectionState(sub));
+
+  }
+
+  function scan(){
+    document.querySelectorAll('.quiz-subsection').forEach(initSub);
+  }
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",scan);
+  }else{
+    scan();
+  }
+
+  new MutationObserver(scan).observe(document.body,{childList:true,subtree:true});
+
+})();
+
+
+/* ==========================================================
+   GLOBAL LINK FADE
+========================================================== */
+
+document.addEventListener("click",function(e){
+
+  const link=e.target.closest("a");
+  if(!link) return;
+
+  e.preventDefault();
+
+  document.body.style.transition="opacity 80ms ease";
+  document.body.style.opacity="0";
+
+  setTimeout(()=>{
+    window.location.href=link.href;
+  },80);
+
+});
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const targets = [
+    { parent:"#layout", content:"#layout", gap:-30 },
+    { parent:"#tocContainer", content:"#tocContainer", gap:-20 },
+    { parent:"#quizModal", content:"#quizModalContent", gap:-30 }
+  ];
+
+  const copyrightHTML = `
+    <section class="copyrightSection">
+      <div class="footer-note copyright">
+        © <span class="auto-year"></span> Nearly Perfect Grammar™. All rights reserved.
+      </div>
+    </section>
+  `;
+
+  function insertCopyright(parent){
+    if (!parent.querySelector(":scope > .copyrightSection")) {
+      parent.insertAdjacentHTML("beforeend", copyrightHTML);
+    }
+  }
+
+  function adjust(parent, content, desiredGap){
+
+    const copyright = parent.querySelector(".copyrightSection");
+    const last = content.lastElementChild;
+
+    if (!copyright || !last) return;
+
+    const lastBottom = last.getBoundingClientRect().bottom;
+    const copyTop = copyright.getBoundingClientRect().top;
+
+    const currentGap = copyTop - lastBottom;
+    const adjust = currentGap - desiredGap;
+
+    copyright.style.marginTop = (-adjust) + "px";
+  }
+
+  function update(){
+
+    targets.forEach(t => {
+
+      const parent = document.querySelector(t.parent);
+      const content = document.querySelector(t.content);
+
+      if (!parent || !content) return;
+
+      insertCopyright(parent);
+      adjust(parent, content, t.gap);
+
+    });
+
+  }
+
+  // set year
+  document.querySelectorAll(".auto-year").forEach(el=>{
+    el.textContent = new Date().getFullYear();
+  });
+
+  update();
+
+  window.addEventListener("resize", update);
+
+});
+</script>
+
+<script>
+(function(){
+
+  const startBtn = document.getElementById('startBtn');
+  let activeEl = null;
+
+  let startX = 0;
+  let startY = 0;
+  let isDragging = false;
+
+  const DRAG_THRESHOLD = 8;
+
+  const X_THRESHOLD = 60;
+  const Y_THRESHOLD = 30;
+
+  const synth = window.speechSynthesis;
+
+  /* =========================
+     STYLE (soft + fade out)
+  ========================= */
+  if (!document.getElementById("chunkHighlightStyle")) {
+    const style = document.createElement("style");
+    style.id = "chunkHighlightStyle";
+    style.textContent = `
+      .chunk-active {
+        background: #fff9c4;
+        transition: background 0.6s ease;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  function fadeHighlight() {
+    if (!activeEl) return;
+
+    activeEl.style.background = "transparent";
+
+    setTimeout(() => {
+      if (activeEl) {
+        activeEl.classList.remove("chunk-active");
+        activeEl.style.background = "";
+        activeEl = null;
+      }
+    }, 600);
+  }
+
+  function setHighlight(el) {
+    if (activeEl) {
+      activeEl.classList.remove("chunk-active");
+    }
+    activeEl = el;
+    el.classList.add("chunk-active");
+  }
+
+  function placeCursorAtStart(el) {
+    const range = document.createRange();
+    const sel = window.getSelection();
+
+    range.selectNodeContents(el);
+    range.collapse(true);
+
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  /* =========================
+     POINTER TRACKING
+  ========================= */
+  document.addEventListener("pointerdown", (e) => {
+    startX = e.clientX;
+    startY = e.clientY;
+    isDragging = false;
+  });
+
+  document.addEventListener("pointermove", (e) => {
+    if (Math.abs(e.clientX - startX) > DRAG_THRESHOLD ||
+        Math.abs(e.clientY - startY) > DRAG_THRESHOLD) {
+      isDragging = true;
+    }
+  });
+
+  /* =========================
+     TAP → TOGGLE PLAY/STOP
+  ========================= */
+  document.addEventListener("pointerup", function(e){
+
+    if (isDragging) return;
+
+    const sel = window.getSelection();
+    if (sel && !sel.isCollapsed) return;
+
+    const p = e.target.closest(".question-text p, #quizSections p");
+    if (!p) return;
+
+    if (e.target.closest("button, input, label")) return;
+
+    const rect = p.getBoundingClientRect();
+
+    const isRightZone = e.clientX > rect.right - X_THRESHOLD;
+    const isBottomZone = e.clientY > rect.bottom - Y_THRESHOLD;
+
+    if (!(isRightZone && isBottomZone)) return;
+
+    // =========================
+    // 🔥 TOGGLE LOGIC
+    // =========================
+
+    if (synth.speaking) {
+      // STOP
+      synth.cancel();
+      fadeHighlight();
+      return;
+    }
+
+    // START (fresh)
+    setHighlight(p);
+    placeCursorAtStart(p);
+
+    setTimeout(() => {
+      if (startBtn) startBtn.click();
+    }, 40);
+
+  });
+
+  /* =========================
+     AUTO FADE WHEN SPEECH ENDS
+  ========================= */
+  const originalSpeak = synth.speak.bind(synth);
+
+  synth.speak = function(utterance) {
+
+    utterance.addEventListener("end", () => {
+      fadeHighlight();
+    });
+
+    return originalSpeak(utterance);
+  };
+
+})();
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<script>
+(function () {
+
+  const synth = window.speechSynthesis;
+  const startBtn = document.getElementById("startBtn");
+  if (!startBtn) return;
+
+  // -------------------------
+  // CREATE BOTTOM BUTTON
+  // -------------------------
+  const proxyBtn = document.createElement("button");
+  document.body.appendChild(proxyBtn);
+
+  // -------------------------
+  // DETECT VISIBILITY
+  // -------------------------
+  function isVisible(el) {
+    if (!el) return false;
+
+    const rect = el.getBoundingClientRect();
+
+    return (
+      rect.width > 0 &&
+      rect.height > 0 &&
+      rect.top < window.innerHeight &&
+      rect.bottom > 0
+    );
+  }
+
+  // -------------------------
+  // SYNC LABEL
+  // -------------------------
+  function syncLabel() {
+    const topLabel = startBtn.textContent?.trim() || "Start";
+    proxyBtn.textContent = topLabel;
+  }
+
+  // -------------------------
+  // 🔥 KEYBOARD-AWARE POSITIONING
+  // -------------------------
+  function adjustForKeyboard() {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const keyboardOffset =
+      window.innerHeight - vv.height - vv.offsetTop;
+
+    proxyBtn.style.transform =
+      `translateY(-${Math.max(0, keyboardOffset)}px)`;
+  }
+
+  // -------------------------
+  // 🔥 SYNC STYLES
+  // -------------------------
+  function syncStyles() {
+    const cs = window.getComputedStyle(startBtn);
+
+    Object.assign(proxyBtn.style, {
+      position: "fixed",
+      bottom: "20px",
+      left: "20px",
+      zIndex: 999999,
+      padding: "10px 14px",
+      borderRadius: "6px",
+      border: cs.border,
+      background: cs.backgroundColor,
+      color: cs.color,
+      fontSize: cs.fontSize,
+      fontFamily: cs.fontFamily,
+      fontWeight: cs.fontWeight,
+      cursor: "pointer",
+      boxShadow: "0 4px 8px rgba(0,0,0,0.5)",
+      userSelect: "none",
+
+      // 🔥 important for smooth movement
+      willChange: "transform",
+      transition: "transform 0.12s ease-out"
+    });
+  }
+
+  // -------------------------
+  // MAIN CLICK
+  // -------------------------
+  proxyBtn.addEventListener("click", () => {
+    startBtn.click();
+  });
+
+  // -------------------------
+  // KEEP IN SYNC
+  // -------------------------
+  const observer = new MutationObserver(() => {
+    syncLabel();
+    syncStyles();
+  });
+
+  observer.observe(startBtn, {
+    subtree: true,
+    childList: true,
+    characterData: true
+  });
+
+  setInterval(() => {
+    syncLabel();
+    syncStyles();
+  }, 300);
+
+  // -------------------------
+  // 🔥 KEYBOARD EVENTS
+  // -------------------------
+  const vv = window.visualViewport;
+
+  if (vv) {
+    vv.addEventListener("resize", adjustForKeyboard);
+    vv.addEventListener("scroll", adjustForKeyboard);
+  }
+
+  // -------------------------
+  // INIT
+  // -------------------------
+  syncLabel();
+  syncStyles();
+  adjustForKeyboard();
+
+})();
+</script>
+
+
+<script>
+(function(){
+
+const RAW_TEXT = `
+Open Section Content 
+1. Click blue buttons to open sections.
+
+---
+
+Reader Tools
+
+1. Highlight - Select text and click to highlight.
+2. Click again to remove highlight.
+3. Copy - Select text and click to copy.
+4. Click Close to exit.
+
+---
+
+Quiz
+
+1. Enter Name and ID.
+2. Select best answer.
+3. Click Submit to see score.
+4. Click Close to exit.
+`;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("instructionsBtn");
+  if (!btn) return;
+
+  // create isolated modal ONCE
+  let modal = document.getElementById("info-instructions-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "info-instructions-modal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      background: "rgba(0,0,0,0.6)",
+      display: "none",
+      zIndex: "999999",
+      padding: "40px",
+      boxSizing: "border-box"
+    });
+
+    modal.innerHTML = `
+      <div style="
+        max-width:700px;
+        margin:0 auto;
+        background:#fff;
+        padding:20px;
+        border-radius:10px;
+        position:relative;
+        max-height:80vh;
+        overflow:auto;
+        font-family:inherit;
+      ">
+        <button id="close-instructions-modal" class="modal-close-btn">✕</button>
+          position:absolute;
+          top:10px;
+          right:10px;
+          cursor:pointer;
+        ">✕</button>
+
+        <pre style="white-space:pre-wrap;margin:0;">${RAW_TEXT}</pre>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#close-instructions-modal").onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+});
+
+})();
+</script>
+<script>
+(function(){
+
+const RAW_TEXT = `
+Comprehensive reading strategy checklist
+
+1. Cut texts into small pieces.
+2. Collect context clues.
+3. Reread when lost.
+4. Scan titles and images.
+5. Identify known/unknown words.
+6. Use background knowledge.
+7. Break down word parts.
+8. Look up vocabulary.
+9. Identify signal words.
+`;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("strategiesBtn");
+  if (!btn) return;
+
+  let modal = document.getElementById("info-strategies-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "info-strategies-modal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      background: "rgba(0,0,0,0.6)",
+      display: "none",
+      zIndex: "999999",
+      padding: "40px",
+      boxSizing: "border-box"
+    });
+
+    modal.innerHTML = `
+      <div style="
+        max-width:700px;
+        margin:0 auto;
+        background:#fff;
+        padding:20px;
+        border-radius:10px;
+        position:relative;
+        max-height:80vh;
+        overflow:auto;
+        font-family:inherit;
+      ">
+
+<button id="close-strategies-modal" class="modal-close-btn">✕</button>
+
+        <pre style="white-space:pre-wrap;margin:0;">${RAW_TEXT}</pre>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#close-strategies-modal").onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+});
+
+})();
+</script>
+
+<script>
+(function(){
+
+const RAW_TEXT = `
+Common Signal Word Categories and Examples
+
+• Time ⏰: words that tell when something happens
+
+on, at, in, before, after, since, until, during, for, now, yesterday, today, tomorrow, later, then, when, while, once
+
+• Addition ➕: words that add ideas together
+
+and, also, too, with, plus, as well as, not only...but also, both...and
+
+• Cause / Effect 🔗: words that show a reason or result
+
+because, so, since, because of, due to, as a result, therefore, that’s why
+
+• Comparison / Similarity / Difference ⚖️: words that compare things
+
+like, as, as...as, than, similar to, different from, more than, less than, the most, just as...so, whereas, in contrast to
+
+• Contrast / Opposition 🎭: words that show differences
+
+but, although, though, even though, however, yet, still, despite, instead, whereas, while, on the other hand
+
+• Frequency 〰️: words that tell how often something happens
+
+always, usually, often, sometimes, occasionally, rarely, never, every day, once a week, hardly ever, from time to time
+
+• Possibility / Certainty 🎲: words that show how possible or sure something is
+
+maybe, probably, possibly, must, might, may, could, can, definitely, certainly
+
+• Advice / Obligation / Permission ☝️: words that tell rules or give guidance
+
+must, must not, have to, don’t have to, should, ought to, had better, can, cannot, may, could
+
+• Manner 🎭: words that tell how something is done
+
+quickly, slowly, carefully, easily, well, badly, with, by, in a...way, as
+
+• Place / Location 📍: words that tell where something is
+
+in, on, at, under, above, between, near, next to, here, there, everywhere, anywhere
+
+• Condition 🌧️: words that show something depends on something else
+
+if, unless, in case, on condition that
+
+• Emphasis / Focus 🎯: words that make something stronger or more important
+
+only, just, even, especially, mainly, particularly
+
+• Questions (Interrogatives) ❓: words used to ask questions
+
+how, when, where, why
+
+• Relative Words 👨‍👩‍👧‍👦: words that connect ideas about time, place, reason, or manner
+
+when, where, why, how
+
+• Direction / Movement 🧭: words that show movement or direction
+
+to, from, toward, away from, up, down, forward, back
+
+• Affirmative and Negative ✔️❌: words that show yes or no
+
+yes, no
+`;
+
+document.addEventListener("DOMContentLoaded", () => {
+
+  const btn = document.getElementById("signalwordsBtn");
+  if (!btn) return;
+
+  let modal = document.getElementById("info-signalwords-modal");
+
+  if (!modal) {
+    modal = document.createElement("div");
+    modal.id = "info-signalwords-modal";
+
+    Object.assign(modal.style, {
+      position: "fixed",
+      inset: "0",
+      background: "rgba(0,0,0,0.6)",
+      display: "none",
+      zIndex: "999999",
+      padding: "40px",
+      boxSizing: "border-box"
+    });
+
+    modal.innerHTML = `
+      <div style="
+        max-width:700px;
+        margin:0 auto;
+        background:#fff;
+        padding:20px;
+        border-radius:10px;
+        position:relative;
+        max-height:80vh;
+        overflow:auto;
+        font-family:inherit;
+      ">
+
+<button id="close-signalwords-modal" class="modal-close-btn">✕</button>
+
+        <pre style="white-space:pre-wrap;margin:0;">${RAW_TEXT}</pre>
+      </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    modal.querySelector("#close-signalwords-modal").onclick = () => {
+      modal.style.display = "none";
+    };
+  }
+
+  btn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+});
+
+})();
+</script>
+
+<!-- <script>
+
+(function(){
+
+/* =========================
+   RAW INSTRUCTIONS TEXT FOOTER
+========================= */
+
+const RAW_TEXT = `
+Open Section Content 
+1. Click blue buttons to open sections.
+
+---
+
+Reader Tools
+
+1. Highlight - Select text and click to highlight.
+2. Click again to remove highlight.
+3. Copy - Select text and click to copy.
+4. Read Aloud - Place the cursor where you want to start reading.
+5. Start- Click Start to hear the text. Click Start again to stop.
+6. Click Close to return to the Table of Contents.
+
+---
+
+`;
+
+
+/* =========================
+   RAW TEXT PARSER
+========================= */
+
+function parseRawInstructions(text){
+
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+
+  lines.forEach(line => {
+
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
+
+    html.push(`<p>${line}</p>`);
+  });
+
+  return html.join("");
+}
+
+
+/* =========================
+   CREATE STYLE
+========================= */
+
+const style = document.createElement("style");
+
+style.textContent = `
+#instructionsBtn{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  padding:10px 16px;
+  background:#2e8b57;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 4px 8px rgba(0,0,0,0.6);
+  z-index:99998;
+}
+
+#instructionsBtn:hover{
+  background:#257047;
+}
+
+#instructionsRoot{
+  position:fixed;
+  inset:0;
+  display:none;
+  z-index:99999;
+}
+
+#instructionsBackdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.35);
+}
+
+#instructionsModal{
+  position:absolute;
+  top:25px;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(650px,90vw);
+  max-height:90vh;
+  background:#fff;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+#instructionsHeader{
+  padding:12px 16px;
+  border-bottom:1px solid #ddd;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+#instructionsTitle{
+  color:#1976d2;
+  font-weight:600;
+  font-size:1.1em;
+}
+
+#instructionsContent{
+  padding:2px 18px 18px 18px;
+  overflow-y:auto;
+  line-height:1.6;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+
+#instructionsContent::-webkit-scrollbar{
+  display:none;
+}
+
+#instructionsContent h3{
+  color:#1976d2;
+  margin:12px 0 4px 0;
+  font-weight:600;
+}
+
+#instructionsContent p{
+  margin:4px 0;
+}
+
+#instructionsContent hr{
+  margin:12px 0;
+}
+`;
+
+document.head.appendChild(style);
+
+
+/* =========================
+   CREATE BUTTON
+========================= */
+
+const btn = document.createElement("button");
+btn.id = "instructionsBtn";
+btn.textContent = "Instructions";
+
+document.body.appendChild(btn);
+
+
+/* =========================
+   CREATE MODAL
+========================= */
+
+const root = document.createElement("div");
+root.id = "instructionsRoot";
+
+root.innerHTML = `
+<div id="instructionsBackdrop"></div>
+
+<div id="instructionsModal">
+
+  <div id="instructionsHeader">
+    <button id="instructionsBack" class="modal-close-btn">✕</button>
+    <span id="instructionsTitle">Instructions</span>
+  </div>
+
+  <div id="instructionsContent">
+    ${parseRawInstructions(RAW_TEXT)}
+  </div>
+
+</div>
+`;
+
+document.body.appendChild(root);
+
+
+/* =========================
+   SCROLL LOCK
+========================= */
+
+const modalContent = document.getElementById("instructionsContent");
+
+modalContent.addEventListener("wheel", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+modalContent.addEventListener("touchmove", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+
+/* =========================
+   OPEN / CLOSE
+========================= */
+
+function openModal(){
+  root.style.display="block";
+  document.body.style.overflow="hidden";
+  document.documentElement.style.overflow="hidden";
+}
+
+function closeModal(){
+  root.style.display="none";
+  document.body.style.overflow="";
+  document.documentElement.style.overflow="";
+}
+
+btn.onclick = openModal;
+
+document.getElementById("instructionsBack").onclick = closeModal;
+document.getElementById("instructionsBackdrop").onclick = closeModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape") closeModal();
+});
+
+/* =========================
+   DYNAMIC BODY PADDING FOR BUTTON
+========================= */
+
+function adjustBodyPadding(){
+  const btnHeight = btn.offsetHeight + -25; // include some gap
+  document.body.style.paddingBottom = `${btnHeight}px`;
+}
+
+// Initial adjustment
+adjustBodyPadding();
+
+// Update if window is resized (responsive)
+window.addEventListener("resize", adjustBodyPadding);
+
+})();
+</script> -->
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<script>
+
+function goToNextQuiz(){
+
+  const modal = document.getElementById("quizModal");
+  const container = modal?.querySelector("#quizSections");
+
+  // ✔️ TARGET THE ACTUAL BUTTON (NOT THE FUNCTION)
+  const goBtn = document.querySelector('button[onclick="goToNextQuiz()"]');
+
+  if(!container) return;
+
+  const originalLabel = goBtn?.textContent || "Go to Quiz";
+
+  function showNoQuizEmoji(){
+
+    if(!goBtn) return;
+
+    goBtn.textContent = "🚫";
+
+    setTimeout(() => {
+      goBtn.textContent = originalLabel;
+    }, 900);
+
+  }
+
+  const firstQuiz = container.querySelector(".quiz-subsection");
+
+  // ===== NO QUIZ FOUND =====
+  if(!firstQuiz){
+    showNoQuizEmoji();
+    return;
+  }
+
+  const readAloud = modal?.querySelector("#readaloudControls");
+  const chapterControls = modal?.querySelector("#chapterVerseControls");
+
+  const offset =
+    (readAloud?.offsetHeight || 0) +
+    (chapterControls?.offsetHeight || 0) +
+    20;
+
+  modal.scrollTo({
+    top: firstQuiz.offsetTop - offset,
+    behavior: "smooth"
+  });
+
+}
+
+</script>
+
+<script>
+// ===== UNIVERSAL CLOSE HANDLER (standalone, non-invasive) =====
+document.addEventListener("click", function (e) {
+
+  const closeBtn = e.target.closest(
+    ".quiz-close, .modal-close, #closeModal, #closeModalBtn"
+  );
+
+  if (!closeBtn) return;
+
+  // Let everything else run normally, then navigate
+  setTimeout(() => {
+    const url = window.location.pathname + "?reload=" + Date.now();
+    window.location.assign(url);
+  }, 0);
+
+});
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+

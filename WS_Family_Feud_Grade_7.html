@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Family Feud Game</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #f3f4f6;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+}
+
+.container {
+  width: 100%;
+  max-width: 700px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.top-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+select, button {
+  height: 38px;
+  font-size: 14px;
+}
+
+select {
+  flex: 1;
+}
+
+.rounds {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.round-btn {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  border-radius: 8px;
+  background: #e5e7eb;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.round-btn.active {
+  background: #111827;
+  color: white;
+}
+
+.round-topic {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #111827;
+  color: white;
+  text-align: center;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+
+/* =========================
+   FIXED FLIP TILE SYSTEM
+   ========================= */
+
+.tile {
+  height: 44px;
+  perspective: 1000px;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+}
+
+.inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.6s;
+  transform-origin: center;
+  will-change: transform;
+}
+
+.tile.revealed .inner {
+  transform: rotateX(180deg);
+}
+
+.face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+
+  border-radius: 10px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-weight: 600;
+  font-size: 13px;
+  padding: 4px;
+  text-align: center;
+
+  box-sizing: border-box;
+  line-height: 1.1;
+}
+
+.front {
+  background: #1f2937;
+  color: white;
+}
+
+.back {
+  background: #fbbf24;
+  color: #111;
+  transform: rotateX(180deg);
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="top-bar">
+    <select id="classSelect"></select>
+    <button id="loadBtn">❌</button>
+  </div>
+
+  <div class="rounds">
+    <button class="round-btn active" data-round="Round 1">Round 1</button>
+    <button class="round-btn" data-round="Round 2">Round 2</button>
+    <button class="round-btn" data-round="Round 3">Round 3</button>
+  </div>
+
+  <div id="roundTopic" class="round-topic"></div>
+
+  <div class="grid" id="grid"></div>
+
+</div>
+
+<!-- BOXING BELL SOUND -->
+<audio id="bingSound" preload="auto">
+  <source src="66952__benboncan__boxing-bell-1.wav" type="audio/wav">
+</audio>
+
+<!-- RUDE BUZZER -->
+<audio id="buzzSound" preload="auto">
+  <source src="floraphonic-buzzer-13-187755.mp3" type="audio/wav">
+</audio>
+
+<script>
+
+const RAW_TEXT = `
+~ Classroom Emergencies
+Round 1 - What behavior keeps students safe?
+1. Stop what you are doing
+2. Look at the teacher
+3. Stay still
+4. Listen carefully
+5. Raise your attention
+6. Put hands down / stop talking
+7. Look around
+8. Wait for instructions
+
+Round 2 - What are some good things to do?
+1. Sit quietly
+2. Stand in place
+3. Look at the teacher
+4. Walk in a line
+5. Help others calmly
+6. Follow the teacher
+7. Stay with the group
+8. Keep hands to self
+
+Round 3 - What some wrong things to do?
+1. Running
+2. Screaming
+3. Pushing
+4. Laughing
+5. Ignoring the teacher
+6. Leaving the group
+7. Talking loudly
+8. Not listening
+
+~First Aid Emergencies
+
+Round 1 - What are some first responses you can do?
+1. Call a teacher
+2. Get help
+3. Stay calm
+4. Go to the person
+5. Check if they are okay
+6. Tell the nurse
+7. Clear the area
+8. Ask what happened
+
+Round 2 - What can you do to help an injured person?
+1. Keep them calm
+2. Talk to them gently
+3. Keep them still
+4. Stay with them
+5. Tell an adult
+6. Help them sit down
+7. Watch them carefully
+8. Bring help
+
+Round 3 - What can make a situation worse?
+1. Move the victim
+2. Panic
+3. Give food or drink
+4. Touch injury too much
+5. Crowd around
+6. Joke about it
+7. Ignore the victim
+8. Try unsafe treatment
+
+~Fire Drills
+
+Round 1 - What do you do when you hear the alarm?
+1. Stop work
+2. Stand up
+3. Line up
+4. Stay quiet
+5. Look at teacher
+6. Walk to door
+7. Push chair in
+8. Prepare to leave
+
+Round 2 - How should students behave?
+1. Walk in line
+2. Stay with class
+3. Follow teacher
+4. Stay quiet
+5. Walk quickly
+6. Go to exit
+7. Stay together
+8. Do not run
+
+Round 3 - What do you do after you move to safety?
+1. Stay with class
+2. Stay quiet
+3. Line up in area
+4. Wait for teacher
+5. Take attendance
+6. Listen for instructions
+7. Stay in place
+8. Do not go back inside
+
+~ What Makes a Good Learning Environment
+Round 1 - Expectations
+1. Respect from teachers 
+2. Clear instructions 
+3. Fair treatment 
+4. A safe classroom 
+5. Help when needed 
+6. Fun lessons 
+7. Good communication 
+8. Supportive classmates 
+9. Opportunities to ask questions 
+10. Organized lessons 
+Round 2 - Negative Behaviors
+1. Talking during lessons 
+2. Bullying classmates 
+3. Using phones in class 
+4. Not listening 
+5. Interrupting others 
+6. Cheating on work 
+7. Being disrespectful 
+8. Arriving late 
+9. Distracting classmates 
+10. Not participating 
+Round 3 - Positive Behaviors
+1. Listening carefully 
+2. Helping classmates 
+3. Participating in class 
+4. Asking questions 
+5. Being respectful 
+6. Following directions 
+7. Encouraging others 
+8. Working together 
+9. Being prepared 
+10. Sharing ideas
+
+
+~ Unit 1 – Family and Friends
+
+Round 1 - Top 10 things people do in their free time
+1. Watch TV / series
+2. Listen to music
+3. Go out with friends
+4. Play video games
+5. Go to the cinema
+6. Play sports
+7. Use the Internet
+8. Read books
+9. Spend time with family
+10. Relax at home
+
+Round 2 - Top 10 things people do at the weekend
+1. Go shopping
+2. Go to a party
+3. Sleep late / get up late
+4. Meet friends
+5. Go to the cinema
+6. Watch films
+7. Play sports
+8. Visit family
+9. Stay at home
+10. Go out for coffee
+
+Round 3 - Top 10 words about family and friends
+1. Best friend
+2. Parents
+3. Sister
+4. Brother
+5. Cousin
+6. Grandmother
+7. Uncle
+8. Aunt
+9. Spend time together
+10. Visit family
+
+~ Unit 2 – Food
+
+Round 1 - Top 10 things people eat for snacks
+1. Crisps
+2. Chocolate bars
+3. Ice cream
+4. Sandwiches
+5. Fruit
+6. Yogurt
+7. Biscuits
+8. Cake / brownie
+9. Pizza slice
+10. Nuts
+
+Round 2 - Top 10 things you find in a kitchen
+1. Fridge
+2. Oven
+3. Pan
+4. Plates
+5. Knife
+6. Spoon
+7. Fork
+8. Cups
+9. Table
+10. Sink
+
+Round 3 - Top 10 adjectives about food
+1. Delicious
+2. Yummy
+3. Spicy
+4. Sweet
+5. Fresh
+6. Healthy
+7. Unhealthy
+8. Hot
+9. Tasty
+10. Expensive
+
+~ Unit 3 – Work
+
+Round 1 - Top 10 jobs people want
+1. Doctor
+2. Teacher
+3. Engineer
+4. Actor / actress
+5. Scientist
+6. Footballer
+7. Pilot
+8. Vet
+9. Journalist
+10. Chef
+
+Round 2 - Top 10 things people do at work
+1. Work in a team
+2. Talk on the phone
+3. Serve customers
+4. Make coffee
+5. Do projects
+6. Use a computer
+7. Work long hours
+8. Attend meetings
+9. Learn new skills
+10. Earn money
+
+Round 3 - Top 10 qualities of a good job
+1. Good salary
+2. Interesting work
+3. Fun environment
+4. Good boss
+5. Work from home
+6. Meet people
+7. Learn skills
+8. Work-life balance
+9. Job security
+10. Career opportunities
+
+~ Unit 4 – People
+
+Round 1 - Top 10 personality traits people like
+1. Friendly
+2. Funny
+3. Kind
+4. Confident
+5. Honest
+6. Smart / clever
+7. Sociable
+8. Helpful
+9. Positive
+10. Energetic
+
+Round 2 - Top 10 appearance words
+1. Tall
+2. Short
+3. Slim
+4. Curly hair
+5. Straight hair
+6. Good-looking
+7. Young
+8. Old
+9. Well-built
+10. Stylish
+
+Round 3 - Top 10 life events
+1. Get married
+2. Get a job
+3. Fall in love
+4. Leave home
+5. Buy a house
+6. Learn to drive
+7. Have children
+8. First date
+9. Start school
+10. Retire
+
+~ Unit 5 – Education
+
+Round 1 - Top 10 things you do at school
+1. Study
+2. Do homework
+3. Take exams
+4. Listen to teachers
+5. Work in groups
+6. Write notes
+7. Read textbooks
+8. Use computers
+9. Do experiments
+10. Ask questions
+
+Round 2 - Top 10 school subjects
+1. Maths
+2. English
+3. Science
+4. History
+5. Geography
+6. PE
+7. Art
+8. IT
+9. Physics
+10. Chemistry
+
+Round 3 - Top 10 school places
+1. Classroom
+2. Library
+3. Canteen
+4. Gym
+5. Playg
+Round
+6. Science lab
+7. Corridor
+8. Office
+9. Sports field
+10. Assembly hall
+
+~ Unit 6 – Health and Sport
+
+Round 1 - Top 10 sports people play
+1. Football
+2. Basketball
+3. Tennis
+4. Swimming
+5. Cycling
+6. Volleyball
+7. Running
+8. Badminton
+9. Table tennis
+10. Yoga
+
+Round 2 - Top 10 healthy habits
+1. Exercise
+2. Eat fruit and vegetables
+3. Drink water
+4. Sleep well
+5. Go to the gym
+6. Stretch
+7. Avoid fast food
+8. Play sports
+9. Rest
+10. Stay active
+
+Round 3 - Top 10 sports words
+1. Match
+2. Team
+3. Coach
+4. Training
+5. Competition
+6. Winner
+7. Medal
+8. Goal
+9. Fitness
+10. Athlete
+
+~ Unit 7 – Travel
+
+Round 1 - Top 10 holiday activities
+1. Go sightseeing
+2. Go to the beach
+3. Swim
+4. Take photos
+5. Visit museums
+6. Relax
+7. Eat local food
+8. Go shopping
+9. Explore cities
+10. Go on excursions
+
+Round 2 - Top 10 transport types
+1. Plane
+2. Train
+3. Bus
+4. Car
+5. Ferry
+6. Bike
+7. Taxi
+8. Underg
+Round
+9. Motorbike
+10. Boat
+
+Round 3 - Top 10 travel problems
+1. Flight delays
+2. Lost luggage
+3. Getting lost
+4. Bad weather
+5. Expensive tickets
+6. Missed transport
+7. Passport problems
+8. Traffic jams
+9. Overbooking
+10. Jet lag
+
+~ Unit 8 – Nature
+
+Round 1 - Top 10 natural places
+1. Mountains
+2. Beaches
+3. Forests
+4. Rivers
+5. Lakes
+6. Waterfalls
+7. Islands
+8. Jungles
+9. Deserts
+10. Oceans
+
+Round 2 - Top 10 environmental problems
+1. Pollution
+2. Climate change
+3. Global warming
+4. Littering
+5. Deforestation
+6. Plastic waste
+7. Air pollution
+8. Water waste
+9. Wildlife extinction
+10. Toxic waste
+
+Round 3 - Top 10 weather words
+1. Sunny
+2. Rainy
+3. Cloudy
+4. Windy
+5. Hot
+6. Cold
+7. Snowy
+8. Stormy
+9. Foggy
+10. Wet
+
+`;
+
+function parse(raw) {
+
+  const units = raw.split(/(?=~)/g);
+
+  const data = {};
+
+  for (let block of units) {
+
+    block = block.trim();
+
+    if (!block.startsWith('~')) continue;
+
+    const lines = block
+      .split('\n')
+      .map(l => l.trim())
+      .filter(Boolean);
+
+    const unit = lines[0].replace('~','').trim();
+
+    const rounds = {};
+
+    let currentRound = null;
+
+    for (let i = 1; i < lines.length; i++) {
+
+      const line = lines[i];
+
+      if (line.startsWith('Round')) {
+
+        const match = line.match(/Round\s*(\d+)/);
+
+        if (!match) continue;
+
+        currentRound = `Round ${match[1]}`;
+
+        rounds[currentRound] = {
+          topic: line.split('-')[1]?.trim() || currentRound,
+          answers: []
+        };
+
+      } else {
+
+        const match = line.match(/^(\d+)\.\s*(.+)$/);
+
+        if (match && currentRound) {
+
+          rounds[currentRound].answers.push({
+            num: match[1],
+            text: match[2]
+          });
+
+        }
+      }
+    }
+
+    data[unit] = rounds;
+  }
+
+  return data;
+}
+
+const data = parse(RAW_TEXT);
+
+const select = document.getElementById('classSelect');
+
+Object.keys(data).forEach(u => {
+
+  const opt = document.createElement('option');
+
+  opt.value = u;
+  opt.textContent = u;
+
+  select.appendChild(opt);
+
+});
+
+let currentUnit = null;
+let currentRound = 'Round 1';
+
+function render() {
+
+  const grid = document.getElementById('grid');
+  const topicEl = document.getElementById('roundTopic');
+
+  grid.innerHTML = '';
+
+  const roundData = data[currentUnit]?.[currentRound];
+
+  if (!roundData) {
+    topicEl.textContent = '';
+    return;
+  }
+
+  topicEl.textContent = roundData.topic;
+
+  const answers = roundData.answers || [];
+
+  answers.forEach((ans) => {
+
+    const tile = document.createElement('div');
+
+    tile.className = 'tile';
+
+    tile.innerHTML = `
+      <div class="inner">
+        <div class="face front">${ans.num}</div>
+        <div class="face back">${ans.num}. ${ans.text}</div>
+      </div>
+    `;
+
+    tile.onclick = () => {
+
+      tile.classList.toggle('revealed');
+
+      const sound = document.getElementById('bingSound');
+
+      sound.currentTime = 0;
+
+      sound.volume = 1;
+
+      sound.play();
+
+    };
+
+    grid.appendChild(tile);
+
+  });
+
+}
+
+select.onchange = () => {
+
+  currentUnit = select.value;
+
+  render();
+
+};
+
+document.getElementById('loadBtn').onclick = () => {
+
+  const buzz = document.getElementById('buzzSound');
+
+  buzz.currentTime = 0;
+
+  buzz.volume = 1;
+
+  buzz.play();
+
+};
+
+currentUnit = Object.keys(data)[0];
+
+select.value = currentUnit;
+
+render();
+
+Array.from(document.querySelectorAll('.round-btn')).forEach(btn => {
+
+  btn.onclick = () => {
+
+    document.querySelectorAll('.round-btn')
+      .forEach(b => b.classList.remove('active'));
+
+    btn.classList.add('active');
+
+    currentRound = btn.dataset.round;
+
+    render();
+
+  };
+
+});
+
+</script>
+
+</body>
+</html>

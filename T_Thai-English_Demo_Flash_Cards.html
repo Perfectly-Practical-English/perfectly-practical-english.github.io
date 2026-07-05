@@ -1,0 +1,2515 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
+<title>Thai English Dictionary</title>
+<script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+  /* Base */
+  body { font-family: Arial, sans-serif; margin:0; padding:0; background:#f7fdfb; }
+  #layout { max-width: 480px; margin:0 auto; padding:20px; box-sizing: border-box; }
+  h2 { text-align:left; margin-bottom:12px; font-size:20px; }
+
+  .top-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: nowrap; align-items: center; }
+  .top-bar input[type="text"] { flex: 1 1 45%; padding: 6px; font-size: 14px; border: 1px solid #9fc8e8; border-radius: 6px; box-sizing: border-box; min-width: 0; }
+  .top-bar button { padding: 6px 12px; font-size: 14px; border: none; border-radius: 6px; background: #1976d2; color: #fff; cursor: pointer; }
+
+  .flashcard-container { perspective: 1000px; margin-bottom: 12px; }
+  .flashcard { width: 100%; min-height: 100px; background: #eaf6ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; transform-style: preserve-3d; transition: transform 0.6s; position: relative; border: 1px solid #9aaed1; box-sizing: border-box; }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .flashcard .front, .flashcard .back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; border-radius: 12px; padding: 12px; text-align: center; box-sizing: border-box; }
+
+.flashcard .back {
+    transform: rotateY(180deg);
+    background: #ffeacf;
+    font-size: 14px;
+    text-align: left;
+    align-items: center;        /* horizontal center */
+    justify-content: center;    /* vertical center */
+    display: flex;
+    flex-direction: column;
+    padding: 12px 16px;
+    overflow-wrap: break-word;
+}
+
+  #vocabHeader { font-size: 16px; font-weight: bold; color: white; background: #1976d2; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; margin-bottom: 12px; text-align: center; transition: background 0.3s; }
+  #vocabHeader:hover { background: #1565c0; }
+
+  #vocabList { list-style-type: disc; list-style-position: outside; padding-left: 20px; margin:0; }
+  #vocabList li { margin-bottom: 6px; font-size: 14px; text-align: left; }
+
+  #exampleInput { width: 100%; padding: 8px; font-size: 14px; border: 1px solid #9aaed1; border-radius: 8px; margin-bottom: 12px; box-sizing: border-box; }
+
+  #navButtons { display: flex; gap: 12px; justify-content: space-between; margin-bottom: 12px; }
+
+  #scoreboard { display: none; border: 2px solid #39FF14; padding: 20px; border-radius: 10px; background: #fff; font-family: monospace; font-size: 14px; max-height: 50vh; overflow-y: auto; box-sizing: border-box; }
+  #scoreboard pre { margin: 0; }
+  #scoreboard .btn-group { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+
+  button { padding: 6px 12px; font-size: 14px; border: none; border-radius: 6px; background: #1976d2; color: white; cursor: pointer; transition: background 0.3s; }
+  button:hover { background: #1565c0; }
+
+  @media (max-width: 480px) {
+    h2 { font-size: 18px; }
+    .flashcard { font-size: 16px; min-height: 90px; }
+    #exampleInput { font-size: 13px; padding: 6px; }
+    #navButtons button, #scoreboard button { font-size: 13px; padding: 5px 10px; }
+    .top-bar input[type="text"] { font-size: 13px; padding: 5px; }
+  }
+
+
+/* Footer styles */
+#copyrightSection {
+  margin-top: 0px;   /* move it up by 20px */
+  text-align: left;    /* flush left text */
+  padding: 0;          /* remove centering padding */
+  font-size: 8px;
+}
+
+
+/* ===============================
+   FORM ROW (shared layout)
+   =============================== */
+
+.formRow {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: nowrap;        /* 🔒 NEVER stack */
+  gap: 6px;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+/* Buttons in a row */
+.formRow > button {
+  margin-top: -10px;   /* bump buttons up 3–5px */
+
+  flex: 0 0 38px;
+  height: 38px;
+  padding: 0;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Selector field behaves like an input */
+.formRow > #sectionWheelContainer {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 38px;
+  position: relative;
+  background: #fff;
+  border: 1px solid #999;
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.15);
+}
+
+/* BUTTONS */
+.sectionBtn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 38px;
+  height: 38px;
+  font-size: 18px;
+  padding: 0;
+  line-height: 1;
+  z-index: 2;
+}
+
+#sectionUp {
+  left: -3px;
+}
+
+#sectionDown {
+  right: -3px;
+}
+
+
+.reading-highlight {
+  background: #cce5ff;
+  transition: background 0.2s ease;
+}
+
+.read-line {
+  display: block;
+}
+
+#scoreOutput {
+  white-space: pre-wrap;      /* keeps line breaks */
+  word-break: break-word;     /* breaks long strings */
+  overflow-wrap: anywhere;    /* forces wrap if needed */
+}
+
+</style>
+</head>
+<body>
+<div id="layout">
+  <h2></h2>
+
+<!-- TOP BAR (UNCHANGED FUNCTIONALLY) -->
+<div class="top-bar">
+  <input id="name" type="text" placeholder="Name" autocomplete="off" />
+  <input id="studentId" type="text" placeholder="ID" autocomplete="off" />
+
+  <!-- 🔊 This becomes your Start / Pause / Resume button -->
+  <button id="finishBtn" class="audio-btn">🔊</button>
+</div>
+
+
+<!-- SECTION CONTROLS -->
+<div class="formRow">
+  <button type="button" id="sectionUp">▲</button>
+
+  <div id="sectionWheelContainer">
+    <div class="wheel"></div>
+  </div>
+
+  <button type="button" id="sectionDown">▼</button>
+</div>
+
+<!-- HEADER (directly under selector) -->
+<div id="vocabHeader" style="margin: 6px 0 10px 0;">
+  Click to view / hide the complete list.
+</div>
+
+<!-- READING AREA -->
+<div id="readingArea">
+
+  <!-- VOCAB LIST -->
+  <ul id="vocabList"></ul>
+
+  <!-- FLASHCARD (single, correct version only) -->
+  <div class="flashcard-container" id="flashcardContainer">
+    <div class="flashcard" id="flashcard">
+      <div class="front read-line"></div>
+      <div class="back read-line"></div>
+    </div>
+  </div>
+
+</div>
+
+  <input type="text" id="exampleInput" class="visible" placeholder="Type your example sentence..." />
+
+  <div id="navButtons" class="visible">
+    <button id="prevBtn">Previous</button>
+    <button id="nextBtn">Next</button>
+  </div>
+
+  <div id="scoreboard">
+    <pre id="scoreOutput"></pre>
+    <div class="btn-group" id="scoreBtns">
+      <button id="copyBtn">Copy</button>
+      <button id="downloadTextBtn">↓TXT</button>
+      <button id="downloadPngBtn">↓PNG</button>
+    </div>
+  </div>
+
+
+  <!-- Copyright Footer Section -->
+  <section id="copyrightSection">
+    <div class="footer-note copyright">© 2026 Perfectly Practical English™. All rights reserved.</div>
+  </section>
+
+  </div>
+</div>
+</div>
+
+<script>
+async function resolveRaw(source) {
+  // If it looks like inline content, return it directly
+  if (source.includes('\n')) return source.trim();
+
+  // Otherwise, treat it as a filename and fetch it
+  const res = await fetch(source);
+  if (!res.ok) throw new Error("Failed to load " + source);
+  return (await res.text()).trim();
+}
+</script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+// --- Starfield ---
+const canvas = document.getElementById('terrainCanvas');
+const ctx = canvas.getContext('2d');
+canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight;
+const stars = [];
+for(let i=0;i<200;i++) stars.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, z: Math.random()*2+0.5});
+function drawStarfield(){
+  ctx.fillStyle='black'; ctx.fillRect(0,0,canvas.width,canvas.height);
+  for(let s of stars){
+    s.x -= 0.5*s.z;
+    if(s.x<0){ s.x=canvas.width; s.y=Math.random()*canvas.height; s.z=Math.random()*2+0.5; }
+    ctx.fillStyle='white'; ctx.fillRect(s.x,s.y,s.z,s.z);
+  }
+  requestAnimationFrame(drawStarfield);
+}
+drawStarfield();
+</script>
+
+<script>
+// ✅ Flexible parser: supports both old verbose and simple "word - definition" lines
+function parseVocabInput(input) {
+  const lines = input.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+  const result = [];
+  let currentWord = null;
+  let currentDef = "";
+
+  lines.forEach(line => {
+    // Line starts with bullet → verbose format
+    if (/^[•*-]/.test(line)) {
+      if (currentWord) result.push({ word: currentWord, definition: currentDef.trim() });
+      const match = line.match(/^[•*-]\s*(.+?)\s*(?:–|—|-)\s*(.+)/);
+      if (match) { currentWord = match[1].trim(); currentDef = match[2].trim(); }
+      else { currentWord = line.replace(/^[•*-]\s*/, ""); currentDef = ""; }
+    } 
+    // Simple "word - definition" format
+ else if (/\s[-–—]\s/.test(line)) {
+  if (currentWord) {
+    result.push({
+      word: currentWord,
+      definition: currentDef.trim()
+    });
+  }
+
+  const match = line.match(/^(.+?)\s[-–—]\s(.+)$/);
+  if (match) {
+    currentWord = match[1].trim();
+    currentDef = match[2].trim();
+  }
+}
+
+    else { // continuation line
+      currentDef = currentDef ? currentDef + "<br/>" + line : line;
+    }
+  });
+  if (currentWord) result.push({ word: currentWord, definition: currentDef.trim() });
+  return result;
+}
+
+// Example vocab source: old verbose OR simple format
+const rawVocabText = `
+// You can paste either format here
+~ Determiners
+• nùeng หนึ่ง - a
+• nùeng หนึ่ง - an
+• - the -
+• níi นี้ - this
+• nán นั้น - that
+• lào-níi เหล่านี้ - these
+• lào-nán เหล่านั้น - those
+• baang บาง - some
+• dai-dai ใดๆ - any
+• mâak มาก - much
+• lǎai หลาย - many
+ 
+~ Pronouns - 
+• chǎn ฉัน - I
+• khun คุณ - you
+• khǎo เขา - he
+• khǎo เขา - she
+• man มัน - it
+• phûak-rao พวกเรา - we
+• phûak-khun พวกคุณ - you
+• phûak-khǎo พวกเขา - they
+• chǎn ฉัน - me
+• khun คุณ - you
+• khǎo เขา - him
+• khǎo เขา - her
+• man มัน - it
+• phûak-rao พวกเรา - us
+• phûak-khun พวกคุณ - you
+• phûak-khǎo พวกเขา - them
+• khrai-baang-khon ใครบางคน - someone
+• khrai-baang-khon ใครบางคน - somebody
+• baang-sìng บางสิ่ง - something
+• thúk-khon ทุกคน - everyone
+• thúk-khon ทุกคน - everybody
+• thúk-sìng ทุกสิ่ง - everything
+• mâi-mii-khrai ไม่มีใคร - no one
+• mâi-mii-khrai ไม่มีใคร - nobody
+• mâi-mii-à-rai ไม่มีอะไร - nothing
+• khrai-gâw-dâai ใครก็ได้ - anyone
+• khrai-gâw-dâai ใครก็ได้ - anybody
+• à-rai-gâw-dâai อะไรก็ได้ - anything
+ 
+~ Nouns
+• wee-laa เวลา - time
+• wan วัน - day
+• thaang ทาง - way
+• lôhk โลก - world
+• chii-wít ชีวิต - life
+• sìng สิ่ง - thing
+• sà-thǎan-thîi สถานที่ - place
+• khon คน - person
+• khon คน - people/man/woman
+• dèk เด็ก - child
+• phâw-mâae / lûuk พ่อแม่/ลูก - parent/child
+• khrâwp-khrua ครอบครัว - family
+• phûean เพื่อน - friend
+• klùm กลุ่ม - group
+• thiim ทีม - team
+• phûean-bâan เพื่อนบ้าน - neighbor
+• phûu-nam ผู้นำ - leader
+• jâo-naai เจ้านาย - boss
+• khruu ครู - teacher
+• nák-rian นักเรียน - student
+• khon-ngaan คนงาน - worker
+• lûuk-kháa ลูกค้า - customer
+• phûu-yài / dèk / thaa-rók ผู้ใหญ่/เด็ก/ทารก - adult/child/baby
+• kham คำ - word
+• phaa-sǎa ภาษา - language
+• khwaam-mǎai ความหมาย - meaning
+• khwaam-khít ความคิด - idea
+• kham-thǎam คำถาม - question
+• kham-tàwp คำตอบ - answer
+• khâaw-khwaam ข้อความ - message/note
+• rʉ̂ang เรื่อง - story
+• khâaw-muun ข้อมูล - fact/information
+• tua-yàang ตัวอย่าง - example
+• gòt กฎ - rule
+• raai-gaan รายการ - list
+• hèt-phǒn เหตุผล - reason
+• kaan-dtàt-sǐn-jai การตัดสินใจ - decision/choice
+• pan-hǎa ปัญหา - problem
+• phǒn-láp ผลลัพธ์ - result
+• bâan บ้าน - home
+• hâwng ห้อง - room
+• hâwng-khrua ห้องครัว - kitchen
+• tó / gâo-îi / dtiiang โต๊ะ/เก้าอี้/เตียง - table/desk/chair/bed
+• bprà-dtuu / nâa-dtàang ประตู/หน้าต่าง - door/window
+• glàawng / grà-bpǎo กล่อง/กระเป๋า - box/bag
+• gun-jaae กุญแจ - key
+• sǎaeng แสง - light
+• grà-dàat กระดาษ - paper
+• nǎng-sʉ̌ʉ หนังสือ - book
+• bpàak-gaa / din-sǎw ปากกา/ดินสอ - pen/pencil
+• ngaan งาน - work/job
+• roong-rian โรงเรียน - school
+• sǎm-nák-ngaan สำนักงาน - office
+• ráan-kháa ร้านค้า - store
+• aa-khaan อาคาร - building
+• mʉang / mùu-bâan เมือง/หมู่บ้าน - city/village
+• bprà-thêet ประเทศ - country
+• thà-nǒn ถนน - road/street
+• rót รถ - car/vehicle
+• ngern เงิน - money
+• thoo-rá-sàp โทรศัพท์ - phone
+• khawm-phiw-dtêr คอมพิวเตอร์ - device/computer
+• khrʉ̂ang-jàk / hùn-yon เครื่องจักร/หุ่นยนต์ - machine/robot
+• râang-gaai ร่างกาย - body
+• hǔa / nâa หัว/หน้า - head/face
+• dtaa / hǔu / jà-mùuk / bpàak ตา/หู/จมูก/ปาก - eye/ear/nose/mouth
+• khǎaen / khǎa แขน/ขา - arm/leg
+• mʉʉ มือ - hand
+• khɔɔ คอ - neck
+• jìt-jai จิตใจ - mind
+• hǔa-jai หัวใจ - heart
+• sǐiang เสียง - voice
+• sùk-khà-phâap สุขภาพ - health
+• pha-lang-ngaan พลังงาน - energy
+• kaan-nawn การนอน - sleep
+• khwaam-jèp-bpùat ความเจ็บปวด - pain
+• aa-gàat อากาศ - air
+• náam น้ำ - water
+• fai ไฟ - fire
+• tháawng-fáa ท้องฟ้า - sky
+• duang-aa-thít ดวงอาทิตย์ - sun
+• fǒn ฝน - rain
+• lom ลม - wind
+• aa-gàat อากาศ - weather
+• dtôn-mái ต้นไม้ - plant/tree
+• sàt สัตว์ - animal
+• chûa-moong ชั่วโมง - hour
+• dʉan เดือน - month
+• bpii ปี - year
+• naa-lí-gaa นาฬิกา - clock
+• kaan-bplìian-bplaaeng การเปลี่ยนแปลง - change
+• phǎen แผน - plan
+• bpâo-mǎai เป้าหมาย - goal
+• rá-bòp ระบบ - system
+• grà-buan-gaan กระบวนการ - process
+• geem เกม - game
+• bpaa-dtîi ปาร์ตี้ - party
+• chʉ̂ʉ ชื่อ - name
+• khwaam-rák ความรัก - love
+• thít-thaang ทิศทาง - direction
+ 
+~ Verbs
+• bpen เป็น - be
+• mii มี - have
+• tham ทำ - do
+• bpai ไป - go
+• dâai ได้ - get
+• tham ทำ - make
+• ao เอา - take
+• khít คิด - think
+• rúu รู้ - know
+• khâo-jai เข้าใจ - understand
+• jam จำ - remember
+• luuem ลืม - forget
+• rian-rúu เรียนรู้ - learn
+• rian เรียน - study
+• à-thí-baai อธิบาย - explain
+• lʉ̂ak เลือก - decide/choose
+• hěn-dûai / mâi-hěn-dûai เห็นด้วย/ไม่เห็นด้วย - agree/disagree
+• phûut พูด - say
+• bàawk บอก - tell
+• phûut พูด - speak
+• khui คุย - talk
+• thǎam ถาม - ask
+• tàwp ตอบ - answer
+• thoo โทร - call
+• sòng ส่ง - send
+• sà-daaeng แสดง - show
+• khǐan เขียน - write
+• àan อ่าน - read
+• fang ฟัง - listen
+• phóp พบ - meet
+• chûai ช่วย - help
+• rák รัก - love
+• sà-nàp-sà-nǔn สนับสนุน - support
+• bɔɔ-ri-gaan บริการ - serve
+• dtaam ตาม - follow
+• nam นำ - lead
+• lên เล่น - play
+• aa-sǎi อาศัย - live
+• gin กิน - eat
+• nawn นอน - sleep
+• tham-aa-hǎan ทำอาหาร - cook
+• tham-khwaam-sà-àat ทำความสะอาด - clean
+• tham-ngaan ทำงาน - work
+• chái ใช้ - use
+• maa / bpai มา/ไป - come/go
+• khlʉ̂an-yáai เคลื่อนย้าย - move
+• dern เดิน - walk
+• wîng วิ่ง - run
+• wâai-náam ว่ายน้ำ - swim
+• maa-thʉ̌ng มาถึง - arrive
+• khâo เข้า - enter
+• òk ออก - exit
+• glàp กลับ - return
+• yùu อยู่ - stay
+• òk ออก - leave
+• yʉʉn ยืน - stand
+• nâng นั่ง - sit
+• hâi ให้ - give
+• ao เอา - take
+• nam-maa นำมา - bring
+• waang วาง - put
+• gèp เก็บ - keep
+• thʉ̌ʉ ถือ - hold
+• bpə̀ət เปิด - open
+• bpìt ปิด - close
+• mǔn หมุน - turn
+• dtâng ตั้ง - set
+• sâang สร้าง - build
+• sâang สร้าง - create
+• sʉ́ʉ ซื้อ - buy
+• jàai จ่าย - pay
+• khǎai ขาย - sell
+• raa-khaa ราคา - cost
+• hěn เห็น - see
+• mawng มอง - look
+• duu ดู - watch
+• rúu-sʉ̀k รู้สึก - feel
+• rʉ̂ʉm / yùt เริ่ม/หยุด - start/stop
+• rʉ̂ʉm / jòp เริ่ม/จบ - begin/end
+• bplìian เปลี่ยน - change
+• dtə̀əp-dtoo เติบโต - grow
+• raw รอ - wait
+• lawng ลอง - try
+• dtâwng-gaan ต้องการ - need
+• yàak อยาก - want
+• lóm-lěo ล้มเหลว - fail
+• sǎm-rèt สำเร็จ - succeed
+• chá-ná / pháae ชนะ/แพ้ - win/lose
+• sǎa-mâat สามารถ - can
+• sǎa-mâat สามารถ - could
+• àat อาจ - may
+• àat-jà อาจจะ - might
+• jà จะ - will
+• jà จะ - would
+• jà จะ - shall
+• khuan ควร - should
+• dtâwng ต้อง - must
+• hâi ให้ - let
+• mii-yùu มีอยู่ - exist/be located
+• lìik-lîiang หลีกเลี่ยง - avoid
+ 
+ 
+~ Adjectives
+• dii ดี - good
+• mâi-dii ไม่ดี - bad
+• sǎm-khan สำคัญ - important
+• sǔai สวย - beautiful
+• nâa-glìiat น่าเกลียด - ugly
+• nâa-sǒn-jai น่าสนใจ - interesting
+• nâa-bʉ̀a น่าเบื่อ - boring
+• ngâai ง่าย - easy
+• yâak ยาก - difficult
+• mii-khwaam-sùk มีความสุข - happy
+• sâo เศร้า - sad
+• gròot โกรธ - angry
+• yài ใหญ่ - big
+• yài ใหญ่ - large
+• lék เล็ก - small
+• khǎaeng-raaeng แข็งแรง - strong
+• òn-ae อ่อนแอ - weak
+• mài ใหม่ - new
+• gào เก่า - old
+• nùm-sǎao หนุ่มสาว - young
+• sǐi สี - red, green, etc.
+• thaawng ทอง - gold
+• ngern เงิน - silver
+• ang-grìt อังกฤษ - English
+• ì-dtaa-lii อิตาลี - Italian
+• jiin จีน - Chinese
+• à-mee-rí-gan อเมริกัน - American
+• thai ไทย - Thai
+• phâa ผ้า - material/fabric
+• loo-hà โลหะ - metal
+• mái ไม้ - wooden
+• hǐn หิน - stone
+• nǎng หนัง - leather
+• fâai ฝ้าย - cotton
+• khǒn-gàe ขนแกะ - wool
+• grà-dàat กระดาษ - paper
+• phláat-sà-dtìk พลาสติก - plastic
+• gâaeo แก้ว - glass
+• lèk เหล็ก - steel
+• à-luu-mí-nii-yam อลูมิเนียม - aluminum
+• mǎi ไหม - silk
+• li-nin ลินิน - linen
+• kaan-tham-aa-hǎan การทำอาหาร - cooking
+• kaan-tham-khwaam-sà-àat การทำความสะอาด - cleaning
+• dern-bpàa เดินป่า - hiking
+• dtâng-khɛ́mp ตั้งแคมป์ - camping
+• dtòk-bplaa ตกปลา - fishing
+• lâa-sàt ล่าสัตว์ - hunting
+• khǎaeng-raaeng แข็งแรง - athletic
+• rɔ́ɔn / ùn / yen ร้อน/อุ่น/เย็น - hot/warm/cold
+ 
+ 
+~ Adverbs
+• dii ดี - well
+• reo เร็ว - fast
+• cháa ช้า - slowly
+• yàang rá-mát rá-wang อย่างระมัดระวัง - carefully
+• sǐang dang เสียงดัง - loudly
+• ngîiap ngîiap เงียบๆ - quietly
+• dton-níi ตอนนี้ - now
+• dton-nán ตอนนั้น - then
+• phêung เพิ่ง - just
+• láaeo แล้ว - already
+• yang ยัง - still
+• wan-níi วันนี้ - today
+• mûea-waan เมื่อวาน - yesterday
+• phrûng-níi พรุ่งนี้ - tomorrow
+• reo reo níi เร็วๆนี้ - soon
+• thii-lǎng ทีหลัง - later
+• nai thîi-sùt ในที่สุด - finally
+• ìik khráŋ อีกครั้ง - again
+• sà-mə̌ə เสมอ - always
+• dooi bpòk-gà-dtì โดยปกติ - usually
+• bòi บ่อย - often
+• baang khráŋ บางครั้ง - sometimes
+• mâi khoei ไม่เคย - never
+• thîi-nîi / thîi-nân ที่นี่/ที่นั่น - here/there
+• khâang nai ข้างใน - inside
+• khâang nâawk ข้างนอก - outside
+• thúk thîi ทุกที่ - everywhere
+• glàp กลับ - back
+• òk bpai ออกไป - away
+• mâak มาก - very
+• jing jing จริงๆ - really
+• mâak มาก - so
+• geern bpai เกินไป - too
+• khâawn khâang ค่อนข้าง - quite
+• nít nòi นิดหน่อย - a little
+• gùeap เกือบ - almost
+• phaaw พอ - enough
+• àat jà อาจจะ - maybe
+• nâa jà น่าจะ - probably
+• nâae-naawn แน่นอน - of course
+• dûay ด้วย - also
+• máae dtàae แม้แต่ - even
+• dooi chà-pháw โดยเฉพาะ - especially
+• dûay gan ด้วยกัน - together
+• khon diao คนเดียว - alone
+• yàang rai อย่างไร - how
+• mûea rài เมื่อไหร่ - when
+• thîi nǎi ที่ไหน - where
+• tham-mai ทำไม - why
+• khâang nâa ข้างหน้า - forward
+ 
+~ Prepositions
+• nai ใน - in
+• bon บน - on
+• thîi ที่ - at
+• dtâai ใต้ - under
+• nǔea เหนือ - over
+• nǔea เหนือ - above
+• khâang lâang ข้างล่าง - below
+• rá-wàang ระหว่าง - between
+• thâam-glaang ท่ามกลาง - among
+• khâang nai ข้างใน - inside
+• khâang nâawk ข้างนอก - outside
+• glâi ใกล้ - near
+• glai ไกล - far
+• râawp râawp รอบๆ - around
+• bpai ไป - to
+• jàak จาก - from
+• khâo bpai nai เข้าไปใน - into
+• khûen bpai bon ขึ้นไปบน - onto
+• òk jàak ออกจาก - out of
+• long jàak ลงจาก - off
+• khâam ข้าม - across
+• phàan ผ่าน - through
+• dtaam ตาม - along
+• gòn ก่อน - before
+• lǎng jàak หลังจาก - after
+• rá-wàang ระหว่าง - during
+• jon thǔeng จนถึง - until
+• dtâng dtàae ตั้งแต่ - since
+• bpen wee-laa เป็นเวลา - for
+• gàp กับ - with
+• dooi mâi mii โดยไม่มี - without
+• gìeow gàp เกี่ยวกับ - about
+• dooi โดย - by
+• khǎawng ของ - of
+• khâang khâang ข้างๆ - next to
+
+~ All Words
+• nùeng หนึ่ง - a
+• nùeng หนึ่ง - an
+• - the -
+• níi นี้ - this
+• nán นั้น - that
+• lào-níi เหล่านี้ - these
+• lào-nán เหล่านั้น - those
+• baang บาง - some
+• dai-dai ใดๆ - any
+• mâak มาก - much
+• lǎai หลาย - many
+• chǎn ฉัน - I
+• khun คุณ - you
+• khǎo เขา - he
+• khǎo เขา - she
+• man มัน - it
+• phûak-rao พวกเรา - we
+• phûak-khun พวกคุณ - you
+• phûak-khǎo พวกเขา - they
+• chǎn ฉัน - me
+• khun คุณ - you
+• khǎo เขา - him
+• khǎo เขา - her
+• man มัน - it
+• phûak-rao พวกเรา - us
+• phûak-khun พวกคุณ - you
+• phûak-khǎo พวกเขา - them
+• khrai-baang-khon ใครบางคน - someone
+• khrai-baang-khon ใครบางคน - somebody
+• baang-sìng บางสิ่ง - something
+• thúk-khon ทุกคน - everyone
+• thúk-khon ทุกคน - everybody
+• thúk-sìng ทุกสิ่ง - everything
+• mâi-mii-khrai ไม่มีใคร - no one
+• mâi-mii-khrai ไม่มีใคร - nobody
+• mâi-mii-à-rai ไม่มีอะไร - nothing
+• khrai-gâw-dâai ใครก็ได้ - anyone
+• khrai-gâw-dâai ใครก็ได้ - anybody
+• à-rai-gâw-dâai อะไรก็ได้ - anything
+• wee-laa เวลา - time
+• wan วัน - day
+• thaang ทาง - way
+• lôhk โลก - world
+• chii-wít ชีวิต - life
+• sìng สิ่ง - thing
+• sà-thǎan-thîi สถานที่ - place
+• khon คน - person
+• khon คน - people/man/woman
+• dèk เด็ก - child
+• phâw-mâae / lûuk พ่อแม่/ลูก - parent/child
+• khrâwp-khrua ครอบครัว - family
+• phûean เพื่อน - friend
+• klùm กลุ่ม - group
+• thiim ทีม - team
+• phûean-bâan เพื่อนบ้าน - neighbor
+• phûu-nam ผู้นำ - leader
+• jâo-naai เจ้านาย - boss
+• khruu ครู - teacher
+• nák-rian นักเรียน - student
+• khon-ngaan คนงาน - worker
+• lûuk-kháa ลูกค้า - customer
+• phûu-yài / dèk / thaa-rók ผู้ใหญ่/เด็ก/ทารก - adult/child/baby
+• kham คำ - word
+• phaa-sǎa ภาษา - language
+• khwaam-mǎai ความหมาย - meaning
+• khwaam-khít ความคิด - idea
+• kham-thǎam คำถาม - question
+• kham-tàwp คำตอบ - answer
+• khâaw-khwaam ข้อความ - message/note
+• rʉ̂ang เรื่อง - story
+• khâaw-muun ข้อมูล - fact/information
+• tua-yàang ตัวอย่าง - example
+• gòt กฎ - rule
+• raai-gaan รายการ - list
+• hèt-phǒn เหตุผล - reason
+• kaan-dtàt-sǐn-jai การตัดสินใจ - decision/choice
+• pan-hǎa ปัญหา - problem
+• phǒn-láp ผลลัพธ์ - result
+• bâan บ้าน - home
+• hâwng ห้อง - room
+• hâwng-khrua ห้องครัว - kitchen
+• tó / gâo-îi / dtiiang โต๊ะ/เก้าอี้/เตียง - table/desk/chair/bed
+• bprà-dtuu / nâa-dtàang ประตู/หน้าต่าง - door/window
+• glàawng / grà-bpǎo กล่อง/กระเป๋า - box/bag
+• gun-jaae กุญแจ - key
+• sǎaeng แสง - light
+• grà-dàat กระดาษ - paper
+• nǎng-sʉ̌ʉ หนังสือ - book
+• bpàak-gaa / din-sǎw ปากกา/ดินสอ - pen/pencil
+• ngaan งาน - work/job
+• roong-rian โรงเรียน - school
+• sǎm-nák-ngaan สำนักงาน - office
+• ráan-kháa ร้านค้า - store
+• aa-khaan อาคาร - building
+• mʉang / mùu-bâan เมือง/หมู่บ้าน - city/village
+• bprà-thêet ประเทศ - country
+• thà-nǒn ถนน - road/street
+• rót รถ - car/vehicle
+• ngern เงิน - money
+• thoo-rá-sàp โทรศัพท์ - phone
+• khawm-phiw-dtêr คอมพิวเตอร์ - device/computer
+• khrʉ̂ang-jàk / hùn-yon เครื่องจักร/หุ่นยนต์ - machine/robot
+• râang-gaai ร่างกาย - body
+• hǔa / nâa หัว/หน้า - head/face
+• dtaa / hǔu / jà-mùuk / bpàak ตา/หู/จมูก/ปาก - eye/ear/nose/mouth
+• khǎaen / khǎa แขน/ขา - arm/leg
+• mʉʉ มือ - hand
+• khɔɔ คอ - neck
+• jìt-jai จิตใจ - mind
+• hǔa-jai หัวใจ - heart
+• sǐiang เสียง - voice
+• sùk-khà-phâap สุขภาพ - health
+• pha-lang-ngaan พลังงาน - energy
+• kaan-nawn การนอน - sleep
+• khwaam-jèp-bpùat ความเจ็บปวด - pain
+• aa-gàat อากาศ - air
+• náam น้ำ - water
+• fai ไฟ - fire
+• tháawng-fáa ท้องฟ้า - sky
+• duang-aa-thít ดวงอาทิตย์ - sun
+• fǒn ฝน - rain
+• lom ลม - wind
+• aa-gàat อากาศ - weather
+• dtôn-mái ต้นไม้ - plant/tree
+• sàt สัตว์ - animal
+• chûa-moong ชั่วโมง - hour
+• dʉan เดือน - month
+• bpii ปี - year
+• naa-lí-gaa นาฬิกา - clock
+• kaan-bplìian-bplaaeng การเปลี่ยนแปลง - change
+• phǎen แผน - plan
+• bpâo-mǎai เป้าหมาย - goal
+• rá-bòp ระบบ - system
+• grà-buan-gaan กระบวนการ - process
+• geem เกม - game
+• bpaa-dtîi ปาร์ตี้ - party
+• chʉ̂ʉ ชื่อ - name
+• khwaam-rák ความรัก - love
+• thít-thaang ทิศทาง - direction
+• bpen เป็น - be
+• mii มี - have
+• tham ทำ - do
+• bpai ไป - go
+• dâai ได้ - get
+• tham ทำ - make
+• ao เอา - take
+• khít คิด - think
+• rúu รู้ - know
+• khâo-jai เข้าใจ - understand
+• jam จำ - remember
+• luuem ลืม - forget
+• rian-rúu เรียนรู้ - learn
+• rian เรียน - study
+• à-thí-baai อธิบาย - explain
+• lʉ̂ak เลือก - decide/choose
+• hěn-dûai / mâi-hěn-dûai เห็นด้วย/ไม่เห็นด้วย - agree/disagree
+• phûut พูด - say
+• bàawk บอก - tell
+• phûut พูด - speak
+• khui คุย - talk
+• thǎam ถาม - ask
+• tàwp ตอบ - answer
+• thoo โทร - call
+• sòng ส่ง - send
+• sà-daaeng แสดง - show
+• khǐan เขียน - write
+• àan อ่าน - read
+• fang ฟัง - listen
+• phóp พบ - meet
+• chûai ช่วย - help
+• rák รัก - love
+• sà-nàp-sà-nǔn สนับสนุน - support
+• bɔɔ-ri-gaan บริการ - serve
+• dtaam ตาม - follow
+• nam นำ - lead
+• lên เล่น - play
+• aa-sǎi อาศัย - live
+• gin กิน - eat
+• nawn นอน - sleep
+• tham-aa-hǎan ทำอาหาร - cook
+• tham-khwaam-sà-àat ทำความสะอาด - clean
+• tham-ngaan ทำงาน - work
+• chái ใช้ - use
+• maa / bpai มา/ไป - come/go
+• khlʉ̂an-yáai เคลื่อนย้าย - move
+• dern เดิน - walk
+• wîng วิ่ง - run
+• wâai-náam ว่ายน้ำ - swim
+• maa-thʉ̌ng มาถึง - arrive
+• khâo เข้า - enter
+• òk ออก - exit
+• glàp กลับ - return
+• yùu อยู่ - stay
+• òk ออก - leave
+• yʉʉn ยืน - stand
+• nâng นั่ง - sit
+• hâi ให้ - give
+• ao เอา - take
+• nam-maa นำมา - bring
+• waang วาง - put
+• gèp เก็บ - keep
+• thʉ̌ʉ ถือ - hold
+• bpə̀ət เปิด - open
+• bpìt ปิด - close
+• mǔn หมุน - turn
+• dtâng ตั้ง - set
+• sâang สร้าง - build
+• sâang สร้าง - create
+• sʉ́ʉ ซื้อ - buy
+• jàai จ่าย - pay
+• khǎai ขาย - sell
+• raa-khaa ราคา - cost
+• hěn เห็น - see
+• mawng มอง - look
+• duu ดู - watch
+• rúu-sʉ̀k รู้สึก - feel
+• rʉ̂ʉm / yùt เริ่ม/หยุด - start/stop
+• rʉ̂ʉm / jòp เริ่ม/จบ - begin/end
+• bplìian เปลี่ยน - change
+• dtə̀əp-dtoo เติบโต - grow
+• raw รอ - wait
+• lawng ลอง - try
+• dtâwng-gaan ต้องการ - need
+• yàak อยาก - want
+• lóm-lěo ล้มเหลว - fail
+• sǎm-rèt สำเร็จ - succeed
+• chá-ná / pháae ชนะ/แพ้ - win/lose
+• sǎa-mâat สามารถ - can
+• sǎa-mâat สามารถ - could
+• àat อาจ - may
+• àat-jà อาจจะ - might
+• jà จะ - will
+• jà จะ - would
+• jà จะ - shall
+• khuan ควร - should
+• dtâwng ต้อง - must
+• hâi ให้ - let
+• mii-yùu มีอยู่ - exist/be located
+• lìik-lîiang หลีกเลี่ยง - avoid
+• dii ดี - good
+• mâi-dii ไม่ดี - bad
+• sǎm-khan สำคัญ - important
+• sǔai สวย - beautiful
+• nâa-glìiat น่าเกลียด - ugly
+• nâa-sǒn-jai น่าสนใจ - interesting
+• nâa-bʉ̀a น่าเบื่อ - boring
+• ngâai ง่าย - easy
+• yâak ยาก - difficult
+• mii-khwaam-sùk มีความสุข - happy
+• sâo เศร้า - sad
+• gròot โกรธ - angry
+• yài ใหญ่ - big
+• yài ใหญ่ - large
+• lék เล็ก - small
+• khǎaeng-raaeng แข็งแรง - strong
+• òn-ae อ่อนแอ - weak
+• mài ใหม่ - new
+• gào เก่า - old
+• nùm-sǎao หนุ่มสาว - young
+• sǐi สี - red, green, etc.
+• thaawng ทอง - gold
+• ngern เงิน - silver
+• ang-grìt อังกฤษ - English
+• ì-dtaa-lii อิตาลี - Italian
+• jiin จีน - Chinese
+• à-mee-rí-gan อเมริกัน - American
+• thai ไทย - Thai
+• phâa ผ้า - material/fabric
+• loo-hà โลหะ - metal
+• mái ไม้ - wooden
+• hǐn หิน - stone
+• nǎng หนัง - leather
+• fâai ฝ้าย - cotton
+• khǒn-gàe ขนแกะ - wool
+• grà-dàat กระดาษ - paper
+• phláat-sà-dtìk พลาสติก - plastic
+• gâaeo แก้ว - glass
+• lèk เหล็ก - steel
+• à-luu-mí-nii-yam อลูมิเนียม - aluminum
+• mǎi ไหม - silk
+• li-nin ลินิน - linen
+• kaan-tham-aa-hǎan การทำอาหาร - cooking
+• kaan-tham-khwaam-sà-àat การทำความสะอาด - cleaning
+• dern-bpàa เดินป่า - hiking
+• dtâng-khɛ́mp ตั้งแคมป์ - camping
+• dtòk-bplaa ตกปลา - fishing
+• lâa-sàt ล่าสัตว์ - hunting
+• khǎaeng-raaeng แข็งแรง - athletic
+• rɔ́ɔn / ùn / yen ร้อน/อุ่น/เย็น - hot/warm/cold
+• dii ดี - well
+• reo เร็ว - fast
+• cháa ช้า - slowly
+• yàang rá-mát rá-wang อย่างระมัดระวัง - carefully
+• sǐang dang เสียงดัง - loudly
+• ngîiap ngîiap เงียบๆ - quietly
+• dton-níi ตอนนี้ - now
+• dton-nán ตอนนั้น - then
+• phêung เพิ่ง - just
+• láaeo แล้ว - already
+• yang ยัง - still
+• wan-níi วันนี้ - today
+• mûea-waan เมื่อวาน - yesterday
+• phrûng-níi พรุ่งนี้ - tomorrow
+• reo reo níi เร็วๆนี้ - soon
+• thii-lǎng ทีหลัง - later
+• nai thîi-sùt ในที่สุด - finally
+• ìik khráŋ อีกครั้ง - again
+• sà-mə̌ə เสมอ - always
+• dooi bpòk-gà-dtì โดยปกติ - usually
+• bòi บ่อย - often
+• baang khráŋ บางครั้ง - sometimes
+• mâi khoei ไม่เคย - never
+• thîi-nîi / thîi-nân ที่นี่/ที่นั่น - here/there
+• khâang nai ข้างใน - inside
+• khâang nâawk ข้างนอก - outside
+• thúk thîi ทุกที่ - everywhere
+• glàp กลับ - back
+• òk bpai ออกไป - away
+• mâak มาก - very
+• jing jing จริงๆ - really
+• mâak มาก - so
+• geern bpai เกินไป - too
+• khâawn khâang ค่อนข้าง - quite
+• nít nòi นิดหน่อย - a little
+• gùeap เกือบ - almost
+• phaaw พอ - enough
+• àat jà อาจจะ - maybe
+• nâa jà น่าจะ - probably
+• nâae-naawn แน่นอน - of course
+• dûay ด้วย - also
+• máae dtàae แม้แต่ - even
+• dooi chà-pháw โดยเฉพาะ - especially
+• dûay gan ด้วยกัน - together
+• khon diao คนเดียว - alone
+• yàang rai อย่างไร - how
+• mûea rài เมื่อไหร่ - when
+• thîi nǎi ที่ไหน - where
+• tham-mai ทำไม - why
+• khâang nâa ข้างหน้า - forward
+• nai ใน - in
+• bon บน - on
+• thîi ที่ - at
+• dtâai ใต้ - under
+• nǔea เหนือ - over
+• nǔea เหนือ - above
+• khâang lâang ข้างล่าง - below
+• rá-wàang ระหว่าง - between
+• thâam-glaang ท่ามกลาง - among
+• khâang nai ข้างใน - inside
+• khâang nâawk ข้างนอก - outside
+• glâi ใกล้ - near
+• glai ไกล - far
+• râawp râawp รอบๆ - around
+• bpai ไป - to
+• jàak จาก - from
+• khâo bpai nai เข้าไปใน - into
+• khûen bpai bon ขึ้นไปบน - onto
+• òk jàak ออกจาก - out of
+• long jàak ลงจาก - off
+• khâam ข้าม - across
+• phàan ผ่าน - through
+• dtaam ตาม - along
+• gòn ก่อน - before
+• lǎng jàak หลังจาก - after
+• rá-wàang ระหว่าง - during
+• jon thǔeng จนถึง - until
+• dtâng dtàae ตั้งแต่ - since
+• bpen wee-laa เป็นเวลา - for
+• gàp กับ - with
+• dooi mâi mii โดยไม่มี - without
+• gìeow gàp เกี่ยวกับ - about
+• dooi โดย - by
+• khǎawng ของ - of
+• khâang khâang ข้างๆ - next to
+
+			
+
+`;
+
+
+</script>
+
+<script>
+/* =========================================
+   FREEZE RAW TEXT FOR SECTION SELECTOR
+   (MUST RUN AFTER wordListSource EXISTS)
+   ========================================= */
+
+(function () {
+  window.__RAW_SECTION_TEXT__ = rawVocabText;
+  console.log("✅ RAW SECTION TEXT FROZEN",
+              window.__RAW_SECTION_TEXT__.length);
+})();
+
+</script>
+
+<!-- 👇 PUT THE NEW SCRIPT HERE -->
+<script>
+/* SECTION → VOCAB BRIDGE */
+let vocabPairs = [];
+
+
+window.addEventListener("sectionchange", (e) => {
+  const sectionText = e.detail?.text || "";
+
+  vocabPairs = parseVocabInput(sectionText);
+
+  if (!vocabPairs.length) {
+    return;
+  }
+
+  studentSentences = Array(vocabPairs.length).fill("");
+  flashcardIndex = 0;        // ✅ THIS FIXES IT
+
+  renderVocabList();
+  updateFlashcard();
+  checkInputs();
+});
+
+
+
+
+
+// 🔥 INIT FIRST SECTION (AFTER LISTENER EXISTS)
+window.addEventListener("DOMContentLoaded", () => {
+  if (window.getSelectedSectionIndex) {
+    const i = window.getSelectedSectionIndex();
+    if (i === 0 && typeof selectSection === "function") {
+      selectSection(1, true);
+    }
+  }
+});
+
+
+</script>
+
+<script>
+/* =========================================
+   HARD SECTION CORPUS OVERRIDE (MC-IMMUNE)
+   ========================================= */
+
+(function () {
+
+  // Preserve original full text
+  const FULL_TEXT = window.wordListText;
+
+  // Active corpus exposed globally
+  window.activeExerciseText = "";
+
+  // 🔥 OVERRIDE wordListText dynamically
+  Object.defineProperty(window, "wordListText", {
+    get() {
+      return window.activeExerciseText || FULL_TEXT;
+    },
+    set(val) {
+      // allow initial assignment only
+      window._wordListText = val;
+    }
+  });
+
+  // Listen for section changes
+window.addEventListener("sectionchange", (e) => {
+  const sectionText = e.detail?.text || "";
+
+  // Build sentences ONLY from section
+  sentences.length = 0;
+  allCorrectAnswers.length = 0;
+
+  const lines = sectionText
+    .split("\n")
+    .map(s => s.trim())
+    .filter(Boolean);
+
+  lines.forEach(line => {
+    if (!line.includes("|")) return;
+    sentences.push(line);
+
+    const matches = line.match(/\|(.+?)\|/g);
+    if (matches) {
+      matches.forEach(m =>
+        allCorrectAnswers.push(m.replace(/\|/g, ""))
+      );
+    }
+  });
+
+  allCorrectAnswers = [...new Set(allCorrectAnswers)];
+
+  // Reset runtime state
+  nextSentenceIndex = 0;
+  activeSentences.length = 0;
+  totalWords = 0;
+  correctWords = 0;
+
+  // Clear UI
+  mcButtonsContainer.innerHTML = "";
+  typedDisplay.textContent = "";
+
+  console.log("✅ Section locked:", e.detail.name);
+});
+
+})();
+</script>
+
+
+<script>
+
+
+/* =========================================
+   SECTION DIAL — SCROLL + CLICK ONLY
+   (SECTION-SCOPED, MC-SAFE, AUTO-TRIGGERING)
+   ========================================= */
+
+(function () {
+
+  const ITEM_HEIGHT = 38;
+
+  let sections = [];
+  let sectionIndex = 0; // 0 = placeholder
+
+  let offset = 0;
+  let startY = 0;
+  let dragging = false;
+let isProgrammaticSelect = false;
+
+
+  /* ---------- GLOBAL MC POOL (SECTION ONLY) ---------- */
+  window.sectionAnswerPool = [];
+
+  function rebuildMCPool(sectionText) {
+    window.sectionAnswerPool = sectionText
+      .split("\n")
+      .map(line => {
+        const m = line.match(/\|([^|]+)\|/);
+        return m ? m[1] : null;
+      })
+      .filter(Boolean);
+
+    // DEBUG — remove later
+    console.log("MC pool rebuilt (section only):", window.sectionAnswerPool);
+  }
+
+  /* ---------- PARSE SECTIONS (STRICT ~ BOUNDARIES) ---------- */
+  function parseSections(raw) {
+    const chunks = raw.split(/\n(?=~+)/);
+
+    return chunks
+      .map(chunk => chunk.trim())
+      .filter(chunk => chunk.startsWith("~"))
+      .map(chunk => {
+        const lines = chunk.split("\n");
+        const name = lines.shift().replace(/^~+/, "").trim();
+        const text = lines.join("\n").trim();
+        return { name, text };
+      });
+  }
+
+  const parsedSections = parseSections(window.__RAW_SECTION_TEXT__);
+
+
+  sections = [
+    { name: "Select a category.", text: "" },
+    ...parsedSections
+  ];
+
+  /* ---------- BUILD UI ---------- */
+  const container = document.getElementById("sectionWheelContainer");
+
+
+// ▲ / ▼ BUTTONS
+const btnUp = document.getElementById("sectionUp");
+const btnDown = document.getElementById("sectionDown");
+
+btnUp.addEventListener("click", () => {
+  selectSection(sectionIndex - 1, true);
+});
+
+btnDown.addEventListener("click", () => {
+  selectSection(sectionIndex + 1, true);
+});
+  container.style.cssText = `
+    position: relative;
+    height: ${ITEM_HEIGHT}px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    touch-action: pan-y;
+    cursor: pointer;
+  `;
+
+  const wheel = document.createElement("div");
+  wheel.style.cssText = `
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    will-change: transform;
+  `;
+
+  sections.forEach((sec, index) => {
+    const item = document.createElement("div");
+    item.textContent = sec.name;
+    item.style.cssText = `
+      height: ${ITEM_HEIGHT}px;
+      line-height: ${ITEM_HEIGHT}px;
+      text-align: center;
+      font-size: ${index === 0 ? "14px" : "15px"};
+      font-style: ${index === 0 ? "italic" : "normal"};
+      color: ${index === 0 ? "#999" : "#777"};
+      user-select: none;
+      white-space: nowrap;
+    `;
+
+item.addEventListener("click", () => {
+  selectSection(index, true);
+});
+
+
+    wheel.appendChild(item);
+  });
+
+  container.appendChild(wheel);
+
+  /* ---------- UPDATE ---------- */
+function update() {
+  wheel.style.transform = `translateY(${offset}px)`;
+
+  [...wheel.children].forEach((el, i) => {
+    if (i === sectionIndex && i !== 0) {
+      el.style.color = "#1f5fbf";
+      el.style.fontWeight = "700";
+    } else {
+      el.style.color = i === 0 ? "#999" : "#777";
+      el.style.fontWeight = "600";
+    }
+  });
+}
+  function fireSectionChange() {
+if (sectionIndex === 0) return;
+
+const section = sections[sectionIndex];
+
+
+    window.sectionSelectionChanged = true;
+
+    // 🔑 BUILD MC POOL HERE
+    rebuildMCPool(section.text);
+
+    window.dispatchEvent(new CustomEvent("sectionchange", {
+      detail: {
+        index: sectionIndex,
+
+        name: section.name,
+        text: section.text
+      }
+    }));
+  }
+
+function snap(fireEvent = false) {
+  // 🔑 CALCULATE INDEX FROM OFFSET
+  const rawIndex = Math.round(-offset / ITEM_HEIGHT);
+  sectionIndex = Math.max(1, Math.min(sections.length - 1, rawIndex));
+
+  offset = -sectionIndex * ITEM_HEIGHT;
+
+  wheel.style.transition = "transform 0.15s ease-out";
+  update();
+  setTimeout(() => wheel.style.transition = "", 150);
+
+  if (fireEvent) {
+    fireSectionChange();
+  }
+}
+
+
+function selectSection(index, fireEvent = true) {
+  sectionIndex = Math.max(1, Math.min(sections.length - 1, index));
+  offset = -sectionIndex * ITEM_HEIGHT;
+  snap(fireEvent);
+}
+
+
+
+
+  /* ---------- DRAG ---------- */
+  function start(y) {
+    dragging = true;
+    startY = y;
+  }
+
+  function move(y) {
+    if (!dragging) return;
+    offset += y - startY;
+    startY = y;
+    update();
+  }
+
+  function end() {
+    if (!dragging) return;
+    dragging = false;
+    snap(true);
+  }
+
+  container.addEventListener("mousedown", e => start(e.clientY));
+  window.addEventListener("mousemove", e => move(e.clientY));
+  window.addEventListener("mouseup", end);
+
+  container.addEventListener("touchstart", e => start(e.touches[0].clientY), { passive: true });
+  container.addEventListener("touchmove", e => move(e.touches[0].clientY), { passive: true });
+  container.addEventListener("touchend", end);
+
+  /* ---------- MOUSE WHEEL ---------- */
+  container.addEventListener("wheel", e => {
+    e.preventDefault();
+    offset += e.deltaY * -0.3;
+    update();
+    snap(true);
+  }, { passive: false });
+
+  /* ---------- INIT ---------- */
+  offset = 0;
+  update();
+
+
+
+
+  /* ---------- SECTION SELECTION BRIDGE ---------- */
+window.getSelectedSectionText = function () {
+  if (sectionIndex === 0) return "";
+  return sections[sectionIndex]?.text || "";
+};
+
+window.getSelectedSectionIndex = function () {
+  return sectionIndex;
+};
+
+
+})();
+</script>
+
+
+<script>
+
+async function loadVocab(source) {
+  let text = "";
+  // If it looks like a filename (ends with .txt), fetch it
+  if (source.trim().endsWith(".txt")) {
+    try {
+      const res = await fetch(source.trim());
+      if (!res.ok) throw new Error("Failed to load file");
+      text = await res.text();
+    } catch (err) {
+      console.error("Error loading vocab file:", err);
+      return [];
+    }
+  } else {
+    // Otherwise treat as raw text
+    text = source;
+  }
+  return parseVocabInput(text);
+}
+
+// Example usage:
+// ❌ Disabled: section selector now controls vocab loading
+// loadVocab("vocab.txt").then(pairs => {
+//   console.log("Loaded vocab pairs:", pairs);
+// });
+
+// Initialize vocabPairs
+
+let studentSentences = [];
+let flashcardIndex = 0;
+
+
+const flashcard = document.getElementById('flashcard');
+const front = flashcard.querySelector('.front');
+const back = flashcard.querySelector('.back');
+const exampleInput = document.getElementById('exampleInput');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const finishBtn = document.getElementById('finishBtn');
+const nameEl = document.getElementById('name');
+const idEl = document.getElementById('studentId');
+const scoreboard = document.getElementById('scoreboard');
+const scoreOutput = document.getElementById('scoreOutput');
+const vocabList = document.getElementById('vocabList');
+const vocabHeader = document.getElementById('vocabHeader');
+
+// Render vocab list
+function renderVocabList() {
+  vocabList.innerHTML = vocabPairs.map(p =>
+    `<li class="read-line">${p.word}: ${p.definition}</li>`
+  ).join('');
+}
+vocabHeader.addEventListener('click', () => {
+  vocabList.style.display = vocabList.style.display === 'none' ? 'block' : 'none';
+});
+
+// Flashcards
+function updateFlashcard() {
+  if (!vocabPairs.length) return;
+
+  front.textContent = vocabPairs[flashcardIndex].word;
+  back.innerHTML = vocabPairs[flashcardIndex].definition;
+  exampleInput.value = studentSentences[flashcardIndex] || '';
+
+  prevBtn.style.display = flashcardIndex === 0 ? "none" : "inline-block";
+  nextBtn.textContent =
+    flashcardIndex === vocabPairs.length - 1 ? "Finish" : "Next";
+
+  flashcard.classList.remove('flipped');
+}
+
+
+function checkInputs() {
+  finishBtn.style.display = 'inline-block';
+}
+
+flashcard.addEventListener('click', () => flashcard.classList.toggle('flipped'));
+exampleInput.addEventListener('input', () =>
+  studentSentences[flashcardIndex] = exampleInput.value.trim()
+);
+
+nameEl.addEventListener('input', checkInputs);
+idEl.addEventListener('input', checkInputs);
+
+prevBtn.addEventListener('click', () => {
+  if (flashcardIndex > 0) {
+    flashcardIndex--;
+    updateFlashcard();
+  }
+});
+nextBtn.addEventListener('click', () => {
+  studentSentences[flashcardIndex] = exampleInput.value.trim();
+
+if (flashcardIndex < vocabPairs.length - 1) {
+  flashcardIndex++;
+  updateFlashcard();
+}
+
+  else { showScoreboard(); }
+});
+// finishBtn.addEventListener('click', showScoreboard);
+
+function showScoreboard() {
+  const name = nameEl.value.trim() || 'Unknown';
+  const sid = idEl.value.trim() || 'N/A';
+  const now = new Date();
+
+  const formattedDate =
+    `${String(now.getDate()).padStart(2,'0')}/` +
+    `${String(now.getMonth()+1).padStart(2,'0')}/` +
+    `${now.getFullYear()} ` +
+    `${String(now.getHours()).padStart(2,'0')}:` +
+    `${String(now.getMinutes()).padStart(2,'0')}:` +
+    `${String(now.getSeconds()).padStart(2,'0')}`;
+
+  // ✅ GET ORIGINAL HTML FILE NAME
+  const fileName = window.location.pathname.split('/').pop() || 'unknown.html';
+
+  // ✅ GET CURRENT SECTION NAME
+  const sectionName =
+    window.getSelectedSectionIndex && window.getSelectedSectionIndex() !== 0
+      ? document.querySelector("#sectionWheelContainer div div:nth-child(" + (window.getSelectedSectionIndex()+1) + ")")?.textContent || "Unknown Section"
+      : "No Section";
+
+  // ✅ NEW HEADER FORMAT
+  let output = `${fileName}|${sectionName}|${name}|${sid}|${formattedDate}\n\n`;
+
+  // KEEP REST THE SAME
+vocabPairs.forEach((p, i) => {
+  const sentence = (studentSentences[i] || "").trim();
+
+  output += `${i+1}. ${sentence ? sentence : '[No response]'}\n`;
+});
+  scoreOutput.textContent = output;
+scoreboard.style.display = 'block';
+
+window.saveResult?.(output);
+
+}
+// Copy / Download / PNG
+document.getElementById('copyBtn').addEventListener('click', ()=> navigator.clipboard.writeText(scoreOutput.textContent).then(()=>alert('Copied!'))); 
+document.getElementById('downloadTextBtn').addEventListener('click', ()=> {
+  const blob = new Blob([scoreOutput.textContent],{type:'text/plain'}); 
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'vocab_sentences.txt'; a.click();
+});
+document.getElementById('downloadPngBtn').addEventListener('click', ()=> {
+  const btnGroup = document.getElementById('scoreBtns'); btnGroup.style.display='none';
+  html2canvas(scoreboard).then(canvas=> { btnGroup.style.display='flex'; const link=document.createElement('a'); link.download='vocab_sentences.png'; link.href=canvas.toDataURL('image/png'); link.click(); });
+});
+
+
+</script>
+
+<script>
+const borderDiv = document.createElement('div');
+borderDiv.style.position = 'fixed';
+borderDiv.style.inset = '0';
+borderDiv.style.border = '10px solid #39FF14';
+borderDiv.style.padding = '20px';
+borderDiv.style.boxSizing = 'border-box';
+borderDiv.style.zIndex = '9999';
+borderDiv.style.pointerEvents = 'none';
+document.body.appendChild(borderDiv);
+</script>
+
+<script>
+(function () {
+  const synth = window.speechSynthesis;
+  let utterance = null;
+  let speaking = false;
+  let paused = false;
+
+  const vocabHeader = document.getElementById("vocabHeader");
+  const vocabList = document.getElementById("vocabList");
+
+  function stripEmojis(text) {
+    return text.replace(/[\p{Emoji}\p{Extended_Pictographic}]/gu, "").trim();
+  }
+
+  function getTextToRead() {
+    if (vocabList.style.display !== "none") {
+      const header = "Vocabulary List. ";
+      const items = [...vocabList.querySelectorAll("li")].map(li => stripEmojis(li.innerText)).join(". ");
+      return header + items;
+    }
+    const word = stripEmojis(document.querySelector("#flashcard .front")?.innerText || "");
+    const def = stripEmojis(document.querySelector("#flashcard .back")?.innerText || "");
+    return `${word}. ${def}`;
+  }
+
+  function createUtterance(text) {
+    if (!text) return null;
+    const u = new SpeechSynthesisUtterance(stripEmojis(text));
+u.rate = 0.75;   // 👈 slower speech (default is 1.0)
+    u.onend = () => { speaking = false; paused = false; };
+    return u;
+  }
+
+  function startReading() {
+    if (paused) { synth.resume(); paused = false; return; }
+    if (!speaking) {
+      const text = getTextToRead();
+      utterance = createUtterance(text);
+      if (!utterance) return;
+      synth.speak(utterance);
+      speaking = true;
+    }
+  }
+
+  function togglePause() { if (!speaking) return; paused ? synth.resume() : synth.pause(); paused = !paused; }
+  function restartReading() { if (speaking) synth.cancel(); paused = false; speaking = false; startReading(); }
+  function stopSpeech() { synth.cancel(); speaking = false; paused = false; }
+  window.stopSpeech = stopSpeech;
+
+  function ensureControlsExist() {
+    const nav = document.getElementById("navButtons");
+    if (!nav) return;
+    let controls = document.getElementById("inlineAudioControls");
+    if (controls) return controls;
+
+    controls = document.createElement("div");
+    controls.id = "inlineAudioControls";
+    controls.style.display = "none";
+    controls.style.gap = "8px";
+    controls.style.marginLeft = "auto";
+    controls.style.alignItems = "center";
+
+/*
+const btns = [
+  { text: "⏮️", title: "Restart", action: restartReading },
+  { text: "⏸️", title: "Pause/Resume", action: togglePause },
+  { text: "▶️", title: "Start", action: startReading }
+];
+*/
+
+    btns.forEach(b => {
+      const btn = document.createElement("button");
+      btn.innerText = b.text;
+      btn.title = b.title;
+      btn.style.padding = "6px 12px";
+      btn.style.fontSize = "14px";
+      btn.style.borderRadius = "6px";
+      btn.style.background = "#1976d2";
+      btn.style.color = "#fff";
+      btn.style.border = "none";
+      btn.style.cursor = "pointer";
+      btn.addEventListener("click", b.action);
+      controls.appendChild(btn);
+    });
+
+    nav.appendChild(controls);
+    return controls;
+  }
+
+  const controls = ensureControlsExist();
+  function syncControls() {
+    const isOpen = vocabList.style.display !== "none";
+    stopSpeech();
+    controls.style.display = isOpen ? "flex" : "none";
+  }
+
+  const observer = new MutationObserver(syncControls);
+  observer.observe(vocabList, { attributes: true, attributeFilter: ["style"] });
+  syncControls();
+
+})();
+</script>
+
+
+<script>
+(async function() {
+  'use strict';
+
+  // Sanitize filenames for download
+  function sanitizeFilename(name) {
+    return name.trim()
+      .replace(/[\\/:*?"<>|]+/g, '_')
+      .replace(/[\r\n]+/g, '_')
+      .slice(0, 200) || 'score';
+  }
+
+  function downloadBlob(blob, filename) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    }, 2000);
+  }
+
+  async function downloadScoreAsPNG(text, filename) {
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = text.replace(/\n/g, '<br>');
+    wrapper.style.whiteSpace = 'pre-wrap';
+    wrapper.style.fontFamily = 'monospace';
+    wrapper.style.padding = '10px';
+    wrapper.style.backgroundColor = '#fff';
+    wrapper.style.color = '#000';
+    document.body.appendChild(wrapper);
+
+    try {
+      const canvas = await html2canvas(wrapper, { scale: 2, backgroundColor: '#fff' });
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+      downloadBlob(blob, filename);
+    } catch (err) {
+      console.error(err);
+      alert('PNG download failed');
+    } finally {
+      wrapper.remove();
+    }
+  }
+
+  function hijackButton(button, getScoreText, getFilename, isText) {
+    if (!button) return;
+    const newBtn = button.cloneNode(true);
+    button.parentNode.replaceChild(newBtn, button);
+
+    newBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      const scoreText = getScoreText();
+      if (!scoreText) {
+        alert('No scoreboard data found. Complete the activity first.');
+        return;
+      }
+
+      const filename = sanitizeFilename(getFilename());
+      if (isText) {
+        downloadBlob(new Blob([scoreText], { type: 'text/plain' }), filename + '.txt');
+      } else {
+        await downloadScoreAsPNG(scoreText, filename + '.png');
+      }
+    }, true);
+  }
+
+  // Scoreboard elements
+  const scoreOutput = document.getElementById('scoreOutput');
+  const nameEl = document.getElementById('name');
+  const idEl = document.getElementById('studentId');
+
+  // Function to generate dynamic filename
+  const getFilename = () => {
+    const rawFilename = window.location.pathname.split('/').pop() || 'flashcards';
+    const name = nameEl?.value.trim() || 'Student';
+    const id = idEl?.value.trim() || 'ID';
+    const now = new Date();
+    const dateStr = `${String(now.getDate()).padStart(2,'0')}${String(now.getMonth()+1).padStart(2,'0')}${now.getFullYear()}`;
+    return `${rawFilename}|${name}|${id}|${dateStr}`;
+  };
+
+  // Hijack buttons
+  const copyBtn = document.getElementById('copyBtn');
+  const downloadTextBtn = document.getElementById('downloadTextBtn');
+  const downloadPngBtn = document.getElementById('downloadPngBtn');
+
+  if (copyBtn) {
+    copyBtn.addEventListener('click', () => {
+      const text = scoreOutput.textContent.trim();
+      if (!text) { alert('No scoreboard data found.'); return; }
+      navigator.clipboard.writeText(text).then(() => alert('Copied!'));
+    });
+  }
+
+  hijackButton(downloadTextBtn, () => scoreOutput.textContent.trim(), getFilename, true);
+  hijackButton(downloadPngBtn, () => scoreOutput.textContent.trim(), getFilename, false);
+
+})();
+</script>
+
+
+
+
+
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Get filename only
+    let filename = window.location.pathname.split("/").pop();
+
+    // Remove .html
+    filename = filename.replace(/\.html$/i, "");
+
+    // Remove everything up to and including the first underscore
+    // (treats that as the prefix)
+    filename = filename.replace(/^[^_]*_/, "");
+
+    // Convert underscores to spaces
+    const title = filename.replace(/_/g, " ");
+
+    // Replace the first <h1>
+    const h1 = document.querySelector("h1");
+    if (h1) {
+        h1.textContent = title;
+    }
+});
+</script>
+
+<script>
+
+(function(){
+
+/* =========================
+   RAW INSTRUCTIONS TEXT
+========================= */
+
+const RAW_TEXT = `
+
+How to use this page...
+
+1. Enter Name and ID.
+2. Select a category to view the main list.
+3. Use the audio controls to hear the main list read aloud.
+4. Click to hide the main list.
+5. Click on the flash cards to show the front or the back.
+5. Click next or previous to go froward or backward through the cards.
+6. Enter example sentences for each word in the text field.
+7. Click Submit to view your example sentences when you are done.
+8. Click to copy or download your example sentences.
+
+`;
+
+
+/* =========================
+   RAW TEXT PARSER
+========================= */
+
+function parseRawInstructions(text){
+
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+
+  lines.forEach(line => {
+
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
+
+    html.push(`<p>${line}</p>`);
+  });
+
+  return html.join("");
+}
+
+
+/* =========================
+   CREATE STYLE
+========================= */
+
+const style = document.createElement("style");
+
+style.textContent = `
+#instructionsBtn{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  padding:10px 16px;
+  background:#2e8b57;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 4px 8px rgba(0,0,0,0.6);
+  z-index:99998;
+}
+
+#instructionsBtn:hover{
+  background:#257047;
+}
+
+#instructionsRoot{
+  position:fixed;
+  inset:0;
+  display:none;
+  z-index:99999;
+}
+
+#instructionsBackdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.35);
+}
+
+#instructionsModal{
+  position:absolute;
+  top:25px;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(650px,90vw);
+  max-height:90vh;
+  background:#fff;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+#instructionsHeader{
+  padding:12px 16px;
+  border-bottom:1px solid #ddd;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+#instructionsTitle{
+  color:#1976d2;
+  font-weight:600;
+  font-size:1.1em;
+}
+
+#instructionsBack{
+  border:none;
+  background:none;
+  font-size:20px;
+  cursor:pointer;
+  color:#1976d2;
+  font-weight:600;
+}
+
+#instructionsContent{
+  padding:2px 18px 18px 18px;
+  overflow-y:auto;
+  line-height:1.6;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+
+#instructionsContent::-webkit-scrollbar{
+  display:none;
+}
+
+#instructionsContent h3{
+  color:#1976d2;
+  margin:12px 0 4px 0;
+  font-weight:600;
+}
+
+#instructionsContent p{
+  margin:4px 0;
+}
+
+#instructionsContent hr{
+  margin:12px 0;
+}
+`;
+
+document.head.appendChild(style);
+
+
+/* =========================
+   CREATE BUTTON
+========================= */
+
+const btn = document.createElement("button");
+btn.id = "instructionsBtn";
+btn.textContent = "Instructions";
+
+document.body.appendChild(btn);
+
+
+/* =========================
+   CREATE MODAL
+========================= */
+
+const root = document.createElement("div");
+root.id = "instructionsRoot";
+
+root.innerHTML = `
+<div id="instructionsBackdrop"></div>
+
+<div id="instructionsModal">
+
+  <div id="instructionsHeader">
+    <button id="instructionsBack">←</button>
+    <span id="instructionsTitle">Instructions</span>
+  </div>
+
+  <div id="instructionsContent">
+    ${parseRawInstructions(RAW_TEXT)}
+  </div>
+
+</div>
+`;
+
+document.body.appendChild(root);
+
+
+/* =========================
+   SCROLL LOCK
+========================= */
+
+const modalContent = document.getElementById("instructionsContent");
+
+modalContent.addEventListener("wheel", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+modalContent.addEventListener("touchmove", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+
+/* =========================
+   OPEN / CLOSE
+========================= */
+
+function openModal(){
+  root.style.display="block";
+  document.body.style.overflow="hidden";
+  document.documentElement.style.overflow="hidden";
+}
+
+function closeModal(){
+  root.style.display="none";
+  document.body.style.overflow="";
+  document.documentElement.style.overflow="";
+}
+
+btn.onclick = openModal;
+
+document.getElementById("instructionsBack").onclick = closeModal;
+document.getElementById("instructionsBackdrop").onclick = closeModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape") closeModal();
+});
+
+/* =========================
+   DYNAMIC BODY PADDING FOR BUTTON
+========================= */
+
+function adjustBodyPadding(){
+  const btnHeight = btn.offsetHeight + -25; // include some gap
+  document.body.style.paddingBottom = `${btnHeight}px`;
+}
+
+// Initial adjustment
+adjustBodyPadding();
+
+// Update if window is resized (responsive)
+window.addEventListener("resize", adjustBodyPadding);
+
+})();
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<script>
+(function () {
+  const synth = window.speechSynthesis;
+  const finishBtn = document.getElementById("finishBtn");
+
+  let utterance = null;
+  let textNodes = [];
+  let currentIndex = 0;
+  let state = "idle"; // idle | speaking | paused
+
+  /* =========================
+     TEXT SELECTION → NODE MAP
+  ========================= */
+
+function getAllReadableNodes() {
+  const walker = document.createTreeWalker(
+    document.getElementById("readingArea"),
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode(node) {
+          if (!node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+          if (node.parentElement.closest("script, style, button, input")) return NodeFilter.FILTER_REJECT;
+          return NodeFilter.FILTER_ACCEPT;
+        }
+      }
+    );
+
+    const nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    return nodes;
+  }
+
+  function findStartIndex(selection) {
+    if (!selection.anchorNode) return 0;
+    return textNodes.findIndex(n => n === selection.anchorNode);
+  }
+
+  /* =========================
+     HIGHLIGHT + SCROLL
+  ========================= */
+
+  let currentHighlight = null;
+
+  function highlightNode(node) {
+    if (!node || !node.parentElement) return;
+
+    if (currentHighlight) {
+      currentHighlight.style.background = "";
+    }
+
+    const el = node.parentElement;
+    el.style.background = "#cce5ff"; // light blue
+    el.scrollIntoView({ behavior: "smooth", block: "center" });
+
+    currentHighlight = el;
+  }
+
+  /* =========================
+     SPEECH ENGINE
+  ========================= */
+
+  function speakNext() {
+    if (currentIndex >= textNodes.length) {
+      stop();
+      return;
+    }
+
+    const node = textNodes[currentIndex];
+    const text = node.nodeValue.trim();
+
+    if (!text) {
+      currentIndex++;
+      speakNext();
+      return;
+    }
+
+    highlightNode(node);
+
+    utterance = new SpeechSynthesisUtterance(text);
+
+    utterance.onend = () => {
+      currentIndex++;
+      speakNext();
+    };
+
+    synth.speak(utterance);
+  }
+
+  function startFromSelection() {
+    const selection = window.getSelection();
+
+    if (!selection || selection.isCollapsed) {
+      alert("Select a word first.");
+      return;
+    }
+
+    textNodes = getAllReadableNodes();
+    currentIndex = findStartIndex(selection);
+
+    synth.cancel();
+    state = "speaking";
+    updateButton();
+
+    speakNext();
+  }
+
+  function pause() {
+    synth.pause();
+    state = "paused";
+    updateButton();
+  }
+
+  function resume() {
+    synth.resume();
+    state = "speaking";
+    updateButton();
+  }
+
+  function stop() {
+    synth.cancel();
+    state = "idle";
+    updateButton();
+
+    if (currentHighlight) {
+      currentHighlight.style.background = "";
+      currentHighlight = null;
+    }
+  }
+
+  /* =========================
+     BUTTON STATE MACHINE
+  ========================= */
+
+  function updateButton() {
+    if (state === "idle") finishBtn.textContent = "🔊";
+    if (state === "speaking") finishBtn.textContent = "⏸️";
+    if (state === "paused") finishBtn.textContent = "▶️";
+  }
+
+  finishBtn.addEventListener("click", () => {
+    if (state === "idle") {
+      startFromSelection();
+    } else if (state === "speaking") {
+      pause();
+    } else if (state === "paused") {
+      resume();
+    }
+  });
+
+  /* =========================
+     OPTIONAL: STOP ON NEW SELECTION
+  ========================= */
+
+  document.addEventListener("selectionchange", () => {
+    if (state !== "idle") {
+      stop();
+    }
+  });
+
+  updateButton();
+})();
+</script>
+
+<script>
+(function () {
+
+  /* =========================
+     1. PALE BLUE SELECTION STYLE
+  ========================= */
+  const style = document.createElement("style");
+  style.textContent = `
+    ::selection {
+      background: rgba(140, 190, 255, 0.25); /* very pale blue */
+      color: inherit;
+    }
+
+    ::-moz-selection {
+      background: rgba(140, 190, 255, 0.25);
+      color: inherit;
+    }
+
+    /* remove tap flash */
+    * {
+      -webkit-tap-highlight-color: transparent;
+    }
+  `;
+  document.head.appendChild(style);
+
+  /* =========================
+     2. WORD SELECTION ON CLICK
+  ========================= */
+
+  function selectWord(el, wordIndex) {
+    const text = el.textContent;
+    const words = text.split(/(\s+)/); // keep spaces
+
+    let charStart = 0;
+    let start = 0;
+    let end = 0;
+
+    for (let i = 0; i < words.length; i++) {
+      const w = words[i];
+      const len = w.length;
+
+      if (i === wordIndex) {
+        start = charStart;
+        end = charStart + len;
+        break;
+      }
+
+      charStart += len;
+    }
+
+    const range = document.createRange();
+    const textNode = el.firstChild;
+
+    if (!textNode || textNode.nodeType !== 3) return;
+
+    range.setStart(textNode, start);
+    range.setEnd(textNode, end);
+
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  /* =========================
+     3. ATTACH CLICK HANDLER
+  ========================= */
+
+  document.addEventListener("click", function (e) {
+    const target = e.target;
+
+    // only operate on plain text elements
+    if (!target || target.children.length > 0) return;
+
+    const text = target.textContent;
+    if (!text || !text.includes(" ")) return;
+
+    // find clicked word position using caret
+    const range = document.caretRangeFromPoint
+      ? document.caretRangeFromPoint(e.clientX, e.clientY)
+      : null;
+
+    if (!range || !range.startContainer) return;
+
+    const node = range.startContainer;
+    if (node.nodeType !== 3) return;
+
+    const words = text.split(/(\s+)/);
+    let offset = range.startOffset;
+
+    let charCount = 0;
+    let wordIndex = 0;
+
+    for (let i = 0; i < words.length; i++) {
+      charCount += words[i].length;
+      if (offset <= charCount) {
+        wordIndex = i;
+        break;
+      }
+    }
+
+    selectWord(target, wordIndex);
+  });
+
+})();
+</script>
+
+<script>
+(function () {
+
+  /* =========================
+     1. EMOJI STRIPPER (ROBUST)
+  ========================= */
+  function removeEmojis(text) {
+    return text
+      // modern emoji ranges
+      .replace(/[\p{Emoji_Presentation}\p{Extended_Pictographic}]/gu, "")
+      // variation selectors + modifiers
+      .replace(/\uFE0F/g, "")
+      .replace(/\u200D/g, "")
+      .trim();
+  }
+
+  /* =========================
+     2. WRAP SPEECH SYNTHESIS
+  ========================= */
+
+  const originalSpeak = window.speechSynthesis.speak.bind(window.speechSynthesis);
+
+  window.speechSynthesis.speak = function (utterance) {
+    if (utterance && utterance.text) {
+      utterance.text = removeEmojis(utterance.text);
+    }
+    return originalSpeak(utterance);
+  };
+
+  /* =========================
+     3. OPTIONAL SAFETY WRAPPER
+     (for direct SpeechSynthesisUtterance usage)
+  ========================= */
+
+  window.createCleanUtterance = function (text, options = {}) {
+    const clean = removeEmojis(text);
+    const u = new SpeechSynthesisUtterance(clean);
+
+    Object.assign(u, options);
+    return u;
+  };
+
+})();
+</script>
+
+<!-- SUPABASE LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const supabaseClient = window.supabase?.createClient(
+  'https://etwwriloppklhhkmswpr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+);
+
+if (!supabaseClient) {
+  console.error("❌ Supabase failed to initialize");
+}
+
+let lastUploadedScore = null;
+
+window.saveResult = async function saveResult(text) {
+
+  if (!supabaseClient) {
+    console.error("❌ No Supabase client");
+    return;
+  }
+
+  // ======================
+  // NORMALIZE INPUT
+  // ======================
+  let cleaned;
+
+  try {
+    cleaned = (typeof text === "string")
+      ? text
+      : JSON.stringify(text);
+
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+
+  } catch (err) {
+    console.error("❌ Normalize error:", err);
+    return;
+  }
+
+  if (!cleaned) {
+    console.error("❌ Empty value blocked");
+    return;
+  }
+
+  if (cleaned === lastUploadedScore) {
+    console.log("⚠️ Duplicate blocked");
+    return;
+  }
+
+  lastUploadedScore = cleaned;
+
+  console.log("📤 INSERTING INTO scoreboard_raw:", cleaned);
+
+  const { data, error } = await supabaseClient
+    .from("scoreboard_raw")
+    .insert([
+      { result_text: cleaned }
+    ])
+    .select();
+
+  if (error) {
+    console.error("❌ INSERT FAILED FULL ERROR:", error);
+    return;
+  }
+
+  console.log("✅ INSERT SUCCESS:", data);
+};
+
+</script>
+
+
+
+</body>
+</html>
+
+
+
+
+
+

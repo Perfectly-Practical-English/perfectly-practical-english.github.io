@@ -1,0 +1,2570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UFO Abduction</title>
+<style>
+:root {
+  --max-width: 380px;
+  --gutter: 12px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+html, body {
+  height: 100%;
+  width: 100%;
+  max-width: none;
+  margin: 0 auto;
+  overflow-x: hidden;
+}
+
+body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+
+  background: radial-gradient(
+    circle at 50% 30%,
+    #1a0033 0%,
+    #050010 40%,
+    #000000 100%
+  );
+}
+
+/* ───────────────────────── TOP FIELDS ───────────────────────── */
+#topFields {
+  display: flex;
+  gap: 6px;
+  margin-top: 20px;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  max-width: 380px;       /* match section selector max-width */
+  margin-left: auto;
+  margin-right: auto;
+  z-index: 9999;
+  position: relative;
+}
+
+#topFields input,
+#topFields button {
+  flex-shrink: 0; /* inputs and buttons won’t shrink below their width */
+
+  height: 36px;            /* match selector buttons */
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+#topFields input {
+  width: 90px;
+}
+
+#topFields button {
+  background: #6B7280;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+#topFields button:disabled {
+  background: #888;
+  cursor: not-allowed;
+}
+
+#countdownOverlay {
+  min-width: 36px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 16px;
+  color: #0288d1;
+  z-index: 9999;
+  position: relative;
+}
+
+/* ───────────────────────── SECTION SELECTOR ───────────────────────── */
+#sectionSelectorRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 380px;
+  margin: 10px auto 0;
+  padding: 0;
+  box-sizing: border-box;
+  z-index: 9999;
+  position: relative;
+
+  /* nudge row 3px left to fix offset */
+  transform: translateX(-4px);
+}
+
+/* Buttons */
+#sectionUp,
+#sectionDown {
+  flex: 0 0 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid transparent; /* match top inputs */
+  background: #6B7280;
+  color: white;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+  padding: 0;
+  margin: 0;
+}
+
+/* Wheel spacing using button margins */
+#sectionUp {
+  margin-right: 6px;
+}
+
+#sectionDown {
+  margin-left: 6px;
+}
+
+#sectionUp:hover,
+#sectionDown:hover {
+  background: #0277bd;
+}
+
+#sectionUp:active,
+#sectionDown:active {
+  transform: scale(0.97);
+}
+
+#sectionUp:disabled,
+#sectionDown:disabled {
+  background: #888;
+  cursor: not-allowed;
+}
+
+/* Wheel Container */
+#sectionWheelContainer {
+  flex: 0 0 260px;
+  height: 36px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0 10px;  /* match top inputs */
+  box-sizing: border-box;
+  margin: 0;
+}
+
+.wheel {
+  flex: 1;
+  padding-left: 0;
+  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
+}
+#windCanvas {
+  position: fixed;
+  inset: 0;
+
+  width: 100vw;
+  height: 100vh;
+
+  pointer-events: none;
+  z-index: 999; /* above tornado, below UI if needed */
+}
+
+
+#gameArea {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  overflow: visible;
+  background: transparent;
+}
+
+
+#ufoContainer {
+  position: absolute;
+  top: -50px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+#ufo {
+  font-size: 175px;
+}
+
+#beam {
+  position: absolute;
+  top: 100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 180px;
+  height: 230px;
+  background: radial-gradient(
+    ellipse at top,
+    rgba(255,255,150,0.6) 0%,
+    rgba(255,255,0,0.1) 80%
+  );
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+/* ───────────────────────── ANIMALS ───────────────────────── */
+
+.cow {
+  position: absolute;
+  bottom: 0px;                 /* anchor all animals to same ground */
+  transform: translateY(-10px);
+  display: flex;
+  align-items: flex-end;    /* align bottoms instead of centers */
+  gap: 6px;
+  font-size: 35px;
+  line-height: 1;           /* remove emoji vertical offset */
+  z-index: 5;
+}
+
+.cowIcon {
+  transform: scaleX(-1);
+  display: inline-block;    /* stabilizes emoji box */
+  line-height: 1;
+}
+
+.cowWord {
+  display: none;
+}
+/* ───────────────────────── INPUT AREA ───────────────────────── */
+
+#inputArea {
+  margin-top: -40px;
+  padding: 0 var(--gutter);
+  display: flex;
+  justify-content: center;
+  position: relative;
+  z-index: 1000;
+}
+
+#wordInput {
+  width: 160px;
+  padding: 6px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+
+/* ───────────────────────── SCOREBOARD ───────────────────────── */
+
+#scoreboard {
+  position: absolute;
+  top: 325px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
+  max-width: 320px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,0.95);
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 12px;
+  display: none;
+  z-index: 100;
+  box-sizing: border-box;
+}
+
+#scoreData {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+
+
+#scoreButtons {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+#scoreButtons button {
+  padding: 6px 12px;
+  font-size: 14px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  background: #6B7280;
+  color: white;
+  cursor: pointer;
+
+  min-width: 90px;          /* 👈 visual balance when centered */
+  text-align: center;
+}
+
+
+/* ───────────────────────── FOOTER ───────────────────────── */
+
+footer {
+  text-align: center;
+  font-size: 12px;
+  margin: 8px;
+}
+
+/* ───────────────────────── EFFECTS ───────────────────────── */
+
+.beamOn {
+  opacity: 1;
+  box-shadow: 0 0 50px 20px rgba(255,255,180,0.6);
+}
+
+
+#ufo {
+  filter: brightness(0.5) contrast(1.1);
+}
+
+#ufo {
+  filter: brightness(0.65) contrast(1.15);
+
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0,0,0,1) 0%,
+    rgba(0,0,0,1) 75%,
+    rgba(0,0,0,0) 100%
+  );
+
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0,0,0,1) 0%,
+    rgba(0,0,0,1) 75%,
+    rgba(0,0,0,0) 100%
+  );
+}
+
+#hiddenInput {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  height: 0;
+  width: 0;
+}
+
+#starLayer {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+}
+
+#groundLayer {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  height: 280px; /* was 300px → +10px moves top edge up */
+  transform: translateY(-10px); /* shift whole layer up */
+
+  z-index: 1;
+  pointer-events: none;
+
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0) 0px,
+    rgba(0,0,0,1) 15px,   /* 15px fade at top edge */
+    rgba(0,0,0,1) 100%
+  );
+
+  mask-image: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0) 0px,
+    rgba(0,0,0,1) 15px,
+    rgba(0,0,0,1) 100%
+  );
+}
+/* canvases fill their containers */
+#starCanvas,
+#groundCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+
+
+</style>
+
+</head>
+<body>
+
+
+<div id="starLayer">
+  <canvas id="starCanvas"></canvas>
+</div>
+
+<div id="groundLayer">
+  <canvas id="groundCanvas"></canvas>
+</div>
+
+
+
+<div id="topControls">
+  <!-- TOP FIELDS -->
+  <div id="topFields">
+    <input type="text" id="nameField" placeholder="Name">
+    <input type="text" id="idField" placeholder="ID">
+    <button id="startButton" class="controlsBtn">Start</button>
+    <button id="submitButton">Submit</button>
+    <div id="countdownOverlay">60</div>
+  </div>
+
+  <!-- SECTION SELECTOR -->
+  <div class="formRow" id="sectionSelectorRow">
+    <button id="sectionUp">▲</button>
+    <div id="sectionWheelContainer">
+      <div class="wheel"></div>
+    </div>
+    <button id="sectionDown">▼</button>
+  </div>
+</div>
+
+
+
+<div id="gameArea">
+  <div id="ufoContainer">
+    <div id="ufo">🛸</div>
+    <div id="beam"></div>
+  </div>
+</div>
+
+<div id="inputArea">
+  <!-- Hidden real input (captures mobile keyboard reliably) -->
+  <input type="text" id="hiddenInput" autocomplete="off" autocapitalize="none">
+
+  <!-- Visible display-only input -->
+  <input type="text" id="wordInput" placeholder="Type word here..." disabled>
+</div>
+<div id="scoreboard">
+  <pre id="scoreData"></pre>
+  <div id="scoreButtons">
+    <button id="copyBtn">Copy</button>
+    <button id="txtBtn">↓TXT</button>
+    <button id="pngBtn">↓PNG</button>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 Perfectly Practical English™. All rights reserved.</p>
+</footer>
+<script>
+function parseVocabInput(rawText) {
+  if (!rawText) return [];
+  return rawText
+    .replace(/<br\s*\/?>/gi, "\n")
+    .split(/[\n,]+/)
+    .map(w =>
+      w.trim().toLowerCase().replace(/[^a-z0-9'-]/g, "")
+    )
+    .filter(Boolean)
+    .filter((word, index, array) => array.indexOf(word) === index);
+}
+</script>
+
+<script>
+function parseSections(raw) {
+  const chunks = raw.split(/\n(?=~+)/);
+
+  return chunks
+    .map(chunk => chunk.trim())
+    .filter(chunk => chunk.startsWith("~"))
+    .map(chunk => {
+      const lines = chunk.split("\n");
+      const name = lines.shift().replace(/^~+/, "").trim();
+      const text = lines.join("\n").trim();
+      return { name, text };
+    });
+}
+
+function extractWords(sectionText) {
+  const lines = sectionText
+    .replace(/<br\s*\/?>/gi, "\n")
+    .split("\n")
+    .map(l => l.trim())
+    .filter(Boolean);
+
+  const words = [];
+
+  lines.forEach(line => {
+    if (!line.startsWith("•")) return;
+
+    const vocabWord = line
+      .replace(/^•\s*/, "")      // remove bullet
+      .split(/[–—-]/)[0]         // remove description
+      .replace(/[^\p{L}\s]/gu, "") // strip emoji/symbols
+      .trim()
+      .toLowerCase()
+      .split(/\s+/)[0];          // first word only
+
+    if (vocabWord) words.push(vocabWord);
+  });
+
+  return words;
+}
+</script>
+
+
+
+<script>
+async function loadVocab(raw) {
+  // filename mode
+  if (
+    typeof raw === "string" &&
+    raw.trim().endsWith(".txt") &&
+    !raw.includes("\n") &&
+    !raw.includes(" ")
+  ) {
+    const res = await fetch(raw.trim());
+    const text = await res.text();
+    return parseVocabInput(text);
+  }
+
+  // embedded raw text mode
+  return parseVocabInput(raw);
+}
+</script>
+
+
+
+<script>
+const rawVocab = `
+
+~Hobbies
+
+• activity 🎯 – something you do for enjoyment or interest
+pastime, action, leisure activity
+
+• achievement 🏆 – something you succeed in doing well
+success, accomplishment, goal
+
+• fun 🎉 – enjoyment or pleasure
+enjoyment, pleasure
+
+• game 🎲 – an activity with rules played for fun
+match, competition
+
+• hobby 🎨 – an activity you do in your free time
+pastime, leisure interest
+
+• interest ❤️ – something you like or care about
+liking, curiosity
+
+• practice 🔁 – time spent learning or improving a skill
+training, repetition
+
+• skill 🛠️ – an ability to do something well
+ability, talent
+
+• sport ⚽ – a physical competitive activity
+athletic activity, competition
+
+• time ⏰ – hours or moments spent doing something
+period, moment
+
+• do ▶️ – to perform an activity
+perform, carry out
+
+• enjoy 😊 – to like something and feel pleasure
+like, take pleasure in
+
+• have 📦 – to take part in or experience something
+experience, take part in
+
+• like 👍 – to feel good about something
+enjoy, appreciate
+
+• learn 📘 – to gain knowledge or a new skill
+study, pick up
+
+• make ✂️ – to create or produce something
+create, build
+
+• play 🎮 – to take part in a game or activity
+participate, take part
+
+• practice 🔄 – to repeat something to improve
+train, rehearse
+
+• try 🔍 – to attempt to do something new
+attempt, test
+
+• watch 👀 – to look at something for enjoyment
+observe, view
+
+• easy 🙂 – not difficult to do
+simple, not hard
+
+• exciting ⚡ – making you feel interested or happy
+thrilling, stimulating
+
+• fun 😄 – enjoyable and pleasant
+enjoyable, pleasant
+
+• interesting 🤔 – holding your attention
+engaging, fascinating
+
+• relaxing 🌿 – helping you feel calm
+calming, restful
+
+• carefully 🧠 – in a slow and thoughtful way
+cautiously, attentively
+
+• easily ✔️ – without difficulty
+simply, effortlessly
+
+• smoothly 🧈 – without problems or stops
+effortlessly, without trouble
+
+• well ⭐ – in a good or correct way
+properly, correctly
+
+• slowly 🐢 – not fast
+gradually, at a low speed
+
+~Helping Others
+
+• action 🤲 – something done to help someone
+step, effort
+
+• family 👨‍👩‍👧‍👦 – people you are related to
+relatives, household
+
+• friend 🧑‍🤝‍🧑 – a person you like and trust
+buddy, companion
+
+• help 🆘 – support or assistance
+aid, assistance
+
+• kindness 💖 – being friendly and caring
+compassion, generosity
+
+• moment ⏳ – a short time
+instant, short time
+
+• need ❗ – something required or wanted
+necessity, requirement
+
+• person 🧍 – a human being
+individual, human
+
+• support 🏗️ – help given to someone
+assistance, backing
+
+• time ⏰ – when something happens
+period, moment
+
+• assist 🤝 – to help someone
+aid, support
+
+• care ❤️ – to feel concern for someone
+look after, care for
+
+• give 🎁 – to provide something
+offer, provide
+
+• help 🛠️ – to make something easier for someone
+assist, support
+
+• listen 👂 – to pay attention to someone speaking
+hear, pay attention
+
+• lend 🤲 – to give something for a short time
+loan, let someone use
+
+• share 🔄 – to give part of something to others
+divide, give
+
+• support 🧱 – to help someone emotionally or physically
+encourage, back
+
+• talk 💬 – to speak with someone
+speak, chat
+
+• teach 📚 – to help someone learn
+instruct, educate
+
+• friendly 🙂 – kind and pleasant
+welcoming, nice
+
+• good 👍 – kind or helpful
+kind, positive
+
+• helpful 🧩 – ready to help
+supportive, useful
+
+• kind 💗 – caring and thoughtful
+caring, gentle
+
+• nice 🌸 – pleasant and friendly
+pleasant, kind
+
+• carefully 🧠 – with attention
+cautiously, attentively
+
+• kindly 🌷 – in a gentle way
+gently, politely
+
+• easily ✔️ – without difficulty
+simply, without trouble
+
+• patiently ⏳ – calmly waiting or helping
+calmly, without rushing
+
+• well ⭐ – in a good way
+properly, correctly
+
+~Heroes
+
+• advice 💬 – helpful ideas or suggestions
+guidance, recommendation
+
+• friend 🧑‍🤝‍🧑 – someone who supports you
+companion, ally
+
+• hero 🦸 – a person who helps or saves others
+role model, protector
+
+• help 🤝 – support given to others
+aid, assistance
+
+• kindness 💛 – caring behavior
+compassion, generosity
+
+• mentor 🎓 – a person who guides others
+guide, coach
+
+• person 🧍 – a human being
+individual, human
+
+• support 🏗️ – help and encouragement
+assistance, encouragement
+
+• teacher 📘 – someone who helps others learn
+educator, instructor
+
+• wisdom 🧠 – knowledge and good judgment
+understanding, insight
+
+• care ❤️ – to look after others
+protect, look after
+
+• give 🎁 – to offer help or support
+provide, offer
+
+• guide 🧭 – to lead or show the way
+lead, direct
+
+• help 🆘 – to assist someone
+aid, assist
+
+• inspire ✨ – to make others feel motivated
+motivate, encourage
+
+• protect 🛡️ – to keep someone safe
+guard, defend
+
+• show 👀 – to demonstrate something
+demonstrate, display
+
+• support 🧱 – to stand by someone
+back, stand by
+
+• teach 📚 – to help someone learn
+educate, instruct
+
+• encourage 🌟 – to give confidence
+motivate, support
+
+• brave 🦁 – not afraid
+fearless, courageous
+
+• good 👍 – kind and helpful
+kind, positive
+
+• kind 💖 – caring and nice
+caring, gentle
+
+• strong 💪 – powerful or brave
+powerful, tough
+
+• wise 🦉 – showing good judgment
+smart, thoughtful
+
+• always 🔁 – at all times
+forever, constantly
+
+• bravely 🛡️ – in a courageous way
+courageously, fearlessly
+
+• helpfully 🤝 – in a useful way
+usefully, supportively
+
+• kindly 🌸 – in a caring way
+gently, politely
+
+• patiently ⏳ – without rushing
+calmly, steadily
+
+~My Best Friend
+
+• bond 🔗 – a close connection
+connection, tie
+
+• friend 🧑‍🤝‍🧑 – someone you like and trust
+buddy, companion
+
+• friendship 💕 – a close relationship
+bond, connection
+
+• memory 🧠 – something you remember
+recollection, experience
+
+• person 🧍 – a human being
+individual, human
+
+• relationship 🤝 – a connection between people
+connection, bond
+
+• support 🧱 – help and care
+help, encouragement
+
+• time ⏰ – moments spent together
+period, moments
+
+• trust 🔐 – belief in someone
+confidence, faith
+
+• laugh 😂 – a sound of happiness
+giggle, chuckle
+
+• care ❤️ – to like and protect someone
+look after, protect
+
+• laugh 😄 – to show happiness
+smile, giggle
+
+• like 👍 – to enjoy someone
+enjoy, appreciate
+
+• love 💖 – strong caring feelings
+affection, care
+
+• meet 🤝 – to see someone
+see, get together
+
+• play 🎮 – to do fun activities
+have fun, spend time
+
+• share 🔄 – to give something to another
+give, exchange
+
+• talk 💬 – to speak with someone
+chat, speak
+
+• trust 🤍 – to believe in someone
+rely on, believe in
+
+• best ⭐ – better than all others
+closest, favorite
+
+• close 🤗 – having a strong connection
+near, connected
+
+• friendly 🙂 – kind and pleasant
+nice, welcoming
+
+• fun 🎉 – enjoyable
+enjoyable, pleasant
+
+• good 👍 – kind or nice
+kind, positive
+
+• really ✔️ – very
+very, truly
+
+• together 🤝 – with each other
+with one another, jointly
+
+• carefully 🧠 – with thought
+gently, attentively
+
+• openly 🔓 – honestly and freely
+honestly, freely
+
+• well ⭐ – in a good way
+properly, nicely
+
+~Dream Job
+
+• career 📈 – a long-term job path
+profession, working life
+
+• dream 💭 – a strong hope for the future
+wish, hope
+
+• future 🔮 – time after now
+later, coming time
+
+• goal 🎯 – something you want to achieve
+aim, target
+
+• job 💼 – paid work
+employment, position
+
+• plan 📝 – an idea for the future
+idea, strategy
+
+• task 📋 – a piece of work
+duty, assignment
+
+• work 🛠️ – effort done for a job
+labor, effort
+
+• company 🏢 – a business organization
+business, firm
+
+• become 🔄 – to change into something
+turn into, grow into
+
+• decide 🧠 – to choose
+choose, make a decision
+
+• dream 💭 – to hope for something
+hope, imagine
+
+• enjoy 😊 – to like doing something
+like, take pleasure in
+
+• help 🤝 – to assist others
+support, aid
+
+• like 👍 – to feel good about something
+enjoy, appreciate
+
+• plan 🗺️ – to prepare for the future
+prepare, organize
+
+• want ❤️ – to wish for something
+wish, hope for
+
+• work 🛠️ – to do your job
+do your job, labor
+
+• exciting ⚡ – making you feel interested
+thrilling, stimulating
+
+• fun 🎉 – enjoyable
+enjoyable, pleasant
+
+• good 👍 – positive or nice
+positive, helpful
+
+• important ❗ – having value
+necessary, valuable
+
+• interesting 🤔 – holding attention
+engaging, fascinating
+
+• efficiently ⚙️ – in a fast and smart way
+effectively, productively
+
+• hard 💪 – with a lot of effort
+intensely, with effort
+
+• really ✔️ – very
+very, truly
+
+• slowly 🐢 – not fast
+gradually, little by little
+
+• well ⭐ – in a good way
+properly, correctly
+
+~Healthy Food
+
+• dish 🍽️ – prepared food
+meal, serving
+
+• food 🍎 – things people eat
+nourishment, meals
+
+• fruit 🍓 – sweet healthy food from plants
+produce, fresh fruit
+
+• health ❤️ – the state of being well
+wellness, fitness
+
+• lunch 🥪 – a midday meal
+midday meal
+
+• meal 🍛 – food eaten at one time
+serving, course
+
+• recipe 📖 – instructions for cooking
+instructions, method
+
+• snack 🍿 – small amount of food
+bite, light meal
+
+• taste 👅 – the flavor of food
+flavor, quality
+
+• vegetable 🥕 – healthy plant food
+greens, produce
+
+• cook 🍳 – to prepare food
+prepare, heat
+
+• eat 🍽️ – to have food
+consume, have
+
+• enjoy 😊 – to like food
+like, appreciate
+
+• make 🥣 – to prepare food
+prepare, create
+
+• prepare 🔪 – to get food ready
+ready, organize
+
+• serve 🍽️ – to give food to others
+offer, present
+
+• taste 👄 – to try food
+sample, try
+
+• try 🔍 – to test food
+sample, taste
+
+• delicious 😋 – very tasty
+tasty, flavorful
+
+• fresh 🌱 – newly made
+new, crisp
+
+• good 👍 – healthy or nice
+healthy, beneficial
+
+• healthy 🥗 – good for the body
+nutritious, good for you
+
+• tasty 😄 – having a good flavor
+flavorful, delicious
+
+• carefully 🧠 – with attention
+gently, attentively
+
+• happily 😊 – with joy
+gladly, cheerfully
+
+• simply ✔️ – in an easy way
+easily, plainly
+
+• slowly 🐢 – not fast
+calmly, gradually
+
+• well ⭐ – in a good way
+properly, nicely
+
+~Famous Places
+
+• city 🏙️ – a large town
+large town, urban area
+
+• country 🌍 – a nation
+nation, state
+
+• dream 💭 – a place you want to visit
+wish, hope
+
+• journey 🚆 – a long trip
+trip, travel
+
+• location 📍 – where something is
+place, position
+
+• place 🗺️ – a specific area
+spot, location
+
+• trip ✈️ – a short journey
+journey, travel
+
+• vacation 🏖️ – time off for travel
+holiday, break
+
+• visit 🧳 – a short stay
+stay, trip
+
+• enjoy 😊 – to like an experience
+like, appreciate
+
+• explore 🧭 – to discover places
+discover, travel around
+
+• feel ❤️ – to have emotions
+experience, sense
+
+• go 🚶 – to move somewhere
+travel, move
+
+• learn 📘 – to gain knowledge
+study, find out
+
+• look 👀 – to see
+watch, view
+
+• see 👁️ – to notice with your eyes
+view, notice
+
+• travel ✈️ – to go to places
+journey, move around
+
+• visit 🏛️ – to go see a place
+see, go to
+
+• want ❤️ – to wish for something
+wish, hope for
+
+• beautiful 🌸 – very nice to look at
+pretty, attractive
+
+• big 🏔️ – large in size
+large, huge
+
+• exciting ⚡ – fun and interesting
+thrilling, stimulating
+
+• famous ⭐ – known by many people
+well-known, popular
+
+• interesting 🤔 – making you curious
+engaging, fascinating
+
+• easily ✔️ – without trouble
+simply, smoothly
+
+• really ✔️ – very
+very, truly
+
+• smoothly 🧈 – without problems
+easily, without trouble
+
+• well ⭐ – in a good way
+properly, nicely
+
+• carefully 🧠 – with attention
+cautiously, attentively
+
+~The Future
+
+• change 🔄 – becoming different
+difference, transformation
+
+• family 👨‍👩‍👧‍👦 – people related to you
+relatives, household
+
+• friends 🧑‍🤝‍🧑 – people you like
+buddies, companions
+
+• future 🔮 – time that has not happened yet
+later, coming time
+
+• house 🏠 – a place to live
+home, building
+
+• life 🌱 – being alive
+living, existence
+
+• technology 💻 – machines and tools
+tech, machines
+
+• work 🛠️ – jobs and effort
+employment, labor
+
+• world 🌍 – the Earth and its people
+Earth, globe
+
+• be 🔄 – to exist or become
+exist, remain
+
+• change 🔁 – to become different
+transform, alter
+
+• decide 🧠 – to choose
+choose, select
+
+• grow 🌱 – to develop
+develop, increase
+
+• help 🤝 – to assist
+support, aid
+
+• live 🏡 – to have a life
+exist, reside
+
+• make ✨ – to create
+create, produce
+
+• see 👀 – to understand or notice
+notice, realize
+
+• start 🚀 – to begin
+begin, launch
+
+• work 🛠️ – to do a job
+labor, work at
+
+• different ⚖️ – not the same
+not the same, changed
+
+• exciting ⚡ – interesting and fun
+thrilling, stimulating
+
+• important ❗ – having value
+necessary, valuable
+
+• new 🆕 – not old
+fresh, recent
+
+• big 📈 – large or important
+large, major
+
+• carefully 🧠 – with thought
+thoughtfully, attentively
+
+• easily ✔️ – without difficulty
+simply, smoothly
+
+• really ✔️ – very
+very, truly
+
+• smoothly 🧈 – without problems
+easily, steadily
+
+• well ⭐ – in a good way
+properly, correctly
+
+~Survival
+
+• danger ⚠️ – risk of harm
+risk, threat
+
+• decision 🧠 – a choice
+choice, decision-making
+
+• help 🆘 – support or aid
+assistance, aid
+
+• life ❤️ – being alive
+living, existence
+
+• moment ⏳ – a short time
+instant, short time
+
+• person 🧍 – a human being
+individual, human
+
+• risk 🎲 – chance of danger
+danger, threat
+
+• situation 🌪️ – what is happening
+condition, circumstance
+
+• time ⏰ – when something happens
+moment, period
+
+• escape 🏃 – to get away
+flee, get away
+
+• face 😠 – to deal with something
+confront, deal with
+
+• fight 🥊 – to struggle
+battle, struggle
+
+• help 🤝 – to assist
+aid, support
+
+• decide 🧠 – to choose
+choose, make a choice
+
+• run 🏃 – to move fast
+hurry, sprint
+
+• save 🛟 – to protect from harm
+rescue, protect
+
+• survive 🏕️ – to stay alive
+stay alive, live
+
+• think 💭 – to use your mind
+consider, reflect
+
+• avoid 🚫 – to stay away from
+prevent, keep away from
+
+• brave 🦁 – not afraid
+fearless, courageous
+
+• dangerous ☠️ – not safe
+risky, unsafe
+
+• hard 💪 – very difficult
+tough, challenging
+
+• important ❗ – very necessary
+necessary, vital
+
+• scary 😨 – causing fear
+frightening, fearful
+
+• bravely 🛡️ – with courage
+courageously, fearlessly
+
+• carefully 🧠 – with caution
+cautiously, attentively
+
+• quickly ⚡ – very fast
+fast, rapidly
+
+• safely 🛟 – without danger
+securely, without harm
+
+• slowly 🐢 – not fast
+gradually, carefully
+
+~Tourists
+
+• activity 🎯 – something done for fun
+event, pastime
+
+• adventure 🧗 – an exciting experience
+journey, experience
+
+• city 🏙️ – a large town
+large town, urban area
+
+• festival 🎉 – a special celebration
+celebration, event
+
+• food 🍽️ – things to eat
+meals, dishes
+
+• location 📍 – where something is
+place, position
+
+• market 🏪 – place to buy things
+shop, marketplace
+
+• place 🗺️ – a location
+spot, area
+
+• temple 🛕 – a religious building
+shrine, place of worship
+
+• trip ✈️ – a journey
+travel, journey
+
+• eat 🍽️ – to have food
+consume, have
+
+• enjoy 😊 – to like something
+like, appreciate
+
+• explore 🧭 – to discover places
+discover, look around
+
+• go 🚶 – to move somewhere
+travel, move
+
+• like 👍 – to enjoy something
+enjoy, appreciate
+
+• see 👀 – to look at
+view, notice
+
+• try 🔍 – to test something new
+attempt, sample
+
+• visit 🧳 – to go to a place
+see, go to
+
+• learn 📘 – to gain knowledge
+study, find out
+
+• beautiful 🌸 – nice to look at
+pretty, attractive
+
+• big 🏔️ – large
+large, huge
+
+• exciting ⚡ – fun and interesting
+thrilling, stimulating
+
+• fun 🎉 – enjoyable
+enjoyable, pleasant
+
+• interesting 🤔 – holding attention
+engaging, fascinating
+
+• carefully 🧠 – with attention
+cautiously, attentively
+
+• eagerly 🔥 – with excitement
+excitedly, enthusiastically
+
+• really ✔️ – very
+very, truly
+
+• smoothly 🧈 – without problems
+easily, steadily
+
+• happily 😊 – with joy
+cheerfully, gladly
+
+~Cryptids
+
+• creature 🐾 – a living being, often unknown or unusual
+cryptid, monster, beast, animal, being, entity
+
+• sightings 👀 – moments when a cryptid is seen or reported
+sighting, encounter, report, observation, witness account
+
+• habitat 🌲 – the place where a cryptid is believed to live
+forest, lake, swamp, mountains, cave, river, wilderness
+
+• behavior 🐾 – the way a cryptid acts
+nocturnal, shy, aggressive, elusive, mysterious, territorial
+
+• evidence 🔬 – proof or signs that suggest existence
+footprint, track, hair, photograph, video, sound
+
+• myth / legend 📜 – traditional stories about cryptids
+legend, myth, folklore, tale, story, lore
+
+• investigation 🕵️ – the study or search for cryptids
+research, expedition, tracking, study, observation
+
+• hoax / skepticism 🤔 – doubt or false information
+hoax, fake, fraud, disbelief, doubt, unverified
+
+• classification 🧬 – ways cryptids are grouped or described
+humanoid, aquatic, reptilian, winged, animal-like, hybrid
+
+• folklore regions 🌎 – places known for cryptid stories
+north america, asia, europe, africa, remote areas, wilderness
+
+~Signal Words
+• Time ⏰ – words that tell when something happens<br>
+on, at, in, before, after, since, until, during, for, now, yesterday, today, tomorrow, later, then, when, while, once
+
+• Addition ➕ – words that add ideas together<br>
+and, also, too, with, plus, as well as, not only...but also, both...and
+
+• Cause / Effect 🔗 – words that show a reason or result<br>
+because, so, since, because of, due to, as a result, therefore, that’s why
+
+• Comparison / Similarity / Difference ⚖️ – words that compare things<br>
+like, as, as...as, than, similar to, different from, more than, less than, the most, just as...so, whereas, in contrast to
+
+• Contrast / Opposition 🎭 – words that show differences<br>
+but, although, though, even though, however, yet, still, despite, instead, whereas, while, on the other hand
+
+• Frequency 〰️ – words that tell how often something happens<br>
+always, usually, often, sometimes, occasionally, rarely, never, every day, once a week, hardly ever, from time to time
+
+• Possibility / Certainty 🎲 – words that show how possible or sure something is<br>
+maybe, probably, possibly, must, might, may, could, can, definitely, certainly
+
+• Advice / Obligation / Permission ☝️ – words that tell rules or give guidance<br>
+must, must not, have to, don’t have to, should, ought to, had better, can, cannot, may, could
+
+• Manner 🎭 – words that tell how something is done<br>
+quickly, slowly, carefully, easily, well, badly, with, by, in a...way, as
+
+• Place / Location 📍 – words that tell where something is<br>
+in, on, at, under, above, between, near, next to, here, there, everywhere, anywhere
+
+• Condition 🌧️ – words that show something depends on something else<br>
+if, unless, in case, on condition that
+
+• Emphasis / Focus 🎯 – words that make something stronger or more important<br>
+only, just, even, especially, mainly, particularly
+
+• Questions (Interrogatives) ❓ – words used to ask questions<br>
+how, when, where, why
+
+• Relative Words 👨‍👩‍👧‍👦 – words that connect ideas about time, place, reason, or manner<br>
+when, where, why, how
+
+• Direction / Movement 🧭 – words that show movement or direction<br>
+to, from, toward, away from, up, down, forward, back
+
+• Affirmative and Negative ✔️❌ – words that show yes or no<br>
+yes, no
+
+
+~Signal Words
+• Time ⏰ – words that tell when something happens<br>
+on, at, in, before, after, since, until, during, for, now, yesterday, today, tomorrow, later, then, when, while, once
+
+• Addition ➕ – words that add ideas together<br>
+and, also, too, with, plus, as well as, not only...but also, both...and
+
+• Cause / Effect 🔗 – words that show a reason or result<br>
+because, so, since, because of, due to, as a result, therefore, that’s why
+
+• Comparison / Similarity / Difference ⚖️ – words that compare things<br>
+like, as, as...as, than, similar to, different from, more than, less than, the most, just as...so, whereas, in contrast to
+
+• Contrast / Opposition 🎭 – words that show differences<br>
+but, although, though, even though, however, yet, still, despite, instead, whereas, while, on the other hand
+
+• Frequency 〰️ – words that tell how often something happens<br>
+always, usually, often, sometimes, occasionally, rarely, never, every day, once a week, hardly ever, from time to time
+
+• Possibility / Certainty 🎲 – words that show how possible or sure something is<br>
+maybe, probably, possibly, must, might, may, could, can, definitely, certainly
+
+• Advice / Obligation / Permission ☝️ – words that tell rules or give guidance<br>
+must, must not, have to, don’t have to, should, ought to, had better, can, cannot, may, could
+
+• Manner 🎭 – words that tell how something is done<br>
+quickly, slowly, carefully, easily, well, badly, with, by, in a...way, as
+
+• Place / Location 📍 – words that tell where something is<br>
+in, on, at, under, above, between, near, next to, here, there, everywhere, anywhere
+
+• Condition 🌧️ – words that show something depends on something else<br>
+if, unless, in case, on condition that
+
+• Emphasis / Focus 🎯 – words that make something stronger or more important<br>
+only, just, even, especially, mainly, particularly
+
+• Questions (Interrogatives) ❓ – words used to ask questions<br>
+how, when, where, why
+
+• Relative Words 👨‍👩‍👧‍👦 – words that connect ideas about time, place, reason, or manner<br>
+when, where, why, how
+
+• Direction / Movement 🧭 – words that show movement or direction<br>
+to, from, toward, away from, up, down, forward, back
+
+• Affirmative and Negative ✔️❌ – words that show yes or no<br>
+yes, no
+`;
+
+
+// ───────────────────────── SECTION + WORD DATA ─────────────────────────
+
+const sections = parseSections(rawVocab);
+
+const sectionData = [
+  { name: "Select a category.", words: [] }, // ✅ placeholder
+  ...sections.map(sec => ({
+    name: sec.name,
+    words: extractWords(sec.text)
+  }))
+];
+
+let currentSectionIndex = 0;
+let activeSectionName = "";
+let words = [];
+
+const wheel = document.querySelector(".wheel");
+const sectionUpBtn = document.getElementById("sectionUp");
+const sectionDownBtn = document.getElementById("sectionDown");
+
+function renderSectionWheel() {
+  if (!sectionData.length) {
+    wheel.textContent = "";
+    return;
+  }
+  wheel.textContent = sectionData[currentSectionIndex].name;
+}
+
+
+// ───────────────────────── SECTION WHEEL LOGIC ─────────────────────────
+
+
+function updateSectionWheel() {
+  if (!sectionData.length) {
+    wheel.textContent = "";
+    return;
+  }
+  wheel.textContent = sectionData[currentSectionIndex].name;
+}
+
+// initialize wheel on load
+updateSectionWheel();
+
+
+sectionUpBtn.addEventListener("click", () => {
+  if (!sectionData.length || gameStarted) return;
+  currentSectionIndex =
+    (currentSectionIndex - 1 + sectionData.length) % sectionData.length;
+  updateSectionWheel();
+});
+
+sectionDownBtn.addEventListener("click", () => {
+  if (!sectionData.length || gameStarted) return;
+  currentSectionIndex =
+    (currentSectionIndex + 1) % sectionData.length;
+  updateSectionWheel();
+});
+
+
+
+const gameArea = document.getElementById('gameArea');
+const wordInput = document.getElementById('wordInput');
+const hiddenInput = document.getElementById('hiddenInput');
+const countdownOverlay = document.getElementById('countdownOverlay');
+const beam = document.getElementById('beam');
+const scoreboard = document.getElementById('scoreboard');
+const scoreData = document.getElementById('scoreData');
+const scoreButtons = document.getElementById('scoreButtons');
+const nameField = document.getElementById('nameField');
+const idField = document.getElementById('idField');
+const startButton = document.getElementById('startButton');
+const submitButton = document.getElementById('submitButton');
+
+let cows = [];
+let score = 0;
+let attempts = 0;
+let timer = 120;//change timer two or more places//
+let timerInterval;
+let gameStarted = false;
+let pendingAbduction = false;
+let currentWordIndex = 0;
+
+const ufoContainer = document.getElementById('ufoContainer');
+let swayAmplitude = 50;
+let swaySpeed = 0.01;
+let swayTime = 0;
+
+
+function syncDisplay() {
+  wordInput.value = hiddenInput.value;
+}
+
+
+function animateUFO() {
+  swayTime += 1;
+  const offsetX = Math.sin(swayTime * swaySpeed) * swayAmplitude;
+  ufoContainer.style.left = `calc(50% + ${offsetX}px)`;
+  requestAnimationFrame(animateUFO);
+}
+requestAnimationFrame(animateUFO);
+
+function checkFields() {
+  const ok = nameField.value.trim() && idField.value.trim();
+  startButton.disabled = !ok || gameStarted;
+  submitButton.disabled = !ok || !gameStarted;
+}
+nameField.addEventListener("input", checkFields);
+idField.addEventListener("input", checkFields);
+
+// ───────────────────────── ANIMAL TRAIN CONFIG ─────────────────────────
+const animalPattern = ["🐄","🐖","🐓","🐖","🐓","🐄","🐄","🐖","🐓","🐖","🐓","🐄","🐄","🐖","🐓","🐖","🐓","🐄",];
+const spacingPattern = [50, 75, 100, 50]; // spacing between animals
+const cowSpeed = 0.5;  // pixels per frame
+let nextTrainStartX = -100;
+let trainInProgress = false;
+
+function spawnCowTrain() {
+  trainInProgress = true;
+  let trainCows = [];
+
+  let currentX = nextTrainStartX;
+
+  // create each animal, positioned relative to the previous one
+  animalPattern.forEach((emoji, i) => {
+    const cow = document.createElement("div");
+    cow.className = "cow";
+    cow.style.position = "absolute";
+    cow.style.left = `${currentX}px`;
+    cow.style.bottom = "50px";
+    cow.innerHTML = `<span class="cowIcon">${emoji}</span>`;
+    gameArea.appendChild(cow);
+    cows.push(cow);
+    trainCows.push(cow);
+
+    // move currentX forward for the next cow
+    let spacing = spacingPattern[i % spacingPattern.length];
+    currentX -= spacing; // animals go off-screen to the left initially
+  });
+
+  // move entire train as a unit
+  const moveTrain = setInterval(() => {
+    trainCows.forEach(cow => {
+      let x = parseFloat(cow.style.left);
+      x += cowSpeed;
+      cow.style.left = x + "px";
+
+      const ufoRect = ufoContainer.getBoundingClientRect();
+      const cowRect = cow.getBoundingClientRect();
+      const cowCenterX = cowRect.left + cowRect.width / 2;
+
+      if (pendingAbduction && Math.abs(cowCenterX - (ufoRect.left + ufoRect.width/2)) < 20) {
+        pendingAbduction = false;
+        beam.classList.add('beamOn');
+        suckCowToUFO(cow);
+        setTimeout(() => beam.classList.remove('beamOn'), 1000);
+      }
+
+      if (x > window.innerWidth + 150) {
+        cow.remove();
+        cows = cows.filter(c => c !== cow);
+      }
+    });
+
+    if (!trainCows.some(c => gameArea.contains(c))) {
+      clearInterval(moveTrain);
+      trainInProgress = false;
+    }
+  }, 20);
+}
+
+// spawn first train
+spawnCowTrain();
+
+// spawn subsequent trains only after previous train leaves
+setInterval(() => {
+  if (gameStarted && !trainInProgress) {
+    nextTrainStartX = -100;
+    spawnCowTrain();
+  }
+}, 500);
+function suckCowToUFO(cow) {
+  clearInterval(cow.moveInterval);
+  const ufoRect = ufoContainer.getBoundingClientRect();
+  const cowRect = cow.getBoundingClientRect();
+  const distX = (ufoRect.left + ufoRect.width / 2) - (cowRect.left + cowRect.width / 2);
+  const distY = (ufoRect.top + ufoRect.height / 2) - (cowRect.top + cowRect.height / 2);
+
+  cow.style.transition = "transform 1.5s linear, opacity 1.2s linear";
+  requestAnimationFrame(() => {
+    cow.style.transform = `translate(${distX}px, ${distY}px)`;
+    cow.style.opacity = "0";
+  });
+
+  setTimeout(() => {
+    cow.remove();
+    cows = cows.filter(c => c !== cow);
+  }, 1500);
+}
+
+function updatePlaceholder() {
+  wordInput.placeholder = words[currentWordIndex];
+  hiddenInput.placeholder = words[currentWordIndex];
+}
+hiddenInput.addEventListener("input", () => {
+  if (!gameStarted) return;
+
+  const val = hiddenInput.value.trim().toLowerCase();
+  syncDisplay();
+
+  if (val.length > 0) attempts++;
+
+  if (words[currentWordIndex] === val) {
+    pendingAbduction = true;
+
+    hiddenInput.value = "";
+    syncDisplay();
+
+    score++;
+    currentWordIndex++;
+
+    if (currentWordIndex < words.length) {
+      updatePlaceholder();
+    } else {
+      endGame();
+    }
+  }
+});
+function startTimer() {
+  clearInterval(timerInterval);
+  timer = 120; //change time limit//
+  countdownOverlay.textContent = timer;
+  timerInterval = setInterval(() => {
+    timer--;
+    countdownOverlay.textContent = timer;
+    if (timer <= 0) { clearInterval(timerInterval); endGame(); }
+  }, 1000);
+}
+
+function endGame() {
+  wordInput.disabled = true;
+  gameStarted = false;
+  checkFields();const now = new Date();
+const pad = n => n.toString().padStart(2, '0');
+
+const dateString = 
+    `${pad(now.getDate())}${pad(now.getMonth()+1)}${now.getFullYear()}, ` +
+    `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+
+  const filename = window.location.pathname.split('/').pop() || 'unknown.html';
+  const name = nameField.value.trim() || 'Anonymous';
+  const id = idField.value.trim() || 'N/A';
+
+  const totalWords = words.length;
+  const scoreCount = score; // number of correctly typed words
+  const percentage = totalWords > 0 ? Math.round((scoreCount / totalWords) * 100) : 0;
+
+// Final scoreboard string, no spaces around |
+const resultText = `${filename}|${name}|${id}|${dateString}|${scoreCount}/${totalWords}|${percentage}%`;
+
+scoreData.textContent = resultText;
+scoreboard.style.display = 'block';
+scoreButtons.style.display = 'flex';
+
+saveResult(resultText);
+}
+startButton.addEventListener("click", () => {
+  if (!sectionData.length) {
+    alert("No sections loaded yet.");
+    return;
+  }
+
+  // 🔒 lock section for this run (SAMPLE BEHAVIOR)
+  words = [...sectionData[currentSectionIndex].words];
+  activeSectionName = sectionData[currentSectionIndex].name;
+
+  if (!words.length) {
+    alert("This section has no entries.");
+    return;
+  }
+
+  if (gameStarted) return;
+  gameStarted = true;
+  score = 0;
+  attempts = 0;
+  currentWordIndex = 0;
+
+  scoreboard.style.display = "none";
+  scoreButtons.style.display = "none";
+
+  // reset inputs properly
+  wordInput.disabled = false;
+  hiddenInput.disabled = false;
+
+  wordInput.value = "";
+  hiddenInput.value = "";
+  syncDisplay();
+
+  updatePlaceholder();
+  startTimer();
+
+  // single source of focus = hidden input
+  hiddenInput.focus({ preventScroll: true });
+
+  startButton.disabled = true;
+  submitButton.disabled = false;
+});
+
+
+submitButton.addEventListener("click", endGame);
+
+
+function scheduleNextCow() {
+  const delay = 1200 + Math.random() * 4000;
+
+  setTimeout(() => {
+    if (gameStarted && currentWordIndex < words.length) {
+
+      if (!trainInProgress) {
+        nextTrainStartX = -100;
+        spawnCowTrain();
+      }
+
+    }
+
+    scheduleNextCow();
+  }, delay);
+}
+window.addEventListener("load", scheduleNextCow);
+
+
+document.getElementById("copyBtn").addEventListener("click", async () => {
+  try {
+    await navigator.clipboard.writeText(scoreData.textContent);
+    alert("Score copied to clipboard!");
+  } catch (err) {
+    alert("Clipboard error.");
+  }
+});
+document.getElementById("txtBtn").addEventListener("click", () => {
+  const blob = new Blob([scoreData.textContent], { type: "text/plain" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "score.txt";
+  a.click();
+});
+
+document.getElementById("pngBtn").addEventListener("click", () => {
+  const text = scoreData.textContent;
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  const fontSize = 12;
+  const lineHeight = 18;
+  const padding = 12;
+
+  ctx.font = `${fontSize}px Arial`;
+
+  // Match narrow iPhone scoreboard width
+  const maxTextWidth =
+  scoreboard.getBoundingClientRect().width - padding * 2;
+
+
+function wrapText(text, maxWidth) {
+  const lines = [];
+  let line = "";
+
+  for (const char of text) {
+    const test = line + char;
+    if (ctx.measureText(test).width > maxWidth) {
+      lines.push(line);
+      line = char;
+    } else {
+      line = test;
+    }
+  }
+
+  if (line) lines.push(line);
+  return lines;
+}
+
+  const wrappedLines = wrapText(text, maxTextWidth);
+
+  canvas.width = maxTextWidth + padding * 2;
+  canvas.height = wrappedLines.length * lineHeight + padding * 2;
+
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "black";
+  wrappedLines.forEach((line, i) => {
+    ctx.fillText(
+      line,
+      padding,
+      padding + fontSize + i * lineHeight
+    );
+  });
+
+  const img = canvas.toDataURL("image/png");
+  const a = document.createElement("a");
+  a.href = img;
+  a.download = "score.png";
+  a.click();
+});
+
+
+</script>
+
+<script>
+  const borderDiv = document.createElement("div");
+  borderDiv.style.position = "fixed";
+  borderDiv.style.inset = "0";
+  borderDiv.style.border = "10px solid #39FF14";
+  borderDiv.style.boxSizing = "border-box";
+  borderDiv.style.zIndex = "9999";
+  borderDiv.style.pointerEvents = "none";
+  document.body.appendChild(borderDiv);
+</script>
+
+
+
+
+
+<script>
+(function () {
+
+const canvas = document.getElementById("starCanvas");
+const ctx = canvas.getContext("2d");
+
+let stars = [];
+let t = 0;
+
+const STAR_COUNT = 2000;
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  createStars();
+}
+
+function createStars() {
+  stars = [];
+
+  const w = canvas.width;
+  const h = canvas.height;
+
+  for (let i = 0; i < STAR_COUNT; i++) {
+    stars.push({
+      // expanded field: 2x wider and taller than screen
+      x: (Math.random() * 2 - 0.5) * w,
+      y: (Math.random() * 2 - 0.5) * h,
+
+      r: Math.random() * 1.6 + 0.3,
+      a: Math.random() * 0.5 + 0.5,
+      s: Math.random() * 0.01 + 0.005
+    });
+  }
+}
+
+window.addEventListener("resize", resize);
+resize();
+
+function draw() {
+
+  const w = canvas.width;
+  const h = canvas.height;
+
+  ctx.clearRect(0, 0, w, h);
+
+  const cx = w / 2;
+  const cy = h * 0.42; // horizon pivot
+const angle = t * 0.0009;
+t += 0.08;
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+
+  ctx.fillStyle = "white";
+
+  for (let i = 0; i < stars.length; i++) {
+
+    const s = stars[i];
+
+    // translate to center
+    let dx = s.x - cx;
+    let dy = s.y - cy;
+
+    // rotate
+    const rx = dx * cos - dy * sin;
+    const ry = dx * sin + dy * cos;
+
+    const x = cx + rx;
+    const y = cy + ry;
+
+    // IMPORTANT: NO OVER-FILTERING
+    if (x >= -10 && x <= w + 10 && y >= -10 && y <= h + 10) {
+
+      ctx.globalAlpha = s.a;
+
+      ctx.beginPath();
+      ctx.arc(x, y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  ctx.globalAlpha = 1;
+
+  t += 1;
+  requestAnimationFrame(draw);
+}
+
+draw();
+
+})();
+</script>
+<script>
+(function () {
+  const canvas = document.getElementById("groundCanvas");
+  const ctx = canvas.getContext("2d");
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  let t = 0;
+
+  function noise(x, y, t) {
+    return (
+      Math.sin(x * 0.008 + t) +
+      Math.sin(y * 0.012 + t * 1.2) +
+      Math.sin((x + y) * 0.006 - t * 0.7)
+    ) / 3;
+  }
+
+  function draw() {
+    const w = canvas.width;
+    const h = canvas.height;
+    const img = ctx.createImageData(w, h);
+    const d = img.data;
+
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+
+        const n =
+          noise(x, y, t) +
+          noise(x * 0.5, y * 0.5, t * 0.9);
+
+        const swirl = Math.sin(n * 6 + y * 0.02);
+        const mix = swirl * 0.5 + 0.5;
+
+        // TAN
+        const tr = 210, tg = 180, tb = 120;
+
+        // GREEN
+        const gr = 80, gg = 140, gb = 60;
+
+        const r = gr * mix + tr * (1 - mix);
+        const g = gg * mix + tg * (1 - mix);
+        const b = gb * mix + tb * (1 - mix);
+
+        const i = (y * w + x) * 4;
+        d[i]     = r;
+        d[i + 1] = g;
+        d[i + 2] = b;
+        d[i + 3] = 255;
+      }
+    }
+
+    ctx.putImageData(img, 0, 0);
+    t += 0.02;
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+})();
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Get filename only
+    let filename = window.location.pathname.split("/").pop();
+
+    // Remove .html
+    filename = filename.replace(/\.html$/i, "");
+
+    // Remove everything up to and including the first underscore
+    // (treats that as the prefix)
+    filename = filename.replace(/^[^_]*_/, "");
+
+    // Convert underscores to spaces
+    const title = filename.replace(/_/g, " ");
+
+    // Replace the first <h1>
+    const h1 = document.querySelector("h1");
+    if (h1) {
+        h1.textContent = title;
+    }
+});
+</script>
+
+<script>
+
+(function(){
+
+/* =========================
+   RAW INSTRUCTIONS TEXT
+========================= */
+
+const RAW_TEXT = `
+
+How to play...
+
+1. Enter Name and ID.
+2. Select a category.
+3. Click Start to begin.
+4. Type the words correctly.
+5. Click Submit to see your score.
+6. Copy or download your score.
+
+`;
+
+
+/* =========================
+   RAW TEXT PARSER
+========================= */
+
+function parseRawInstructions(text){
+
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+
+  lines.forEach(line => {
+
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
+
+    html.push(`<p>${line}</p>`);
+  });
+
+  return html.join("");
+}
+
+
+/* =========================
+   CREATE STYLE
+========================= */
+
+const style = document.createElement("style");
+
+style.textContent = `
+#instructionsBtn{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  padding:10px 16px;
+  background:#2e8b57;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 4px 8px rgba(0,0,0,0.6);
+  z-index:99998;
+}
+
+#instructionsBtn:hover{
+  background:#257047;
+}
+
+#instructionsRoot{
+  position:fixed;
+  inset:0;
+  display:none;
+  z-index:99999;
+}
+
+#instructionsBackdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.35);
+}
+
+#instructionsModal{
+  position:absolute;
+  top:25px;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(650px,90vw);
+  max-height:90vh;
+  background:#fff;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+#instructionsHeader{
+  padding:12px 16px;
+  border-bottom:1px solid #ddd;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+#instructionsTitle{
+  color:#1976d2;
+  font-weight:600;
+  font-size:1.1em;
+}
+
+#instructionsBack{
+  border:none;
+  background:none;
+  font-size:20px;
+  cursor:pointer;
+  color:#1976d2;
+  font-weight:600;
+}
+
+#instructionsContent{
+  padding:2px 18px 18px 18px;
+  overflow-y:auto;
+  line-height:1.6;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+
+#instructionsContent::-webkit-scrollbar{
+  display:none;
+}
+
+#instructionsContent h3{
+  color:#1976d2;
+  margin:12px 0 4px 0;
+  font-weight:600;
+}
+
+#instructionsContent p{
+  margin:4px 0;
+}
+
+#instructionsContent hr{
+  margin:12px 0;
+}
+`;
+
+document.head.appendChild(style);
+
+
+/* =========================
+   CREATE BUTTON
+========================= */
+
+const btn = document.createElement("button");
+btn.id = "instructionsBtn";
+btn.textContent = "Instructions";
+
+document.body.appendChild(btn);
+
+
+/* =========================
+   CREATE MODAL
+========================= */
+
+const root = document.createElement("div");
+root.id = "instructionsRoot";
+
+root.innerHTML = `
+<div id="instructionsBackdrop"></div>
+
+<div id="instructionsModal">
+
+  <div id="instructionsHeader">
+    <button id="instructionsBack">←</button>
+    <span id="instructionsTitle">Instructions</span>
+  </div>
+
+  <div id="instructionsContent">
+    ${parseRawInstructions(RAW_TEXT)}
+  </div>
+
+</div>
+`;
+
+document.body.appendChild(root);
+
+
+/* =========================
+   SCROLL LOCK
+========================= */
+
+const modalContent = document.getElementById("instructionsContent");
+
+modalContent.addEventListener("wheel", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+modalContent.addEventListener("touchmove", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+
+/* =========================
+   OPEN / CLOSE
+========================= */
+
+function openModal(){
+  root.style.display="block";
+  document.body.style.overflow="hidden";
+  document.documentElement.style.overflow="hidden";
+}
+
+function closeModal(){
+  root.style.display="none";
+  document.body.style.overflow="";
+  document.documentElement.style.overflow="";
+}
+
+btn.onclick = openModal;
+
+document.getElementById("instructionsBack").onclick = closeModal;
+document.getElementById("instructionsBackdrop").onclick = closeModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape") closeModal();
+});
+
+/* =========================
+   DYNAMIC BODY PADDING FOR BUTTON
+========================= */
+
+function adjustBodyPadding(){
+  const btnHeight = btn.offsetHeight + -25; // include some gap
+  document.body.style.paddingBottom = `${btnHeight}px`;
+}
+
+// Initial adjustment
+adjustBodyPadding();
+
+// Update if window is resized (responsive)
+window.addEventListener("resize", adjustBodyPadding);
+
+})();
+
+</script>
+
+<script>
+  // Grab the elements
+  const gameArea = document.getElementById("gameArea");
+  const wordInput = document.getElementById("wordInput");
+
+  // Focus input on touch or click inside game area
+gameArea.addEventListener("pointerdown", () => {
+  if (!hiddenInput.disabled) {
+    hiddenInput.focus({ preventScroll: true });
+  }
+});
+// Keep mobile keyboard pinned to hidden input
+hiddenInput.addEventListener("blur", () => {
+  setTimeout(() => {
+    if (
+      document.activeElement !== hiddenInput &&
+      !hiddenInput.disabled &&
+      gameStarted
+    ) {
+      hiddenInput.focus({ preventScroll: true });
+    }
+  }, 50);
+});</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+
+<!-- SUPABASE LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const supabaseClient = window.supabase.createClient(
+  'https://etwwriloppklhhkmswpr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+);
+
+if (!supabaseClient) {
+  console.error("❌ Supabase failed to initialize");
+}
+
+let lastUploadedScore = null;
+
+window.saveResult = async function saveResult(text) {
+
+  if (!supabaseClient) {
+    console.error("❌ No Supabase client");
+    return;
+  }
+
+  // ======================
+  // NORMALIZE INPUT
+  // ======================
+  let cleaned;
+
+  try {
+    cleaned = (typeof text === "string")
+      ? text
+      : JSON.stringify(text);
+
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+
+  } catch (err) {
+    console.error("❌ Normalize error:", err);
+    return;
+  }
+
+  if (!cleaned) {
+    console.error("❌ Empty value blocked");
+    return;
+  }
+
+  if (cleaned === lastUploadedScore) {
+    console.log("⚠️ Duplicate blocked");
+    return;
+  }
+
+  lastUploadedScore = cleaned;
+
+  console.log("📤 INSERTING INTO scoreboard_raw:", cleaned);
+
+  const { data, error } = await supabaseClient
+    .from("scoreboard_raw")
+    .insert([
+      { result_text: cleaned }
+    ])
+    .select();
+
+  if (error) {
+    console.error("❌ INSERT FAILED FULL ERROR:", error);
+    return;
+  }
+
+  console.log("✅ INSERT SUCCESS:", data);
+};
+
+</script>
+
+
+</body>
+</html>
+

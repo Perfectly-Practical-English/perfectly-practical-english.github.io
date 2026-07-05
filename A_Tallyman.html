@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Tallyman</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: #f3f4f6;
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.container {
+  width: 100%;
+  max-width: 500px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.top-bar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+select, button {
+  height: 38px;
+  font-size: 14px;
+}
+
+select {
+  flex: 1;
+}
+
+#wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#tile {
+  height: 40px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  transition: all 0.25s ease;
+  background: #eee;
+}
+
+#scoreboard {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.teamPanel {
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  background: white;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+
+.teamHeader {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px;
+}
+
+.tallies {
+  min-height: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  cursor: pointer;
+}
+
+.tally-group {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  width: 100%;
+  justify-content: center;
+}
+
+.tally-group svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+.tally-stick {
+  width: 2px;
+  height: 14px;
+  background: #111;
+}
+
+.score {
+  text-align: center;
+  font-size: 10px;
+  font-weight: 700;
+  border-top: 1px solid #ddd;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="top-bar">
+    <select id="classSelect"></select>
+    <button id="loadBtn">Load</button>
+  </div>
+
+  <div id="wrapper">
+    <div id="tile">Select a class</div>
+
+    <div id="scoreboard">
+      <div class="teamPanel">
+        <div class="teamHeader">Blue</div>
+        <div class="tallies" data-team="Blue"></div>
+        <div class="score" id="scoreBlue">0</div>
+      </div>
+
+      <div class="teamPanel">
+        <div class="teamHeader">Green</div>
+        <div class="tallies" data-team="Green"></div>
+        <div class="score" id="scoreGreen">0</div>
+      </div>
+
+      <div class="teamPanel">
+        <div class="teamHeader">Orange</div>
+        <div class="tallies" data-team="Orange"></div>
+        <div class="score" id="scoreOrange">0</div>
+      </div>
+
+      <div class="teamPanel">
+        <div class="teamHeader">Red</div>
+        <div class="tallies" data-team="Red"></div>
+        <div class="score" id="scoreRed">0</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const RAW_TEXT = `
+~11.1	
+Blue	Thanawat
+Blue	Warawut
+Blue	Phawat
+Green	Suphajak
+Green	Kallapapruek
+Green	Soraphat
+Orange	Nacharot
+Orange	Paphawin
+Orange	Pattaradorn
+Orange	Theerapith
+Red	Thannakorn
+Red	Khemmanat
+Red	Pannawit
+Red	Chatchanok
+~13.2	
+Blue	Patiphan
+Blue	Katanyu
+Blue	Suthimont
+Green	Korravit
+Green	Machat
+Green	Phoomipat
+Orange	Ingkrit
+Orange	Pachara
+Orange	Khanaphot
+Orange	Napol
+Red	Kannaphat
+Red	Natthapakorn
+Red	Phurit
+Red	Pawarut
+~14.1	
+Blue	Krittanart
+Blue	Natthanan
+Blue	Nanaruchote
+Green	Phutthiphat
+Green	Boonraksa
+Green	Kronpanod
+Orange	Phudit
+Orange	Dhatsawitt
+Orange	Nonthapat
+Orange	Chayangkoon
+Orange	Punyawee
+Red	Yuttanin
+Red	Photsawee
+Red	Jommanut
+Red	Phurarit
+~15.3	
+Blue	Akkravich
+Blue	Thanakorn
+Blue	Punnawatz
+Green	Puri
+Green	Api Cha
+Green	Panyarat
+Orange	Nakarin
+Orange	Chananon
+Orange	Rachchavich
+Orange	Phumiphat
+Red	Naravich
+Red	Preedipat 
+Red	Archawin
+Red	Worawit
+~16.2	
+Blue	Vachirasak
+Blue	Chutipan
+Blue	Pakornpat
+Green	Panpuris
+Green	Koonwich
+Green	Nutphalod
+Green	Jirayu
+Orange	Setthawut
+Orange	Theerapatch
+Orange	Theeraphat
+Orange	Pannatat
+Red	Thanakrit
+Red	Nakhun
+Red	Boonpipon
+Red	Warawat
+`;
+
+function parseData(raw) {
+  const blocks = raw.split(/(?=~)/g);
+  const result = {};
+
+  for (let block of blocks) {
+    block = block.trim();
+    if (!block.startsWith("~")) continue;
+
+    const lines = block.split("\n").map(l => l.trim()).filter(Boolean);
+    const className = lines[0].replace("~", "").trim();
+
+    const teams = {};
+
+    for (let i = 1; i < lines.length; i++) {
+      const parts = lines[i].split(/\s+/);
+      const team = parts[0];
+      const name = parts.slice(1).join(" ");
+
+      if (!teams[team]) teams[team] = [];
+      teams[team].push(name);
+    }
+
+    result[className] = teams;
+  }
+
+  return result;
+}
+
+const classData = parseData(RAW_TEXT);
+
+/* ---------- SLIDESHOW ---------- */
+
+const colors = {
+  Blue: "#93c5fd",
+  Green: "#86efac",
+  Orange: "#fdba74",
+  Red: "#fca5a5"
+};
+
+let queue = [];
+let index = 0;
+let timer = null;
+
+let currentClass = null;
+
+function shuffle(arr) {
+  const a = [...arr];
+
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+
+  return a;
+}
+
+function buildQueue(className) {
+
+  const data = classData[className];
+
+  // Green first, then Blue, then Orange, then Red
+  const teamOrder = ["Blue", "Green", "Orange", "Red"];
+
+  // Shuffle each team's roster independently
+  const shuffledTeams = {};
+
+  teamOrder.forEach(team => {
+    shuffledTeams[team] = shuffle(data[team] || []);
+  });
+
+  const q = [];
+
+  let namesRemain = true;
+
+  while (namesRemain) {
+
+    namesRemain = false;
+
+    teamOrder.forEach(team => {
+
+      if (shuffledTeams[team].length > 0) {
+
+q.push({
+  text: shuffledTeams[team].shift(),
+  color: colors[team]
+});
+
+        namesRemain = true;
+      }
+
+    });
+
+  }
+
+  return q;
+}
+function showNextName() {
+
+  if (!currentClass) return;
+
+  if (index >= queue.length) {
+
+    queue = buildQueue(currentClass);
+
+    index = 0;
+  }
+
+  const item = queue[index++];
+
+  const tile = document.getElementById("tile");
+
+  tile.style.opacity = 0;
+
+  setTimeout(() => {
+
+tile.textContent = item.text;
+
+tile.style.background = item.color;
+
+    tile.style.opacity = 1;
+
+  }, 120);
+}
+function startSlideshow(className) {
+
+  currentClass = className;
+
+  queue = buildQueue(className);
+
+  index = 0;
+
+  const tile = document.getElementById("tile");
+
+  tile.textContent = "Click to begin";
+  tile.style.background = "#eee";
+}
+
+/* ---------- DROPDOWN ---------- */
+
+const select = document.getElementById("classSelect");
+
+function initSelect() {
+  Object.keys(classData).forEach(c => {
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = c;
+    select.appendChild(opt);
+  });
+}
+
+document.getElementById("loadBtn").addEventListener("click", () => {
+  startSlideshow(select.value);
+});
+
+document.getElementById("tile").addEventListener("click", () => {
+  showNextName();
+});
+
+initSelect();
+/* ---------- SCOREBOARD ---------- */
+
+const scores = { Blue:0, Green:0, Orange:0, Red:0 };
+
+function addTally(team) {
+
+  scores[team]++;
+
+  const area =
+    document.querySelector(`[data-team="${team}"]`);
+
+  const groups = area.querySelectorAll(".tally-group");
+
+  let lastGroup = groups[groups.length - 1];
+
+  if (!lastGroup || parseInt(lastGroup.dataset.count || "0", 10) === 5) {
+
+    lastGroup = document.createElement("div");
+    lastGroup.className = "tally-group";
+    lastGroup.dataset.count = "0";
+
+    area.appendChild(lastGroup);
+  }
+
+  let count = parseInt(lastGroup.dataset.count || "0", 10);
+
+  if (count < 4) {
+
+    const stick = document.createElement("div");
+    stick.className = "tally-stick";
+
+    lastGroup.appendChild(stick);
+  }
+
+  count++;
+
+  if (count === 5) {
+
+    const svg =
+      document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "svg"
+      );
+
+    svg.setAttribute("viewBox", "0 0 20 20");
+
+    svg.innerHTML =
+      '<line x1="2" y1="2" x2="18" y2="18" stroke="#111" stroke-width="2" stroke-linecap="round"/>';
+
+    lastGroup.appendChild(svg);
+  }
+
+  lastGroup.dataset.count = count;
+
+  document.getElementById("score" + team).textContent =
+    scores[team];
+}
+document.querySelectorAll(".tallies").forEach(el => {
+  el.addEventListener("click", () => addTally(el.dataset.team));
+});
+</script>
+
+</body>
+</html>
