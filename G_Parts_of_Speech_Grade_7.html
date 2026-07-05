@@ -1132,6 +1132,79 @@ pngBtn.addEventListener('click', () => {
 
 const rawExercisesSource = `
 
+
+~ Review for Midterm
+
+Review for Midterm
+
+
+Review Unit 1a
+
+Present Simple Jingle
+
+For |habits| and |routines|—things that you always do.
+For |general truths| and |science facts|—things that are always true.
+
+|Present Simple| is the right tense,
+Now it's time to make a sentence.
+
+Use the |base form of the verb| with almost every pronoun,
+But with |he| and |she| and |it|, you know, we always add the |"s"| sound.
+
+Review Unit 2a
+
+A, An, and The Jingle
+
+|An| elephant walks through |the| jungle.
+
+|The| elephant sees |a| banana.
+
+|He| eats |the| banana.
+
+|It| is delicious.
+
+Review Unit 2b
+
+Some, Any, Much, Many Jingle
+
+|Some| monkeys live in the jungle.
+There are |many| monkeys, but there is not |much| food.
+The monkeys want |a little| food, but there isn’t |any|.
+
+Then they see |a few| bananas.
+They ask each other, “Are there |any| more?”
+Now, a monkey sees a big bunch of bananas.
+
+There are |enough| bananas to share.
+
+Review Unit 2c
+
+Uncountable Nouns Jingle
+
+Let's go to the |beach|, feel |wind| and |sand|,
+Hear rolling |waves| roar as they crash on the land.
+We can count |sailboats| that gently drift by,
+And count noisy |seabirds| that squawk in the sky.
+
+But we cannot count |wind|
+As it blows through our |hair|.
+No, we cannot count |wind|—
+It’s just invisible |air|.
+
+And we cannot count |water|,
+It’s a |liquid|, my friend.
+We might start to count |waves|,
+But the |waves| never end.
+
+We can try to count |sand|,
+And we might count a few.
+|Time| will come to go |home|,
+Long before we are through.
+
+So why not relax at the |beach| for a |day|?
+Who goes to the |beach| to do |math| anyway?
+
+
 ~Unit 1 – Family and Friends - Adverbs of Frequency
 
 How |often| do your parents visit their friends?
@@ -1398,7 +1471,13 @@ window.SCRAMBLE_INDEX = 0;
 
 
 function parseExercise(exerciseText, index) {
-  let prompt = `${index}.`;
+  /* ==========================================================
+   STANDALONE MODE PATCH
+   Exercise numbers disabled.
+   Restore:
+       let prompt = `${index}.`;
+   ========================================================== */
+let prompt = "";
   let sentence = exerciseText;
 
   // If a prompt delimiter exists, split safely
@@ -1427,7 +1506,13 @@ function parseExercise(exerciseText, index) {
       : token;
   }).join('');
 
-  return `${prompt} ${parsedSentence}`;
+  /* ==========================================================
+   STANDALONE MODE PATCH
+   Render sentence only (no exercise number).
+   Restore:
+       return `${prompt} ${parsedSentence}`;
+   ========================================================== */
+return parsedSentence;
 }
 
 
@@ -2542,6 +2627,72 @@ window.saveResult = async function saveResult(text) {
 };
 
 </script>
+
+<!--<script>
+/* ==========================================================
+   STANDALONE MODE PATCH
+   Optional Login
+   ----------------------------------------------------------
+   • Automatically fills Name and ID if left blank.
+   • Keeps the Submit button enabled.
+   • Does not modify any other quiz behavior.
+   • Remove this script to restore normal login behavior.
+   ========================================================== */
+
+(function () {
+
+    function enableSubmit() {
+
+        const name = document.getElementById("name");
+        const id = document.getElementById("id");
+        const submit = document.getElementById("grammarsubmit");
+
+        if (!submit) {
+            setTimeout(enableSubmit, 100);
+            return;
+        }
+
+        // Fill defaults if empty
+        if (name && !name.value.trim()) name.value = "Guest";
+        if (id && !id.value.trim()) id.value = "0000";
+
+        // Always enable submit
+        submit.disabled = false;
+
+        // Keep it enabled even if page logic tries to disable it
+        const observer = new MutationObserver(() => {
+            submit.disabled = false;
+
+            if (name && !name.value.trim()) name.value = "Guest";
+            if (id && !id.value.trim()) id.value = "0000";
+        });
+
+        observer.observe(submit, {
+            attributes: true,
+            attributeFilter: ["disabled"]
+        });
+
+        // If the user clears the fields, immediately refill them
+        [name, id].forEach(input => {
+            if (!input) return;
+
+            input.addEventListener("input", () => {
+                if (input === name && !name.value.trim()) name.value = "Guest";
+                if (input === id && !id.value.trim()) id.value = "0000";
+                submit.disabled = false;
+            });
+        });
+
+    }
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", enableSubmit);
+    } else {
+        enableSubmit();
+    }
+
+})();
+</script> -->
 
 </body>
 </html>
