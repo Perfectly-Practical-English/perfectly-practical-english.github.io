@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +7,7 @@
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>School</title>
+<title>All About Me</title>
 
 <style>
 
@@ -1661,20 +1663,29 @@ correctAnswers += Number(ex.dataset.score || 0);
   /* =========================================================
      COPY SELECTED TEXT
   ========================================================= */
-  copyBtn?.addEventListener('click', () => {
-    const sel = window.getSelection();
-    const text = sel.toString().trim();
+copyBtn?.addEventListener('click', () => {
 
+    const sel = window.getSelection();
+    let text = sel.toString().trim();
+
+    // If nothing is selected, copy the entire passage.
     if (!text) {
-      alert("Select text first.");
-      return;
+
+        const editor = document.querySelector(".question-text");
+
+        if (!editor) {
+            alert("Nothing to copy.");
+            return;
+        }
+
+        text = editor.innerText.trim();
     }
 
     navigator.clipboard.writeText(text)
-      .then(() => alert("Copied!"))
-      .catch(err => console.error(err));
-  });
+        .then(() => alert("Copied!"))
+        .catch(err => console.error(err));
 
+});
 
   /* =========================================================
      READABLE CONTAINER LOGIC
@@ -3982,6 +3993,340 @@ window.saveResult = async function saveResult(text) {
   console.log("✅ INSERT SUCCESS:", data);
 };
 
+</script>
+
+<script>
+(() => {
+"use strict";
+
+
+function waitForEditor(){
+
+    const editor = document.querySelector(".question-text");
+
+    if(!editor){
+        setTimeout(waitForEditor,200);
+        return;
+    }
+
+    initialize(editor);
+}
+
+
+
+function initialize(editor){
+
+    const originalText = getText(editor);
+
+
+    //-------------------------------------------------
+    // Percentage overlay
+    //-------------------------------------------------
+
+    const overlay=document.createElement("div");
+
+    Object.assign(overlay.style,{
+        position:"fixed",
+        right:"8px",
+        bottom:"8px",
+        background:"rgba(0,0,0,.75)",
+        color:"#fff",
+        padding:"4px 8px",
+        borderRadius:"4px",
+        font:"11px Arial",
+        zIndex:999999,
+        pointerEvents:"none"
+    });
+
+    overlay.textContent="Changed: 0.0%";
+
+    document.body.appendChild(overlay);
+
+
+
+    function getPercent(){
+
+        const current=getText(editor);
+
+        const edits=levenshtein(
+            originalText,
+            current
+        );
+
+        const maxLen=Math.max(
+            originalText.length,
+            current.length
+        );
+
+        if(maxLen===0) return 0;
+
+        return edits/maxLen*100;
+    }
+
+
+
+    editor.addEventListener(
+        "input",
+        ()=>{
+            overlay.textContent=
+            "Changed: "
+            + getPercent().toFixed(1)
+            +"%";
+        }
+    );
+
+
+
+    //-------------------------------------------------
+    // Clipboard override
+    //-------------------------------------------------
+
+    if(!navigator.clipboard) return;
+
+
+    const originalWrite =
+        navigator.clipboard.writeText
+        .bind(navigator.clipboard);
+
+
+
+    navigator.clipboard.writeText =
+    function(text){
+
+
+        let copyText=text || "";
+
+
+        // Selected text first
+        const selection =
+        window.getSelection()
+        .toString()
+        .trim();
+
+
+
+        if(selection){
+
+            copyText=selection;
+
+        } else if(!copyText.trim()){
+
+            copyText=getText(editor);
+
+        }
+
+
+
+        //-------------------------------------------------
+        // CREATE SCOREBOARD DATA
+        //-------------------------------------------------
+
+        const filename =
+        window.location.pathname
+        .split("/")
+        .pop()
+        || "Unknown File";
+
+
+
+        const section =
+        document.querySelector(".section h2")
+        ?.textContent
+        ?.replace(/:+$/,"")
+        .trim()
+        ||
+        "Unknown Section";
+
+
+
+        const subsection =
+        document.querySelector(".quiz-subsection")
+        ?.dataset.subsection
+        ||
+        "No Quiz Subsection";
+
+
+
+        const name =
+        document.querySelector(".quiz-name")
+        ?.value
+        ||
+        "Anonymous";
+
+
+
+        const id =
+        document.querySelector(".quiz-id")
+        ?.value
+        ||
+        "N/A";
+
+
+
+        //-------------------------------------------------
+        // Quiz data if available
+        //-------------------------------------------------
+
+        let correctCount=0;
+        let totalExercises=0;
+
+
+
+        document
+        .querySelectorAll(".quiz-subsection .exercise")
+        .forEach(ex=>{
+
+            totalExercises++;
+
+            correctCount +=
+            Number(ex.dataset.score || 0);
+
+        });
+
+
+
+        const percentage =
+        totalExercises>0
+        ?
+        Math.round(
+        (correctCount/totalExercises)*100
+        )
+        :
+        0;
+
+
+
+        const now=new Date();
+
+        const pad=n=>
+        String(n).padStart(2,"0");
+
+
+
+        const dateString =
+        `${pad(now.getDate())}/`+
+        `${pad(now.getMonth()+1)}/`+
+        `${now.getFullYear()} `+
+        `${pad(now.getHours())}:`+
+        `${pad(now.getMinutes())}:`+
+        `${pad(now.getSeconds())}`;
+
+
+
+        const scoreboard =
+`${filename}|${section}: ${subsection}|${name}|${id}|${dateString}|${correctCount}/${totalExercises}|${percentage}%`;
+
+
+
+        //-------------------------------------------------
+        // Final copied output
+        //-------------------------------------------------
+
+const changed =
+getPercent().toFixed(1);
+
+
+
+const finalScoreboard =
+scoreboard +
+"|Changed: " +
+changed +
+"%";
+
+
+
+const finalText =
+finalScoreboard
++
+"\n\n"
++
+copyText;
+
+
+        return originalWrite(finalText);
+
+    };
+
+
+
+console.log(
+"Standalone scoreboard + change tracker installed."
+);
+
+}
+
+
+
+
+function getText(el){
+
+return (
+el.innerText ||
+el.textContent ||
+""
+)
+.replace(/\r/g,"");
+
+}
+
+
+
+
+function levenshtein(a,b){
+
+const m=a.length;
+const n=b.length;
+
+const dp=new Array(n+1);
+
+for(let j=0;j<=n;j++)
+dp[j]=j;
+
+
+for(let i=1;i<=m;i++){
+
+let prev=dp[0];
+
+dp[0]=i;
+
+
+for(let j=1;j<=n;j++){
+
+let temp=dp[j];
+
+
+if(a[i-1]===b[j-1]){
+
+dp[j]=prev;
+
+}else{
+
+dp[j]=Math.min(
+prev+1,
+dp[j]+1,
+dp[j-1]+1
+);
+
+}
+
+
+prev=temp;
+
+}
+
+}
+
+
+return dp[n];
+
+}
+
+
+
+waitForEditor();
+
+
+})();
 </script>
 
 </body>
