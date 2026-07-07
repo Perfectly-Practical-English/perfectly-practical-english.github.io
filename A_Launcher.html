@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -501,4 +502,509 @@ span.style.color = "#00E676";
 </script> -->
 
 </body>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Launcher</title>
+
+<style>
+  body {
+    margin: 0;
+    background: #d8c2ff; /* slightly darker + richer purple */
+    font-family: sans-serif;
+    overflow: hidden;
+  }
+
+:root {
+  --tile-size: 60px;
+  --gap-size: 6px;
+}
+
+  /* Wrapper for scaling */
+.grid-wrapper {
+    width: 100vw;
+    height: calc(100vh - 70px);
+    overflow: hidden;
+}
+
+  /* 5x5 GRID */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, var(--tile-size));
+  gap: var(--gap-size);
+
+  padding: var(--gap-size);
+
+  justify-content: start;
+  align-content: start;
+
+  width: 100vw;
+  height: 100vh;
+
+  overflow: auto;
+}
+  /* SQUARE TILE */
+.tile {
+  width: 60px;
+  height: 60px;
+
+  background: #a56bff;
+
+  border-radius: 18px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.tile:active {
+  opacity: 0.9;
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.3);
+}
+
+  /* CENTERED ICON */
+.tile img,
+.tile span {
+  width: 60px;
+  height: 60px;
+  font-size: 60px;
+}
+
+.tile span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60%;
+  height: 60%;
+}
+
+.flip {
+  transform: scaleX(-1);
+}
+
+
+.title {
+  margin: 0;
+  padding: 8px var(--gap-size) 4px;  /* aligns with the grid */
+  text-align: left;
+
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.1;
+
+  color: #6b3fa0;    /* medium dark purple */
+
+  flex-shrink: 0;
+}
+
+.copyright {
+  padding: 6px var(--gap-size) 10px;
+  text-align: left;
+
+  color: #6b3fa0;      /* Same as the title */
+  font-size: 10px;
+  font-weight: 400;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1 class="title">Perfectly Practical English</h1>
+<div class="copyright">
+  © <span id="year"></span> Perfectly Practical English™. All rights reserved.
+</div>
+
+<div class="grid-wrapper">
+  <div class="grid" id="grid"></div>
+</div>
+
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const targets = [
+    { parent:"#layout", content:"#layout", gap:-30 },
+    { parent:"#tocContainer", content:"#tocContainer", gap:-20 },
+    { parent:"#quizModal", content:"#quizModalContent", gap:-30 }
+  ];
+
+  const copyrightHTML = `
+    <section class="copyrightSection">
+      <div class="footer-note copyright">
+        © <span class="auto-year"></span> Perfectly Practical English™. All rights reserved.
+      </div>
+<div id="visitor-count">Visits: loading...</div>
+
+    </section>
+  `;
+
+  function insertCopyright(parent){
+    if (!parent.querySelector(":scope > .copyrightSection")) {
+      parent.insertAdjacentHTML("beforeend", copyrightHTML);
+    }
+  }
+
+  function adjust(parent, content, desiredGap){
+
+    const copyright = parent.querySelector(".copyrightSection");
+    const last = content.lastElementChild;
+
+    if (!copyright || !last) return;
+
+    const lastBottom = last.getBoundingClientRect().bottom;
+    const copyTop = copyright.getBoundingClientRect().top;
+
+    const currentGap = copyTop - lastBottom;
+    const adjust = currentGap - desiredGap;
+
+    copyright.style.marginTop = (-adjust - 5) + "px";
+  }
+
+  function update(){
+
+    targets.forEach(t => {
+
+      const parent = document.querySelector(t.parent);
+      const content = document.querySelector(t.content);
+
+      if (!parent || !content) return;
+
+      insertCopyright(parent);
+      adjust(parent, content, t.gap);
+
+    });
+
+  }
+
+  // set year
+  document.querySelectorAll(".auto-year").forEach(el=>{
+    el.textContent = new Date().getFullYear();
+  });
+
+  update();
+
+  window.addEventListener("resize", update);
+
+});
+</script>
+
+
+<script>
+const rawData = `
+
+🪑 | A_Seating_Chart_Optimum.html
+📋 | A_Lesson_Agenda.html
+🧱 | W_Word_Wall_Words_Only_Offline.html
+📝 | W_Presentation_OPPO.html
+🔎 | index.html
+⚠️ | All_About_Me.html
+🌐 | https://perfectly-practical-english.github.io/
+📖 | file:///C:/Users/User/Documents/Focus_Book_Pages/!Focus.html
+III | A_Tallyman.html
+💬 | G_Parts_of_Speech_Grade_7.html
+🔀 | G_Word_Scramble_Grade_7.html
+♠️ | V_Flash_Cards_Grade_7.html
+💣 | V_Game_Word_Bombs_Grade_7.html
+🫧 | V_Game_Bubbles_Grade_7.html
+👾 | V_Game_Space_Invaders_Grade_7.html
+🌸 | V_Game_Kaleidoscope_Grade_7.html
+🌪️ | V_Game_Twister_Grade_7.html
+🛸 | V_Game_UFO_Abduction_Grade_7.html
+🟰 | V_Vocabulary_Tiles_Grade_7.html
+🔠 | V_Word_Search_EFL.html
+🧩 | G_Parts_of_Speech_Grade_7.html
+🚀 | G_Game_Asteroids_Grade_7.html
+✈ | G_Game_B-52_Stratofortress_Grade_7.html
+🐒 | G_Game_Coconuts_Grade_7.html
+👻 | G_Game_Haunted_House_Grade_7.html
+⬆️ | G_Game_Sentence_Up_Grade_7.html
+🍱 | G_Game_Sushi_Bar_Grade_7.html
+🐜 | G_Game_Ants_Grade_7.html
+🚗 | G_Game_Cars_Grade_7.html
+〰️ | G_Game_Adverbs of Frequency.html
+🛠️ | G_A_Basic_English_Toolkit.html
+🦊 | R_Davids_Grammar_Fables_by_Aesop.html
+😄 | RJ_Joke_Book.html
+🔊 | file:///C:/Users/User/Documents/Focus_Book_Pages/Audio
+🎟️ | A_Digital Hall Pass.html
+☕ | A_Break_Time.html
+🕒 | A_Clock.html
+📆 | A_My_Calendar.html
+⌚ | A_My_Schedule.html
+⚠️ | file:///C:/Users/User/Documents/zGate Duty Thurs 16 July Fri 17 July 2026 - 2027/Gate Duty Thurs 16 July Fri 17 July 2026 - 2027 20260611_072309.jpg
+
+
+
+
+
+`;
+
+const items = rawData
+  .trim()
+  .split("\n")
+  .map(line => {
+    const [icon, page] = line.split("|").map(s => s.trim());
+    return { icon, page };
+  });
+
+const grid = document.getElementById("grid");
+
+items.forEach(item => {
+  const a = document.createElement("a");
+  a.className = "tile";
+  a.href = item.page;
+a.target = "_blank";
+
+
+if (item.icon.includes(".png") || item.icon.includes("file://") || item.icon.includes("http")) {
+  const img = document.createElement("img");
+  img.src = item.icon;
+  a.appendChild(img);
+} else {
+  const span = document.createElement("span");
+  span.textContent = item.icon;
+  span.style.fontSize = "2.5rem";
+  span.style.lineHeight = "1";
+
+  if (item.icon === "🐢") {
+    span.classList.add("flip");
+  }
+
+  a.appendChild(span);
+}
+
+grid.appendChild(a);
+});
+</script>
+
+<script>
+document.getElementById("year").textContent = new Date().getFullYear();
+
+</script>
+
+<style>
+#david-corner {
+    position: fixed;
+    right: 8px;
+    bottom: 0;
+
+    width: 20vw;       /* about one-fifth of the window width */
+    max-width: 320px;  /* don't let it get too large */
+    min-width: 140px;  /* don't let it get too small */
+
+    height: auto;
+
+    pointer-events: none; /* clicks pass through the image */
+    user-select: none;
+    z-index: 9999;
+}
+
+#david-corner img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+</style>
+
+<div id="david-corner">
+    <img src="David-large.png" alt="">
+</div>
+
+
+<script>
+(function () {
+
+    const QR_IMAGE_URL = "PerfectlyPracticalEnglish_with_Hotspot.app.jpg";
+
+    const grid = document.getElementById("grid");
+    if (!grid) return;
+
+    // Create launcher tile
+    const tile = document.createElement("a");
+    tile.href = "#";
+    tile.className = "tile";
+    tile.title = "Show QR Code";
+
+    const span = document.createElement("span");
+    span.textContent = "▦";
+span.style.color = "#00E676";
+    span.style.fontSize = "2.5rem";
+    span.style.lineHeight = "1";
+
+    tile.appendChild(span);
+    grid.appendChild(tile);
+
+    // Modal overlay
+    const overlay = document.createElement("div");
+
+    Object.assign(overlay.style, {
+        position: "fixed",
+        inset: "0",
+        display: "none",
+        justifyContent: "center",
+        alignItems: "center",
+        background: "rgba(0,0,0,.45)",
+        zIndex: "2147483647"
+    });
+
+    const img = document.createElement("img");
+    img.src = QR_IMAGE_URL;
+    img.alt = "QR Code";
+
+    Object.assign(img.style, {
+        maxWidth: "80vw",
+        maxHeight: "80vh",
+        background: "#fff",
+        padding: "12px",
+        borderRadius: "8px",
+        boxShadow: "0 8px 30px rgba(0,0,0,.5)",
+        cursor: "pointer"
+    });
+
+    overlay.appendChild(img);
+    document.body.appendChild(overlay);
+
+    let open = false;
+
+    function closeQR() {
+        open = false;
+        overlay.style.display = "none";
+    }
+
+    function toggleQR() {
+        open = !open;
+        overlay.style.display = open ? "flex" : "none";
+    }
+
+    // Open / toggle from tile
+    tile.addEventListener("click", function (e) {
+        e.preventDefault();
+        toggleQR();
+    });
+
+    // Click outside image closes it
+    overlay.addEventListener("click", function (e) {
+        if (e.target === overlay) {
+            closeQR();
+        }
+    });
+
+    // Click image ALSO closes it (your requirement)
+    img.addEventListener("click", function () {
+        closeQR();
+    });
+
+})();
+</script>
+
+<!-- <script>
+(function () {
+  const config = {
+    imageUrl: "qr.png",
+    buttonSize: 20,
+    modalMaxWidth: "80vw",
+    id: "qrToggleButton"
+  };
+
+  // Prevent duplicates
+  if (document.getElementById(config.id)) return;
+
+  // ===== BUTTON (grid launcher OR floating depending on CSS) =====
+  const button = document.createElement("button");
+  button.id = config.id;
+
+  Object.assign(button.style, {
+    position: "fixed",   // change/remove if you only want grid use
+    right: "2px",
+    bottom: "2px",
+    width: config.buttonSize + "px",
+    height: config.buttonSize + "px",
+    borderRadius: "50%",
+    border: "1px solid #2f6d2f",
+    background: "#6cbf43",
+    padding: "0",
+    margin: "0",
+    overflow: "hidden",
+    cursor: "pointer",
+    zIndex: "2147483647",
+    boxShadow: "0 0 4px rgba(0,0,0,.4)"
+  });
+
+  const imgThumb = document.createElement("img");
+  imgThumb.src = config.imageUrl;
+  imgThumb.alt = "QR";
+
+  Object.assign(imgThumb.style, {
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    pointerEvents: "none"
+  });
+
+  button.appendChild(imgThumb);
+
+  // ===== MODAL =====
+  const overlay = document.createElement("div");
+
+  Object.assign(overlay.style, {
+    position: "fixed",
+    inset: "0",
+    display: "none",
+    justifyContent: "center",
+    alignItems: "center",
+    background: "rgba(0,0,0,.45)",
+    zIndex: "2147483647"
+  });
+
+  const modalImg = document.createElement("img");
+  modalImg.src = config.imageUrl;
+
+  Object.assign(modalImg.style, {
+    maxWidth: config.modalMaxWidth,
+    maxHeight: "80vh",
+    background: "#fff",
+    padding: "12px",
+    borderRadius: "8px",
+    boxShadow: "0 8px 30px rgba(0,0,0,.5)"
+  });
+
+  overlay.appendChild(modalImg);
+
+  let open = false;
+
+  function toggle() {
+    open = !open;
+    overlay.style.display = open ? "flex" : "none";
+  }
+
+  button.addEventListener("click", (e) => {
+    e.preventDefault();
+    toggle();
+  });
+
+  overlay.addEventListener("click", (e) => {
+    if (e.target === overlay) {
+      open = false;
+      overlay.style.display = "none";
+    }
+  });
+
+  document.body.appendChild(button);
+  document.body.appendChild(overlay);
+})();
+
+</script> -->
+
+</body>
+>>>>>>> 121670929d86f5a1f0d7c3ad98cbb9dd7c5afc87
 </html>
