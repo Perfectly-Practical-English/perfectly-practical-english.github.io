@@ -738,5 +738,284 @@ document.addEventListener("keydown", e=>{
 
 </script>
 
+<script>
+
+/* ==============================
+   Role Voice Player + MP3 Button
+   ============================== */
+
+(function(){
+
+let currentUtterance = null;
+let selectedRole = "Adult male 1";
+
+
+/* ==============================
+   Speak textarea with role voice
+   ============================== */
+
+window.playRoleVoice = function(role){
+
+    const input = document.getElementById("text");
+
+    if(!input || !input.value.trim()){
+        status.textContent="No text";
+        return;
+    }
+
+
+    speechSynthesis.cancel();
+
+
+    const profile = ROLE_PROFILES[role];
+
+
+    // USER INPUT ONLY
+    const userText = input.value.trim();
+
+
+    const utterance =
+        new SpeechSynthesisUtterance(
+            shapeSpeech(userText, role)
+        );
+
+
+    utterance.voice =
+        resolveVoice(role);
+
+
+    utterance.pitch =
+        profile.p;
+
+
+    utterance.rate =
+        profile.r;
+
+
+    utterance.onstart = ()=>{
+
+        status.textContent =
+        "Speaking: " + role;
+
+    };
+
+
+    utterance.onend = ()=>{
+
+        status.textContent="Ready";
+
+    };
+
+
+    currentUtterance = utterance;
+
+
+    speechSynthesis.speak(utterance);
+
+};
+
+
+
+/* ==============================
+   Stop
+   ============================== */
+
+window.stopSelectedVoice=function(){
+
+    speechSynthesis.cancel();
+    status.textContent="Stopped";
+
+};
+
+
+
+/* ==============================
+   Create Voice Flyout
+   ============================== */
+
+const wrapper=document.createElement("div");
+
+wrapper.style.position="relative";
+wrapper.style.display="inline-block";
+wrapper.style.marginTop="5px";
+
+
+
+const playButton=document.createElement("button");
+
+playButton.textContent =
+"▶ Speak Selected Voice ▼";
+
+playButton.style.marginRight="5px";
+
+
+
+const menu=document.createElement("div");
+
+menu.style.position="absolute";
+
+
+// OPEN DOWNWARD
+menu.style.top="25px";
+
+menu.style.left="0";
+
+menu.style.background="#fff";
+menu.style.border="1px solid #888";
+menu.style.padding="4px";
+menu.style.display="none";
+menu.style.zIndex="9999";
+menu.style.boxShadow="0 2px 8px rgba(0,0,0,.25)";
+
+
+
+Object.keys(ROLE_PROFILES).forEach(role=>{
+
+
+    const item=document.createElement("button");
+
+    item.textContent=role;
+
+    item.style.display="block";
+    item.style.width="140px";
+    item.style.margin="2px";
+    item.style.textAlign="left";
+
+
+    item.onclick=function(){
+
+        selectedRole=role;
+
+
+        playButton.textContent =
+        "▶ "+role+" ▼";
+
+
+        menu.style.display="none";
+
+
+        // Speak USER INPUT
+        playRoleVoice(role);
+
+    };
+
+
+    menu.appendChild(item);
+
+
+});
+
+
+
+playButton.onclick=function(){
+
+    menu.style.display =
+    menu.style.display==="none"
+    ? "block"
+    : "none";
+
+};
+
+
+
+wrapper.appendChild(playButton);
+wrapper.appendChild(menu);
+
+document.body.appendChild(wrapper);
+
+
+
+
+/* ==============================
+   MP3 Download Button
+   ============================== */
+
+const mp3Button=document.createElement("button");
+
+mp3Button.textContent="Download MP3";
+
+mp3Button.style.marginTop="5px";
+
+
+
+mp3Button.onclick=function(){
+
+
+alert(
+`Selected voice:
+${selectedRole}
+
+The browser speech engine can play this voice,
+but it cannot export the generated audio.
+
+MP3 export requires routing this selected voice
+through a TTS service that returns an audio file.`
+);
+
+
+};
+
+
+document.body.appendChild(mp3Button);
+
+
+
+
+/* ==============================
+   Voice List Dropdown
+   ============================== */
+
+function refreshVoices(){
+
+    const select =
+    document.getElementById("voiceSelect");
+
+
+    if(!select) return;
+
+
+    select.innerHTML="";
+
+
+    speechSynthesis
+    .getVoices()
+    .forEach((voice,index)=>{
+
+
+        const option =
+        document.createElement("option");
+
+
+        option.value=index;
+
+
+        option.textContent =
+        voice.name+
+        " ("+
+        voice.lang+
+        ")";
+
+
+        select.appendChild(option);
+
+
+    });
+
+}
+
+
+
+speechSynthesis.onvoiceschanged =
+refreshVoices;
+
+
+refreshVoices();
+
+
+
+})();
+
+</script>
+
 </body>
 </html>
