@@ -230,14 +230,14 @@ III | A_Tallyman.html
 🛠️ | G_A_Basic_English_Toolkit.html
 🦊 | R_Davids_Grammar_Fables_by_Aesop.html
 😄 | RJ_Joke_Book.html
-🔊 | file:///C:/Users/User/Documents/Focus_Book_Pages/Audio
+🎧 | file:///C:/Users/User/Documents/Focus_Book_Pages/Audio
 ⚠️ | file:///C:/Users/User/Documents/zGate Duty Thurs 16 July Fri 17 July 2026 - 2027/Gate Duty Thurs 16 July Fri 17 July 2026 - 2027 20260611_072309.jpg
 🎟️ | A_Digital Hall Pass.html
 ☕ | A_Break_Time.html
 🕒 | A_Clock.html
 📆 | A_My_Calendar.html
 ⌚ | A_My_Schedule.html
-🎧 | A_TTS_Microphone.html
+🔊 | A_TTS_Audio_Player.html
 
 
 
@@ -499,6 +499,274 @@ span.style.color = "#00E676";
 })();
 
 </script> -->
+
+
+
+<script>
+(function () {
+
+    const QR_IMAGE_URL = "Human_Ear.png";
+
+    // ============================================================
+    // Add or remove MP3s here (one per line)
+    // ============================================================
+    const AUDIO_FILES = `
+
+Classical.mp3
+Guitar.mp3
+To_the_Moon.mp3
+Jazz.mp3
+Ragtime.mp3
+Keygen_1.mp3
+Keygen_2.mp3
+Elevator_Music.mp3
+Cats.mp3
+
+`;
+
+    const grid = document.getElementById("grid");
+    if (!grid) return;
+
+    // One audio player reused for every soundtrack
+    const audio = new Audio();
+    audio.loop = true;
+    audio.preload = "auto";
+
+    let currentButton = null;
+    let currentFile = "";
+    let open = false;
+
+    // ------------------------------------------------------------
+    // Launcher tile
+    // ------------------------------------------------------------
+
+    const tile = document.createElement("a");
+    tile.href = "#";
+    tile.className = "tile";
+    tile.title = "Show Ear";
+
+    const span = document.createElement("span");
+    span.textContent = "👂🏻";
+    span.style.color = "#00E676";
+    span.style.fontSize = "2.5rem";
+    span.style.lineHeight = "1";
+
+    tile.appendChild(span);
+    grid.appendChild(tile);
+
+    // ------------------------------------------------------------
+    // Overlay
+    // ------------------------------------------------------------
+
+    const overlay = document.createElement("div");
+
+    Object.assign(overlay.style,{
+        position:"fixed",
+        inset:"0",
+        display:"none",
+        justifyContent:"center",
+        alignItems:"center",
+        background:"rgba(0,0,0,.45)",
+        zIndex:"2147483647"
+    });
+
+    // ------------------------------------------------------------
+    // Ear Image
+    // ------------------------------------------------------------
+
+    const img = document.createElement("img");
+
+    img.src = QR_IMAGE_URL;
+
+    Object.assign(img.style,{
+        maxWidth:"80vw",
+        maxHeight:"72vh",
+        background:"#fff",
+        padding:"12px",
+        borderRadius:"10px",
+        boxShadow:"0 8px 30px rgba(0,0,0,.55)",
+        cursor:"pointer"
+    });
+
+    overlay.appendChild(img);
+
+    // ------------------------------------------------------------
+    // Bottom Soundtrack Bar
+    // ------------------------------------------------------------
+
+    const soundtrackBar = document.createElement("div");
+
+    Object.assign(soundtrackBar.style,{
+        position:"absolute",
+        left:"0",
+        right:"0",
+        bottom:"22px",
+        display:"flex",
+        justifyContent:"center",
+        flexWrap:"wrap",
+        gap:"10px",
+        padding:"0 20px",
+        pointerEvents:"auto"
+    });
+
+    overlay.appendChild(soundtrackBar);
+
+    document.body.appendChild(overlay);
+
+    // ============================================================
+    // PART 2 STARTS HERE
+    // ============================================================
+
+    // ============================================================
+    // Build soundtrack buttons
+    // ============================================================
+
+    AUDIO_FILES
+        .trim()
+        .split(/\r?\n/)
+        .filter(Boolean)
+        .forEach(file => {
+
+            const button = document.createElement("button");
+
+            // Button text from filename
+            let label = file
+                .replace(/^Class_Soundtrack_/i,"")
+                .replace(/\.mp3$/i,"")
+                .replace(/_/g," ");
+
+            button.textContent = label;
+
+            Object.assign(button.style,{
+                background:"rgba(20,20,20,.85)",
+                color:"#ffffff",
+                border:"2px solid #00E676",
+                borderRadius:"999px",
+                padding:"10px 18px",
+                fontSize:"15px",
+                fontWeight:"600",
+                cursor:"pointer",
+                transition:"all .2s ease",
+                userSelect:"none"
+            });
+
+            button.onmouseenter = () => {
+                if (button !== currentButton)
+                    button.style.background = "#222";
+            };
+
+            button.onmouseleave = () => {
+                if (button !== currentButton)
+                    button.style.background = "rgba(20,20,20,.85)";
+            };
+
+            button.addEventListener("click", function(e){
+
+                // Don't let the click close the overlay
+                e.stopPropagation();
+
+                // Clicking the current button stops playback
+                if (currentButton === button){
+
+                    audio.pause();
+                    audio.currentTime = 0;
+
+                    button.style.background = "rgba(20,20,20,.85)";
+                    button.style.color = "#ffffff";
+
+                    currentButton = null;
+                    currentFile = "";
+
+                    return;
+                }
+
+                // Stop previous track
+                audio.pause();
+                audio.currentTime = 0;
+
+                // Restore previous button
+                if(currentButton){
+                    currentButton.style.background="rgba(20,20,20,.85)";
+                    currentButton.style.color="#ffffff";
+                }
+
+                // Start selected track
+                currentButton = button;
+                currentFile = file;
+
+                button.style.background="#00E676";
+                button.style.color="#000";
+
+                audio.src = currentFile;
+
+                audio.play().catch(err=>{
+                    console.log(err);
+                });
+
+            });
+
+            soundtrackBar.appendChild(button);
+
+        });
+
+    // ============================================================
+    // Open / Close
+    // ============================================================
+
+    function openQR(){
+
+        if(open) return;
+
+        open = true;
+        overlay.style.display = "flex";
+
+    }
+
+    function closeQR(){
+
+        open = false;
+
+        overlay.style.display = "none";
+
+        audio.pause();
+        audio.currentTime = 0;
+
+        if(currentButton){
+            currentButton.style.background="rgba(20,20,20,.85)";
+            currentButton.style.color="#ffffff";
+        }
+
+        currentButton = null;
+        currentFile = "";
+
+    }
+
+    // ============================================================
+    // Events
+    // ============================================================
+
+    tile.addEventListener("click",function(e){
+
+        e.preventDefault();
+
+        openQR();
+
+    });
+
+    overlay.addEventListener("click",function(e){
+
+        if(e.target===overlay){
+
+            closeQR();
+
+        }
+
+    });
+
+    img.addEventListener("click",closeQR);
+
+})();
+</script>
 
 </body>
 </html>
