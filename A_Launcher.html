@@ -40,15 +40,26 @@ body {
     padding: var(--gap-size);
 
     width: calc(5 * var(--tile-size) + 6 * var(--gap-size));
-    height: 100%; /* enables the scroll container */
+    height: 100%;
 
     justify-content: center;
     align-content: start;
 
     overflow-y: auto;
     overflow-x: hidden;
+
+    /* Hide scrollbar */
+    scrollbar-width: none;        /* Firefox */
+    -ms-overflow-style: none;     /* IE/old Edge */
+
+    /* Smooth touch scrolling */
+    -webkit-overflow-scrolling: touch;
 }
-  /* SQUARE TILE */
+
+/* Hide scrollbar in Chrome, Safari, Edge */
+.grid::-webkit-scrollbar {
+    display: none;
+}  /* SQUARE TILE */
 .tile {
   width: var(--tile-size);
   height: var(--tile-size);
