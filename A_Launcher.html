@@ -28,19 +28,21 @@
   /* 5x5 GRID */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, var(--tile-size));
+
+  grid-template-columns: repeat(7, var(--tile-size));
   gap: var(--gap-size);
 
   padding: var(--gap-size);
 
+  width: calc(7 * var(--tile-size) + 8 * var(--gap-size));
+  height: 100vh;
+
   justify-content: start;
   align-content: start;
 
-  width: 100vw;
-  height: 100vh;
-
   overflow: auto;
 }
+
   /* SQUARE TILE */
 .tile {
   width: 60px;
@@ -288,120 +290,6 @@ document.getElementById("year").textContent = new Date().getFullYear();
 
 </script>
 
-<style>
-#david-corner {
-    position: fixed;
-    right: 0;
-    bottom: 0;
-
-    width: 20vw;       /* about one-fifth of the window width */
-    max-width: 320px;  /* don't let it get too large */
-    min-width: 140px;  /* don't let it get too small */
-
-    height: auto;
-
-    pointer-events: none; /* clicks pass through the image */
-    user-select: none;
-    z-index: 9999;
-}
-
-#david-corner img {
-    display: block;
-    width: 100%;
-    height: auto;
-}
-</style>
-
-<div id="david-corner">
-    <img src="David-large.png" alt="">
-</div>
-
-
-<script>
-(function () {
-
-    const QR_IMAGE_URL = "PerfectlyPracticalEnglish_with_Hotspot.app.jpg";
-
-    const grid = document.getElementById("grid");
-    if (!grid) return;
-
-    // Create launcher tile
-    const tile = document.createElement("a");
-    tile.href = "#";
-    tile.className = "tile";
-    tile.title = "Show QR Code";
-
-    const span = document.createElement("span");
-    span.textContent = "▦";
-span.style.color = "#00E676";
-    span.style.fontSize = "2.5rem";
-    span.style.lineHeight = "1";
-
-    tile.appendChild(span);
-    grid.appendChild(tile);
-
-    // Modal overlay
-    const overlay = document.createElement("div");
-
-    Object.assign(overlay.style, {
-        position: "fixed",
-        inset: "0",
-        display: "none",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "rgba(0,0,0,.45)",
-        zIndex: "2147483647"
-    });
-
-    const img = document.createElement("img");
-    img.src = QR_IMAGE_URL;
-    img.alt = "QR Code";
-
-    Object.assign(img.style, {
-        maxWidth: "80vw",
-        maxHeight: "80vh",
-        background: "#fff",
-        padding: "12px",
-        borderRadius: "8px",
-        boxShadow: "0 8px 30px rgba(0,0,0,.5)",
-        cursor: "pointer"
-    });
-
-    overlay.appendChild(img);
-    document.body.appendChild(overlay);
-
-    let open = false;
-
-    function closeQR() {
-        open = false;
-        overlay.style.display = "none";
-    }
-
-    function toggleQR() {
-        open = !open;
-        overlay.style.display = open ? "flex" : "none";
-    }
-
-    // Open / toggle from tile
-    tile.addEventListener("click", function (e) {
-        e.preventDefault();
-        toggleQR();
-    });
-
-    // Click outside image closes it
-    overlay.addEventListener("click", function (e) {
-        if (e.target === overlay) {
-            closeQR();
-        }
-    });
-
-    // Click image ALSO closes it (your requirement)
-    img.addEventListener("click", function () {
-        closeQR();
-    });
-
-})();
-</script>
 
 <!-- <script>
 (function () {
@@ -500,6 +388,7 @@ span.style.color = "#00E676";
 })();
 
 </script> -->
+
 
 
 
@@ -765,6 +654,121 @@ Cats.mp3
     });
 
     img.addEventListener("click",closeQR);
+
+})();
+</script>
+
+<!--<style>
+#david-corner {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+
+    width: 20vw;       /* about one-fifth of the window width */
+    max-width: 320px;  /* don't let it get too large */
+    min-width: 140px;  /* don't let it get too small */
+
+    height: auto;
+
+    pointer-events: none; /* clicks pass through the image */
+    user-select: none;
+    z-index: 9999;
+}
+
+#david-corner img {
+    display: block;
+    width: 100%;
+    height: auto;
+}
+</style>-->
+
+<!--<div id="david-corner">
+    <img src="Pointer.png" alt="">
+</div>-->
+
+
+<script>
+(function () {
+
+    const QR_IMAGE_URL = "PerfectlyPracticalEnglish_with_Hotspot.app.jpg";
+
+    const grid = document.getElementById("grid");
+    if (!grid) return;
+
+    // Create launcher tile
+    const tile = document.createElement("a");
+    tile.href = "#";
+    tile.className = "tile";
+    tile.title = "Show QR Code";
+
+    const span = document.createElement("span");
+    span.textContent = "▦";
+span.style.color = "#00E676";
+    span.style.fontSize = "2.5rem";
+    span.style.lineHeight = "1";
+
+    tile.appendChild(span);
+    grid.appendChild(tile);
+
+    // Modal overlay
+    const overlay = document.createElement("div");
+
+    Object.assign(overlay.style, {
+        position: "fixed",
+        inset: "0",
+        display: "none",
+        justifyContent: "center",
+        alignItems: "center",
+        background: "rgba(0,0,0,.45)",
+        zIndex: "2147483647"
+    });
+
+    const img = document.createElement("img");
+    img.src = QR_IMAGE_URL;
+    img.alt = "QR Code";
+
+    Object.assign(img.style, {
+        maxWidth: "80vw",
+        maxHeight: "80vh",
+        background: "#fff",
+        padding: "12px",
+        borderRadius: "8px",
+        boxShadow: "0 8px 30px rgba(0,0,0,.5)",
+        cursor: "pointer"
+    });
+
+    overlay.appendChild(img);
+    document.body.appendChild(overlay);
+
+    let open = false;
+
+    function closeQR() {
+        open = false;
+        overlay.style.display = "none";
+    }
+
+    function toggleQR() {
+        open = !open;
+        overlay.style.display = open ? "flex" : "none";
+    }
+
+    // Open / toggle from tile
+    tile.addEventListener("click", function (e) {
+        e.preventDefault();
+        toggleQR();
+    });
+
+    // Click outside image closes it
+    overlay.addEventListener("click", function (e) {
+        if (e.target === overlay) {
+            closeQR();
+        }
+    });
+
+    // Click image ALSO closes it (your requirement)
+    img.addEventListener("click", function () {
+        closeQR();
+    });
 
 })();
 </script>

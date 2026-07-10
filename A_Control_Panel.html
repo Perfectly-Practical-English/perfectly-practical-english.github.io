@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>New Control Panel</title>
+
+<style>
+html, body {
+    margin:0;
+    height:100%;
+    overflow:hidden;
+}
+
+.wrapper {
+    display:flex;
+    height:100vh;
+}
+
+.panel {
+    position:relative;
+    height:100%;
+}
+
+#leftPanel {
+    flex: 0 0 40%;
+}
+
+#rightPanel {
+    flex: 1 1 auto;
+}
+
+iframe {
+    width:100%;
+    height:100%;
+    border:0;
+}
+
+/* Small triangular back buttons */
+.back {
+    position:absolute;
+    top:10px;
+    left:10px;
+    width:0;
+    height:0;
+    border-top:10px solid transparent;
+    border-bottom:10px solid transparent;
+    border-right:16px solid #555;
+    cursor:pointer;
+    z-index:20;
+}
+
+.back:hover {
+    border-right-color:black;
+}
+
+.divider {
+    width:5px;
+    background:#ddd;
+    cursor:col-resize;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="wrapper">
+
+    <div class="panel" id="leftPanel">
+        <div class="back" onclick="backFrame('leftFrame')"></div>
+        <iframe id="leftFrame" name="leftFrame" src="A_Launcher.html"></iframe>
+    </div>
+
+    <div class="divider" id="drag"></div>
+
+    <div class="panel" id="rightPanel">
+        <div class="back" onclick="backFrame('rightFrame')"></div>
+<iframe id="rightFrame" name="rightFrame"
+  src="https://perfectly-practical-english.github.io/">
+</iframe>
+    </div>
+
+</div>
+
+
+<script>
+
+function backFrame(id) {
+    let frame = document.getElementById(id);
+    frame.contentWindow.history.back();
+}
+
+
+// Adjustable divider
+let dragging = false;
+let divider = document.getElementById("drag");
+let leftPanel = document.getElementById("leftPanel");
+
+divider.onmousedown = () => dragging = true;
+
+document.onmouseup = () => dragging = false;
+
+document.onmousemove = (e) => {
+    if (!dragging) return;
+
+    let width = (e.clientX / window.innerWidth) * 100;
+
+    if (width > 10 && width < 90) {
+        leftPanel.style.width = width + "%";
+    }
+};
+
+</script>
+
+
+
+</body>
+</html>
