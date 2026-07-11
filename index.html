@@ -478,7 +478,7 @@ T_Thai-English_Demo_Flash_Cards.html
 </div>
 
 <div class="section">
-  <h3 class="collapsible" target="ZONE">Resources<br></h3>
+  <h3 class="collapsible" target="blank">Resources<br></h3>
 
   <div class="content">
 A_About_Me.html
@@ -589,7 +589,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const link = document.createElement('a');
         link.href = line;
         link.innerText = line;
-        link.target = "self"; // default target
+        link.target = "blank"; // default target
         div.appendChild(link);
         div.appendChild(document.createElement('br'));
       }
@@ -602,7 +602,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <script>
 (function () {
-  const DEFAULT_TARGET = "self";
+  const DEFAULT_TARGET = "blank";
 
   function forceTarget(root = document) {
     const links = root.querySelectorAll('a[href]');
