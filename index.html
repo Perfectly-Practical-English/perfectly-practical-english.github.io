@@ -18,6 +18,7 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding-left: 15px;
+  padding-right: 15px;
   background: #fff;
   color: #111;
   line-height: 1.5;
@@ -47,16 +48,22 @@ html::-webkit-scrollbar {
     a { color: #007acc; text-decoration: none; word-break: break-word; }
     a:hover, a:focus { text-decoration: underline; }
     .section { margin-bottom: 2em; }
-    .collapsible {
-      font-size: 1.2em;
-      cursor: pointer;
-      user-select: none;
-      padding-left: .5em;
-      color: #222;
-      background: #f0f0f0;
-      border-radius: 4px;
-      transition: background 0.2s;
-    }
+.collapsible {
+  width: 100%;
+  display: block;
+
+  font-size: 1.2em;
+  cursor: pointer;
+  user-select: none;
+
+  padding-left: .5em;
+
+  color: #222;
+  background: #f0f0f0;
+  border-radius: 4px;
+
+  transition: background 0.2s;
+}
     .collapsible:hover { background: #e0e0e0; }
     .content {
       display: none;
@@ -644,18 +651,28 @@ document.addEventListener("DOMContentLoaded", function () {
 
 <!-- Green Border -->
 <script>
-  const borderDiv = document.createElement('div');
-  borderDiv.style.position = 'fixed';
-borderDiv.style.top = '0';
-borderDiv.style.left = '0';
-borderDiv.style.right = '0';
-borderDiv.style.bottom = '0';  borderDiv.style.border = '10px solid #39FF14';
-  borderDiv.style.boxSizing = 'border-box';
-  borderDiv.style.zIndex = '9999';
-  borderDiv.style.pointerEvents = 'none';
-  borderDiv.style.backgroundColor = 'transparent';
-  document.body.appendChild(borderDiv);
+(function () {
+
+  const borderDiv = document.createElement("div");
+
+  Object.assign(borderDiv.style, {
+    position: "fixed",
+    top: "0",
+    left: "0",
+    width: "100vw",
+    height: "100vh",
+    border: "10px solid #39FF14",
+    boxSizing: "border-box",
+    zIndex: "2147483647",
+    pointerEvents: "none",
+    background: "transparent"
+  });
+
+  document.documentElement.appendChild(borderDiv);
+
+})();
 </script>
+
 
 <script>
 (function() {

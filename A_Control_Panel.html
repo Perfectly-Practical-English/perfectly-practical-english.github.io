@@ -1,218 +1,74 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>New Control Panel</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Control Panel</title>
 
 <style>
+
+* {
+    box-sizing: border-box;
+}
+
 html, body {
-    margin:0;
-    min-height:100%;
-    overflow-y:auto;
-    overflow-x:hidden;
-
-    scrollbar-width:none;
-    -ms-overflow-style:none;
+    margin: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
 }
 
-body::-webkit-scrollbar {
-    display:none;
-}
-.wrapper {
-    display:flex;
-    height:100vh;
+body {
+    display: flex;
+    background: white;
 }
 
-.wrapper {
-    display:flex;
-    height:100vh;
+/* LEFT LAUNCHER */
+#launcherFrame {
+
+    width: 390px;
+    min-width: 390px;
+
+    height: 100vh;
+
+    border: none;
+
+    background: #d8c2ff;
 }
 
-.panel {
-    height:100%;
-    overflow:auto;
-    scrollbar-width:none;
-    -ms-overflow-style:none;
+
+/* RIGHT INDEX */
+#indexFrame {
+
+    flex: 1;
+
+    height: 100vh;
+
+    border: none;
+
+    background: white;
 }
-
-.panel::-webkit-scrollbar {
-    display:none;
-}
-
-#leftPanel {
-    flex:0 0 28%;
-}
-
-#rightPanel {
-    flex:1 1 auto;
-    overflow:auto;
-}
-
-#leftFrame {
-    width:100%;
-    height:calc(100% + 110px);
-    border:0;
-}
-
-#rightFrame {
-    width:100%;
-    height:calc(100% + 110px);
-    border:0;
-}
-
-/* keep scrolling, hide nothing here *//* Small triangular back buttons */
-.back
-
-{
-    position:absolute;
-    top:10px;
-    left:10px;
-    width:0;
-    height:0;
-    border-top:10px solid transparent;
-    border-bottom:10px solid transparent;
-    border-right:16px solid #555;
-    cursor:pointer;
-    z-index:20;
-}
-
-.back:hover {
-    border-right-color:black;
-}
-
-/*.divider {
-    width:5px;
-    background:#ddd;
-    cursor:col-resize;
-}*/
-
-
 
 
 </style>
 
 </head>
 
+
 <body>
 
-<div class="wrapper">
 
-    <div class="panel" id="leftPanel">
-        <!-- <div class="back" onclick="backFrame('leftFrame')"></div> -->
-        <iframe id="leftFrame" name="leftFrame" src="A_Launcher.html"></iframe>
-    </div>
-
-    <div class="divider" id="drag"></div>
-
-    <div class="panel" id="rightPanel">
-        <!-- <div class="back" onclick="backFrame('rightFrame')"></div> -->
-<iframe id="rightFrame" name="rightFrame"
-  src="https://perfectly-practical-english.github.io/"
-  scrolling="yes">
-</iframe>    </div>
-
-</div>
+<iframe
+    id="launcherFrame"
+    src="A_Launcher.html">
+</iframe>
 
 
-<script>
-
-function backFrame(id) {
-    let frame = document.getElementById(id);
-    frame.contentWindow.history.back();
-}
-
-
-// Adjustable divider
-<!-- let dragging = false;
-let divider = document.getElementById("drag");
-let leftPanel = document.getElementById("leftPanel");
-
-divider.onmousedown = () => dragging = true;
-
-document.onmouseup = () => dragging = false;
-
-document.onmousemove = (e) => {
-    if (!dragging) return;
-
-    let width = (e.clientX / window.innerWidth) * 100;
-
-    if (width > 10 && width < 90) {
-        leftPanel.style.width = width + "%";
-    }
-}; -->
-
-</script>
-
-<script>
-(function () {
-
-    const COLOR = "#6b3fa0";   // Same dark purple as PPE text
-    const SIZE  = 18;          // Triangle size
-    const OFFSET = 3;          // Distance from top/left
-
-    document.querySelectorAll("iframe").forEach(frame => {
-
-        // Make sure the iframe's parent can position children
-        const parent = frame.parentElement;
-        if (getComputedStyle(parent).position === "static") {
-            parent.style.position = "relative";
-        }
-
-        const btn = document.createElement("button");
-
-        btn.innerHTML = "◀";
-
-        Object.assign(btn.style,{
-            position:"absolute",
-            top:OFFSET+"px",
-            left:OFFSET+"px",
-            width:SIZE+"px",
-            height:SIZE+"px",
-
-            padding:"0",
-            margin:"0",
-
-            border:"none",
-            background:"transparent",
-
-            color:COLOR,
-            fontSize:"16px",
-            fontWeight:"700",
-            lineHeight:"1",
-
-            cursor:"pointer",
-            zIndex:"99999"
-        });
-
-        btn.title = "Back";
-
-        btn.onclick = function(e){
-            e.preventDefault();
-
-            try{
-                frame.contentWindow.history.back();
-            }catch(err){
-                console.log("Cannot access iframe history.", err);
-            }
-        };
-
-        parent.appendChild(btn);
-
-    });
-
-})();
-</script>
-
-<script>
-  const borderDiv = document.createElement('div');
-  borderDiv.style.position = 'fixed';
-  borderDiv.style.inset = '0';
-  borderDiv.style.border = '10px solid #39FF14';
-  borderDiv.style.boxSizing = 'border-box';
-  borderDiv.style.zIndex = '9999';
-  borderDiv.style.pointerEvents = 'none';
-  borderDiv.style.backgroundColor = 'transparent';
-  document.body.appendChild(borderDiv);
-</script>
+<iframe
+    id="indexFrame"
+    src="index.html">
+</iframe>
 
 <script>
 
@@ -309,64 +165,6 @@ document.onmousemove = (e) => {
 })();
 </script>
 
-
-<script>
-(function () {
-
-    // ===== SETTINGS =====
-    const LEFT_SCALE  = 0.90;   // launcher size
-    const RIGHT_SCALE = 0.90;   // external site size
-
-
-    function applyScale(frame, scale) {
-
-        if (!frame) return;
-
-        const compensation = (1 / scale) * 100;
-
-        frame.style.transform = "scale(" + scale + ")";
-        frame.style.transformOrigin = "top left";
-
-        frame.style.width = compensation + "%";
-        frame.style.height = compensation + "%";
-
-        frame.style.display = "block";
-        frame.style.border = "0";
-    }
-
-
-    function normalize() {
-
-        // Keep panels stable
-        document.querySelectorAll(".panel").forEach(panel => {
-
-            panel.style.position = "relative";
-            panel.style.minWidth = "0";
-            panel.style.minHeight = "0";
-            panel.style.overflow = "hidden";
-
-        });
-
-
-        // Normalize iframe windows
-        applyScale(
-            document.getElementById("leftFrame"),
-            LEFT_SCALE
-        );
-
-        applyScale(
-            document.getElementById("rightFrame"),
-            RIGHT_SCALE
-        );
-
-    }
-
-
-    window.addEventListener("load", normalize);
-    window.addEventListener("resize", normalize);
-
-})();
-</script>
 
 
 </body>

@@ -35,6 +35,8 @@ body {
 
     display: flex;
     flex-direction: column;
+
+    padding-bottom: 20px;
 }
 /* 5x5 GRID */
 .grid {
@@ -795,6 +797,65 @@ span.style.color = "#00E676";
     img.addEventListener("click", function () {
         closeQR();
     });
+
+})();
+</script>
+
+<!-- Responsive Green Border -->
+<script>
+(function () {
+
+  // Create border
+  const borderDiv = document.createElement("div");
+
+  borderDiv.id = "green-border";
+
+  Object.assign(borderDiv.style, {
+    position: "fixed",
+    top: "0",
+    left: "0",
+    right: "0",
+    bottom: "0",
+
+    borderTop: "10px solid #39FF14",
+    borderLeft: "10px solid #39FF14",
+    borderBottom: "10px solid #39FF14",
+    borderRight: "10px solid #39FF14",
+
+    boxSizing: "border-box",
+    zIndex: "9999",
+    pointerEvents: "none",
+    background: "transparent"
+  });
+
+  document.body.appendChild(borderDiv);
+
+
+  // =====================================================
+  // Disable right border when requested
+  // =====================================================
+
+  window.disableRightGreenBorder = function () {
+    borderDiv.style.borderRight = "none";
+  };
+
+
+  // Re-enable right border
+  window.enableRightGreenBorder = function () {
+    borderDiv.style.borderRight = "10px solid #39FF14";
+  };
+
+
+  // =====================================================
+  // Optional automatic detection:
+  // If this page is inside an iframe, remove right border.
+  // Remove this block if you do not want automatic behavior.
+  // =====================================================
+
+  if (window.self !== window.top) {
+    borderDiv.style.borderRight = "none";
+  }
+
 
 })();
 </script>
