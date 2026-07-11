@@ -310,6 +310,64 @@ document.onmousemove = (e) => {
 </script>
 
 
+<script>
+(function () {
+
+    // ===== SETTINGS =====
+    const LEFT_SCALE  = 0.90;   // launcher size
+    const RIGHT_SCALE = 0.90;   // external site size
+
+
+    function applyScale(frame, scale) {
+
+        if (!frame) return;
+
+        const compensation = (1 / scale) * 100;
+
+        frame.style.transform = "scale(" + scale + ")";
+        frame.style.transformOrigin = "top left";
+
+        frame.style.width = compensation + "%";
+        frame.style.height = compensation + "%";
+
+        frame.style.display = "block";
+        frame.style.border = "0";
+    }
+
+
+    function normalize() {
+
+        // Keep panels stable
+        document.querySelectorAll(".panel").forEach(panel => {
+
+            panel.style.position = "relative";
+            panel.style.minWidth = "0";
+            panel.style.minHeight = "0";
+            panel.style.overflow = "hidden";
+
+        });
+
+
+        // Normalize iframe windows
+        applyScale(
+            document.getElementById("leftFrame"),
+            LEFT_SCALE
+        );
+
+        applyScale(
+            document.getElementById("rightFrame"),
+            RIGHT_SCALE
+        );
+
+    }
+
+
+    window.addEventListener("load", normalize);
+    window.addEventListener("resize", normalize);
+
+})();
+</script>
+
 
 </body>
 </html>
