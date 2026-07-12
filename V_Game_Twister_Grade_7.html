@@ -2158,18 +2158,8 @@ gameArea.addEventListener("pointerdown", () => {
     hiddenInput.focus({ preventScroll: true });
   }
 });
-// Keep mobile keyboard pinned to hidden input
-hiddenInput.addEventListener("blur", () => {
-  setTimeout(() => {
-    if (
-      document.activeElement !== hiddenInput &&
-      !hiddenInput.disabled &&
-      gameStarted
-    ) {
-      hiddenInput.focus({ preventScroll: true });
-    }
-  }, 50);
-});</script>
+
+</script>
 
 <script>
 (function() {
