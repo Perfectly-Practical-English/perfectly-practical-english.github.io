@@ -330,7 +330,55 @@ img {
     box-shadow: 0 2px 8px rgba(0,0,0,0.25);
 }
 
+#scriptBar{
 
+    position:fixed;
+
+    left:0;
+    right:0;
+    bottom:0;
+
+    height:24px;
+
+    display:flex;
+
+    border-top:1px solid #999;
+
+    background:#ececec;
+}
+
+#worksheetScript{
+
+    flex:1;
+
+    height:22px;
+
+    resize:none;
+
+    overflow:auto;
+
+    font:10px Consolas,monospace;
+
+    white-space:pre;
+
+    border:none;
+
+    outline:none;
+}
+
+#scriptBar.expanded{
+
+    height:220px;
+}
+
+#scriptBar.expanded #worksheetScript{
+
+    height:218px;
+}
+
+#viewer{
+    touch-action:none;
+}
 </style>
 </head>
 <body>
@@ -394,7 +442,17 @@ img {
 
 </div>
 
+
 <div id="tiles"></div>
+
+<div id="scriptBar">
+
+    <button id="toggleScript">▼</button>
+
+    <textarea id="worksheetScript"></textarea>
+
+</div>
+
 
 <script>
 
@@ -577,6 +635,7 @@ zoomSelect.addEventListener("change", function(){
 
 let panX = 0;
 let panY = 0;
+let panLocked = false;
 
 window.spread = document.getElementById("spread");
 
@@ -595,15 +654,30 @@ let lastX = 0;
 let lastY = 0;
 
 viewer.addEventListener("pointerdown", (e) => {
-    if (panLocked) return;   // 🔒 ADD THIS LINE
-    if (e.button !== 0) return;
+
+    // Ignore placed overlays
+    if(e.target.classList.contains("draggable")){
+        return;
+    }
+
+    // Ignore placement clicks
+    if(placeMode){
+        return;
+    }
+
+    if(panLocked) return;
+
+    if(e.button !== 0) return;
+
 
     isPanning = true;
+
     lastX = e.clientX;
     lastY = e.clientY;
 
-    viewer.setPointerCapture(e.pointerId);
-});
+viewer.setPointerCapture(e.pointerId);
+
+}, true);
 
 viewer.addEventListener("pointermove", (e) => {
     if (panLocked) return;   // 🔒 ADD THIS LINE
@@ -650,7 +724,28 @@ if (contentH <= viewH) {
 }
 
 updateTransform();
+}, true);
+
+/* ==========================
+   MOUSE WHEEL / TRACKPAD PAN
+========================== */
+
+viewer.addEventListener("wheel", function(e){
+
+    if(panLocked) return;
+
+    e.preventDefault();
+
+    panX -= e.deltaX;
+    panY -= e.deltaY;
+
+    updateTransform();
+
+},
+{
+    passive:false
 });
+
 
 viewer.addEventListener("pointerup", (e) => {
     isPanning = false;
@@ -662,49 +757,11 @@ viewer.addEventListener("pointerup", (e) => {
 
 <script>
 
-/* ==========================
-   ANIMALS (RAW STYLE INPUT)
-========================== */
+/* ======================================================
+   ANSWER TILE ENGINE
+   Replacement for old ANIMALS script
+====================================================== */
 
-const animals = `
-
-I usually go to parties every night.
-I usually bring a desert, like a pie or a cake.
-Yes, she mentioned desert.
-C
-F
-E
-D
-A
-B
-Greeting
-Opening the email
-Making the invitation
-Giving the details
-Asking for confirmation
-Finishing the email
-The subject comes before the verb.
-The adjective comes before the noun.
-When there is no subject, the adjective comes after the verb to be.
-It is a fancy dress party.
-Your sandiwches are delicious.
-After diner, I listen to my favorite music.
-The music is fantastic.
-You can make an easy recipe.
-We are having a party on...
-Saturday, the 4th of July, 2026.
-It will be a...
-backyard barbeque.
-birthday party.
-picnic.
-Everyone will bring something.
-Would you like to come?
-What will you bring?
-1overlay-small.png
-1overlay-large.png
-Circleoverlay.png
-
-`.trim().split("\n");
 
 /* ==========================
    STATE
@@ -713,180 +770,453 @@ Circleoverlay.png
 let placeMode = null;
 let selectedEl = null;
 
-let undoStack = [];   // ← ADD IT RIGHT HERE
-
-
-let panLocked = false;
 
 /* ==========================
-   ANIMAL PALETTE
+   PARSED INPUT STORAGE
 ========================== */
 
-animals.forEach(animal => {
+let answerItems = [];
 
-    const tile = document.createElement("div");
 
-    tile.className = "tile";
-    tile.textContent = animal;
+/* ==========================
+   PARSER
+========================== */
 
-tile.onclick = () => {
+function parseAnswers(raw){
 
-    document.querySelectorAll("#tiles .tile")
-        .forEach(t => t.classList.remove("selected"));
+    answerItems = [];
 
-    tile.classList.add("selected");
+    const lines = raw.split(/\r?\n/);
 
-    if (animal.endsWith(".png")) {
-        placeMode = {
-            type: "image",
-            value: animal
+
+    lines.forEach(line=>{
+
+        line = line.trim();
+
+
+        if(!line.startsWith("~")) return;
+
+
+        line = line.substring(1).trim();
+
+
+
+        /*
+            IMAGE INPUT
+
+            ~1overlay.png
+            ~1overlay.jpg
+            ~"some image".png
+        */
+
+        let imageMatch =
+        line.match(/^"?(.+?)"?\.(png|jpg|jpeg)$/i);
+
+
+        if(imageMatch){
+
+            answerItems.push({
+
+                label:imageMatch[1],
+
+                type:"image",
+
+                value:line
+
+            });
+
+            return;
+
+        }
+
+
+
+        /*
+            TEXT INPUT
+
+            Everything before "-"
+            becomes button label.
+
+            Everything after "-"
+            becomes placed answer.
+
+        */
+
+        let dashMatch =
+        line.match(/^(.+?)\s*-\s*(.+)$/);
+
+
+        if(dashMatch){
+
+            answerItems.push({
+
+                label:
+                dashMatch[1].trim(),
+
+                type:"text",
+
+                value:
+                dashMatch[2].trim()
+
+            });
+
+            return;
+
+        }
+
+
+    });
+
+}
+
+
+
+/* ==========================
+   BUILD TILES
+========================== */
+
+function buildAnswerTiles(){
+
+
+    const tileArea =
+    document.getElementById("tiles");
+
+
+    tileArea.innerHTML="";
+
+
+    answerItems.forEach(item=>{
+
+
+        const tile =
+        document.createElement("div");
+
+
+        tile.className="tile";
+
+
+        tile.textContent =
+        item.label;
+
+
+
+        tile.onclick=function(){
+
+
+            document
+            .querySelectorAll("#tiles .tile")
+            .forEach(t=>
+                t.classList.remove("selected")
+            );
+
+
+            tile.classList.add("selected");
+
+
+            placeMode={
+
+                type:item.type,
+
+                value:item.value
+
+            };
+
+
+            selectedEl=null;
+
+
         };
-    } else {
-        placeMode = {
-            type: "text",
-            value: animal
-        };
-    }
 
-    selectedEl = null;
-};
-    tiles.appendChild(tile);
+
+        tileArea.appendChild(tile);
+
+
+    });
+
+
+}
+
+
+
+/* ==========================
+   AUTO LOAD INPUT
+========================== */
+
+const worksheetInput =
+document.getElementById("worksheetScript");
+
+
+worksheetInput.addEventListener(
+"input",
+function(){
+
+
+    parseAnswers(
+        this.value
+    );
+
+
+    buildAnswerTiles();
+
 
 });
-/* ==========================
-   ADD CRAP
-========================== */
+
+
 
 
 /* ==========================
-   END ADD CRAP
-========================== */
-/* ==========================
-   SELECT + MOVE + PLACE
+   PLACE ON SPREAD
 ========================== */
 
-spread.addEventListener("pointerdown", function(e){
+spread.addEventListener(
+"pointerdown",
+function(e){
 
-    const el = e.target;
 
-    if (el.classList.contains("draggable")) {
+    const target = e.target;
+
+
+    /*
+        Select existing overlay
+    */
+
+    if(target.classList.contains("draggable")){
+
 
         e.stopPropagation();
 
-        selectedEl = el;
+        selectedEl = target;
+
         placeMode = null;
 
         return;
+
     }
 
-    if (!placeMode && !selectedEl) return;
 
-const rect = spread.getBoundingClientRect();
 
-const pos = {
-    x: (e.clientX - rect.left) / viewerScale,
-    y: (e.clientY - rect.top) / viewerScale
-};
+    /*
+        Nothing selected from tiles
+    */
 
-// MOVE existing (always allowed in lock mode OR normal mode)
-if (selectedEl) {
+    if(!placeMode) return;
 
-        selectedEl.style.left = pos.x + "px";
-        selectedEl.style.top = pos.y + "px";
 
-        selectedEl = null;
-        return;
-    }
 
-// CREATE new
-let obj;
+    const rect =
+    spread.getBoundingClientRect();
 
-if (placeMode.type === "image") {
 
-    obj = document.createElement("img");
 
-    obj.src = "1overlay.png";
+    const x =
+    (e.clientX - rect.left) / viewerScale;
 
-    obj.className = "draggable overlayPng";
 
-    if (placeMode.value === "1overlay-small.png") {
-        obj.style.width = "80px";
-    }
+    const y =
+    (e.clientY - rect.top) / viewerScale;
 
-    if (placeMode.value === "1overlay-large.png") {
+
+
+    let obj;
+
+
+
+    /*
+        IMAGE ANSWER
+    */
+
+    if(placeMode.type === "image"){
+
+
+        obj =
+        document.createElement("img");
+
+
+        obj.src =
+        placeMode.value;
+
+
+        obj.className =
+        "draggable overlayPng";
+
+
         obj.style.width = "140px";
+
+
     }
 
-    obj.style.height = "auto";
-}
-
- else {
-
-    obj = document.createElement("div");
-
-    obj.className = "draggable tile tileAnchor";
-
-    obj.textContent = placeMode.value;
-}
-
-if (placeMode.type === "image") {
-
-    obj.style.left = (pos.x - 40) + "px";
-    obj.style.top  = (pos.y - 40) + "px";
-
-} else {
-
-    obj.style.left = pos.x + "px";
-    obj.style.top  = pos.y + "px";
 
 
-}
+    /*
+        TEXT ANSWER
+    */
 
-spread.appendChild(obj);
+    else{
 
-if (placeMode.type === "image") {
 
-    obj.addEventListener("pointerdown", function (ev) {
+        obj =
+        document.createElement("div");
 
-        ev.stopPropagation();
-        ev.preventDefault();
 
-        const el = obj;
+        obj.className =
+        "draggable tile tileAnchor";
 
-        const rect = spread.getBoundingClientRect();
 
-        let offsetX = (ev.clientX - rect.left) / viewerScale - parseFloat(el.style.left || 0);
-        let offsetY = (ev.clientY - rect.top) / viewerScale - parseFloat(el.style.top || 0);
+        obj.textContent =
+        placeMode.value;
 
-        function move(e) {
-            const x = (e.clientX - rect.left) / viewerScale;
-            const y = (e.clientY - rect.top) / viewerScale;
 
-            el.style.left = (x - offsetX) + "px";
-            el.style.top  = (y - offsetY) + "px";
-        }
+    }
 
-        function up() {
-            window.removeEventListener("pointermove", move);
-            window.removeEventListener("pointerup", up);
-        }
 
-        window.addEventListener("pointermove", move);
-        window.addEventListener("pointerup", up);
-    });
 
-} else {
+    obj.style.left =
+    x + "px";
 
-    obj.addEventListener("pointerdown", function(ev){
-        ev.stopPropagation();
-        selectedEl = obj;
-    });
-}
-placeMode = null;
+
+    obj.style.top =
+    y + "px";
+
+
+
+    spread.appendChild(obj);
+
+
+
+    enableDragging(obj);
+
+
+
+    selectedEl = obj;
+
+
+    placeMode = null;
+
 
 });
-</script>
 
+
+
+/* ==========================
+   DRAGGING
+========================== */
+
+function enableDragging(el){
+
+
+    el.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+        e.stopPropagation();
+
+
+        selectedEl = el;
+
+
+
+        const rect =
+        spread.getBoundingClientRect();
+
+
+
+        const offsetX =
+        (e.clientX - rect.left) / viewerScale
+        - parseFloat(el.style.left);
+
+
+
+        const offsetY =
+        (e.clientY - rect.top) / viewerScale
+        - parseFloat(el.style.top);
+
+
+
+        function move(ev){
+
+
+            el.style.left =
+            (
+            (ev.clientX - rect.left) / viewerScale
+            - offsetX
+            )
+            + "px";
+
+
+
+            el.style.top =
+            (
+            (ev.clientY - rect.top) / viewerScale
+            - offsetY
+            )
+            + "px";
+
+
+        }
+
+
+
+        function up(){
+
+
+            window.removeEventListener(
+                "pointermove",
+                move
+            );
+
+
+            window.removeEventListener(
+                "pointerup",
+                up
+            );
+
+
+        }
+
+
+
+        window.addEventListener(
+            "pointermove",
+            move
+        );
+
+
+        window.addEventListener(
+            "pointerup",
+            up
+        );
+
+
+    });
+
+
+}
+/* ==========================
+   DELETE SELECTED
+========================== */
+
+window.addEventListener(
+"keydown",
+function(e){
+
+
+    if(e.key==="Delete" && selectedEl){
+
+
+        selectedEl.remove();
+
+
+        selectedEl=null;
+
+
+    }
+
+
+});
+
+
+</script>
 
 <script>
 
@@ -929,8 +1259,6 @@ window.addEventListener("DOMContentLoaded", () => {
 </script>
 
 <script>
-
-let selectedEl = null;
 
 /* =========================
    SELECT TILE (TEXT + IMAGE)
@@ -1010,6 +1338,35 @@ the
 1overlay-large.png
 Circleoverlay.png-->
 
+<script>
 
+const toggleScriptBtn = document.getElementById("toggleScript");
+const scriptBar = document.getElementById("scriptBar");
+const worksheetScript = document.getElementById("worksheetScript");
+
+toggleScriptBtn.addEventListener("click", function(){
+
+    const expanded = scriptBar.classList.toggle("expanded");
+
+    if(expanded){
+
+        scriptBar.style.height = "calc(100vh - 58px)";
+        worksheetScript.style.height = "calc(100vh - 82px)";
+
+        toggleScriptBtn.textContent = "▲";
+
+    }
+    else{
+
+        scriptBar.style.height = "24px";
+        worksheetScript.style.height = "22px";
+
+        toggleScriptBtn.textContent = "▼";
+
+    }
+
+});
+
+</script>
 </body>
 </html>

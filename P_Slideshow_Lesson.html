@@ -194,5 +194,43 @@ showSlide(0);
 
 </script>
 
+<script>
+// ===== Auto Advance Add-on =====
+
+const AUTO_INTERVAL = 8000; // 8 seconds
+let autoTimer = null;
+let autoRunning = false;
+
+// Create the button automatically
+const autoBtn = document.createElement("button");
+autoBtn.textContent = "▶ Auto";
+autoBtn.onclick = toggleAutoAdvance;
+
+// Insert before the Full Screen button
+const controls = document.getElementById("controls");
+controls.insertBefore(autoBtn, controls.lastElementChild);
+
+function toggleAutoAdvance() {
+
+    if (autoRunning) {
+
+        clearInterval(autoTimer);
+        autoTimer = null;
+        autoRunning = false;
+        autoBtn.textContent = "▶ Auto";
+
+    } else {
+
+        autoRunning = true;
+        autoBtn.textContent = "⏸ Stop Auto";
+
+        autoTimer = setInterval(() => {
+            nextSlide();
+        }, AUTO_INTERVAL);
+
+    }
+}
+</script>
+
 </body>
 </html>
