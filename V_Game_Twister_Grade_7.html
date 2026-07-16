@@ -412,9 +412,9 @@ body::-webkit-scrollbar {
 </script>
 
 
-<canvas id="blueCloudCanvas"></canvas>
+<!--<canvas id="blueCloudCanvas"></canvas>-->
 
-<script>
+<!--<script>
 (function () {
   const canvas = document.getElementById("blueCloudCanvas");
   const ctx = canvas.getContext("2d");
@@ -476,7 +476,7 @@ body::-webkit-scrollbar {
   draw();
 
 })();
-</script>
+</script>-->
 
 <div id="topBar">
   <input type="text" id="nameField" placeholder="Name">
@@ -2579,16 +2579,17 @@ requestAnimationFrame(() => {
 
 
 
-      let x =
-        parseFloat(cow.style.left);
+if(cow.dataset.abducting === "true"){
+  return;
+}
 
+let x =
+  parseFloat(cow.style.left);
 
+x += cowSpeed;
 
-      x += cowSpeed;
-
-
-      cow.style.left =
-        x + "px";
+cow.style.left =
+  x + "px";
 
 
 
@@ -2618,7 +2619,7 @@ requestAnimationFrame(() => {
 
 
 if(
-  Math.abs(cowCenter - ufoCenter) < 120
+  Math.abs(cowCenter - ufoCenter) < 35
 ){
 
           pendingAbduction = false;
@@ -2689,7 +2690,7 @@ if(
 
 
 function suckCowToUFO(cow){
-
+cow.dataset.abducting = "true";
 
   const ufoRect =
     ufoContainer.getBoundingClientRect();
@@ -2700,30 +2701,27 @@ function suckCowToUFO(cow){
 
 
 
-  const distX =
-    (
-      ufoRect.left +
-      ufoRect.width/2
-    )
-    -
-    (
-      cowRect.left +
-      cowRect.width/2
-    );
+const targetX =
+  ufoRect.left +
+  ufoRect.width / 2;
 
+const targetY =
+  ufoRect.top +
+  ufoRect.height * 0.70;
 
+const distX =
+  targetX -
+  (
+    cowRect.left +
+    cowRect.width / 2
+  );
 
-  const distY =
-    (
-      ufoRect.top +
-      ufoRect.height/2
-    )
-    -
-    (
-      cowRect.top +
-      cowRect.height/2
-    );
-
+const distY =
+  targetY -
+  (
+    cowRect.top +
+    cowRect.height / 2
+  );
 
 
   cow.style.transition =
@@ -2735,8 +2733,7 @@ function suckCowToUFO(cow){
 
 
 cow.style.transform =
-  `translateX(-50%) translate(${distX}px,${distY}px)`;
-
+  `translateX(-50%) translate(${distX}px, ${distY - 80}px)`;
 
     cow.style.opacity="0";
 
@@ -3048,22 +3045,23 @@ draw();
     const time = performance.now() * wobbleSettings.speed;
 
 
-    animals.forEach((animal,index)=>{
+animals.forEach((animal,index)=>{
 
-      // give each animal its own timing offset
-      const offset = wobbleSettings.randomOffset ? index * 1.7 : 0;
+  if(animal.dataset.abducting === "true"){
+    return;
+  }
 
-      const angle =
-        Math.sin(time + offset) *
-        wobbleSettings.maxAngle;
+  // give each animal its own timing offset
+  const offset = wobbleSettings.randomOffset ? index * 1.7 : 0;
 
+  const angle =
+    Math.sin(time + offset) *
+    wobbleSettings.maxAngle;
 
-      animal.style.transform =
-        `rotate(${angle}deg)`;
+  animal.style.transform =
+    `translateX(-50%) rotate(${angle}deg)`;
 
-    });
-
-
+});
     requestAnimationFrame(animateAnimalWobble);
 
   }
