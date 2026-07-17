@@ -91,6 +91,8 @@ button:disabled {
    SCOREBOARD & BUTTONS
    ============================== */
 #scoreboardContainer {
+  position: relative;
+  z-index: 1000;
   transform: translateY(-260px);
 
   margin: 30px 0 0 0;
@@ -101,6 +103,10 @@ button:disabled {
 }
 
 #scoreButtons {
+
+  position: relative; /* or absolute/fixed if appropriate */
+  z-index: 1001;
+
   transform: translateY(-250px);
 
   margin: 12px 0 24px 0;
@@ -1397,11 +1403,11 @@ async function loadVocab(source) {
     // Otherwise treat as raw text
     text = source;
   }
-  return parseVocabInput(text);
+  return [];
 }
 
 // Example usage:
-const rawVocabTextOrFilename = `vocab.txt`; // can also be pasted text
+const rawVocabTextOrFilename = wordListText; // can also be pasted text
 loadVocab(rawVocabTextOrFilename).then(pairs => {
   console.log("Loaded vocab pairs:", pairs);
   // initialize flashcards here
@@ -1902,44 +1908,6 @@ if(window.gameStarted && !gameStopped)
 
  typingInput.focus();});
 
-  copyBtn.addEventListener('click', ()=>{if(!scoreboardContainer.textContent) return; navigator.clipboard.writeText(scoreboardContainer.textContent).then(()=>alert('Scoreboard copied.'));});
-  downloadTxtBtn.addEventListener('click', ()=>{if(!scoreboardContainer.textContent) return; const blob=new Blob([scoreboardContainer.textContent],{type:'text/plain'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`score_${nameInput.value.trim()||'player'}.txt`; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},100);});
-  downloadPngBtn.addEventListener('click', () => {
-
-    if (!scoreboardContainer.textContent) return;
-
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-
-    const text = scoreboardContainer.textContent;
-
-    canvas.width = 1200;
-    canvas.height = 200;
-
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    ctx.fillStyle = "black";
-    ctx.font = "24px Arial";
-    ctx.textBaseline = "top";
-
-    ctx.fillText(text, 20, 20);
-
-    const link = document.createElement('a');
-
-    link.download =
-      `score_${nameInput.value.trim() || 'player'}.png`;
-
-    link.href = canvas.toDataURL("image/png");
-
-    document.body.appendChild(link);
-
-    link.click();
-
-    link.remove();
-
-  });
-
 
 })();</script>
 
@@ -1958,126 +1926,6 @@ if(window.gameStarted && !gameStopped)
     document.body.appendChild(borderDiv);
   </script>
 
-<script>
-(async function() {
-  'use strict';
-
-  // Sanitize filenames to remove illegal characters
-  function sanitizeFilename(name) {
-    return name.trim()
-      .replace(/[\\/:*?"<>|]+/g, '_')
-      .replace(/[\r\n]+/g, '_')
-      .slice(0, 200) || 'score';
-  }
-
-  // Generic download function
-  function downloadBlob(blob, filename) {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    setTimeout(() => {
-      URL.revokeObjectURL(a.href);
-      a.remove();
-    }, 2000);
-  }
-
-  // Convert scoreboard to PNG using html2canvas
-  async function downloadScoreAsPNG(text, filename) {
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = text.replace(/\n/g, '<br>');
-
-  /* MATCH SCOREBOARD APPEARANCE */
-  wrapper.style.display = 'inline-block';
-  wrapper.style.whiteSpace = 'pre-wrap';
-  wrapper.style.fontFamily = 'monospace';
-  wrapper.style.fontWeight = 'bold';
-  wrapper.style.fontSize = '18px';
-  wrapper.style.lineHeight = '1.2';
-  wrapper.style.padding = '6px 8px';
-  wrapper.style.backgroundColor = '#fff';
-  wrapper.style.color = '#000';
-
-  document.body.appendChild(wrapper);
-
-  try {
-if (!window.html2canvas) {
-  alert("html2canvas library is not loaded.");
-  return;
-}
-    const canvas = await html2canvas(wrapper, {
-      scale: 2,
-      backgroundColor: '#fff',
-      width: wrapper.offsetWidth,
-      height: wrapper.offsetHeight
-    });
-
-const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
-
-if (!blob) {
-  throw new Error("PNG conversion failed");
-}
-
-downloadBlob(blob, filename);
-  } catch (err) {
-    console.error(err);
-    alert('PNG download failed');
-  } finally {
-    wrapper.remove();
-  }
-}
-
-
-  // Hijack a download button
-  function hijackDownloadButton(button, getScoreText, getFilename, isText) {
-    if (!button) return;
-
-    const newBtn = button.cloneNode(true);
-    button.parentNode.replaceChild(newBtn, button);
-
-    newBtn.addEventListener('click', async e => {
-      e.preventDefault();
-      e.stopImmediatePropagation();
-
-      const scoreText = getScoreText();
-      if (!scoreText) {
-        alert('No scoreboard data found. Submit first.');
-        return;
-      }
-
-      const filename = sanitizeFilename(getFilename());
-      if (isText) {
-        downloadBlob(new Blob([scoreText], { type: 'text/plain' }), filename + '.txt');
-      } else {
-        await downloadScoreAsPNG(scoreText, filename + '.png');
-      }
-    }, true);
-  }
-
-  // Grab scoreboard and buttons
-  const scoreboard = document.getElementById('scoreboardContainer');
-  const downloadTxtBtn = document.getElementById('downloadTxtBtn');
-  const downloadPngBtn = document.getElementById('downloadPngBtn');
-const nameInput = document.getElementById('nameField');
-const idInput = document.getElementById('idField');
-
-  if (scoreboard) {
-    const getFilename = () => {
-      const htmlFile = window.location.pathname.split('/').pop() || 'index.html';
-      const name = nameInput?.value.trim() || 'Student';
-      const id = idInput?.value.trim() || 'ID';
-      const now = new Date();
-      const dateStr = `${String(now.getDate()).padStart(2,'0')}${String(now.getMonth()+1).padStart(2,'0')}${now.getFullYear()}`;
-      return `${htmlFile}_${name}_${id}_${dateStr}`;
-    };
-
-    hijackDownloadButton(downloadTxtBtn, () => scoreboard.textContent.trim(), getFilename, true);
-    hijackDownloadButton(downloadPngBtn, () => scoreboard.textContent.trim(), getFilename, false);
-  }
-
-})();
-</script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -2389,6 +2237,142 @@ window.addEventListener("resize", adjustBodyPadding);
 </script>
 
 <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<script>
+(async function() {
+  'use strict';
+
+  // Sanitize filenames to remove illegal characters
+  function sanitizeFilename(name) {
+    return name.trim()
+      .replace(/[\\/:*?"<>|]+/g, '_')
+      .replace(/[\r\n]+/g, '_')
+      .slice(0, 200) || 'score';
+  }
+
+  // Generic download function
+  function downloadBlob(blob, filename) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    }, 2000);
+  }
+
+  // Convert scoreboard to PNG using html2canvas
+  async function downloadScoreAsPNG(text, filename) {
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = text.replace(/\n/g, '<br>');
+
+  /* MATCH SCOREBOARD APPEARANCE */
+  wrapper.style.display = 'inline-block';
+  wrapper.style.whiteSpace = 'pre-wrap';
+  wrapper.style.fontFamily = 'monospace';
+  wrapper.style.fontWeight = 'bold';
+  wrapper.style.fontSize = '18px';
+  wrapper.style.lineHeight = '1.2';
+  wrapper.style.padding = '6px 8px';
+  wrapper.style.backgroundColor = '#fff';
+  wrapper.style.color = '#000';
+
+  document.body.appendChild(wrapper);
+
+  try {
+if (!window.html2canvas) {
+  alert("html2canvas library is not loaded.");
+  return;
+}
+    const canvas = await html2canvas(wrapper, {
+      scale: 2,
+      backgroundColor: '#fff',
+      width: wrapper.offsetWidth,
+      height: wrapper.offsetHeight
+    });
+
+const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+
+if (!blob) {
+  throw new Error("PNG conversion failed");
+}
+
+downloadBlob(blob, filename);
+  } catch (err) {
+    console.error(err);
+    alert('PNG download failed');
+  } finally {
+    wrapper.remove();
+  }
+}
+
+
+  // Hijack a download button
+  function hijackDownloadButton(button, getScoreText, getFilename, isText) {
+    if (!button) return;
+
+    const newBtn = button.cloneNode(true);
+    button.parentNode.replaceChild(newBtn, button);
+
+    newBtn.addEventListener('click', async e => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      const scoreText = getScoreText();
+      if (!scoreText) {
+        alert('No scoreboard data found. Submit first.');
+        return;
+      }
+
+      const filename = sanitizeFilename(getFilename());
+      if (isText) {
+        downloadBlob(new Blob([scoreText], { type: 'text/plain' }), filename + '.txt');
+      } else {
+        await downloadScoreAsPNG(scoreText, filename + '.png');
+      }
+    }, true);
+  }
+
+  // Grab scoreboard and buttons
+  const scoreboard = document.getElementById('scoreboardContainer');
+
+const copyBtn = document.getElementById('copyBtn');
+
+copyBtn?.addEventListener('click', async () => {
+  const score = scoreboard.textContent.trim();
+
+  if (!score) {
+    alert("No scoreboard data found. Submit first.");
+    return;
+  }
+
+  await navigator.clipboard.writeText(score);
+  alert("Score copied.");
+});
+  const downloadTxtBtn = document.getElementById('downloadTxtBtn');
+  const downloadPngBtn = document.getElementById('downloadPngBtn');
+const nameInput = document.getElementById('nameField');
+const idInput = document.getElementById('idField');
+
+  if (scoreboard) {
+    const getFilename = () => {
+      const htmlFile = window.location.pathname.split('/').pop() || 'index.html';
+      const name = nameInput?.value.trim() || 'Student';
+      const id = idInput?.value.trim() || 'ID';
+      const now = new Date();
+      const dateStr = `${String(now.getDate()).padStart(2,'0')}${String(now.getMonth()+1).padStart(2,'0')}${now.getFullYear()}`;
+      return `${htmlFile}_${name}_${id}_${dateStr}`;
+    };
+
+    hijackDownloadButton(downloadTxtBtn, () => scoreboard.textContent.trim(), getFilename, true);
+    hijackDownloadButton(downloadPngBtn, () => scoreboard.textContent.trim(), getFilename, false);
+  }
+
+})();
+</script>
+
 
 <!-- SUPABASE LIBRARY -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -3149,7 +3133,6 @@ animals.forEach((animal,index)=>{
 
 </body>
 </html>
-
 
 
 
