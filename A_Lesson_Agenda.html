@@ -796,155 +796,46 @@ html.ui-ready h1[data-auto-title] {
 </div>
 <div id="rawTextSource" class="visually-hidden">
 
+~Unit: 3 – Work
+
+Learning Objectives
+
+Talk about jobs and careers.
+Write emails.
+Differentiate between the present simple and present continuous.~
+
+BLANK?
+BLANK
+
 ~Lesson 1
 
-Lesson Objectives
-
-Talk about food.
-Understand articles.
-Use countable and uncountable nouns.
-Describe hobbies and free-time activities.
-Talk about routines.
-Use adverbs of frequency.
-
-Activator
-
-Quick review of determiners and quantifiers.
-Quick review of Unit 1 vocabulary.
-
-Task 1
-
-Unit 2 Progress Test.
-
-Task 2
-
-Review:
-
-Present Simple
-Facts, habits, routines, and general truths
-Subject–verb agreement
-Questions and negatives
-Pronouns (I, you, he, she, it, we, they)
-Third-person singular endings (-s/-es)
-Adverbs of frequency
-
-Practice quiz.
-
-Task 3
-
-Online games for practice.~
+Activator: Discuss future careers (What do you want to be?).
+Task 1: Introduce Unit 3, review objectives, discuss students' interests and whether jobs will exist in the future.
+Task 2: Vocabulary – Pages 36–37 (3.1), whole-class activity.
+If time permits...
 
 BLANK?
 BLANK
 
 ~Lesson 2
 
-Lesson Objectives
-
-Talk about food.
-Understand articles.
-Use countable and uncountable nouns.
-Describe hobbies and free-time activities.
-Talk about routines.
-Use adverbs of frequency.
-
-Activator
-
-Quick review of countable and uncountable nouns.
-Quick review of Unit 2 vocabulary.
-
-Task 1
-
-Review:
-
-a, an, the
-some, any
-much, many
-a lot of
-a little, a few
-enough
-
-Practice test.
-
-Task 2
-
-Writing preparation.
-
-Task 3
-
-Speaking preparation.~
+Activator: Observe classmates (What are the students doing?).
+Task 1: Review Unit 3 and discuss the present continuous.
+Task 2: Grammar – Page 38 (3.2), pair work with teacher support.
+Task 3: Listening – Page 39 (3.3), whole-class activity.~
 
 BLANK?
 BLANK
 
 ~Lesson 3
 
-Lesson Objectives
-
-Talk about food.
-Understand articles.
-Use countable and uncountable nouns.
-Describe hobbies and free-time activities.
-Talk about routines.
-Use adverbs of frequency.
-
-Activator
-
-Speaking practice.
-
-Task 1
-
-Reading strategies and practice quiz.
-
-Task 2
-
-Listening strategies and practice quiz.
-
-Task 3
-
-Online games for practice.~
+Activator: Read Pages 40–41.
+Task 1: Reading – Pages 40–41 (3.4).
+Task 2: Group discussion: brainstorm a hobby that could become a job and share ideas.
+Task 3: Online grammar review games (if time permits).~
 
 BLANK?
 BLANK
-
-~Unit Vocabulary
-
-• ingredients 🥣 - components
-elements, components
-
-
-• mayonnaise 🥫 - creamy sauce
-mayo, dressing
-
-• taste 👅 - flavour
-flavour, savour
-
-• prepare 👩‍🍳 - get ready
-get ready, assemble
-
-• jar 🫙 - glass container
-pot, storage jar
-
-• crisps 🍟 - potato chips
-chips, snacks
-
-• recommend 👍 - suggest
-advise, put forward
-
-• dessert 🍰 - sweet food
-sweet course, pudding
-
-• fresh 🌿 - not old
-crisp, newly made
-
-• vegetarian 🥗 - no meat diet
-plant-based eater, non-meat eater
-~
-
-BLANK?
-BLANK
-
-
 
 </div>
 
@@ -1061,7 +952,7 @@ BLANK
     if (line && !urlRegex.test(line) && urlRegex.test(next)) {
 
       htmlResult.push(
-        `<a href="${next}" target="_blank" rel="noopener">${line}</a>`
+        `<a href="${next}" target="_self" rel="noopener">${line}</a>`
       );
 
       speechChunks.push(line);
@@ -1072,7 +963,7 @@ BLANK
 
     // INLINE URL HANDLING
     const htmlLine = line.replace(urlAnywhere, url =>
-      `<a href="${url}" target="_blank" rel="noopener">${url}</a>`
+      `<a href="${url}" target="_self" rel="noopener">${url}</a>`
     );
 
     htmlResult.push(htmlLine);
