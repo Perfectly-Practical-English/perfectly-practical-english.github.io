@@ -72,99 +72,36 @@ body {
 
 <script>
 
-(function () {
-    // ===== CONFIG =====
-    const QR_IMAGE_URL = "PerfectlyPracticalEnglish_with_Hotspot.app.jpg"; // <-- Change to your PNG
-    const BUTTON_SIZE = 20;
-    const MODAL_MAX_SIZE = "80vw";
+const launcherFrame = document.getElementById("launcherFrame");
+const indexFrame = document.getElementById("indexFrame");
 
-    if (document.getElementById("qrToggleButton")) return;
 
-    // Button
-    const button = document.createElement("button");
-    button.id = "qrToggleButton";
+// Two-way communication bridge
+window.addEventListener("message", function(e){
 
-    Object.assign(button.style, {
-        position: "fixed",
-        right: "2px",
-        bottom: "2px",
-        width: BUTTON_SIZE + "px",
-        height: BUTTON_SIZE + "px",
-        borderRadius: "50%",
-        border: "1px solid #2f6d2f",
-        background: "#6cbf43", // dollar-bill green
-        padding: "0",
-        margin: "0",
-        overflow: "hidden",
-        cursor: "pointer",
-        zIndex: "2147483647",
-        boxShadow: "0 0 4px rgba(0,0,0,.4)"
-    });
+    if(e.source === launcherFrame.contentWindow){
 
-    const thumb = document.createElement("img");
-    thumb.src = QR_IMAGE_URL;
-    thumb.alt = "QR";
-    Object.assign(thumb.style, {
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
-        pointerEvents: "none"
-    });
+        indexFrame.contentWindow.postMessage(
+            e.data,
+            "*"
+        );
 
-    button.appendChild(thumb);
-
-    // Modal
-    const overlay = document.createElement("div");
-
-    Object.assign(overlay.style, {
-        position: "fixed",
-        inset: "0",
-        display: "none",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "rgba(0,0,0,.45)",
-        zIndex: "2147483647"
-    });
-
-    const img = document.createElement("img");
-    img.src = QR_IMAGE_URL;
-    img.alt = "QR Code";
-
-    Object.assign(img.style, {
-        maxWidth: MODAL_MAX_SIZE,
-        maxHeight: "80vh",
-        background: "#fff",
-        padding: "12px",
-        borderRadius: "8px",
-        boxShadow: "0 8px 30px rgba(0,0,0,.5)"
-    });
-
-    overlay.appendChild(img);
-
-    let open = false;
-
-    function toggle() {
-        open = !open;
-        overlay.style.display = open ? "flex" : "none";
     }
 
-    button.addEventListener("click", function (e) {
-        e.stopPropagation();
-        toggle();
-    });
 
-    overlay.addEventListener("click", function (e) {
-        if (e.target === overlay) {
-            open = false;
-            overlay.style.display = "none";
-        }
-    });
+    if(e.source === indexFrame.contentWindow){
 
-    document.body.appendChild(button);
-    document.body.appendChild(overlay);
-})();
-</script>
+        launcherFrame.contentWindow.postMessage(
+            e.data,
+            "*"
+        );
 
+    }
+
+});
+
+
+(function () {
 
 
 </body>
