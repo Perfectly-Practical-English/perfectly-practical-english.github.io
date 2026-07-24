@@ -1,0 +1,3938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<title>Focus Pages</title>
+spinner
+<style>
+
+*{
+    box-sizing:border-box;draggable
+
+}
+
+html,body{
+    margin:0;
+    height:100%;
+    overflow:hidden;
+    font-family:Arial,sans-serif;
+    background:#d0d0d0;
+}
+
+/* ==========================
+   MAIN LAYOUT
+========================== */
+
+#main{
+    display:flex;
+    height:calc(100vh - 100px);
+}
+
+/* ==========================
+   LEFT COLUMN
+========================== */
+
+#leftColumn{
+    width:90px;
+    min-width:90px;
+    background:#ececec;
+    border-right:1px solid #999;
+    display:flex;
+    flex-direction:column;
+}
+
+/* ==========================
+   RIGHT COLUMN
+========================== */
+
+#rightColumn{
+    width:90px;
+    min-width:90px;
+    background:#ececec;
+    border-left:1px solid #999;
+    display:flex;
+    flex-direction:column;
+}
+
+
+#clearBoardBtn,
+#clearBoardBtnRight{
+    height:24px;
+    font-size:10px;
+    border:none;
+    border-bottom:1px solid #999;
+    cursor:pointer;
+}
+#pageList,
+#pageListRight{
+    flex:1;
+    overflow-y:auto;
+}
+
+
+.pageBtn{
+    width:100%;
+    height:18px;
+    border:none;
+    border-bottom:1px solid #000;
+    font-size:10px;
+    cursor:pointer;
+    padding:0;
+    background:#f7f7f7;
+}
+
+
+.pageBtn.active{
+    background:#4a90e2;
+    color:white;
+}
+/* ==========================
+   VIEWER
+========================== */
+
+#viewer{
+    flex:1;
+    overflow:hidden;
+    background:white;
+    position:relative;
+    cursor: move;
+}
+
+
+#spread{
+    position:absolute;
+    top:0;
+    left:0;
+    height:100%;
+    white-space:nowrap;
+    font-size:0;
+}
+/* ==========================
+   PAGES
+========================== */
+
+.imagePanel{
+    display:inline-block;
+    height:100%;
+}
+
+.imgWrap{
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    position:relative;
+}
+
+.pageImage{
+    display:block;
+    height:100%;
+    width:auto;
+}
+
+/* left page */
+
+.leftPage{
+
+    left:0;
+
+    width:calc(100% + 2px);
+
+    clip-path: inset(
+        0px
+        14px
+        0px
+        0
+    );
+}
+
+/* right page */
+
+.rightPage{
+
+    left:-15px;
+
+    width:calc(100% + 2px);
+
+    clip-path: inset(
+        0px
+        14px
+        0px
+        0
+    );
+}
+
+/* ==========================
+   TILES
+========================== */
+
+#tiles{
+    height:100px;
+    background:white;
+    border-top:1px solid #000;
+    border-left:1px solid #000;
+    border-right:1px solid #000;
+    border-bottom:1px solid #000;
+    display:flex;
+    flex-wrap:wrap;
+
+    gap:2px;
+
+    padding:1px;
+
+    overflow:auto;
+
+    align-content: flex-start;  /* IMPORTANT */
+    justify-content: flex-start;
+}
+
+.tile{
+    min-width:8ch;
+    height:14px;
+    line-height:14px;
+    font-size:9px;
+
+    padding:0 4px;
+    margin:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+    background:#E8D8B5;
+    border:1px solid #B99F6B;
+    color:#222;
+
+    cursor:pointer;
+    white-space:nowrap;
+    user-select:none;
+}
+
+.tile.selected{
+    background:#4a90e2;
+    border-color:#2f6fb7;
+    color:white;
+}
+
+/* ==========================
+   DRAGGABLES
+========================== */
+
+.draggable{
+
+    position:absolute;
+
+    z-index:9999;
+
+    cursor:move;
+
+    user-select:none;
+
+}
+
+.overlayPng{
+    position:absolute;
+
+    width:140px;
+    height:auto;
+
+    background:transparent !important;
+    border:none !important;
+    padding:0 !important;
+    margin:0 !important;
+
+    display:block;
+
+    pointer-events:auto;
+
+    object-fit:contain;
+}
+
+.draggable {
+    position:absolute;
+    z-index:9999;
+    cursor:default;
+    user-select:none;
+    -webkit-user-drag: none;
+    touch-action: none;
+    transform: none;
+
+}
+
+
+
+img {
+    -webkit-user-drag: none;
+    user-drag: none;
+    -webkit-touch-callout: none;
+}
+
+#viewer, #spread, .imagePanel, .imgWrap {
+    user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+#centerBar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    width: 35px;
+    transform: translateX(-50%);
+    pointer-events: none;
+    z-index: 10;
+
+    /* solid-ish white, slightly see-through */
+    background: rgba(255, 255, 255, 0.85);
+
+    /* soft edge glow instead of transparency */
+    box-shadow:
+        0 0 10px rgba(255, 255, 255, 0.35),
+        0 0 25px rgba(255, 255, 255, 0.15);
+
+    /* subtle edge fade (not full transparency) */
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        black 15%,
+        black 85%,
+        transparent 100%
+    );
+
+    mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        black 15%,
+        black 85%,
+        transparent 100%
+    );
+}
+
+.pageImage {
+    pointer-events: none;
+}
+
+.draggable.overlayPng{
+    transform:none;
+}
+
+
+.tileAnchor {
+    transform: translate(-100%, -100%);
+}
+
+
+.draggable.tile{
+    min-width:6ch;
+    height:10px;
+    font-size:6px;
+}
+
+
+#deleteBtn,
+#deleteBtnRight {
+    width:100%;
+    height:24px;
+    font-size:10px;
+    border:none;
+    border-bottom:1px solid #999;
+    cursor:pointer;
+    background:#f7f7f7;
+}
+
+#scriptBar{
+
+    position:fixed;
+
+    left:0;
+    right:0;
+    bottom:0;
+
+    height:24px;
+
+    display:flex;
+
+    border-top:1px solid #999;
+
+    background:#ececec;
+}
+
+#worksheetScript{
+
+    flex:1;
+
+    height:22px;
+
+    resize:none;
+
+    overflow:auto;
+
+    font:10px Consolas,monospace;
+
+    white-space:pre;
+
+    border:none;
+
+    outline:none;
+}
+
+#scriptBar.expanded{
+
+    height:220px;
+}
+
+#scriptBar.expanded #worksheetScript{
+
+    height:218px;
+}
+
+#viewer{
+    touch-action:none;
+}
+
+
+/* ==========================
+   MP3 BUTTONS
+========================== */
+
+.mp3Tile{
+    min-width:8ch;
+    height:14px;
+    line-height:14px;
+    font-size:9px;
+
+    padding:0 4px;
+    margin:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+    white-space:nowrap;
+    user-select:none;
+    cursor:pointer;
+
+    background:#7CCB6A;
+    border:1px solid #4F9E43;
+    color:#111;
+}
+
+.mp3Tile.selected{
+    background:#2E7D32;
+    border-color:#1B5E20;
+    color:white;
+}
+
+.placedTile {
+    background: rgba(255,255,255,0.85);
+    border: none;
+    color: red;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 4px;
+
+    /* Fade the background at the edges */
+    -webkit-mask-image: radial-gradient(
+        ellipse at center,
+        black 60%,
+        transparent 100%
+    );
+    mask-image: radial-gradient(
+        ellipse at center,
+        black 60%,
+        transparent 100%
+    );
+}
+
+
+#deleteBtn,
+#deleteBtnRight {
+    width:100%;
+    height:24px;
+    font-size:10px;
+    border:none;
+    border-bottom:1px solid #999;
+    cursor:pointer;
+    background:#f7f7f7;
+}
+
+.classSelect{
+
+    width:100%;
+    height:24px;
+    font-size:10px;
+    text-align:center;
+    text-align-last:center;
+
+}
+
+
+.studentTile{
+
+    width:100%;
+    height:28px;
+
+    font-size:10px;
+
+    margin:2px 0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    overflow:hidden;
+
+    cursor:pointer;
+
+}
+
+.breakBtn{
+    height:24px;
+    font-size:10px;
+    border:none;
+    border-bottom:1px solid #999;
+    background:#ffd27f;
+    cursor:pointer;
+}
+
+
+/* ==========================
+   BREAK MODAL
+========================== */
+
+#breakModal{
+
+    position:absolute;
+
+    width:260px;
+    height:180px;
+
+    left:50%;
+    top:50%;
+
+    transform:translate(-50%,-50%);
+
+background:#000;
+
+    border-radius:15px;
+
+    color:white;
+
+    z-index:50000;
+
+    display:none;
+
+    box-shadow:
+        0 0 30px rgba(0,0,0,.6);
+
+    backdrop-filter:blur(4px);
+
+    cursor:move;
+
+    user-select:none;
+}
+
+
+#breakContent{
+
+    height:100%;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    text-align:center;
+
+}
+
+
+#breakContent h1{
+
+    font-size:32px;
+
+    margin:0;
+
+    text-shadow:
+        0 0 20px black;
+
+}
+
+
+#breakTimer{
+
+    margin-top:5px;
+
+    font-size:34px;
+
+    color:orange;
+
+    text-shadow:
+        0 0 15px black;
+
+}
+
+
+#breakStart{
+
+    margin-top:20px;
+
+    transform:translateY(-15px);
+
+
+    padding:8px 18px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:orange;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+}
+
+
+
+.breakControls{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:12px;
+
+    margin-top:5px;
+
+}
+
+
+#breakStart{
+
+    transform:translateY(-15px);
+
+}
+
+
+.breakArrow{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    color:orange;
+
+    font-size:24px;
+
+    cursor:pointer;
+
+    user-select:none;
+
+    height:40px;
+
+}
+
+.breakControls button{
+
+    margin:0;
+
+    padding:8px 10px;
+
+    font-size:12px;
+
+    border:none;
+
+    border-radius:6px;
+
+    background:orange;
+
+    cursor:pointer;
+
+    font-weight:bold;
+
+}
+
+
+.breakControls button:hover{
+
+    background:#ffb347;
+
+}
+
+.breakArrow{
+
+    color:orange;
+
+    font-size:24px;
+
+    cursor:pointer;
+
+    user-select:none;
+
+    line-height:1;
+
+}
+
+
+.breakArrow:hover{
+
+    color:#ffb347;
+
+}
+
+.breakArrow{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    color:orange;
+
+    font-size:24px;
+
+    cursor:pointer;
+
+    user-select:none;
+
+    height:40px;
+
+    transform:translateY(-5px);
+
+}
+
+.spinnerAssembly{
+    position:absolute;
+    z-index:9999;
+    pointer-events:none;
+}
+
+.spinnerButton{
+
+    width:100%;
+    height:24px;
+
+    font-size:10px;
+    font-family:Arial,sans-serif;
+
+    border:none;
+    border-bottom:1px solid #999;
+
+    background:#f7f7f7;
+
+    cursor:pointer;
+
+    padding:0;
+
+    pointer-events:auto;
+}</style>
+</head>
+<body>
+
+
+<input
+    type="file"
+    id="pngLoader"
+    accept=".png"
+    hidden>
+
+<input
+    type="file"
+    id="txtLoader"
+    accept=".txt"
+    hidden>
+
+
+<div id="main">
+
+    <!-- ==========================
+         LEFT CONTROLS
+    ========================== -->
+    <div id="leftColumn">
+
+<button class="breakBtn" onclick="openBreakModal()">Break</button>
+
+<!-- LOAD TXT -->
+<button id="loadTxtBtn"
+style="
+height:24px;
+width:100%;
+font-size:10px;
+border:none;
+border-bottom:1px solid #999;
+cursor:pointer;
+">
+Browse
+</button>
+
+
+
+        <!-- ZOOM -->
+        <div style="height:24px; padding:2px; border-bottom:1px solid #999;">
+            <select id="zoomSelect" style="width:100%; height:20px; font-size:10px;">
+                <option value="1">100%</option>
+                <option value="1.8">180%</option>
+                <option value="2.0">200%</option>
+                <option value="2.25">225%</option>
+                <option value="2.5">250%</option>
+                <option value="2.75">275%</option>
+                <option value="3.0">300%</option>
+            </select>
+        </div>
+
+<select class="classSelect"></select>
+
+<div class="studentTile tile">
+    Student
+</div>
+
+<button id="spinnerBtn" class="spinnerButton">
+    Spinner
+</button>
+
+<!-- CLEAR -->
+<button id="clearBoardBtn">
+    Clear
+</button>
+
+<!-- DELETE -->
+<button id="deleteBtn">
+    Delete
+</button>
+
+        <!-- PAGE BUTTONS -->
+        <div id="pageList"></div>
+
+    </div>
+
+    <!-- ==========================
+         VIEWER
+    ========================== -->
+    <div id="viewer">
+
+        <div id="spread">
+
+            <div id="centerBar"></div>
+
+            <div class="imagePanel">
+                <div class="imgWrap">
+                    <img id="leftImage" class="pageImage leftPage">
+                </div>
+            </div>
+
+            <div class="imagePanel">
+                <div class="imgWrap">
+                    <img id="rightImage" class="pageImage rightPage">
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+<!-- ==========================
+     RIGHT CONTROLS
+========================== -->
+<div id="rightColumn">
+
+    <button class="breakBtn" onclick="openBreakModal()">Break</button>
+
+    <!-- LOAD TXT -->
+    <button id="loadTxtBtnRight"
+    style="
+    height:24px;
+    width:100%;
+    font-size:10px;
+    border:none;
+    border-bottom:1px solid #999;
+    cursor:pointer;
+    ">
+    Browse
+    </button>
+
+    <!-- ZOOM -->
+    <div style="height:24px; padding:2px; border-bottom:1px solid #999;">
+        <select id="zoomSelectRight" style="width:100%; height:20px; font-size:10px;">
+            <option value="1">100%</option>
+            <option value="1.8">180%</option>
+            <option value="2.0">200%</option>
+            <option value="2.25">225%</option>
+            <option value="2.5">250%</option>
+            <option value="2.75">275%</option>
+            <option value="3.0">300%</option>
+        </select>
+    </div>
+
+    <select class="classSelect">
+    <option value="">Select</option>
+</select>
+
+    <div class="studentTile tile">
+        Student
+    </div>
+
+<button id="spinnerBtnRight" class="spinnerButton">
+    Spinner
+</button>
+
+<!-- CLEAR -->
+<button id="clearBoardBtnRight">
+    Clear
+</button>
+    <!-- DELETE -->
+    <button id="deleteBtnRight">
+        Delete
+    </button>
+
+    <!-- PAGE BUTTONS -->
+    <div id="pageListRight"></div>
+
+</div>
+</div>
+
+<div id="tiles"></div>
+
+<div id="scriptBar">
+
+    <button id="toggleScript">▼</button>
+
+    <textarea id="worksheetScript"></textarea>
+
+</div>
+
+
+<div id="breakModal">
+
+    <div id="breakContent">
+
+        <h1>☕ Break Time</h1>
+
+        <div id="breakTimer">
+            5:00
+        </div>
+
+
+<div class="breakControls">
+
+    <span id="breakMinus" class="breakArrow">
+        ▼
+    </span>
+
+    <button id="breakStart">
+        Start / Restart
+    </button>
+
+    <span id="breakPlus" class="breakArrow">
+        ▲
+    </span>
+
+</div>
+
+
+    </div>
+
+</div>
+<script>
+
+
+/* ==========================
+   PAGE BUTTONS
+========================== */
+
+const spreads = [
+
+    [36, 37],
+    [38, 39],
+    [40, 41],
+    [42, 43],
+    [44, 45],
+    [46, 47],
+    [48, 49],
+    [50, 51],
+    [52, 53],
+    [54, 55],
+    [56, 57],
+    [58, 59],
+    [60, 61],
+    [62, 63],
+    [64, 65],
+    [66, 67],
+    [68, 69],
+    [70, 71],
+    [72, 73],
+    [74, 75],
+    [76, 77],
+    [78, 79],
+    [80, 81],
+    [82, 83],
+    [84, 85],
+    [86, 87],
+    [88, 89],
+    [90, 91],
+    [92, 93],
+    [94, 95],
+    [96, 97],
+    [98, 99],
+    [100, 101],
+    [102, 103],
+    [104, 105],
+    [106, 107],
+    [108, 109],
+    [110, 111],
+    [112, 113],
+    [114, 115],
+    [116, 117],
+    [118, 119],
+    [120, 121],
+    [122, 123],
+    [124, 125],
+    [126, 127],
+    [128, 129],
+    [130, 131],
+    [132, 133],
+    [134, 135],
+    [136, 137],
+    [138, 139],
+    [140, 141],
+    [142, 143],
+    [2, 3],
+    [4, 5],
+    [6, 7],
+    [8, 9],
+    [10, 11],
+    [12, 13],
+    [14, 15],
+    [16, 17],
+    [18, 19],
+    [20, 21],
+    [22, 23],
+    [24, 25]
+];
+
+spreads.forEach(([left, right]) => {
+
+    const btn = document.createElement("button");
+    btn.className = "pageBtn";
+    btn.textContent = `${left}-${right}`;
+
+    btn.onclick = () => {
+
+        document.querySelectorAll(".pageBtn")
+            .forEach(b => b.classList.remove("active"));
+
+        btn.classList.add("active");
+
+        loadSpread(left);
+    };
+
+    pageList.appendChild(btn);
+});
+function loadSpread(page){
+
+    leftImage.src =
+    `Focus (${page}).jpg`;
+
+    rightImage.src =
+    `Focus (${page+1}).jpg`;
+}
+
+// Start with a blank viewer
+
+leftImage.removeAttribute("src");
+rightImage.removeAttribute("src");
+
+
+/* ==========================
+   PNG LOADER
+========================== */
+
+pngLoader.addEventListener(
+"change",
+function(e){
+
+    const file =
+    e.target.files[0];
+
+    if(!file) return;
+
+    const reader =
+    new FileReader();
+
+    reader.onload =
+    function(evt){
+
+        pngData =
+        evt.target.result;
+
+        placeMode = "png";
+    };
+
+    reader.readAsDataURL(file);
+});
+
+/* ==========================
+   CLEAR BOARD
+========================== */
+
+document
+.getElementById("clearBoardBtn")
+.onclick = ()=>{
+
+    document
+    .querySelectorAll(".draggable")
+    .forEach(el=>el.remove());
+};
+
+/* ==========================
+   DRAGGING
+========================== */
+
+
+/* ==========================
+   ZOOM
+========================== */
+
+let viewerScale = 1;
+
+const zoomSelect = document.getElementById("zoomSelect");
+
+if(zoomSelect){
+
+    zoomSelect.addEventListener("change", function(){
+
+        viewerScale = Number(this.value);
+
+        updateTransform();
+
+    });
+
+}
+let panX = 0;
+let panY = 0;
+let panLocked = false;
+
+window.spread = document.getElementById("spread");
+
+function updateTransform(){
+spread.style.transform =
+    `translate(${panX}px, ${panY}px) scale(${viewerScale})`;
+spread.style.transformOrigin = "0 0";
+}
+
+/* ==========================
+   PAN (CLEAN CAMERA STYLE)
+========================== */
+
+let isPanning = false;
+let lastX = 0;
+let lastY = 0;
+
+viewer.addEventListener("pointerdown", (e) => {
+
+    // Ignore placed overlays
+    if(e.target.classList.contains("draggable")){
+        return;
+    }
+
+    // Ignore placement clicks
+    if(placeMode){
+        return;
+    }
+
+    if(panLocked) return;
+
+    if(e.button !== 0) return;
+
+
+    isPanning = true;
+
+    lastX = e.clientX;
+    lastY = e.clientY;
+
+    viewer.setPointerCapture(e.pointerId);
+
+});
+
+
+viewer.addEventListener("pointermove", (e) => {
+    if (panLocked) return;   // 🔒 ADD THIS LINE
+    if (!isPanning) return;
+
+
+    const dx = e.clientX - lastX;
+    const dy = e.clientY - lastY;
+
+    panX += dx;
+    panY += dy;
+
+lastX = e.clientX;
+lastY = e.clientY;
+
+// ==========================
+// CLAMP CAMERA (ADD THIS)
+// ==========================
+
+const rect = viewer.getBoundingClientRect();
+
+const contentW = spread.offsetWidth * viewerScale;
+const contentH = spread.offsetHeight * viewerScale;
+
+const viewW = rect.width;
+const viewH = rect.height;
+
+// X axis clamp
+if (contentW <= viewW) {
+    panX = (viewW - contentW) / 2;
+} else {
+    const minX = viewW - contentW;
+    const maxX = 0;
+    panX = Math.max(minX, Math.min(maxX, panX));
+}
+
+// Y axis clamp
+if (contentH <= viewH) {
+    panY = (viewH - contentH) / 2;
+} else {
+    const minY = viewH - contentH;
+    const maxY = 0;
+    panY = Math.max(minY, Math.min(maxY, panY));
+}
+
+updateTransform();
+}, true);
+
+/* ==========================
+   MOUSE WHEEL / TRACKPAD PAN
+========================== */
+
+viewer.addEventListener("wheel", function(e){
+
+    if(panLocked) return;
+
+    e.preventDefault();
+
+    panX -= e.deltaX;
+    panY -= e.deltaY;
+
+    updateTransform();
+
+},
+{
+    passive:false
+});
+
+
+viewer.addEventListener("pointerup", (e) => {
+    isPanning = false;
+    viewer.releasePointerCapture(e.pointerId);
+});
+
+</script>
+
+
+<script>
+
+/* ======================================================
+   ANSWER TILE ENGINE
+   Replacement for old ANIMALS script
+====================================================== */
+
+
+/* ==========================
+   STATE
+========================== */
+
+let placeMode = null;
+let selectedEl = null;
+
+
+/* ==========================
+   PARSED INPUT STORAGE
+========================== */
+
+let answerItems = [];
+
+
+/* ==========================
+   PARSER
+========================== */
+
+function parseAnswers(raw){
+
+    answerItems = [];
+
+    const lines = raw.split(/\r?\n/);
+
+
+lines.forEach(line=>{
+
+    line = line.trim();
+
+    if(!line.startsWith("~")) return;
+
+    // IGNORE SOUND CATEGORY DESIGNATIONS
+    if(/^~S/i.test(line)){
+        return;
+    }
+
+
+line = line.substring(1).trim();
+
+
+
+/*
+    IMAGE INPUT
+
+    ~1overlay.png
+            ~1overlay.jpg
+            ~"some image".png
+        */
+
+        let imageMatch =
+        line.match(/^"?(.+?)"?\.(png|jpg|jpeg)$/i);
+
+
+        if(imageMatch){
+
+            answerItems.push({
+
+                label:imageMatch[1],
+
+                type:"image",
+
+                value:line
+
+            });
+
+            return;
+
+        }
+
+
+
+        /*
+            TEXT INPUT
+
+            Everything before "-"
+            becomes button label.
+
+            Everything after "-"
+            becomes placed answer.
+
+        */
+
+        let dashMatch =
+        line.match(/^(.+?)\s*-\s*(.+)$/);
+
+
+        if(dashMatch){
+
+            answerItems.push({
+
+                label:
+                dashMatch[1].trim(),
+
+                type:"text",
+
+                value:
+                dashMatch[2].trim()
+
+            });
+
+            return;
+
+        }
+
+
+    });
+
+}
+
+
+
+/* ==========================
+   BUILD TILES
+========================== */
+
+function buildAnswerTiles(){
+
+
+    const tileArea =
+    document.getElementById("tiles");
+
+
+    tileArea.innerHTML="";
+
+
+    answerItems.forEach(item=>{
+
+
+        const tile =
+        document.createElement("div");
+
+
+        tile.className="tile";
+
+
+        tile.textContent =
+        item.label;
+
+
+
+        tile.onclick=function(){
+
+
+            document
+            .querySelectorAll("#tiles .tile")
+            .forEach(t=>
+                t.classList.remove("selected")
+            );
+
+
+            tile.classList.add("selected");
+
+
+            placeMode={
+
+                type:item.type,
+
+                value:item.value
+
+            };
+
+
+            selectedEl=null;
+
+
+        };
+
+
+        tileArea.appendChild(tile);
+
+
+    });
+
+
+}
+
+
+
+/* ==========================
+   AUTO LOAD INPUT
+========================== */
+
+const worksheetInput =
+document.getElementById("worksheetScript");
+
+
+worksheetInput.addEventListener(
+"input",
+function(){
+
+
+    parseAnswers(
+        this.value
+    );
+
+
+    buildAnswerTiles();
+
+
+});
+
+
+
+
+/* ==========================
+   PLACE ON SPREAD
+========================== */
+
+viewer.addEventListener(
+"pointerdown",
+function(e){
+
+
+
+    const target = e.target;
+
+
+    /*
+        Select existing overlay
+    */
+
+    if(target.classList.contains("draggable")){
+
+
+        e.stopPropagation();
+
+        selectedEl = target;
+
+        placeMode = null;
+
+        return;
+
+    }
+
+
+
+    /*
+        Nothing selected from tiles
+    */
+
+    if(!placeMode) return;
+
+
+
+    const rect =
+    spread.getBoundingClientRect();
+
+
+
+    const x =
+    (e.clientX - rect.left) / viewerScale;
+
+
+    const y =
+    (e.clientY - rect.top) / viewerScale;
+
+
+
+    let obj;
+
+
+
+    /*
+        IMAGE ANSWER
+    */
+
+    if(placeMode.type === "image"){
+
+
+        obj =
+        document.createElement("img");
+
+
+        obj.src =
+        placeMode.value;
+
+
+        obj.className =
+        "draggable overlayPng";
+
+
+        obj.style.width = "140px";
+
+
+    }
+
+
+
+    /*
+        TEXT ANSWER
+    */
+
+    else{
+
+
+        obj =
+obj = document.createElement("div");
+
+obj.className = "draggable tile tileAnchor placedTile";
+
+obj.textContent = placeMode.value;
+
+
+    }
+
+
+
+    obj.style.left =
+    x + "px";
+
+
+    obj.style.top =
+    y + "px";
+
+
+
+    spread.appendChild(obj);
+
+
+
+    enableDragging(obj);
+
+
+
+    selectedEl = obj;
+
+
+    placeMode = null;
+
+
+});
+
+
+
+/* ==========================
+   DRAGGING
+========================== */
+
+function enableDragging(el){
+
+
+    el.addEventListener(
+    "pointerdown",
+    function(e){
+
+
+        e.stopPropagation();
+
+
+        selectedEl = el;
+
+
+
+        const rect =
+        spread.getBoundingClientRect();
+
+
+
+        const offsetX =
+        (e.clientX - rect.left) / viewerScale
+        - parseFloat(el.style.left);
+
+
+
+        const offsetY =
+        (e.clientY - rect.top) / viewerScale
+        - parseFloat(el.style.top);
+
+
+
+        function move(ev){
+
+
+            el.style.left =
+            (
+            (ev.clientX - rect.left) / viewerScale
+            - offsetX
+            )
+            + "px";
+
+
+
+            el.style.top =
+            (
+            (ev.clientY - rect.top) / viewerScale
+            - offsetY
+            )
+            + "px";
+
+
+        }
+
+
+
+        function up(){
+
+
+            window.removeEventListener(
+                "pointermove",
+                move
+            );
+
+
+            window.removeEventListener(
+                "pointerup",
+                up
+            );
+
+
+        }
+
+
+
+        window.addEventListener(
+            "pointermove",
+            move
+        );
+
+
+        window.addEventListener(
+            "pointerup",
+            up
+        );
+
+
+    });
+
+
+}
+/* ==========================
+   DELETE SELECTED
+========================== */
+
+window.addEventListener(
+"keydown",
+function(e){
+
+
+    if(e.key==="Delete" && selectedEl){
+
+
+        selectedEl.remove();
+
+
+        selectedEl=null;
+
+
+    }
+
+
+});
+
+
+</script>
+
+<script>
+
+/* =========================
+   DELETE SELECTED TILE
+========================= */
+
+window.addEventListener("DOMContentLoaded", () => {
+
+    const btn = document.getElementById("deleteBtn");
+
+    if (!btn) return;
+
+    btn.onclick = function(){
+
+        if(!selectedEl) return;
+
+        selectedEl.remove();
+        selectedEl = null;
+
+    };
+
+});
+</script>
+
+<script>
+
+/* =========================
+   SELECT TILE (TEXT + IMAGE)
+========================= */
+/*
+You MUST already call this when creating tiles:
+- for text tiles
+- for image tiles
+*/
+
+function enableSelection(el) {
+    el.addEventListener("pointerdown", function (e) {
+        e.stopPropagation();
+        selectedEl = el;
+    });
+}
+
+/* =========================
+   DELETE SELECTED TILE
+========================= */
+function deleteSelectedTile() {
+
+    if (!selectedEl) return;
+
+    selectedEl.remove();
+    selectedEl = null;
+}
+
+/* =========================
+   BUTTON HOOK (optional)
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+
+    const btn = document.getElementById("deleteBtn");
+
+    if (btn) {
+        btn.onclick = deleteSelectedTile;
+    }
+});
+
+/* =========================
+   KEYBOARD DELETE SUPPORT
+========================= */
+window.addEventListener("keydown", function (e) {
+
+    if (e.key === "Delete" || e.key === "Backspace") {
+
+        if (document.activeElement.tagName === "INPUT") return;
+
+        deleteSelectedTile();
+    }
+});
+
+/* =========================
+   HOW TO USE (IMPORTANT)
+========================= */
+/*
+WHEN YOU CREATE A TILE:
+
+TEXT TILE:
+    enableSelection(obj);
+
+IMAGE TILE:
+    enableSelection(obj);
+*/
+
+</script>
+
+<!--A festival
+In Bunol, Spain
+Every August
+a
+an
+the
+∅
+1overlay-small.png
+1overlay-large.png
+Circleoverlay.png-->
+
+<script>
+
+const toggleScriptBtn = document.getElementById("toggleScript");
+const scriptBar = document.getElementById("scriptBar");
+const worksheetScript = document.getElementById("worksheetScript");
+
+toggleScriptBtn.addEventListener("click", function(){
+
+    const expanded = scriptBar.classList.toggle("expanded");
+
+    if(expanded){
+
+        scriptBar.style.height = "calc(100vh - 58px)";
+        worksheetScript.style.height = "calc(100vh - 82px)";
+
+        toggleScriptBtn.textContent = "▲";
+
+    }
+    else{
+
+        scriptBar.style.height = "24px";
+        worksheetScript.style.height = "22px";
+
+        toggleScriptBtn.textContent = "▼";
+
+    }
+
+});
+
+</script>
+
+<script>
+
+/* =========================================
+   MP3 BUTTON ENGINE
+========================================= */
+
+
+
+
+/* =========================================
+   PLAY MP3
+========================================= */
+
+function playMP3(file){
+
+    let audioPath = file;
+
+    if(/^[A-Z]:\\/i.test(audioPath)){
+
+        audioPath =
+            "file:///" +
+            audioPath.replace(/\\/g,"/");
+
+    }
+
+    window.open(audioPath);
+
+}
+/* =========================================
+   SCAN SCRIPT
+========================================= */
+
+function scanMP3References(){
+
+    const tiles = document.getElementById("tiles");
+
+    tiles.querySelectorAll(".mp3Tile").forEach(t=>t.remove());
+
+    const lines =
+        document
+        .getElementById("worksheetScript")
+        .value
+        .split(/\r?\n/);
+
+lines.forEach(line=>{
+
+    line = line.trim();
+
+
+    if(!line.startsWith("~")) return;
+
+
+    // IGNORE SOUND CATEGORY DESIGNATIONS
+    if(/^~S/i.test(line)){
+        return;
+    }
+
+// DO NOT MAKE ANSWER BUTTONS FROM ~S LINES
+if(line.startsWith("~S")){
+    return;
+}
+
+
+line = line.substring(1).trim();
+
+        const match =
+            line.match(/^(.+?)\s*[-–—]\s*(.+?\.mp3)\s*$/i);
+
+        if(!match) return;
+
+        const label = match[1].trim();
+        const file  = match[2].trim();
+
+        const tile = document.createElement("div");
+
+        tile.className = "tile mp3Tile";
+        tile.textContent = label;
+
+        tile.onclick = function(){
+
+            playMP3(file);
+
+        };
+
+        tiles.appendChild(tile);
+
+    });
+
+}
+
+/* =========================================
+   STARTUP
+========================================= */
+
+document
+.getElementById("worksheetScript")
+.addEventListener("input", scanMP3References);
+
+scanMP3References();
+
+</script>
+
+<script>
+
+/* ==========================================================
+   LEFT / RIGHT CONTROL PANEL COORDINATOR
+   Put this LAST script in the file.
+========================================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const leftZoom  = document.getElementById("zoomSelect");
+    const rightZoom = document.getElementById("zoomSelectRight");
+
+    const leftClear  = document.getElementById("clearBoardBtn");
+    const rightClear = document.getElementById("clearBoardBtnRight");
+
+const leftDelete  = document.getElementById("deleteBtn");
+const rightDelete = document.getElementById("deleteBtnRight");
+
+const leftBrowser  = document.getElementById("loadTxtBtn");
+const rightBrowser = document.getElementById("loadTxtBtnRight");
+
+const leftSpinner  = document.getElementById("spinnerBtn");
+const rightSpinner = document.getElementById("spinnerBtnRight");
+
+    const leftPages  = document.getElementById("pageList");
+    const rightPages = document.getElementById("pageListRight");
+
+    if(!leftPages || !rightPages) return;
+
+    /* ==========================================
+       ZOOM
+    ========================================== */
+
+    if(leftZoom && rightZoom){
+
+        rightZoom.value = leftZoom.value;
+
+        leftZoom.addEventListener("change", () => {
+            rightZoom.value = leftZoom.value;
+        });
+
+        rightZoom.addEventListener("change", () => {
+
+            leftZoom.value = rightZoom.value;
+
+            leftZoom.dispatchEvent(
+                new Event("change",{bubbles:true})
+            );
+
+        });
+
+    }
+
+    /* ==========================================
+       CLEAR
+    ========================================== */
+
+    if(rightClear && leftClear){
+
+        rightClear.addEventListener("click", () => {
+            leftClear.click();
+        });
+
+    }
+
+    /* ==========================================
+       DELETE
+    ========================================== */
+
+    if(rightDelete && leftDelete){
+
+        rightDelete.addEventListener("click", () => {
+            leftDelete.click();
+        });
+
+    }
+
+    /* ==========================================
+       BUILD RIGHT PAGE BUTTONS
+    ========================================== */
+
+function syncPageButtons(){
+
+    rightPages.innerHTML = "";
+
+    const buttons =
+        leftPages.querySelectorAll(".pageBtn");
+
+
+    buttons.forEach((btn,index)=>{
+
+        const clone =
+            document.createElement("button");
+
+
+        // FORCE IDENTICAL BUTTON STYLE
+        clone.className = "pageBtn";
+
+
+        // FORCE IDENTICAL TEXT
+        clone.innerHTML = btn.innerHTML;
+
+
+        // MATCH ACTIVE STATE
+        if(btn.classList.contains("active")){
+            clone.classList.add("active");
+        }
+
+
+        clone.onclick = function(){
+
+            buttons[index].click();
+
+        };
+
+
+        rightPages.appendChild(clone);
+
+    });
+
+}
+    syncPageButtons();
+
+    /* ==========================================
+       WATCH FOR PAGE BUTTON CHANGES
+    ========================================== */
+
+    const observer = new MutationObserver(syncPageButtons);
+
+    observer.observe(leftPages,{
+        childList:true,
+        subtree:true,
+        attributes:true,
+        attributeFilter:["class"]
+    });
+
+});
+
+</script>
+
+<script>
+
+/* =====================================
+   LOCAL TXT BROWSER LOADER
+===================================== */
+
+const loadTxtBtn =
+document.getElementById("loadTxtBtn");
+
+const txtLoader =
+document.getElementById("txtLoader");
+
+
+loadTxtBtn.onclick = function(){
+
+    txtLoader.click();
+
+};
+
+
+const loadTxtBtnRight =
+document.getElementById("loadTxtBtnRight");
+
+
+if(loadTxtBtnRight){
+
+    loadTxtBtnRight.onclick = function(){
+
+        txtLoader.click();
+
+    };
+
+}
+
+txtLoader.addEventListener(
+"change",
+function(){
+
+    const file =
+    this.files[0];
+
+    if(!file) return;
+
+
+    const reader =
+    new FileReader();
+
+
+    reader.onload =
+    function(e){
+
+        const text =
+        e.target.result;
+
+
+        worksheetScript.value =
+        text;
+
+
+        worksheetScript.dispatchEvent(
+            new Event("input")
+        );
+
+    };
+
+
+    reader.readAsText(file);
+
+
+});
+
+</script>
+
+<script>
+
+/* ==========================
+   STUDENT PICKER WITH COLORS
+========================== */
+
+
+const RAW_TEXT = `
+
+~11.1	
+Blue	Thanawat
+Blue	Warawut
+Blue	Phawat
+Green	Suphajak
+Green	Kallapapruek
+Green	Soraphat
+Orange	Nacharot
+Orange	Paphawin
+Orange	Pattaradorn
+Orange	Theerapith
+Red	Thannakorn
+Red	Khemmanat
+Red	Pannawit
+Red	Chatchanok
+Purple	Tarzan
+~13.2	
+Blue	Patiphan
+Blue	Katanyu
+Blue	Suthimont
+Green	Korravit
+Green	Machat
+Green	Phoomipat
+Orange	Ingkrit
+Orange	Pachara
+Orange	Khanaphot
+Orange	Napol
+Red	Kannaphat
+Red	Natthapakorn
+Red	Phurit
+Red	Pawarut
+Purple	Tarzan
+~14.1	
+Blue	Krittanart
+Blue	Natthanan
+Blue	Nanaruchote
+Green	Phutthiphat
+Green	Boonraksa
+Green	Kronpanod
+Orange	Phudit
+Orange	Dhatsawitt
+Orange	Nonthapat
+Orange	Chayangkoon
+Orange	Punyawee
+Red	Yuttanin
+Red	Photsawee
+Red	Jommanut
+Red	Phurarit
+Purple	Tarzan
+~15.3	
+Blue	Akkravich
+Blue	Thanakorn
+Blue	Punnawatz
+Green	Puri
+Green	Api Cha
+Green	Panyarat
+Orange	Nakarin
+Orange	Chananon
+Orange	Rachchavich
+Orange	Phumiphat
+Red	Naravich
+Red	Preedipat 
+Red	Archawin
+Red	Worawit
+Purple	Tarzan
+~16.2	
+Blue	Vachirasak
+Blue	Chutipan
+Blue	Pakornpat
+Green	Panpuris
+Green	Koonwich
+Green	Nutphalod
+Green	Jirayu
+Orange	Setthawut
+Orange	Theerapatch
+Orange	Theeraphat
+Orange	Pannatat
+Red	Thanakrit
+Red	Nakhun
+Red	Boonpipon
+Red	Warawat
+Purple	Tarzan
+
+`;
+
+
+/* TEAM COLORS */
+
+const studentColors = {
+
+    Blue:"#93c5fd",
+
+    Green:"#86efac",
+
+    Orange:"#fdba74",
+
+    Red:"#fca5a5"
+
+};
+
+
+
+/* PARSE DATA */
+
+function parseStudents(raw){
+
+
+    const blocks =
+    raw.split(/(?=~)/g);
+
+
+    const result={};
+
+
+    blocks.forEach(block=>{
+
+
+        block=block.trim();
+
+
+        if(!block.startsWith("~"))
+            return;
+
+
+        const lines =
+        block.split("\n")
+        .map(x=>x.trim())
+        .filter(Boolean);
+
+
+
+        const className =
+        lines[0]
+        .replace("~","")
+        .trim();
+
+
+
+        result[className]=[];
+
+
+
+        for(let i=1;i<lines.length;i++){
+
+
+            const parts =
+            lines[i].split(/\s+/);
+
+
+
+            const team =
+            parts.shift();
+
+
+
+            const name =
+            parts.join(" ");
+
+
+
+result[className].push({
+
+    name:name,
+
+    team:team,
+
+    color:studentColors[team]
+
+});
+
+        }
+
+
+    });
+
+
+    return result;
+
+}
+
+
+
+const studentData =
+parseStudents(RAW_TEXT);
+
+
+
+const classSelectors =
+document.querySelectorAll(".classSelect");
+
+
+const studentTiles =
+document.querySelectorAll(".studentTile");
+
+
+
+let colorQueues = {};
+let currentColor = 0;
+
+const colorOrder = [
+    "Blue",
+    "Green",
+    "Orange",
+    "Red"
+];
+
+function shuffle(array){
+
+    return [...array]
+    .sort(()=>Math.random()-0.5);
+
+}
+
+function loadClass(className){
+
+    colorQueues = {};
+
+    colorOrder.forEach(color=>{
+
+        colorQueues[color] =
+            shuffle(
+                studentData[className]
+                .filter(s=>s.team===color)
+            );
+
+    });
+
+    currentColor = 0;
+
+}
+
+
+/* NEXT STUDENT */
+
+function nextStudent(){
+
+    const className =
+        classSelectors[0].value;
+
+    const color =
+        colorOrder[currentColor];
+
+    if(colorQueues[color].length===0){
+
+        colorQueues[color] =
+            shuffle(
+                studentData[className]
+                .filter(s=>s.team===color)
+            );
+
+    }
+
+    const student =
+        colorQueues[color].shift();
+
+    studentTiles.forEach(tile=>{
+
+        tile.textContent =
+            student.name;
+
+        tile.style.background =
+            student.color;
+
+    });
+
+    currentColor =
+        (currentColor+1) %
+        colorOrder.length;
+
+}
+
+/* BUILD DROPDOWNS */
+
+Object.keys(studentData)
+.forEach(className=>{
+
+
+    classSelectors.forEach(select=>{
+
+
+        const option =
+        document.createElement("option");
+
+
+        option.value =
+        className;
+
+
+        option.textContent =
+        className;
+
+
+        select.appendChild(option);
+
+
+    });
+
+
+});
+
+
+
+/* SYNC CLASS SELECTORS */
+
+classSelectors.forEach(select=>{
+
+
+    select.addEventListener(
+    "change",
+    function(){
+
+
+        classSelectors.forEach(other=>{
+
+            other.value =
+            this.value;
+
+        });
+
+
+
+        loadClass(
+            this.value
+        );
+
+
+        nextStudent();
+
+
+    });
+
+
+});
+
+
+
+/* CLICK STUDENT TILE */
+
+studentTiles.forEach(tile=>{
+
+
+    tile.onclick=function(){
+
+        nextStudent();
+
+    };
+
+
+});
+
+
+
+/* START */
+
+if(classSelectors.length){
+
+
+    loadClass(
+        classSelectors[0].value
+    );
+
+
+    nextStudent();
+
+
+}
+
+
+</script>
+
+<script>
+
+(function(){
+
+const Wheel={
+
+    overlay:null,
+    panel:null,
+    canvas:null,
+    ctx:null,
+
+    students:[],
+    angle:0,
+
+    currentName:null,
+
+    spinning:false,
+    queuedName:null,
+    size:0,
+    radius:0,
+    duration:2000
+};
+/* ==========================
+ CREATE WHEEL
+========================== */
+
+function createWheel(){
+
+    if(Wheel.overlay) return;
+
+
+    const style=document.createElement("style");
+
+    style.textContent=`
+
+:root{
+--wheel-size:350px;
+}
+
+#studentWheelOverlay{
+
+position:fixed;
+inset:0;
+
+display:none;
+
+align-items:center;
+justify-content:center;
+
+background:transparent;
+
+pointer-events:none;
+
+z-index:999999;
+
+}
+
+
+#studentWheelPanel{
+
+position:relative;
+
+width:calc(var(--wheel-size) + 120px);
+height:calc(var(--wheel-size) + 120px);
+
+cursor:move;
+
+pointer-events:auto;
+
+    touch-action:none;
+
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+}
+#studentWheelCanvas{
+
+display:block;
+
+width:var(--wheel-size);
+height:var(--wheel-size);
+
+transform:none;
+
+background:transparent;
+
+pointer-events:none;
+
+}`;
+
+document.head.appendChild(style);
+
+
+
+Wheel.overlay=document.createElement("div");
+
+Wheel.overlay.id="studentWheelOverlay";
+
+
+
+Wheel.panel=document.createElement("div");
+
+Wheel.panel.id="studentWheelPanel";
+
+
+
+Wheel.canvas=document.createElement("canvas");
+
+Wheel.canvas.id="studentWheelCanvas";
+
+Wheel.size = parseInt(
+    getComputedStyle(document.documentElement)
+        .getPropertyValue("--wheel-size")
+);
+
+Wheel.radius = Wheel.size / 2 - 10;
+
+const extraSpace = 40;
+
+Wheel.canvas.width = Wheel.size + extraSpace;
+Wheel.canvas.height = Wheel.size + extraSpace;
+Wheel.ctx =
+Wheel.canvas.getContext("2d");
+Wheel.panel.appendChild(Wheel.canvas);
+
+Wheel.overlay.appendChild(Wheel.panel);
+
+document.body.appendChild(Wheel.overlay);
+
+
+
+/* drag wheel */
+
+let dragging=false;
+let ox=0;
+let oy=0;
+
+
+Wheel.panel.addEventListener("pointerdown",e=>{
+
+dragging=true;
+
+const r=Wheel.panel.getBoundingClientRect();
+
+ox=e.clientX-r.left;
+oy=e.clientY-r.top;
+
+Wheel.panel.setPointerCapture(e.pointerId);
+
+});
+
+
+Wheel.panel.addEventListener("pointermove",e=>{
+
+if(!dragging)return;
+
+
+Wheel.panel.style.position="fixed";
+
+Wheel.panel.style.left=
+(e.clientX-ox)+"px";
+
+Wheel.panel.style.top=
+(e.clientY-oy)+"px";
+
+
+Wheel.panel.style.transform="none";
+
+
+});
+
+
+Wheel.panel.addEventListener("pointerup",()=>{
+
+dragging=false;
+
+});
+
+
+
+/* Overlay is now click-through.
+   Spinner button opens/closes it. */
+
+}
+
+
+
+/* ==========================
+ LOAD STUDENTS
+========================== */
+
+function loadWheelStudents(){
+
+    const className =
+        document.querySelector(".classSelect").value;
+
+
+    Wheel.students =
+        studentData[className].map(s => ({...s}));
+
+
+    /*
+       Rearrange students so identical colors
+       are spread apart whenever possible.
+    */
+
+    const colorGroups = {};
+
+    Wheel.students.forEach(student=>{
+
+        const color = student.color || "#ddd";
+
+        if(!colorGroups[color]){
+            colorGroups[color] = [];
+        }
+
+        colorGroups[color].push(student);
+
+    });
+
+
+    const groups = Object.values(colorGroups);
+
+
+    Wheel.students = [];
+
+    let lastColor = null;
+
+
+    while(groups.some(g => g.length)){
+
+        // Find the largest remaining group
+        groups.sort((a,b)=>b.length-a.length);
+
+
+        let selected =
+            groups.find(g =>
+                g.length &&
+                (g[0].color || "#ddd") !== lastColor
+            );
+
+
+        // If no different color exists, use whatever remains
+        if(!selected){
+            selected =
+                groups.find(g=>g.length);
+        }
+
+
+        const student =
+            selected.shift();
+
+
+        Wheel.students.push(student);
+
+        lastColor =
+            student.color || "#ddd";
+
+    }
+
+
+    const tile =
+        document.querySelector(".studentTile");
+
+
+    if(tile){
+
+        Wheel.currentName =
+            tile.textContent.trim();
+
+    }
+
+}
+/* ==========================
+ DRAW
+========================== */
+function drawWheel(){
+
+const ctx = Wheel.ctx;
+
+/* COMPLETE CANVAS RESET */
+ctx.setTransform(1,0,0,1,0,0);
+
+ctx.globalAlpha = 1;
+
+ctx.shadowColor = "transparent";
+ctx.shadowBlur = 0;
+ctx.shadowOffsetX = 0;
+ctx.shadowOffsetY = 0;
+
+ctx.clearRect(
+    0,
+    0,
+    Wheel.canvas.width,
+    Wheel.canvas.height
+);
+const extraSpace = 40;
+
+const cx = (Wheel.size/2) + extraSpace/2;
+const cy = (Wheel.size/2) + extraSpace/2;
+
+ctx.save();
+
+ctx.shadowColor = "transparent";
+ctx.shadowBlur = 0;
+
+const students=Wheel.students;
+
+
+if(!students.length)return;
+
+
+const slice=
+Math.PI*2/students.length;
+
+
+
+students.forEach((s,i)=>{
+
+
+const start=
+Wheel.angle+i*slice;
+
+
+const end=start+slice;
+
+
+ctx.beginPath();
+
+ctx.moveTo(cx,cy);
+
+ctx.arc(
+cx,
+cy,
+Wheel.radius,
+start,
+end
+);
+
+ctx.closePath();
+
+
+ctx.fillStyle =
+    s.color || "#ddd";
+
+ctx.fill();
+
+
+ctx.strokeStyle="#000";
+
+ctx.lineWidth=.25;
+
+ctx.stroke();
+
+
+
+const mid=(start+end)/2;
+
+
+ctx.save();
+
+
+/* Move the label closer to the rim */
+
+const labelRadius = Wheel.radius - 15; 
+
+// first letter 25px from crust
+ctx.translate(
+
+    cx + Math.cos(mid) * labelRadius,
+
+    cy + Math.sin(mid) * labelRadius
+
+);
+
+/* Keep the text vertical relative to its slice */
+
+ctx.rotate(mid + Math.PI);
+
+
+ctx.fillStyle="#111";
+
+ctx.font = "bold " + (Wheel.size * 0.035) + "px Arial";
+
+ctx.textAlign="left";
+
+ctx.textBaseline="middle";
+
+
+ctx.fillText(
+    s.name,
+    0,
+    0
+);
+
+ctx.restore();
+
+
+});
+
+ctx.restore();
+
+
+
+/* Soft slice seams */
+
+const fuzzySlice =
+    (Math.PI * 2) / Wheel.students.length;
+
+
+ctx.shadowColor = "rgba(0,0,0,0.35)";
+ctx.shadowBlur = 3;
+
+ctx.strokeStyle = "rgba(60,40,15,0.35)";
+ctx.lineWidth = 1;
+
+
+Wheel.students.forEach((s,i)=>{
+
+    const seamAngle =
+        Wheel.angle + i * fuzzySlice;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(cx,cy);
+
+    ctx.lineTo(
+        cx + Math.cos(seamAngle) * Wheel.radius,
+        cy + Math.sin(seamAngle) * Wheel.radius
+    );
+
+    ctx.stroke();
+
+});
+
+
+ctx.restore();
+
+
+/* ==========================
+   BRASS METALLIC OUTER RIM
+========================== */
+
+ctx.save();
+
+const rimWidth = 10;
+
+const rimGradient = ctx.createRadialGradient(
+    cx,
+    cy,
+    Wheel.radius - rimWidth,
+    cx,
+    cy,
+    Wheel.radius + 5
+);
+
+rimGradient.addColorStop(0, "#5c3900");
+rimGradient.addColorStop(0.25, "#d8a62a");
+rimGradient.addColorStop(0.45, "#fff2a6");
+rimGradient.addColorStop(0.65, "#c58a16");
+rimGradient.addColorStop(0.85, "#8b5a05");
+rimGradient.addColorStop(1, "#3b2400");
+
+
+ctx.beginPath();
+
+ctx.arc(
+    cx,
+    cy,
+    Wheel.radius,
+    0,
+    Math.PI * 2
+);
+
+ctx.strokeStyle = rimGradient;
+ctx.lineWidth = rimWidth;
+
+ctx.stroke();
+
+
+/* Fine highlight edge */
+
+ctx.beginPath();
+
+ctx.arc(
+    cx,
+    cy,
+    Wheel.radius - rimWidth/2,
+    0,
+    Math.PI * 2
+);
+
+ctx.strokeStyle = "rgba(255,240,150,0.8)";
+ctx.lineWidth = 1;
+
+ctx.stroke();
+
+
+ctx.restore();
+
+
+
+
+
+/* ==========================
+   FUZZY WHEEL FINISHING PASS
+========================== */
+
+ctx.save();
+
+ctx.globalAlpha = 1;
+
+/* Soft outer perimeter */
+
+ctx.beginPath();
+
+ctx.arc(
+    cx,
+    cy,
+    Wheel.radius + 3,
+    0,
+    Math.PI * 2
+);
+
+ctx.strokeStyle = "rgba(40,25,5,0.45)";
+ctx.lineWidth = 8;
+ctx.shadowColor = "rgba(40,25,5,0.65)";
+ctx.shadowBlur = 12;
+
+ctx.stroke();
+
+
+/* Brass glow around rim */
+
+ctx.beginPath();
+
+ctx.arc(
+    cx,
+    cy,
+    Wheel.radius,
+    0,
+    Math.PI * 2
+);
+
+ctx.strokeStyle = "rgba(255,190,50,0.5)";
+ctx.lineWidth = 5;
+ctx.shadowColor = "rgba(255,190,50,0.8)";
+ctx.shadowBlur = 8;
+
+ctx.stroke();
+
+/* pointer */
+
+ctx.beginPath();
+
+ctx.moveTo(cx,35);
+
+ctx.lineTo(cx-10,18);
+
+ctx.lineTo(cx+10,18);
+
+ctx.closePath();
+
+ctx.fillStyle="red";
+
+ctx.fill();
+
+
+/* Brass cone hub */
+
+const hubX = cx;
+const hubY = cy;
+
+ctx.save();
+
+/* Shadow under cone */
+ctx.beginPath();
+ctx.arc(
+    hubX + 3,
+    hubY + 5,
+    28,
+    0,
+    Math.PI * 2
+);
+
+ctx.fillStyle = "rgba(0,0,0,0.35)";
+ctx.fill();
+
+
+/* Cone body - radial metallic brass */
+const brass = ctx.createRadialGradient(
+    hubX - 8,
+    hubY - 10,
+    3,
+    hubX,
+    hubY,
+    30
+);
+
+brass.addColorStop(0, "#fff2a6");   // bright brass reflection
+brass.addColorStop(0.15, "#ffd34e");
+brass.addColorStop(0.35, "#c58a16");
+brass.addColorStop(0.65, "#8b5a05");
+brass.addColorStop(0.85, "#d8a62a");
+brass.addColorStop(1, "#5c3900");
+
+
+ctx.beginPath();
+
+ctx.arc(
+    hubX,
+    hubY,
+    28,
+    0,
+    Math.PI * 2
+);
+
+ctx.fillStyle = brass;
+ctx.fill();
+
+
+/* Cone rim */
+ctx.beginPath();
+
+ctx.arc(
+    hubX,
+    hubY,
+    28,
+    0,
+    Math.PI * 2
+);
+
+ctx.strokeStyle = "#5a3500";
+ctx.lineWidth = 2;
+ctx.stroke();
+
+
+/* Top bevel ring */
+ctx.beginPath();
+
+ctx.arc(
+    hubX,
+    hubY,
+    20,
+    0,
+    Math.PI * 2
+);
+
+ctx.strokeStyle = "rgba(255,240,150,0.8)";
+ctx.lineWidth = 2;
+ctx.stroke();
+
+
+/* Center shine */
+ctx.beginPath();
+
+ctx.arc(
+    hubX - 7,
+    hubY - 8,
+    7,
+    0,
+    Math.PI * 2
+);
+
+ctx.fillStyle = "rgba(255,255,220,0.55)";
+ctx.fill();
+
+
+ctx.restore();
+
+
+
+
+}
+
+
+
+/* ==========================
+ SPIN
+========================== */
+
+function spinWheel(){
+
+
+if(Wheel.spinning){
+
+    return;
+
+}
+
+Wheel.spinning=true;
+
+
+loadWheelStudents();
+
+
+if(!Wheel.students.length){
+
+Wheel.spinning=false;
+
+return;
+
+}
+
+
+
+let start=
+performance.now();
+
+
+let startAngle=
+Wheel.angle;
+
+
+
+const slice =
+    (Math.PI * 2) / Wheel.students.length;
+
+
+
+
+
+/*
+    Aim the CENTER of the student's slice
+    at the pointer.
+*/
+
+const targetIndex =
+    Wheel.students.findIndex(
+        s => s.name === Wheel.currentName
+    );
+
+
+if(targetIndex < 0){
+
+    Wheel.spinning=false;
+    return;
+
+}
+
+
+const studentAngle =
+    (targetIndex * slice) +
+    (slice / 2);
+
+const pointerAngle =
+    -Math.PI / 2;
+
+/* Angle needed to line the student's slice up
+   with the pointer. */
+let offset =
+    pointerAngle - studentAngle - startAngle;
+
+/* Keep it positive so we never spin backwards. */
+offset =
+    ((offset % (Math.PI * 2)) + (Math.PI * 2)) %
+    (Math.PI * 2);
+
+/* Always spin at least 3 complete turns first. */
+const minimumTurns = 7;
+
+let target =
+    startAngle +
+    (minimumTurns * Math.PI * 2) +
+    offset;
+function animate(now){
+
+
+let p=
+(now-start)/Wheel.duration;
+
+
+if(p>1)p=1;
+
+
+let ease=
+1-Math.pow(1-p,5);
+
+
+Wheel.angle=
+startAngle+
+(target-startAngle)*ease;
+
+
+drawWheel();
+
+
+
+if(p<1){
+
+requestAnimationFrame(animate);
+
+}
+
+else{
+
+Wheel.spinning=false;
+
+/* Advance to the same student
+   the wheel just landed on */
+
+loadWheelStudents();
+
+drawWheel();
+
+
+
+}
+
+}
+
+
+requestAnimationFrame(animate);
+
+
+}
+
+
+/* ==========================
+ SHOW / HIDE
+========================== */
+
+function showWheel(){
+
+createWheel();
+
+Wheel.overlay.style.display="flex";
+
+loadWheelStudents();
+
+drawWheel();
+
+}
+
+
+function hideWheel(){
+
+if(Wheel.overlay){
+
+Wheel.overlay.style.display="none";
+
+}
+
+}
+
+
+
+/* ==========================
+ BUTTON
+========================== */
+
+
+function toggleSpinner(){
+
+    if(
+        Wheel.overlay &&
+        Wheel.overlay.style.display === "flex"
+    ){
+        hideWheel();
+    }
+    else{
+        showWheel();
+    }
+
+}
+
+const leftSpinner =
+document.getElementById("spinnerBtn");
+
+if(leftSpinner){
+    leftSpinner.onclick = toggleSpinner;
+}
+
+const rightSpinner =
+document.getElementById("spinnerBtnRight");
+
+if(rightSpinner){
+    rightSpinner.onclick = toggleSpinner;
+}
+
+/* make available */
+
+window.spinWheel = spinWheel;
+window.hideWheel = hideWheel;
+
+/* ---------------------------------------
+   CONNECT TO EXISTING STUDENT TILE LOGIC
+--------------------------------------- */
+
+/* ---------------------------------------
+   WATCH STUDENT TILE CLICKS
+--------------------------------------- */
+
+document.addEventListener("click", function(e){
+
+    if(
+        e.target.classList.contains("studentTile")
+    ){
+
+        /* BLOCK TILE ADVANCE WHILE SPINNER IS RUNNING */
+        if(Wheel.spinning){
+
+            e.stopImmediatePropagation();
+            e.preventDefault();
+
+            return;
+
+        }
+
+
+        if(
+            Wheel.overlay &&
+            Wheel.overlay.style.display==="flex"
+        ){
+
+            setTimeout(()=>{
+
+                loadWheelStudents();
+
+                spinWheel();
+
+            },50);
+
+        }
+
+    }
+
+}, true);
+})();
+
+</script>
+
+<script>
+
+/* ==========================
+   BREAK TIMER MODAL
+========================== */
+
+
+let breakInterval=null;
+let breakRemaining=300;
+
+
+function openBreakModal(){
+
+    const modal = document.getElementById("breakModal");
+
+
+    if(modal.style.display === "block"){
+
+        // hide modal
+        modal.style.display = "none";
+
+        // optionally stop timer
+        clearInterval(breakInterval);
+        breakInterval = null;
+
+        return;
+    }
+
+
+    // show modal
+    modal.style.display = "block";
+
+    startBreak();
+
+}
+
+function renderBreak(){
+
+    let m=Math.floor(breakRemaining/60);
+
+    let s=String(breakRemaining%60)
+        .padStart(2,"0");
+
+    document.getElementById("breakTimer")
+        .textContent=`${m}:${s}`;
+
+}
+
+function adjustBreakTime(amount){
+
+    breakRemaining += amount;
+
+    if(breakRemaining < 0){
+
+        breakRemaining = 0;
+
+    }
+
+    renderBreak();
+
+}
+
+function startBreak(duration=300){
+
+    clearInterval(breakInterval);
+
+    breakRemaining=duration;
+
+    renderBreak();
+
+
+    breakInterval=setInterval(()=>{
+
+        breakRemaining--;
+
+        renderBreak();
+
+
+        if(breakRemaining<=0){
+
+            clearInterval(breakInterval);
+
+            breakInterval=null;
+
+            document.getElementById("breakTimer")
+                .textContent="Time's up!";
+
+        }
+
+    },1000);
+
+}
+
+
+document
+.getElementById("breakStart")
+.onclick=()=>startBreak();
+
+document
+.getElementById("breakPlus")
+.onclick=()=>adjustBreakTime(60);
+
+
+document
+.getElementById("breakMinus")
+.onclick=()=>adjustBreakTime(-60);
+
+
+
+/* ==========================
+   DRAGGABLE BREAK MODAL
+========================== */
+
+(function(){
+
+let modal=document.getElementById("breakModal");
+
+let dragging=false;
+
+let offsetX=0;
+let offsetY=0;
+
+
+modal.addEventListener("mousedown",e=>{
+
+    dragging=true;
+
+    offsetX=e.clientX-modal.offsetLeft;
+    offsetY=e.clientY-modal.offsetTop;
+
+});
+
+
+document.addEventListener("mousemove",e=>{
+
+    if(!dragging)return;
+
+
+    modal.style.left=
+        (e.clientX-offsetX)+"px";
+
+
+    modal.style.top=
+        (e.clientY-offsetY)+"px";
+
+
+    modal.style.transform="none";
+
+});
+
+
+document.addEventListener("mouseup",()=>{
+
+    dragging=false;
+
+});
+
+
+})();
+
+</script>
+
+<script>
+
+/* ==========================================================
+   SOUND CATEGORY ENGINE
+   PART 1
+========================================================== */
+
+(function(){
+
+/* ==========================================
+   PLAYLIST STORAGE
+========================================== */
+
+const SoundEngine = {
+
+    buttons:[],    // all ~S sound buttons
+
+    volume:0.80,
+    currentAudio:null
+
+};
+
+/* ==========================================
+   PLAY ONE SOUND
+========================================== */
+
+let audioUnlocked = false;
+let pendingSound = null;
+
+function playSound(file){
+
+    if(!file) return;
+
+    let player =
+        document.getElementById("soundPlayer");
+
+    if(!player){
+
+        player =
+            document.createElement("audio");
+
+        player.id = "soundPlayer";
+        player.style.display = "none";
+
+        document.body.appendChild(player);
+
+    }
+
+    function startPlayback(){
+
+        player.pause();
+
+        player.currentTime = 0;
+
+        console.log("Loading audio:", file);
+
+player.src = file;
+
+        player.volume = SoundEngine.volume;
+
+        player.load();
+
+        player.play().catch(function(err){
+
+            console.log(
+                "Sound playback failed:",
+                file,
+                err
+            );
+
+        });
+
+    }
+
+    if(audioUnlocked){
+
+        startPlayback();
+        return;
+
+    }
+
+    pendingSound = file;
+
+}
+
+
+/* ==========================================
+   CLEAR PLAYLISTS
+========================================== */
+
+function clearPlaylists(){
+
+    SoundEngine.buttons=[];
+
+}
+/* ==========================================
+   SCAN WORKSHEET FOR SOUND COMMANDS
+========================================== */
+
+function scanSoundScript(){
+
+    console.log("SoundEngine scan started");
+
+    clearPlaylists();
+    const input =
+        document.getElementById(
+            "worksheetScript"
+        );
+
+    if(!input) return;
+
+    const lines =
+        input.value.split(/\r?\n/);
+
+    lines.forEach(function(line){
+
+        line = line.trim();
+
+if(!/^~S/i.test(line))
+    return;
+/*
+    Expected format:
+
+    ~S - Label - filename.mp3
+*/
+/* ==========================
+   LABELLED SOUND BUTTON
+   ~S - Dog - dog.mp3
+========================== */
+
+const buttonMatch =
+    line.match(
+        /^~S\S*\s*-\s*(.+?\.(?:mp3|wav|ogg|m4a))\s*$/i
+    );
+
+if(buttonMatch){
+
+    const file =
+        buttonMatch[1].trim();
+
+    const label =
+        file.replace(/\.[^.]+$/,"");
+
+    SoundEngine.buttons.push({
+
+        label: label,
+
+        file: file
+
+    });
+
+    return;
+
+}
+
+return;    });
+
+    buildSoundTiles();
+
+}
+
+
+/* ==========================================
+   BUILD SOUND TILES
+========================================== */
+
+function buildSoundTiles(){
+
+    const tileArea =
+        document.getElementById("tiles");
+
+    if(!tileArea) return;
+
+    /* Remove old sound tiles */
+
+    tileArea
+        .querySelectorAll(".soundTile")
+        .forEach(function(tile){
+
+            tile.remove();
+
+        });
+
+
+    /* Friendly category names */
+
+/* Build labelled ~S buttons */
+
+console.log("S BUTTON COUNT:", SoundEngine.buttons.length);
+
+SoundEngine.buttons.forEach(function(sound){
+
+    const tile =
+        document.createElement("button");
+
+    tile.type="button";
+
+    tile.className =
+        "tile soundTile";
+
+    tile.textContent =
+        sound.label;
+
+tile.onclick=function(){
+
+    console.log("Clicked:", sound);
+
+    playSound(sound.file);
+
+};
+
+    tileArea.appendChild(tile);
+
+playSound(sound.file);
+
+});
+
+}
+
+
+/* ==========================================
+   UNLOCK AUDIO ON FIRST USER ACTION
+========================================== */
+
+function unlockAudio(){
+
+    if(audioUnlocked) return;
+
+    audioUnlocked = true;
+
+    if(pendingSound){
+
+        const sound = pendingSound;
+
+        pendingSound = null;
+
+        playSound(sound);
+
+    }
+
+}
+
+document.addEventListener(
+    "pointerdown",
+    unlockAudio,
+    { once:true }
+);
+
+document.addEventListener(
+    "keydown",
+    unlockAudio,
+    { once:true }
+);
+
+
+
+
+
+/* ==========================================
+   AUTO REBUILD WHEN SCRIPT CHANGES
+========================================== */
+
+const worksheetScript =
+    document.getElementById("worksheetScript");
+
+if(worksheetScript){
+
+    worksheetScript.addEventListener(
+        "input",
+        scanSoundScript
+    );
+
+}
+
+
+/* ==========================================
+   INITIAL SCAN
+========================================== */
+
+scanSoundScript();
+
+
+/* ==========================================
+   OPTIONAL DEBUG
+========================================== */
+
+window.SoundEngine = SoundEngine;
+
+
+/* ==========================================
+   END ENGINE
+========================================== */
+
+})();
+
+
+</script>
+
+
+
+</body>
+</html>
