@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>Focus Pages</title>
-spinner
+
 <style>
 
 *{
@@ -27,7 +27,7 @@ html,body{
 
 #main{
     display:flex;
-    height:calc(100vh - 88px);
+    height:calc(100vh - 100px);
 }
 
 /* ==========================
@@ -167,13 +167,54 @@ html,body{
    TILES
 ========================== */
 
+#tilesBar{
+
+    position:fixed;
+
+    left:0;
+    right:0;
+
+    bottom:24px;
+
+    height:100px;
+
+    display:flex;
+    flex-direction:column;
+
+    border-top:1px solid #999;
+
+    background:#ececec;
+
+    z-index:9998;
+
+}
+#toggleTiles{
+
+    width:24px;
+
+    border:none;
+
+    border-right:1px solid #999;
+
+    cursor:pointer;
+
+    background:#ececec;
+
+    font-size:12px;
+
+    padding:0;
+
+}
+
 #tiles{
-    height:58px;
+
+    flex:1;
+
+    height:100%;
+
     background:white;
-    border-top:1px solid #000;
-    border-left:1px solid #000;
-    border-right:1px solid #000;
-    border-bottom:1px solid #000;
+
+
     display:flex;
     flex-wrap:wrap;
 
@@ -183,10 +224,11 @@ html,body{
 
     overflow:auto;
 
-    align-content: flex-start;  /* IMPORTANT */
-    justify-content: flex-start;
-}
+    align-content:flex-start;
 
+    justify-content:flex-start;
+
+}
 .tile{
     min-width:8ch;
     height:14px;
@@ -215,6 +257,23 @@ html,body{
     border-color:#2f6fb7;
     color:white;
 }
+
+#tilesResizeBar{
+
+    height:8px;
+
+    width:100%;
+
+    background:#999;
+
+    cursor:ns-resize;
+
+    flex-shrink:0;
+
+}
+
+
+
 
 /* ==========================
    DRAGGABLES
@@ -354,12 +413,35 @@ img {
     height:24px;
 
     display:flex;
+    flex-direction:row;
+    align-items:stretch;
 
     border-top:1px solid #999;
 
     background:#ececec;
+    z-index:10000;
+
 }
 
+#scriptResizeBar{
+
+    position:absolute;
+
+    top:-8px;
+
+    left:0;
+
+    width:100%;
+
+    height:8px;
+
+    background:#999;
+
+    cursor:ns-resize;
+
+    z-index:10001;
+
+}
 #worksheetScript{
 
     flex:1;
@@ -377,8 +459,44 @@ img {
     border:none;
 
     outline:none;
+
+    scrollbar-width:none;   /* Firefox */
+
 }
 
+
+#worksheetScript::-webkit-scrollbar{
+
+    display:none;           /* Chrome / Edge */
+
+}
+
+#downloadTxtBtn{
+
+    width:32px;
+
+    height:22px;
+
+    font-size:10px;
+
+    border:none;
+
+    border-left:1px solid #999;
+
+    background:#f7f7f7;
+
+    cursor:pointer;
+
+    padding:0;
+
+}
+
+
+#downloadTxtBtn:hover{
+
+    background:#ddd;
+
+}
 #scriptBar.expanded{
 
     height:220px;
@@ -426,6 +544,47 @@ img {
     border-color:#1B5E20;
     color:white;
 }
+
+
+/* ==========================
+   SECONDARY ~S AUDIO BUTTONS
+========================== */
+
+.soundTile{
+
+    min-width:8ch;
+    height:14px;
+    line-height:14px;
+    font-size:9px;
+
+    padding:0 4px;
+    margin:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+    white-space:nowrap;
+    user-select:none;
+    cursor:pointer;
+
+    background:#F6C58B;      /* pastel orange */
+    border:1px solid #D99A4A;
+    color:#222;
+
+}
+
+
+.soundTile.selected{
+
+    background:#E67E22;      /* clicked orange */
+    border-color:#B85C00;
+    color:white;
+
+}
+
+
 
 .placedTile {
     background: rgba(255,255,255,0.85);
@@ -739,7 +898,40 @@ background:#000;
     padding:0;
 
     pointer-events:auto;
-}</style>
+}
+
+.imageTile{
+
+    background:#888;
+    border:1px solid #666;
+    color:white;
+
+}
+
+.imageTile.selected{
+
+    background:#555;
+    border-color:#333;
+    color:white;
+
+}
+
+#tallymanLeftBtn,
+#tallymanRightBtn{
+
+height:24px;
+width:100%;
+
+font-size:10px;
+
+border:none;
+border-bottom:1px solid #999;
+
+cursor:pointer;
+
+}
+
+</style>
 </head>
 <body>
 
@@ -783,7 +975,8 @@ Browse
 
         <!-- ZOOM -->
         <div style="height:24px; padding:2px; border-bottom:1px solid #999;">
-            <select id="zoomSelect" style="width:100%; height:20px; font-size:10px;">
+<select id="zoomSelect" style="width:100%; height:20px; font-size:10px; text-align:center; text-align-last:center;">
+
                 <option value="1">100%</option>
                 <option value="1.8">180%</option>
                 <option value="2.0">200%</option>
@@ -794,7 +987,9 @@ Browse
             </select>
         </div>
 
-<select class="classSelect"></select>
+    <select class="classSelect">
+    <option value="">Select</option>
+</select>
 
 <div class="studentTile tile">
     Student
@@ -802,6 +997,10 @@ Browse
 
 <button id="spinnerBtn" class="spinnerButton">
     Spinner
+</button>
+
+<button id="tallymanLeftBtn">
+Tallyman
 </button>
 
 <!-- CLEAR -->
@@ -866,8 +1065,7 @@ Browse
 
     <!-- ZOOM -->
     <div style="height:24px; padding:2px; border-bottom:1px solid #999;">
-        <select id="zoomSelectRight" style="width:100%; height:20px; font-size:10px;">
-            <option value="1">100%</option>
+<select id="zoomSelect" style="width:100%; height:20px; font-size:10px; text-align:center; text-align-last:center;">            <option value="1">100%</option>
             <option value="1.8">180%</option>
             <option value="2.0">200%</option>
             <option value="2.25">225%</option>
@@ -889,6 +1087,12 @@ Browse
     Spinner
 </button>
 
+<button id="tallymanRightBtn">
+Tallyman
+</button>
+
+
+
 <!-- CLEAR -->
 <button id="clearBoardBtnRight">
     Clear
@@ -904,22 +1108,31 @@ Browse
 </div>
 </div>
 
-<div id="tiles"></div>
+<div id="tilesBar">
 
-<div id="scriptBar">
+    
 
-    <button id="toggleScript">▼</button>
+<div id="tilesResizeBar"></div>
 
-    <textarea id="worksheetScript"></textarea>
+<div id="tiles">
+</div>
 
 </div>
 
+<div id="scriptBar">
 
-<div id="breakModal">
+<div id="scriptResizeBar"></div>
+
+<div id="scriptBar">
+    <textarea id="worksheetScript"></textarea>
+    <button id="downloadTxtBtn">TXT</button>
+</div>
+
+</div><div id="breakModal">
 
     <div id="breakContent">
 
-        <h1>☕ Break Time</h1>
+        <h1>A Brief Pause</h1>
 
         <div id="breakTimer">
             5:00
@@ -933,7 +1146,7 @@ Browse
     </span>
 
     <button id="breakStart">
-        Start / Restart
+        Restart
     </button>
 
     <span id="breakPlus" class="breakArrow">
@@ -1278,45 +1491,66 @@ function parseAnswers(raw){
     const lines = raw.split(/\r?\n/);
 
 
-    lines.forEach(line=>{
+lines.forEach(line=>{
 
-        line = line.trim();
+    line = line.trim();
 
+    if(!line.startsWith("~")) return;
 
-        if(!line.startsWith("~")) return;
-
-
-        line = line.substring(1).trim();
-
-
-
-        /*
-            IMAGE INPUT
-
-            ~1overlay.png
-            ~1overlay.jpg
-            ~"some image".png
-        */
-
-        let imageMatch =
-        line.match(/^"?(.+?)"?\.(png|jpg|jpeg)$/i);
+    // IGNORE SOUND CATEGORY DESIGNATIONS
+    if(/^~S/i.test(line)){
+        return;
+    }
 
 
-        if(imageMatch){
+line = line.substring(1).trim();
 
-            answerItems.push({
 
-                label:imageMatch[1],
 
-                type:"image",
+/*
+    IMAGE INPUT
 
-                value:line
+    Format:
 
-            });
+    ~I - filename.png
+    ~IA - filename.jpg
+    ~SB - filename.png
+    ~SC - filename.png
+    ~I1 - filename.png
 
-            return;
+*/
 
-        }
+let imageMatch =
+line.match(/^([A-Za-z0-9]+)\s*-\s*(.+\.(png|jpg|jpeg))$/i);
+
+
+if(imageMatch){
+
+    let filename =
+        imageMatch[2].trim();
+
+
+    let label =
+        filename
+        .replace(/\.(png|jpg|jpeg)$/i,"")
+        .trim();
+
+
+    answerItems.push({
+
+        label: label,
+
+        type: "image",
+
+        value: filename
+
+    });
+
+
+    return;
+
+}
+
 
 
 
@@ -1374,18 +1608,26 @@ function buildAnswerTiles(){
     tileArea.innerHTML="";
 
 
-    answerItems.forEach(item=>{
+answerItems.forEach(item=>{
+
+    const tile =
+    document.createElement("div");
 
 
-        const tile =
-        document.createElement("div");
+    if(item.type === "image"){
+
+        tile.className = "tile imageTile";
+
+    }
+    else{
+
+        tile.className = "tile";
+
+    }
 
 
-        tile.className="tile";
-
-
-        tile.textContent =
-        item.label;
+    tile.textContent =
+    item.label;
 
 
 
@@ -1808,36 +2050,6 @@ the
 1overlay-large.png
 Circleoverlay.png-->
 
-<script>
-
-const toggleScriptBtn = document.getElementById("toggleScript");
-const scriptBar = document.getElementById("scriptBar");
-const worksheetScript = document.getElementById("worksheetScript");
-
-toggleScriptBtn.addEventListener("click", function(){
-
-    const expanded = scriptBar.classList.toggle("expanded");
-
-    if(expanded){
-
-        scriptBar.style.height = "calc(100vh - 58px)";
-        worksheetScript.style.height = "calc(100vh - 82px)";
-
-        toggleScriptBtn.textContent = "▲";
-
-    }
-    else{
-
-        scriptBar.style.height = "24px";
-        worksheetScript.style.height = "22px";
-
-        toggleScriptBtn.textContent = "▼";
-
-    }
-
-});
-
-</script>
 
 <script>
 
@@ -1883,13 +2095,26 @@ function scanMP3References(){
         .value
         .split(/\r?\n/);
 
-    lines.forEach(line=>{
+lines.forEach(line=>{
 
-        line = line.trim();
+    line = line.trim();
 
-        if(!line.startsWith("~")) return;
 
-        line = line.substring(1).trim();
+    if(!line.startsWith("~")) return;
+
+
+    // IGNORE SOUND CATEGORY DESIGNATIONS
+    if(/^~S/i.test(line)){
+        return;
+    }
+
+// DO NOT MAKE ANSWER BUTTONS FROM ~S LINES
+if(line.startsWith("~S")){
+    return;
+}
+
+
+line = line.substring(1).trim();
 
         const match =
             line.match(/^(.+?)\s*[-–—]\s*(.+?\.mp3)\s*$/i);
@@ -2904,8 +3129,7 @@ ctx.rotate(mid + Math.PI);
 
 ctx.fillStyle="#111";
 
-ctx.font = "bold " + (Wheel.size * 0.035) + "px Arial";
-
+ctx.font = (Wheel.size * 0.035) + "px Arial";
 ctx.textAlign="left";
 
 ctx.textBaseline="middle";
@@ -3215,13 +3439,19 @@ if(Wheel.spinning){
 
 Wheel.spinning=true;
 
-
+if(window.startSpinnerSound){
+    startSpinnerSound();
+}
 loadWheelStudents();
 
 
 if(!Wheel.students.length){
 
 Wheel.spinning=false;
+stopSpinnerSound();
+
+/* Advance to the same student
+   the wheel just landed on */
 
 return;
 
@@ -3321,6 +3551,10 @@ else{
 
 Wheel.spinning=false;
 
+if(window.stopSpinnerSound){
+    stopSpinnerSound();
+}
+
 /* Advance to the same student
    the wheel just landed on */
 
@@ -3328,10 +3562,7 @@ loadWheelStudents();
 
 drawWheel();
 
-
-
 }
-
 }
 
 
@@ -3347,17 +3578,77 @@ requestAnimationFrame(animate);
 
 function showWheel(){
 
-createWheel();
+    createWheel();
 
-Wheel.overlay.style.display="flex";
+    Wheel.overlay.style.display="flex";
 
-loadWheelStudents();
 
-drawWheel();
+    /* Load current student tile as starting position */
+
+    const tile =
+        document.querySelector(".studentTile");
+
+    if(tile){
+
+        const name =
+            tile.textContent.trim();
+
+        if(name && name !== "Student"){
+
+            Wheel.currentName = name;
+
+        }
+        else{
+
+            /*
+               No selected student:
+               allow spinner to choose normally
+            */
+
+            Wheel.currentName = null;
+
+        }
+
+    }
+
+
+    loadWheelStudents();
+
+
+    /*
+       Align current student with pointer
+       when wheel opens.
+    */
+
+    const targetIndex =
+        Wheel.students.findIndex(
+            s => s.name === Wheel.currentName
+        );
+
+
+    if(targetIndex >= 0 && Wheel.students.length){
+
+        const slice =
+            (Math.PI * 2) / Wheel.students.length;
+
+
+        const studentCenter =
+            (targetIndex * slice) + (slice / 2);
+
+
+        /*
+           Pointer is at top (-90 degrees)
+        */
+
+        Wheel.angle =
+            (-Math.PI / 2) - studentCenter;
+
+    }
+
+
+    drawWheel();
 
 }
-
-
 function hideWheel(){
 
 if(Wheel.overlay){
@@ -3505,49 +3796,89 @@ function renderBreak(){
 
 function adjustBreakTime(amount){
 
-    breakRemaining += amount;
+    /*
+       If timer is finished,
+       start a new countdown.
+    */
 
-    if(breakRemaining < 0){
+    if(breakRemaining <= 0){
 
-        breakRemaining = 0;
+        startBreak(amount);
+
+    }
+    else{
+
+        /*
+           Add time to current countdown.
+        */
+
+        breakRemaining += amount;
+
+        renderBreak();
 
     }
 
-    renderBreak();
+
+    /*
+       Restart audio whenever + button is clicked.
+    */
+
+    if(typeof restartMusicAfterExtension === "function"){
+
+        restartMusicAfterExtension();
+
+    }
 
 }
+
+
 
 function startBreak(duration=300){
 
     clearInterval(breakInterval);
 
-    breakRemaining=duration;
+
+    /*
+       Start new countdown duration.
+       Works after Time's up.
+    */
+
+    breakRemaining = duration;
 
     renderBreak();
 
 
-    breakInterval=setInterval(()=>{
+    breakInterval = setInterval(()=>{
 
         breakRemaining--;
 
         renderBreak();
 
 
-        if(breakRemaining<=0){
+        if(breakRemaining <= 0){
 
             clearInterval(breakInterval);
 
-            breakInterval=null;
+            breakInterval = null;
 
-            document.getElementById("breakTimer")
-                .textContent="Time's up!";
+
+            document
+            .getElementById("breakTimer")
+            .textContent = "Time's up!";
+
+
+            /*
+               Keep value at zero so
+               next + click starts a new break.
+            */
+
+            breakRemaining = 0;
 
         }
 
     },1000);
 
 }
-
 
 document
 .getElementById("breakStart")
@@ -3617,6 +3948,2265 @@ document.addEventListener("mouseup",()=>{
 
 </script>
 
+<script>
+
+/* ==========================================================
+   SOUND CATEGORY ENGINE
+   PART 1
+========================================================== */
+
+(function(){
+
+/* ==========================================
+   PLAYLIST STORAGE
+========================================== */
+
+const SoundEngine = {
+
+    buttons:[],    // all ~S sound buttons
+
+    volume:0.80,
+    currentAudio:null
+
+};
+
+/* ==========================================
+   PLAY ONE SOUND
+========================================== */
+
+let audioUnlocked = false;
+let pendingSound = null;
+
+function playSound(file){
+
+    if(!file) return;
+
+    let player =
+        document.getElementById("soundPlayer");
+
+    if(!player){
+
+        player =
+            document.createElement("audio");
+
+        player.id = "soundPlayer";
+        player.style.display = "none";
+
+        document.body.appendChild(player);
+
+    }
+
+    function startPlayback(){
+
+        player.pause();
+
+        player.currentTime = 0;
+
+        console.log("Loading audio:", file);
+
+player.src = file;
+
+        player.volume = SoundEngine.volume;
+
+        player.load();
+
+        player.play().catch(function(err){
+
+            console.log(
+                "Sound playback failed:",
+                file,
+                err
+            );
+
+        });
+
+    }
+
+    if(audioUnlocked){
+
+        startPlayback();
+        return;
+
+    }
+
+    pendingSound = file;
+
+}
+
+
+/* ==========================================
+   CLEAR PLAYLISTS
+========================================== */
+
+function clearPlaylists(){
+
+    SoundEngine.buttons=[];
+
+}
+/* ==========================================
+   SCAN WORKSHEET FOR SOUND COMMANDS
+========================================== */
+
+function scanSoundScript(){
+
+    console.log("SoundEngine scan started");
+
+    clearPlaylists();
+    const input =
+        document.getElementById(
+            "worksheetScript"
+        );
+
+    if(!input) return;
+
+    const lines =
+        input.value.split(/\r?\n/);
+
+    lines.forEach(function(line){
+
+        line = line.trim();
+
+if(!/^~S/i.test(line))
+    return;
+/*
+    Expected format:
+
+    ~S - Label - filename.mp3
+*/
+/* ==========================
+   LABELLED SOUND BUTTON
+   ~S - Dog - dog.mp3
+========================== */
+
+const buttonMatch =
+    line.match(
+        /^~S\S*\s*-\s*(.+?\.(?:mp3|wav|ogg|m4a))\s*$/i
+    );
+
+if(buttonMatch){
+
+    const file =
+        buttonMatch[1].trim();
+
+    const label =
+        file.replace(/\.[^.]+$/,"");
+
+    SoundEngine.buttons.push({
+
+        label: label,
+
+        file: file
+
+    });
+
+    return;
+
+}
+
+return;    });
+
+    buildSoundTiles();
+
+}
+
+
+/* ==========================================
+   BUILD SOUND TILES
+========================================== */
+
+function buildSoundTiles(){
+
+    const tileArea =
+        document.getElementById("tiles");
+
+    if(!tileArea) return;
+
+    /* Remove old sound tiles */
+
+    tileArea
+        .querySelectorAll(".soundTile")
+        .forEach(function(tile){
+
+            tile.remove();
+
+        });
+
+
+    /* Friendly category names */
+
+/* Build labelled ~S buttons */
+
+console.log("S BUTTON COUNT:", SoundEngine.buttons.length);
+
+SoundEngine.buttons.forEach(function(sound){
+
+    const tile =
+        document.createElement("button");
+
+    tile.type="button";
+
+    tile.className =
+        "tile soundTile";
+
+    tile.textContent =
+        sound.label;
+
+tile.onclick=function(){
+
+    const player =
+        document.getElementById("soundPlayer");
+
+
+    /*
+       Click same button again = STOP
+    */
+
+    if(
+        tile.classList.contains("selected") &&
+        player &&
+        !player.paused
+    ){
+
+        player.pause();
+
+        player.currentTime = 0;
+
+        tile.classList.remove("selected");
+
+        return;
+
+    }
+
+
+    /*
+       Turn off other selected sound buttons
+    */
+
+    document
+    .querySelectorAll(".soundTile.selected")
+    .forEach(t=>{
+
+        t.classList.remove("selected");
+
+    });
+
+
+    tile.classList.add("selected");
+
+
+    playSound(sound.file);
+
+};
+    tileArea.appendChild(tile);
+
+
+});
+
+}
+
+
+/* ==========================================
+   UNLOCK AUDIO ON FIRST USER ACTION
+========================================== */
+
+function unlockAudio(){
+
+    if(audioUnlocked) return;
+
+    audioUnlocked = true;
+
+    if(pendingSound){
+
+        const sound = pendingSound;
+
+        pendingSound = null;
+
+        playSound(sound);
+
+    }
+
+}
+
+document.addEventListener(
+    "pointerdown",
+    unlockAudio,
+    { once:true }
+);
+
+document.addEventListener(
+    "keydown",
+    unlockAudio,
+    { once:true }
+);
+
+
+
+
+
+/* ==========================================
+   AUTO REBUILD WHEN SCRIPT CHANGES
+========================================== */
+
+const worksheetScript =
+    document.getElementById("worksheetScript");
+
+if(worksheetScript){
+
+    worksheetScript.addEventListener(
+        "input",
+        scanSoundScript
+    );
+
+}
+
+
+/* ==========================================
+   INITIAL SCAN
+========================================== */
+
+scanSoundScript();
+
+
+/* ==========================================
+   OPTIONAL DEBUG
+========================================== */
+
+window.SoundEngine = SoundEngine;
+
+
+/* ==========================================
+   END ENGINE
+========================================== */
+
+})();
+
+
+</script>
+
+<script>
+
+/* =====================================
+   DOWNLOAD SCRIPT TXT
+===================================== */
+
+(function(){
+
+const btn =
+document.getElementById("downloadTxtBtn");
+
+const field =
+document.getElementById("worksheetScript");
+
+
+if(!btn || !field) return;
+
+
+btn.onclick=function(){
+
+    const blob =
+    new Blob(
+        [field.value],
+        {type:"text/plain;charset=utf-8"}
+    );
+
+
+    const a =
+    document.createElement("a");
+
+
+    a.href =
+    URL.createObjectURL(blob);
+
+
+    a.download =
+    "Worksheet.txt";
+
+
+    a.click();
+
+
+    URL.revokeObjectURL(a.href);
+
+};
+
+})();
+
+</script>
+
+<script>
+
+(function(){
+
+const bar =
+document.getElementById("tilesResizeBar");
+
+const tiles =
+document.getElementById("tiles");
+
+const script =
+document.getElementById("scriptBar");
+
+let dragging=false;
+
+
+bar.addEventListener("pointerdown",e=>{
+
+    dragging=true;
+
+    bar.setPointerCapture(e.pointerId);
+
+});
+
+
+bar.addEventListener("pointermove",e=>{
+
+    if(!dragging) return;
+
+
+    const y=e.clientY;
+
+    const height =
+        window.innerHeight - y - script.offsetHeight;
+
+
+if(height > 40){
+
+    document.getElementById("tilesBar").style.height =
+        height + "px";
+
+}
+
+});
+
+
+bar.addEventListener("pointerup",()=>{
+
+    dragging=false;
+
+});
+
+
+})();
+
+</script>
+
+<script>
+
+(function(){
+
+const handle =
+document.getElementById("scriptResizeBar");
+
+const scriptBar =
+document.getElementById("scriptBar");
+
+const textarea =
+document.getElementById("worksheetScript");
+
+const txt =
+document.getElementById("downloadTxtBtn");
+
+let resizing=false;
+
+
+handle.addEventListener("pointerdown", e=>{
+
+    resizing=true;
+
+    handle.setPointerCapture(e.pointerId);
+
+});
+
+
+handle.addEventListener("pointermove", e=>{
+
+    if(!resizing) return;
+
+
+const y = Math.max(40, e.clientY);
+
+let height =
+        window.innerHeight - y;
+
+
+    if(height < 24)
+        height = 24;
+
+
+    scriptBar.style.height =
+        height + "px";
+
+
+    textarea.style.height =
+        height + "px";
+
+
+});
+
+
+handle.addEventListener("pointerup",()=>{
+
+    resizing=false;
+
+});
+
+
+})();
+
+</script>
+
+<script>
+
+(function(){
+
+const bar =
+document.getElementById("tilesResizeBar");
+
+const tilesBar =
+document.getElementById("tilesBar");
+
+const scriptBar =
+document.getElementById("scriptBar");
+
+const leftColumn =
+document.getElementById("leftColumn");
+
+let dragging=false;
+
+let minTop=0;
+
+
+/* SET INITIAL POSITION */
+
+function setTileLimit(){
+
+    if(!leftColumn) return;
+
+    minTop =
+        leftColumn.offsetHeight;
+
+    tilesBar.style.top =
+        minTop + "px";
+
+    tilesBar.style.bottom =
+        scriptBar.offsetHeight + "px";
+
+}
+
+
+window.addEventListener(
+"load",
+setTileLimit
+);
+
+
+window.addEventListener(
+"resize",
+setTileLimit
+);
+
+
+
+/* DRAG */
+
+bar.addEventListener("pointerdown",e=>{
+
+    dragging=true;
+
+    bar.setPointerCapture(e.pointerId);
+
+});
+
+
+bar.addEventListener("pointermove",e=>{
+
+    if(!dragging) return;
+
+
+    let newTop =
+        e.clientY;
+
+
+    // NEVER move below page buttons
+    if(newTop > minTop){
+        newTop = minTop;
+    }
+
+
+    // never off the top
+    if(newTop < 0){
+        newTop = 0;
+    }
+
+
+    tilesBar.style.top =
+        newTop + "px";
+
+
+    tilesBar.style.bottom =
+        scriptBar.offsetHeight + "px";
+
+
+});
+
+
+bar.addEventListener("pointerup",()=>{
+
+    dragging=false;
+
+});
+
+
+})();
+
+</script>
+
+<script>
+
+(function(){
+
+const bar =
+document.getElementById("tilesResizeBar");
+
+const tilesBar =
+document.getElementById("tilesBar");
+
+const scriptBar =
+document.getElementById("scriptBar");
+
+const leftColumn =
+document.getElementById("leftColumn");
+
+let dragging=false;
+
+let maxY=0;
+
+
+function setTileLimit(){
+
+    if(!leftColumn) return;
+
+    maxY =
+        leftColumn.offsetHeight;
+
+    // initial position
+    const startHeight =
+        window.innerHeight -
+        maxY -
+        scriptBar.offsetHeight;
+
+    tilesBar.style.height =
+        startHeight + "px";
+
+}
+
+
+window.addEventListener(
+"load",
+setTileLimit
+);
+
+
+window.addEventListener(
+"resize",
+setTileLimit
+);
+
+
+
+bar.addEventListener("pointerdown",e=>{
+
+    dragging=true;
+
+    bar.setPointerCapture(e.pointerId);
+
+});
+
+
+bar.addEventListener("pointermove",e=>{
+
+    if(!dragging) return;
+
+
+    let y = e.clientY;
+
+
+    // splitter cannot go lower
+    if(y > maxY){
+        y = maxY;
+    }
+
+
+    // splitter cannot go above top
+    if(y < 0){
+        y = 0;
+    }
+
+
+    const newHeight =
+        window.innerHeight -
+        y -
+        scriptBar.offsetHeight;
+
+
+    tilesBar.style.height =
+        newHeight + "px";
+
+
+});
+
+
+bar.addEventListener("pointerup",()=>{
+
+    dragging=false;
+
+});
+
+
+})();
+
+</script>
+
+<script>
+
+(function(){
+
+/* ==========================================
+   TILE PLACEMENT SOUND ENGINE
+========================================== */
+
+
+const PlacementSound = {
+
+    audio:null,
+
+    file:"bubble-pop-406640.mp3",
+
+    volume:0.5
+
+};
+
+
+/* ==========================================
+   CREATE AUDIO
+========================================== */
+
+function initSound(){
+
+    if(PlacementSound.audio)
+        return;
+
+
+    PlacementSound.audio =
+    document.createElement("audio");
+
+
+    PlacementSound.audio.src =
+        PlacementSound.file;
+
+
+    PlacementSound.audio.volume =
+        PlacementSound.volume;
+
+
+    PlacementSound.audio.preload="auto";
+
+
+    document.body.appendChild(
+        PlacementSound.audio
+    );
+
+}
+
+
+
+/* ==========================================
+   PLAY SOUND
+========================================== */
+
+function playPlacementSound(){
+
+    initSound();
+
+
+    PlacementSound.audio.pause();
+
+
+    PlacementSound.audio.currentTime=0;
+
+
+    PlacementSound.audio.play()
+    .catch(err=>{
+
+        console.log(
+            "Placement sound waiting for user interaction"
+        );
+
+    });
+
+}
+
+
+
+/* ==========================================
+   WATCH FOR NEW TILES
+========================================== */
+
+function startWatcher(){
+
+
+    const spread =
+        document.getElementById("spread");
+
+
+    if(!spread)
+        return;
+
+
+
+    const observer =
+    new MutationObserver(function(records){
+
+
+        records.forEach(record=>{
+
+
+            record.addedNodes.forEach(node=>{
+
+
+                if(
+                    node.nodeType === 1 &&
+                    node.classList.contains("draggable")
+                ){
+
+                    playPlacementSound();
+
+                }
+
+
+            });
+
+
+        });
+
+
+    });
+
+
+
+    observer.observe(
+        spread,
+        {
+            childList:true
+        }
+    );
+
+
+}
+
+
+
+/* ==========================================
+   START
+========================================== */
+
+window.addEventListener(
+"DOMContentLoaded",
+startWatcher
+);
+
+
+
+/* expose control */
+
+window.PlacementSound =
+    PlacementSound;
+
+
+})();
+
+</script>
+
+<script>
+/* ==========================================
+   SPINNER MP3 PLAYER
+   Standalone
+========================================== */
+
+(function () {
+
+    const spinnerSound = new Audio("freesound_community-spinner-sound-36693.mp3");
+
+    spinnerSound.loop = true;
+    spinnerSound.preload = "auto";
+    spinnerSound.volume = .05;
+
+    let isPlaying = false;
+
+    function startSpinnerSound() {
+
+        if (isPlaying) return;
+
+        isPlaying = true;
+
+        spinnerSound.pause();
+        spinnerSound.currentTime = 0;
+
+        const playPromise = spinnerSound.play();
+
+        if (playPromise !== undefined) {
+            playPromise.catch(err => {
+                console.error("Spinner sound failed:", err);
+                isPlaying = false;
+            });
+        }
+
+    }
+
+    function stopSpinnerSound() {
+
+        if (!isPlaying) return;
+
+        isPlaying = false;
+
+        spinnerSound.pause();
+        spinnerSound.currentTime = 0;
+
+    }
+
+    /* Optional: preload once after the first user interaction */
+    function unlockAudio() {
+
+        spinnerSound.play()
+            .then(() => {
+                spinnerSound.pause();
+                spinnerSound.currentTime = 0;
+            })
+            .catch(() => {});
+
+        document.removeEventListener("pointerdown", unlockAudio);
+    }
+
+    document.addEventListener("pointerdown", unlockAudio, { once: true });
+
+    window.startSpinnerSound = startSpinnerSound;
+    window.stopSpinnerSound = stopSpinnerSound;
+
+})();
+</script>
+
+<script>
+/* ==========================================
+   COFFEE BREAK MUSIC PLAYER
+   Standalone
+========================================== */
+
+(function () {
+
+    const breakMusic = new Audio(
+        "musicalmix2020-bossa-nova-summer-instrumental-brazil-7969.mp3"
+    );
+
+    breakMusic.loop = true;
+    breakMusic.preload = "auto";
+    breakMusic.volume = 0.15;
+
+
+    let musicTimer = null;
+
+
+
+    function playMusicFromStart(){
+
+        breakMusic.pause();
+
+        breakMusic.currentTime = 0;
+
+
+        breakMusic.play()
+        .then(()=>{
+
+            console.log(
+                "Coffee music restarted"
+            );
+
+        })
+        .catch(err=>{
+
+            console.log(
+                "Coffee music blocked:",
+                err
+            );
+
+        });
+
+
+        watchBreakTimer();
+
+    }
+
+
+
+    function startBreakMusic(){
+
+        if(!breakMusic.paused){
+            return;
+        }
+
+
+        playMusicFromStart();
+
+    }
+
+
+
+    function restartBreakMusic(){
+
+        /*
+           Restart button
+        */
+
+        playMusicFromStart();
+
+    }
+
+
+
+    function restartMusicAfterExtension(){
+
+        /*
+           Up button:
+           Timer has already been increased elsewhere.
+           We only restart audio.
+        */
+
+        playMusicFromStart();
+
+    }
+
+
+
+    function stopBreakMusic(){
+
+        breakMusic.pause();
+
+        breakMusic.currentTime = 0;
+
+
+        clearInterval(musicTimer);
+
+        musicTimer = null;
+
+    }
+
+
+
+    function watchBreakTimer(){
+
+        clearInterval(musicTimer);
+
+
+        musicTimer = setInterval(()=>{
+
+
+            if(
+                typeof breakRemaining !== "undefined" &&
+                breakRemaining <= 0
+            ){
+
+                stopBreakMusic();
+
+            }
+
+
+        },500);
+
+    }
+
+
+
+    /*
+       Existing Break modal connection
+    */
+
+    const oldOpenBreakModal =
+        window.openBreakModal;
+
+
+    window.openBreakModal = function(){
+
+
+        const modal =
+            document.getElementById("breakModal");
+
+
+        if(
+            modal &&
+            modal.style.display === "block"
+        ){
+
+            stopBreakMusic();
+
+        }
+        else{
+
+            startBreakMusic();
+
+        }
+
+
+        oldOpenBreakModal();
+
+    };
+
+
+
+    /*
+       Global controls
+    */
+
+    window.startBreakMusic =
+        startBreakMusic;
+
+
+    window.stopBreakMusic =
+        stopBreakMusic;
+
+
+    window.restartBreakMusic =
+        restartBreakMusic;
+
+
+    window.restartMusicAfterExtension =
+        restartMusicAfterExtension;
+
+
+
+})();
+</script>
+
+<script>
+(function(){
+
+"use strict";
+
+/*==================================================
+ TALLYMAN STANDALONE
+ PART 1
+ Floating Launcher + Modal Shell
+==================================================*/
+
+const TM = {
+
+version:"1.0",
+
+width:360,
+height:420
+
+};
+
+
+/*==================================================
+ CSS
+==================================================*/
+
+const style=document.createElement("style");
+
+style.textContent=`
+
+#tmWindow{
+
+position:fixed;
+
+right:100px;
+bottom:130px;
+
+width:${TM.width}px;
+height:${TM.height}px;
+
+display:none;
+
+background:transparent;
+
+z-index:2147483646;
+
+font-family:system-ui,sans-serif;
+
+}
+
+#tmWindow.tmOpen{
+
+display:block;
+
+}
+
+#tmPanel{
+
+position:absolute;
+inset:0;
+
+background:#dbeafe;
+
+border-radius:12px;
+
+box-shadow:
+0 10px 30px rgba(0,0,0,.30);
+
+overflow:hidden;
+
+display:flex;
+flex-direction:column;
+
+}
+
+#tmDrag{
+
+height:16px;
+
+cursor:move;
+
+background:#f2f2f2;
+
+position:relative;
+
+user-select:none;
+
+}
+
+#tmClose{
+
+position:absolute;
+
+right:4px;
+top:1px;
+
+width:14px;
+height:14px;
+
+border:none;
+
+border-radius:50%;
+
+background:#000;
+
+color:#fff;
+
+font-size:10px;
+
+cursor:pointer;
+
+padding:0;
+
+line-height:14px;
+
+}
+
+#tmContent{
+
+flex:1;
+
+overflow:auto;
+
+padding:12px;
+
+}
+
+`;
+
+document.head.appendChild(style);
+
+/*==================================================
+ HTML
+==================================================*/
+
+
+const win=document.createElement("div");
+
+win.id="tmWindow";
+
+win.innerHTML=`
+
+<div id="tmPanel">
+
+<div id="tmDrag">
+
+<button id="tmClose">×</button>
+
+</div>
+
+<div id="tmContent">
+
+<h3 style="margin-top:0;">
+Tallyman
+</h3>
+
+<div id="tmApp"></div>
+
+</div>
+
+</div>
+
+`;
+
+document.body.appendChild(win);
+
+function openTallyman(){
+
+    win.classList.add("tmOpen");
+
+}
+
+
+document.addEventListener("click",function(e){
+
+    if(e.target.id==="tallymanLeftBtn" ||
+       e.target.id==="tallymanRightBtn"){
+
+        openTallyman();
+
+    }
+
+});
+
+document
+.getElementById("tmClose")
+.addEventListener("click",function(e){
+
+    e.stopPropagation();
+
+    win.classList.remove("tmOpen");
+
+});
+
+
+/*==================================================
+ OPEN / CLOSE
+==================================================*/
+
+
+
+document
+.getElementById("tmClose")
+.addEventListener("click",function(e){
+
+e.stopPropagation();
+
+win.classList.remove("tmOpen");
+
+});
+
+/*==================================================
+ DRAG FUNCTION
+==================================================*/
+
+function drag(target,handle){
+
+let dragging=false;
+
+let ox=0;
+let oy=0;
+
+handle.addEventListener("mousedown",function(e){
+
+dragging=true;
+
+ox=e.clientX-target.offsetLeft;
+
+oy=e.clientY-target.offsetTop;
+
+});
+
+document.addEventListener("mousemove",function(e){
+
+if(!dragging)return;
+
+target.style.left=
+(e.clientX-ox)+"px";
+
+target.style.top=
+(e.clientY-oy)+"px";
+
+target.style.right="auto";
+target.style.bottom="auto";
+
+});
+
+document.addEventListener("mouseup",function(){
+
+dragging=false;
+
+});
+
+}
+
+/*==================================================
+ ENABLE DRAGGING
+==================================================*/
+
+
+
+drag(
+win,
+document.getElementById("tmDrag")
+);
+
+
+
+/*==================================================
+ TALLYMAN STANDALONE
+ PART 2
+ Interface
+==================================================*/
+
+const app=document.getElementById("tmApp");
+
+app.innerHTML=`
+
+<div id="tmWrapper">
+
+<div id="tmTopBar">
+
+<select id="tmClassSelect">
+<option value="" selected disabled>Select a student</option>
+</select>
+
+</div>
+
+<div id="tmTile">
+
+
+</div>
+
+<div id="tmScoreboard">
+
+<div class="tmTeam">
+
+<div class="tmHeader">
+Blue
+</div>
+
+<div class="tmTallies"
+data-team="Blue">
+</div>
+
+<div class="tmScore"
+id="tmScoreBlue">
+0
+</div>
+
+</div>
+
+
+<div class="tmTeam">
+
+<div class="tmHeader">
+Green
+</div>
+
+<div class="tmTallies"
+data-team="Green">
+</div>
+
+<div class="tmScore"
+id="tmScoreGreen">
+0
+</div>
+
+</div>
+
+
+<div class="tmTeam">
+
+<div class="tmHeader">
+Orange
+</div>
+
+<div class="tmTallies"
+data-team="Orange">
+</div>
+
+<div class="tmScore"
+id="tmScoreOrange">
+0
+</div>
+
+</div>
+
+
+<div class="tmTeam">
+
+<div class="tmHeader">
+Red
+</div>
+
+<div class="tmTallies"
+data-team="Red">
+</div>
+
+<div class="tmScore"
+id="tmScoreRed">
+0
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+/*==================================================
+ PART 2 CSS
+==================================================*/
+
+style.textContent+=`
+
+#tmWrapper{
+
+display:flex;
+flex-direction:column;
+gap:8px;
+
+}
+
+#tmTopBar{
+
+display:flex;
+gap:6px;
+
+}
+
+#tmTopBar select{
+
+flex:1;
+height:34px;
+
+}
+
+#tmTopBar button{
+
+width:70px;
+height:34px;
+
+}
+
+#tmTile{
+
+height:42px;
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+font-size:16px;
+font-weight:700;
+
+border-radius:8px;
+
+background:#ececec;
+
+transition:.25s;
+
+user-select:none;
+cursor:pointer;
+
+}
+
+#tmScoreboard{
+
+display:grid;
+
+grid-template-columns:
+repeat(4,1fr);
+
+gap:6px;
+
+}
+
+.tmTeam{
+
+border:1px solid #ccc;
+
+border-radius:6px;
+
+background:#fff;
+
+display:grid;
+
+grid-template-rows:
+auto
+1fr
+auto;
+
+}
+
+.tmHeader{
+
+font-size:10px;
+font-weight:700;
+
+text-align:center;
+
+padding:3px;
+
+}
+
+.tmTallies{
+
+min-height:54px;
+
+padding:4px;
+
+display:flex;
+
+flex-direction:column;
+
+align-items:center;
+
+gap:4px;
+
+cursor:pointer;
+
+}
+
+.tmGroup{
+
+position:relative;
+
+display:flex;
+
+justify-content:center;
+
+align-items:center;
+
+gap:3px;
+
+width:100%;
+
+}
+
+.tmGroup svg{
+
+position:absolute;
+
+inset:0;
+
+width:100%;
+height:100%;
+
+pointer-events:none;
+
+}
+
+.tmStick{
+
+width:2px;
+height:14px;
+
+background:#111;
+
+}
+
+.tmScore{
+
+border-top:1px solid #ddd;
+
+text-align:center;
+
+font-size:10px;
+
+font-weight:700;
+
+padding:2px;
+
+}
+
+`;
+
+/*==================================================
+ TALLYMAN STANDALONE
+ PART 3
+ Data + Parser + Slideshow
+==================================================*/
+
+const TM_COLORS={
+    Blue:"#93c5fd",
+    Green:"#86efac",
+    Orange:"#fdba74",
+    Red:"#fca5a5"
+};
+
+const TM_RAW=`
+
+~11.1	
+Blue	Thanawat
+Blue	Warawut
+Blue	Phawat
+Green	Suphajak
+Green	Kallapapruek
+Green	Soraphat
+Orange	Nacharot
+Orange	Paphawin
+Orange	Pattaradorn
+Orange	Theerapith
+Red	Thannakorn
+Red	Khemmanat
+Red	Pannawit
+Red	Chatchanok
+~13.2	
+Blue	Patiphan
+Blue	Katanyu
+Blue	Suthimont
+Green	Korravit
+Green	Machat
+Green	Phoomipat
+Orange	Ingkrit
+Orange	Pachara
+Orange	Khanaphot
+Orange	Napol
+Red	Kannaphat
+Red	Natthapakorn
+Red	Phurit
+Red	Pawarut
+~14.1	
+Blue	Krittanart
+Blue	Natthanan
+Blue	Nanaruchote
+Green	Phutthiphat
+Green	Boonraksa
+Green	Kronpanod
+Orange	Phudit
+Orange	Dhatsawitt
+Orange	Nonthapat
+Orange	Chayangkoon
+Orange	Punyawee
+Red	Yuttanin
+Red	Photsawee
+Red	Jommanut
+Red	Phurarit
+~15.3	
+Blue	Akkravich
+Blue	Thanakorn
+Blue	Punnawatz
+Green	Puri
+Green	Api Cha
+Green	Panyarat
+Orange	Nakarin
+Orange	Chananon
+Orange	Rachchavich
+Orange	Phumiphat
+Red	Naravich
+Red	Preedipat 
+Red	Archawin
+Red	Worawit
+~16.2	
+Blue	Vachirasak
+Blue	Chutipan
+Blue	Pakornpat
+Green	Panpuris
+Green	Koonwich
+Green	Nutphalod
+Green	Jirayu
+Orange	Setthawut
+Orange	Theerapatch
+Orange	Theeraphat
+Orange	Pannatat
+Red	Thanakrit
+Red	Nakhun
+Red	Boonpipon
+Red	Warawat
+
+
+`;
+
+function tmParse(raw){
+
+const result={};
+
+const blocks=raw.split(/(?=~)/g);
+
+for(let block of blocks){
+
+block=block.trim();
+
+if(!block.startsWith("~")) continue;
+
+const lines=block
+.split("\n")
+.map(v=>v.trim())
+.filter(Boolean);
+
+const className=
+lines[0].substring(1).trim();
+
+const teams={};
+
+for(let i=1;i<lines.length;i++){
+
+const parts=
+lines[i].split(/\s+/);
+
+const team=parts[0];
+
+const name=
+parts.slice(1).join(" ");
+
+if(!teams[team])
+teams[team]=[];
+
+teams[team].push(name);
+
+}
+
+result[className]=teams;
+
+}
+
+return result;
+
+}
+
+const tmClasses=
+tmParse(TM_RAW);
+
+const tmSelect =
+document.getElementById("tmClassSelect");
+
+tmSelect.innerHTML =
+'<option value="" disabled>Select a class</option>';
+
+Object.keys(tmClasses)
+.forEach(cls=>{
+
+const option =
+document.createElement("option");
+
+option.value = cls;
+option.textContent = cls;
+
+tmSelect.appendChild(option);
+
+});
+tmSelect.selectedIndex = 0;
+
+tmSelect.style.color = "#777";
+let tmQueue=[];
+let tmIndex=0;
+let tmCurrentClass=null;
+
+function tmShuffle(arr){
+
+const copy=[...arr];
+
+for(let i=copy.length-1;i>0;i--){
+
+const j=
+Math.floor(
+Math.random()*(i+1)
+);
+
+[copy[i],copy[j]]=
+[copy[j],copy[i]];
+
+}
+
+return copy;
+
+}
+
+function tmBuildQueue(className){
+
+const data=
+tmClasses[className];
+
+const order=[
+"Blue",
+"Green",
+"Orange",
+"Red"
+];
+
+const teams={};
+
+order.forEach(team=>{
+
+teams[team]=
+tmShuffle(
+data[team]||[]
+);
+
+});
+
+const queue=[];
+
+let remaining=true;
+
+while(remaining){
+
+remaining=false;
+
+order.forEach(team=>{
+
+if(teams[team].length){
+
+queue.push({
+
+text:
+teams[team].shift(),
+
+color:
+TM_COLORS[team]
+
+});
+
+remaining=true;
+
+}
+
+});
+
+}
+
+return queue;
+
+}
+
+function tmLoadClass(){
+
+if(!tmSelect.value)
+return;
+
+tmCurrentClass=
+tmSelect.value;
+
+tmQueue=
+tmBuildQueue(
+tmCurrentClass
+);
+
+tmIndex=0;
+
+const tile=
+document.getElementById("tmTile");
+
+tile.textContent="";
+
+tile.style.background=
+"#ececec";
+
+}
+function tmNext(){
+
+if(!tmCurrentClass)
+return;
+
+if(tmIndex>=tmQueue.length){
+
+tmQueue=
+tmBuildQueue(
+tmCurrentClass
+);
+
+tmIndex=0;
+
+}
+
+const item=
+tmQueue[tmIndex++];
+
+const tile=
+document.getElementById("tmTile");
+
+tile.style.opacity=0;
+
+setTimeout(()=>{
+
+tile.textContent=
+item.text;
+
+tile.style.background=
+item.color;
+
+tile.style.opacity=1;
+
+},120);
+
+}
+
+
+
+tmSelect.addEventListener("change", function(){
+
+    tmLoadClass();
+
+    tmNext();
+
+});
+
+document
+.getElementById("tmTile")
+.addEventListener(
+"click",
+tmNext
+);
+
+/*==================================================
+ TALLYMAN STANDALONE
+ PART 4
+ Scoreboard + Tallies
+==================================================*/
+
+const tmScores={
+    Blue:0,
+    Green:0,
+    Orange:0,
+    Red:0
+};
+
+function tmAddTally(team){
+
+    tmScores[team]++;
+
+    const area=document.querySelector(
+        '.tmTallies[data-team="'+team+'"]'
+    );
+
+    let groups=
+    area.querySelectorAll(".tmGroup");
+
+    let group=
+    groups[groups.length-1];
+
+    if(
+        !group ||
+        Number(group.dataset.count)>=5
+    ){
+
+        group=document.createElement("div");
+
+        group.className="tmGroup";
+
+        group.dataset.count=0;
+
+        area.appendChild(group);
+
+    }
+
+    let count=
+    Number(group.dataset.count);
+
+    if(count<4){
+
+        const stick=
+        document.createElement("div");
+
+        stick.className="tmStick";
+
+        group.appendChild(stick);
+
+    }
+
+    count++;
+
+    if(count===5){
+
+        const svg=document.createElementNS(
+            "http://www.w3.org/2000/svg",
+            "svg"
+        );
+
+        svg.setAttribute(
+            "viewBox",
+            "0 0 20 20"
+        );
+
+        svg.innerHTML=`
+<line
+x1="2"
+y1="2"
+x2="18"
+y2="18"
+stroke="#111"
+stroke-width="2"
+stroke-linecap="round"/>
+`;
+
+        group.appendChild(svg);
+
+    }
+
+    group.dataset.count=count;
+
+    document.getElementById(
+        "tmScore"+team
+    ).textContent=tmScores[team];
+
+}
+
+/*==========================================
+ CLICK TO ADD TALLY
+==========================================*/
+
+document
+.querySelectorAll(".tmTallies")
+.forEach(panel=>{
+
+    panel.addEventListener(
+        "click",
+        function(){
+
+            tmAddTally(
+                panel.dataset.team
+            );
+
+        }
+    );
+
+});
+
+/*==========================================
+ OPTIONAL RESET FUNCTION
+==========================================*/
+
+function tmResetScores(){
+
+    Object.keys(tmScores)
+    .forEach(team=>{
+
+        tmScores[team]=0;
+
+        document.getElementById(
+            "tmScore"+team
+        ).textContent=0;
+
+        const area=document.querySelector(
+            '.tmTallies[data-team="'+team+'"]'
+        );
+
+        area.innerHTML="";
+
+    });
+
+}
+
+/*==================================================
+ TALLYMAN STANDALONE
+ PART 5
+ Final Initialization
+==================================================*/
+
+/*----------------------------------
+ INITIALIZE DEFAULT CLASS
+----------------------------------*/
+
+if (tmSelect.options.length) {
+
+    tmSelect.selectedIndex = -0;
+
+document.getElementById("tmTile").textContent = "";
+
+}/*----------------------------------
+ PUBLIC API
+----------------------------------*/
+
+window.Tallyman = {
+
+    version: "1.0",
+
+    load: tmLoadClass,
+
+    next: tmNext,
+
+    add: tmAddTally,
+
+    reset: tmResetScores,
+
+    scores: tmScores,
+
+    classes: tmClasses
+
+};
+
+/*----------------------------------
+ OPTIONAL KEYBOARD SHORTCUTS
+
+Space = Next Name
+1-4 = Add Tally
+
+----------------------------------*/
+
+document.addEventListener("keydown", function(e){
+
+    if(!win.classList.contains("tmOpen"))
+        return;
+
+    switch(e.key){
+
+        case " ":
+
+            e.preventDefault();
+
+            tmNext();
+
+            break;
+
+        case "1":
+
+            tmAddTally("Blue");
+
+            break;
+
+        case "2":
+
+            tmAddTally("Green");
+
+            break;
+
+        case "3":
+
+            tmAddTally("Orange");
+
+            break;
+
+        case "4":
+
+            tmAddTally("Red");
+
+            break;
+
+    }
+
+});
+
+/*----------------------------------
+ DOUBLE CLICK LAUNCHER
+RESET SCORES
+----------------------------------*/
+
+document
+.getElementById("tallymanLeftBtn")
+.addEventListener("dblclick",function(){
+
+    tmResetScores();
+
+});
+/*----------------------------------
+ START HIDDEN
+----------------------------------*/
+
+win.classList.remove("tmOpen");
+
+/*----------------------------------
+ READY
+----------------------------------*/
+
+console.log("Tallyman Standalone Loaded");
+
+})();
+
+
+</script>
 
 </body>
 </html>
