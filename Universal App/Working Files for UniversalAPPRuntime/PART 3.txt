@@ -1,0 +1,582 @@
+/* =========================================================
+
+   UNIVERSAL APP RUNTIME (UAR)
+
+   PART 3
+   INPUT COMPATIBILITY ENGINE
+
+   Requires:
+   PART 1 CORE ENGINE
+   PART 2 VIEWPORT ENGINE
+
+========================================================= */
+
+
+(function(window){
+
+"use strict";
+
+
+if(!window.UAR){
+
+    console.error(
+        "UAR Part 3 requires Part 1"
+    );
+
+    return;
+
+}
+
+
+const UAR = window.UAR;
+
+
+
+/* =========================================================
+   INPUT OBJECT
+========================================================= */
+
+UAR.input = {
+
+    enabled:true,
+
+    touch:false,
+
+    pointer:false,
+
+    mouse:false,
+
+    lastX:0,
+
+    lastY:0,
+
+    startX:0,
+
+    startY:0,
+
+    startTime:0,
+
+    listeners:{}
+
+};
+
+
+
+
+
+/* =========================================================
+   DEVICE INPUT DETECTION
+========================================================= */
+
+function detectInput(){
+
+
+    UAR.input.touch =
+    "ontouchstart" in window
+    ||
+    navigator.maxTouchPoints>0;
+
+
+
+    UAR.input.pointer =
+    !!window.PointerEvent;
+
+
+
+    UAR.input.mouse =
+    matchMedia(
+        "(pointer:fine)"
+    ).matches;
+
+
+}
+
+
+
+
+
+/* =========================================================
+   UNIFIED EVENT SYSTEM
+========================================================= */
+
+
+UAR.input.on=function(
+    element,
+    event,
+    callback
+){
+
+
+    if(!element){
+
+        return;
+
+    }
+
+
+
+    let events;
+
+
+
+    switch(event){
+
+
+        case "tap":
+
+            events =
+            [
+                "click",
+                "pointerup",
+                "touchend"
+            ];
+
+            break;
+
+
+
+        case "down":
+
+            events =
+            [
+                "pointerdown",
+                "mousedown",
+                "touchstart"
+            ];
+
+            break;
+
+
+
+        case "move":
+
+            events =
+            [
+                "pointermove",
+                "mousemove",
+                "touchmove"
+            ];
+
+            break;
+
+
+
+        case "up":
+
+            events =
+            [
+                "pointerup",
+                "mouseup",
+                "touchend"
+            ];
+
+            break;
+
+
+
+        default:
+
+            events=[event];
+
+    }
+
+
+
+    events.forEach(type=>{
+
+
+        element.addEventListener(
+
+            type,
+
+            function(e){
+
+
+                callback(
+                    normalizeEvent(e)
+                );
+
+
+            },
+
+            {
+                passive:false
+            }
+
+        );
+
+
+    });
+
+
+};
+
+
+
+
+
+/* =========================================================
+   NORMALIZE EVENTS
+========================================================= */
+
+function normalizeEvent(e){
+
+
+    let x=0;
+
+    let y=0;
+
+
+
+    if(
+        e.touches &&
+        e.touches.length
+    ){
+
+        x =
+        e.touches[0].clientX;
+
+
+        y =
+        e.touches[0].clientY;
+
+    }
+
+
+    else if(
+        e.changedTouches &&
+        e.changedTouches.length
+    ){
+
+        x =
+        e.changedTouches[0].clientX;
+
+
+        y =
+        e.changedTouches[0].clientY;
+
+    }
+
+
+    else{
+
+        x =
+        e.clientX || 0;
+
+
+        y =
+        e.clientY || 0;
+
+    }
+
+
+
+    UAR.input.lastX=x;
+
+    UAR.input.lastY=y;
+
+
+
+    return {
+
+
+        original:e,
+
+
+        x:x,
+
+        y:y,
+
+
+        type:e.type,
+
+
+        target:e.target
+
+
+    };
+
+
+}
+
+
+
+
+
+
+/* =========================================================
+   TAP DETECTION
+========================================================= */
+
+UAR.input.tap=function(
+    element,
+    callback
+){
+
+
+    let start;
+
+
+    UAR.input.on(
+
+        element,
+
+        "down",
+
+        function(e){
+
+            start=e;
+
+            UAR.input.startTime=
+            Date.now();
+
+
+        }
+
+    );
+
+
+
+    UAR.input.on(
+
+        element,
+
+        "up",
+
+        function(e){
+
+
+            const time =
+            Date.now()
+            -
+            UAR.input.startTime;
+
+
+
+            const distance =
+            Math.sqrt(
+
+                Math.pow(
+                    e.x-start.x,
+                    2
+                )
+
+                +
+
+                Math.pow(
+                    e.y-start.y,
+                    2
+                )
+
+            );
+
+
+
+            if(
+                time < 500
+                &&
+                distance < 15
+            ){
+
+                callback(e);
+
+            }
+
+
+        }
+
+    );
+
+
+};
+
+
+
+
+
+
+/* =========================================================
+   LONG PRESS
+========================================================= */
+
+UAR.input.longPress=function(
+    element,
+    callback,
+    delay=700
+){
+
+
+    let timer;
+
+
+    UAR.input.on(
+
+        element,
+
+        "down",
+
+        function(e){
+
+
+            timer=setTimeout(
+
+                function(){
+
+                    callback(e);
+
+                },
+
+                delay
+
+            );
+
+
+        }
+
+    );
+
+
+
+    UAR.input.on(
+
+        element,
+
+        "up",
+
+        function(){
+
+            clearTimeout(timer);
+
+        }
+
+    );
+
+
+};
+
+
+
+
+
+
+/* =========================================================
+   SWIPE DETECTION
+========================================================= */
+
+UAR.input.swipe=function(
+    element,
+    callback
+){
+
+
+    let startX;
+
+    let startY;
+
+
+
+    UAR.input.on(
+
+        element,
+
+        "down",
+
+        function(e){
+
+            startX=e.x;
+
+            startY=e.y;
+
+        }
+
+    );
+
+
+
+    UAR.input.on(
+
+        element,
+
+        "up",
+
+        function(e){
+
+
+            const dx =
+            e.x-startX;
+
+
+            const dy =
+            e.y-startY;
+
+
+
+            if(
+                Math.abs(dx)>50
+                ||
+                Math.abs(dy)>50
+            ){
+
+                callback({
+
+                    x:dx,
+
+                    y:dy,
+
+                    direction:
+
+                    Math.abs(dx)>Math.abs(dy)
+
+                    ?
+
+                    (
+                        dx>0
+                        ?
+                        "right"
+                        :
+                        "left"
+                    )
+
+                    :
+
+                    (
+                        dy>0
+                        ?
+                        "down"
+                        :
+                        "up"
+                    )
+
+
+                });
+
+            }
+
+
+        }
+
+    );
+
+
+};
+
+
+
+
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+detectInput();
+
+
+
+UAR.utils.log(
+    "Input Engine loaded"
+);
+
+
+
+})(window);

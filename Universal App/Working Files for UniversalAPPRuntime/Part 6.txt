@@ -1,0 +1,547 @@
+/* =========================================================
+
+   UNIVERSAL APP RUNTIME (UAR)
+
+   PART 6
+   PERFORMANCE & DIAGNOSTICS ENGINE
+
+   Requires:
+   PART 1 CORE ENGINE
+
+========================================================= */
+
+
+(function(window){
+
+"use strict";
+
+
+if(!window.UAR){
+
+    console.error(
+        "UAR Part 6 requires Part 1"
+    );
+
+    return;
+
+}
+
+
+const UAR = window.UAR;
+
+
+
+
+
+/* =========================================================
+   PERFORMANCE OBJECT
+========================================================= */
+
+UAR.performance={
+
+
+    fps:0,
+
+
+    frameTime:0,
+
+
+    frames:0,
+
+
+    lastTime:performance.now(),
+
+
+    memory:null
+
+
+};
+
+
+
+
+
+
+/* =========================================================
+   FPS MONITOR
+========================================================= */
+
+
+function measureFPS(time){
+
+
+    UAR.performance.frames++;
+
+
+
+    const elapsed =
+    time -
+    UAR.performance.lastTime;
+
+
+
+    if(
+        elapsed >=1000
+    ){
+
+
+        UAR.performance.fps =
+        UAR.performance.frames;
+
+
+        UAR.performance.frameTime =
+        elapsed /
+        UAR.performance.frames;
+
+
+
+        UAR.performance.frames=0;
+
+
+        UAR.performance.lastTime=time;
+
+
+    }
+
+
+
+    requestAnimationFrame(
+        measureFPS
+    );
+
+
+}
+
+
+
+
+/* =========================================================
+   MEMORY INFORMATION
+========================================================= */
+
+
+function updateMemory(){
+
+
+    if(
+        performance.memory
+    ){
+
+        UAR.performance.memory={
+
+
+            used:
+            Math.round(
+                performance.memory.usedJSHeapSize
+                /
+                1048576
+            )
+            +" MB",
+
+
+            total:
+            Math.round(
+                performance.memory.totalJSHeapSize
+                /
+                1048576
+            )
+            +" MB"
+
+
+        };
+
+
+    }
+
+
+}
+
+
+
+
+
+
+
+/* =========================================================
+   DIAGNOSTIC OBJECT
+========================================================= */
+
+
+UAR.debug={
+
+
+    enabled:false,
+
+
+    panel:null,
+
+
+    open:function(){
+
+
+        UAR.debug.enabled=true;
+
+
+        createPanel();
+
+
+    },
+
+
+    close:function(){
+
+
+        UAR.debug.enabled=false;
+
+
+        if(
+            UAR.debug.panel
+        ){
+
+            UAR.debug.panel.remove();
+
+            UAR.debug.panel=null;
+
+        }
+
+
+    }
+
+
+};
+
+
+
+
+
+
+
+/* =========================================================
+   DEBUG PANEL
+========================================================= */
+
+
+function createPanel(){
+
+
+    if(
+        UAR.debug.panel
+    ){
+
+        return;
+
+    }
+
+
+
+    const panel =
+    document.createElement(
+        "div"
+    );
+
+
+
+    panel.id =
+    "uar-debug-panel";
+
+
+
+    panel.style.position =
+    "fixed";
+
+    panel.style.top =
+    "10px";
+
+    panel.style.right =
+    "10px";
+
+    panel.style.zIndex =
+    "999999";
+
+    panel.style.background =
+    "rgba(0,0,0,.8)";
+
+    panel.style.color =
+    "white";
+
+    panel.style.padding =
+    "12px";
+
+    panel.style.fontFamily =
+    "monospace";
+
+    panel.style.fontSize =
+    "12px";
+
+    panel.style.borderRadius =
+    "8px";
+
+    panel.style.pointerEvents =
+    "none";
+
+
+
+    document.body.appendChild(
+        panel
+    );
+
+
+
+    UAR.debug.panel =
+    panel;
+
+
+
+    updatePanel();
+
+
+}
+
+
+
+
+
+function updatePanel(){
+
+
+    if(
+        !UAR.debug.panel
+    ){
+
+        return;
+
+    }
+
+
+
+    const vp =
+    UAR.viewport
+    ||
+    {};
+
+
+
+    UAR.debug.panel.innerHTML = `
+
+    <b>UAR ${UAR.version}</b><br><br>
+
+    FPS:
+    ${UAR.performance.fps}<br>
+
+    DPR:
+    ${UAR.device.dpr}<br>
+
+    Touch:
+    ${UAR.device.touch}<br>
+
+    Mobile:
+    ${UAR.device.mobile}<br>
+
+    Browser:
+    ${Object.keys(UAR.browser)
+    .filter(k=>UAR.browser[k])
+    [0] || "unknown"}<br><br>
+
+    Viewport:
+    ${Math.round(vp.width||0)}
+    x
+    ${Math.round(vp.height||0)}<br>
+
+    Scale:
+    ${(vp.scale||1).toFixed(2)}<br>
+
+    Orientation:
+    ${vp.orientation||""}
+
+    `;
+
+
+
+    requestAnimationFrame(
+        updatePanel
+    );
+
+
+}
+
+
+
+
+
+
+
+/* =========================================================
+   EVENT MONITOR
+========================================================= */
+
+
+UAR.events={};
+
+
+UAR.events.counts={};
+
+
+
+UAR.events.track=function(name){
+
+
+    if(
+        !UAR.events.counts[name]
+    ){
+
+        UAR.events.counts[name]=0;
+
+    }
+
+
+    UAR.events.counts[name]++;
+
+
+};
+
+
+
+
+
+
+
+/* =========================================================
+   RUNTIME STATUS
+========================================================= */
+
+
+UAR.status=function(){
+
+
+    return {
+
+
+        version:
+        UAR.version,
+
+
+        device:
+        UAR.device,
+
+
+        browser:
+        UAR.browser,
+
+
+        features:
+        UAR.features,
+
+
+        viewport:
+        UAR.viewport,
+
+
+        performance:
+        UAR.performance
+
+
+    };
+
+
+};
+
+
+
+
+
+
+
+/* =========================================================
+   FINAL READY SYSTEM
+========================================================= */
+
+
+UAR.readyCallbacks=[];
+
+
+UAR.onReady=function(callback){
+
+
+    if(
+        UAR.ready
+    ){
+
+        callback(UAR);
+
+    }
+
+    else{
+
+        UAR.readyCallbacks.push(
+            callback
+        );
+
+    }
+
+
+};
+
+
+
+
+function finishReady(){
+
+
+    UAR.ready=true;
+
+
+    UAR.readyCallbacks
+    .forEach(
+
+        fn=>fn(UAR)
+
+    );
+
+
+    UAR.readyCallbacks=[];
+
+
+}
+
+
+
+
+
+
+/* =========================================================
+   START
+========================================================= */
+
+
+requestAnimationFrame(
+    measureFPS
+);
+
+
+
+setInterval(
+
+    updateMemory,
+
+    5000
+
+);
+
+
+
+finishReady();
+
+
+
+UAR.utils.log(
+    "Performance Engine loaded"
+);
+
+
+UAR.utils.log(
+    "Universal App Runtime complete"
+);
+
+
+
+})(window);

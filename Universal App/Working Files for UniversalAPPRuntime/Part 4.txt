@@ -1,0 +1,485 @@
+/* =========================================================
+
+   UNIVERSAL APP RUNTIME (UAR)
+
+   PART 4
+   DISPLAY & MEDIA ENGINE
+
+   Requires:
+   PART 1 CORE ENGINE
+   PART 2 VIEWPORT ENGINE
+
+========================================================= */
+
+
+(function(window){
+
+"use strict";
+
+
+if(!window.UAR){
+
+    console.error(
+        "UAR Part 4 requires Part 1"
+    );
+
+    return;
+
+}
+
+
+const UAR = window.UAR;
+
+
+
+/* =========================================================
+   DISPLAY OBJECT
+========================================================= */
+
+UAR.display={
+
+    dpr:
+    window.devicePixelRatio || 1,
+
+
+    canvases:[],
+
+    images:[],
+
+    observers:[]
+
+
+};
+
+
+
+
+
+/* =========================================================
+   CANVAS MANAGER
+========================================================= */
+
+UAR.display.canvas={};
+
+
+
+/*
+    Makes canvas match display size
+*/
+
+UAR.display.canvas.fit=function(canvas){
+
+
+    if(!canvas ||
+       !canvas.getContext){
+
+        return;
+
+    }
+
+
+    const rect =
+    canvas.getBoundingClientRect();
+
+
+
+    const dpr =
+    window.devicePixelRatio || 1;
+
+
+
+    canvas.width =
+    Math.round(
+        rect.width*dpr
+    );
+
+
+    canvas.height =
+    Math.round(
+        rect.height*dpr
+    );
+
+
+
+    const ctx =
+    canvas.getContext("2d");
+
+
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
+
+
+    UAR.utils.log(
+        "Canvas fitted",
+        rect.width,
+        rect.height,
+        dpr
+    );
+
+
+};
+
+
+
+
+
+
+/*
+    Register canvas
+*/
+
+UAR.display.canvas.register=function(canvas){
+
+
+    if(
+        !canvas
+    ){
+
+        return;
+
+    }
+
+
+
+    UAR.display.canvases.push(
+        canvas
+    );
+
+
+    UAR.display.canvas.fit(
+        canvas
+    );
+
+
+};
+
+
+
+
+
+
+/*
+    Resize all canvases
+*/
+
+UAR.display.canvas.resizeAll=function(){
+
+
+    UAR.display.canvases
+    .forEach(
+
+        canvas=>{
+
+            UAR.display.canvas.fit(
+                canvas
+            );
+
+        }
+
+    );
+
+
+};
+
+
+
+
+
+
+
+/* =========================================================
+   IMAGE MANAGER
+========================================================= */
+
+
+UAR.display.image={};
+
+
+
+UAR.display.image.fit=function(img){
+
+
+    if(!img){
+
+        return;
+
+    }
+
+
+
+    img.style.maxWidth =
+    "100%";
+
+
+    img.style.height =
+    "auto";
+
+
+
+};
+
+
+
+
+
+UAR.display.image.register=function(img){
+
+
+    if(!img){
+
+        return;
+
+    }
+
+
+
+    UAR.display.images.push(
+        img
+    );
+
+
+    UAR.display.image.fit(
+        img
+    );
+
+
+};
+
+
+
+
+
+UAR.display.image.resizeAll=function(){
+
+
+    UAR.display.images
+    .forEach(
+
+        img=>{
+
+            UAR.display.image.fit(
+                img
+            );
+
+        }
+
+    );
+
+
+};
+
+
+
+
+
+
+
+/* =========================================================
+   ELEMENT SIZE OBSERVER
+========================================================= */
+
+UAR.display.observe=function(
+    element,
+    callback
+){
+
+
+    if(
+        !window.ResizeObserver
+    ){
+
+        return;
+
+    }
+
+
+
+    const observer =
+    new ResizeObserver(
+
+        entries=>{
+
+            callback(
+                entries[0]
+            );
+
+        }
+
+    );
+
+
+
+    observer.observe(
+        element
+    );
+
+
+    UAR.display.observers.push(
+        observer
+    );
+
+
+};
+
+
+
+
+
+
+/* =========================================================
+   AUTOMATIC DISCOVERY
+========================================================= */
+
+function scanPage(){
+
+
+    document
+    .querySelectorAll("canvas")
+    .forEach(
+
+        canvas=>{
+
+            UAR.display.canvas.register(
+                canvas
+            );
+
+        }
+
+    );
+
+
+
+    document
+    .querySelectorAll("img")
+    .forEach(
+
+        img=>{
+
+            UAR.display.image.register(
+                img
+            );
+
+        }
+
+    );
+
+
+}
+
+
+
+
+
+/* =========================================================
+   SVG SUPPORT
+========================================================= */
+
+UAR.display.svg={};
+
+
+UAR.display.svg.fit=function(svg){
+
+
+    if(!svg){
+
+        return;
+
+    }
+
+
+
+    svg.style.maxWidth =
+    "100%";
+
+
+    svg.style.height =
+    "auto";
+
+
+};
+
+
+
+
+
+
+/* =========================================================
+   GLOBAL REFRESH
+========================================================= */
+
+UAR.display.refresh=function(){
+
+
+    UAR.display.canvas.resizeAll();
+
+    UAR.display.image.resizeAll();
+
+
+};
+
+
+
+
+
+
+
+/* =========================================================
+   EVENTS
+========================================================= */
+
+const refresh =
+UAR.utils.debounce(
+
+    function(){
+
+        UAR.display.refresh();
+
+    },
+
+    150
+
+);
+
+
+
+window.addEventListener(
+    "resize",
+    refresh
+);
+
+
+
+window.addEventListener(
+    "orientationchange",
+    refresh
+);
+
+
+
+
+
+
+
+/* =========================================================
+   START
+========================================================= */
+
+scanPage();
+
+
+
+UAR.utils.log(
+    "Display Engine loaded"
+);
+
+
+
+})(window);

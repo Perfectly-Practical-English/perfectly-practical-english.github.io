@@ -1,0 +1,515 @@
+/* =========================================================
+
+   UNIVERSAL APP RUNTIME (UAR)
+
+   PART 5
+   MOBILE ENVIRONMENT ENGINE
+
+   Requires:
+   PART 1 CORE ENGINE
+   PART 2 VIEWPORT ENGINE
+
+========================================================= */
+
+
+(function(window){
+
+"use strict";
+
+
+if(!window.UAR){
+
+    console.error(
+        "UAR Part 5 requires Part 1"
+    );
+
+    return;
+
+}
+
+
+const UAR = window.UAR;
+
+
+
+
+/* =========================================================
+   MOBILE OBJECT
+========================================================= */
+
+UAR.mobile={
+
+
+    keyboard:false,
+
+
+    fullscreen:false,
+
+
+    safeArea:{
+
+
+        top:0,
+
+        bottom:0,
+
+        left:0,
+
+        right:0
+
+
+    },
+
+
+    scrollingLocked:false
+
+
+};
+
+
+
+
+
+
+/* =========================================================
+   SAFE AREA DETECTION
+========================================================= */
+
+
+function detectSafeArea(){
+
+
+    const probe =
+    document.createElement("div");
+
+
+    probe.style.position="fixed";
+
+    probe.style.visibility="hidden";
+
+    probe.style.paddingTop=
+    "env(safe-area-inset-top)";
+
+    probe.style.paddingBottom=
+    "env(safe-area-inset-bottom)";
+
+    probe.style.paddingLeft=
+    "env(safe-area-inset-left)";
+
+    probe.style.paddingRight=
+    "env(safe-area-inset-right)";
+
+
+
+    document.body.appendChild(
+        probe
+    );
+
+
+
+    const style =
+    getComputedStyle(
+        probe
+    );
+
+
+
+    UAR.mobile.safeArea.top =
+    parseInt(
+        style.paddingTop
+    )
+    ||
+    0;
+
+
+
+    UAR.mobile.safeArea.bottom =
+    parseInt(
+        style.paddingBottom
+    )
+    ||
+    0;
+
+
+
+    UAR.mobile.safeArea.left =
+    parseInt(
+        style.paddingLeft
+    )
+    ||
+    0;
+
+
+
+    UAR.mobile.safeArea.right =
+    parseInt(
+        style.paddingRight
+    )
+    ||
+    0;
+
+
+
+    probe.remove();
+
+
+
+}
+
+
+
+
+
+/* =========================================================
+   MOBILE KEYBOARD DETECTION
+========================================================= */
+
+
+function detectKeyboard(){
+
+
+    if(
+        !window.visualViewport
+    ){
+
+        return;
+
+    }
+
+
+
+    const viewport =
+    window.visualViewport;
+
+
+
+    const check=function(){
+
+
+        const difference =
+        window.innerHeight -
+        viewport.height;
+
+
+
+        UAR.mobile.keyboard =
+        difference > 150;
+
+
+
+    };
+
+
+
+    viewport.addEventListener(
+        "resize",
+        check
+    );
+
+
+
+    check();
+
+
+}
+
+
+
+
+
+/* =========================================================
+   SCROLL CONTROL
+========================================================= */
+
+
+UAR.mobile.lockScroll=function(){
+
+
+    if(
+        UAR.mobile.scrollingLocked
+    ){
+
+        return;
+
+    }
+
+
+
+    document.body.dataset.uarOverflow =
+    document.body.style.overflow;
+
+
+
+    document.body.style.overflow =
+    "hidden";
+
+
+
+    UAR.mobile.scrollingLocked=true;
+
+
+};
+
+
+
+
+
+
+UAR.mobile.unlockScroll=function(){
+
+
+    if(
+        !UAR.mobile.scrollingLocked
+    ){
+
+        return;
+
+    }
+
+
+
+    document.body.style.overflow =
+    document.body.dataset.uarOverflow
+    ||
+    "";
+
+
+
+    UAR.mobile.scrollingLocked=false;
+
+
+};
+
+
+
+
+
+
+
+/* =========================================================
+   OVERSCROLL PROTECTION
+========================================================= */
+
+
+function preventOverscroll(){
+
+
+    if(
+        !UAR.config.preventOverscroll
+    ){
+
+        return;
+
+    }
+
+
+
+    document.body.style.overscrollBehavior =
+    "none";
+
+
+}
+
+
+
+
+
+
+/* =========================================================
+   ZOOM CONTROL
+========================================================= */
+
+
+function preventZoom(){
+
+
+    if(
+        !UAR.config.preventZoom
+    ){
+
+        return;
+
+    }
+
+
+
+    document.addEventListener(
+
+        "gesturestart",
+
+        function(e){
+
+            e.preventDefault();
+
+        },
+
+        {
+            passive:false
+        }
+
+    );
+
+
+}
+
+
+
+
+
+
+
+/* =========================================================
+   FULLSCREEN
+========================================================= */
+
+
+UAR.mobile.fullscreenEnter=function(){
+
+
+    const el =
+    document.documentElement;
+
+
+
+    if(
+        el.requestFullscreen
+    ){
+
+        el.requestFullscreen();
+
+        UAR.mobile.fullscreen=true;
+
+    }
+
+
+};
+
+
+
+
+
+UAR.mobile.fullscreenExit=function(){
+
+
+    if(
+        document.exitFullscreen
+    ){
+
+        document.exitFullscreen();
+
+        UAR.mobile.fullscreen=false;
+
+    }
+
+
+};
+
+
+
+
+
+
+
+
+/* =========================================================
+   CSS VARIABLES
+========================================================= */
+
+
+function updateMobileVariables(){
+
+
+    document.documentElement
+    .style
+    .setProperty(
+
+        "--uar-safe-top",
+
+        UAR.mobile.safeArea.top+"px"
+
+    );
+
+
+    document.documentElement
+    .style
+    .setProperty(
+
+        "--uar-safe-bottom",
+
+        UAR.mobile.safeArea.bottom+"px"
+
+    );
+
+
+    document.documentElement
+    .style
+    .setProperty(
+
+        "--uar-keyboard-open",
+
+        UAR.mobile.keyboard
+        ?
+        "1"
+        :
+        "0"
+
+    );
+
+
+}
+
+
+
+
+
+
+/* =========================================================
+   INITIALIZE
+========================================================= */
+
+
+function initialize(){
+
+
+    detectSafeArea();
+
+
+    detectKeyboard();
+
+
+    preventOverscroll();
+
+
+    preventZoom();
+
+
+    updateMobileVariables();
+
+
+}
+
+
+
+initialize();
+
+
+
+window.addEventListener(
+
+    "resize",
+
+    updateMobileVariables
+
+);
+
+
+
+
+
+UAR.utils.log(
+    "Mobile Environment Engine loaded"
+);
+
+
+
+})(window);

@@ -1,0 +1,11 @@
+<script src="UniversalAppRuntime.js"></script>
+
+Then optionally:
+
+UAR.onReady(function(){
+
+    console.log(
+        "App running on UAR"
+    );
+
+});
