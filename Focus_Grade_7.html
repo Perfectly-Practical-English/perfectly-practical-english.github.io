@@ -6375,218 +6375,91 @@ console.log("Tallyman Standalone Loaded");
  No Tallyman edits required
 ========================================*/
 
-
 let count = -1;
-
 let audio = null;
 
-
 function initAudio(){
-
     if(!audio){
-
-        audio =
-        new (window.AudioContext ||
-        window.webkitAudioContext)();
-
+        audio = new (window.AudioContext || window.webkitAudioContext)();
     }
-
-
     if(audio.state==="suspended"){
-
         audio.resume();
-
     }
-
 }
-
 
 /*========================================
  PENCIL SCRATCH
 ========================================*/
 
 function pencilScratch(){
-
     initAudio();
-
     const ctx=audio;
-
     const duration=.18;
 
-
-    const buffer =
-    ctx.createBuffer(
+    const buffer = ctx.createBuffer(
         1,
         ctx.sampleRate*duration,
         ctx.sampleRate
     );
 
-
-    const data =
-    buffer.getChannelData(0);
-
+    const data = buffer.getChannelData(0);
 
     for(let i=0;i<data.length;i++){
-
         data[i]=
         (Math.random()*2-1)
         *
         (1-i/data.length)
         *
         .35;
-
     }
 
-
-    const source =
-    ctx.createBufferSource();
-
-
-    const filter =
-    ctx.createBiquadFilter();
-
-
-    const gain =
-    ctx.createGain();
-
+    const source = ctx.createBufferSource();
+    const filter = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
 
     filter.type="bandpass";
     filter.frequency.value=2800;
 
-
     gain.gain.value=.35;
 
-
     source.buffer=buffer;
-
 
     source
     .connect(filter)
     .connect(gain)
     .connect(ctx.destination);
 
-
     source.start();
-
 }
-
-
-/*========================================
- FAIRY BLING
-========================================*/
-
-function fairyBling(){
-
-    initAudio();
-
-    const ctx=audio;
-
-
-    [1400,1800,2400]
-    .forEach((f,i)=>{
-
-
-        const osc=
-        ctx.createOscillator();
-
-
-        const gain=
-        ctx.createGain();
-
-
-        osc.frequency.value=f;
-
-
-        gain.gain.setValueAtTime(
-            .001,
-            ctx.currentTime
-        );
-
-
-        gain.gain.exponentialRampToValueAtTime(
-            .25,
-            ctx.currentTime+.05+(i*.04)
-        );
-
-
-        gain.gain.exponentialRampToValueAtTime(
-            .001,
-            ctx.currentTime+.45
-        );
-
-
-        osc
-        .connect(gain)
-        .connect(ctx.destination);
-
-
-        osc.start();
-
-        osc.stop(
-            ctx.currentTime+.5
-        );
-
-
-    });
-
-}
-
 
 /*========================================
  WATCH TALLY STROKES
 ========================================*/
 
-const observer =
-new MutationObserver(function(){
-
-    const groups =
-    document.querySelectorAll(".tmGroup");
-
-
+const observer = new MutationObserver(function(){
+    const groups = document.querySelectorAll(".tmGroup");
     let total = 0;
 
-
     groups.forEach(group=>{
-
         total += Number(group.dataset.count || 0);
-
     });
 
-
-if(total !== count){
-
-    count = total;
-
-    if(count <= 0) return;
-
-    if(count % 5 === 0){
-
-        fairyBling();
-
+    if(total !== count){
+        // Only trigger scratch if the total is increasing (a tally mark was made)
+        if(total > count && count !== -1){
+            pencilScratch();
+        }
+        count = total;
     }
-    else{
-
-        pencilScratch();
-
-    }
-
-}
 });
 
 function start(){
-
-    const board =
-    document.querySelector("#tmScoreboard");
-
+    const board = document.querySelector("#tmScoreboard");
 
     if(!board){
-
         setTimeout(start,500);
-
         return;
-
     }
-
 
     observer.observe(
         board,
@@ -6596,20 +6469,15 @@ function start(){
         }
     );
 
-
     console.log(
-    "Tallyman audio observer loaded"
+        "Tallyman audio observer loaded"
     );
-
 }
-
 
 start();
 
-
 })();
 </script>
-
 
 <script>
 
@@ -7627,6 +7495,17 @@ background: transparent; /* Ensures no dark or white overlay tint */
     padding-bottom: 2px;
     border-bottom: 1px solid rgba(0,0,0,0.1);
   }
+
+#leftBtn,
+#rightBtn {
+    height: 24px;
+    width: 100%;
+    font-size: 10px;
+    border: none;
+    border-bottom: 1px solid #999;
+    background: #f7f7f7;
+    cursor: pointer;
+}
 </style>
 
 <!-- MODAL HTML STRUCTURE -->
@@ -8485,6 +8364,167 @@ background: transparent; /* Ensures no dark or white overlay tint */
     animate();
   });
 })();
+</script>
+
+
+<script>
+/* ==========================================================
+   PPE HOTSPOT IMAGE BUTTON (Standalone Script)
+========================================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    // 1. Create and insert the button in the Left Column
+    const leftColumn = document.getElementById("leftColumn");
+    if (leftColumn) {
+        const leftBtn = document.createElement("button");
+        leftBtn.id = "ppeLeftBtn";
+        leftBtn.textContent = "QR";
+        leftBtn.style.cssText = "height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;";
+        
+        const jellyBeansLeft = document.getElementById("leftBtn");
+        if (jellyBeansLeft) {
+            leftColumn.insertBefore(leftBtn, jellyBeansLeft);
+        } else {
+            leftColumn.appendChild(leftBtn);
+        }
+
+        leftBtn.onclick = togglePpeHotspot;
+    }
+
+    // 2. Create and insert the button in the Right Column
+    const rightColumn = document.getElementById("rightColumn");
+    if (rightColumn) {
+        const rightBtn = document.createElement("button");
+        rightBtn.id = "ppeRightBtn";
+        rightBtn.textContent = "QR";
+        rightBtn.style.cssText = "height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;";
+        
+        const jellyBeansRight = document.getElementById("rightBtn");
+        if (jellyBeansRight) {
+            rightColumn.insertBefore(rightBtn, jellyBeansRight);
+        } else {
+            rightColumn.appendChild(rightBtn);
+        }
+
+        rightBtn.onclick = togglePpeHotspot;
+    }
+
+    // 3. Toggle Function: Spawns if missing, removes if already open
+    function togglePpeHotspot() {
+        const viewer = document.getElementById("viewer");
+        if (!viewer) return;
+
+        const existing = viewer.querySelector(".ppeHotspotImg");
+        if (existing) {
+            if (selectedEl === existing) {
+                selectedEl = null;
+            }
+            existing.remove();
+            return; // Exit so it turns off instead of respawning
+        }
+
+        const img = document.createElement("img");
+        img.src = "PerfectlyPracticalEnglish_with_Hotspot.app.jpg";
+        img.className = "draggable overlayPng ppeHotspotImg";
+        
+        // Fixed dimensions and appearance (keeping your custom tweaks)
+        img.style.position = "absolute";
+        img.style.width = "190px";
+        img.style.zIndex = "10005";
+        img.style.boxShadow = "3px 15px 30px 10px rgba(0, 0, 0, 0.8)";
+        
+        // Fixed positioning from the top-right of the viewport / control column boundary
+        img.style.right = "20px";
+        img.style.top = "40px";
+
+        viewer.appendChild(img);
+
+        if (typeof enableDragging === "function") {
+            enableDragging(img);
+        }
+
+        selectedEl = img;
+    }
+
+    // 4. Handle clicking off the PPE hotspot image to make it disappear
+    const viewer = document.getElementById("viewer");
+    if (viewer) {
+        viewer.addEventListener("pointerdown", (e) => {
+            if (e.target === viewer || e.target.id === "spread" || e.target.id === "centerBar" || e.target.classList.contains("pageImage")) {
+                if (selectedEl && selectedEl.classList.contains("ppeHotspotImg")) {
+                    selectedEl.remove();
+                    selectedEl = null;
+                }
+            }
+        });
+    }
+
+});
+</script>
+
+
+<script>
+/* ==========================================================
+    MP3 BUZZER TOGGLE BUTTON (Standalone Script)
+========================================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    // 1. Preload the Audio Object
+    const buzzerAudio = new Audio("floraphonic-buzzer-13-187755.mp3");
+    buzzerAudio.preload = "auto";
+
+    // Toggle Function: Plays if paused/ended, stops if currently playing
+    function toggleBuzzer() {
+        if (buzzerAudio.paused) {
+            buzzerAudio.currentTime = 0;
+            buzzerAudio.play().catch(error => {
+                console.log("Audio playback prevented or failed:", error);
+            });
+        } else {
+            buzzerAudio.pause();
+            buzzerAudio.currentTime = 0;
+        }
+    }
+
+    // 2. Create and insert the button in the Left Column
+    const leftColumn = document.getElementById("leftColumn");
+    if (leftColumn) {
+        const leftBtn = document.createElement("button");
+        leftBtn.id = "buzzerLeftBtn";
+        leftBtn.textContent = "Buzzer";
+        leftBtn.style.cssText = "height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;";
+        
+        const jellyBeansLeft = document.getElementById("leftBtn");
+        if (jellyBeansLeft) {
+            leftColumn.insertBefore(leftBtn, jellyBeansLeft);
+        } else {
+            leftColumn.appendChild(leftBtn);
+        }
+
+        leftBtn.onclick = toggleBuzzer;
+    }
+
+    // 3. Create and insert the button in the Right Column
+    const rightColumn = document.getElementById("rightColumn");
+    if (rightColumn) {
+        const rightBtn = document.createElement("button");
+        rightBtn.id = "buzzerRightBtn";
+        rightBtn.textContent = "Buzzer";
+        rightBtn.style.cssText = "height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;";
+        
+        const jellyBeansRight = document.getElementById("rightBtn");
+        if (jellyBeansRight) {
+            rightColumn.insertBefore(rightBtn, jellyBeansRight);
+        } else {
+            rightColumn.appendChild(rightBtn);
+        }
+
+        rightBtn.onclick = toggleBuzzer;
+    }
+
+});
 </script>
 
 </body>
