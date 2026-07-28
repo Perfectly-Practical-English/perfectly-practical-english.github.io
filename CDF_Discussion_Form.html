@@ -237,7 +237,7 @@ function timeStamp() {
   return new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
 }
 
-/* POST → SUPABASE */
+/* POST → SUPABASE (Sends data, relies on database return/realtime to render) */
 postBtn.onclick = async () => {
   const payload = {
     name: nameInput.value || "Anonymous",
