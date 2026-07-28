@@ -282,10 +282,9 @@ const { error } = await supabaseClient
 </script>
 
 <script>
-/* THREAD LOADER */
+/* THREAD LOADER & REALTIME SUBSCRIPTION */
 
 async function loadThread() {
-
   const { data, error } = await supabaseClient
     .from("instant_input")
     .select("entry")
@@ -297,10 +296,9 @@ async function loadThread() {
   }
 
   thread.innerHTML = "";
-
   for (const row of data) {
     try {
-      const post = JSON.parse(row.entry);
+      const post = typeof row.entry === 'string' ? JSON.parse(row.entry) : row.entry;
       renderPost(post);
     } catch (e) {
       console.warn("Bad row:", row.entry);
@@ -308,9 +306,25 @@ async function loadThread() {
   }
 }
 
+// Load initial posts on page open
 loadThread();
-setInterval(loadThread, 5000);
 
+// Listen for live inserts instantly via WebSockets
+supabaseClient
+  .channel('public:instant_input')
+  .on(
+    'postgres_changes',
+    { event: 'INSERT', schema: 'public', table: 'instant_input' },
+    (payload) => {
+      try {
+        const post = typeof payload.new.entry === 'string' ? JSON.parse(payload.new.entry) : payload.new.entry;
+        renderPost(post);
+      } catch (e) {
+        console.warn("Realtime parse error:", e);
+      }
+    }
+  )
+  .subscribe();
 </script>
 
 </body>
