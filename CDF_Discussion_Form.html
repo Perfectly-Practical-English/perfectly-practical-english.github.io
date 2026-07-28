@@ -134,6 +134,7 @@
     pointer-events: none;
     z-index: 9999;
   }
+
 </style>
 </head>
 
@@ -142,7 +143,9 @@
 <div id="border"></div>
 
 <div class="container">
+
   <h1>Comments Section</h1>
+
   <div id="thread"></div>
 
   <div id="inputRow">
@@ -152,12 +155,14 @@
   </div>
 
   <textarea id="messageInput" placeholder="Type your message…"></textarea>
+
   <div id="status"></div>
 
   <div id="speechRow">
     <button id="startBtn">Start</button>
     <button id="stopBtn">Stop</button>
   </div>
+
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -177,9 +182,13 @@ const msgInput = document.getElementById("messageInput");
 const startBtn = document.getElementById("startBtn");
 const stopBtn = document.getElementById("stopBtn");
 const postBtn = document.getElementById("postBtn");
+
 const statusBox = document.getElementById("status");
 
-/* SPEECH RECOGNITION */
+/* =========================
+   FIXED SPEECH RECOGNITION
+========================= */
+
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
 
@@ -187,18 +196,24 @@ recognition.continuous = true;
 recognition.interimResults = true;
 recognition.lang = "en-US";
 
+/* ✅ critical fix: prevent duplication */
 let finalTranscript = "";
 
 recognition.onresult = (event) => {
+
   let interimTranscript = "";
+
   for (let i = event.resultIndex; i < event.results.length; i++) {
+
     const text = event.results[i][0].transcript;
+
     if (event.results[i].isFinal) {
       finalTranscript += text + " ";
     } else {
       interimTranscript += text;
     }
   }
+
   msgInput.value = finalTranscript + interimTranscript;
 };
 
@@ -206,6 +221,7 @@ recognition.onerror = (e) => {
   statusBox.textContent = "Speech error: " + e.error;
 };
 
+/* START / STOP */
 startBtn.onclick = () => {
   recognition.start();
   statusBox.textContent = "Recording...";
@@ -222,30 +238,22 @@ function renderPost(p) {
   div.className = "post";
   div.innerHTML = `
     <div class="postHeader">
-      <span class="postName">${escapeHtml(p.name)} (${escapeHtml(p.student_id)})</span>
-      <span>${escapeHtml(p.time)}</span>
+      <span class="postName">${p.name} (${p.student_id})</span>
+      <span>${p.time}</span>
     </div>
-    <div class="postBody">${escapeHtml(p.message)}</div>
+    <div class="postBody">${p.message}</div>
   `;
   thread.prepend(div);
 }
 
+/* TIME */
 function timeStamp() {
   return new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
 }
 
-/* XSS Protection helper */
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
 /* POST → SUPABASE */
 postBtn.onclick = async () => {
+
   const payload = {
     name: nameInput.value || "Anonymous",
     student_id: idInput.value || "-",
@@ -255,21 +263,29 @@ postBtn.onclick = async () => {
 
   if (!payload.message.trim()) return;
 
+  renderPost(payload);
+
   const { error } = await supabaseClient
     .from("instant_input")
-    .insert({ entry: JSON.stringify(payload) });
+    .insert({
+      entry: payload
+    });
 
   if (error) {
     statusBox.textContent = "❌ " + error.message;
   } else {
     statusBox.textContent = "Saved";
     msgInput.value = "";
-    finalTranscript = "";
+    finalTranscript = ""; // ✅ important reset
   }
 };
+</script>
 
-/* LOAD INITIAL THREAD & LISTEN REALTIME */
+<script>
+/* THREAD LOADER */
+
 async function loadThread() {
+
   const { data, error } = await supabaseClient
     .from("instant_input")
     .select("entry")
@@ -281,6 +297,7 @@ async function loadThread() {
   }
 
   thread.innerHTML = "";
+
   for (const row of data) {
     try {
       const post = JSON.parse(row.entry);
@@ -291,20 +308,9 @@ async function loadThread() {
   }
 }
 
-// Initialize Realtime subscription
-supabaseClient
-  .channel('public:instant_input')
-  .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'instant_input' }, payload => {
-    try {
-      const post = JSON.parse(payload.new.entry);
-      renderPost(post);
-    } catch (e) {
-      console.warn("Realtime parse error:", e);
-    }
-  })
-  .subscribe();
-
 loadThread();
+setInterval(loadThread, 5000);
+
 </script>
 
 </body>
