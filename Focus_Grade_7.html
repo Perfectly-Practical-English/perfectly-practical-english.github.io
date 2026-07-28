@@ -9,8 +9,7 @@
 <style>
 
 *{
-    box-sizing:border-box;draggable
-
+    box-sizing:border-box;
 }
 
 html,body{
@@ -27,9 +26,12 @@ html,body{
 
 #main{
     display:flex;
-    height:calc(100vh - 100px);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 124px; /* Stops the control columns right where the tiles bar begins on load */
 }
-
 /* ==========================
    LEFT COLUMN
 ========================== */
@@ -168,27 +170,18 @@ html,body{
 ========================== */
 
 #tilesBar{
-
-    position:fixed;
-
-    left:0;
-    right:0;
-
-    bottom:24px;
-
-    height:100px;
-
-    display:flex;
-    flex-direction:column;
-
-    border-top:1px solid #999;
-
-    background:#ececec;
-
-    z-index:9998;
-
-}
-#toggleTiles{
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 24px;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid #999;
+    background: #ececec;
+    z-index: 9998;
+    box-sizing: border-box;
+}#toggleTiles{
 
     width:24px;
 
@@ -279,47 +272,30 @@ html,body{
    DRAGGABLES
 ========================== */
 
-.draggable{
-
-    position:absolute;
-
-    z-index:9999;
-
-    cursor:move;
-
-    user-select:none;
-
-}
-
-.overlayPng{
-    position:absolute;
-
-    width:140px;
-    height:auto;
-
-    background:transparent !important;
-    border:none !important;
-    padding:0 !important;
-    margin:0 !important;
-
-    display:block;
-
-    pointer-events:auto;
-
-    object-fit:contain;
-}
-
 .draggable {
-    position:absolute;
-    z-index:9999;
-    cursor:default;
-    user-select:none;
+    position: absolute;
+    z-index: 9999;
+    cursor: move;
+    user-select: none;
     -webkit-user-drag: none;
     touch-action: none;
-    transform: none;
-
+    transition: none !important;
+    animation: none !important;
+    filter: none !important;
+    transform: none !important;
 }
-
+.overlayPng {
+    position: absolute;
+    width: 140px;
+    height: auto;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block;
+    pointer-events: auto;
+    object-fit: contain;
+}
 
 
 img {
@@ -374,15 +350,11 @@ img {
     pointer-events: none;
 }
 
-.draggable.overlayPng{
-    transform:none;
-}
 
 
 .tileAnchor {
-    transform: translate(-100%, -100%);
+    transform: none !important;
 }
-
 
 .draggable.tile{
     min-width:6ch;
@@ -593,20 +565,7 @@ img {
     font-weight: bold;
     padding: 2px 8px;
     border-radius: 4px;
-
-    /* Fade the background at the edges */
-    -webkit-mask-image: radial-gradient(
-        ellipse at center,
-        black 60%,
-        transparent 100%
-    );
-    mask-image: radial-gradient(
-        ellipse at center,
-        black 60%,
-        transparent 100%
-    );
 }
-
 
 #deleteBtn,
 #deleteBtnRight {
@@ -931,6 +890,88 @@ cursor:pointer;
 
 }
 
+#leftColumn *,
+#rightColumn * {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Set the default white background for buttons, inputs, selects, and flyouts */
+#leftColumn button,
+#rightColumn button,
+#leftColumn input,
+#rightColumn input,
+#leftColumn select,
+#rightColumn select,
+#leftColumn .breakBtn,
+#rightColumn .breakBtn,
+#leftColumn .spinnerButton,
+#rightColumn .spinnerButton,
+#leftColumn .flyout,
+#leftColumn [class*="flyout"],
+#rightColumn .flyout,
+#rightColumn [class*="flyout"] {
+    background: #ffffff !important;
+    color: #222 !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    transition: background 0.2s ease;
+}
+
+/* Pastel orange when clicked / active */
+#leftColumn button:active,
+#rightColumn button:active,
+#leftColumn button.active,
+#rightColumn button.active,
+#leftColumn .breakBtn:active,
+#rightColumn .breakBtn:active,
+#leftColumn .spinnerButton:active,
+#rightColumn .spinnerButton:active {
+    background: #ffdab9 !important; /* Pastel orange */
+    color: #111 !important;
+}
+
+#leftColumn button:hover,
+#rightColumn button:hover {
+    background: #fdfdfd !important;
+}
+
+#leftBtn,
+#rightBtn {
+    width: 100%;
+    height: 24px;
+    font-size: 10px;
+    border: none;
+    border-bottom: 1px solid #999;
+    cursor: pointer;
+    background: #f7f7f7;
+    padding: 0;
+}
+
+
+.control-column, .sidebar-column {
+    height: 100vh; /* Or a specific fixed height like 600px */
+    min-height: 600px;
+    max-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto; /* Handles overflow cleanly without shifting layout */
+}
+
+
+.tile-container-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: flex-start;
+}
+
+.tile-drag-bar {
+    flex-shrink: 0; /* Prevents the drag bar from compressing or moving */
+}
 </style>
 </head>
 <body>
@@ -969,7 +1010,7 @@ text-align-last:center;
 ">
 
 <option selected>PPE</option>
-<option value="iframe">Iframe</option>
+<option value="iframe">Local</option>
 <option value="online">Online</option>
 
 </select><button class="breakBtn" onclick="openBreakModal()">Break</button>
@@ -1003,7 +1044,7 @@ Browse
         </div>
 
     <select class="classSelect">
-    <option value="">Select</option>
+    <option value="">Class</option>
 </select>
 
 <div class="studentTile tile">
@@ -1080,7 +1121,7 @@ text-align-last:center;
 ">
 
 <option selected>PPE</option>
-<option value="iframe">Iframe</option>
+<option value="iframe">Local</option>
 <option value="online">Online</option>
 
 </select><button class="breakBtn" onclick="openBreakModal()">Break</button>
@@ -1113,7 +1154,7 @@ Browse
     </div>
 
     <select class="classSelect">
-    <option value="">Select</option>
+    <option value="">Class</option>
 </select>
 
     <div class="studentTile tile">
@@ -1158,41 +1199,24 @@ Tallyman
 </div>
 
 <div id="scriptBar">
-
-<div id="scriptResizeBar"></div>
-
-<div id="scriptBar">
+    <div id="scriptResizeBar"></div>
     <textarea id="worksheetScript"></textarea>
     <button id="downloadTxtBtn">TXT</button>
 </div>
 
-</div><div id="breakModal">
-
+<div id="breakModal">
     <div id="breakContent">
-
         <h1>A Brief Pause</h1>
-
         <div id="breakTimer">
             5:00
         </div>
-
-
-<div class="breakControls">
-
-    <span id="breakMinus" class="breakArrow">
-        ▼
-    </span>
-
-    <button id="breakStart">
-        Restart
-    </button>
-
-    <span id="breakPlus" class="breakArrow">
-        ▲
-    </span>
-
+        <div class="breakControls">
+            <span id="breakMinus" class="breakArrow">▼</span>
+            <button id="breakStart">Restart</button>
+            <span id="breakPlus" class="breakArrow">▲</span>
+        </div>
+    </div>
 </div>
-
 
     </div>
 
@@ -1798,6 +1822,10 @@ function(e){
         IMAGE ANSWER
     */
 
+    /*
+        IMAGE ANSWER
+    */
+
     if(placeMode.type === "image"){
 
 
@@ -1821,22 +1849,21 @@ function(e){
 
 
     /*
+/*
         TEXT ANSWER
     */
 
-    else{
+else{
 
 
-        obj =
-obj = document.createElement("div");
+        obj = document.createElement("div");
 
-obj.className = "draggable tile tileAnchor placedTile";
+        obj.className = "draggable tile tileAnchor placedTile";
 
-obj.textContent = placeMode.value;
+        obj.textContent = placeMode.value;
 
 
     }
-
 
 
     obj.style.left =
@@ -1962,28 +1989,34 @@ function enableDragging(el){
 
 }
 /* ==========================
-   DELETE SELECTED
+   UNIFIED DELETE ENGINE
 ========================== */
 
-window.addEventListener(
-"keydown",
-function(e){
-
-
-    if(e.key==="Delete" && selectedEl){
-
-
-        selectedEl.remove();
-
-
-        selectedEl=null;
-
-
-    }
-
-
+function deleteSelectedTile() {
+    if (!selectedEl) return;
+    
+    // Instantly strip all styles, classes, and filters so the element vanishes with zero animation frames
+    selectedEl.className = "";
+    selectedEl.style = "";
+    selectedEl.remove();
+    selectedEl = null;
+}
+// Button Clicks
+document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("deleteBtn");
+    if (btn) btn.onclick = deleteSelectedTile;
+    
+    const btnRight = document.getElementById("deleteBtnRight");
+    if (btnRight) btnRight.onclick = deleteSelectedTile;
 });
 
+// Keyboard Delete / Backspace
+window.addEventListener("keydown", function (e) {
+    if (e.key === "Delete" || e.key === "Backspace") {
+        if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") return;
+        deleteSelectedTile();
+    }
+});
 
 </script>
 
@@ -2809,7 +2842,7 @@ const Wheel={
     duration:2000
 };
 /* ==========================
- CREATE WHEEL
+   CREATE WHEEL
 ========================== */
 
 function createWheel(){
@@ -2874,7 +2907,8 @@ transform:none;
 
 background:transparent;
 
-pointer-events:none;
+pointer-events:auto;
+cursor:pointer;
 
 }`;
 
@@ -2928,14 +2962,30 @@ let oy=0;
 
 Wheel.panel.addEventListener("pointerdown",e=>{
 
-dragging=true;
+    // If clicking the center hub, let the click handler handle it instead of dragging
+    const canvasRect = Wheel.canvas.getBoundingClientRect();
+    const extraSpace = 40;
+    const cx = (Wheel.size / 2) + extraSpace / 2;
+    const cy = (Wheel.size / 2) + extraSpace / 2;
+    const scaleX = Wheel.canvas.width / canvasRect.width;
+    const scaleY = Wheel.canvas.height / canvasRect.height;
+    const internalX = (e.clientX - canvasRect.left) * scaleX;
+    const internalY = (e.clientY - canvasRect.top) * scaleY;
+    const dx = internalX - cx;
+    const dy = internalY - cy;
 
-const r=Wheel.panel.getBoundingClientRect();
+    if(Math.sqrt(dx * dx + dy * dy) <= 28){
+        return; // Don't initiate drag on center hub
+    }
 
-ox=e.clientX-r.left;
-oy=e.clientY-r.top;
+    dragging=true;
 
-Wheel.panel.setPointerCapture(e.pointerId);
+    const r=Wheel.panel.getBoundingClientRect();
+
+    ox=e.clientX-r.left;
+    oy=e.clientY-r.top;
+
+    Wheel.panel.setPointerCapture(e.pointerId);
 
 });
 
@@ -2976,7 +3026,7 @@ dragging=false;
 
 
 /* ==========================
- LOAD STUDENTS
+   LOAD STUDENTS
 ========================== */
 
 function loadWheelStudents(){
@@ -2990,8 +3040,8 @@ function loadWheelStudents(){
 
 
     /*
-       Rearrange students so identical colors
-       are spread apart whenever possible.
+        Rearrange students so identical colors
+        are spread apart whenever possible.
     */
 
     const colorGroups = {};
@@ -3062,7 +3112,7 @@ function loadWheelStudents(){
 
 }
 /* ==========================
- DRAW
+   DRAW
 ========================== */
 function drawWheel(){
 
@@ -3466,7 +3516,7 @@ ctx.restore();
 
 
 /* ==========================
- SPIN
+   SPIN
 ========================== */
 
 function spinWheel(){
@@ -3489,10 +3539,7 @@ loadWheelStudents();
 if(!Wheel.students.length){
 
 Wheel.spinning=false;
-stopSpinnerSound();
-
-/* Advance to the same student
-   the wheel just landed on */
+if(window.stopSpinnerSound) stopSpinnerSound();
 
 return;
 
@@ -3513,12 +3560,24 @@ const slice =
     (Math.PI * 2) / Wheel.students.length;
 
 
+// Trigger the control panel selection logic (same as clicking the control panel button or student tile)
+const mainGenBtn = document.querySelector("#randomBtn, .random-btn, [data-random-student], #generateBtn, .studentTile");
+if(mainGenBtn && typeof mainGenBtn.click === "function" && !mainGenBtn.classList.contains("studentTile")){
+    mainGenBtn.click();
+} else if(typeof window.nextStudent === "function"){
+    window.nextStudent();
+}
+
+const tile = document.querySelector(".studentTile");
+if(tile){
+    Wheel.currentName = tile.textContent.trim();
+}
 
 
 
 /*
-    Aim the CENTER of the student's slice
-    at the pointer.
+   Aim the CENTER of the student's slice
+   at the pointer.
 */
 
 const targetIndex =
@@ -3530,6 +3589,7 @@ const targetIndex =
 if(targetIndex < 0){
 
     Wheel.spinning=false;
+    if(window.stopSpinnerSound) stopSpinnerSound();
     return;
 
 }
@@ -3614,7 +3674,7 @@ requestAnimationFrame(animate);
 
 
 /* ==========================
- SHOW / HIDE
+   SHOW / HIDE
 ========================== */
 
 function showWheel(){
@@ -3703,7 +3763,7 @@ Wheel.overlay.style.display="none";
 
 
 /* ==========================
- BUTTON
+   BUTTON
 ========================== */
 
 
@@ -3741,8 +3801,33 @@ window.spinWheel = spinWheel;
 window.hideWheel = hideWheel;
 
 /* ---------------------------------------
-   CONNECT TO EXISTING STUDENT TILE LOGIC
+   BRASS HUB CENTER CLICK HOTSPOT
 --------------------------------------- */
+
+document.addEventListener("click", function(e){
+    if(!Wheel.overlay || Wheel.overlay.style.display !== "flex") return;
+    if(e.target !== Wheel.canvas) return;
+
+    const canvasRect = Wheel.canvas.getBoundingClientRect();
+    const extraSpace = 40;
+    const cx = (Wheel.size / 2) + extraSpace / 2;
+    const cy = (Wheel.size / 2) + extraSpace / 2;
+
+    const scaleX = Wheel.canvas.width / canvasRect.width;
+    const scaleY = Wheel.canvas.height / canvasRect.height;
+    const internalX = (e.clientX - canvasRect.left) * scaleX;
+    const internalY = (e.clientY - canvasRect.top) * scaleY;
+
+    const dx = internalX - cx;
+    const dy = internalY - cy;
+
+    // Center hub radius is 28px
+    if(Math.sqrt(dx * dx + dy * dy) <= 28){
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        spinWheel();
+    }
+}, true);
 
 /* ---------------------------------------
    WATCH STUDENT TILE CLICKS
@@ -3786,7 +3871,6 @@ document.addEventListener("click", function(e){
 })();
 
 </script>
-
 <script>
 
 /* ==========================
@@ -5135,1236 +5219,448 @@ window.PlacementSound =
 "use strict";
 
 /*==================================================
- TALLYMAN STANDALONE
- PART 1
- Floating Launcher + Modal Shell
+  TALLYMAN STANDALONE (COLOR SYNC)
+  PART 1: Floating Launcher + Modal Shell
 ==================================================*/
 
 const TM = {
-
-version:"1.0",
-
-width:360,
-height:420
-
+  version:"1.3",
+  width:360,
+  height:420
 };
 
-
-/*==================================================
- CSS
-==================================================*/
-
 const style=document.createElement("style");
-
 style.textContent=`
-
 #tmWindow{
-
-position:fixed;
-
-right:100px;
-bottom:130px;
-
-width:${TM.width}px;
-height:${TM.height}px;
-
-display:none;
-
-background:transparent;
-
-z-index:2147483646;
-
-font-family:system-ui,sans-serif;
-
+  position:fixed;
+  right:100px;
+  bottom:130px;
+  width:${TM.width}px;
+  height:${TM.height}px;
+  display:none;
+  background:transparent;
+  z-index:2147483646;
+  font-family:system-ui,sans-serif;
 }
-
 #tmWindow.tmOpen{
-
-display:block;
-
+  display:block;
 }
-
 #tmPanel{
-
-position:absolute;
-inset:0;
-
-background:#dbeafe;
-
-border-radius:12px;
-
-box-shadow:
-0 10px 30px rgba(0,0,0,.30);
-
-overflow:hidden;
-
-display:flex;
-flex-direction:column;
-
+  position:absolute;
+  inset:0;
+  background:#dbeafe;
+  border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.30);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
 }
-
 #tmDrag{
-
-height:16px;
-
-cursor:move;
-
-background:#f2f2f2;
-
-position:relative;
-
-user-select:none;
-
+  height:16px;
+  cursor:move;
+  background:#f2f2f2;
+  position:relative;
+  user-select:none;
 }
-
 #tmClose{
-
-position:absolute;
-
-right:4px;
-top:1px;
-
-width:14px;
-height:14px;
-
-border:none;
-
-border-radius:50%;
-
-background:#000;
-
-color:#fff;
-
-font-size:10px;
-
-cursor:pointer;
-
-padding:0;
-
-line-height:14px;
-
+  position:absolute;
+  right:4px;
+  top:1px;
+  width:14px;
+  height:14px;
+  border:none;
+  border-radius:50%;
+  background:#000;
+  color:#fff;
+  font-size:10px;
+  cursor:pointer;
+  padding:0;
+  line-height:14px;
 }
-
 #tmContent{
-
-flex:1;
-
-overflow:auto;
-
-padding:12px;
-
+  flex:1;
+  overflow:auto;
+  padding:12px;
 }
-
 `;
-
 document.head.appendChild(style);
 
-/*==================================================
- HTML
-==================================================*/
-
-
 const win=document.createElement("div");
-
 win.id="tmWindow";
-
 win.innerHTML=`
-
 <div id="tmPanel">
-
-<div id="tmDrag">
-
-<button id="tmClose">×</button>
-
+  <div id="tmDrag">
+    <button id="tmClose">×</button>
+  </div>
+  <div id="tmContent">
+    <h3 style="margin-top:0;">Tallyman</h3>
+    <div id="tmApp"></div>
+  </div>
 </div>
-
-<div id="tmContent">
-
-<h3 style="margin-top:0;">
-Tallyman
-</h3>
-
-<div id="tmApp"></div>
-
-</div>
-
-</div>
-
 `;
-
 document.body.appendChild(win);
 
 function openTallyman(){
-
-    win.classList.add("tmOpen");
-
+  win.classList.add("tmOpen");
 }
-
 
 document.addEventListener("click",function(e){
-
-    if(e.target.id==="tallymanLeftBtn" ||
-       e.target.id==="tallymanRightBtn"){
-
+    const trigger = e.target.closest("#tallymanLeftBtn, #tallymanRightBtn, [data-open-tallyman]");
+    if(trigger){
         openTallyman();
-
     }
-
 });
 
-document
-.getElementById("tmClose")
-.addEventListener("click",function(e){
-
+document.getElementById("tmClose").addEventListener("click",function(e){
     e.stopPropagation();
-
     win.classList.remove("tmOpen");
-
 });
-
-
-/*==================================================
- OPEN / CLOSE
-==================================================*/
-
-
-
-document
-.getElementById("tmClose")
-.addEventListener("click",function(e){
-
-e.stopPropagation();
-
-win.classList.remove("tmOpen");
-
-});
-
-/*==================================================
- DRAG FUNCTION
-==================================================*/
 
 function drag(target,handle){
-
-let dragging=false;
-
-let ox=0;
-let oy=0;
-
-handle.addEventListener("mousedown",function(e){
-
-dragging=true;
-
-ox=e.clientX-target.offsetLeft;
-
-oy=e.clientY-target.offsetTop;
-
-});
-
-document.addEventListener("mousemove",function(e){
-
-if(!dragging)return;
-
-target.style.left=
-(e.clientX-ox)+"px";
-
-target.style.top=
-(e.clientY-oy)+"px";
-
-target.style.right="auto";
-target.style.bottom="auto";
-
-});
-
-document.addEventListener("mouseup",function(){
-
-dragging=false;
-
-});
-
+  let dragging=false;
+  let ox=0;
+  let oy=0;
+  handle.addEventListener("mousedown",function(e){
+    dragging=true;
+    ox=e.clientX-target.offsetLeft;
+    oy=e.clientY-target.offsetTop;
+  });
+  document.addEventListener("mousemove",function(e){
+    if(!dragging)return;
+    target.style.left=(e.clientX-ox)+"px";
+    target.style.top=(e.clientY-oy)+"px";
+    target.style.right="auto";
+    target.style.bottom="auto";
+  });
+  document.addEventListener("mouseup",function(){
+    dragging=false;
+  });
 }
 
-/*==================================================
- ENABLE DRAGGING
-==================================================*/
-
-
-
-drag(
-win,
-document.getElementById("tmDrag")
-);
-
-
+drag(win, document.getElementById("tmDrag"));
 
 /*==================================================
- TALLYMAN STANDALONE
- PART 2
- Interface
+  PART 2: Interface Setup
 ==================================================*/
 
 const app=document.getElementById("tmApp");
-
 app.innerHTML=`
-
 <div id="tmWrapper">
-
-<div id="tmTopBar">
-
-<select id="tmClassSelect">
-<option value="" selected disabled>Select a student</option>
-</select>
-
+  <div id="tmTile">Select or generate a student</div>
+  <div id="tmScoreboard">
+    <div class="tmTeam">
+      <div class="tmHeader">Blue</div>
+      <div class="tmTallies" data-team="Blue"></div>
+      <div class="tmScore" id="tmScoreBlue">0</div>
+      <button class="tmDelete" data-team="Blue">Delete</button>
+    </div>
+    <div class="tmTeam">
+      <div class="tmHeader">Green</div>
+      <div class="tmTallies" data-team="Green"></div>
+      <div class="tmScore" id="tmScoreGreen">0</div>
+      <button class="tmDelete" data-team="Green">Delete</button>
+    </div>
+    <div class="tmTeam">
+      <div class="tmHeader">Orange</div>
+      <div class="tmTallies" data-team="Orange"></div>
+      <div class="tmScore" id="tmScoreOrange">0</div>
+      <button class="tmDelete" data-team="Orange">Delete</button>
+    </div>
+    <div class="tmTeam">
+      <div class="tmHeader">Red</div>
+      <div class="tmTallies" data-team="Red"></div>
+      <div class="tmScore" id="tmScoreRed">0</div>
+      <button class="tmDelete" data-team="Red">Delete</button>
+    </div>
+  </div>
 </div>
-
-<div id="tmTile">
-
-
-</div>
-
-<div id="tmScoreboard">
-
-<div class="tmTeam">
-
-<div class="tmHeader">
-Blue
-</div>
-
-<div class="tmTallies"
-data-team="Blue">
-</div>
-
-<div class="tmScore"
-id="tmScoreBlue">
-0
-</div>
-
-<button class="tmDelete"
-data-team="Blue">
-Delete
-</button>
-</div>
-
-
-<div class="tmTeam">
-
-<div class="tmHeader">
-Green
-</div>
-
-<div class="tmTallies"
-data-team="Green">
-</div>
-
-<div class="tmScore"
-id="tmScoreGreen">
-0
-</div>
-
-<button class="tmDelete"
-data-team="Green">
-Delete
-</button>
-</div>
-
-
-<div class="tmTeam">
-
-<div class="tmHeader">
-Orange
-</div>
-
-<div class="tmTallies"
-data-team="Orange">
-</div>
-
-<div class="tmScore"
-id="tmScoreOrange">
-0
-</div>
-
-<button class="tmDelete"
-data-team="Orange">
-Delete
-</button>
-
-</div>
-
-
-<div class="tmTeam">
-
-<div class="tmHeader">
-Red
-</div>
-
-<div class="tmTallies"
-data-team="Red">
-</div>
-
-<div class="tmScore"
-id="tmScoreRed">
-0
-</div>
-
-<button class="tmDelete"
-data-team="Red">
-Delete
-</button>
-
-</div>
-
-</div>
-
-</div>
-
 `;
-
-/*==================================================
- PART 2 CSS
-==================================================*/
 
 style.textContent+=`
-
 #tmWrapper{
-
-display:flex;
-flex-direction:column;
-gap:8px;
-
+  display:flex;
+  flex-direction:column;
+  gap:8px;
 }
-
-#tmTopBar{
-
-display:flex;
-gap:6px;
-
-}
-
-#tmTopBar select{
-
-flex:1;
-height:34px;
-
-}
-
-#tmTopBar button{
-
-width:70px;
-height:34px;
-
-}
-
 #tmTile{
-
-height:42px;
-
-display:flex;
-align-items:center;
-justify-content:center;
-
-font-size:16px;
-font-weight:700;
-
-border-radius:8px;
-
-background:#ececec;
-
-transition:.25s;
-
-user-select:none;
-cursor:pointer;
-
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  font-weight:700;
+  border-radius:8px;
+  background:#ececec;
+  color:#111;
+  transition:background .25s, color .25s;
+  user-select:none;
+  cursor:pointer;
+  padding: 0 8px;
+  text-align: center;
 }
-
 #tmScoreboard{
-
-display:grid;
-
-grid-template-columns:
-repeat(4,1fr);
-
-gap:6px;
-
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
 }
-
 .tmTeam{
-
-border:1px solid #ccc;
-
-border-radius:6px;
-
-background:#fff;
-
-display:grid;
-
-grid-template-rows:
-auto
-1fr
-auto;
-
+  border:1px solid #ccc;
+  border-radius:6px;
+  background:#fff;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
 }
-
 .tmHeader{
-
-font-size:10px;
-font-weight:700;
-
-text-align:center;
-
-padding:3px;
-
+  font-size:10px;
+  font-weight:700;
+  text-align:center;
+  padding:3px;
 }
-
 .tmTallies{
-
-min-height:54px;
-
-padding:4px;
-
-display:flex;
-
-flex-direction:column;
-
-align-items:center;
-
-gap:4px;
-
-cursor:pointer;
-
+  min-height:54px;
+  padding:4px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  cursor:pointer;
 }
-
 .tmGroup{
-
-position:relative;
-
-display:flex;
-
-justify-content:center;
-
-align-items:center;
-
-gap:3px;
-
-width:100%;
-
+  position:relative;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:3px;
+  width:100%;
 }
-
 .tmGroup svg{
-
-position:absolute;
-
-inset:0;
-
-width:100%;
-height:100%;
-
-pointer-events:none;
-
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
 }
-
 .tmStick{
-
-width:2px;
-height:14px;
-
-background:#111;
-
+  width:2px;
+  height:14px;
+  background:#111;
 }
-
 .tmScore{
-
-border-top:1px solid #ddd;
-
-text-align:center;
-
-font-size:10px;
-
-font-weight:700;
-
-padding:2px;
-
+  border-top:1px solid #ddd;
+  text-align:center;
+  font-size:10px;
+  font-weight:700;
+  padding:2px;
 }
-
 .tmDelete{
-
-width:100%;
-
-border:none;
-
-border-top:1px solid #ddd;
-
-background:#f3f3f3;
-
-font-size:10px;
-
-padding:3px 0;
-
-cursor:pointer;
-
+  width:100%;
+  border:none;
+  border-top:1px solid #ddd;
+  background:#f3f3f3;
+  font-size:10px;
+  padding:3px 0;
+  cursor:pointer;
 }
-
 .tmDelete:hover{
-
-background:#ffd7d7;
-
+  background:#ffd7d7;
 }
 `;
 
 /*==================================================
- TALLYMAN STANDALONE
- PART 3
- Data + Parser + Slideshow
+  PART 3 & 4: Global Logic, Name & Color Sync
 ==================================================*/
 
-const TM_COLORS={
-    Blue:"#93c5fd",
-    Green:"#86efac",
-    Orange:"#fdba74",
-    Red:"#fca5a5"
-};
+const tmTile = document.getElementById("tmTile");
 
-const TM_RAW=`
-
-~11.1	
-Blue	Thanawat
-Blue	Warawut
-Blue	Phawat
-Green	Suphajak
-Green	Kallapapruek
-Green	Soraphat
-Orange	Nacharot
-Orange	Paphawin
-Orange	Pattaradorn
-Orange	Theerapith
-Red	Thannakorn
-Red	Khemmanat
-Red	Pannawit
-Red	Chatchanok
-~13.2	
-Blue	Patiphan
-Blue	Katanyu
-Blue	Suthimont
-Green	Korravit
-Green	Machat
-Green	Phoomipat
-Orange	Ingkrit
-Orange	Pachara
-Orange	Khanaphot
-Orange	Napol
-Red	Kannaphat
-Red	Natthapakorn
-Red	Phurit
-Red	Pawarut
-~14.1	
-Blue	Krittanart
-Blue	Natthanan
-Blue	Nanaruchote
-Green	Phutthiphat
-Green	Boonraksa
-Green	Kronpanod
-Orange	Phudit
-Orange	Dhatsawitt
-Orange	Nonthapat
-Orange	Chayangkoon
-Orange	Punyawee
-Red	Yuttanin
-Red	Photsawee
-Red	Jommanut
-Red	Phurarit
-~15.3	
-Blue	Akkravich
-Blue	Thanakorn
-Blue	Punnawatz
-Green	Puri
-Green	Api Cha
-Green	Panyarat
-Orange	Nakarin
-Orange	Chananon
-Orange	Rachchavich
-Orange	Phumiphat
-Red	Naravich
-Red	Preedipat 
-Red	Archawin
-Red	Worawit
-~16.2	
-Blue	Vachirasak
-Blue	Chutipan
-Blue	Pakornpat
-Green	Panpuris
-Green	Koonwich
-Green	Nutphalod
-Green	Jirayu
-Orange	Setthawut
-Orange	Theerapatch
-Orange	Theeraphat
-Orange	Pannatat
-Red	Thanakrit
-Red	Nakhun
-Red	Boonpipon
-Red	Warawat
-
-
-`;
-
-function tmParse(raw){
-
-const result={};
-
-const blocks=raw.split(/(?=~)/g);
-
-for(let block of blocks){
-
-block=block.trim();
-
-if(!block.startsWith("~")) continue;
-
-const lines=block
-.split("\n")
-.map(v=>v.trim())
-.filter(Boolean);
-
-const className=
-lines[0].substring(1).trim();
-
-const teams={};
-
-for(let i=1;i<lines.length;i++){
-
-const parts=
-lines[i].split(/\s+/);
-
-const team=parts[0];
-
-const name=
-parts.slice(1).join(" ");
-
-if(!teams[team])
-teams[team]=[];
-
-teams[team].push(name);
-
+function tmTriggerExternalNext() {
+    if (typeof window.nextStudent === "function") {
+        window.nextStudent();
+    } else {
+        const mainGenBtn = document.querySelector("#randomBtn, .random-btn, [data-random-student], #generateBtn");
+        if (mainGenBtn) mainGenBtn.click();
+    }
 }
 
-result[className]=teams;
-
+// Determines if a background color is dark to automatically adjust text color for contrast
+function isColorDark(colorStr) {
+    let rgb = colorStr.match(/\d+/g);
+    if (!rgb || rgb.length < 3) return false;
+    let brightness = (Number(rgb[0]) * 299 + Number(rgb[1]) * 587 + Number(rgb[2]) * 114) / 1000;
+    return brightness < 125;
 }
 
-return result;
-
+// Scans the main page control column / UI for the active student element, updating text and styling color
+function updateTmTileFromControlColumn() {
+    try {
+        const controlCol = document.querySelector("#controlColumn, .control-column, aside, .sidebar") || document.body;
+        const candidates = controlCol.querySelectorAll("div, span, h1, h2, h3, h4");
+        
+        for (let el of candidates) {
+            if (el.id === "tmWindow" || el.closest("#tmWindow")) continue;
+            
+            const idClass = (el.id + " " + el.className).toLowerCase();
+            if (idClass.includes("student") || idClass.includes("name") || idClass.includes("display") || idClass.includes("tile")) {
+                const text = el.textContent.trim();
+                if (text && text.length > 0 && text.length < 35 && !text.includes("Tallyman") && !text.includes("Scoreboard")) {
+                    tmTile.textContent = text;
+                    
+                    // Extract background style/color from the matched student element in the main logic
+                    const computed = window.getComputedStyle(el);
+                    const bg = computed.backgroundColor;
+                    
+                    if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") {
+                        tmTile.style.background = bg;
+                        tmTile.style.color = isColorDark(bg) ? "#ffffff" : "#111111";
+                    } else {
+                        // Fallback if background is on an inline style attribute
+                        const inlineBg = el.style.backgroundColor || el.style.background;
+                        if (inlineBg) {
+                            tmTile.style.background = inlineBg;
+                            tmTile.style.color = isColorDark(inlineBg) ? "#ffffff" : "#111111";
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    } catch(e) {
+        // Fail silently to keep application stable
+    }
 }
 
-const tmClasses=
-tmParse(TM_RAW);
+// Continuous check to sync name and color instantly
+setInterval(updateTmTileFromControlColumn, 250);
 
-const tmSelect =
-document.getElementById("tmClassSelect");
-
-tmSelect.innerHTML =
-'<option value="" disabled>Select a class</option>';
-
-Object.keys(tmClasses)
-.forEach(cls=>{
-
-const option =
-document.createElement("option");
-
-option.value = cls;
-option.textContent = cls;
-
-tmSelect.appendChild(option);
-
-});
-tmSelect.selectedIndex = 0;
-
-tmSelect.style.color = "#777";
-let tmQueue=[];
-let tmIndex=0;
-let tmCurrentClass=null;
-
-function tmShuffle(arr){
-
-const copy=[...arr];
-
-for(let i=copy.length-1;i>0;i--){
-
-const j=
-Math.floor(
-Math.random()*(i+1)
-);
-
-[copy[i],copy[j]]=
-[copy[j],copy[i]];
-
-}
-
-return copy;
-
-}
-
-function tmBuildQueue(className){
-
-const data=
-tmClasses[className];
-
-const order=[
-"Blue",
-"Green",
-"Orange",
-"Red"
-];
-
-const teams={};
-
-order.forEach(team=>{
-
-teams[team]=
-tmShuffle(
-data[team]||[]
-);
-
+tmTile.addEventListener("click", function() {
+    tmTriggerExternalNext();
+    setTimeout(updateTmTileFromControlColumn, 100);
 });
 
-const queue=[];
-
-let remaining=true;
-
-while(remaining){
-
-remaining=false;
-
-order.forEach(team=>{
-
-if(teams[team].length){
-
-queue.push({
-
-text:
-teams[team].shift(),
-
-color:
-TM_COLORS[team]
-
-});
-
-remaining=true;
-
-}
-
-});
-
-}
-
-return queue;
-
-}
-
-function tmLoadClass(){
-
-if(!tmSelect.value)
-return;
-
-tmCurrentClass=
-tmSelect.value;
-
-tmQueue=
-tmBuildQueue(
-tmCurrentClass
-);
-
-tmIndex=0;
-
-const tile=
-document.getElementById("tmTile");
-
-tile.textContent="";
-
-tile.style.background=
-"#ececec";
-
-}
-function tmNext(){
-
-if(!tmCurrentClass)
-return;
-
-if(tmIndex>=tmQueue.length){
-
-tmQueue=
-tmBuildQueue(
-tmCurrentClass
-);
-
-tmIndex=0;
-
-}
-
-const item=
-tmQueue[tmIndex++];
-
-const tile=
-document.getElementById("tmTile");
-
-tile.style.opacity=0;
-
-setTimeout(()=>{
-
-tile.textContent=
-item.text;
-
-tile.style.background=
-item.color;
-
-tile.style.opacity=1;
-
-},120);
-
-}
-
-
-
-tmSelect.addEventListener("change", function(){
-
-    tmLoadClass();
-
-    tmNext();
-
-});
-
-document
-.getElementById("tmTile")
-.addEventListener(
-"click",
-tmNext
-);
-
-/*==================================================
- TALLYMAN STANDALONE
- PART 4
- Scoreboard + Tallies
-==================================================*/
-
-const tmScores={
-    Blue:0,
-    Green:0,
-    Orange:0,
-    Red:0
-};
+const tmScores = { Blue:0, Green:0, Orange:0, Red:0 };
 
 function tmAddTally(team){
-
     tmScores[team]++;
+    const area = document.querySelector('.tmTallies[data-team="'+team+'"]');
+    if(!area) return;
 
-    const area=document.querySelector(
-        '.tmTallies[data-team="'+team+'"]'
-    );
+    let groups = area.querySelectorAll(".tmGroup");
+    let group = groups[groups.length-1];
 
-    let groups=
-    area.querySelectorAll(".tmGroup");
-
-    let group=
-    groups[groups.length-1];
-
-    if(
-        !group ||
-        Number(group.dataset.count)>=5
-    ){
-
-        group=document.createElement("div");
-
-        group.className="tmGroup";
-
-        group.dataset.count=0;
-
+    if(!group || Number(group.dataset.count)>=5){
+        group = document.createElement("div");
+        group.className = "tmGroup";
+        group.dataset.count = 0;
         area.appendChild(group);
-
     }
 
-    let count=
-    Number(group.dataset.count);
-
+    let count = Number(group.dataset.count);
     if(count<4){
-
-        const stick=
-        document.createElement("div");
-
-        stick.className="tmStick";
-
+        const stick = document.createElement("div");
+        stick.className = "tmStick";
         group.appendChild(stick);
-
     }
-
     count++;
 
     if(count===5){
-
-        const svg=document.createElementNS(
-            "http://www.w3.org/2000/svg",
-            "svg"
-        );
-
-        svg.setAttribute(
-            "viewBox",
-            "0 0 20 20"
-        );
-
-        svg.innerHTML=`
-<line
-x1="2"
-y1="2"
-x2="18"
-y2="18"
-stroke="#111"
-stroke-width="2"
-stroke-linecap="round"/>
-`;
-
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", "0 0 20 20");
+        svg.innerHTML=`<line x1="2" y1="2" x2="18" y2="18" stroke="#111" stroke-width="2" stroke-linecap="round"/>`;
         group.appendChild(svg);
-
     }
 
-    group.dataset.count=count;
-
-    document.getElementById(
-        "tmScore"+team
-    ).textContent=tmScores[team];
-
+    group.dataset.count = count;
+    document.getElementById("tmScore"+team).textContent = tmScores[team];
 }
 
-/*==========================================
- CLICK TO ADD TALLY
-==========================================*/
-
-document
-.querySelectorAll(".tmTallies")
-.forEach(panel=>{
-
-    panel.addEventListener(
-        "click",
-        function(){
-
-            tmAddTally(
-                panel.dataset.team
-            );
-
-        }
-    );
-
-});
-
-document
-.querySelectorAll(".tmDelete")
-.forEach(btn=>{
-
-    btn.addEventListener(
-        "click",
-        function(e){
-
-            e.stopPropagation();
-
-            tmDeleteTally(
-                btn.dataset.team
-            );
-
-        }
-    );
-
-});
-/*==========================================
- OPTIONAL RESET FUNCTION
-==========================================*/
 function tmDeleteTally(team){
-
-    if(tmScores[team]===0)return;
-
+    if(tmScores[team]===0) return;
     tmScores[team]--;
+    const area = document.querySelector('.tmTallies[data-team="'+team+'"]');
+    if(!area) return;
 
-    const area=document.querySelector(
-        '.tmTallies[data-team="'+team+'"]'
-    );
+    const groups = area.querySelectorAll(".tmGroup");
+    if(!groups.length) return;
 
-    const groups=area.querySelectorAll(".tmGroup");
-
-    if(!groups.length)return;
-
-    const group=groups[groups.length-1];
-
-    let count=Number(group.dataset.count);
+    const group = groups[groups.length-1];
+    let count = Number(group.dataset.count);
 
     if(count===5){
-
-        const svg=group.querySelector("svg");
-
-        if(svg)svg.remove();
-
-    }
-    else{
-
-        const sticks=group.querySelectorAll(".tmStick");
-
-        if(sticks.length)
-            sticks[sticks.length-1].remove();
-
+        const svg = group.querySelector("svg");
+        if(svg) svg.remove();
+    } else {
+        const sticks = group.querySelectorAll(".tmStick");
+        if(sticks.length) sticks[sticks.length-1].remove();
     }
 
     count--;
-
-    group.dataset.count=count;
-
-/* Nothing else to remove.
-   The four vertical sticks stay so the
-   next tally becomes the diagonal slash again. */
-
+    group.dataset.count = count;
     if(count===0){
-
         group.remove();
-
     }
-
-    document.getElementById(
-        "tmScore"+team
-    ).textContent=tmScores[team];
-
+    document.getElementById("tmScore"+team).textContent = tmScores[team];
 }
 
 function tmResetScores(){
-
-    Object.keys(tmScores)
-    .forEach(team=>{
-
+    Object.keys(tmScores).forEach(team=>{
         tmScores[team]=0;
-
-        document.getElementById(
-            "tmScore"+team
-        ).textContent=0;
-
-        const area=document.querySelector(
-            '.tmTallies[data-team="'+team+'"]'
-        );
-
-        area.innerHTML="";
-
+        document.getElementById("tmScore"+team).textContent = 0;
+        const area = document.querySelector('.tmTallies[data-team="'+team+'"]');
+        if(area) area.innerHTML="";
     });
-
 }
 
+document.querySelectorAll(".tmTallies").forEach(panel=>{
+    panel.addEventListener("click", function(){
+        tmAddTally(panel.dataset.team);
+    });
+});
+
+document.querySelectorAll(".tmDelete").forEach(btn=>{
+    btn.addEventListener("click", function(e){
+        e.stopPropagation();
+        tmDeleteTally(btn.dataset.team);
+    });
+});
+
 /*==================================================
- TALLYMAN STANDALONE
- PART 5
- Final Initialization
+  PART 5: Initialization & Shortcuts
 ==================================================*/
 
-/*----------------------------------
- INITIALIZE DEFAULT CLASS
-----------------------------------*/
-
-if (tmSelect.options.length) {
-
-    tmSelect.selectedIndex = -0;
-
-document.getElementById("tmTile").textContent = "";
-
-}/*----------------------------------
- PUBLIC API
-----------------------------------*/
 window.tmAddTally = tmAddTally;
-
 window.Tallyman = {
-
-    version: "1.0",
-
-    load: tmLoadClass,
-
-    next: tmNext,
-
+    version: "1.3",
     add: tmAddTally,
-
     reset: tmResetScores,
-
-    scores: tmScores,
-
-    classes: tmClasses
-
+    scores: tmScores
 };
 
-/*----------------------------------
- OPTIONAL KEYBOARD SHORTCUTS
-
-Space = Next Name
-1-4 = Add Tally
-
-----------------------------------*/
-
 document.addEventListener("keydown", function(e){
-
-    if(!win.classList.contains("tmOpen"))
-        return;
-
+    if(!win.classList.contains("tmOpen")) return;
     switch(e.key){
-
         case " ":
-
             e.preventDefault();
-
-            tmNext();
-
+            tmTriggerExternalNext();
+            setTimeout(updateTmTileFromControlColumn, 100);
             break;
-
-        case "1":
-
-            tmAddTally("Blue");
-
-            break;
-
-        case "2":
-
-            tmAddTally("Green");
-
-            break;
-
-        case "3":
-
-            tmAddTally("Orange");
-
-            break;
-
-        case "4":
-
-            tmAddTally("Red");
-
-            break;
-
+        case "1": tmAddTally("Blue"); break;
+        case "2": tmAddTally("Green"); break;
+        case "3": tmAddTally("Orange"); break;
+        case "4": tmAddTally("Red"); break;
     }
-
 });
 
-/*----------------------------------
- DOUBLE CLICK LAUNCHER
-RESET SCORES
-----------------------------------*/
-
-document
-.getElementById("tallymanLeftBtn")
-.addEventListener("dblclick",function(){
-
-    tmResetScores();
-
-});
-/*----------------------------------
- START HIDDEN
-----------------------------------*/
+const leftBtn = document.getElementById("tallymanLeftBtn");
+if(leftBtn) {
+    leftBtn.addEventListener("dblclick", function(){
+        tmResetScores();
+    });
+}
 
 win.classList.remove("tmOpen");
-
-/*----------------------------------
- READY
-----------------------------------*/
-
-console.log("Tallyman Standalone Loaded");
+console.log("Tallyman Standalone Loaded (Name & Color Synced)");
 
 })();
-
-
 </script>
-
 <script>
 (function(){
 
@@ -7107,6 +6403,11 @@ update();
  Standalone
 ==========================================*/
 
+/*==========================================
+ PERFECTLY PRACTICAL LAUNCHER
+ Standalone
+==========================================*/
+
 (function(){
 
 "use strict";
@@ -7115,11 +6416,9 @@ update();
  Configuration
 ------------------------------------------*/
 
-const INDEX_URL="file:///C:/Users/User/Documents/perfectly-practical-english.github.io/index.html";
+const LOCAL_URL="file:///C:/Users/User/Documents/perfectly-practical-english.github.io/index.html";
 
 const ONLINE_URL="https://perfectly-practical-english.github.io/";
-
-let ppModal=null;
 
 
 /*------------------------------------------
@@ -7146,18 +6445,17 @@ function initLauncher(id){
         switch(sel.value){
 
             case "iframe":
-
-                openPPModal();
-
+                window.open(
+                    LOCAL_URL,
+                    "_blank"
+                );
                 break;
 
             case "online":
-
                 window.open(
-                    INDEX_URL,
+                    ONLINE_URL,
                     "_blank"
                 );
-
                 break;
 
         }
@@ -7167,152 +6465,8 @@ function initLauncher(id){
     });
 
 }
-/*------------------------------------------
- Modal
-------------------------------------------*/
 
-function openPPModal(){
-
-    if(ppModal){
-
-        ppModal.style.display="block";
-
-        ppModal.querySelector("iframe").src=INDEX_URL;
-
-        return;
-
-    }
-
-    ppModal=document.createElement("div");
-
-    ppModal.style.position="fixed";
-    ppModal.style.left="40px";
-    ppModal.style.top="40px";
-    ppModal.style.width="calc(100vw - 80px)";
-    ppModal.style.height="calc(100vh - 80px)";
-    ppModal.style.background="#fff";
-    ppModal.style.border="2px solid #444";
-    ppModal.style.boxShadow="0 8px 24px rgba(0,0,0,.35)";
-    ppModal.style.zIndex="999999";
-    ppModal.style.display="block";
-
-    ppModal.innerHTML=`
-
-<div id="ppHeader"
-style="
-height:36px;
-background:#333;
-color:#fff;
-display:flex;
-align-items:center;
-justify-content:space-between;
-padding:0 10px;
-cursor:move;
-font-family:sans-serif;
-font-size:14px;
-">
-
-<span>Perfectly Practical</span>
-
-<button id="ppClose"
-style="
-background:#c33;
-color:#fff;
-border:none;
-padding:4px 10px;
-cursor:pointer;
-">
-✕
-</button>
-
-</div>
-
-<iframe
-src="${INDEX_URL}"
-style="
-width:100%;
-height:calc(100% - 36px);
-border:none;
-background:#fff;
-">
-</iframe>
-
-`;
-
-    document.body.appendChild(ppModal);
-
-    document
-        .getElementById("ppClose")
-        .onclick=()=>{
-
-            ppModal.style.display="none";
-
-        };
-
-
-    makeDraggable(
-        ppModal,
-        document.getElementById("ppHeader")
-    );
-
-}
-
-
-/*------------------------------------------
- Drag
-------------------------------------------*/
-
-function makeDraggable(win,bar){
-
-    let down=false;
-
-    let sx=0;
-    let sy=0;
-
-    let ox=0;
-    let oy=0;
-
-    bar.onmousedown=e=>{
-
-        down=true;
-
-        sx=e.clientX;
-        sy=e.clientY;
-
-        ox=win.offsetLeft;
-        oy=win.offsetTop;
-
-        document.onmousemove=move;
-        document.onmouseup=up;
-
-    };
-
-    function move(e){
-
-        if(!down) return;
-
-        win.style.left=
-            ox+(e.clientX-sx)+"px";
-
-        win.style.top=
-            oy+(e.clientY-sy)+"px";
-
-    }
-
-    function up(){
-
-        down=false;
-
-        document.onmousemove=null;
-        document.onmouseup=null;
-
-    }
-
-}
-
-})();
-
-</script>
+})();</script>
 
 <!-- ==========================================================
      JELLY BEAN JAR MODAL SYSTEM (STANDALONE SCRIPT)
@@ -7326,489 +6480,13 @@ function makeDraggable(win,bar){
     left: 0;
     width: 100vw;
     height: 100vh;
-background: transparent; /* Ensures no dark or white overlay tint */
-    pointer-events: none; /* Allows clicks to pass through to the spread underneath */
-    z-index: 50000;
-    display: none;
-  }
-
-  /* Main Floating Modal Box */
-  #jbJarWrapper {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 12px;
-    gap: 12px;
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 2px solid rgba(255, 255, 255, 0.7);
-    border-radius: 20px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
-    pointer-events: auto; /* Re-enable pointer events inside the modal */
-    touch-action: none;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-
-  /* Jar Container scaled for modal overlay */
-  #jbJarContainer {
-    position: relative;
-    width: 380px;
-    height: 555px;
-    aspect-ratio: 520 / 760;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: visible;
-  }
-
-  #jbJarBack {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  #jbBeanCanvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
-  }
-
-  #jbJarGlassOverlay {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 5;
-  }
-
-#jbJarLid {
-    position: absolute;
-    width: 98%;
-    left: 1%;
-    top: 0;
-    transform: translateX(3px); /* Nudges it exactly 4px to the right without breaking JS tracking */
-    margin-top: 100px; /* Adjust this to move lid up/down */
-    object-fit: contain;
-    cursor: grab;
-    z-index: 100;
-    pointer-events: auto;
-    touch-action: none;
-    transition: transform 0.05s ease-out;
-  }
-
-  #jbJarLid:active {
-    cursor: grabbing;
-  }
-
-  #jbMouthHotspot {
-    position: absolute;
-    width: calc(50% + 5px);
-    height: 14%;
-    left: calc(25% - 2.5px);
-    top: 8%;
-    z-index: 30;
-    cursor: pointer;
-    background: rgba(0, 0, 0, 0);
-  }
-
-  #jbScoreDisplay {
-    position: absolute;
-    left: 50%;
-    top: 52%;
-    transform: translate(-50%, -50%);
-    width: 22%;
-    height: 12%;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.92);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 26px;
-    font-weight: bold;
-    color: #222;
-    cursor: pointer;
-    z-index: 40;
-    transition: transform 0.1s ease, background 0.1s ease;
-  }
-
-  #jbScoreDisplay:active {
-    transform: translate(-50%, -50%) scale(0.9);
-    background: rgba(255, 240, 180, 0.95);
-  }
-
-  /* Bottom Controls Bar */
-  #jbControls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    z-index: 150;
-  }
-
-  #jbClassSelect {
-    font-size: 14px;
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    background: #fff;
-  }
-
-  .jb-btn {
-    padding: 6px 14px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 6px;
-    border: 1px solid #bbb;
-    background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: background-color 0.15s ease;
-  }
-
-  .jb-btn:hover {
-    background-color: #f0f0f0;
-  }
-
-  .jb-drag-handle {
-    width: 100%;
-    text-align: center;
-    font-size: 12px;
-    font-weight: bold;
-    color: #555;
-    cursor: move;
-    padding-bottom: 2px;
-    border-bottom: 1px solid rgba(0,0,0,0.1);
-  }
-
-#leftBtn,
-#rightBtn {
-    height: 24px;
-    width: 100%;
-    font-size: 10px;
-    border: none;
-    border-bottom: 1px solid #999;
-    background: #f7f7f7;
-    cursor: pointer;
-}
-</style>
-
-<!-- MODAL HTML STRUCTURE -->
-<div id="jellyBeanModalContainer">
-  <div id="jbJarWrapper">
-    <div class="jb-drag-handle" id="jbHeaderDrag">Move Jar</div>
-    
-    <div id="jbJarContainer">
-      <!-- Background Layer -->
-      <img id="jbJarBack" src="Jar_Background.png" draggable="false" alt="Jar Back">
-
-      <!-- Dynamic Bean Canvas Layer -->
-      <canvas id="jbBeanCanvas" width="520" height="760"></canvas>
-
-      <!-- SVG Glass Reflection Overlay -->
-      <svg id="jbJarGlassOverlay" viewBox="0 0 520 760">
-        <path d="M150,180 Q130,220 130,620 Q130,660 170,660 L350,660 Q390,660 390,620 Q390,220 370,180 Z" 
-              fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="8"/>
-        <path d="M155,200 Q142,250 142,600" 
-              fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="6" stroke-linecap="round"/>
-      </svg>
-
-      <!-- Draggable Lid -->
-      <img id="jbJarLid" src="Jar_Lid.png" draggable="false" alt="Jar Lid">
-
-      <!-- Hotspots -->
-      <div id="jbMouthHotspot" title="Click to Add Bean"></div>
-      <div id="jbScoreDisplay" title="Click to Remove Bean">0</div>
-    </div>
-
-    <!-- Controls Row -->
-    <div id="jbControls">
-      <select id="jbClassSelect">
-        <option>11.1</option>
-        <option>11.2</option>
-        <option>11.3</option>
-        <option>12.1</option>
-        <option>12.2</option>
-        <option>12.3</option>
-        <option>13.1</option>
-        <option>13.2</option>
-        <option>13.3</option>
-      </select>
-
-      <button id="jbSaveButton" class="jb-btn">Save</button>
-      <input type="file" id="jbFileInput" accept=".txt" hidden>
-      <button id="jbBrowseButton" class="jb-btn">Update</button>
-    </div>
-  </div>
-</div>
-
-<!-- ==========================================================
-     JELLY BEAN JAR SCRIPT (FULLY INTEGRATED WITH YOUR BUTTONS)
-     Place these buttons anywhere in your main layout:
-     <button id="leftBtn">-</button>
-     <button id="rightBtn">+</button>
-========================================================== -->
-<style>
-  /* Full-screen transparent, click-through overlay container */
-  #jellyBeanModalContainer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    pointer-events: none; /* Allows clicks to pass through to the page underneath */
-    z-index: 50000;
-    display: none;
-  }
-
-  /* Main Floating Modal Box */
-  #jbJarWrapper {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 12px;
-    gap: 12px;
-    background: rgba(255, 255, 255, 0.4);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
-    border: 2px solid rgba(255, 255, 255, 0.7);
-    border-radius: 20px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
-    pointer-events: auto; /* Re-enable pointer events inside the modal */
-    touch-action: none;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-
-  /* Jar Container scaled for modal overlay */
-  #jbJarContainer {
-    position: relative;
-    width: 380px;
-    height: 555px;
-    aspect-ratio: 520 / 760;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: visible;
-  }
-
-  #jbJarBack {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    pointer-events: none;
-    z-index: 1;
-  }
-
-  #jbBeanCanvas {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2;
-  }
-
-  #jbJarGlassOverlay {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: 5;
-  }
-
-#jbJarLid {
-    position: absolute;
-    width: 98%;
-    left: 1px;
-    top: 5px; /* <-- Change this pixel value */
-    object-fit: contain;
-    cursor: grab;
-    z-index: 100;
-    pointer-events: auto;
-    touch-action: none;
-    transition: transform 0.05s ease-out;
-  }
-
-  #jbJarLid:active {
-    cursor: grabbing;
-  }
-
-  #jbMouthHotspot {
-    position: absolute;
-    width: calc(50% + 5px);
-    height: 14%;
-    left: calc(25% - 2.5px);
-    top: 8%;
-    z-index: 30;
-    cursor: pointer;
-    background: rgba(0, 0, 0, 0);
-  }
-
-  #jbScoreDisplay {
-    position: absolute;
-    left: 50%;
-    top: 52%;
-    transform: translate(-50%, -50%);
-    width: 22%;
-    height: 12%;
-    border-radius: 12px;
-    background: rgba(255, 255, 255, 0.92);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 26px;
-    font-weight: bold;
-    color: #222;
-    cursor: pointer;
-    z-index: 40;
-    transition: transform 0.1s ease, background 0.1s ease;
-  }
-
-  #jbScoreDisplay:active {
-    transform: translate(-50%, -50%) scale(0.9);
-    background: rgba(255, 240, 180, 0.95);
-  }
-
-  /* Bottom Controls Bar */
-  #jbControls {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    gap: 8px;
-    z-index: 150;
-  }
-
-  #jbClassSelect {
-    font-size: 14px;
-    padding: 6px 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    background: #fff;
-  }
-
-  .jb-btn {
-    padding: 6px 14px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 6px;
-    border: 1px solid #bbb;
-    background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: background-color 0.15s ease;
-  }
-
-  .jb-btn:hover {
-    background-color: #f0f0f0;
-  }
-
-  .jb-drag-handle {
-    width: 100%;
-    text-align: center;
-    font-size: 12px;
-    font-weight: bold;
-    color: #555;
-    cursor: move;
-    padding-bottom: 2px;
-    border-bottom: 1px solid rgba(0,0,0,0.1);
-  }
-</style>
-
-<!-- MODAL HTML STRUCTURE -->
-<div id="jellyBeanModalContainer">
-  <div id="jbJarWrapper">
-    <div class="jb-drag-handle" id="jbHeaderDrag">🫘 JELLY BEAN JAR (DRAG HERE)</div>
-    
-    <div id="jbJarContainer">
-      <!-- Background Layer -->
-      <img id="jbJarBack" src="Jar_Background.png" draggable="false" alt="Jar Back">
-
-      <!-- Dynamic Bean Canvas Layer -->
-      <canvas id="jbBeanCanvas" width="520" height="760"></canvas>
-
-      <!-- SVG Glass Reflection Overlay -->
-      <svg id="jbJarGlassOverlay" viewBox="0 0 520 760">
-        <path d="M150,180 Q130,220 130,620 Q130,660 170,660 L350,660 Q390,660 390,620 Q390,220 370,180 Z" 
-              fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="8"/>
-        <path d="M155,200 Q142,250 142,600" 
-              fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="6" stroke-linecap="round"/>
-      </svg>
-
-      <!-- Draggable Lid -->
-      <img id="jbJarLid" src="Jar_Lid.png" draggable="false" alt="Jar Lid">
-
-      <!-- Hotspots -->
-      <div id="jbMouthHotspot" title="Click to Add Bean"></div>
-      <div id="jbScoreDisplay" title="Click to Remove Bean">0</div>
-    </div>
-
-    <!-- Controls Row -->
-    <div id="jbControls">
-      <select id="jbClassSelect">
-        <option>11.1</option>
-        <option>11.2</option>
-        <option>11.3</option>
-        <option>12.1</option>
-        <option>12.2</option>
-        <option>12.3</option>
-        <option>13.1</option>
-        <option>13.2</option>
-        <option>13.3</option>
-      </select>
-
-      <button id="jbSaveButton" class="jb-btn">Save</button>
-      <input type="file" id="jbFileInput" accept=".txt" hidden>
-      <button id="jbBrowseButton" class="jb-btn">Update</button>
-    </div>
-  </div>
-</div>
-
-<!-- ==========================================================
-     JELLY BEAN JAR SCRIPT (MARGIN-CONTROLLED LID HEIGHT)
-     Ensure your layout contains:
-     <button id="leftBtn">Jelly Beans</button>
-     <button id="rightBtn">Jelly Beans</button>
-========================================================== -->
-<style>
-  /* Full-screen completely transparent, click-through overlay container */
-  #jellyBeanModalContainer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
     background: transparent;
     pointer-events: none;
     z-index: 50000;
     display: none;
   }
 
-  /* Main Floating Modal Box - Scaled Up */
+  /* Main Floating Modal Box - Draggable anywhere inside its background area */
   #jbJarWrapper {
     position: absolute;
     top: 50%;
@@ -7818,9 +6496,9 @@ background: transparent; /* Ensures no dark or white overlay tint */
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 10px;
+    padding: 12px;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.4); /* Ready for future transparency changes */
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 2px solid rgba(255, 255, 255, 0.7);
@@ -7830,9 +6508,10 @@ background: transparent; /* Ensures no dark or white overlay tint */
     touch-action: none;
     user-select: none;
     -webkit-user-select: none;
+    cursor: move;
   }
 
-  /* Jar Container scaled up */
+  /* Jar Container */
   #jbJarContainer {
     position: relative;
     width: 320px;
@@ -7844,7 +6523,6 @@ background: transparent; /* Ensures no dark or white overlay tint */
     overflow: visible;
   }
 
-  /* Background, Canvas, and Glass Overlay sized directly to the container */
   #jbJarBack, #jbBeanCanvas, #jbJarGlassOverlay {
     position: absolute;
     inset: 0;
@@ -7858,21 +6536,36 @@ background: transparent; /* Ensures no dark or white overlay tint */
   #jbBeanCanvas { z-index: 2; }
   #jbJarGlassOverlay { z-index: 5; }
 
-  /* Draggable Lid: Lowered by increasing margin-top */
+  /* Lid Image at full original size and position */
   #jbJarLid {
     position: absolute;
     width: 98%;
     left: 1%;
     top: 0;
-    margin-top: 55px; /* Lowered lid position */
+    margin-top: 55px;
+transform: translateX(3px); /* Shifts it precisely 10px right */
     object-fit: contain;
-    cursor: grab;
+    pointer-events: none;
     z-index: 100;
-    pointer-events: auto;
-    touch-action: none;
   }
 
-  #jbJarLid:active {
+  /* Lid Hitbox precisely matching the full visible dimensions of the lid asset */
+  #jbLidHitbox {
+    position: absolute;
+    width: 98%;
+    left: 1%;
+    top: 0;
+    height: 22%; /* Covers the full vertical height of the lid asset */
+    margin-top: 55px;
+transform: translateX(3px); /* Keeps hitbox aligned with the image */
+    cursor: grab;
+    z-index: 105;
+    pointer-events: auto;
+    touch-action: none;
+    background: rgba(0, 0, 0, 0);
+  }
+
+  #jbLidHitbox:active {
     cursor: grabbing;
   }
 
@@ -7931,7 +6624,8 @@ background: transparent; /* Ensures no dark or white overlay tint */
     background: #fff;
   }
 
-  .jb-btn {
+.jb-btn {
+    font-family: inherit; /* Ensures it matches the rest of your text/buttons */
     padding: 4px 10px;
     font-size: 12px;
     font-weight: bold;
@@ -7947,29 +6641,26 @@ background: transparent; /* Ensures no dark or white overlay tint */
     background-color: #f0f0f0;
   }
 
-  .jb-drag-handle {
-    width: 100%;
-    text-align: center;
-    font-size: 10px;
-    font-weight: bold;
-    color: #555;
-    cursor: move;
-    padding-bottom: 2px;
-    border-bottom: 1px solid rgba(0,0,0,0.1);
-  }
+
+.draggable.disappearing,
+.draggable:not(:hover):not(:active) {
+    /* Ensures no interpolation happens on removal */
+    transition: none !important;
+}
 </style>
 
 <!-- MODAL HTML STRUCTURE -->
 <div id="jellyBeanModalContainer">
   <div id="jbJarWrapper">
-    <div class="jb-drag-handle" id="jbHeaderDrag">🫘 JELLY BEAN JAR (DRAG HERE)</div>
-    
     <div id="jbJarContainer">
-      <!-- Background Layer -->
+<!-- Background Layer -->
       <img id="jbJarBack" src="Jar_Background.png" draggable="false" alt="Jar Back">
 
+      <!-- Cosmetic Background Animation Canvas Layer -->
+      <canvas id="jbAnimCanvas" width="520" height="760" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:1.5;"></canvas>
+
       <!-- Dynamic Bean Canvas Layer -->
-      <canvas id="jbBeanCanvas" width="520" height="760"></canvas>
+      <canvas id="jbBeanCanvas" width="520" height="760" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:2;"></canvas>
 
       <!-- SVG Glass Reflection Overlay -->
       <svg id="jbJarGlassOverlay" viewBox="0 0 520 760">
@@ -7979,8 +6670,9 @@ background: transparent; /* Ensures no dark or white overlay tint */
               fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="6" stroke-linecap="round"/>
       </svg>
 
-      <!-- Draggable Lid -->
+      <!-- Draggable Lid & Full-Coverage Hitbox -->
       <img id="jbJarLid" src="Jar_Lid.png" draggable="false" alt="Jar Lid">
+      <div id="jbLidHitbox" title="Drag Lid"></div>
 
       <!-- Hotspots -->
       <div id="jbMouthHotspot" title="Click to Add Bean"></div>
@@ -8014,7 +6706,6 @@ background: transparent; /* Ensures no dark or white overlay tint */
 
   const modalContainer = document.getElementById("jellyBeanModalContainer");
   const jarWrapper = document.getElementById("jbJarWrapper");
-  const headerDrag = document.getElementById("jbHeaderDrag");
   const jarContainer = document.getElementById("jbJarContainer");
   const beanCanvas = document.getElementById("jbBeanCanvas");
   const ctx = beanCanvas.getContext("2d");
@@ -8022,6 +6713,7 @@ background: transparent; /* Ensures no dark or white overlay tint */
   const scoreDisplay = document.getElementById("jbScoreDisplay");
   const mouthHotspot = document.getElementById("jbMouthHotspot");
   const jarLid = document.getElementById("jbJarLid");
+  const lidHitbox = document.getElementById("jbLidHitbox");
 
   const saveButton = document.getElementById("jbSaveButton");
   const browseButton = document.getElementById("jbBrowseButton");
@@ -8043,7 +6735,6 @@ background: transparent; /* Ensures no dark or white overlay tint */
 
   let beans = [];
   let score = 0;
-  let animationRunning = true;
 
   const BEAN_COLORS = [
     { fill: "#E74C3C" },
@@ -8149,14 +6840,9 @@ background: transparent; /* Ensures no dark or white overlay tint */
     }
   }
 
-  function updateBeans() {
-    for (const bean of beans) {
-      if (bean.removing) {
-        bean.y -= 8;
-        bean.alpha -= 0.05;
-      }
-    }
-    beans = beans.filter(b => b.alpha > 0);
+function updateBeans() {
+    // Instantly remove beans without flying up or moving positions
+    beans = beans.filter(b => !b.removing);
   }
 
   function drawBeans() {
@@ -8191,19 +6877,19 @@ background: transparent; /* Ensures no dark or white overlay tint */
     }
   }
 
-  // --- Controlled, Smooth Lid Dragging Variables ---
+  // --- Lid Dragging Logic ---
   let lidDragging = false;
   let lidOffsetX = 0;
   let lidOffsetY = 0;
   let currentLidX = 0;
-  let currentLidY = 55; // Initial margin-top offset
+  let currentLidY = 55;
   let targetLidX = 0;
   let targetLidY = 55;
 
-  jarLid.addEventListener("pointerdown", (event) => {
+  lidHitbox.addEventListener("pointerdown", (event) => {
     event.stopPropagation();
     lidDragging = true;
-    jarLid.setPointerCapture(event.pointerId);
+    lidHitbox.setPointerCapture(event.pointerId);
 
     const containerRect = jarContainer.getBoundingClientRect();
     const lidRect = jarLid.getBoundingClientRect();
@@ -8215,8 +6901,9 @@ background: transparent; /* Ensures no dark or white overlay tint */
     targetLidY = lidRect.top - containerRect.top;
   });
 
-  jarLid.addEventListener("pointermove", (event) => {
+  lidHitbox.addEventListener("pointermove", (event) => {
     if (!lidDragging) return;
+    event.stopPropagation();
     const containerRect = jarContainer.getBoundingClientRect();
     targetLidX = event.clientX - containerRect.left - lidOffsetX;
     targetLidY = event.clientY - containerRect.top - lidOffsetY;
@@ -8225,21 +6912,24 @@ background: transparent; /* Ensures no dark or white overlay tint */
   const stopLidDrag = (event) => {
     if (lidDragging) {
       lidDragging = false;
-      try { jarLid.releasePointerCapture(event.pointerId); } catch (e) {}
+      try { lidHitbox.releasePointerCapture(event.pointerId); } catch (e) {}
     }
   };
-  jarLid.addEventListener("pointerup", stopLidDrag);
-  jarLid.addEventListener("pointercancel", stopLidDrag);
+  lidHitbox.addEventListener("pointerup", stopLidDrag);
+  lidHitbox.addEventListener("pointercancel", stopLidDrag);
 
   function animate() {
     if (modalOpen) {
-      // Smoothly interpolate (lerp) lid position for controlled, deliberate handling
       currentLidX += (targetLidX - currentLidX) * 0.25;
       currentLidY += (targetLidY - currentLidY) * 0.25;
 
       jarLid.style.left = currentLidX + "px";
       jarLid.style.top = currentLidY + "px";
-      jarLid.style.margin = "0"; // Clear absolute positioning offset conflicts
+      jarLid.style.margin = "0";
+
+      lidHitbox.style.left = currentLidX + "px";
+      lidHitbox.style.top = currentLidY + "px";
+      lidHitbox.style.margin = "0";
 
       updateBeans();
       drawBeans();
@@ -8255,7 +6945,8 @@ background: transparent; /* Ensures no dark or white overlay tint */
     return `${year}-${month}-${day}`;
   }
 
-  saveButton.addEventListener("pointerdown", () => {
+  saveButton.addEventListener("pointerdown", (e) => {
+    e.stopPropagation();
     const selectedClass = classSelect.value;
     const filename = `${selectedClass}_${getDateString()}.txt`;
     const blob = new Blob([score.toString()], { type: "text/plain" });
@@ -8269,7 +6960,10 @@ background: transparent; /* Ensures no dark or white overlay tint */
     URL.revokeObjectURL(downloadLink.href);
   });
 
-  browseButton.addEventListener("pointerdown", () => fileInput.click());
+  browseButton.addEventListener("pointerdown", (e) => {
+    e.stopPropagation();
+    fileInput.click();
+  });
 
   fileInput.addEventListener("change", (event) => {
     const file = event.target.files[0];
@@ -8295,21 +6989,31 @@ background: transparent; /* Ensures no dark or white overlay tint */
     reader.readAsText(file);
   });
 
-  function makeModalDraggable(dragHandle, el) {
-    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-    dragHandle.onpointerdown = (e) => {
-      e.stopPropagation();
-      pos3 = e.clientX;
-      pos4 = e.clientY;
+  // Modal Dragging centered on grab point
+  function makeModalDraggable(el) {
+    el.onpointerdown = (e) => {
+      if (e.target.closest('#jbControls') || e.target.closest('#jbLidHitbox') || e.target.closest('#jbJarLid') || e.target.closest('#jbScoreDisplay') || e.target.closest('#jbMouthHotspot')) {
+        return;
+      }
+
+      // Initialize positioning using pixel offsets if currently using CSS translate center transform
+      const rect = el.getBoundingClientRect();
+      if (el.style.transform.includes("translate")) {
+        el.style.transform = "none";
+        el.style.left = rect.left + "px";
+        el.style.top = rect.top + "px";
+      }
+
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const initialLeft = el.offsetLeft;
+      const initialTop = el.offsetTop;
 
       document.onpointermove = (ev) => {
-        pos1 = pos3 - ev.clientX;
-        pos2 = pos4 - ev.clientY;
-        pos3 = ev.clientX;
-        pos4 = ev.clientY;
-        el.style.top = (el.offsetTop - pos2) + "px";
-        el.style.left = (el.offsetLeft - pos1) + "px";
-        el.style.transform = "none";
+        const deltaX = ev.clientX - startX;
+        const deltaY = ev.clientY - startY;
+        el.style.left = (initialLeft + deltaX) + "px";
+        el.style.top = (initialTop + deltaY) + "px";
       };
 
       document.onpointerup = () => {
@@ -8353,13 +7057,17 @@ background: transparent; /* Ensures no dark or white overlay tint */
       toggleModal();
     };
 
-    mouthHotspot.addEventListener("pointerdown", () => createBean());
+    mouthHotspot.addEventListener("pointerdown", (e) => {
+      e.stopPropagation();
+      createBean();
+    });
+
     scoreDisplay.addEventListener("pointerdown", (e) => {
       e.stopPropagation();
       removeBean();
     });
 
-    makeModalDraggable(headerDrag, jarWrapper);
+    makeModalDraggable(jarWrapper);
     updateScore();
     animate();
   });
@@ -8525,6 +7233,144 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 });
+</script>
+
+<!-- ==========================================================
+     STANDALONE NEUTRAL GREY FALLING BEAN SYSTEM
+     A blurred bean shape that drops in a neutral grey tone
+========================================================== -->
+<script>
+(function() {
+  window.addEventListener("DOMContentLoaded", () => {
+    const jarContainer = document.getElementById("jbJarContainer");
+    const beanCanvas = document.getElementById("jbBeanCanvas");
+    const scoreDisplay = document.getElementById("jbScoreDisplay");
+    
+    if (!jarContainer || !beanCanvas || !scoreDisplay) return;
+
+    // 1. Create standalone cosmetic blur canvas positioned right behind the beans (z-index: 4)
+    const blurCanvas = document.createElement("canvas");
+    blurCanvas.id = "jbBlurCanvas";
+    blurCanvas.width = 520;
+    blurCanvas.height = 760;
+    blurCanvas.style.cssText = "position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:4;";
+    
+    beanCanvas.style.zIndex = "3";
+    jarContainer.appendChild(blurCanvas);
+    const blurCtx = blurCanvas.getContext("2d");
+
+    let impressionisticTrails = [];
+    let lastKnownScore = parseInt(scoreDisplay.textContent) || 0;
+
+    const jarBounds = { left: 135, right: 385, top: 175, bottom: 645 };
+    const BEAN_RADIUS = 20.9;
+    const maxCols = 6;
+    
+    // Fallback neutral grey color for the dropping bean
+    const NEUTRAL_GREY = "#95A5A6";
+
+    function getBeanCoordinates(scoreIndex) {
+      const targetIndex = Math.max(0, scoreIndex);
+      const col = targetIndex % maxCols;
+      const row = Math.floor(targetIndex / maxCols);
+
+      const availableWidth = (jarBounds.right - 10) - (jarBounds.left + 10) - (BEAN_RADIUS * 2);
+      const colSpacing = availableWidth / (maxCols - 1);
+      const baseTargetX = (jarBounds.left + 10) + BEAN_RADIUS + (col * colSpacing);
+      const baseFloor = (jarBounds.bottom - 5) + 15;
+      const baseTargetY = baseFloor - BEAN_RADIUS - (row * (BEAN_RADIUS * 1.3));
+
+      const jarCenterX = (jarBounds.left + jarBounds.right) / 2;
+      const edgeCurveFactor = Math.min(1, Math.abs(baseTargetX - jarCenterX) / ((jarBounds.right - jarBounds.left) / 2));
+      const edgeLift = (row === 0) ? (edgeCurveFactor * 8) : 0;
+
+      return {
+        x: baseTargetX + (Math.sin(targetIndex * 12.9898) * 12),
+        y: (baseTargetY - edgeLift) + (Math.cos(targetIndex * 78.233) * 6)
+      };
+    }
+
+    // 2. Monitor score changes and use neutral grey for the falling/rising bean trail
+    const observer = new MutationObserver(() => {
+      const currentScore = parseInt(scoreDisplay.textContent) || 0;
+      if (currentScore === lastKnownScore) return;
+
+      const centerX = (jarBounds.left + jarBounds.right) / 2;
+      const startY = jarBounds.top - 15;
+      
+      const targetScoreIndex = currentScore > lastKnownScore ? currentScore - 1 : currentScore;
+      const targetCoord = getBeanCoordinates(targetScoreIndex);
+      const endY = targetCoord.y;
+
+      if (currentScore > lastKnownScore) {
+        impressionisticTrails.push({
+          x: centerX,
+          y: startY,
+          targetY: endY,
+          color: NEUTRAL_GREY,
+          alpha: 0.35,
+          life: 1.0,
+          decay: 0.015
+        });
+      } else if (currentScore < lastKnownScore) {
+        impressionisticTrails.push({
+          x: centerX,
+          y: endY,
+          targetY: startY,
+          color: NEUTRAL_GREY,
+          alpha: 0.35,
+          life: 1.0,
+          decay: 0.015
+        });
+      }
+
+      lastKnownScore = currentScore;
+    });
+
+    observer.observe(scoreDisplay, { childList: true, characterData: true, subtree: true });
+
+    // 3. Render the neutral grey blurred bean trail right behind the main beans layer
+    function renderBlurTrails() {
+      blurCtx.clearRect(0, 0, blurCanvas.width, blurCanvas.height);
+
+      for (let i = impressionisticTrails.length - 1; i >= 0; i--) {
+        let trail = impressionisticTrails[i];
+        
+        trail.y += (trail.targetY - trail.y) * 0.12;
+        trail.life -= trail.decay;
+
+        if (trail.life <= 0 || Math.abs(trail.targetY - trail.y) < 1) {
+          impressionisticTrails.splice(i, 1);
+          continue;
+        }
+
+        blurCtx.save();
+        blurCtx.globalAlpha = trail.alpha * trail.life;
+        
+        blurCtx.shadowColor = trail.color;
+        blurCtx.shadowBlur = 35;
+        
+        blurCtx.translate(trail.x, trail.y);
+
+        blurCtx.beginPath();
+        blurCtx.moveTo(-19, -6);
+        blurCtx.bezierCurveTo(-24, -22, 19, -25, 24, -6);
+        blurCtx.bezierCurveTo(28, 11, -4, 25, -19, 15);
+        blurCtx.bezierCurveTo(-26, 9, -24, 0, -19, -6);
+        blurCtx.closePath();
+
+        blurCtx.fillStyle = trail.color;
+        blurCtx.fill();
+
+        blurCtx.restore();
+      }
+
+      requestAnimationFrame(renderBlurTrails);
+    }
+
+    renderBlurTrails();
+  });
+})();
 </script>
 
 </body>
