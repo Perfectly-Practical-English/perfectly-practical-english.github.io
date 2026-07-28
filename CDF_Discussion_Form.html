@@ -49,6 +49,7 @@
     background: #fafafa;
     display: flex;
     flex-direction: column;
+    gap: 8px;
   }
 
   .post {
@@ -134,7 +135,6 @@
     pointer-events: none;
     z-index: 9999;
   }
-
 </style>
 </head>
 
@@ -143,9 +143,7 @@
 <div id="border"></div>
 
 <div class="container">
-
   <h1>Comments Section</h1>
-
   <div id="thread"></div>
 
   <div id="inputRow">
@@ -155,14 +153,12 @@
   </div>
 
   <textarea id="messageInput" placeholder="Type your message…"></textarea>
-
   <div id="status"></div>
 
   <div id="speechRow">
     <button id="startBtn">Start</button>
     <button id="stopBtn">Stop</button>
   </div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -182,13 +178,9 @@ const msgInput = document.getElementById("messageInput");
 const startBtn = document.getElementById("startBtn");
 const stopBtn = document.getElementById("stopBtn");
 const postBtn = document.getElementById("postBtn");
-
 const statusBox = document.getElementById("status");
 
-/* =========================
-   FIXED SPEECH RECOGNITION
-========================= */
-
+/* SPEECH RECOGNITION */
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
 
@@ -196,24 +188,18 @@ recognition.continuous = true;
 recognition.interimResults = true;
 recognition.lang = "en-US";
 
-/* ✅ critical fix: prevent duplication */
 let finalTranscript = "";
 
 recognition.onresult = (event) => {
-
   let interimTranscript = "";
-
   for (let i = event.resultIndex; i < event.results.length; i++) {
-
     const text = event.results[i][0].transcript;
-
     if (event.results[i].isFinal) {
       finalTranscript += text + " ";
     } else {
       interimTranscript += text;
     }
   }
-
   msgInput.value = finalTranscript + interimTranscript;
 };
 
@@ -221,7 +207,6 @@ recognition.onerror = (e) => {
   statusBox.textContent = "Speech error: " + e.error;
 };
 
-/* START / STOP */
 startBtn.onclick = () => {
   recognition.start();
   statusBox.textContent = "Recording...";
@@ -243,7 +228,8 @@ function renderPost(p) {
     </div>
     <div class="postBody">${p.message}</div>
   `;
-  thread.prepend(div);
+  thread.appendChild(div);
+  thread.scrollTop = thread.scrollHeight;
 }
 
 /* TIME */
@@ -253,7 +239,6 @@ function timeStamp() {
 
 /* POST → SUPABASE */
 postBtn.onclick = async () => {
-
   const payload = {
     name: nameInput.value || "Anonymous",
     student_id: idInput.value || "-",
@@ -263,9 +248,7 @@ postBtn.onclick = async () => {
 
   if (!payload.message.trim()) return;
 
-  renderPost(payload);
-
-const { error } = await supabaseClient
+  const { error } = await supabaseClient
     .from("instant_input")
     .insert({
       entry: payload
@@ -276,19 +259,16 @@ const { error } = await supabaseClient
   } else {
     statusBox.textContent = "Saved";
     msgInput.value = "";
-    finalTranscript = ""; // ✅ important reset
+    finalTranscript = "";
   }
 };
-</script>
 
-<script>
-/* THREAD LOADER & REALTIME SUBSCRIPTION */
-
+/* LOAD THREAD & REALTIME */
 async function loadThread() {
   const { data, error } = await supabaseClient
     .from("instant_input")
     .select("entry")
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: true });
 
   if (error) {
     console.error("Load error:", error);
@@ -306,10 +286,8 @@ async function loadThread() {
   }
 }
 
-// Load initial posts on page open
 loadThread();
 
-// Listen for live inserts instantly via WebSockets
 supabaseClient
   .channel('public:instant_input')
   .on(
