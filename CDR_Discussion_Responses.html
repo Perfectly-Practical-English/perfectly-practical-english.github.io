@@ -71,7 +71,7 @@
     white-space: pre-wrap;
   }
 
-  /* CLEAN SCROLLBAR (optional aesthetic) */
+  /* CLEAN SCROLLBAR */
   #thread::-webkit-scrollbar {
     width: 8px;
   }
@@ -125,16 +125,16 @@ function renderPost(p) {
   div.appendChild(header);
   div.appendChild(body);
 
-  thread.appendChild(div);
+  // Prepend so the newest posts appear at the top
+  thread.prepend(div);
 }
 
 /* LOAD THREAD */
 async function loadThread() {
-
   const { data, error } = await supabaseClient
     .from("instant_input")
     .select("entry")
-    .order("id", { ascending: false });
+    .order("created_at", { ascending: false });
 
   if (error) {
     console.error("Load error:", error);
@@ -143,9 +143,11 @@ async function loadThread() {
 
   thread.innerHTML = "";
 
-  for (const row of data) {
+  // Loop backwards since we are prepending elements
+  for (let i = data.length - 1; i >= 0; i--) {
+    const row = data[i];
     try {
-      const post = JSON.parse(row.entry);
+      const post = typeof row.entry === 'string' ? JSON.parse(row.entry) : row.entry;
       renderPost(post);
     } catch (e) {
       console.warn("Bad row:", row.entry);
@@ -153,9 +155,24 @@ async function loadThread() {
   }
 }
 
-/* INIT */
+/* INIT & REALTIME SUBSCRIPTION */
 loadThread();
-setInterval(loadThread, 5000);
+
+supabaseClient
+  .channel('public:instant_input')
+  .on(
+    'postgres_changes',
+    { event: 'INSERT', schema: 'public', table: 'instant_input' },
+    (payload) => {
+      try {
+        const post = typeof payload.new.entry === 'string' ? JSON.parse(payload.new.entry) : payload.new.entry;
+        renderPost(post);
+      } catch (e) {
+        console.warn("Realtime parse error:", e);
+      }
+    }
+  )
+  .subscribe();
 </script>
 
 </body>
