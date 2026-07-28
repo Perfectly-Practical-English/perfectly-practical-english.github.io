@@ -265,7 +265,7 @@ postBtn.onclick = async () => {
 
   renderPost(payload);
 
-  const { error } = await supabaseClient
+const { error } = await supabaseClient
     .from("instant_input")
     .insert({
       entry: payload
