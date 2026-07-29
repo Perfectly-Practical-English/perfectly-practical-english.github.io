@@ -1073,6 +1073,9 @@ Tallyman
     Delete
 </button>
 
+<!-- PLAYLIST BUTTON -->
+<button id="playlistBtnLeft" class="playlistBtn">Playlist</button>
+
         <!-- PAGE BUTTONS -->
         <div id="pageList"></div>
 
@@ -1180,6 +1183,9 @@ Tallyman
     <button id="deleteBtnRight">
         Delete
     </button>
+
+<!-- PLAYLIST BUTTON -->
+<button id="playlistBtnRight" class="playlistBtn">Playlist</button>
 
     <!-- PAGE BUTTONS -->
     <div id="pageListRight"></div>
@@ -6647,6 +6653,23 @@ transform: translateX(3px); /* Keeps hitbox aligned with the image */
     /* Ensures no interpolation happens on removal */
     transition: none !important;
 }
+
+.playlistBtn {
+    width: 100%;
+    height: 24px;
+    font-size: 10px;
+    font-family: Arial, sans-serif;
+    border: none;
+    border-bottom: 1px solid #999;
+    background: #f7f7f7;
+    cursor: pointer;
+    padding: 0;
+    text-align: center;
+}
+
+.playlistBtn:hover {
+    background: #ddd;
+}
 </style>
 
 <!-- MODAL HTML STRUCTURE -->
@@ -7371,6 +7394,28 @@ document.addEventListener("DOMContentLoaded", () => {
     renderBlurTrails();
   });
 })();
+</script>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+    const playlistBtnLeft = document.getElementById("playlistBtnLeft");
+    const playlistBtnRight = document.getElementById("playlistBtnRight");
+    const targetFile = "A_Audio_Links.html";
+
+    function openPlaylist() {
+        window.open(targetFile, "_blank");
+    }
+
+    if (playlistBtnLeft) {
+        playlistBtnLeft.addEventListener("click", openPlaylist);
+    }
+
+    if (playlistBtnRight) {
+        playlistBtnRight.addEventListener("click", openPlaylist);
+    }
+});
+
 </script>
 
 </body>
