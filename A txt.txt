@@ -1,0 +1,41 @@
+Title: Doggie Doo
+
+Page: 13
+
+Instructions: Don't do it.
+
+
+Cells:
+
+|Adjectives|
+crunchy
+crispy
+
+chewy
+creamy
+
+greasy
+sticky
+
+|Nouns|
+can
+
+bottle
+
+plastic wrapper
+chip bag
+
+|Verbs|
+eat
+
+bite
+
+chew
+munch
+
+
+Left Lines:
+
+Line 4. Dog
+
+Line 8. Cat
