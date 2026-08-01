@@ -73,6 +73,61 @@ html::-webkit-scrollbar {
       font-family: inherit;
     }
     .collapsible.active + .content { display: block; }
+
+    /* Tighter Grid Styling for Buttons */
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 6px;
+      padding: 6px 0;
+      max-width: 700px;
+    }
+
+    .games-grid a.game-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      min-height: 40px;
+      padding: 6px 8px;
+      font-size: 0.78em;
+      font-weight: bold;
+      color: #22153b;
+      text-decoration: none;
+      word-break: normal;
+      line-height: 1.15;
+
+      /* Polished Stone Button Look */
+      background: linear-gradient(145deg, #eee3ff, #bca1f5);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 
+        0 3px 5px rgba(0, 0, 0, 0.16),
+        0 1px 2px rgba(0, 0, 0, 0.1),
+        inset 0 1px 1px rgba(255, 255, 255, 0.8),
+        inset 0 -2px 3px rgba(0, 0, 0, 0.1);
+
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .games-grid a.game-btn:hover {
+      text-decoration: none;
+      background: linear-gradient(145deg, #f3ebff, #c5acfa);
+      transform: translateY(-2px);
+      box-shadow: 
+        0 5px 8px rgba(0, 0, 0, 0.2),
+        0 2px 3px rgba(0, 0, 0, 0.1),
+        inset 0 1px 1px rgba(255, 255, 255, 0.9),
+        inset 0 -2px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .games-grid a.game-btn:active {
+      transform: translateY(1px);
+      box-shadow: 
+        0 2px 2px rgba(0, 0, 0, 0.2),
+        inset 0 2px 3px rgba(0, 0, 0, 0.15);
+    }
+
 @media (max-width: 600px) {
   body { font-size: 1.05em; margin: 0.5em; }
   .collapsible { width: 100%; font-size: 1.2em; padding-left: .6em; }
@@ -134,6 +189,37 @@ html::-webkit-scrollbar {
 <h1>Perfectly Practical English</h1>
 <p>For instructions, click the green bar at the bottom of each page. If you have questions, contact <a href="mailto:PerfectlyPracticalEnglish@outlook.com">PerfectlyPracticalEnglish@outlook.com</a>.
 </p>
+
+<!-- data-grid attribute automatically builds the tight polished grid and parses labels via JS -->
+<div class="section">
+  <h3 class="collapsible">Grammar Games</h3>
+  <div class="content" data-grid="true">
+GB_Universal_Gameboard.html
+G_Game_Ants_Grade_7.html
+G_Game_Asteroids_Grade_7.html
+G_Game_B-52_Stratofortress_Grade_7.html
+G_Game_Cars_Grade_7.html
+G_Game_Coconuts_Grade_7.html
+G_Game_Haunted_House_Grade_7.html
+G_Game_Sentence_Up_Grade_7.html
+G_Game_Sushi_Bar_Grade_7.html
+G_Game_Vending_Machine_Grade_7.html
+G_Word_Scramble_Grade_7.html
+
+  </div>
+</div>
+
+
+<!-- data-grid attribute automatically builds the tight polished grid and parses labels via JS -->
+<div class="section">
+  <h3 class="collapsible">Vocabulary Games</h3>
+  <div class="content" data-grid="true">
+V_Game_Bubbles_Grade_7.html
+V_Game_Kaleidoscope_Grade_7.html
+V_Game_Space_Invaders_Grade_7.html
+V_Game_Word_Bombs_Grade_7.html
+  </div>
+</div>
 
 <div class="section">
   <h3 class="collapsible">Today</h3>
@@ -347,75 +433,6 @@ WSR_Logical Fallacies.html
   </div>
 </div>
 
-<!-- <div class="section">
-  <h3 class="collapsible">Projects</h3>
-  <div class="content">
-
-
-  </div>
-</div>-->
-
-<!--<div class="section">
-  <h3 class="collapsible">Interesting External Links</h3>
-  <div class="content">
-
-https://davebirss.com/free-resources/
-https://www.ferryhalim.com/orisinal/
-https://www.eslkidsgames.com/esl-story-dice-online
-https://a4esl.org
-https://blog.abaenglish.com
-https://elt.oup.com
-https://eslgamesworld.com
-https://grammar.ccc.commnet.edu
-https://kahoot.it
-https://learnenglish.britishcouncil.org
-https://learnenglishkids.britishcouncil.org
-https://pserm-e-grammar.blogspot.com
-https://speakspeak.com
-https://www.1-language.com
-https://www.autoenglish.org
-https://www.bbc.co.uk
-https://www.better-english.com
-https://www.ecenglish.com
-https://www.edufind.com
-https://www.ego4u.com
-https://www.engisfun.com
-https://www.english4all.pro.br
-https://www.englishbee.net
-https://www.englishgrammarsecrets.com
-https://www.englishlanguageworld.com
-https://www.englishmaven.org
-https://www.englishpage.com
-https://www.english-test.net
-https://www.englishexercises.org
-https://www.englisch-hilfen.de
-https://www.engvid.com
-https://www.eslcafe.com
-https://www.eslgamesplus.com
-https://www.examenglish.com
-https://www.grammar-quizzes.com
-https://www.learnenglish-online.com
-https://www.learnenglishfeelgood.com
-https://www.myenglishpages.com
-https://www.onestopenglish.com
-https://www.perfect-english-grammar.com
-https://www.really-learn-english.com
-https://www.slideshare.net
-https://www.tinyteflteacher.co.uk
-https://www.tolearnenglish.com
-https://www.usingenglish.com
-https://www.vocabulary.cl
-
-  </div>
-</div>-->
-
-<!-- <div class="section">
-  <h3 class="collapsible">Class Rules</h3>
-  <div class="content">
-D_Class_Rules.html
-  </div>
-</div> -->
-
 <div class="section">
   <h3 class="collapsible">Bible Study</h3>
   <div class="content">
@@ -521,7 +538,7 @@ V_Game_UFO_Abduction_Grade_7.html
 
 
 <div id="qrBox">
-  <img     src="PerfectlyPracticalEnglish_with_Hotspot.app.png" alt="QR Code"
+  <img      src="PerfectlyPracticalEnglish_with_Hotspot.app.png" alt="QR Code"
   ><p class="hotspot-info">
   IEP32 Hotspot: IEP32_FL3_PALME 2746<br>Password: 0!92V2x8<br>
 </p>
@@ -542,7 +559,7 @@ V_Game_UFO_Abduction_Grade_7.html
 
 
 
-<!-- Collapsible & Linkify Script -->
+<!-- Collapsible & Linkify Script with Dynamic Label Parsing & Safeguards -->
 <script>
 document.addEventListener("DOMContentLoaded", function () {
   // Toggle collapsibles
@@ -555,28 +572,63 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   });
 
-  // Convert filenames to links, interpret ~ as subheader
+  // Helper function to clean raw filenames into neat button labels
+  function parseButtonLabel(filename) {
+    let name = filename.replace(/\.html$/i, '');
+    
+    // Handle specific prefixes (Game prefixes, standard G_, V_, GB_, WS_, etc.)
+    name = name.replace(/^(G_Game_|V_Game_|GB_|G_|V_|WS_)/, '');
+
+    // Strip out trailing level/suffix indicators like _Grade_7, _EFL, etc.
+    name = name.replace(/_Grade_\d+$/i, '');
+    name = name.replace(/_EFL$/i, '');
+    name = name.replace(/_/g, ' ');
+    return name;
+  }
+
+  // Convert raw text filenames inside divs into links or tight grid buttons dynamically
   const contents = document.querySelectorAll(".content");
   contents.forEach(div => {
-    const lines = div.innerText.split(/\r?\n/).filter(Boolean);
+    const isGrid = div.hasAttribute("data-grid");
+    const lines = div.innerText.split(/\r?\n/).map(l => l.trim()).filter(line => line.length > 0);
     div.innerHTML = ''; // clear original text
+
+    let targetContainer = div;
+    if (isGrid) {
+      const gridContainer = document.createElement('div');
+      gridContainer.className = 'games-grid';
+      div.appendChild(gridContainer);
+      targetContainer = gridContainer;
+    }
+
     lines.forEach(line => {
-      line = line.trim();
+      // Safety check: skip lines that are just symbols or too short to be valid filenames
+      if (line.length < 3) return;
 
       // Check if line is a subheader
-      if (line.startsWith('~') && line.endsWith('~')) {
+      if (!isGrid && line.startsWith('~') && line.endsWith('~')) {
         const subheader = document.createElement('h4');
         subheader.innerText = line.slice(1, -1); // remove surrounding ~
         subheader.style.marginLeft = '1em';
         subheader.style.marginTop = '0.5em';
-        div.appendChild(subheader);
+        targetContainer.appendChild(subheader);
       } else {
         const link = document.createElement('a');
         link.href = line;
-        link.innerText = line;
         link.target = "blank"; // default target
-        div.appendChild(link);
-        div.appendChild(document.createElement('br'));
+        
+        if (isGrid) {
+          link.className = 'game-btn';
+          link.innerText = parseButtonLabel(line);
+        } else {
+          link.innerText = line;
+        }
+
+        targetContainer.appendChild(link);
+        
+        if (!isGrid) {
+          targetContainer.appendChild(document.createElement('br'));
+        }
       }
     });
   });
@@ -647,7 +699,7 @@ document.addEventListener("DOMContentLoaded", function () {
     width: "100vw",
     height: "100vh",
     border: "10px solid #39FF14",
-    boxSizing: "border-box",
+    boxSizing: "box-sizing",
     zIndex: "2147483647",
     pointerEvents: "none",
     background: "transparent"
@@ -695,7 +747,7 @@ document.addEventListener("DOMContentLoaded", function () {
     transform: translateY(-20px);
 
 
-    width: 20vw;       /* about one-fifth of the window width */
+    width: 20vw;        /* about one-fifth of the window width */
     max-width: 320px;  /* don't let it get too large */
     min-width: 140px;  /* don't let it get too small */
 
@@ -716,101 +768,6 @@ document.addEventListener("DOMContentLoaded", function () {
 <div id="david-corner">
     <img src="Gemini_Generated_Image_lb5csulb5csulb5c-removebg-preview.png" alt="">
 </div>
-
-<!-- <script>
-
-(function () {
-    // ===== CONFIG =====
-    const QR_IMAGE_URL = "PerfectlyPracticalEnglish_with_Hotspot.app.jpg"; // <-- Change to your PNG
-    const BUTTON_SIZE = 20;
-    const MODAL_MAX_SIZE = "80vw";
-
-    if (document.getElementById("qrToggleButton")) return;
-
-    // Button
-    const button = document.createElement("button");
-    button.id = "qrToggleButton";
-
-    Object.assign(button.style, {
-        position: "fixed",
-        right: "2px",
-        bottom: "2px",
-        width: BUTTON_SIZE + "px",
-        height: BUTTON_SIZE + "px",
-        borderRadius: "50%",
-        border: "1px solid #2f6d2f",
-        background: "#6cbf43", // dollar-bill green
-        padding: "0",
-        margin: "0",
-        overflow: "hidden",
-        cursor: "pointer",
-        zIndex: "2147483647",
-        boxShadow: "0 0 4px rgba(0,0,0,.4)"
-    });
-
-    const thumb = document.createElement("img");
-    thumb.src = QR_IMAGE_URL;
-    thumb.alt = "QR";
-    Object.assign(thumb.style, {
-        width: "100%",
-        height: "100%",
-        objectFit: "cover",
-        pointerEvents: "none"
-    });
-
-    button.appendChild(thumb);
-
-    // Modal
-    const overlay = document.createElement("div");
-
-    Object.assign(overlay.style, {
-        position: "fixed",
-        inset: "0",
-        display: "none",
-        justifyContent: "center",
-        alignItems: "center",
-        background: "rgba(0,0,0,.45)",
-        zIndex: "2147483647"
-    });
-
-    const img = document.createElement("img");
-    img.src = QR_IMAGE_URL;
-    img.alt = "QR Code";
-
-    Object.assign(img.style, {
-        maxWidth: MODAL_MAX_SIZE,
-        maxHeight: "80vh",
-        background: "#fff",
-        padding: "12px",
-        borderRadius: "8px",
-        boxShadow: "0 8px 30px rgba(0,0,0,.5)"
-    });
-
-    overlay.appendChild(img);
-
-    let open = false;
-
-    function toggle() {
-        open = !open;
-        overlay.style.display = open ? "flex" : "none";
-    }
-
-    button.addEventListener("click", function (e) {
-        e.stopPropagation();
-        toggle();
-    });
-
-    overlay.addEventListener("click", function (e) {
-        if (e.target === overlay) {
-            open = false;
-            overlay.style.display = "none";
-        }
-    });
-
-    document.body.appendChild(button);
-    document.body.appendChild(overlay);
-})();
-</script> -->
 
 </body>
 </html>
