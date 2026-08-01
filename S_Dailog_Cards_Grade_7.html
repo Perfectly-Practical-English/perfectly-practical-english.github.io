@@ -1,0 +1,539 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
+<title>Dual-Student Conversation App (Units 1-8 & Signal Words)</title>
+<style>
+  /* Base & Reset */
+  body { 
+    font-family: Arial, sans-serif; 
+    margin: 0; 
+    padding: 0; 
+    background: #eef2f5; 
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  #app-container {
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
+  }
+
+  /* Half-Screen Styles */
+  .student-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 16px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    position: relative;
+    border-bottom: 2px dashed #bbb;
+  }
+
+  /* Top Half (Pale Blue & Inverted) */
+  #top-pane {
+    background: #eaf2f8;
+    transform: rotate(180deg);
+  }
+
+  /* Bottom Half (Pale Green) */
+  #bottom-pane {
+    background: #eafaf1;
+  }
+
+  .pane-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+  }
+
+  .prompt-display {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 8px;
+    margin: 8px 0;
+    border: 1px solid rgba(0,0,0,0.05);
+    word-break: break-word;
+  }
+
+  .pane-footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .next-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    background: #1976d2;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: background 0.2s;
+  }
+
+  .next-btn:hover {
+    background: #115293;
+  }
+
+  /* Control Bar Overlay */
+  #control-bar {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    background: white;
+    padding: 10px 16px;
+    border-radius: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #ccc;
+  }
+
+  .control-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: bold;
+  }
+
+  select, button.toggle-mode {
+    padding: 6px 10px;
+    font-size: 13px;
+    border-radius: 6px;
+    border: 1px solid #999;
+    background: #fff;
+    cursor: pointer;
+  }
+
+  button.toggle-mode.active {
+    background: #2e7d32;
+    color: white;
+    border-color: #1b5e20;
+  }
+</style>
+</head>
+<body>
+
+<div id="app-container">
+  
+  <!-- Central Control Bar -->
+  <div id="control-bar">
+    <div class="control-group">
+      <label for="topic-select">Topic:</label>
+      <select id="topic-select">
+        <option value="">-- Choose Topic --</option>
+      </select>
+    </div>
+    
+    <!-- CONFIGURATION SWITCH: Set order mode here or via toggle button -->
+    <div class="control-group">
+      <button id="mode-toggle" class="toggle-mode" title="Toggle between sequential and random order">Order: Sequential</button>
+    </div>
+  </div>
+
+  <!-- Top Student Pane (Inverted & Pale Blue) -->
+  <div id="top-pane" class="student-pane">
+    <div class="pane-header">
+      <span class="student-role">Student A</span>
+      <span class="counter-top">1 / 1</span>
+    </div>
+    <div class="prompt-display" id="prompt-top">Select a topic to begin.</div>
+    <div class="pane-footer">
+      <button class="next-btn" id="next-top">Next →</button>
+    </div>
+  </div>
+
+  <!-- Bottom Student Pane (Pale Green) -->
+  <div id="bottom-pane" class="student-pane">
+    <div class="pane-header">
+      <span class="student-role">Student B</span>
+      <span class="counter-bottom">1 / 1</span>
+    </div>
+    <div class="prompt-display" id="prompt-bottom">Select a topic to begin.</div>
+    <div class="pane-footer">
+      <button class="next-btn" id="next-bottom">Next →</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Separate raw text data for Student A and Student B
+const rawDataA = `
+~Unit 1 Test
+Do you always study, or are you constantly and forever busy?
+What makes an awesome, amazing, and fantastic movie?
+How often do you do exercise, physical training, or a workout?
+Where do you find information, data, and knowledge online?
+What are you interested in, curious about, or drawn to?
+What magazine, journal, or publication do you read?
+Which museum, gallery, or exhibit center did you visit?
+Can you play a musical instrument, music tool, or gear?
+What do your parents, guardians, or mum and dad say?
+Do you have an uncle, relative, or family uncle living nearby?
+
+~Unit 2 Test
+Do you like crisps, potato chips, chips, or snacks?
+What is your favorite dessert, sweet food, sweet course, or pudding?
+Are these apples fresh, crisp, and newly made?
+What ingredients, elements, or components are in this dish?
+Do you put mayonnaise, mayo, or dressing on your salad?
+Did you buy a packet, pack, or sachet of cookies?
+How do you prepare, get ready, or assemble dinner?
+What restaurant would you recommend, advise, or put forward?
+How does the taste, flavour, or savour of this soup feel?
+Are you a vegetarian, plant-based eater, or non-meat eater?
+
+~Unit 3 Test
+What is your main duty, responsibility, task, or obligation?
+How do you earn, make income, or get paid for chores?
+Is the education, schooling, or training system improving?
+What does an engineer, technician, or specialist do?
+How does life experience, personal knowledge, or lived experience help you?
+Is this book fascinating, captivating, or gripping?
+What language, speech system, or communication method do you use?
+When do you call a plumber, pipe fitter, or repair worker?
+Why is it important to be responsible, dependable, and trustworthy?
+Have you ever worked as a volunteer, helper, or unpaid worker?
+
+~Unit 4 Test
+How do you change your appearance, looks, or outward form?
+Why is it good to be confident, self-assured, and bold?
+What makes a person creative, imaginative, inventive, and original?
+How do you stay energetic, lively, and dynamic all day?
+Are you flexible, adaptable, and versatile when plans change?
+Is your teacher generous, giving, and charitable?
+How do you show your humour, wit, or comedic sense?
+How would you describe your personality, character, temperament, and traits?
+Why do people dislike unfriendly, hostile, or cold behavior?
+Do you want to look well-built, muscular, and strong-built?
+
+~Unit 5 Test
+What do you buy at the school canteen, cafeteria, or refectory?
+What do you learn in Chemistry, chemical science, or chemistry subject?
+How do you concentrate, focus, and attend in class?
+What experiment, test, or trial did you do in lab?
+What do you study in Geography, earth studies, or mapping science?
+Do you remember kindergarten, preschool, or nursery school?
+What is your favorite lesson, class, or session today?
+How many books are in the library, reading room, or archive?
+What formulas do you study in Physics, physical science, or mechanics?
+Which university, college, or academy do you want to attend?
+
+~Unit 6 Test
+How did the caterpillar become, turn into, and develop into a butterfly?
+What have you always believed, accepted, and trusted as truth?
+Are you joining any competition, contest, or showdown this weekend?
+Do you enjoy cycling, biking, or riding a bicycle?
+Who explained, made clear, and broke down the math problem?
+Is every individual, single person, and one unit unique?
+Have you ever tried karate, combat sport, or striking art?
+What martial arts, combat training, or fighting systems do you know?
+Why is stretching, loosening, and extending your muscles important before running?
+What major success, achievement, victory, or triumph did you celebrate?
+
+~Unit 7 Test
+What adventure, expedition, or journey would you like to take?
+What is your dream destination, endpoint, or arrival place?
+How long is your flight, air journey, or flying trip?
+Where is your luggage, baggage, or suitcases?
+Are you a passenger, traveler, or rider on this train?
+Did you make a reservation, booking, or holding for the hotel?
+Are there many tourists, visitors, and sightseers in your town?
+What public transport, transit, or mobility system do you use?
+Have you ever taken a trip abroad, overseas travel, or international trip?
+Have you stayed at a youth hostel, backpacker lodge, or budget stay?
+
+~Unit 8 Test
+How does the climate, weather condition, or atmospheric state affect crops?
+Which continent, landmass, or major region do you live on?
+Why do some animals disappear, vanish, or fade out?
+How can we save energy, power, and force at home?
+How do we protect our environment, natural world, and habitat?
+Is pollution a global, international, or planetary problem?
+What is the natural habitat, ecosystem, or natural home of pandas?
+How does pollution, contamination, or fouling hurt rivers?
+How do you dispose of rubbish, waste, and garbage?
+Why are some chemicals toxic, hazardous, and venomous?
+
+`;
+
+const rawDataB = `
+~Unit 1 Test
+Are you always studying, or are you usually busy with many things?
+What makes a movie excellent, exciting, and enjoyable?
+How often do you exercise, train your body, or do workouts?
+Where can you get facts, details, and knowledge on the internet?
+What topics are you interested in, curious about, or attracted to?
+Which magazine, publication, or reading material do you enjoy?
+Which museum, art gallery, or exhibition place have you visited?
+Can you play an instrument, musical device, or piece of equipment?
+What advice do your parents, guardians, or family members give you?
+Do you have an uncle, aunt, or other relative who lives close to you?
+
+~Unit 2 Test
+Do you enjoy eating crisps, chips, snacks, or small foods?
+What dessert, sweet treat, or sugary food do you like best?
+Are these apples fresh, crunchy, and good to eat?
+What foods, items, or parts are used to make this dish?
+Do you add mayonnaise, sauce, or dressing to your salad?
+Did you buy a bag, packet, or small package of cookies?
+How do you prepare, organize, or make dinner?
+Which restaurant would you suggest, recommend, or tell others about?
+How would you describe the flavor, taste, or smell of this soup?
+Are you a vegetarian, plant eater, or someone who does not eat meat?
+
+~Unit 3 Test
+What is your main job, responsibility, or thing you must do?
+How do you earn money, receive payment, or make income from work?
+Is the school, education, or learning system getting better?
+What does an engineer, expert, or technical worker do?
+How does your past experience, knowledge, or learning help you?
+Is this story interesting, exciting, and enjoyable to read?
+What language, way of speaking, or communication system do you use?
+When should you call a plumber, repair person, or pipe worker?
+Why is it important to be reliable, responsible, and someone people can trust?
+Have you ever helped as a volunteer, assistant, or unpaid worker?
+
+
+~Unit 4 Test
+How do you change your style, appearance, or the way you look?
+Why is it helpful to be confident, brave, and sure of yourself?
+What makes someone creative, original, and full of new ideas?
+How do you keep yourself active, energetic, and full of life?
+Can you adapt, change, and adjust when something unexpected happens?
+Is your teacher kind, generous, and willing to help others?
+How do you show your sense of humor, fun, or ability to make people laugh?
+How would you explain your personality, character, and usual behavior?
+Why do people avoid rude, unfriendly, or unpleasant behavior?
+Would you like to look strong, fit, and muscular?
+~Unit 5 Test
+What food do you usually buy from the school canteen or cafeteria?
+What topics do you study in Chemistry class?
+How do you pay attention, focus, and listen during lessons?
+What science experiment, investigation, or test have you done in the laboratory?
+What do you learn about in Geography class?
+Do you remember your early school years in kindergarten or preschool?
+Which lesson, subject, or class do you enjoy the most today?
+How many books can you find in your school library?
+What equations, rules, or ideas do you learn in Physics?
+Which university, college, or higher education school would you like to go to?
+
+~Unit 6 Test
+How did the caterpillar change, grow, and become a butterfly?
+What idea, fact, or belief have you always trusted to be true?
+Are you taking part in a competition, event, or contest this week?
+Do you like riding a bicycle, cycling, or biking?
+Who helped you understand, explain, or solve the math question?
+Is every person, individual, and human being different?
+Have you ever practiced karate, martial arts, or another fighting sport?
+What types of martial arts, combat sports, or fighting techniques do you know?
+Why is it important to stretch, relax, and prepare your muscles before exercise?
+What important achievement, success, or victory have you experienced?
+
+
+~Unit 7 Test
+What exciting adventure, trip, or journey would you like to experience?
+What place, location, or destination do you most want to visit?
+How much time does your flight, airplane trip, or air journey take?
+Where do you keep your luggage, bags, or suitcases when traveling?
+Are you a traveler, passenger, or person riding on this train?
+Did you make a hotel reservation, booking, or arrangement before your trip?
+Are there many visitors, travelers, and tourists in your city?
+What type of public transportation, travel system, or transport do you use?
+Have you ever traveled to another country or gone overseas?
+Have you ever stayed in a hostel, cheap hotel, or backpacker accommodation?
+
+~ Unit 8 Test
+How does the climate, weather, or temperature affect farming and plants?
+Which continent, large area of land, or region is your country in?
+Why do some animals become extinct, disappear, or no longer exist?
+How can people reduce energy use, save electricity, and use less power?
+How can we protect nature, the environment, and the world around us?
+Is pollution a worldwide, international, or global problem?
+What is the natural home, environment, or habitat of pandas?
+How does pollution, dirty water, or contamination damage rivers?
+How do you throw away rubbish, waste, and unwanted things?
+Why can some chemicals be dangerous, harmful, or poisonous?
+`;
+
+let topicsA = {};
+let topicsB = {};
+let activeListsA = {}; 
+let activeListsB = {}; 
+let currentTopicKey = "";
+let currentIndexTop = 0;
+let currentIndexBottom = 0;
+
+let isRandomMode = false; 
+
+function parseRawData(text, targetObj) {
+  const chunks = text.split(/\n(?=~+)/);
+  chunks.forEach(chunk => {
+    const lines = chunk.trim().split("\n");
+    if (lines.length === 0) return;
+    const headerLine = lines.shift().trim();
+    if (headerLine.startsWith("~")) {
+      const topicName = headerLine.replace(/^~+/, "").trim();
+      const prompts = lines
+        .map(l => l.replace(/^[•*-]\s*/, "").trim())
+        .filter(Boolean);
+      targetObj[topicName] = prompts;
+    }
+  });
+}
+
+parseRawData(rawDataA, topicsA);
+parseRawData(rawDataB, topicsB);
+
+function shuffleArray(array) {
+  let arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function prepareActiveLists() {
+  activeListsA = {};
+  activeListsB = {};
+  
+  Object.keys(topicsA).forEach(topic => {
+    if (isRandomMode) {
+      activeListsA[topic] = shuffleArray(topicsA[topic]);
+    } else {
+      activeListsA[topic] = [...topicsA[topic]];
+    }
+  });
+
+  Object.keys(topicsB).forEach(topic => {
+    if (isRandomMode) {
+      activeListsB[topic] = shuffleArray(topicsB[topic]);
+    } else {
+      activeListsB[topic] = [...topicsB[topic]];
+    }
+  });
+}
+
+prepareActiveLists();
+
+const topicSelect = document.getElementById("topic-select");
+Object.keys(topicsA).forEach(topic => {
+  const option = document.createElement("option");
+  option.value = topic;
+  option.textContent = topic;
+  topicSelect.appendChild(option);
+});
+
+const promptTop = document.getElementById("prompt-top");
+const promptBottom = document.getElementById("prompt-bottom");
+const counterTop = document.querySelector(".counter-top");
+const counterBottom = document.querySelector(".counter-bottom");
+const modeToggleBtn = document.getElementById("mode-toggle");
+
+function updateModeButtonUI() {
+  if (isRandomMode) {
+    modeToggleBtn.textContent = "Order: Randomized";
+    modeToggleBtn.classList.add("active");
+  } else {
+    modeToggleBtn.textContent = "Order: Sequential";
+    modeToggleBtn.classList.remove("active");
+  }
+}
+updateModeButtonUI();
+
+function updateDisplays() {
+  if (!currentTopicKey) return;
+  
+  const listA = activeListsA[currentTopicKey];
+  const listB = activeListsB[currentTopicKey];
+
+  if (listA) {
+    promptTop.textContent = listA[currentIndexTop] || "End of list.";
+    counterTop.textContent = `${currentIndexTop + 1} / ${listA.length}`;
+  }
+
+  if (listB) {
+    promptBottom.textContent = listB[currentIndexBottom] || "End of list.";
+    counterBottom.textContent = `${currentIndexBottom + 1} / ${listB.length}`;
+  }
+}
+
+topicSelect.addEventListener("change", (e) => {
+  currentTopicKey = e.target.value;
+  currentIndexTop = 0;
+  currentIndexBottom = 0;
+  if (!currentTopicKey) {
+    promptTop.textContent = "Select a topic to begin.";
+    promptBottom.textContent = "Select a topic to begin.";
+    counterTop.textContent = "1 / 1";
+    counterBottom.textContent = "1 / 1";
+    return;
+  }
+  updateDisplays();
+});
+
+modeToggleBtn.addEventListener("click", () => {
+  isRandomMode = !isRandomMode;
+  updateModeButtonUI();
+  prepareActiveLists();
+  currentIndexTop = 0;
+  currentIndexBottom = 0;
+  if (currentTopicKey) {
+    updateDisplays();
+  }
+});
+
+document.getElementById("next-top").addEventListener("click", () => {
+  if (!currentTopicKey) return;
+  const listA = activeListsA[currentTopicKey];
+  if (currentIndexTop < listA.length - 1) {
+    currentIndexTop++;
+  } else {
+    currentIndexTop = 0; 
+  }
+  updateDisplays();
+});
+
+document.getElementById("next-bottom").addEventListener("click", () => {
+  if (!currentTopicKey) return;
+  const listB = activeListsB[currentTopicKey];
+  if (currentIndexBottom < listB.length - 1) {
+    currentIndexBottom++;
+  } else {
+    currentIndexBottom = 0; 
+  }
+  updateDisplays();
+});
+</script>
+
+</body>
+</html>
