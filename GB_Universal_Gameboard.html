@@ -515,25 +515,18 @@
             if (selectedPieceId === null) return;
             if (e.target.closest('#dice-slot-container')) return;
 
-            const rect = gameContainer.getBoundingClientRect();
+            // Use transformWrapper's bounding rect instead of gameContainer 
+            // so coordinates align with the rotated/scaled board space directly.
+            const rect = transformWrapper.getBoundingClientRect();
             let xClick = e.clientX - rect.left;
             let yClick = e.clientY - rect.top;
 
             let xNorm = xClick / rect.width;
             let yNorm = yClick / rect.height;
 
-            if (currentRotation === 90) {
-                let temp = xNorm;
-                xNorm = yNorm;
-                yNorm = 1 - temp;
-            } else if (currentRotation === 180) {
-                xNorm = 1 - xNorm;
-                yNorm = 1 - yNorm;
-            } else if (currentRotation === 270) {
-                let temp = xNorm;
-                xNorm = 1 - yNorm;
-                yNorm = temp;
-            }
+            // Ensure bounds stay within 0 to 1
+            xNorm = Math.max(0, Math.min(1, xNorm));
+            yNorm = Math.max(0, Math.min(1, yNorm));
 
             const piece = pieces.find(p => p.id === selectedPieceId);
             if (piece) {
