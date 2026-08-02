@@ -34,8 +34,8 @@ button {
   font-size: 12px;
   line-height: 1;
 
-  background: 2b5d84;
-  color: #444;
+  background: #2b5d84;
+  color: #fff;
 
   border: none;
   border-radius: 6px;
@@ -85,10 +85,10 @@ button:disabled { background:#888; cursor:not-allowed; }
    =============================== */
 #conveyorContainer {
   position: relative;
-  overflow: visible;          /* allow taller content */
+  overflow: visible;         /* allow taller content */
   margin-top: 10px;
 
-  height: 90px;               /* ⬅ taller container */
+  height: 90px;              /* ⬅ taller container */
 
   width: 100vw;
   display: flex;
@@ -203,7 +203,7 @@ button:disabled { background:#888; cursor:not-allowed; }
   align-items: center;
   gap: 6px;
   width: 100%;
-  max-width: 400px;       /* match #topFields max-width */
+  max-width: 400px;        /* match #topFields max-width */
   margin-bottom: 10px;
   justify-content: space-between;
 }
@@ -274,10 +274,13 @@ button:disabled { background:#888; cursor:not-allowed; }
    =============================== */
 @media (max-width: 500px) {
   #topFields, #sectionSelector {
-    margin-left: 1mm;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    max-width: none;
+    padding-left: 12px;
+    padding-right: 12px;
     gap: 4px;
-    justify-content: flex-start;
-    width: calc(100% - 10mm);
   }
 
   #topFields input {
@@ -308,8 +311,11 @@ button:disabled { background:#888; cursor:not-allowed; }
   pointer-events: none;
 }
 
-
 </style>
+</head>
+<body>
+</body>
+</html>
 </head>
 <body>
 

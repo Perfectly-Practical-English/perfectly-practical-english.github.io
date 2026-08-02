@@ -309,11 +309,14 @@ button:disabled { background:#A0B4C3; cursor:not-allowed; }
    MOBILE
    =============================== */
 @media (max-width: 500px) {
-  #topFields {
-    margin-left: 1mm;
+  #topFields, #sectionSelector {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    max-width: none;
+    padding-left: 12px;
+    padding-right: 12px;
     gap: 4px;
-    justify-content: flex-start;
-    width: calc(100% - 10mm);
   }
 
   #topFields input {
@@ -396,6 +399,10 @@ footer {
 }
 
 </style>
+</head>
+<body>
+</body>
+</html>
 </head>
 <body>
 

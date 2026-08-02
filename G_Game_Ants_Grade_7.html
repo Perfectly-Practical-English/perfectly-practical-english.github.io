@@ -82,10 +82,10 @@ button:disabled { background:#0277bd; cursor:not-allowed; }
    =============================== */
 #conveyorContainer {
   position: relative;
-  overflow: visible;          /* allow taller content */
+  overflow: visible;         /* allow taller content */
   margin-top: 10px;
 
-  height: 90px;               /* ⬅ taller container */
+  height: 90px;              /* ⬅ taller container */
 
   width: 100vw;
   display: flex;
@@ -268,9 +268,13 @@ button:disabled { background:#0277bd; cursor:not-allowed; }
    =============================== */
 @media (max-width: 500px) {
   #topFields, #sectionSelector {
-    margin-left: 1mm;
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    max-width: none;
+    padding-left: 12px;
+    padding-right: 12px;
     gap: 4px;
-    width: calc(100% - 10mm);
   }
 
   #topFields input {
@@ -300,6 +304,14 @@ button:disabled { background:#0277bd; cursor:not-allowed; }
 }
 
 </style>
+</head>
+<body>
+</body>
+</html>
+</head>
+<body>
+</body>
+</html>
 </head>
 <body>
 
