@@ -689,14 +689,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const borderDiv = document.createElement("div");
 
-  Object.assign(borderDiv.style, {
+Object.assign(borderDiv.style, {
     position: "fixed",
     top: "0",
     left: "0",
-    right: "0",
-    bottom: "0",
-    width: "100%",
-    height: "100%",
+    width: "100vw",
+    height: "100dvh", /* Adapts smoothly to mobile browser bar resizing */
     border: "10px solid #39FF14",
     boxSizing: "border-box",
     zIndex: "2147483647",
@@ -708,6 +706,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 })();
 </script>
+
 
 <script>
 (function() {
