@@ -57,9 +57,10 @@
     a:hover, a:focus { text-decoration: underline; }
     .section { margin-bottom: 2em; width: 100%; max-width: 100%; }
 
-    .collapsible {
-      width: 100%;
-      max-width: 100%;
+.collapsible {
+      width: calc(100% - 5px);
+      margin-left: 5px;
+      max-width: calc(100% - 5px);
       display: block;
       font-size: 1.2em;
       cursor: pointer;
@@ -75,26 +76,26 @@
     .content {
       display: none;
       margin-top: 0;
+      margin-left: 5px;
       padding-left: 0;
       white-space: pre-wrap;
       font-family: inherit;
       min-height: 40px; 
-      width: 100%;
-      max-width: 100%;
+      width: calc(100% - 5px);
+      max-width: calc(100% - 5px);
     }
 
     .collapsible.active + .content { display: block; }
 
-    /* Strict Grid Layout Fitting */
+    /* Narrower Grid Layout with 5px inset on both sides */
     .games-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
       gap: 6px;
-      padding: 6px 0;
+      padding: 6px 5px;
       width: 100%;
       max-width: 100%;
     }
-
     .games-grid a.game-btn {
       display: flex;
       align-items: center;
@@ -662,7 +663,7 @@ document.addEventListener("DOMContentLoaded", function () {
     position: "fixed",
     top: "0",
     left: "0",
-    width: "100vw",
+    width: "100%",
     border: "10px solid #39FF14",
     boxSizing: "border-box",
     zIndex: "2147483647",
@@ -670,7 +671,7 @@ document.addEventListener("DOMContentLoaded", function () {
     background: "transparent"
   });
 
-  // Dynamically lock height to actual visible window innerHeight to prevent mobile address bar cutoff
+  // Dynamically track the visible height to avoid getting cut off by mobile toolbars
   function updateHeight() {
     borderDiv.style.height = window.innerHeight + "px";
   }
