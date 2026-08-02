@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 Title: Doggie Doo
 
 Page: 13
@@ -41,47 +40,3 @@ Line 4. Dog
 Line 8. Cat
 
 
-=======
-Title: Doggie Doo
-
-Page: 13
-
-Instructions: Don't do it.
-
-
-Right Lines:
-
-1. Picnic Planning Conversation (4 people)
-Anna: I like this picnic, and I want to bring a basket of fruit with fresh apples, bananas, and grapes.
-
-Ben: I like this idea too, and I want to bring a bag of potato chips and a package of cookies.
-I will also take some lemonade and put it beside the fruit.
-
-Clara: I want to prepare something healthy, so I will make a fresh salad with lettuce and tomatoes.
-I like fruity food, so I will also bring some strawberries and watermelon.
-
-David: I like cooking, so I want to grill chicken and fry some pieces so they are hot and tasty.
-
-2. Party Planning Conversation (4 people)
-
-Emma: I love this party, and I want to bake a cake and some brownies.
-I like fruity flavors, so I will put strawberries on the cake.
-We need many drinks like juice, soda, and lemonade for everyone.
-
-Ethan: I want to cook hamburgers and hot dogs because they are tasty and savory.
-
-Fiona: I want to prepare a fresh salad bar, so I will slice and dice vegetables like carrots and cucumbers.
-I like healthy food, so I will also bring a basket of fruit with oranges and apples.
-
-George: I like cooking, so I want to roast chicken and boil noodles for the party.
-I will peel vegetables and steam them so they are soft and healthy.
-
-
-Left Lines:
-
-Line 4. Dog
-
-Line 8. Cat
-
-
->>>>>>> 42e2e1d604fdc85e8f57635ec75b21af83e42b99

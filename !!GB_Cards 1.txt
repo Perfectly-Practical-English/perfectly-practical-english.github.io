@@ -1,0 +1,16 @@
+Move forward 3 spaces.
+Go back 2 spaces.
+Skip your next turn.
+Roll the dice again.
+Advance 1 space.
+Go back to Start.
+Move forward 5 spaces.
+Move backward 1 space.
+Take an extra turn.
+Swap positions with the player behind you.
+Move forward 2 spaces.
+Go back 3 spaces.
+Draw another card.
+Do nothing on your next turn.
+Move to the nearest corner space.
+Swap places with the player in the lead.
