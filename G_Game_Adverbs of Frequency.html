@@ -38,17 +38,19 @@
 /* Shared sizing for all top-bar controls */
 .top-bar input,
 .top-bar button {
-  flex: 1 1 0;          /* 🔑 span the full row width */
+  flex: 1 1 0;          /* span the full row width */
   min-width: 0;
 
   height: 40px;
-  font-size: 1rem;
+  font-size: 13px;      /* 🔑 exact pixel size instead of rem */
   border-radius: 6px;
   border: none;
   box-sizing: border-box;
+  padding: 0 4px;       /* 🔑 prevents text clipping at edges */
 }
 
 /* Inputs slightly wider than buttons (optional but sane) */
+/* Inputs slightly wider than buttons */
 #playerName,
 #playerID {
   flex: 2 1 0;
@@ -63,6 +65,7 @@
   background: #3b82f6;
   color: #fff;
   cursor: pointer;
+  font-weight: 600;     /* 🔑 keeps the smaller text clear and readable */
 }
     #startBtn:hover, #submitBtn:hover {
       background: #2563eb;

@@ -203,11 +203,10 @@ button:disabled { background:#888; cursor:not-allowed; }
   align-items: center;
   gap: 6px;
   width: 100%;
-  max-width: 400px;
+  max-width: 400px;       /* match #topFields max-width */
   margin-bottom: 10px;
-  justify-content: center;
+  justify-content: space-between;
 }
-
 /* ▲ ▼ ONLY */
 #sectionUp,
 #sectionDown {
@@ -252,7 +251,8 @@ button:disabled { background:#888; cursor:not-allowed; }
 
 /* START button */
 #startButton {
-  min-width: 90px;
+  min-width: 70px;
+  width: auto;
 }
 
 
@@ -273,7 +273,7 @@ button:disabled { background:#888; cursor:not-allowed; }
    MOBILE
    =============================== */
 @media (max-width: 500px) {
-  #topFields {
+  #topFields, #sectionSelector {
     margin-left: 1mm;
     gap: 4px;
     justify-content: flex-start;

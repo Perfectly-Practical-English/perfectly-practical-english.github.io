@@ -200,7 +200,7 @@ button:disabled { background:#0277bd; cursor:not-allowed; }
   width: 100%;
   max-width: 400px;       /* match #topFields max-width */
   margin-bottom: 10px;
-  justify-content: center;
+  justify-content: space-between; /* stretch edge-to-edge flush */
 }
 
 /* ▲ ▼ ONLY */
@@ -247,7 +247,8 @@ button:disabled { background:#0277bd; cursor:not-allowed; }
 
 /* START button */
 #startButton {
-  min-width: 90px;
+  min-width: 70px;
+  width: auto;
 }
 /* ===============================
    SCOREBOARD
@@ -266,10 +267,9 @@ button:disabled { background:#0277bd; cursor:not-allowed; }
    MOBILE
    =============================== */
 @media (max-width: 500px) {
-  #topFields {
+  #topFields, #sectionSelector {
     margin-left: 1mm;
     gap: 4px;
-    justify-content: flex-start;
     width: calc(100% - 10mm);
   }
 
