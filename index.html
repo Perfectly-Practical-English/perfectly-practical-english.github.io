@@ -75,36 +75,23 @@ body::-webkit-scrollbar {
 .content {
       display: none;
       margin-top: 0;
-      padding-left: 1em;
-      white-space: pre-wrap; /* preserves line breaks */
+      padding-left: 0; /* Align flush with the left edge of collapsible bars */
+      white-space: pre-wrap;
       font-family: inherit;
-      /* Reserves a stable block area to prevent layout jumps when JS loads */
       min-height: 40px; 
     }
-
 
     .collapsible.active + .content { display: block; }
 
     /* Tighter Grid Styling for Buttons */
-/* Tighter Grid Styling for Buttons */
     .games-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(115px, 1fr));
       gap: 6px;
       padding: 6px 0;
       width: 100%;
-      box-sizing: border-box;
+      max-width: 100%;
     }
-
-.content {
-      display: none;
-      margin-top: 0;
-      padding-left: 0; /* Align flush with the left edge of collapsible bars */
-      white-space: pre-wrap;
-      font-family: inherit;
-      min-height: 40px;
-    }
-
     .games-grid a.game-btn {
       display: flex;
       align-items: center;
@@ -689,12 +676,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const borderDiv = document.createElement("div");
 
-Object.assign(borderDiv.style, {
+  Object.assign(borderDiv.style, {
     position: "fixed",
     top: "0",
     left: "0",
-    width: "100vw",
-    height: "100dvh", /* Adapts smoothly to mobile browser bar resizing */
+    right: "0",
+    bottom: "0",
+    width: "100%",
+    height: "100%",
     border: "10px solid #39FF14",
     boxSizing: "border-box",
     zIndex: "2147483647",
@@ -706,7 +695,6 @@ Object.assign(borderDiv.style, {
 
 })();
 </script>
-
 
 <script>
 (function() {
