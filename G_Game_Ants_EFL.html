@@ -57,8 +57,8 @@ button:disabled { background:#0277bd; cursor:not-allowed; }
   justify-content: center;
   margin-top:20px;
   margin-bottom:10px;
-  width: 100%;
-  max-width: 400px;
+  width: calc(100% - 10px);
+  max-width: 390px;
 }
 
 #topFields input {
@@ -197,8 +197,8 @@ button:disabled { background:#0277bd; cursor:not-allowed; }
   display: flex;
   align-items: center;
   gap: 6px;
-  width: 100%;
-  max-width: 400px;       /* match #topFields max-width */
+  width: calc(100% - 10px);
+  max-width: 390px;       /* match #topFields max-width */
   margin-bottom: 10px;
   justify-content: space-between; /* stretch edge-to-edge flush */
 }
@@ -268,9 +268,9 @@ button:disabled { background:#0277bd; cursor:not-allowed; }
    =============================== */
 @media (max-width: 500px) {
   #topFields, #sectionSelector {
-    margin-left: 0;
-    margin-right: 0;
-    width: 100%;
+    margin-left: 5px;
+    margin-right: 5px;
+    width: calc(100% - 10px);
     max-width: none;
     padding-left: 12px;
     padding-right: 12px;

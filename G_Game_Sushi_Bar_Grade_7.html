@@ -1,3 +1,8844 @@
+Conversation with Gemini
+I need 5 px breathing room on the left and right of the top control bars. Thats a 5px decrease on both sides.
+
+To add 5px breathing room on the left and right of the top control bars (decreasing their width by 5px on both sides), you can update the padding or width properties for #topFields and #sectionSelector in the CSS styles.  
+HTML
+
+Here are the specific style adjustments to make:
+
+1. Update #topFields and #sectionSelector
+Modify the max-width or add horizontal padding/margins so they pull inward by 5px:
+
+CSS
+#topFields {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  width: calc(100% - 10px); /* ⬅ Decreased by 10px total (5px each side) */
+  max-width: 390px;         /* ⬅ Reduced from 400px by 10px */
+}
+
+#sectionSelector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: calc(100% - 10px); /* ⬅ Decreased by 10px total (5px each side) */
+  max-width: 390px;         /* ⬅ Reduced from 400px by 10px */
+  margin-bottom: 10px;
+  justify-content: space-between;
+}
+2. Update Mobile Query (@media (max-width: 500px))
+Ensure the mobile view also respects the 5px (or equivalent responsive spacing) breathing room:
+
+CSS
+@media (max-width: 500px) {
+  #topFields, #sectionSelector {
+    margin-left: 5px;   /* ⬅ Added 5px breathing room on left */
+    margin-right: 5px;  /* ⬅ Added 5px breathing room on right */
+    width: calc(100% - 10px);
+    max-width: none;
+    padding-left: 12px;
+    padding-right: 12px;
+    gap: 4px;
+  }
+  /* ... rest of mobile styles ... */
+}
+Please update this complete block accordingly...
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Ants</title>
+
+<style>
+
+* { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
+
+html, body { height: 100%; width: 100%; }
+
+body {
+
+  background: linear-gradient(to bottom, #b3d9ff 10%, #66cc66 40%);
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  padding: 0;
+
+  overflow-x: hidden;
+
+}
+
+
+
+/* ===============================
+
+   GLOBAL BUTTON STYLE (MASTER)
+
+   =============================== */
+
+button {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+
+
+  height: 36px;
+
+  padding: 0 12px;
+
+  min-width: 80px;
+
+
+
+  font-size: 12px;
+
+  line-height: 1;
+
+
+
+  background: #65d669;
+
+  color: #000000;
+
+
+
+  border: none;
+
+  border-radius: 6px;
+
+
+
+  cursor: pointer;
+
+  user-select: none;
+
+
+
+  transition: background 0.15s ease, transform 0.1s ease;
+
+}
+
+
+
+button:hover:not(:disabled) { background: #0277bd; }
+
+button:active:not(:disabled) { transform: scale(0.97); }
+
+button:disabled { background:#0277bd; cursor:not-allowed; }
+
+
+
+/* ===============================
+
+   TOP FIELDS
+
+   =============================== */
+
+#topFields {
+
+  display:flex;
+
+  gap:6px;
+
+  align-items:center;
+
+  justify-content: center;
+
+  margin-top:20px;
+
+  margin-bottom:10px;
+
+  width: 100%;
+
+  max-width: 400px;
+
+}
+
+
+
+#topFields input {
+
+  flex: 1;
+
+  min-width: 0;
+
+  padding:8px;
+
+  border:1px solid #ccc;
+
+  border-radius:4px;
+
+  font-size:14px;
+
+}
+
+
+
+.countdownOverlay {
+
+  margin-left:6px;
+
+  font-size:14px;
+
+  color:#333;
+
+  white-space: nowrap;
+
+}
+
+
+
+/* ===============================
+
+   CONVEYOR
+
+   =============================== */
+
+#conveyorContainer {
+
+  position: relative;
+
+  overflow: visible;         /* allow taller content */
+
+  margin-top: 10px;
+
+
+
+  height: 90px;              /* ⬅ taller container */
+
+
+
+  width: 100vw;
+
+  display: flex;
+
+  align-items: flex-end;      /* ⬅ baseline stays at bottom */
+
+  margin-bottom: 10px;
+
+}
+
+
+
+
+
+#conveyor {
+
+  display:flex;
+
+  gap:6px;
+
+  white-space:nowrap;
+
+  will-change:transform;
+
+  position:absolute;
+
+  left:0;
+
+  bottom:0;
+
+}
+
+
+
+.tileWrapper {
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: flex-end;
+
+  position: relative;
+
+  margin-top: 15px;
+
+}
+
+
+
+/* ===============================
+
+   DROP ZONE
+
+   =============================== */
+
+#dropBand {
+
+  width: 100vw;
+
+  height: 90px;
+
+  margin-top: 8px;
+
+  padding: 2px 0 0;
+
+  background: rgba(245,245,220,0.5);
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: flex-start;
+
+}
+
+
+
+#dropContainer {
+
+  width: 90%;
+
+  max-width: 600px;
+
+  height: 84px;
+
+  padding: 8px 10px 0;
+
+
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  justify-content: center;
+
+  align-content: flex-start;
+
+
+
+  column-gap: 6px;
+
+  row-gap: 5px;
+
+
+
+  overflow: hidden;
+
+}
+
+
+
+/* kill ant layout inside drop zone */
+
+#dropContainer .tileWrapper {
+
+  margin-top: 0;
+
+  padding: 0;
+
+  height: auto;
+
+  flex-direction: row;
+
+}
+
+
+
+/* tiles */
+
+.tile {
+
+  padding:8px 12px;
+
+  background:#ffd8a8;
+
+  border-radius:6px;
+
+  cursor:pointer;
+
+  user-select:none;
+
+  font-size:14px;
+
+  display:inline-block;
+
+}
+
+
+
+.tile:hover { transform:translateY(-1px); }
+
+
+
+.tile.sushi {
+
+  background: transparent;
+
+  font-size: 30px;
+
+  cursor: default;
+
+  padding: 0;
+
+  line-height: 1;
+
+}
+
+
+
+.ant {
+
+  font-size:11px;
+
+  line-height:1;
+
+  margin-top:-2px;
+
+  pointer-events:none;
+
+}
+
+
+
+/* ===============================
+
+   CONTROLS
+
+   =============================== */
+
+.controls {
+
+  display:flex;
+
+  gap:4px;
+
+  margin-top:20px;
+
+  justify-content:center;
+
+}
+
+
+
+/* ===============================
+
+   SECTION SELECTOR
+
+   =============================== */
+
+#sectionSelector {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  width: 100%;
+
+  max-width: 400px;       /* match #topFields max-width */
+
+  margin-bottom: 10px;
+
+  justify-content: space-between; /* stretch edge-to-edge flush */
+
+}
+
+
+
+/* ▲ ▼ ONLY */
+
+#sectionUp,
+
+#sectionDown {
+
+  width: 36px;
+
+  min-width: 36px;
+
+  padding: 0;
+
+  font-size: 14px;
+
+}
+
+
+
+/* selector window */
+
+#sectionWheelContainer {
+
+  flex: 1;               /* grow to fill remaining space between arrows */
+
+  height: 36px;
+
+  position: relative;
+
+  background: #fff;
+
+  border: 1px solid #999;
+
+  border-radius: 6px;
+
+  overflow: hidden;
+
+  min-width: 0;           /* allows shrinking on small screens */
+
+}
+
+
+
+#sectionWheelContainer .wheel {
+
+  position: absolute;
+
+  top: 0;
+
+  left: 0;
+
+  width: 100%;
+
+  height: auto;          /* allow full list height */
+
+  will-change: transform;
+
+}
+
+
+
+.wheel-item {
+
+  height: 36px;
+
+  line-height: 36px;
+
+  text-align: center;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  color: #666;
+
+  white-space: nowrap;
+
+}
+
+
+
+.wheel-item.selected { color:#000; }
+
+
+
+/* START button */
+
+#startButton {
+
+  min-width: 70px;
+
+  width: auto;
+
+}
+
+/* ===============================
+
+   SCOREBOARD
+
+   =============================== */
+
+#scoreboard {
+
+  margin-top:25px;
+
+  padding:6px;
+
+  background:#fff;
+
+  border:1px solid #ccc;
+
+  border-radius:6px;
+
+  display:none;
+
+  font-size:12px;
+
+}
+
+
+
+/* ===============================
+
+   MOBILE
+
+   =============================== */
+
+@media (max-width: 500px) {
+
+  #topFields, #sectionSelector {
+
+    margin-left: 0;
+
+    margin-right: 0;
+
+    width: 100%;
+
+    max-width: none;
+
+    padding-left: 12px;
+
+    padding-right: 12px;
+
+    gap: 4px;
+
+  }
+
+
+
+  #topFields input {
+
+    width: 30%;
+
+    padding: 6px;
+
+  }
+
+
+
+  .countdownOverlay {
+
+    font-size: 12px;
+
+    margin-left: auto;
+
+  }
+
+}
+
+
+
+  footer {
+
+    margin-top: 16px;
+
+    padding: 10px 12px;
+
+    text-align: left;
+
+    font-size: 10px;
+
+    color: #666;
+
+    background: #none;
+
+    border-radius: 6px;
+
+  }
+
+
+
+.wheel-item.selected {
+
+  color: #999;
+
+  font-weight: 500;
+
+}
+
+
+
+</style>
+
+CSS
+/* ===============================
+   TOP FIELDS
+   =============================== */
+#topFields {
+  display:flex;
+  gap:6px;
+  align-items:center;
+  justify-content: center;
+  margin-top:20px;
+  margin-bottom:10px;
+  width: calc(100% - 10px);
+  max-width: 390px;
+}
+
+#topFields input {
+  flex: 1;
+  min-width: 0;
+  padding:8px;
+  border:1px solid #ccc;
+  border-radius:4px;
+  font-size:14px;
+}
+
+.countdownOverlay {
+  margin-left:6px;
+  font-size:14px;
+  color:#333;
+  white-space: nowrap;
+}
+CSS
+/* ===============================
+   SECTION SELECTOR
+   =============================== */
+#sectionSelector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: calc(100% - 10px);
+  max-width: 390px;
+  margin-bottom: 10px;
+  justify-content: space-between;
+}
+CSS
+/* ===============================
+   MOBILE
+   =============================== */
+@media (max-width: 500px) {
+  #topFields, #sectionSelector {
+    margin-left: 5px;
+    margin-right: 5px;
+    width: calc(100% - 10px);
+    max-width: none;
+    padding-left: 12px;
+    padding-right: 12px;
+    gap: 4px;
+  }
+
+  #topFields input {
+    width: 30%;
+    padding: 6px;
+  }
+
+  .countdownOverlay {
+    font-size: 12px;
+    margin-left: auto;
+  }
+}
+I need to plug/paste this block in, so please update it accordingly...
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Ants</title>
+
+<style>
+
+* { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
+
+html, body { height: 100%; width: 100%; }
+
+body {
+
+  background: linear-gradient(to bottom, #b3d9ff 10%, #66cc66 40%);
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  padding: 0;
+
+  overflow-x: hidden;
+
+}
+
+
+
+/* ===============================
+
+   GLOBAL BUTTON STYLE (MASTER)
+
+   =============================== */
+
+button {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+
+
+  height: 36px;
+
+  padding: 0 12px;
+
+  min-width: 80px;
+
+
+
+  font-size: 12px;
+
+  line-height: 1;
+
+
+
+  background: #65d669;
+
+  color: #000000;
+
+
+
+  border: none;
+
+  border-radius: 6px;
+
+
+
+  cursor: pointer;
+
+  user-select: none;
+
+
+
+  transition: background 0.15s ease, transform 0.1s ease;
+
+}
+
+
+
+button:hover:not(:disabled) { background: #0277bd; }
+
+button:active:not(:disabled) { transform: scale(0.97); }
+
+button:disabled { background:#0277bd; cursor:not-allowed; }
+
+
+
+/* ===============================
+
+   TOP FIELDS
+
+   =============================== */
+
+#topFields {
+
+  display:flex;
+
+  gap:6px;
+
+  align-items:center;
+
+  justify-content: center;
+
+  margin-top:20px;
+
+  margin-bottom:10px;
+
+  width: 100%;
+
+  max-width: 400px;
+
+}
+
+
+
+#topFields input {
+
+  flex: 1;
+
+  min-width: 0;
+
+  padding:8px;
+
+  border:1px solid #ccc;
+
+  border-radius:4px;
+
+  font-size:14px;
+
+}
+
+
+
+.countdownOverlay {
+
+  margin-left:6px;
+
+  font-size:14px;
+
+  color:#333;
+
+  white-space: nowrap;
+
+}
+
+
+
+/* ===============================
+
+   CONVEYOR
+
+   =============================== */
+
+#conveyorContainer {
+
+  position: relative;
+
+  overflow: visible;         /* allow taller content */
+
+  margin-top: 10px;
+
+
+
+  height: 90px;              /* ⬅ taller container */
+
+
+
+  width: 100vw;
+
+  display: flex;
+
+  align-items: flex-end;      /* ⬅ baseline stays at bottom */
+
+  margin-bottom: 10px;
+
+}
+
+
+
+
+
+#conveyor {
+
+  display:flex;
+
+  gap:6px;
+
+  white-space:nowrap;
+
+  will-change:transform;
+
+  position:absolute;
+
+  left:0;
+
+  bottom:0;
+
+}
+
+
+
+.tileWrapper {
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: flex-end;
+
+  position: relative;
+
+  margin-top: 15px;
+
+}
+
+
+
+/* ===============================
+
+   DROP ZONE
+
+   =============================== */
+
+#dropBand {
+
+  width: 100vw;
+
+  height: 90px;
+
+  margin-top: 8px;
+
+  padding: 2px 0 0;
+
+  background: rgba(245,245,220,0.5);
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: flex-start;
+
+}
+
+
+
+#dropContainer {
+
+  width: 90%;
+
+  max-width: 600px;
+
+  height: 84px;
+
+  padding: 8px 10px 0;
+
+
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  justify-content: center;
+
+  align-content: flex-start;
+
+
+
+  column-gap: 6px;
+
+  row-gap: 5px;
+
+
+
+  overflow: hidden;
+
+}
+
+
+
+/* kill ant layout inside drop zone */
+
+#dropContainer .tileWrapper {
+
+  margin-top: 0;
+
+  padding: 0;
+
+  height: auto;
+
+  flex-direction: row;
+
+}
+
+
+
+/* tiles */
+
+.tile {
+
+  padding:8px 12px;
+
+  background:#ffd8a8;
+
+  border-radius:6px;
+
+  cursor:pointer;
+
+  user-select:none;
+
+  font-size:14px;
+
+  display:inline-block;
+
+}
+
+
+
+.tile:hover { transform:translateY(-1px); }
+
+
+
+.tile.sushi {
+
+  background: transparent;
+
+  font-size: 30px;
+
+  cursor: default;
+
+  padding: 0;
+
+  line-height: 1;
+
+}
+
+
+
+.ant {
+
+  font-size:11px;
+
+  line-height:1;
+
+  margin-top:-2px;
+
+  pointer-events:none;
+
+}
+
+
+
+/* ===============================
+
+   CONTROLS
+
+   =============================== */
+
+.controls {
+
+  display:flex;
+
+  gap:4px;
+
+  margin-top:20px;
+
+  justify-content:center;
+
+}
+
+
+
+/* ===============================
+
+   SECTION SELECTOR
+
+   =============================== */
+
+#sectionSelector {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  width: 100%;
+
+  max-width: 400px;       /* match #topFields max-width */
+
+  margin-bottom: 10px;
+
+  justify-content: space-between; /* stretch edge-to-edge flush */
+
+}
+
+
+
+/* ▲ ▼ ONLY */
+
+#sectionUp,
+
+#sectionDown {
+
+  width: 36px;
+
+  min-width: 36px;
+
+  padding: 0;
+
+  font-size: 14px;
+
+}
+
+
+
+/* selector window */
+
+#sectionWheelContainer {
+
+  flex: 1;               /* grow to fill remaining space between arrows */
+
+  height: 36px;
+
+  position: relative;
+
+  background: #fff;
+
+  border: 1px solid #999;
+
+  border-radius: 6px;
+
+  overflow: hidden;
+
+  min-width: 0;           /* allows shrinking on small screens */
+
+}
+
+
+
+#sectionWheelContainer .wheel {
+
+  position: absolute;
+
+  top: 0;
+
+  left: 0;
+
+  width: 100%;
+
+  height: auto;          /* allow full list height */
+
+  will-change: transform;
+
+}
+
+
+
+.wheel-item {
+
+  height: 36px;
+
+  line-height: 36px;
+
+  text-align: center;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  color: #666;
+
+  white-space: nowrap;
+
+}
+
+
+
+.wheel-item.selected { color:#000; }
+
+
+
+/* START button */
+
+#startButton {
+
+  min-width: 70px;
+
+  width: auto;
+
+}
+
+/* ===============================
+
+   SCOREBOARD
+
+   =============================== */
+
+#scoreboard {
+
+  margin-top:25px;
+
+  padding:6px;
+
+  background:#fff;
+
+  border:1px solid #ccc;
+
+  border-radius:6px;
+
+  display:none;
+
+  font-size:12px;
+
+}
+
+
+
+/* ===============================
+
+   MOBILE
+
+   =============================== */
+
+@media (max-width: 500px) {
+
+  #topFields, #sectionSelector {
+
+    margin-left: 0;
+
+    margin-right: 0;
+
+    width: 100%;
+
+    max-width: none;
+
+    padding-left: 12px;
+
+    padding-right: 12px;
+
+    gap: 4px;
+
+  }
+
+
+
+  #topFields input {
+
+    width: 30%;
+
+    padding: 6px;
+
+  }
+
+
+
+  .countdownOverlay {
+
+    font-size: 12px;
+
+    margin-left: auto;
+
+  }
+
+}
+
+
+
+  footer {
+
+    margin-top: 16px;
+
+    padding: 10px 12px;
+
+    text-align: left;
+
+    font-size: 10px;
+
+    color: #666;
+
+    background: #none;
+
+    border-radius: 6px;
+
+  }
+
+
+
+.wheel-item.selected {
+
+  color: #999;
+
+  font-weight: 500;
+
+}
+
+
+
+</style>
+
+HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ants</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
+html, body { height: 100%; width: 100%; }
+body {
+  background: linear-gradient(to bottom, #b3d9ff 10%, #66cc66 40%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* ===============================
+   GLOBAL BUTTON STYLE (MASTER)
+   =============================== */
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 36px;
+  padding: 0 12px;
+  min-width: 80px;
+
+  font-size: 12px;
+  line-height: 1;
+
+  background: #65d669;
+  color: #000000;
+
+  border: none;
+  border-radius: 6px;
+
+  cursor: pointer;
+  user-select: none;
+
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+button:hover:not(:disabled) { background: #0277bd; }
+button:active:not(:disabled) { transform: scale(0.97); }
+button:disabled { background:#0277bd; cursor:not-allowed; }
+
+/* ===============================
+   TOP FIELDS
+   =============================== */
+#topFields {
+  display:flex;
+  gap:6px;
+  align-items:center;
+  justify-content: center;
+  margin-top:20px;
+  margin-bottom:10px;
+  width: calc(100% - 10px);
+  max-width: 390px;
+}
+
+#topFields input {
+  flex: 1;
+  min-width: 0;
+  padding:8px;
+  border:1px solid #ccc;
+  border-radius:4px;
+  font-size:14px;
+}
+
+.countdownOverlay {
+  margin-left:6px;
+  font-size:14px;
+  color:#333;
+  white-space: nowrap;
+}
+
+/* ===============================
+   CONVEYOR
+   =============================== */
+#conveyorContainer {
+  position: relative;
+  overflow: visible;         /* allow taller content */
+  margin-top: 10px;
+
+  height: 90px;              /* ⬅ taller container */
+
+  width: 100vw;
+  display: flex;
+  align-items: flex-end;      /* ⬅ baseline stays at bottom */
+  margin-bottom: 10px;
+}
+
+
+#conveyor {
+  display:flex;
+  gap:6px;
+  white-space:nowrap;
+  will-change:transform;
+  position:absolute;
+  left:0;
+  bottom:0;
+}
+
+.tileWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+  margin-top: 15px;
+}
+
+/* ===============================
+   DROP ZONE
+   =============================== */
+#dropBand {
+  width: 100vw;
+  height: 90px;
+  margin-top: 8px;
+  padding: 2px 0 0;
+  background: rgba(245,245,220,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+#dropContainer {
+  width: 90%;
+  max-width: 600px;
+  height: 84px;
+  padding: 8px 10px 0;
+
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: flex-start;
+
+  column-gap: 6px;
+  row-gap: 5px;
+
+  overflow: hidden;
+}
+
+/* kill ant layout inside drop zone */
+#dropContainer .tileWrapper {
+  margin-top: 0;
+  padding: 0;
+  height: auto;
+  flex-direction: row;
+}
+
+/* tiles */
+.tile {
+  padding:8px 12px;
+  background:#ffd8a8;
+  border-radius:6px;
+  cursor:pointer;
+  user-select:none;
+  font-size:14px;
+  display:inline-block;
+}
+
+.tile:hover { transform:translateY(-1px); }
+
+.tile.sushi {
+  background: transparent;
+  font-size: 30px;
+  cursor: default;
+  padding: 0;
+  line-height: 1;
+}
+
+.ant {
+  font-size:11px;
+  line-height:1;
+  margin-top:-2px;
+  pointer-events:none;
+}
+
+/* ===============================
+   CONTROLS
+   =============================== */
+.controls {
+  display:flex;
+  gap:4px;
+  margin-top:20px;
+  justify-content:center;
+}
+
+/* ===============================
+   SECTION SELECTOR
+   =============================== */
+#sectionSelector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: calc(100% - 10px);
+  max-width: 390px;       /* match #topFields max-width */
+  margin-bottom: 10px;
+  justify-content: space-between; /* stretch edge-to-edge flush */
+}
+
+/* ▲ ▼ ONLY */
+#sectionUp,
+#sectionDown {
+  width: 36px;
+  min-width: 36px;
+  padding: 0;
+  font-size: 14px;
+}
+
+/* selector window */
+#sectionWheelContainer {
+  flex: 1;               /* grow to fill remaining space between arrows */
+  height: 36px;
+  position: relative;
+  background: #fff;
+  border: 1px solid #999;
+  border-radius: 6px;
+  overflow: hidden;
+  min-width: 0;           /* allows shrinking on small screens */
+}
+
+#sectionWheelContainer .wheel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;          /* allow full list height */
+  will-change: transform;
+}
+
+.wheel-item {
+  height: 36px;
+  line-height: 36px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  white-space: nowrap;
+}
+
+.wheel-item.selected { color:#000; }
+
+/* START button */
+#startButton {
+  min-width: 70px;
+  width: auto;
+}
+/* ===============================
+   SCOREBOARD
+   =============================== */
+#scoreboard {
+  margin-top:25px;
+  padding:6px;
+  background:#fff;
+  border:1px solid #ccc;
+  border-radius:6px;
+  display:none;
+  font-size:12px;
+}
+
+/* ===============================
+   MOBILE
+   =============================== */
+@media (max-width: 500px) {
+  #topFields, #sectionSelector {
+    margin-left: 5px;
+    margin-right: 5px;
+    width: calc(100% - 10px);
+    max-width: none;
+    padding-left: 12px;
+    padding-right: 12px;
+    gap: 4px;
+  }
+
+  #topFields input {
+    width: 30%;
+    padding: 6px;
+  }
+
+  .countdownOverlay {
+    font-size: 12px;
+    margin-left: auto;
+  }
+}
+
+  footer {
+    margin-top: 16px;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 10px;
+    color: #666;
+    background: #none;
+    border-radius: 6px;
+  }
+
+.wheel-item.selected {
+  color: #999;
+  font-weight: 500;
+}
+
+</style>
+</head>
+</html>
+SAme request for this file...
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Cars</title>
+
+<style>
+
+* { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
+
+html, body { height: 100%; width: 100%; }
+
+body {
+
+background: linear-gradient(to bottom, #dcdcdc 0%, #2f2f2f 45%, #dcdcdc 100%);
+
+  
+
+
+
+display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  padding: 0;
+
+  overflow-x: hidden;
+
+}
+
+
+
+
+
+/* ===============================
+
+   GLOBAL BUTTON STYLE (MASTER)
+
+   =============================== */
+
+button {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+
+
+  height: 36px;
+
+  padding: 0 12px;
+
+  min-width: 80px;
+
+
+
+  font-size: 12px;
+
+  line-height: 1;
+
+
+
+  background: #2b5d84;
+
+  color: #fff;
+
+
+
+  border: none;
+
+  border-radius: 6px;
+
+
+
+  cursor: pointer;
+
+  user-select: none;
+
+
+
+  transition: background 0.15s ease, transform 0.1s ease;
+
+}
+
+
+
+button:hover:not(:disabled) { background: #0277bd; }
+
+button:active:not(:disabled) { transform: scale(0.97); }
+
+button:disabled { background:#888; cursor:not-allowed; }
+
+
+
+/* ===============================
+
+   TOP FIELDS
+
+   =============================== */
+
+#topFields {
+
+  display:flex;
+
+  gap:6px;
+
+  align-items:center;
+
+  justify-content: center;
+
+  margin-top:20px;
+
+  margin-bottom:10px;
+
+  width: 100%;
+
+  max-width: 400px;
+
+}
+
+
+
+#topFields input {
+
+  flex: 1;
+
+  min-width: 0;
+
+  padding:8px;
+
+  border:1px solid #ccc;
+
+  border-radius:4px;
+
+  font-size:14px;
+
+}
+
+
+
+.countdownOverlay {
+
+  margin-left:6px;
+
+  font-size:14px;
+
+  color:#333;
+
+  white-space: nowrap;
+
+}
+
+
+
+/* ===============================
+
+   CONVEYOR
+
+   =============================== */
+
+#conveyorContainer {
+
+  position: relative;
+
+  overflow: visible;         /* allow taller content */
+
+  margin-top: 10px;
+
+
+
+  height: 90px;              /* ⬅ taller container */
+
+
+
+  width: 100vw;
+
+  display: flex;
+
+  align-items: flex-end;      /* ⬅ baseline stays at bottom */
+
+  margin-bottom: 10px;
+
+}
+
+
+
+
+
+#conveyor {
+
+  display:flex;
+
+  gap:6px;
+
+  white-space:nowrap;
+
+  will-change:transform;
+
+  position:absolute;
+
+  left:0;
+
+  bottom:0;
+
+}
+
+
+
+.tileWrapper {
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: flex-end;
+
+  position: relative;
+
+  margin-top: 6px;   /* ✅ enough spacing, no clipping */
+
+}
+
+
+
+/* ===============================
+
+   DROP ZONE
+
+   =============================== */
+
+#dropBand {
+
+  width: 100vw;
+
+  height: 90px;
+
+  margin-top: 8px;
+
+  padding: 2px 0 0;
+
+  background: rgba(245,245,220,0.5);
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: flex-start;
+
+}
+
+
+
+#dropContainer {
+
+  width: 90%;
+
+  max-width: 600px;
+
+  height: 84px;
+
+  padding: 8px 10px 0;
+
+
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  justify-content: center;
+
+  align-content: flex-start;
+
+
+
+  column-gap: 6px;
+
+  row-gap: 5px;
+
+
+
+  overflow: hidden;
+
+}
+
+
+
+/* kill ant layout inside drop zone */
+
+#dropContainer .tileWrapper {
+
+  margin-top: 0;
+
+  padding: 0;
+
+  height: auto;
+
+  flex-direction: row;
+
+}
+
+
+
+/* tiles */
+
+.tile {
+
+  padding: 8px 12px;
+
+  background: #ffd8a8;
+
+  border-radius: 6px;
+
+  cursor: pointer;
+
+  user-select: none;
+
+  font-size: 14px;
+
+  display: inline-block;
+
+
+
+  margin-bottom: -7px; /* 👈 pulls tile closer to vehicle */
+
+}
+
+
+
+.tile:hover { transform:translateY(-1px); }
+
+
+
+.tile.sushi {
+
+  background: transparent;
+
+  font-size: 30px;
+
+  cursor: default;
+
+  padding: 0;
+
+  line-height: 1;
+
+}
+
+
+
+.ant {
+
+  font-size:44px;
+
+  line-height:1;
+
+  margin-top:-4px;
+
+  pointer-events:none;
+
+}
+
+
+
+/* ===============================
+
+   CONTROLS
+
+   =============================== */
+
+.controls {
+
+  display:flex;
+
+  gap:4px;
+
+  margin-top:20px;
+
+  justify-content:center;
+
+}
+
+
+
+/* ===============================
+
+   SECTION SELECTOR
+
+   =============================== */
+
+#sectionSelector {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  width: 100%;
+
+  max-width: 400px;        /* match #topFields max-width */
+
+  margin-bottom: 10px;
+
+  justify-content: space-between;
+
+}
+
+/* ▲ ▼ ONLY */
+
+#sectionUp,
+
+#sectionDown {
+
+  width: 36px;
+
+  min-width: 36px;
+
+  padding: 0;
+
+  font-size: 14px;
+
+}
+
+
+
+/* selector window */
+
+#sectionWheelContainer {
+
+  flex: 1;
+
+  height: 36px;
+
+  position: relative;
+
+  background: #fff;
+
+  border: 1px solid #999;
+
+  border-radius: 6px;
+
+  overflow: hidden;
+
+  min-width: 0;
+
+}
+
+
+
+#sectionWheelContainer .wheel {
+
+  position: absolute;
+
+  top: 0;
+
+  left: 0;
+
+  width: 100%;
+
+  height: auto;
+
+  will-change: transform;
+
+}
+
+
+
+.wheel-item {
+
+  height: 36px;
+
+  line-height: 36px;
+
+  text-align: center;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  color: #666;
+
+  white-space: nowrap;
+
+}
+
+
+
+.wheel-item.selected { color:#000; }
+
+
+
+/* START button */
+
+#startButton {
+
+  min-width: 70px;
+
+  width: auto;
+
+}
+
+
+
+
+
+/* ===============================
+
+   SCOREBOARD
+
+   =============================== */
+
+#scoreboard {
+
+  margin-top:25px;
+
+  padding:6px;
+
+  background:#fff;
+
+  border:1px solid #ccc;
+
+  border-radius:6px;
+
+  display:none;
+
+  font-size:12px;
+
+}
+
+
+
+/* ===============================
+
+   MOBILE
+
+   =============================== */
+
+@media (max-width: 500px) {
+
+  #topFields, #sectionSelector {
+
+    margin-left: 0;
+
+    margin-right: 0;
+
+    width: 100%;
+
+    max-width: none;
+
+    padding-left: 12px;
+
+    padding-right: 12px;
+
+    gap: 4px;
+
+  }
+
+
+
+  #topFields input {
+
+    width: 30%;
+
+    padding: 6px;
+
+  }
+
+
+
+  .countdownOverlay {
+
+    font-size: 12px;
+
+    margin-left: auto;
+
+  }
+
+}
+
+
+
+  footer {
+
+    margin-top: 16px;
+
+    padding: 10px 12px;
+
+    text-align: left;
+
+    font-size: 10px;
+
+    color: #666;
+
+    background: #none;
+
+    border-radius: 6px;
+
+  }
+
+
+
+#skyline {
+
+  position: fixed;
+
+  left: 0;
+
+  width: 100vw;
+
+  pointer-events: none;
+
+}
+
+
+
+</style>
+
+</head>
+
+<body>
+
+</body>
+
+</html>
+
+</head>
+
+<body>
+
+
+
+<div id="topFields">
+
+  <input type="text" id="nameField" placeholder="Name">
+
+  <input type="text" id="idField" placeholder="ID">
+
+  <div class="countdownOverlay" id="countdownOverlay">60</div>
+
+</div>
+
+
+
+<div id="sectionSelector">
+
+  <button id="sectionUp">▲</button>
+
+  <div id="sectionWheelContainer">
+
+    <div class="wheel"></div>
+
+  </div>
+
+  <button id="sectionDown">▼</button>
+
+<button id="startButton" class="controlsBtn">Start</button>
+
+</div>
+
+
+
+<div id="conveyorContainer">
+
+  <div id="conveyor"></div>
+
+</div>
+
+
+
+<!-- <div id="countertop"></div> -->
+
+<div id="dropBand">
+
+  <div id="dropContainer"></div>
+
+</div>
+
+
+
+<div class="controls">
+
+  <button id="backButton">Back</button>
+
+  <button id="nextButton">Next</button>
+
+  <button id="submitButton">Submit</button>
+
+</div>
+
+
+
+<div id="scoreboard">
+
+  <pre id="scoreData"></pre>
+
+  <div class="controls">
+
+    <button id="copyButton">Copy</button>
+
+    <button id="downloadTxtButton">↓TXT</button>
+
+    <button id="downloadPngButton">↓PNG</button>
+
+  </div>
+
+</div>
+
+
+
+<textarea id="rawTextInput" style="display:none;">
+
+
+
+~Determiners
+
+I saw |a| cat in the garden.
+
+She wants |some| water.
+
+There isn’t |any| milk left.
+
+He bought |an| umbrella.
+
+We need |more| time.
+
+She has |few| friends here.
+
+I don’t have |much| money.
+
+They own |several| houses.
+
+He ate |the| apple.
+
+She found |this| book helpful.
+
+
+
+
+
+~Nouns
+
+The |dog| barked loudly.
+
+Her |happiness| was obvious.
+
+The |children| are playing.
+
+That |city| is very old.
+
+His |advice| was useful.
+
+The |team| is winning.
+
+She opened the |box|.
+
+We visited the |museum|.
+
+The |teacher| arrived early.
+
+Music gives me |joy|.
+
+
+
+
+
+~Pronouns
+
+|She| is my best friend.
+
+This gift is |mine|.
+
+I spoke to |him|.
+
+|They| are waiting outside.
+
+The book belongs to |her|.
+
+I hurt |myself|.
+
+|We| are ready.
+
+Give it to |them|.
+
+That seat is |yours|.
+
+He blamed |himself|.
+
+
+
+
+
+~Indefinite Pronouns
+
+|Everyone| was excited.
+
+|Someone| is at the door.
+
+|Nothing| makes sense.
+
+|Anybody| can join.
+
+|Each| has a ticket.
+
+|Nobody| knows the answer.
+
+|Something| smells strange.
+
+|All| were invited.
+
+|One| must be careful.
+
+|Everything| is ready.
+
+
+
+
+
+~Verbs
+
+I |run| every morning.
+
+She |wrote| a letter.
+
+They |are playing| outside.
+
+He |has finished| his work.
+
+We |eat| dinner at six.
+
+She |opened| the door.
+
+I |will call| you later.
+
+They |were waiting| patiently.
+
+He |fixes| cars.
+
+We |have seen| it before.
+
+
+
+
+
+~State Verbs
+
+I |know| the answer.
+
+She |likes| chocolate.
+
+He |believes| you.
+
+We |own| this house.
+
+I |understand| the problem.
+
+She |hates| noise.
+
+They |prefer| coffee.
+
+He |needs| help.
+
+I |remember| her name.
+
+She |loves| music.
+
+
+
+
+
+~Present Simple
+
+I |work| on Mondays.
+
+She |teaches| English.
+
+They |live| nearby.
+
+He |plays| chess.
+
+We |study| at night.
+
+She |reads| daily.
+
+I |wake| early.
+
+They |watch| TV often.
+
+He |drives| carefully.
+
+We |eat| together.
+
+
+
+
+
+~Have Got
+
+I |have got| a bike.
+
+She |has got| a dog.
+
+We |have got| time.
+
+He |has got| an idea.
+
+They |have got| tickets.
+
+I |haven’t got| money.
+
+She |hasn’t got| keys.
+
+Have you |got| a pen?
+
+He |has got| a cold.
+
+We |have got| plans.
+
+
+
+
+
+~Verb To Be
+
+I |am| ready.
+
+She |is| happy.
+
+They |are| here.
+
+He |was| tired.
+
+We |were| late.
+
+It |is| cold.
+
+I |am not| angry.
+
+She |isn’t| home.
+
+They |aren’t| ready.
+
+He |wasn’t| sure.
+
+
+
+
+
+~State-of-Being Linking Verbs
+
+She |is| calm.
+
+He |seems| tired.
+
+They |remain| silent.
+
+I |feel| confident.
+
+The room |looks| clean.
+
+She |became| angry.
+
+He |stayed| quiet.
+
+The food |tastes| good.
+
+She |appears| nervous.
+
+The plan |sounds| risky.
+
+
+
+
+
+~Sensory Linking Verbs
+
+The soup |smells| good.
+
+She |looks| happy.
+
+The music |sounds| loud.
+
+The cake |tastes| sweet.
+
+The fabric |feels| soft.
+
+He |looks| tired.
+
+The air |smells| fresh.
+
+The idea |sounds| strange.
+
+The pillow |feels| hard.
+
+The coffee |tastes| bitter.
+
+
+
+
+
+~Present Continuous
+
+I |am studying| now.
+
+She |is cooking| dinner.
+
+They |are playing| outside.
+
+He |is working| late.
+
+We |are waiting| here.
+
+She |is reading| quietly.
+
+I |am listening| carefully.
+
+They |are watching| TV.
+
+He |is driving| fast.
+
+We |are learning| grammar.
+
+
+
+
+
+~Present Perfect
+
+I |have finished| my work.
+
+She |has visited| Rome.
+
+They |have seen| it.
+
+He |has broken| it.
+
+We |have learned| a lot.
+
+She |has lost| her keys.
+
+I |have eaten| already.
+
+They |have arrived| early.
+
+He |has written| a book.
+
+We |have tried| that.
+
+
+
+
+
+~Present Perfect Continuous
+
+I |have been studying| all day.
+
+She |has been working| hard.
+
+They |have been waiting| long.
+
+He |has been running| outside.
+
+We |have been learning| English.
+
+She |has been cooking| since noon.
+
+I |have been reading| for hours.
+
+They |have been traveling| a lot.
+
+He |has been fixing| cars.
+
+We |have been practicing| daily.
+
+
+
+
+
+~Past Simple
+
+I |walked| home.
+
+She |called| me.
+
+They |left| early.
+
+He |won| the game.
+
+We |studied| together.
+
+She |found| it.
+
+I |ate| lunch.
+
+They |watched| TV.
+
+He |drove| fast.
+
+We |slept| well.
+
+
+
+~Past Continuous
+
+I |was walking| home.
+
+She |was cooking| dinner.
+
+They |were playing| outside.
+
+He |was working| late.
+
+We |were studying| together.
+
+She |was reading| quietly.
+
+I |was listening| carefully.
+
+They |were waiting| patiently.
+
+He |was driving| fast.
+
+We |were sleeping| deeply.
+
+
+
+
+
+~Past Perfect
+
+I |had finished| before noon.
+
+She |had left| early.
+
+They |had seen| it before.
+
+He |had eaten| already.
+
+We |had studied| enough.
+
+She |had forgotten| his name.
+
+I |had cleaned| the room.
+
+They |had arrived| early.
+
+He |had written| the letter.
+
+We |had decided| already.
+
+
+
+
+
+~Future Simple
+
+I |will call| you later.
+
+She |will help| us.
+
+They |will arrive| soon.
+
+He |will finish| today.
+
+We |will start| tomorrow.
+
+She |will explain| everything.
+
+I |will try| again.
+
+They |will win| easily.
+
+He |will return| soon.
+
+We |will meet| later.
+
+
+
+
+
+~Going to for the Future
+
+I |am going to study| tonight.
+
+She |is going to travel| abroad.
+
+They |are going to move| soon.
+
+He |is going to start| work.
+
+We |are going to eat| out.
+
+She |is going to buy| a car.
+
+I |am going to rest| today.
+
+They |are going to visit| us.
+
+He |is going to fix| it.
+
+We |are going to learn| more.
+
+
+
+
+
+~Adjectives
+
+It is a |big| house.
+
+She has |beautiful| eyes.
+
+They bought a |new| car.
+
+He wore a |black| jacket.
+
+We saw an |interesting| movie.
+
+She felt |happy| today.
+
+It was a |cold| night.
+
+He gave a |quick| answer.
+
+They live in a |quiet| area.
+
+She made a |delicious| meal.
+
+
+
+
+
+~Intensifiers
+
+It is |very| cold.
+
+She is |extremely| tired.
+
+They are |really| happy.
+
+He was |too| angry.
+
+We are |quite| ready.
+
+She felt |so| excited.
+
+It is |absolutely| perfect.
+
+They were |very| late.
+
+He spoke |really| loudly.
+
+She was |too| nervous.
+
+
+
+
+
+~Yes/No Questions
+
+|Are| you ready?
+
+|Is| she home?
+
+|Did| they arrive?
+
+|Was| he late?
+
+|Have| we finished?
+
+|Can| you help?
+
+|Will| she come?
+
+|Do| they know?
+
+|Has| he left?
+
+|Were| we wrong?
+
+
+
+
+
+~Wh-Questions
+
+|What| is your name?
+
+|Where| do you live?
+
+|When| did they arrive?
+
+|Why| are you late?
+
+|Who| called you?
+
+|How| does it work?
+
+|Which| one is yours?
+
+|Whose| bag is this?
+
+|How many| students came?
+
+|What time| is it?
+
+
+
+
+
+~Conjunctions
+
+I stayed home |because| it rained.
+
+She called |and| apologized.
+
+He was tired |but| happy.
+
+We waited |so| we were late.
+
+They tried |although| it was hard.
+
+I ran |and| fell.
+
+She studied |because| she cared.
+
+He wanted tea |but| chose coffee.
+
+We hurried |so| we wouldn’t miss it.
+
+They stayed |although| it was late.
+
+
+
+
+
+~Modal Verbs
+
+I |can| swim.
+
+She |must| leave now.
+
+They |should| listen.
+
+He |may| arrive late.
+
+We |have to| work.
+
+She |could| help.
+
+I |might| go later.
+
+They |must| finish today.
+
+He |should| apologize.
+
+We |can| try again.
+
+
+
+
+
+~Conditionals
+
+If it rains, I |will stay| home.
+
+If I study, I |will pass|.
+
+If she calls, we |will answer|.
+
+If they hurry, they |will arrive| early.
+
+If he tries, he |will succeed|.
+
+If we leave now, we |will be| on time.
+
+If you ask, I |will help|.
+
+If it breaks, we |will fix| it.
+
+If she agrees, we |will start|.
+
+If they win, they |will celebrate|.
+
+
+
+
+
+~Passive Voice
+
+The letter |was written| yesterday.
+
+The cake |was eaten| quickly.
+
+The room |was cleaned| well.
+
+The song |was sung| loudly.
+
+The car |was fixed| today.
+
+The book |was read| twice.
+
+The window |was broken| accidentally.
+
+The work |was finished| early.
+
+The house |was built| recently.
+
+The rules |were explained| clearly.
+
+
+
+
+
+~Question Tags
+
+You are ready, |aren’t you|?
+
+She is here, |isn’t she|?
+
+They arrived late, |didn’t they|?
+
+He can swim, |can’t he|?
+
+We were right, |weren’t we|?
+
+She likes it, |doesn’t she|?
+
+They will come, |won’t they|?
+
+He finished early, |didn’t he|?
+
+We can start, |can’t we|?
+
+She was tired, |wasn’t she|?
+
+
+
+
+
+~Cause/Effect
+
+I stayed home |because| it rained.
+
+She studied hard, |so| she passed.
+
+They were tired |because| they worked late.
+
+He missed the bus, |so| he was late.
+
+We left early |because| it was dark.
+
+She practiced, |so| she improved.
+
+They stayed inside |because| it snowed.
+
+He forgot, |so| he apologized.
+
+We rushed |because| time was short.
+
+She smiled, |so| we relaxed.
+
+
+
+
+
+~Contrast/Contradiction
+
+He tried, |but| failed.
+
+She was tired, |yet| continued.
+
+They left early |although| it was fun.
+
+I like coffee, |but| prefer tea.
+
+She smiled |although| she was sad.
+
+He studied, |but| didn’t pass.
+
+They stayed, |yet| complained.
+
+We went out |although| it rained.
+
+She agreed, |but| hesitated.
+
+He helped, |yet| complained.
+
+
+
+
+
+~Frequency
+
+I |always| wake early.
+
+She |usually| eats lunch.
+
+They |often| travel.
+
+He |sometimes| forgets.
+
+We |rarely| argue.
+
+She |never| lies.
+
+I |often| read.
+
+They |usually| arrive on time.
+
+He |sometimes| cooks.
+
+We |always| try.
+
+
+
+
+
+~Intensity/Emphasis
+
+I |do| understand.
+
+She |did| try hard.
+
+They |really| care.
+
+He |does| know the answer.
+
+We |absolutely| agree.
+
+She |so| wants this.
+
+I |really| mean it.
+
+They |definitely| tried.
+
+He |truly| believes.
+
+We |certainly| agree.
+
+
+
+
+
+~Focus/Limitation
+
+I |only| asked once.
+
+She |just| arrived.
+
+They |only| wanted help.
+
+He |just| finished.
+
+We |only| need time.
+
+She |just| called.
+
+I |only| meant well.
+
+They |just| left.
+
+He |only| tried once.
+
+We |just| started.
+
+
+
+
+
+~Certainty/Probability
+
+It |must| be true.
+
+She |might| come later.
+
+They |will| arrive soon.
+
+He |could| be right.
+
+We |may| win.
+
+She |must| know.
+
+I |might| try.
+
+They |probably| forgot.
+
+He |will| succeed.
+
+We |could| help.
+
+
+
+
+
+~Deduction
+
+He |must| be tired.
+
+She |can’t| be serious.
+
+They |must| have left.
+
+He |can’t| know yet.
+
+We |must| be late.
+
+She |can’t| have done it.
+
+They |must| be home.
+
+He |can’t| understand.
+
+We |must| be careful.
+
+She |can’t| forget.
+
+
+
+
+
+~Obligation/Permission/Ability
+
+I |must| finish this.
+
+She |can| leave now.
+
+They |have to| work.
+
+He |may| stay.
+
+We |can| help.
+
+She |must| obey.
+
+I |am able to| swim.
+
+They |may| enter.
+
+He |has to| decide.
+
+We |can| try.
+
+
+
+
+
+~Similarity/Difference
+
+This is |like| that.
+
+She acts |similar to| her sister.
+
+They think |differently|.
+
+He works |unlike| me.
+
+We reacted |the same way|.
+
+She looks |like| her mother.
+
+They behave |differently|.
+
+He answered |similarly|.
+
+We think |differently|.
+
+She dresses |like| me.
+
+
+
+
+
+~Manner
+
+She spoke |politely|.
+
+He worked |carefully|.
+
+They moved |slowly|.
+
+I answered |honestly|.
+
+She smiled |warmly|.
+
+He reacted |quickly|.
+
+We listened |attentively|.
+
+They walked |quietly|.
+
+I drove |carefully|.
+
+She replied |calmly|.
+
+
+
+
+
+~Direction/Movement
+
+He walked |toward| me.
+
+She ran |into| the room.
+
+They moved |away from| danger.
+
+I went |to| school.
+
+He climbed |up| the hill.
+
+We walked |through| the park.
+
+She jumped |over| the fence.
+
+They came |back| home.
+
+I moved |forward|.
+
+He ran |across| the field.
+
+
+
+
+
+~Place/Location
+
+The keys are |on| the table.
+
+She lives |in| Paris.
+
+They met |at| school.
+
+The cat is |under| the chair.
+
+He stayed |inside| the house.
+
+We waited |outside|.
+
+The bag is |next to| the door.
+
+She stood |near| me.
+
+They sat |behind| us.
+
+I stayed |here|.
+
+
+
+
+
+~Adding Ideas
+
+She sings |and| dances.
+
+I like coffee |and| tea.
+
+He called |and| apologized.
+
+We studied |and| practiced.
+
+She bought apples |and| oranges.
+
+They laughed |and| talked.
+
+I wrote |and| revised.
+
+He cooked |and| cleaned.
+
+We planned |and| prepared.
+
+She listened |and| learned.
+
+
+
+</textarea>
+
+
+
+<footer>
+
+  <p>© 2026 Perfectly Practical English™. All rights reserved.</p>
+
+</footer>
+
+
+
+
+
+<script>
+
+/* =========================================
+
+   UNIVERSAL RAW TEXT RESOLVER (PER BLOCK)
+
+   ========================================= */
+
+
+
+/**
+
+ * resolveRaw(source)
+
+ * - If source is a filename (single line, no newlines), load it
+
+ * - Otherwise treat source as literal raw text
+
+ */
+
+async function resolveRaw(source) {
+
+  if (typeof source === "string" && !source.includes("\n")) {
+
+    try {
+
+      const res = await fetch(source, { cache: "no-store" });
+
+      if (res.ok) return await res.text();
+
+    } catch {}
+
+  }
+
+  return source;
+
+}
+
+</script>
+
+
+
+
+
+<!-- Add html2canvas for PNG export -->
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script>
+
+// Your original JS remains unchanged
+
+const conveyor = document.getElementById('conveyor');
+
+const dropContainer = document.getElementById('dropContainer');
+
+const backButton = document.getElementById('backButton');
+
+const nextButton = document.getElementById('nextButton');
+
+const submitButton = document.getElementById('submitButton');
+
+const startButton = document.getElementById('startButton');
+
+
+
+const nameField = document.getElementById('nameField');
+
+const idField = document.getElementById('idField');
+
+const countdownOverlay = document.getElementById('countdownOverlay');
+
+const scoreboard = document.getElementById('scoreboard');
+
+const scoreData = document.getElementById('scoreData');
+
+
+
+const copyButton = document.getElementById('copyButton');
+
+const downloadTxtButton = document.getElementById('downloadTxtButton');
+
+const downloadPngButton = document.getElementById('downloadPngButton');
+
+
+
+function parseSections(raw) {
+
+  const lines = raw.split('\n').map(l => l.trim());
+
+  const sections = [];
+
+  let current = null;
+
+
+
+  for (const line of lines) {
+
+    if (!line) continue;
+
+
+
+    if (line.startsWith('~')) {
+
+      current = {
+
+        title: line.replace(/^~+/, '').trim(),
+
+        lines: []
+
+      };
+
+      sections.push(current);
+
+    } else if (current) {
+
+      current.lines.push(line);
+
+    }
+
+  }
+
+  return sections;
+
+}
+
+
+
+const rawText = document.getElementById('rawTextInput').value;
+
+const sections = parseSections(rawText);
+
+const wheel = document.querySelector('#sectionWheelContainer .wheel');
+
+
+
+/* 👇 PUT FIX #5 RIGHT HERE 👇 */
+
+
+
+let currentSectionIndex = -1; // placeholder state
+
+
+
+let gameStarted = false;
+
+
+
+
+
+const sectionUp = document.getElementById('sectionUp');
+
+const sectionDown = document.getElementById('sectionDown');
+
+
+
+
+
+sectionUp.addEventListener('click', () => {
+
+  if (gameStarted) saveAnswer();
+
+
+
+  if (currentSectionIndex === -1) {
+
+    currentSectionIndex = sections.length - 1;
+
+  } else {
+
+    currentSectionIndex =
+
+      (currentSectionIndex - 1 + sections.length) % sections.length;
+
+  }
+
+
+
+  renderSectionWheel();
+
+});
+
+
+
+sectionDown.addEventListener('click', () => {
+
+  if (gameStarted) saveAnswer();
+
+
+
+  if (currentSectionIndex === -1) {
+
+    currentSectionIndex = 0;
+
+  } else {
+
+    currentSectionIndex =
+
+      (currentSectionIndex + 1) % sections.length;
+
+  }
+
+
+
+  renderSectionWheel();
+
+});
+
+
+
+function renderSectionWheel() {
+
+  wheel.innerHTML = '';
+
+
+
+  // placeholder row
+
+  const placeholder = document.createElement('div');
+
+  placeholder.className =
+
+    'wheel-item' + (currentSectionIndex === -1 ? ' selected' : '');
+
+  placeholder.textContent = 'Select a topic.';
+
+  wheel.appendChild(placeholder);
+
+
+
+  // section titles
+
+  sections.forEach((sec, i) => {
+
+    const div = document.createElement('div');
+
+    div.className =
+
+      'wheel-item' + (i === currentSectionIndex ? ' selected' : '');
+
+    div.textContent = sec.title;
+
+    wheel.appendChild(div);
+
+  });
+
+
+
+  // scroll so selected row is centered
+
+  wheel.style.transform =
+
+    `translateY(${-(currentSectionIndex + 1) * 36}px)`;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+let remainingWords = [];
+
+let selectedTile = null;
+
+let timer = 60, timerInterval;
+
+const sushiEmojis = ['','','','','',''];
+
+const vehicleEmojis = ['🚗','🚙','🚌','🚐','🛻','🚚','🚛','🛵'];
+
+let sushiIndex = 0;
+
+let conveyorItems = [];
+
+let scrollPos = 0;
+
+
+
+
+
+startButton.addEventListener('click', () => {
+
+
+
+  if (currentSectionIndex === -1) {
+
+    alert('Please select a topic first.');
+
+    return;
+
+  }
+
+  gameStarted = true;
+
+
+
+  currentIndex = 0;
+
+  dropContainer.innerHTML = '';
+
+  conveyor.innerHTML = '';
+
+  conveyorItems = [];
+
+  scrollPos = 0;
+
+
+
+  renderSectionWheel();
+
+  renderCurrent();
+
+  startTimer();
+
+});
+
+
+
+
+
+requestAnimationFrame(animateConveyor);
+
+
+
+
+
+/* 👆 END FIX #5 👆 */
+
+
+
+let currentIndex = 0;
+
+let userAnswers = sections.map(sec => new Array(sec.lines.length).fill(null));
+
+
+
+
+
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+let maxSushiInRow = 3;
+
+
+
+function buildConveyor(){
+
+  conveyorItems = conveyorItems.filter(item => item && !item.consumed);
+
+  const targetLength = 30;
+
+  let sushiInRow = 0;
+
+
+
+  while(conveyorItems.length < targetLength){
+
+    const minSushiBeforeWord = 1 + Math.floor(Math.random() * 2);
+
+    const shouldAddWord = remainingWords.length > 0 && sushiInRow >= minSushiBeforeWord;
+
+
+
+    if(shouldAddWord){
+
+      const w = remainingWords.shift();
+
+      conveyorItems.push({ text: w, sushi: false, consumed: false });
+
+      sushiInRow = 0;
+
+      maxSushiInRow = 2 + Math.floor(Math.random() * 4);
+
+    } else {
+
+      const s = sushiEmojis[sushiIndex];
+
+      sushiIndex = (sushiIndex + 1) % sushiEmojis.length;
+
+      conveyorItems.push({ text: s, sushi: true });
+
+      sushiInRow++;
+
+    }
+
+  }
+
+
+
+  conveyor.innerHTML = '';
+
+  conveyorItems.forEach(item=>{
+
+    const wrapper = document.createElement('div');
+
+    wrapper.className = 'tileWrapper';
+
+    const tile = document.createElement('span');
+
+    tile.className = item.sushi ? 'tile sushi' : 'tile';
+
+    tile.textContent = item.text;
+
+    if(!item.sushi && !item.consumed) tile.addEventListener('click',()=>addToDrop(tile,item));
+
+    const ant = document.createElement('div');
+
+    ant.className = 'ant';
+
+    if(!item.vehicle) item.vehicle = vehicleEmojis[Math.floor(Math.random()*vehicleEmojis.length)];
+
+    ant.textContent = item.vehicle;
+
+
+
+    wrapper.appendChild(tile);
+
+    wrapper.appendChild(ant);
+
+    item.element = wrapper;
+
+    conveyor.appendChild(wrapper);
+
+  });
+
+
+
+} // ✅ CLOSE buildConveyor()
+
+
+
+
+
+function animateConveyor(){
+
+  scrollPos -= 1;
+
+  const firstItem = conveyorItems[0];
+
+  if(firstItem && firstItem.element.getBoundingClientRect().right < conveyor.parentElement.getBoundingClientRect().left){
+
+    conveyorItems.shift();
+
+    conveyorItems.push(firstItem);
+
+    scrollPos += firstItem.element.offsetWidth + 6;
+
+    buildConveyor();
+
+  }
+
+  conveyor.style.transform = `translateX(${scrollPos}px)`;
+
+  requestAnimationFrame(animateConveyor);
+
+}
+
+
+
+function addToDrop(span, item){
+
+  if(item.sushi || item.consumed) return;
+
+  const wrapper = document.createElement('div');
+
+  wrapper.className = 'tileWrapper';
+
+  const newTile = document.createElement('span');
+
+  newTile.className = 'tile';
+
+  newTile.textContent = span.textContent;
+
+  newTile.addEventListener('click', ()=>selectDropTile(newTile));
+
+  wrapper.appendChild(newTile);
+
+  dropContainer.appendChild(wrapper);
+
+  item.consumed = true;
+
+  if(item.element && item.element.parentNode) item.element.remove();
+
+  maxSushiInRow = 2 + Math.floor(Math.random() * 4);
+
+  buildConveyor();
+
+}
+
+
+
+function selectDropTile(tile){
+
+  if(!selectedTile){ selectedTile=tile; tile.style.border='2px solid yellow'; }
+
+  else if(selectedTile===tile){ tile.style.border=''; selectedTile=null; }
+
+  else { const tmp=selectedTile.textContent; selectedTile.textContent=tile.textContent; tile.textContent=tmp; selectedTile.style.border=''; selectedTile=null; }
+
+}
+
+
+
+function saveAnswer() {
+
+  // 🚫 do nothing while placeholder is active
+
+  if (currentSectionIndex === -1) return;
+
+
+
+  const words = [...dropContainer.children]
+
+    .map(t => t.querySelector('.tile').textContent);
+
+
+
+  userAnswers[currentSectionIndex][currentIndex] = words;
+
+}
+
+
+
+
+
+function renderCurrent(){
+
+  dropContainer.innerHTML="";
+
+  const sentence = sections[currentSectionIndex].lines[currentIndex];
+
+remainingWords = shuffle(sentence.match(/[\w'-]+[.,!?;:]?/g) || []);
+
+
+
+if (userAnswers[currentSectionIndex][currentIndex]) {
+
+  userAnswers[currentSectionIndex][currentIndex].forEach(w => {
+
+
+
+      const wrapper=document.createElement('div');
+
+      wrapper.className='tileWrapper';
+
+      const t=document.createElement('span');
+
+      t.className='tile';
+
+      t.textContent=w;
+
+      t.addEventListener('click',()=>selectDropTile(t));
+
+      wrapper.appendChild(t);
+
+      dropContainer.appendChild(wrapper);
+
+      const idx = remainingWords.indexOf(w);
+
+      if(idx>-1) remainingWords.splice(idx,1);
+
+    });
+
+  }
+
+  conveyorItems = [];
+
+  sushiIndex = 0;
+
+  maxSushiInRow = 3;
+
+  buildConveyor();
+
+}
+
+
+
+backButton.addEventListener('click', () => {
+
+  saveAnswer();
+
+  currentIndex--;
+
+  if (currentIndex < 0) {
+
+    currentIndex = sections[currentSectionIndex].lines.length - 1;
+
+  }
+
+  renderCurrent();
+
+});
+
+
+
+nextButton.addEventListener('click', () => {
+
+  saveAnswer();
+
+  currentIndex++;
+
+  if (currentIndex >= sections[currentSectionIndex].lines.length) {
+
+    currentIndex = 0;
+
+  }
+
+  renderCurrent();
+
+});
+
+
+
+submitButton.addEventListener('click', () => {
+
+  saveAnswer(); // Save the current dropContainer
+
+
+
+  const name = nameField.value.trim() || 'Anonymous';
+
+  const id = idField.value.trim() || 'N/A';
+
+  const filename = window.location.pathname.split('/').pop() || 'unknown.html';
+
+
+
+// --- Count correct answers (CURRENT SECTION ONLY) ---
+
+if (currentSectionIndex === -1 || !sections[currentSectionIndex]) {
+
+  alert("No section selected.");
+
+  return;
+
+}
+
+
+
+let correctCount = 0;
+
+let total = 0;
+
+
+
+const sec = sections[currentSectionIndex];
+
+const answers = userAnswers[currentSectionIndex];
+
+
+
+sec.lines.forEach((line, lIdx) => {
+
+  total++;
+
+
+
+  const orig = line.match(/[\w'-]+[.,!?;:]?/g) || [];
+
+  const ans = answers[lIdx];
+
+
+
+  if (
+
+    ans &&
+
+    ans.length === orig.length &&
+
+    ans.every((w, k) => w === orig[k])
+
+  ) {
+
+    correctCount++;
+
+  }
+
+});
+
+
+
+  
+
+  const percentage = Math.round((correctCount / total) * 100);
+
+
+
+  // --- Build date string with military time ---
+
+  const now = new Date();
+
+  const pad = n => n.toString().padStart(2,'0');
+
+  const dateString = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ` +
+
+                     `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+
+
+  // --- Final data string ---
+
+const resultText = `${filename}|${name}|${id}|${dateString}|${correctCount}/${total}|${percentage}%`;
+
+
+
+// --- Show on scoreboard ---
+
+scoreData.textContent = resultText;
+
+scoreboard.style.display = 'block';
+
+
+
+// --- SAFE SUPABASE PAYLOAD (DO NOT TOUCH UI ABOVE) ---
+
+const resultPayload = {
+
+  filename,
+
+  name,
+
+  id,
+
+  date: dateString,
+
+  correct: correctCount,
+
+  total,
+
+  percentage,
+
+  raw: resultText
+
+};
+
+
+
+// send to Supabase
+
+saveResult(resultPayload);
+
+});
+
+
+
+copyButton.addEventListener('click', ()=>{ navigator.clipboard.writeText(scoreData.textContent).then(()=>alert('Copied to clipboard')); });
+
+downloadTxtButton.addEventListener('click', ()=>{
+
+  const blob = new Blob([scoreData.textContent], {type:'text/plain'});
+
+  const a = document.createElement('a');
+
+  a.href = URL.createObjectURL(blob);
+
+  a.download = 'score.txt';
+
+  a.click();
+
+});
+
+downloadPngButton.addEventListener('click', () => {
+
+  const text = scoreData.textContent;
+
+  const canvas = document.createElement('canvas');
+
+  const ctx = canvas.getContext('2d');
+
+  const fontSize = 14;
+
+  ctx.font = `${fontSize}px Arial`;
+
+
+
+  const textWidth = ctx.measureText(text).width;
+
+  canvas.width = textWidth + 20;
+
+  canvas.height = fontSize + 20;
+
+
+
+  ctx.fillStyle = '#fff';
+
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+
+
+  ctx.fillStyle = '#000';
+
+  ctx.font = `${fontSize}px Arial`;
+
+  ctx.textBaseline = 'top';
+
+  ctx.fillText(text, 10, 10);
+
+
+
+  const a = document.createElement('a');
+
+  a.href = canvas.toDataURL('image/png');
+
+  a.download = 'score.png';
+
+  a.click();
+
+});
+
+
+
+function startTimer(){
+
+  clearInterval(timerInterval); 
+
+  timer=60; 
+
+  countdownOverlay.textContent=timer;
+
+  timerInterval=setInterval(()=>{
+
+    timer--; 
+
+    countdownOverlay.textContent=timer; 
+
+    if(timer<=0) clearInterval(timerInterval); 
+
+  },1000);
+
+}
+
+
+
+renderSectionWheel();
+
+
+
+
+
+</script>
+
+
+
+<script>
+
+// Neon green border
+
+const borderDiv=document.createElement("div");
+
+borderDiv.style.position="fixed"; borderDiv.style.inset="0";
+
+borderDiv.style.border="10px solid #39FF14";
+
+borderDiv.style.boxSizing="border-box";
+
+borderDiv.style.zIndex="9999";
+
+borderDiv.style.pointerEvents="none";
+
+document.body.appendChild(borderDiv);
+
+</script>
+
+
+
+
+
+<script>
+
+(function () {
+
+  /* -----------------------------
+
+     Inject CSS
+
+     ----------------------------- */
+
+  const style = document.createElement('style');
+
+  style.textContent = `
+
+    #skylineBackdrop {
+
+      position: absolute;
+
+      left: 0;
+
+      width: 100vw;
+
+      pointer-events: none;
+
+      z-index: 0;
+
+      display: flex;
+
+      align-items: flex-end;
+
+      overflow: hidden;
+
+    }
+
+
+
+    .skyline-building {
+
+      align-self: flex-end;
+
+    }
+
+
+
+    body > *:not(#skylineBackdrop) {
+
+      position: relative;
+
+      z-index: 1;
+
+    }
+
+  `;
+
+  document.head.appendChild(style);
+
+
+
+  /* -----------------------------
+
+     Create container
+
+     ----------------------------- */
+
+  const skyline = document.createElement('div');
+
+  skyline.id = 'skylineBackdrop';
+
+  document.body.appendChild(skyline);
+
+
+
+  /* -----------------------------
+
+     Position skyline
+
+     ----------------------------- */
+
+  function positionSkyline() {
+
+    const dropBand = document.getElementById('dropBand');
+
+    if (!dropBand) return;
+
+
+
+    const rect = dropBand.getBoundingClientRect();
+
+
+
+const viewportHeight = window.innerHeight;
+
+const baseline = viewportHeight - rect.top;
+
+
+
+skyline.style.bottom = `${baseline + 20}px`; // ⬆ move buildings up 50px
+
+
+
+    skyline.style.height = '120px';           // ⬇ slightly shorter overall
+
+  }
+
+
+
+  /* -----------------------------
+
+     Build skyline
+
+     ----------------------------- */
+
+  function buildSkyline() {
+
+    skyline.innerHTML = '';
+
+
+
+    const screenWidth = window.innerWidth;
+
+    let usedWidth = 0;
+
+
+
+    while (usedWidth < screenWidth) {
+
+      const building = document.createElement('div');
+
+
+
+const width = 6 + Math.random() * 10; // ⬅ wider buildings
+
+      const height = 20 + Math.random() * 90;  // shorter buildings
+
+      const shade = 175 + Math.floor(Math.random() * 50);
+
+
+
+      building.className = 'skyline-building';
+
+      building.style.width = width + 'px';
+
+      building.style.height = height + 'px';
+
+      building.style.backgroundColor =
+
+        `rgb(${shade},${shade},${shade})`;
+
+
+
+      skyline.appendChild
+
+HTML
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cars</title>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
+html, body { height: 100%; width: 100%; }
+body {
+background: linear-gradient(to bottom, #dcdcdc 0%, #2f2f2f 45%, #dcdcdc 100%);
+  
+
+display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+
+/* ===============================
+   GLOBAL BUTTON STYLE (MASTER)
+   =============================== */
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 36px;
+  padding: 0 12px;
+  min-width: 80px;
+
+  font-size: 12px;
+  line-height: 1;
+
+  background: #2b5d84;
+  color: #fff;
+
+  border: none;
+  border-radius: 6px;
+
+  cursor: pointer;
+  user-select: none;
+
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+button:hover:not(:disabled) { background: #0277bd; }
+button:active:not(:disabled) { transform: scale(0.97); }
+button:disabled { background:#888; cursor:not-allowed; }
+
+/* ===============================
+   TOP FIELDS
+   =============================== */
+#topFields {
+  display:flex;
+  gap:6px;
+  align-items:center;
+  justify-content: center;
+  margin-top:20px;
+  margin-bottom:10px;
+  width: 100%;
+  max-width: 400px;
+}
+
+#topFields input {
+  flex: 1;
+  min-width: 0;
+  padding:8px;
+  border:1px solid #ccc;
+  border-radius:4px;
+  font-size:14px;
+}
+
+.countdownOverlay {
+  margin-left:6px;
+  font-size:14px;
+  color:#333;
+  white-space: nowrap;
+}
+
+/* ===============================
+   CONVEYOR
+   =============================== */
+#conveyorContainer {
+  position: relative;
+  overflow: visible;         /* allow taller content */
+  margin-top: 10px;
+
+  height: 90px;              /* ⬅ taller container */
+
+  width: 100vw;
+  display: flex;
+  align-items: flex-end;      /* ⬅ baseline stays at bottom */
+  margin-bottom: 10px;
+}
+
+
+#conveyor {
+  display:flex;
+  gap:6px;
+  white-space:nowrap;
+  will-change:transform;
+  position:absolute;
+  left:0;
+  bottom:0;
+}
+
+.tileWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+  margin-top: 6px;   /* ✅ enough spacing, no clipping */
+}
+
+/* ===============================
+   DROP ZONE
+   =============================== */
+#dropBand {
+  width: 100vw;
+  height: 90px;
+  margin-top: 8px;
+  padding: 2px 0 0;
+  background: rgba(245,245,220,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+#dropContainer {
+  width: 90%;
+  max-width: 600px;
+  height: 84px;
+  padding: 8px 10px 0;
+
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: flex-start;
+
+  column-gap: 6px;
+  row-gap: 5px;
+
+  overflow: hidden;
+}
+
+/* kill ant layout inside drop zone */
+#dropContainer .tileWrapper {
+  margin-top: 0;
+  padding: 0;
+  height: auto;
+  flex-direction: row;
+}
+
+/* tiles */
+.tile {
+  padding: 8px 12px;
+  background: #ffd8a8;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+  display: inline-block;
+
+  margin-bottom: -7px; /* 👈 pulls tile closer to vehicle */
+}
+
+.tile:hover { transform:translateY(-1px); }
+
+.tile.sushi {
+  background: transparent;
+  font-size: 30px;
+  cursor: default;
+  padding: 0;
+  line-height: 1;
+}
+
+.ant {
+  font-size:44px;
+  line-height:1;
+  margin-top:-4px;
+  pointer-events:none;
+}
+
+/* ===============================
+   CONTROLS
+   =============================== */
+.controls {
+  display:flex;
+  gap:4px;
+  margin-top:20px;
+  justify-content:center;
+}
+
+/* ===============================
+   SECTION SELECTOR
+   =============================== */
+#sectionSelector {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  max-width: 400px;         /* match #topFields max-width */
+  margin-bottom: 10px;
+  justify-content: space-between;
+}
+/* ▲ ▼ ONLY */
+#sectionUp,
+#sectionDown {
+  width: 36px;
+  min-width: 36px;
+  padding: 0;
+  font-size: 14px;
+}
+
+/* selector window */
+#sectionWheelContainer {
+  flex: 1;
+  height: 36px;
+  position: relative;
+  background: #fff;
+  border: 1px solid #999;
+  border-radius: 6px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+#sectionWheelContainer .wheel {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: auto;
+  will-change: transform;
+}
+
+.wheel-item {
+  height: 36px;
+  line-height: 36px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 600;
+  color: #666;
+  white-space: nowrap;
+}
+
+.wheel-item.selected { color:#000; }
+
+/* START button */
+#startButton {
+  min-width: 70px;
+  width: auto;
+}
+
+
+/* ===============================
+   SCOREBOARD
+   =============================== */
+#scoreboard {
+  margin-top:25px;
+  padding:6px;
+  background:#fff;
+  border:1px solid #ccc;
+  border-radius:6px;
+  display:none;
+  font-size:12px;
+}
+
+/* ===============================
+   MOBILE
+   =============================== */
+@media (max-width: 500px) {
+  #topFields, #sectionSelector {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+    max-width: none;
+    padding-left: 12px;
+    padding-right: 12px;
+    gap: 4px;
+  }
+
+  #topFields input {
+    width: 30%;
+    padding: 6px;
+  }
+
+  .countdownOverlay {
+    font-size: 12px;
+    margin-left: auto;
+  }
+}
+
+  footer {
+    margin-top: 16px;
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 10px;
+    color: #666;
+    background: #none;
+    border-radius: 6px;
+  }
+
+#skyline {
+  position: fixed;
+  left: 0;
+  width: 100vw;
+  pointer-events: none;
+}
+
+</style>
+</head>
+<body>
+
+<div id="topFields">
+  <input type="text" id="nameField" placeholder="Name">
+  <input type="text" id="idField" placeholder="ID">
+  <div class="countdownOverlay" id="countdownOverlay">60</div>
+</div>
+
+<div id="sectionSelector">
+  <button id="sectionUp">▲</button>
+  <div id="sectionWheelContainer">
+    <div class="wheel"></div>
+  </div>
+  <button id="sectionDown">▼</button>
+<button id="startButton" class="controlsBtn">Start</button>
+</div>
+
+<div id="conveyorContainer">
+  <div id="conveyor"></div>
+</div>
+
+<!-- <div id="countertop"></div> -->
+<div id="dropBand">
+  <div id="dropContainer"></div>
+</div>
+
+<div class="controls">
+  <button id="backButton">Back</button>
+  <button id="nextButton">Next</button>
+  <button id="submitButton">Submit</button>
+</div>
+
+<div id="scoreboard">
+  <pre id="scoreData"></pre>
+  <div class="controls">
+    <button id="copyButton">Copy</button>
+    <button id="downloadTxtButton">↓TXT</button>
+    <button id="downloadPngButton">↓PNG</button>
+  </div>
+</div>
+
+<textarea id="rawTextInput" style="display:none;">
+
+~Determiners
+I saw |a| cat in the garden.
+She wants |some| water.
+There isn’t |any| milk left.
+He bought |an| umbrella.
+We need |more| time.
+She has |few| friends here.
+I don’t have |much| money.
+They own |several| houses.
+He ate |the| apple.
+She found |this| book helpful.
+
+
+~Nouns
+The |dog| barked loudly.
+Her |happiness| was obvious.
+The |children| are playing.
+That |city| is very old.
+His |advice| was useful.
+The |team| is winning.
+She opened the |box|.
+We visited the |museum|.
+The |teacher| arrived early.
+Music gives me |joy|.
+
+
+~Pronouns
+|She| is my best friend.
+This gift is |mine|.
+I spoke to |him|.
+|They| are waiting outside.
+The book belongs to |her|.
+I hurt |myself|.
+|We| are ready.
+Give it to |them|.
+That seat is |yours|.
+He blamed |himself|.
+
+
+~Indefinite Pronouns
+|Everyone| was excited.
+|Someone| is at the door.
+|Nothing| makes sense.
+|Anybody| can join.
+|Each| has a ticket.
+|Nobody| knows the answer.
+|Something| smells strange.
+|All| were invited.
+|One| must be careful.
+|Everything| is ready.
+
+
+~Verbs
+I |run| every morning.
+She |wrote| a letter.
+They |are playing| outside.
+He |has finished| his work.
+We |eat| dinner at six.
+She |opened| the door.
+I |will call| you later.
+They |were waiting| patiently.
+He |fixes| cars.
+We |have seen| it before.
+
+
+~State Verbs
+I |know| the answer.
+She |likes| chocolate.
+He |believes| you.
+We |own| this house.
+I |understand| the problem.
+She |hates| noise.
+They |prefer| coffee.
+He |needs| help.
+I |remember| her name.
+She |loves| music.
+
+
+~Present Simple
+I |work| on Mondays.
+She |teaches| English.
+They |live| nearby.
+He |plays| chess.
+We |study| at night.
+She |reads| daily.
+I |wake| early.
+They |watch| TV often.
+He |drives| carefully.
+We |eat| together.
+
+
+~Have Got
+I |have got| a bike.
+She |has got| a dog.
+We |have got| time.
+He |has got| an idea.
+They |have got| tickets.
+I |haven’t got| money.
+She |hasn’t got| keys.
+Have you |got| a pen?
+He |has got| a cold.
+We |have got| plans.
+
+
+~Verb To Be
+I |am| ready.
+She |is| happy.
+They |are| here.
+He |was| tired.
+We |were| late.
+It |is| cold.
+I |am not| angry.
+She |isn’t| home.
+They |aren’t| ready.
+He |wasn’t| sure.
+
+
+~State-of-Being Linking Verbs
+She |is| calm.
+He |seems| tired.
+They |remain| silent.
+I |feel| confident.
+The room |looks| clean.
+She |became| angry.
+He |stayed| quiet.
+The food |tastes| good.
+She |appears| nervous.
+The plan |sounds| risky.
+
+
+~Sensory Linking Verbs
+The soup |smells| good.
+She |looks| happy.
+The music |sounds| loud.
+The cake |tastes| sweet.
+The fabric |feels| soft.
+He |looks| tired.
+The air |smells| fresh.
+The idea |sounds| strange.
+The pillow |feels| hard.
+The coffee |tastes| bitter.
+
+
+~Present Continuous
+I |am studying| now.
+She |is cooking| dinner.
+They |are playing| outside.
+He |is working| late.
+We |are waiting| here.
+She |is reading| quietly.
+I |am listening| carefully.
+They |are watching| TV.
+He |is driving| fast.
+We |are learning| grammar.
+
+
+~Present Perfect
+I |have finished| my work.
+She |has visited| Rome.
+They |have seen| it.
+He |has broken| it.
+We |have learned| a lot.
+She |has lost| her keys.
+I |have eaten| already.
+They |have arrived| early.
+He |has written| a book.
+We |have tried| that.
+
+
+~Present Perfect Continuous
+I |have been studying| all day.
+She |has been working| hard.
+They |have been waiting| long.
+He |has been running| outside.
+We |have been learning| English.
+She |has been cooking| since noon.
+I |have been reading| for hours.
+They |have been traveling| a lot.
+He |has been fixing| cars.
+We |have been practicing| daily.
+
+
+~Past Simple
+I |walked| home.
+She |called| me.
+They |left| early.
+He |won| the game.
+We |studied| together.
+She |found| it.
+I |ate| lunch.
+They |watched| TV.
+He |drove| fast.
+We |slept| well.
+
+~Past Continuous
+I |was walking| home.
+She |was cooking| dinner.
+They |were playing| outside.
+He |was working| late.
+We |were studying| together.
+She |was reading| quietly.
+I |was listening| carefully.
+They |were waiting| patiently.
+He |was driving| fast.
+We |were sleeping| deeply.
+
+
+~Past Perfect
+I |had finished| before noon.
+She |had left| early.
+They |had seen| it before.
+He |had eaten| already.
+We |had studied| enough.
+She |had forgotten| his name.
+I |had cleaned| the room.
+They |had arrived| early.
+He |had written| the letter.
+We |had decided| already.
+
+
+~Future Simple
+I |will call| you later.
+She |will help| us.
+They |will arrive| soon.
+He |will finish| today.
+We |will start| tomorrow.
+She |will explain| everything.
+I |will try| again.
+They |will win| easily.
+He |will return| soon.
+We |will meet| later.
+
+
+~Going to for the Future
+I |am going to study| tonight.
+She |is going to travel| abroad.
+They |are going to move| soon.
+He |is going to start| work.
+We |are going to eat| out.
+She |is going to buy| a car.
+I |am going to rest| today.
+They |are going to visit| us.
+He |is going to fix| it.
+We |are going to learn| more.
+
+
+~Adjectives
+It is a |big| house.
+She has |beautiful| eyes.
+They bought a |new| car.
+He wore a |black| jacket.
+We saw an |interesting| movie.
+She felt |happy| today.
+It was a |cold| night.
+He gave a |quick| answer.
+They live in a |quiet| area.
+She made a |delicious| meal.
+
+
+~Intensifiers
+It is |very| cold.
+She is |extremely| tired.
+They are |really| happy.
+He was |too| angry.
+We are |quite| ready.
+She felt |so| excited.
+It is |absolutely| perfect.
+They were |very| late.
+He spoke |really| loudly.
+She was |too| nervous.
+
+
+~Yes/No Questions
+|Are| you ready?
+|Is| she home?
+|Did| they arrive?
+|Was| he late?
+|Have| we finished?
+|Can| you help?
+|Will| she come?
+|Do| they know?
+|Has| he left?
+|Were| we wrong?
+
+
+~Wh-Questions
+|What| is your name?
+|Where| do you live?
+|When| did they arrive?
+|Why| are you late?
+|Who| called you?
+|How| does it work?
+|Which| one is yours?
+|Whose| bag is this?
+|How many| students came?
+|What time| is it?
+
+
+~Conjunctions
+I stayed home |because| it rained.
+She called |and| apologized.
+He was tired |but| happy.
+We waited |so| we were late.
+They tried |although| it was hard.
+I ran |and| fell.
+She studied |because| she cared.
+He wanted tea |but| chose coffee.
+We hurried |so| we wouldn’t miss it.
+They stayed |although| it was late.
+
+
+~Modal Verbs
+I |can| swim.
+She |must| leave now.
+They |should| listen.
+He |may| arrive late.
+We |have to| work.
+She |could| help.
+I |might| go later.
+They |must| finish today.
+He |should| apologize.
+We |can| try again.
+
+
+~Conditionals
+If it rains, I |will stay| home.
+If I study, I |will pass|.
+If she calls, we |will answer|.
+If they hurry, they |will arrive| early.
+If he tries, he |will succeed|.
+If we leave now, we |will be| on time.
+If you ask, I |will help|.
+If it breaks, we |will fix| it.
+If she agrees, we |will start|.
+If they win, they |will celebrate|.
+
+
+~Passive Voice
+The letter |was written| yesterday.
+The cake |was eaten| quickly.
+The room |was cleaned| well.
+The song |was sung| loudly.
+The car |was fixed| today.
+The book |was read| twice.
+The window |was broken| accidentally.
+The work |was finished| early.
+The house |was built| recently.
+The rules |were explained| clearly.
+
+
+~Question Tags
+You are ready, |aren’t you|?
+She is here, |isn’t she|?
+They arrived late, |didn’t they|?
+He can swim, |can’t he|?
+We were right, |weren’t we|?
+She likes it, |doesn’t she|?
+They will come, |won’t they|?
+He finished early, |didn’t he|?
+We can start, |can’t he|?
+She was tired, |wasn’t she|?
+
+
+~Cause/Effect
+I stayed home |because| it rained.
+She studied hard, |so| she passed.
+They were tired |because| they worked late.
+He missed the bus, |so| he was late.
+We left early |because| it was dark.
+She practiced, |so| she improved.
+They stayed inside |because| it snowed.
+He forgot, |so| he apologized.
+We rushed |because| time was short.
+She smiled, |so| we relaxed.
+
+
+~Contrast/Contradiction
+He tried, |but| failed.
+She was tired, |yet| continued.
+They left early |although| it was fun.
+I like coffee, |but| prefer tea.
+She smiled |although| she was sad.
+He studied, |but| didn’t pass.
+They stayed, |yet| complained.
+We went out |although| it rained.
+She agreed, |but| hesitated.
+He helped, |yet| complained.
+
+
+~Frequency
+I |always| wake early.
+She |usually| eats lunch.
+They |often| travel.
+He |sometimes| forgets.
+We |rarely| argue.
+She |never| lies.
+I |often| read.
+They |usually| arrive on time.
+He |sometimes| cooks.
+We |always| try.
+
+
+~Intensity/Emphasis
+I |do| understand.
+She |did| try hard.
+They |really| care.
+He |does| know the answer.
+We |absolutely| agree.
+She |so| wants this.
+I |really| mean it.
+They |definitely| tried.
+He |truly| believes.
+We |certainly| agree.
+
+
+~Focus/Limitation
+I |only| asked once.
+She |just| arrived.
+They |only| wanted help.
+He |just| finished.
+We |only| need time.
+She |just| called.
+I |only| meant well.
+They |just| left.
+He |only| tried once.
+We |just| started.
+
+
+~Certainty/Probability
+It |must| be true.
+She |might| come later.
+They |will| arrive soon.
+He |could| be right.
+We |may| win.
+She |must| know.
+I |might| try.
+They |probably| forgot.
+He |will| succeed.
+We |could| help.
+
+
+~Deduction
+He |must| be tired.
+She |can’t| be serious.
+They |must| have left.
+He |can’t| know yet.
+We |must| be late.
+She |can’t| have done it.
+They |must| be home.
+He |can’t| understand.
+We |must| be careful.
+She |can’t| forget.
+
+
+~Obligation/Permission/Ability
+I |must| finish this.
+She |can| leave now.
+They |have to| work.
+He |may| stay.
+We |can| help.
+She |must| obey.
+I |am able to| swim.
+They |may| enter.
+He |has to| decide.
+We |can| try.
+
+
+~Similarity/Difference
+This is |like| that.
+She acts |similar to| her sister.
+They think |differently|.
+He works |unlike| me.
+We reacted |the same way|.
+She looks |like| her mother.
+They behave |differently|.
+He answered |similarly|.
+We think |differently|.
+She dresses |like| me.
+
+
+~Manner
+She spoke |politely|.
+He worked |carefully|.
+They moved |slowly|.
+I answered |honestly|.
+She smiled |warmly|.
+He reacted |quickly|.
+We listened |attentively|.
+They walked |quietly|.
+I drove |carefully|.
+She replied |calmly|.
+
+
+~Direction/Movement
+He walked |toward| me.
+She ran |into| the room.
+They moved |away from| danger.
+I went |to| school.
+He climbed |up| the hill.
+We walked |through| the park.
+She jumped |over| the fence.
+They came |back| home.
+I moved |forward|.
+He ran |across| the field.
+
+
+~Place/Location
+The keys are |on| the table.
+She lives |in| Paris.
+They met |at| school.
+The cat is |under| the chair.
+He stayed |inside| the house.
+We waited |outside|.
+The bag is |next to| the door.
+She stood |near| me.
+They sat |behind| us.
+I stayed |here|.
+
+
+~Adding Ideas
+She sings |and| dances.
+I like coffee |and| tea.
+He called |and| apologized.
+We studied |and| practiced.
+She bought apples |and| oranges.
+They laughed |and| talked.
+I wrote |and| revised.
+He cooked |and| cleaned.
+We planned |and| prepared.
+She listened |and| learned.
+
+</textarea>
+
+<footer>
+  <p>© 2026 Perfectly Practical English™. All rights reserved.</p>
+</footer>
+
+
+<script>
+/* =========================================
+   UNIVERSAL RAW TEXT RESOLVER (PER BLOCK)
+   ========================================= */
+
+/**
+ * resolveRaw(source)
+ * - If source is a filename (single line, no newlines), load it
+ * - Otherwise treat source as literal raw text
+ */
+async function resolveRaw(source) {
+  if (typeof source === "string" && !source.includes("\n")) {
+    try {
+      const res = await fetch(source, { cache: "no-store" });
+      if (res.ok) return await res.text();
+    } catch {}
+  }
+  return source;
+}
+</script>
+
+
+<!-- Add html2canvas for PNG export -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+// Your original JS remains unchanged
+const conveyor = document.getElementById('conveyor');
+const dropContainer = document.getElementById('dropContainer');
+const backButton = document.getElementById('backButton');
+const nextButton = document.getElementById('nextButton');
+const submitButton = document.getElementById('submitButton');
+const startButton = document.getElementById('startButton');
+
+const nameField = document.getElementById('nameField');
+const idField = document.getElementById('idField');
+const countdownOverlay = document.getElementById('countdownOverlay');
+const scoreboard = document.getElementById('scoreboard');
+const scoreData = document.getElementById('scoreData');
+
+const copyButton = document.getElementById('copyButton');
+const downloadTxtButton = document.getElementById('downloadTxtButton');
+const downloadPngButton = document.getElementById('downloadPngButton');
+
+function parseSections(raw) {
+  const lines = raw.split('\n').map(l => l.trim());
+  const sections = [];
+  let current = null;
+
+  for (const line of lines) {
+    if (!line) continue;
+
+    if (line.startsWith('~')) {
+      current = {
+        title: line.replace(/^~+/, '').trim(),
+        lines: []
+      };
+      sections.push(current);
+    } else if (current) {
+      current.lines.push(line);
+    }
+  }
+  return sections;
+}
+
+const rawText = document.getElementById('rawTextInput').value;
+const sections = parseSections(rawText);
+const wheel = document.querySelector('#sectionWheelContainer .wheel');
+
+/* 👇 PUT FIX #5 RIGHT HERE 👇 */
+
+let currentSectionIndex = -1; // placeholder state
+
+let gameStarted = false;
+
+
+const sectionUp = document.getElementById('sectionUp');
+const sectionDown = document.getElementById('sectionDown');
+
+
+sectionUp.addEventListener('click', () => {
+  if (gameStarted) saveAnswer();
+
+  if (currentSectionIndex === -1) {
+    currentSectionIndex = sections.length - 1;
+  } else {
+    currentSectionIndex =
+      (currentSectionIndex - 1 + sections.length) % sections.length;
+  }
+
+  renderSectionWheel();
+});
+
+sectionDown.addEventListener('click', () => {
+  if (gameStarted) saveAnswer();
+
+  if (currentSectionIndex === -1) {
+    currentSectionIndex = 0;
+  } else {
+    currentSectionIndex =
+      (currentSectionIndex + 1) % sections.length;
+  }
+
+  renderSectionWheel();
+});
+
+function renderSectionWheel() {
+  wheel.innerHTML = '';
+
+  // placeholder row
+  const placeholder = document.createElement('div');
+  placeholder.className =
+    'wheel-item' + (currentSectionIndex === -1 ? ' selected' : '');
+  placeholder.textContent = 'Select a topic.';
+  wheel.appendChild(placeholder);
+
+  // section titles
+  sections.forEach((sec, i) => {
+    const div = document.createElement('div');
+    div.className =
+      'wheel-item' + (i === currentSectionIndex ? ' selected' : '');
+    div.textContent = sec.title;
+    wheel.appendChild(div);
+  });
+
+  // scroll so selected row is centered
+  wheel.style.transform =
+    `translateY(${-(currentSectionIndex + 1) * 36}px)`;
+}
+
+
+
+
+
+let remainingWords = [];
+let selectedTile = null;
+let timer = 60, timerInterval;
+const sushiEmojis = ['','','','','',''];
+const vehicleEmojis = ['🚗','🚙','🚌','🚐','🛻','🚚','🚛','🛵'];
+let sushiIndex = 0;
+let conveyorItems = [];
+let scrollPos = 0;
+
+
+startButton.addEventListener('click', () => {
+
+  if (currentSectionIndex === -1) {
+    alert('Please select a topic first.');
+    return;
+  }
+  gameStarted = true;
+
+  currentIndex = 0;
+  dropContainer.innerHTML = '';
+  conveyor.innerHTML = '';
+  conveyorItems = [];
+  scrollPos = 0;
+
+  renderSectionWheel();
+  renderCurrent();
+  startTimer();
+});
+
+
+requestAnimationFrame(animateConveyor);
+
+
+/* 👆 END FIX #5 👆 */
+
+let currentIndex = 0;
+let userAnswers = sections.map(sec => new Array(sec.lines.length).fill(null));
+
+
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+let maxSushiInRow = 3;
+
+function buildConveyor(){
+  conveyorItems = conveyorItems.filter(item => item && !item.consumed);
+  const targetLength = 30;
+  let sushiInRow = 0;
+
+  while(conveyorItems.length < targetLength){
+    const minSushiBeforeWord = 1 + Math.floor(Math.random() * 2);
+    const shouldAddWord = remainingWords.length > 0 && sushiInRow >= minSushiBeforeWord;
+
+    if(shouldAddWord){
+      const w = remainingWords.shift();
+      conveyorItems.push({ text: w, sushi: false, consumed: false });
+      sushiInRow = 0;
+      maxSushiInRow = 2 + Math.floor(Math.random() * 4);
+    } else {
+      const s = sushiEmojis[sushiIndex];
+      sushiIndex = (sushiIndex + 1) % sushiEmojis.length;
+      conveyorItems.push({ text: s, sushi: true });
+      sushiInRow++;
+    }
+  }
+
+  conveyor.innerHTML = '';
+  conveyorItems.forEach(item=>{
+    const wrapper = document.createElement('div');
+    wrapper.className = 'tileWrapper';
+    const tile = document.createElement('span');
+    tile.className = item.sushi ? 'tile sushi' : 'tile';
+    tile.textContent = item.text;
+    if(!item.sushi && !item.consumed) tile.addEventListener('click',()=>addToDrop(tile,item));
+    const ant = document.createElement('div');
+    ant.className = 'ant';
+    if(!item.vehicle) item.vehicle = vehicleEmojis[Math.floor(Math.random()*vehicleEmojis.length)];
+    ant.textContent = item.vehicle;
+
+    wrapper.appendChild(tile);
+    wrapper.appendChild(ant);
+    item.element = wrapper;
+    conveyor.appendChild(wrapper);
+  });
+
+} // ✅ CLOSE buildConveyor()
+
+
+function animateConveyor(){
+  scrollPos -= 1;
+  const firstItem = conveyorItems[0];
+  if(firstItem && firstItem.element.getBoundingClientRect().right < conveyor.parentElement.getBoundingClientRect().left){
+    conveyorItems.shift();
+    conveyorItems.push(firstItem);
+    scrollPos += firstItem.element.offsetWidth + 6;
+    buildConveyor();
+  }
+  conveyor.style.transform = `translateX(${scrollPos}px)`;
+  requestAnimationFrame(animateConveyor);
+}
+
+function addToDrop(span, item){
+  if(item.sushi || item.consumed) return;
+  const wrapper = document.createElement('div');
+  wrapper.className = 'tileWrapper';
+  const newTile = document.createElement('span');
+  newTile.className = 'tile';
+  newTile.textContent = span.textContent;
+  newTile.addEventListener('click', ()=>selectDropTile(newTile));
+  wrapper.appendChild(newTile);
+  dropContainer.appendChild(wrapper);
+  item.consumed = true;
+  if(item.element && item.element.parentNode) item.element.remove();
+  maxSushiInRow = 2 + Math.floor(Math.random() * 4);
+  buildConveyor();
+}
+
+function selectDropTile(tile){
+  if(!selectedTile){ selectedTile=tile; tile.style.border='2px solid yellow'; }
+  else if(selectedTile===tile){ tile.style.border=''; selectedTile=null; }
+  else { const tmp=selectedTile.textContent; selectedTile.textContent=tile.textContent; tile.textContent=tmp; selectedTile.style.border=''; selectedTile=null; }
+}
+
+function saveAnswer() {
+  // 🚫 do nothing while placeholder is active
+  if (currentSectionIndex === -1) return;
+
+  const words = [...dropContainer.children]
+    .map(t => t.querySelector('.tile').textContent);
+
+  userAnswers[currentSectionIndex][currentIndex] = words;
+}
+
+
+function renderCurrent(){
+  dropContainer.innerHTML="";
+  const sentence = sections[currentSectionIndex].lines[currentIndex];
+remainingWords = shuffle(sentence.match(/[\w'-]+[.,!?;:]?/g) || []);
+
+if (userAnswers[currentSectionIndex][currentIndex]) {
+  userAnswers[currentSectionIndex][currentIndex].forEach(w => {
+
+      const wrapper=document.createElement('div');
+      wrapper.className='tileWrapper';
+      const t=document.createElement('span');
+      t.className='tile';
+      t.textContent=w;
+      t.addEventListener('click',()=>selectDropTile(t));
+      wrapper.appendChild(t);
+      dropContainer.appendChild(wrapper);
+      const idx = remainingWords.indexOf(w);
+      if(idx>-1) remainingWords.splice(idx,1);
+    });
+  }
+  conveyorItems = [];
+  sushiIndex = 0;
+  maxSushiInRow = 3;
+  buildConveyor();
+}
+
+backButton.addEventListener('click', () => {
+  saveAnswer();
+  currentIndex--;
+  if (currentIndex < 0) {
+    currentIndex = sections[currentSectionIndex].lines.length - 1;
+  }
+  renderCurrent();
+});
+
+nextButton.addEventListener('click', () => {
+  saveAnswer();
+  currentIndex++;
+  if (currentIndex >= sections[currentSectionIndex].lines.length) {
+    currentIndex = 0;
+  }
+  renderCurrent();
+});
+
+submitButton.addEventListener('click', () => {
+  saveAnswer(); // Save the current dropContainer
+
+  const name = nameField.value.trim() || 'Anonymous';
+  const id = idField.value.trim() || 'N/A';
+  const filename = window.location.pathname.split('/').pop() || 'unknown.html';
+
+// --- Count correct answers (CURRENT SECTION ONLY) ---
+if (currentSectionIndex === -1 || !sections[currentSectionIndex]) {
+  alert("No section selected.");
+  return;
+}
+
+let correctCount = 0;
+let total = 0;
+
+const sec = sections[currentSectionIndex];
+const answers = userAnswers[currentSectionIndex];
+
+sec.lines.forEach((line, lIdx) => {
+  total++;
+
+  const orig = line.match(/[\w'-]+[.,!?;:]?/g) || [];
+  const ans = answers[lIdx];
+
+  if (
+    ans &&
+    ans.length === orig.length &&
+    ans.every((w, k) => w === orig[k])
+  ) {
+    correctCount++;
+  }
+});
+
+  
+  const percentage = Math.round((correctCount / total) * 100);
+
+  // --- Build date string with military time ---
+  const now = new Date();
+  const pad = n => n.toString().padStart(2,'0');
+  const dateString = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ` +
+                     `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+  // --- Final data string ---
+const resultText = `${filename}|${name}|${id}|${dateString}|${correctCount}/${total}|${percentage}%`;
+
+// --- Show on scoreboard ---
+scoreData.textContent = resultText;
+scoreboard.style.display = 'block';
+
+// --- SAFE SUPABASE PAYLOAD (DO NOT TOUCH UI ABOVE) ---
+const resultPayload = {
+  filename,
+  name,
+  id,
+  date: dateString,
+  correct: correctCount,
+  total,
+  percentage,
+  raw: resultText
+};
+
+// send to Supabase
+saveResult(resultPayload);
+});
+
+copyButton.addEventListener('click', ()=>{ navigator.clipboard.writeText(scoreData.textContent).then(()=>alert('Copied to clipboard')); });
+downloadTxtButton.addEventListener('click', ()=>{
+  const blob = new Blob([scoreData.textContent], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'score.txt';
+  a.click();
+});
+downloadPngButton.addEventListener('click', () => {
+  const text = scoreData.textContent;
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  const fontSize = 14;
+  ctx.font = `${fontSize}px Arial`;
+
+  const textWidth = ctx.measureText(text).width;
+  canvas.width = textWidth + 20;
+  canvas.height = fontSize + 20;
+
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = '#000';
+  ctx.font = `${fontSize}px Arial`;
+  ctx.textBaseline = 'top';
+  ctx.fillText(text, 10, 10);
+
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = 'score.png';
+  a.click();
+});
+
+function startTimer(){
+  clearInterval(timerInterval); 
+  timer=60; 
+  countdownOverlay.textContent=timer;
+  timerInterval=setInterval(()=>{
+    timer--; 
+    countdownOverlay.textContent=timer; 
+    if(timer<=0) clearInterval(timerInterval); 
+  },1000);
+}
+
+renderSectionWheel();
+
+
+</script>
+
+<script>
+// Neon green border
+const borderDiv=document.createElement("div");
+borderDiv.style.position="fixed"; borderDiv.style.inset="0";
+borderDiv.style.border="10px solid #39FF14";
+borderDiv.style.boxSizing="border-box";
+borderDiv.style.zIndex="9999";
+borderDiv.style.pointerEvents="none";
+document.body.appendChild(borderDiv);
+</script>
+
+
+<script>
+(function () {
+  /* -----------------------------
+     Inject CSS
+     ----------------------------- */
+  const style = document.createElement('style');
+  style.textContent = `
+    #skylineBackdrop {
+      position: absolute;
+      left: 0;
+      width: 100vw;
+      pointer-events: none;
+      z-index: 0;
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
+    }
+
+    .skyline-building {
+      align-self: flex-end;
+    }
+
+    body > *:not(#skylineBackdrop) {
+      position: relative;
+      z-index: 1;
+    }
+  `;
+  document.head.appendChild(style);
+
+  /* -----------------------------
+     Create container
+     ----------------------------- */
+  const skyline = document.createElement('div');
+  skyline.id = 'skylineBackdrop';
+  document.body.appendChild(skyline);
+
+  /* -----------------------------
+     Position skyline
+     ----------------------------- */
+  function positionSkyline() {
+    const dropBand = document.getElementById('dropBand');
+    if (!dropBand) return;
+
+    const rect = dropBand.getBoundingClientRect();
+
+const viewportHeight = window.innerHeight;
+const baseline = viewportHeight - rect.top;
+
+skyline.style.bottom = `${baseline + 20}px`; // ⬆ move buildings up 50px
+
+    skyline.style.height = '120px';            // ⬇ slightly shorter overall
+  }
+
+  /* -----------------------------
+     Build skyline
+     ----------------------------- */
+  function buildSkyline() {
+    skyline.innerHTML = '';
+
+    const screenWidth = window.innerWidth;
+    let usedWidth = 0;
+
+    while (usedWidth < screenWidth) {
+      const building = document.createElement('div');
+
+      const width = 6 + Math.random() * 10; // ⬅ wider buildings
+      const height = 20 + Math.random() * 90;  // shorter buildings
+      const shade = 175 + Math.floor(Math.random() * 50);
+
+      building.className = 'skyline-building';
+      building.style.width = width + 'px';
+      building.style.height = height + 'px';
+      building.style.backgroundColor =
+        `rgb(${shade},${shade},${shade})`;
+
+      skyline.appendChild(building);
+      usedWidth += width + 2;
+    }
+  }
+
+  positionSkyline();
+  buildSkyline();
+
+  window.addEventListener('resize', () => {
+    positionSkyline();
+    buildSkyline();
+  });
+})();
+</script>
+
+</body>
+</html>
+Same request for this file...
+
+
+
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Sushi Bar</title>
+
+<style>
+
+* { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
+
+html, body { height: 100%; width: 100%; }
+
+
+
+body {
+
+  /* Bamboo simulation with atmospheric mist */
+
+  background:
+
+    radial-gradient(
+
+      circle at 50% 30%,
+
+      rgba(255,255,255,0.35) 0%,
+
+      rgba(255,255,255,0.25) 35%,
+
+      rgba(255,255,255,0.15) 55%,
+
+      rgba(255,255,255,0.05) 70%,
+
+      rgba(255,255,255,0.00) 100%
+
+    ),
+
+    repeating-linear-gradient(
+
+      to right,
+
+      #071b0c 0px,
+
+      #1b5e20 8px,
+
+      #81c784 19px,
+
+      #1b5e20 30px,
+
+      #071b0c 38px
+
+    ),
+
+    repeating-linear-gradient(
+
+      to bottom,
+
+      rgba(255,255,255,0.20) 0px,
+
+      rgba(255,255,255,0.20) 6px,
+
+      rgba(0,0,0,0.18) 6px,
+
+      rgba(0,0,0,0.18) 10px,
+
+      rgba(255,255,255,0.20) 10px,
+
+      rgba(255,255,255,0.20) 80px
+
+    );
+
+
+
+  background-attachment: fixed;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  padding: 0;
+
+  overflow-x: hidden;
+
+}
+
+
+
+/* ===============================
+
+   GLOBAL BUTTON STYLE (MASTER)
+
+   =============================== */
+
+button {
+
+  display: inline-flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+
+
+  height: 36px;
+
+  padding: 0 12px;
+
+  min-width: 80px;
+
+
+
+  font-size: 12px;
+
+  line-height: 1;
+
+
+
+  background: #2b5d84;
+
+  color: #fff;
+
+
+
+  border: none;
+
+  border-radius: 6px;
+
+
+
+  cursor: pointer;
+
+  user-select: none;
+
+
+
+  transition: background 0.15s ease, transform 0.1s ease;
+
+}
+
+
+
+button:hover:not(:disabled) { background: #1f4563; }
+
+button:active:not(:disabled) { transform: scale(0.97); }
+
+button:disabled { background:#A0B4C3; cursor:not-allowed; }
+
+
+
+/* ===============================
+
+   TOP FIELDS
+
+   =============================== */
+
+#topFields {
+
+  display:flex;
+
+  gap:6px;
+
+  align-items:center;
+
+  justify-content: center;
+
+  margin-top:20px;
+
+  margin-bottom:10px;
+
+  width: 100%;
+
+  max-width: 400px;
+
+}
+
+
+
+#topFields input {
+
+  flex: 1;
+
+  min-width: 0;
+
+  padding:8px;
+
+  border:1px solid #ccc;
+
+  border-radius:4px;
+
+  font-size:14px;
+
+}
+
+
+
+.countdownOverlay {
+
+  margin-left:6px;
+
+  font-size:14px;
+
+  color:#333;
+
+  white-space: nowrap;
+
+}
+
+
+
+/* ===============================
+
+   CONVEYOR
+
+   =============================== */
+
+#conveyorContainer {
+
+  position: relative;
+
+  overflow: visible;
+
+  margin-top: 10px;
+
+  height: 90px;
+
+  width: 100vw;
+
+  display: flex;
+
+  align-items: flex-end;
+
+  margin-bottom: 10px;
+
+}
+
+
+
+#conveyor {
+
+  display:flex;
+
+  gap:6px;
+
+  white-space:nowrap;
+
+  will-change:transform;
+
+  position:absolute;
+
+  left:0;
+
+  bottom:0;
+
+}
+
+
+
+.tileWrapper {
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: flex-end;
+
+  position: relative;
+
+  margin-top: 15px;
+
+  z-index: 1;
+
+}
+
+
+
+.plate {
+
+  width: 50px;
+
+  height: 12px;
+
+  border-radius: 50%;
+
+  background-color: #fff;
+
+  position: absolute;
+
+  bottom: -6px;
+
+  z-index: -1;
+
+  box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+
+}
+
+
+
+/* ===============================
+
+   DROP ZONE
+
+   =============================== */
+
+#dropBand {
+
+  width: 100vw;
+
+  height: 90px;
+
+  margin-top: 8px;
+
+  padding: 2px 0 0;
+
+  background: rgba(255,255,255,0.95);
+
+  display: flex;
+
+  justify-content: center;
+
+  align-items: flex-start;
+
+}
+
+
+
+#dropContainer {
+
+  width: 90%;
+
+  max-width: 600px;
+
+  height: 84px;
+
+  padding: 8px 10px 0;
+
+
+
+  display: flex;
+
+  flex-wrap: wrap;
+
+  justify-content: center;
+
+  align-content: flex-start;
+
+
+
+  column-gap: 6px;
+
+  row-gap: 5px;
+
+
+
+  overflow: hidden;
+
+}
+
+
+
+/* kill ant layout inside drop zone */
+
+#dropContainer .tileWrapper {
+
+  margin-top: 0;
+
+  padding: 0;
+
+  height: auto;
+
+  flex-direction: row;
+
+}
+
+
+
+/* tiles */
+
+.tile {
+
+  padding:8px 12px;
+
+  background:#ffd8a8;
+
+  border-radius:6px;
+
+  cursor:pointer;
+
+  user-select:none;
+
+  font-size:14px;
+
+  display:inline-block;
+
+}
+
+
+
+.tile:hover { transform:translateY(-1px); }
+
+
+
+.tile.sushi {
+
+  background: transparent;
+
+  font-size: 30px;
+
+  cursor: default;
+
+  padding: 0;
+
+  line-height: 1;
+
+}
+
+
+
+.ant {
+
+  font-size:11px;
+
+  line-height:1;
+
+  margin-top:-2px;
+
+  pointer-events:none;
+
+}
+
+
+
+/* ===============================
+
+   CONTROLS
+
+   =============================== */
+
+.controls {
+
+  display:flex;
+
+  gap:4px;
+
+  margin-top:20px;
+
+  justify-content:center;
+
+  position: relative;
+
+  z-index: 10;
+
+}
+
+
+
+/* ===============================
+
+   SECTION SELECTOR
+
+   =============================== */
+
+#sectionSelector {
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 6px;
+
+  width: 100%;
+
+  max-width: 400px;
+
+  margin-bottom: 10px;
+
+  justify-content: center;
+
+}
+
+
+
+/* ▲ ▼ ONLY */
+
+#sectionUp,
+
+#sectionDown {
+
+  width: 36px;
+
+  min-width: 36px;
+
+  padding: 0;
+
+  font-size: 14px;
+
+}
+
+
+
+/* selector window */
+
+#sectionWheelContainer {
+
+  flex: 1;
+
+  height: 36px;
+
+  position: relative;
+
+  background: #fff;
+
+  border: 1px solid #999;
+
+  border-radius: 6px;
+
+  overflow: hidden;
+
+  min-width: 0;
+
+}
+
+
+
+#sectionWheelContainer .wheel {
+
+  position: absolute;
+
+  top: 0;
+
+  left: 0;
+
+  width: 100%;
+
+  height: auto;
+
+  will-change: transform;
+
+}
+
+
+
+.wheel-item {
+
+  height: 36px;
+
+  line-height: 36px;
+
+  text-align: center;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  color: #666;
+
+  white-space: nowrap;
+
+}
+
+
+
+.wheel-item.selected { color:#000; }
+
+
+
+/* START button */
+
+#startButton {
+
+  min-width: 90px;
+
+}
+
+
+
+/* ===============================
+
+   SCOREBOARD
+
+   =============================== */
+
+#scoreboard {
+
+  margin-top:25px;
+
+  padding:6px;
+
+  background:#fff;
+
+  border:1px solid #ccc;
+
+  border-radius:6px;
+
+  display:none;
+
+  font-size:12px;
+
+  position: relative;
+
+  z-index: 10;
+
+}
+
+
+
+/* ===============================
+
+   MOBILE
+
+   =============================== */
+
+@media (max-width: 500px) {
+
+  #topFields, #sectionSelector {
+
+    margin-left: 0;
+
+    margin-right: 0;
+
+    width: 100%;
+
+    max-width: none;
+
+    padding-left: 12px;
+
+    padding-right: 12px;
+
+    gap: 4px;
+
+  }
+
+
+
+  #topFields input {
+
+    width: 30%;
+
+    padding: 6px;
+
+  }
+
+
+
+  .countdownOverlay {
+
+    font-size: 12px;
+
+    margin-left: auto;
+
+  }
+
+}
+
+
+
+footer {
+
+  margin-top: 16px;
+
+  padding: 10px 12px;
+
+  text-align: left;
+
+  font-size: 10px;
+
+  color: #666;
+
+  background: #none;
+
+  border-radius: 6px;
+
+}
+
+
+
+.wheel-item.selected {
+
+  color: #999;
+
+  font-weight: 500;
+
+}
+
+
+
+/* ===============================
+
+   INSTRUCTIONS MODAL & TEMPLATE
+
+   =============================== */
+
+#instructionsBackdrop {
+
+  position: fixed;
+
+  top:0;
+
+  left:0;
+
+  width:100vw;
+
+  height:100vh;
+
+  background: rgba(0,0,0,0.5);
+
+  display:none;
+
+  align-items:center;
+
+  justify-content:center;
+
+  z-index: 1000;
+
+}
+
+
+
+#instructionsModal {
+
+  background:#fff;
+
+  border-radius:8px;
+
+  padding: 20px;
+
+  max-width: 500px;
+
+  width: 90%;
+
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+
+  text-align: left;
+
+}
+
+
+
+#instructionsModal h2 {
+
+  margin-top:0;
+
+  font-size:18px;
+
+  margin-bottom:12px;
+
+}
+
+
+
+#instructionsModal p {
+
+  font-size:14px;
+
+  margin-bottom:8px;
+
+}
+
+
+
+#instructionsModal button {
+
+  margin-top:16px;
+
+  float:right;
+
+}
+
+
+
+/* add fade-in animation */
+
+#instructionsBackdrop.show {
+
+  display:flex;
+
+  animation: fadeIn 0.2s ease forwards;
+
+}
+
+
+
+@keyframes fadeIn {
+
+  from { opacity:0; }
+
+  to { opacity:1; }
+
+}
+
+
+
+</style>
+
+</head>
+
+<body>
+
+</body>
+
+</html>
+
+</head>
+
+<body>
+
+
+
+<div id="topFields">
+
+  <input type="text" id="nameField" placeholder="Name">
+
+  <input type="text" id="idField" placeholder="ID">
+
+  <div class="countdownOverlay" id="countdownOverlay">60</div>
+
+</div>
+
+
+
+<div id="sectionSelector">
+
+  <button id="sectionUp">▲</button>
+
+  <div id="sectionWheelContainer">
+
+    <div class="wheel"></div>
+
+  </div>
+
+  <button id="sectionDown">▼</button>
+
+<button id="startButton" class="controlsBtn">Start</button>
+
+</div>
+
+
+
+<div id="conveyorContainer">
+
+  <div id="conveyor"></div>
+
+</div>
+
+
+
+<!-- <div id="countertop"></div> -->
+
+<div id="dropBand">
+
+  <div id="dropContainer"></div>
+
+</div>
+
+
+
+<div class="controls">
+
+  <button id="backButton">Back</button>
+
+  <button id="nextButton">Next</button>
+
+  <button id="submitButton">Submit</button>
+
+</div>
+
+
+
+<div id="scoreboard">
+
+  <pre id="scoreData"></pre>
+
+  <div class="controls">
+
+    <button id="copyButton">Copy</button>
+
+    <button id="downloadTxtButton">↓TXT</button>
+
+    <button id="downloadPngButton">↓PNG</button>
+
+  </div>
+
+</div>
+
+
+
+<textarea id="rawTextInput" style="display:none;">
+
+
+
+~Determiners
+
+I saw |a| cat in the garden.
+
+She wants |some| water.
+
+There isn’t |any| milk left.
+
+He bought |an| umbrella.
+
+We need |more| time.
+
+She has |few| friends here.
+
+I don’t have |much| money.
+
+They own |several| houses.
+
+He ate |the| apple.
+
+She found |this| book helpful.
+
+
+
+
+
+~Nouns
+
+The |dog| barked loudly.
+
+Her |happiness| was obvious.
+
+The |children| are playing.
+
+That |city| is very old.
+
+His |advice| was useful.
+
+The |team| is winning.
+
+She opened the |box|.
+
+We visited the |museum|.
+
+The |teacher| arrived early.
+
+Music gives me |joy|.
+
+
+
+
+
+~Pronouns
+
+|She| is my best friend.
+
+This gift is |mine|.
+
+I spoke to |him|.
+
+|They| are waiting outside.
+
+The book belongs to |her|.
+
+I hurt |myself|.
+
+|We| are ready.
+
+Give it to |them|.
+
+That seat is |yours|.
+
+He blamed |himself|.
+
+
+
+
+
+~Indefinite Pronouns
+
+|Everyone| was excited.
+
+|Someone| is at the door.
+
+|Nothing| makes sense.
+
+|Anybody| can join.
+
+|Each| has a ticket.
+
+|Nobody| knows the answer.
+
+|Something| smells strange.
+
+|All| were invited.
+
+|One| must be careful.
+
+|Everything| is ready.
+
+
+
+
+
+~Verbs
+
+I |run| every morning.
+
+She |wrote| a letter.
+
+They |are playing| outside.
+
+He |has finished| his work.
+
+We |eat| dinner at six.
+
+She |opened| the door.
+
+I |will call| you later.
+
+They |were waiting| patiently.
+
+He |fixes| cars.
+
+We |have seen| it before.
+
+
+
+
+
+~State Verbs
+
+I |know| the answer.
+
+She |likes| chocolate.
+
+He |believes| you.
+
+We |own| this house.
+
+I |understand| the problem.
+
+She |hates| noise.
+
+They |prefer| coffee.
+
+He |needs| help.
+
+I |remember| her name.
+
+She |loves| music.
+
+
+
+
+
+~Present Simple
+
+I |work| on Mondays.
+
+She |teaches| English.
+
+They |live| nearby.
+
+He |plays| chess.
+
+We |study| at night.
+
+She |reads| daily.
+
+I |wake| early.
+
+They |watch| TV often.
+
+He |drives| carefully.
+
+We |eat| together.
+
+
+
+
+
+~Have Got
+
+I |have got| a bike.
+
+She |has got| a dog.
+
+We |have got| time.
+
+He |has got| an idea.
+
+They |have got| tickets.
+
+I |haven’t got| money.
+
+She |hasn’t got| keys.
+
+Have you |got| a pen?
+
+He |has got| a cold.
+
+We |have got| plans.
+
+
+
+
+
+~Verb To Be
+
+I |am| ready.
+
+She |is| happy.
+
+They |are| here.
+
+He |was| tired.
+
+We |were| late.
+
+It |is| cold.
+
+I |am not| angry.
+
+She |isn’t| home.
+
+They |aren’t| ready.
+
+He |wasn’t| sure.
+
+
+
+
+
+~State-of-Being Linking Verbs
+
+She |is| calm.
+
+He |seems| tired.
+
+They |remain| silent.
+
+I |feel| confident.
+
+The room |looks| clean.
+
+She |became| angry.
+
+He |stayed| quiet.
+
+The food |tastes| good.
+
+She |appears| nervous.
+
+The plan |sounds| risky.
+
+
+
+
+
+~Sensory Linking Verbs
+
+The soup |smells| good.
+
+She |looks| happy.
+
+The music |sounds| loud.
+
+The cake |tastes| sweet.
+
+The fabric |feels| soft.
+
+He |looks| tired.
+
+The air |smells| fresh.
+
+The idea |sounds| strange.
+
+The pillow |feels| hard.
+
+The coffee |tastes| bitter.
+
+
+
+
+
+~Present Continuous
+
+I |am studying| now.
+
+She |is cooking| dinner.
+
+They |are playing| outside.
+
+He |is working| late.
+
+We |are waiting| here.
+
+She |is reading| quietly.
+
+I |am listening| carefully.
+
+They |are watching| TV.
+
+He |is driving| fast.
+
+We |are learning| grammar.
+
+
+
+
+
+~Present Perfect
+
+I |have finished| my work.
+
+She |has visited| Rome.
+
+They |have seen| it.
+
+He |has broken| it.
+
+We |have learned| a lot.
+
+She |has lost| her keys.
+
+I |have eaten| already.
+
+They |have arrived| early.
+
+He |has written| a book.
+
+We |have tried| that.
+
+
+
+
+
+~Present Perfect Continuous
+
+I |have been studying| all day.
+
+She |has been working| hard.
+
+They |have been waiting| long.
+
+He |has been running| outside.
+
+We |have been learning| English.
+
+She |has been cooking| since noon.
+
+I |have been reading| for hours.
+
+They |have been traveling| a lot.
+
+He |has been fixing| cars.
+
+We |have been practicing| daily.
+
+
+
+
+
+~Past Simple
+
+I |walked| home.
+
+She |called| me.
+
+They |left| early.
+
+He |won| the game.
+
+We |studied| together.
+
+She |found| it.
+
+I |ate| lunch.
+
+They |watched| TV.
+
+He |drove| fast.
+
+We |slept| well.
+
+
+
+~Past Continuous
+
+I |was walking| home.
+
+She |was cooking| dinner.
+
+They |were playing| outside.
+
+He |was working| late.
+
+We |were studying| together.
+
+She |was reading| quietly.
+
+I |was listening| carefully.
+
+They |were waiting| patiently.
+
+He |was driving| fast.
+
+We |were sleeping| deeply.
+
+
+
+
+
+~Past Perfect
+
+I |had finished| before noon.
+
+She |had left| early.
+
+They |had seen| it before.
+
+He |had eaten| already.
+
+We |had studied| enough.
+
+She |had forgotten| his name.
+
+I |had cleaned| the room.
+
+They |had arrived| early.
+
+He |had written| the letter.
+
+We |had decided| already.
+
+
+
+
+
+~Future Simple
+
+I |will call| you later.
+
+She |will help| us.
+
+They |will arrive| soon.
+
+He |will finish| today.
+
+We |will start| tomorrow.
+
+She |will explain| everything.
+
+I |will try| again.
+
+They |will win| easily.
+
+He |will return| soon.
+
+We |will meet| later.
+
+
+
+
+
+~Going to for the Future
+
+I |am going to study| tonight.
+
+She |is going to travel| abroad.
+
+They |are going to move| soon.
+
+He |is going to start| work.
+
+We |are going to eat| out.
+
+She |is going to buy| a car.
+
+I |am going to rest| today.
+
+They |are going to visit| us.
+
+He |is going to fix| it.
+
+We |are going to learn| more.
+
+
+
+
+
+~Adjectives
+
+It is a |big| house.
+
+She has |beautiful| eyes.
+
+They bought a |new| car.
+
+He wore a |black| jacket.
+
+We saw an |interesting| movie.
+
+She felt |happy| today.
+
+It was a |cold| night.
+
+He gave a |quick| answer.
+
+They live in a |quiet| area.
+
+She made a |delicious| meal.
+
+
+
+
+
+~Intensifiers
+
+It is |very| cold.
+
+She is |extremely| tired.
+
+They are |really| happy.
+
+He was |too| angry.
+
+We are |quite| ready.
+
+She felt |so| excited.
+
+It is |absolutely| perfect.
+
+They were |very| late.
+
+He spoke |really| loudly.
+
+She was |too| nervous.
+
+
+
+
+
+~Yes/No Questions
+
+|Are| you ready?
+
+|Is| she home?
+
+|Did| they arrive?
+
+|Was| he late?
+
+|Have| we finished?
+
+|Can| you help?
+
+|Will| she come?
+
+|Do| they know?
+
+|Has| he left?
+
+|Were| we wrong?
+
+
+
+
+
+~Wh-Questions
+
+|What| is your name?
+
+|Where| do you live?
+
+|When| did they arrive?
+
+|Why| are you late?
+
+|Who| called you?
+
+|How| does it work?
+
+|Which| one is yours?
+
+|Whose| bag is this?
+
+|How many| students came?
+
+|What time| is it?
+
+
+
+
+
+~Conjunctions
+
+I stayed home |because| it rained.
+
+She called |and| apologized.
+
+He was tired |but| happy.
+
+We waited |so| we were late.
+
+They tried |although| it was hard.
+
+I ran |and| fell.
+
+She studied |because| she cared.
+
+He wanted tea |but| chose coffee.
+
+We hurried |so| we wouldn’t miss it.
+
+They stayed |although| it was late.
+
+
+
+
+
+~Modal Verbs
+
+I |can| swim.
+
+She |must| leave now.
+
+They |should| listen.
+
+He |may| arrive late.
+
+We |have to| work.
+
+She |could| help.
+
+I |might| go later.
+
+They |must| finish today.
+
+He |should| apologize.
+
+We |can| try again.
+
+
+
+
+
+~Conditionals
+
+If it rains, I |will stay| home.
+
+If I study, I |will pass|.
+
+If she calls, we |will answer|.
+
+If they hurry, they |will arrive| early.
+
+If he tries, he |will succeed|.
+
+If we leave now, we |will be| on time.
+
+If you ask, I |will help|.
+
+If it breaks, we |will fix| it.
+
+If she agrees, we |will start|.
+
+If they win, they |will celebrate|.
+
+
+
+
+
+~Passive Voice
+
+The letter |was written| yesterday.
+
+The cake |was eaten| quickly.
+
+The room |was cleaned| well.
+
+The song |was sung| loudly.
+
+The car |was fixed| today.
+
+The book |was read| twice.
+
+The window |was broken| accidentally.
+
+The work |was finished| early.
+
+The house |was built| recently.
+
+The rules |were explained| clearly.
+
+
+
+
+
+~Question Tags
+
+You are ready, |aren’t you|?
+
+She is here, |isn’t she|?
+
+They arrived late, |didn’t they|?
+
+He can swim, |can’t he|?
+
+We were right, |weren’t we|?
+
+She likes it, |doesn’t she|?
+
+They will come, |won’t they|?
+
+He finished early, |didn’t he|?
+
+We can start, |can’t we|?
+
+She was tired, |wasn’t she|?
+
+
+
+
+
+~Cause/Effect
+
+I stayed home |because| it rained.
+
+She studied hard, |so| she passed.
+
+They were tired |because| they worked late.
+
+He missed the bus, |so| he was late.
+
+We left early |because| it was dark.
+
+She practiced, |so| she improved.
+
+They stayed inside |because| it snowed.
+
+He forgot, |so| he apologized.
+
+We rushed |because| time was short.
+
+She smiled, |so| we relaxed.
+
+
+
+
+
+~Contrast/Contradiction
+
+He tried, |but| failed.
+
+She was tired, |yet| continued.
+
+They left early |although| it was fun.
+
+I like coffee, |but| prefer tea.
+
+She smiled |although| she was sad.
+
+He studied, |but| didn’t pass.
+
+They stayed, |yet| complained.
+
+We went out |although| it rained.
+
+She agreed, |but| hesitated.
+
+He helped, |yet| complained.
+
+
+
+
+
+~Frequency
+
+I |always| wake early.
+
+She |usually| eats lunch.
+
+They |often| travel.
+
+He |sometimes| forgets.
+
+We |rarely| argue.
+
+She |never| lies.
+
+I |often| read.
+
+They |usually| arrive on time.
+
+He |sometimes| cooks.
+
+We |always| try.
+
+
+
+
+
+~Intensity/Emphasis
+
+I |do| understand.
+
+She |did| try hard.
+
+They |really| care.
+
+He |does| know the answer.
+
+We |absolutely| agree.
+
+She |so| wants this.
+
+I |really| mean it.
+
+They |definitely| tried.
+
+He |truly| believes.
+
+We |certainly| agree.
+
+
+
+
+
+~Focus/Limitation
+
+I |only| asked once.
+
+She |just| arrived.
+
+They |only| wanted help.
+
+He |just| finished.
+
+We |only| need time.
+
+She |just| called.
+
+I |only| meant well.
+
+They |just| left.
+
+He |only| tried once.
+
+We |just| started.
+
+
+
+
+
+~Certainty/Probability
+
+It |must| be true.
+
+She |might| come later.
+
+They |will| arrive soon.
+
+He |could| be right.
+
+We |may| win.
+
+She |must| know.
+
+I |might| try.
+
+They |probably| forgot.
+
+He |will| succeed.
+
+We |could| help.
+
+
+
+
+
+~Deduction
+
+He |must| be tired.
+
+She |can’t| be serious.
+
+They |must| have left.
+
+He |can’t| know yet.
+
+We |must| be late.
+
+She |can’t| have done it.
+
+They |must| be home.
+
+He |can’t| understand.
+
+We |must| be careful.
+
+She |can’t| forget.
+
+
+
+
+
+~Obligation/Permission/Ability
+
+I |must| finish this.
+
+She |can| leave now.
+
+They |have to| work.
+
+He |may| stay.
+
+We |can| help.
+
+She |must| obey.
+
+I |am able to| swim.
+
+They |may| enter.
+
+He |has to| decide.
+
+We |can| try.
+
+
+
+
+
+~Similarity/Difference
+
+This is |like| that.
+
+She acts |similar to| her sister.
+
+They think |differently|.
+
+He works |unlike| me.
+
+We reacted |the same way|.
+
+She looks |like| her mother.
+
+They behave |differently|.
+
+He answered |similarly|.
+
+We think |differently|.
+
+She dresses |like| me.
+
+
+
+
+
+~Manner
+
+She spoke |politely|.
+
+He worked |carefully|.
+
+They moved |slowly|.
+
+I answered |honestly|.
+
+She smiled |warmly|.
+
+He reacted |quickly|.
+
+We listened |attentively|.
+
+They walked |quietly|.
+
+I drove |carefully|.
+
+She replied |calmly|.
+
+
+
+
+
+~Direction/Movement
+
+He walked |toward| me.
+
+She ran |into| the room.
+
+They moved |away from| danger.
+
+I went |to| school.
+
+He climbed |up| the hill.
+
+We walked |through| the park.
+
+She jumped |over| the fence.
+
+They came |back| home.
+
+I moved |forward|.
+
+He ran |across| the field.
+
+
+
+
+
+~Place/Location
+
+The keys are |on| the table.
+
+She lives |in| Paris.
+
+They met |at| school.
+
+The cat is |under| the chair.
+
+He stayed |inside| the house.
+
+We waited |outside|.
+
+The bag is |next to| the door.
+
+She stood |near| me.
+
+They sat |behind| us.
+
+I stayed |here|.
+
+
+
+
+
+~Adding Ideas
+
+She sings |and| dances.
+
+I like coffee |and| tea.
+
+He called |and| apologized.
+
+We studied |and| practiced.
+
+She bought apples |and| oranges.
+
+They laughed |and| talked.
+
+I wrote |and| revised.
+
+He cooked |and| cleaned.
+
+We planned |and| prepared.
+
+She listened |and| learned.
+
+
+
+</textarea>
+
+
+
+<footer>
+
+  <p>© 2026 Perfectly Practical English™. All rights reserved.</p>
+
+</footer>
+
+
+
+
+
+<script>
+
+/* =========================================
+
+   UNIVERSAL RAW TEXT RESOLVER (PER BLOCK)
+
+   ========================================= */
+
+
+
+/**
+
+ * resolveRaw(source)
+
+ * - If source is a filename (single line, no newlines), load it
+
+ * - Otherwise treat source as literal raw text
+
+ */
+
+async function resolveRaw(source) {
+
+  if (typeof source === "string" && !source.includes("\n")) {
+
+    try {
+
+      const res = await fetch(source, { cache: "no-store" });
+
+      if (res.ok) return await res.text();
+
+    } catch {}
+
+  }
+
+  return source;
+
+}
+
+</script>
+
+
+
+
+
+<!-- Add html2canvas for PNG export -->
+
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<script>
+
+// Your original JS remains unchanged
+
+const conveyor = document.getElementById('conveyor');
+
+const dropContainer = document.getElementById('dropContainer');
+
+const backButton = document.getElementById('backButton');
+
+const nextButton = document.getElementById('nextButton');
+
+const submitButton = document.getElementById('submitButton');
+
+const startButton = document.getElementById('startButton');
+
+
+
+const nameField = document.getElementById('nameField');
+
+const idField = document.getElementById('idField');
+
+const countdownOverlay = document.getElementById('countdownOverlay');
+
+const scoreboard = document.getElementById('scoreboard');
+
+const scoreData = document.getElementById('scoreData');
+
+
+
+const copyButton = document.getElementById('copyButton');
+
+const downloadTxtButton = document.getElementById('downloadTxtButton');
+
+const downloadPngButton = document.getElementById('downloadPngButton');
+
+
+
+function parseSections(raw) {
+
+  const lines = raw.split('\n').map(l => l.trim());
+
+  const sections = [];
+
+  let current = null;
+
+
+
+  for (const line of lines) {
+
+    if (!line) continue;
+
+
+
+    if (line.startsWith('~')) {
+
+      current = {
+
+        title: line.replace(/^~+/, '').trim(),
+
+        lines: []
+
+      };
+
+      sections.push(current);
+
+    } else if (current) {
+
+      current.lines.push(line);
+
+    }
+
+  }
+
+  return sections;
+
+}
+
+
+
+const rawText = document.getElementById('rawTextInput').value;
+
+const sections = parseSections(rawText);
+
+
+
+/* 👇 PUT FIX #5 RIGHT HERE 👇 */
+
+
+
+let currentSectionIndex = -1; // placeholder state
+
+
+
+let gameStarted = false;
+
+
+
+const wheel = document.querySelector('#sectionWheelContainer .wheel');
+
+
+
+function renderSectionWheel() {
+
+  wheel.innerHTML = '';
+
+
+
+  // 🔹 Placeholder state
+
+  if (currentSectionIndex === -1) {
+
+    const div = document.createElement('div');
+
+    div.className = 'wheel-item selected';
+
+    div.textContent = 'Select a category.';
+
+    wheel.appendChild(div);
+
+    wheel.style.transform = 'translateY(0)';
+
+    return;
+
+  }
+
+
+
+function activateSelectedSection() {
+
+  if (currentSectionIndex === -1) return;
+
+
+
+  currentIndex = 0;
+
+
+
+  dropContainer.innerHTML = '';
+
+  conveyor.innerHTML = '';
+
+  conveyorItems = [];
+
+  scrollPos = 0;
+
+
+
+  renderCurrent();
+
+}
+
+
+
+
+
+  // 🔹 Normal section list
+
+  sections.forEach((sec, i) => {
+
+    const div = document.createElement('div');
+
+    div.className = 'wheel-item' + (i === currentSectionIndex ? ' selected' : '');
+
+    div.textContent = sec.title;
+
+    wheel.appendChild(div);
+
+  });
+
+
+
+  wheel.style.transform = `translateY(${-currentSectionIndex * 36}px)`;
+
+}
+
+
+
+const sectionUp = document.getElementById('sectionUp');
+
+const sectionDown = document.getElementById('sectionDown');
+
+
+
+sectionUp.addEventListener('click', () => {
+
+  saveAnswer();
+
+
+
+  if (currentSectionIndex === -1) {
+
+    currentSectionIndex = sections.length - 1;
+
+  } else {
+
+    currentSectionIndex--;
+
+    if (currentSectionIndex < 0) {
+
+      currentSectionIndex = sections.length - 1;
+
+    }
+
+  }
+
+
+
+  renderSectionWheel();
+
+  activateSelectedSection(); // 🔑 THIS LINE WAS MISSING
+
+});
+
+
+
+sectionDown.addEventListener('click', () => {
+
+  saveAnswer();
+
+
+
+  if (currentSectionIndex === -1) {
+
+    currentSectionIndex = 0;
+
+  } else {
+
+    currentSectionIndex++;
+
+    if (currentSectionIndex >= sections.length) {
+
+      currentSectionIndex = 0;
+
+    }
+
+  }
+
+
+
+  renderSectionWheel();
+
+  activateSelectedSection(); // 🔑 THIS LINE WAS MISSING
+
+});
+
+
+
+
+
+let remainingWords = [];
+
+let selectedTile = null;
+
+let timer = 60, timerInterval;
+
+const sushiEmojis = ['🍣','🍤','🍙','🍥','🥢','🍱'];
+
+
+
+let sushiIndex = 0;
+
+let conveyorItems = [];
+
+let scrollPos = 0;
+
+
+
+
+
+startButton.addEventListener('click', () => {
+
+
+
+  if (currentSectionIndex === -1) {
+
+    alert('Please select a category first.');
+
+    return;
+
+  }
+
+  gameStarted = true;
+
+
+
+  currentIndex = 0;
+
+  dropContainer.innerHTML = '';
+
+  conveyor.innerHTML = '';
+
+  conveyorItems = [];
+
+  scrollPos = 0;
+
+
+
+  renderSectionWheel();
+
+  renderCurrent();
+
+  startTimer();
+
+});
+
+
+
+
+
+requestAnimationFrame(animateConveyor);
+
+
+
+
+
+/* 👆 END FIX #5 👆 */
+
+
+
+let currentIndex = 0;
+
+let userAnswers = sections.map(sec => new Array(sec.lines.length).fill(null));
+
+
+
+
+
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+let maxSushiInRow = 3; // hard cap, enforced in buildConveyor
+
+
+
+
+
+function buildConveyor(){
+
+  conveyorItems = conveyorItems.filter(item => item && !item.consumed);
+
+  const targetLength = 30;
+
+  let sushiInRow = 0;
+
+maxSushiInRow = maxSushiInRow || 3;
+
+
+
+  while(conveyorItems.length < targetLength){
+
+    const minSushiBeforeWord = 1 + Math.floor(Math.random() * 2);
+
+    const shouldAddWord =
+
+  remainingWords.length > 0 &&
+
+  (sushiInRow >= minSushiBeforeWord || sushiInRow >= maxSushiInRow);
+
+
+
+
+
+    if(shouldAddWord){
+
+      const w = remainingWords.shift();
+
+      conveyorItems.push({ text: w, sushi: false, consumed: false });
+
+      sushiInRow = 0;
+
+      maxSushiInRow = 2 + Math.floor(Math.random() * 4);
+
+    } else {
+
+      const s = sushiEmojis[sushiIndex] || '🍣';
+
+
+
+      sushiIndex = (sushiIndex + 1) % sushiEmojis.length;
+
+      conveyorItems.push({ text: s, sushi: true });
+
+      sushiInRow++;
+
+    }
+
+  }
+
+
+
+  conveyor.innerHTML = '';
+
+  conveyorItems.forEach(item=>{
+
+const wrapper = document.createElement('div');
+
+wrapper.className = 'tileWrapper';
+
+
+
+// plate (new)
+
+const plate = document.createElement('div');
+
+plate.className = 'plate';
+
+wrapper.appendChild(plate);
+
+
+
+// tile (unchanged logic, new anatomy)
+
+const tile = document.createElement('span');
+
+tile.className = item.sushi ? 'tile sushi' : 'tile';
+
+tile.textContent = item.text;
+
+
+
+if (!item.sushi && !item.consumed) {
+
+  tile.addEventListener('click', () => addToDrop(wrapper, item));
+
+}
+
+
+
+wrapper.appendChild(tile);
+
+item.element = wrapper;
+
+conveyor.appendChild(wrapper);
+
+
+
+  });
+
+}
+
+
+
+function animateConveyor(){
+
+  scrollPos -= 1;
+
+  const firstItem = conveyorItems[0];
+
+  if(firstItem && firstItem.element.getBoundingClientRect().right < conveyor.parentElement.getBoundingClientRect().left){
+
+    conveyorItems.shift();
+
+    conveyorItems.push(firstItem);
+
+    scrollPos += firstItem.element.offsetWidth + 6;
+
+    buildConveyor();
+
+  }
+
+  conveyor.style.transform = `translateX(${scrollPos}px)`;
+
+  requestAnimationFrame(animateConveyor);
+
+}
+
+
+
+function addToDrop(wrapper, item){
+
+  if(item.sushi || item.consumed) return;
+
+
+
+  const newWrapper = document.createElement('div');
+
+  newWrapper.className = 'tileWrapper';
+
+
+
+  const plate = document.createElement('div');
+
+  plate.className = 'plate';
+
+  newWrapper.appendChild(plate);
+
+
+
+  const newTile = document.createElement('span');
+
+  newTile.className = 'tile';
+
+  newTile.textContent = wrapper.querySelector('.tile').textContent;
+
+  newTile.addEventListener('click', ()=>selectDropTile(newTile));
+
+
+
+  newWrapper.appendChild(newTile);
+
+  dropContainer.appendChild(newWrapper);
+
+
+
+  item.consumed = true;
+
+  if(item.element) item.element.remove();
+
+
+
+  buildConveyor();
+
+}
+
+
+
+
+
+function selectDropTile(tile){
+
+  if(!selectedTile){ selectedTile=tile; tile.style.border='2px solid yellow'; }
+
+  else if(selectedTile===tile){ tile.style.border=''; selectedTile=null; }
+
+  else { const tmp=selectedTile.textContent; selectedTile.textContent=tile.textContent; tile.textContent=tmp; selectedTile.style.border=''; selectedTile=null; }
+
+}
+
+
+
+function saveAnswer() {
+
+  // 🚫 do nothing while placeholder is active
+
+  if (currentSectionIndex === -1) return;
+
+
+
+  const words = [...dropContainer.children]
+
+    .map(t => t.querySelector('.tile').textContent);
+
+
+
+  userAnswers[currentSectionIndex][currentIndex] = words;
+
+}
+
+
+
+
+
+function renderCurrent(){
+
+  dropContainer.innerHTML="";
+
+  const sentence = sections[currentSectionIndex].lines[currentIndex];
+
+remainingWords = shuffle(sentence.match(/[\w'-]+[.,!?;:]?/g) || []);
+
+
+
+if (userAnswers[currentSectionIndex][currentIndex]) {
+
+  userAnswers[currentSectionIndex][currentIndex].forEach(w => {
+
+
+
+      const wrapper=document.createElement('div');
+
+      wrapper.className='tileWrapper';
+
+      const t=document.createElement('span');
+
+      t.className='tile';
+
+      t.textContent=w;
+
+      t.addEventListener('click',()=>selectDropTile(t));
+
+      wrapper.appendChild(t);
+
+      dropContainer.appendChild(wrapper);
+
+      const idx = remainingWords.indexOf(w);
+
+      if(idx>-1) remainingWords.splice(idx,1);
+
+    });
+
+  }
+
+  conveyorItems = [];
+
+  sushiIndex = 0;
+
+  maxSushiInRow = 3;
+
+  buildConveyor();
+
+}
+
+
+
+backButton.addEventListener('click', () => {
+
+  saveAnswer();
+
+  currentIndex--;
+
+  if (currentIndex < 0) {
+
+    currentIndex = sections[currentSectionIndex].lines.length - 1;
+
+  }
+
+  renderCurrent();
+
+});
+
+
+
+nextButton.addEventListener('click', () => {
+
+  saveAnswer();
+
+  currentIndex++;
+
+  if (currentIndex >= sections[currentSectionIndex].lines.length) {
+
+    currentIndex = 0;
+
+  }
+
+  renderCurrent();
+
+});
+
+
+
+submitButton.addEventListener('click', () => {
+
+  saveAnswer(); // Save the current dropContainer
+
+
+
+  const name = nameField.value.trim() || 'Anonymous';
+
+  const id = idField.value.trim() || 'N/A';
+
+  const filename = window.location.pathname.split('/').pop() || 'unknown.html';
+
+
+
+  // --- Count correct answers ---
+
+// --- Count correct answers (CURRENT SECTION ONLY) ---
+
+if (currentSectionIndex === -1) {
+
+  alert("No section selected.");
+
+  return;
+
+}
+
+
+
+let correctCount = 0;
+
+let total = 0;
+
+
+
+const sec = sections[currentSectionIndex];
+
+const answers = userAnswers[currentSectionIndex];
+
+
+
+sec.lines.forEach((line, lIdx) => {
+
+  total++;
+
+
+
+  const orig = line.match(/[\w'-]+[.,!?;:]?/g) || [];
+
+  const ans = answers[lIdx];
+
+
+
+  if (
+
+    ans &&
+
+    ans.length === orig.length &&
+
+    ans.every((w, k) => w === orig[k])
+
+  ) {
+
+    correctCount++;
+
+  }
+
+});
+
+
+
+  
+
+  const percentage = Math.round((correctCount / total) * 100);
+
+
+
+  // --- Build date string with military time ---
+
+  const now = new Date();
+
+  const pad = n => n.toString().padStart(2,'0');
+
+  const dateString = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ` +
+
+                     `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+
+
+  // --- Final data string ---
+
+const resultText = `${filename}|${name}|${id}|${dateString}|${correctCount}/${total}|${percentage}%`;
+
+
+
+saveResult(resultText); // ✅ ADD THIS
+
+
+
+scoreData.textContent = resultText;
+
+scoreboard.style.display = 'block';
+
+
+
+  // --- Show on scoreboard ---
+
+  scoreData.textContent = resultText;
+
+  scoreboard.style.display = 'block';
+
+});
+
+
+
+copyButton.addEventListener('click', ()=>{ navigator.clipboard.writeText(scoreData.textContent).then(()=>alert('Copied to clipboard')); });
+
+downloadTxtButton.addEventListener('click', ()=>{
+
+  const blob = new Blob([scoreData.textContent], {type:'text/plain'});
+
+  const a = document.createElement('a');
+
+  a.href = URL.createObjectURL(blob);
+
+  a.download = 'score.txt';
+
+  a.click();
+
+});
+
+downloadPngButton.addEventListener('click', () => {
+
+  const text = scoreData.textContent;
+
+  const canvas = document.createElement('canvas');
+
+  const ctx = canvas.getContext('2d');
+
+  const fontSize = 14;
+
+  ctx.font = `${fontSize}px Arial`;
+
+
+
+  const textWidth = ctx.measureText(text).width;
+
+  canvas.width = textWidth + 20;
+
+  canvas.height = fontSize + 20;
+
+
+
+  ctx.fillStyle = '#fff';
+
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+
+
+  ctx.fillStyle = '#000';
+
+  ctx.font = `${fontSize}px Arial`;
+
+  ctx.textBaseline = 'top';
+
+  ctx.fillText(text, 10, 10);
+
+
+
+  const a = document.createElement('a');
+
+  a.href = canvas.toDataURL('image/png');
+
+  a.download = 'score.png';
+
+  a.click();
+
+});
+
+
+
+function startTimer(){
+
+  clearInterval(timerInterval); 
+
+  timer=60; 
+
+  countdownOverlay.textContent=timer;
+
+  timerInterval=setInterval(()=>{
+
+    timer--; 
+
+    countdownOverlay.textContent=timer; 
+
+    if(timer<=0) clearInterval(timerInterval); 
+
+  },1000);
+
+}
+
+
+
+renderSectionWheel();
+
+
+
+
+
+</script>
+
+
+
+<script>
+
+// Neon green border
+
+const borderDiv=document.createElement("div");
+
+borderDiv.style.position="fixed"; borderDiv.style.inset="0";
+
+borderDiv.style.border="10px solid #39FF14";
+
+borderDiv.style.boxSizing="border-box";
+
+borderDiv.style.zIndex="9999";
+
+borderDiv.style.pointerEvents="none";
+
+document.body.appendChild(borderDiv);
+
+</script>
+
+
+
+
+
+
+
+<script>
+
+(function () {
+
+  const container = document.getElementById("conveyorContainer");
+
+  if (!container) return;
+
+
+
+  // Ensure stacking context
+
+  container.style.position ||= "relative";
+
+
+
+  // Create shimmer band
+
+  const band = document.createElement("div");
+
+  band.setAttribute("aria-hidden", "true");
+
+
+
+  Object.assign(band
+
+HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -182,7 +9023,6 @@ button:disabled { background:#A0B4C3; cursor:not-allowed; }
   overflow: hidden;
 }
 
-/* kill ant layout inside drop zone */
 #dropContainer .tileWrapper {
   margin-top: 0;
   padding: 0;
@@ -190,7 +9030,6 @@ button:disabled { background:#A0B4C3; cursor:not-allowed; }
   flex-direction: row;
 }
 
-/* tiles */
 .tile {
   padding:8px 12px;
   background:#ffd8a8;
@@ -243,7 +9082,6 @@ button:disabled { background:#A0B4C3; cursor:not-allowed; }
   justify-content: center;
 }
 
-/* ▲ ▼ ONLY */
 #sectionUp,
 #sectionDown {
   width: 36px;
@@ -252,7 +9090,6 @@ button:disabled { background:#A0B4C3; cursor:not-allowed; }
   font-size: 14px;
 }
 
-/* selector window */
 #sectionWheelContainer {
   flex: 1;
   height: 36px;
@@ -285,7 +9122,6 @@ button:disabled { background:#A0B4C3; cursor:not-allowed; }
 
 .wheel-item.selected { color:#000; }
 
-/* START button */
 #startButton {
   min-width: 90px;
 }
@@ -336,7 +9172,7 @@ footer {
   text-align: left;
   font-size: 10px;
   color: #666;
-  background: #none;
+  background: none;
   border-radius: 6px;
 }
 
@@ -387,7 +9223,6 @@ footer {
   float:right;
 }
 
-/* add fade-in animation */
 #instructionsBackdrop.show {
   display:flex;
   animation: fadeIn 0.2s ease forwards;
