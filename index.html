@@ -12,27 +12,35 @@ html {
   width: 100%;
   height: 100%;
   overflow-x: hidden;
+  overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
 body {
   width: 100%;
+  min-height: 100%;
   font-family: Arial, sans-serif;
   margin: 0;
   padding-left: 15px;
   padding-right: 15px;
-  /* Add bottom padding so fixed elements never cover content */
   padding-bottom: 120px; 
   background: #fff;
   color: #111;
   line-height: 1.5;
   max-width: 100vw;
   overflow-x: hidden;
+  overflow-y: auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
-html {
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}html {
   overflow-x: hidden;
   overflow-y: scroll;
   scrollbar-width: none;
