@@ -26,10 +26,27 @@ body {
 /* ==============================
    TOP + MID BARS
    ============================== */
-#topBar,
+#topBar {
+  position: relative;
+  z-index: 10000;
+  display: grid;
+  grid-template-columns: 1fr 1fr auto auto;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  margin: 0 auto 16px auto;
+  background: transparent;
+  border: 1.5px solid #999;
+  border-radius: 4px;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 #midBar {
   position: relative;
   z-index: 10000;
+  display: flex;
   align-items: center;
   gap: 6px;
   padding: 8px;
@@ -37,11 +54,25 @@ body {
   background: transparent;
   border: 1px solid rgba(255,255,255,0.6);
   border-radius: 6px;
-  flex-wrap: nowrap;
   width: 100%;
   max-width: 100%;
+  box-sizing: border-box;
 }
 
+#topBar input[type="text"] {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+  flex: none;
+}
+
+#topBar button,
+#midBar button {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding-left: 12px;
+  padding-right: 12px;
+}
 #topBar input[type="text"] {
   flex: 1 1 0;
   min-width: 70px;
