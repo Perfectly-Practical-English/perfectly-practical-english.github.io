@@ -80,12 +80,23 @@ html::-webkit-scrollbar {
     .collapsible.active + .content { display: block; }
 
     /* Tighter Grid Styling for Buttons */
+/* Tighter Grid Styling for Buttons */
     .games-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
       gap: 6px;
       padding: 6px 0;
-      max-width: 700px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+.content {
+      display: none;
+      margin-top: 0;
+      padding-left: 0; /* Align flush with the left edge of collapsible bars */
+      white-space: pre-wrap;
+      font-family: inherit;
+      min-height: 40px;
     }
 
     .games-grid a.game-btn {
