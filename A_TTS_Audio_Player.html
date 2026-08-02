@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TTS Microphone</title>
+
+<style>
+body {
+  font: 12px Arial, sans-serif;
+  padding: 6px;
+  max-width: 520px;
+  margin: auto;
+}
+
+h1 {
+  font-size: 13px;
+  margin: 0 0 4px 0;
+  text-align: center;
+  letter-spacing: 0.5px;
+}
+
+textarea {
+  width: 100%;
+  height: 64px;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+/* === Controls === */
+select, button {
+  font-size: 11px;
+  height: 22px;
+  padding: 0 6px;
+  line-height: 1;
+  box-sizing: border-box;
+}
+
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* === Rows === */
+.row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.label {
+  font-weight: bold;
+  min-width: 38px;
+  text-align: right;
+}
+
+.val {
+  width: 28px;
+  text-align: center;
+  font-weight: bold;
+}
+
+/* === Pipes === */
+.pipe {
+  width: 6px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.pipe::before {
+  content: "";
+  width: 1px;
+  height: 100%;
+  background: #888;
+  opacity: 0.4;
+}
+
+/* === Role sampler grid === */
+.roles {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  margin-top: 6px;
+  width: 100%;
+}
+
+.roles button {
+  background: #e7f0ff;
+  border: 1px solid #7aa7ff;
+  color: #123a7a;
+  height: 22px;
+  padding: 0 6px;
+  white-space: nowrap;
+}
+
+.roles button.active {
+  background: #2d7cff;
+  border-color: #1f5fd6;
+  color: #fff;
+}
+
+/* === Status === */
+#status {
+  font-size: 10px;
+  margin-top: 3px;
+  color: #444;
+}
+</style>
+</head>
+
+<body>
+
+<h1>TTS Microphone</h1>
+
+<textarea id="text" onmouseup="recordCaret()" onkeyup="recordCaret()">
+
+
+
+</textarea>
+
+<div class="row">
+  <span class="label">Voice</span>
+  <select id="voiceSelect" style="flex:1"></select>
+</div>
+
+<div class="row">
+  <span class="pipe"></span>
+
+  <span class="label">Pitch</span>
+  <button onclick="adj('p',-0.1)">−</button>
+  <span class="val" id="pVal">1.0</span>
+  <button onclick="adj('p',0.1)">+</button>
+
+  <span class="pipe"></span>
+
+  <span class="label">Rate</span>
+  <button onclick="adj('r',-0.1)">−</button>
+  <span class="val" id="rVal">1.0</span>
+  <button onclick="adj('r',0.1)">+</button>
+
+  <span class="pipe"></span>
+
+  <span class="label">Delay</span>
+  <button onclick="adj('d',-0.5)">−</button>
+  <span class="val" id="dVal">1.0</span>
+  <button onclick="adj('d',0.5)">+</button>
+
+  <span class="pipe"></span>
+
+  <button onclick="restart()">◀</button>
+  <button onclick="pauseStop()">■</button>
+  <button onclick="playResume()">▶</button>
+</div>
+
+<!-- Sampler Grid -->
+<div class="roles">
+  <button onclick="playSample('Male child')">Male child</button>
+  <button onclick="playSample('Adult male 1')">Adult male 1</button>
+  <button onclick="playSample('Adult male 2')">Adult male 2</button>
+  <button onclick="playSample('Older male 1')">Older male 1</button>
+  <button onclick="playSample('Older male 2')">Older male 2</button>
+
+  <button onclick="playSample('Female child')">Female child</button>
+  <button onclick="playSample('Adult female 1')">Adult female 1</button>
+  <button onclick="playSample('Adult female 2')">Adult female 2</button>
+  <button onclick="playSample('Older female 1')">Older female 1</button>
+  <button onclick="playSample('Older female 2')">Older female 2</button>
+</div>
+
+<div id="status">Ready</div>
+
+<script>
+/* ===== State ===== */
+let p=1,r=1,d=1;
+let voices=[];
+let queue=[];
+let index=0;
+let activeSampleRole=null;
+let VOICE_GROUP_CACHE={};
+
+
+
+
+
+// ▶ Resume / caret state
+let lastCaret = null;
+let wasStopped = false;
+
+/* ===== Role Profiles (VOICE GROUPS) ===== */
+const ROLE_PROFILES = {
+
+"Male child": {
+  g: "m",
+  voiceGroup: "maleB",
+  p: 30,
+  r: 1.5
+},
+
+"Female child": {
+  g: "f",
+  voiceGroup: "femaleA",
+  p: 30,
+  r: 1.5
+},
+
+
+  "Adult male 1":  { g:"m", voiceGroup:"maleA",   p:1.0, r:1.0 },
+  "Older male 1":  { g:"m", voiceGroup:"maleA",   p:0.85, r:0.9 },
+
+  "Adult male 2":  { g:"m", voiceGroup:"maleB",   p:1.15, r:1.05 },
+  "Older male 2":  { g:"m", voiceGroup:"maleB",   p:0.75, r:0.85 },
+
+  "Adult female 1":{ g:"f", voiceGroup:"femaleA", p:1.0, r:1.0 },
+  "Older female 1":{ g:"f", voiceGroup:"femaleA", p:0.9, r:0.9 },
+
+  "Adult female 2":{ g:"f", voiceGroup:"femaleB", p:1.1, r:1.0 },
+  "Older female 2":{ g:"f", voiceGroup:"femaleB", p:0.85, r:0.85 }
+};
+
+/* ===== Sampler Text (FIXED, ISOLATED) ===== */
+const rawText = `
+
+~Short Fluency and Pronunciation Practice Text
+
+The quick brown fox jumps over the lazy dog. He runs into the forest and follows a small path. The sun shines through the trees, and birds sing in the branches. The fox hears a sound and stops. A red bird flaps its wings and flies away. The fox walks slowly past a big rock and a quiet stream. He sees a rabbit eating grass in the field. The rabbit looks up, then hops into the bushes. The fox is not hungry — he just wants to explore. After a while, he lies down under a tree and closes his eyes. The forest is calm. The quick brown fox falls asleep.~
+
+~Long Fluency and Pronunciation Practice Text
+
+The quick brown fox jumps over the lazy dog. He runs into the forest and follows a small path. The sun shines through the trees, and birds sing in the branches. A red bird flaps its wings and flies away. The fox stops and listens to the soft rustle of the leaves as a squirrel scurries past. A car rumbles down a nearby road, and the fox pricks up his ears. The fox walks slowly past a big rock and a quiet stream. He sees a rabbit eating grass in the field. The rabbit looks up, then hops into the bushes. The fox is not hungry — he just wants to explore. After a while, he lies down under a tree and closes his eyes. The forest is calm. The quick brown fox falls asleep, his tail curled tightly around him.~
+
+`;
+
+/* ===== Utils ===== */
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+function adj(t,x){
+  if(t=="p"){p=clamp(+(p+x).toFixed(1),0.5,2);pVal.textContent=p;}
+  if(t=="r"){r=clamp(+(r+x).toFixed(1),0.5,2);rVal.textContent=r;}
+  if(t=="d"){d=clamp(+(d+x).toFixed(1),0,5);dVal.textContent=d;}
+}
+
+/* ===== Voices ===== */
+function loadVoices(){
+  voices=speechSynthesis.getVoices();
+  voiceSelect.innerHTML="";
+  voices.forEach((v,i)=>{
+    const o=document.createElement("option");
+    o.value=i;
+    o.textContent=v.name;
+    voiceSelect.appendChild(o);
+  });
+  VOICE_GROUP_CACHE={};
+}
+speechSynthesis.onvoiceschanged=loadVoices;
+loadVoices();
+
+/* ===== Voice Resolution (GROUP LOCKED) ===== */
+function resolveVoice(role){
+  const prof = ROLE_PROFILES[role];
+  const group = prof.voiceGroup;
+
+  if (VOICE_GROUP_CACHE[group]) {
+    return VOICE_GROUP_CACHE[group];
+  }
+
+  const matches = voices.filter(v => {
+    const n = v.name.toLowerCase();
+    return prof.g === "f"
+      ? /zira|jenny|aria|female/.test(n)
+      : /david|mark|alex|male/.test(n);
+  });
+
+  let chosen;
+
+  if (matches.length >= 2) {
+    chosen = group.endsWith("B") ? matches[1] : matches[0];
+  } else if (matches.length === 1) {
+    chosen = matches[0]; // fallback for systems with 1 voice
+  } else {
+    chosen =
+      voices.find(v => v.lang.startsWith("en")) ||
+      voices[0] ||
+      null;
+  }
+
+  VOICE_GROUP_CACHE[group] = chosen;
+  return chosen;
+}
+
+/* ===== Sampler ===== */
+function updateButtons(){
+  document.querySelectorAll(".roles button").forEach(b=>{
+    b.classList.toggle("active",b.textContent===activeSampleRole);
+  });
+}
+
+function playSample(role){
+  if(activeSampleRole===role && speechSynthesis.speaking){
+    speechSynthesis.cancel();
+    activeSampleRole=null;
+    updateButtons();
+    status.textContent="Sample stopped";
+    return;
+  }
+
+  speechSynthesis.cancel();
+  activeSampleRole=role;
+  updateButtons();
+
+  const u=new SpeechSynthesisUtterance(rawText.trim());
+  const prof=ROLE_PROFILES[role];
+  u.voice=resolveVoice(role);
+  u.pitch=prof.p;
+  u.rate=prof.r;
+  u.onend=()=>{
+    activeSampleRole=null;
+    updateButtons();
+    status.textContent="Ready";
+  };
+
+  status.textContent=`Sample: ${role}`;
+  speechSynthesis.speak(u);
+}
+
+
+/* ===== Speech Shaping ===== */
+function shapeSpeech(text, role) {
+  let t = text.trim();
+
+  // --- Base cleanup ---
+  t = t.replace(/\s+/g, " ");
+
+  // --- Gentle universal pauses ---
+  t = t.replace(/,/g, ", ");
+  t = t.replace(/\?/g, "? ");
+  t = t.replace(/!/g, "! ");
+  t = t.replace(/\.(?!\.)/g, ". ");
+
+  // --- Paragraph / thought pauses ---
+  t = t.replace(/\n+/g, "\n\n");
+
+  // --- Number smoothing (17 83 → 1783) ---
+  // Spoken-year handling (e.g. 1883 → eighteen eighty-three)
+t = t.replace(/\b(1[5-9]\d{2}|20\d{2})\b/g, y => {
+  const yr = Number(y);
+  const first = Math.floor(yr / 100);
+  const last = yr % 100;
+
+  if (last === 0) return `${first} hundred`;
+  if (last < 10) return `${first} oh ${last}`;
+
+  return `${first} ${last}`;
+});
+
+
+  // ===== ROLE-BASED SHAPING =====
+
+  // Older speakers: reflective, spaced
+  if (role.startsWith("Older")) {
+    t = "… " + t.replace(/\./g, ". … ");
+  }
+
+  // Male child (7–9): curious, slightly hesitant
+  if (role === "Male child") {
+    t = "… " + t;
+    t = t.replace(/\?/g, "? …");
+    t = t.replace(/\.(?!\.)/g, "... ");
+  }
+
+  // Female child (7–10): light, expressive
+  if (role === "Female child") {
+    t = t.replace(/\.(?!\.)/g, ".. ");
+  }
+
+  return t;
+}
+
+
+
+/* ===== Script Playback ===== */
+function parseDialog(){
+  return text.value.split("\n").map(l=>{
+    for(const r in ROLE_PROFILES){
+      if(l.startsWith(r+":")){
+        const clean = l.slice(r.length+1).trim();
+        return {
+          role: r,
+          text: shapeSpeech(clean, r)
+        };
+      }
+    }
+    return null;
+  }).filter(Boolean);
+}
+
+function speakNext(){
+  if(index >= queue.length){
+    status.textContent = "Done";
+    return;
+  }
+
+  const { role, text } = queue[index++];
+  const prof = ROLE_PROFILES[role];
+
+  const u = new SpeechSynthesisUtterance(text);
+  u.voice = resolveVoice(role);
+  u.pitch = prof.p;
+  u.rate = prof.r;
+
+  // Slight silence between speakers
+  u.onend = () => setTimeout(speakNext, 250);
+
+  speechSynthesis.speak(u);
+}
+
+function playResume(){
+  speechSynthesis.cancel();
+  activeSampleRole=null;
+  updateButtons();
+  queue=parseDialog();
+  index=0;
+  status.textContent="Pre-roll…";
+  setTimeout(speakNext,d*1000);
+}
+
+function pauseStop(){
+  speechSynthesis.cancel();
+  status.textContent="Stopped";
+}
+
+function restart(){
+  speechSynthesis.cancel();
+  playResume();
+}
+
+function speakFromCaret() {
+  const el = text;
+  const caret = el.selectionStart;
+  const content = el.value.slice(caret).trim();
+
+  if (!content) {
+    status.textContent = "Nothing after caret";
+    return;
+  }
+
+  speechSynthesis.cancel();
+
+  // Default role: infer from nearest preceding speaker label
+  let role = "Adult male 1";
+  const before = el.value.slice(0, caret).split("\n").reverse();
+  for (const line of before) {
+    for (const r in ROLE_PROFILES) {
+      if (line.startsWith(r + ":")) {
+        role = r;
+        break;
+      }
+    }
+    if (role !== "Adult male 1") break;
+  }
+
+  const shaped = shapeSpeech(content, role);
+  const u = new SpeechSynthesisUtterance(shaped);
+  const prof = ROLE_PROFILES[role];
+
+  u.voice = resolveVoice(role);
+  u.pitch = prof.p;
+  u.rate  = prof.r;
+
+  status.textContent = `Speaking from caret (${role})`;
+  speechSynthesis.speak(u);
+}
+
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Get filename only
+    let filename = window.location.pathname.split("/").pop();
+
+    // Remove .html
+    filename = filename.replace(/\.html$/i, "");
+
+    // Remove everything up to and including the first underscore
+    // (treats that as the prefix)
+    filename = filename.replace(/^[^_]*_/, "");
+
+    // Convert underscores to spaces
+    const title = filename.replace(/_/g, " ");
+
+    // Replace the first <h1>
+    const h1 = document.querySelector("h1");
+    if (h1) {
+        h1.textContent = title;
+    }
+});
+</script>
+
+<script>
+
+(function(){
+
+/* =========================
+   RAW INSTRUCTIONS TEXT
+========================= */
+
+const RAW_TEXT = `
+
+How to play...
+
+1. Add text.
+2. Select a voice to Text-to-Speech.
+3. Click the arrow button to play speech.
+
+`;
+
+
+/* =========================
+   RAW TEXT PARSER
+========================= */
+
+function parseRawInstructions(text){
+
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+
+  lines.forEach(line => {
+
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
+
+    html.push(`<p>${line}</p>`);
+  });
+
+  return html.join("");
+}
+
+
+/* =========================
+   CREATE STYLE
+========================= */
+
+const style = document.createElement("style");
+
+style.textContent = `
+#instructionsBtn{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  padding:10px 16px;
+  background:#2e8b57;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 4px 8px rgba(0,0,0,0.6);
+  z-index:99998;
+}
+
+#instructionsBtn:hover{
+  background:#257047;
+}
+
+#instructionsRoot{
+  position:fixed;
+  inset:0;
+  display:none;
+  z-index:99999;
+}
+
+#instructionsBackdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.35);
+}
+
+#instructionsModal{
+  position:absolute;
+  top:25px;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(650px,90vw);
+  max-height:90vh;
+  background:#fff;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+#instructionsHeader{
+  padding:12px 16px;
+  border-bottom:1px solid #ddd;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+#instructionsTitle{
+  color:#1976d2;
+  font-weight:600;
+  font-size:1.1em;
+}
+
+#instructionsBack{
+  border:none;
+  background:none;
+  font-size:20px;
+  cursor:pointer;
+  color:#1976d2;
+  font-weight:600;
+}
+
+#instructionsContent{
+  padding:2px 18px 18px 18px;
+  overflow-y:auto;
+  line-height:1.6;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+
+#instructionsContent::-webkit-scrollbar{
+  display:none;
+}
+
+#instructionsContent h3{
+  color:#1976d2;
+  margin:12px 0 4px 0;
+  font-weight:600;
+}
+
+#instructionsContent p{
+  margin:4px 0;
+}
+
+#instructionsContent hr{
+  margin:12px 0;
+}
+`;
+
+document.head.appendChild(style);
+
+
+/* =========================
+   CREATE BUTTON
+========================= */
+
+const btn = document.createElement("button");
+btn.id = "instructionsBtn";
+btn.textContent = "Instructions";
+
+document.body.appendChild(btn);
+
+
+/* =========================
+   CREATE MODAL
+========================= */
+
+const root = document.createElement("div");
+root.id = "instructionsRoot";
+
+root.innerHTML = `
+<div id="instructionsBackdrop"></div>
+
+<div id="instructionsModal">
+
+  <div id="instructionsHeader">
+    <button id="instructionsBack">←</button>
+    <span id="instructionsTitle">Instructions</span>
+  </div>
+
+  <div id="instructionsContent">
+    ${parseRawInstructions(RAW_TEXT)}
+  </div>
+
+</div>
+`;
+
+document.body.appendChild(root);
+
+
+/* =========================
+   SCROLL LOCK
+========================= */
+
+const modalContent = document.getElementById("instructionsContent");
+
+modalContent.addEventListener("wheel", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+modalContent.addEventListener("touchmove", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+
+/* =========================
+   OPEN / CLOSE
+========================= */
+
+function openModal(){
+  root.style.display="block";
+  document.body.style.overflow="hidden";
+  document.documentElement.style.overflow="hidden";
+}
+
+function closeModal(){
+  root.style.display="none";
+  document.body.style.overflow="";
+  document.documentElement.style.overflow="";
+}
+
+btn.onclick = openModal;
+
+document.getElementById("instructionsBack").onclick = closeModal;
+document.getElementById("instructionsBackdrop").onclick = closeModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape") closeModal();
+});
+
+})();
+
+</script>
+
+<script>
+
+/* ==============================
+   Role Voice Player + MP3 Button
+   ============================== */
+
+(function(){
+
+let currentUtterance = null;
+let selectedRole = "Adult male 1";
+
+
+/* ==============================
+   Speak textarea with role voice
+   ============================== */
+
+window.playRoleVoice = function(role){
+
+    const input = document.getElementById("text");
+
+    if(!input || !input.value.trim()){
+        status.textContent="No text";
+        return;
+    }
+
+
+    speechSynthesis.cancel();
+
+
+    const profile = ROLE_PROFILES[role];
+
+
+    // USER INPUT ONLY
+    const userText = input.value.trim();
+
+
+    const utterance =
+        new SpeechSynthesisUtterance(
+            shapeSpeech(userText, role)
+        );
+
+
+    utterance.voice =
+        resolveVoice(role);
+
+
+    utterance.pitch =
+        profile.p;
+
+
+    utterance.rate =
+        profile.r;
+
+
+    utterance.onstart = ()=>{
+
+        status.textContent =
+        "Speaking: " + role;
+
+    };
+
+
+    utterance.onend = ()=>{
+
+        status.textContent="Ready";
+
+    };
+
+
+    currentUtterance = utterance;
+
+
+    speechSynthesis.speak(utterance);
+
+};
+
+
+
+/* ==============================
+   Stop
+   ============================== */
+
+window.stopSelectedVoice=function(){
+
+    speechSynthesis.cancel();
+    status.textContent="Stopped";
+
+};
+
+
+
+/* ==============================
+   Create Voice Flyout
+   ============================== */
+
+const wrapper=document.createElement("div");
+
+wrapper.style.position="relative";
+wrapper.style.display="inline-block";
+wrapper.style.marginTop="5px";
+
+
+
+const playButton=document.createElement("button");
+
+playButton.textContent =
+"▶ Speak Selected Voice ▼";
+
+playButton.style.marginRight="5px";
+
+
+
+const menu=document.createElement("div");
+
+menu.style.position="absolute";
+
+
+// OPEN DOWNWARD
+menu.style.top="25px";
+
+menu.style.left="0";
+
+menu.style.background="#fff";
+menu.style.border="1px solid #888";
+menu.style.padding="4px";
+menu.style.display="none";
+menu.style.zIndex="9999";
+menu.style.boxShadow="0 2px 8px rgba(0,0,0,.25)";
+
+
+
+Object.keys(ROLE_PROFILES).forEach(role=>{
+
+
+    const item=document.createElement("button");
+
+    item.textContent=role;
+
+    item.style.display="block";
+    item.style.width="140px";
+    item.style.margin="2px";
+    item.style.textAlign="left";
+
+
+    item.onclick=function(){
+
+        selectedRole=role;
+
+
+        playButton.textContent =
+        "▶ "+role+" ▼";
+
+
+        menu.style.display="none";
+
+
+        // Speak USER INPUT
+        playRoleVoice(role);
+
+    };
+
+
+    menu.appendChild(item);
+
+
+});
+
+
+
+playButton.onclick=function(){
+
+    menu.style.display =
+    menu.style.display==="none"
+    ? "block"
+    : "none";
+
+};
+
+
+
+wrapper.appendChild(playButton);
+wrapper.appendChild(menu);
+
+document.body.appendChild(wrapper);
+
+
+
+
+/* ==============================
+   MP3 Download Button
+   ============================== */
+
+const mp3Button=document.createElement("button");
+
+mp3Button.textContent="Download MP3";
+
+mp3Button.style.marginTop="5px";
+
+
+
+mp3Button.onclick=function(){
+
+
+alert(
+`Selected voice:
+${selectedRole}
+
+The browser speech engine can play this voice,
+but it cannot export the generated audio.
+
+MP3 export requires routing this selected voice
+through a TTS service that returns an audio file.`
+);
+
+
+};
+
+
+document.body.appendChild(mp3Button);
+
+
+
+
+/* ==============================
+   Voice List Dropdown
+   ============================== */
+
+function refreshVoices(){
+
+    const select =
+    document.getElementById("voiceSelect");
+
+
+    if(!select) return;
+
+
+    select.innerHTML="";
+
+
+    speechSynthesis
+    .getVoices()
+    .forEach((voice,index)=>{
+
+
+        const option =
+        document.createElement("option");
+
+
+        option.value=index;
+
+
+        option.textContent =
+        voice.name+
+        " ("+
+        voice.lang+
+        ")";
+
+
+        select.appendChild(option);
+
+
+    });
+
+}
+
+
+
+speechSynthesis.onvoiceschanged =
+refreshVoices;
+
+
+refreshVoices();
+
+
+
+})();
+
+</script>
+
+</body>
+</html>

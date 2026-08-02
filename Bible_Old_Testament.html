@@ -49170,7 +49170,7 @@ BLANK
 <!-- <button id="signalwordsBtn">Signals</button> -->
 <button id="goBtn">Go</button>
 
-<button onclick="goToNextQuiz()">Go to Quiz</button>
+<button onclick="goToNextQuiz()">Quiz</button>
 
       </div>
     </div>
@@ -49233,7 +49233,7 @@ BLANK
 
     // INLINE URL HANDLING
     const htmlLine = line.replace(urlAnywhere, url =>
-      `<a href="${url}" target="_blank" rel="noopener">${url}</a>`
+      `<a href="${url}" target="_self" rel="noopener">${url}</a>`
     );
 
     htmlResult.push(htmlLine);

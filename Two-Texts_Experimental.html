@@ -1,0 +1,573 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
+<title>Dual-Student Conversation App (Units 1-8 & Signal Words)</title>
+<style>
+  /* Base & Reset */
+  body { 
+    font-family: Arial, sans-serif; 
+    margin: 0; 
+    padding: 0; 
+    background: #eef2f5; 
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  #app-container {
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    height: 100vh;
+    box-sizing: border-box;
+  }
+
+  /* Half-Screen Styles */
+  .student-pane {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 16px;
+    box-sizing: border-box;
+    overflow-y: auto;
+    position: relative;
+    border-bottom: 2px dashed #bbb;
+  }
+
+  /* Top Half (Pale Blue & Inverted) */
+  #top-pane {
+    background: #eaf2f8;
+    transform: rotate(180deg);
+  }
+
+  /* Bottom Half (Pale Green) */
+  #bottom-pane {
+    background: #eafaf1;
+  }
+
+  .pane-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+  }
+
+  .prompt-display {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: #2c3e50;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 8px;
+    margin: 8px 0;
+    border: 1px solid rgba(0,0,0,0.05);
+    word-break: break-word;
+  }
+
+  .pane-footer {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .next-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    background: #1976d2;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: background 0.2s;
+  }
+
+  .next-btn:hover {
+    background: #115293;
+  }
+
+  /* Control Bar Overlay */
+  #control-bar {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+    background: white;
+    padding: 10px 16px;
+    border-radius: 30px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: 1px solid #ccc;
+  }
+
+  .control-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: bold;
+  }
+
+  select, button.toggle-mode {
+    padding: 6px 10px;
+    font-size: 13px;
+    border-radius: 6px;
+    border: 1px solid #999;
+    background: #fff;
+    cursor: pointer;
+  }
+
+  button.toggle-mode.active {
+    background: #2e7d32;
+    color: white;
+    border-color: #1b5e20;
+  }
+</style>
+</head>
+<body>
+
+<div id="app-container">
+  
+  <!-- Central Control Bar -->
+  <div id="control-bar">
+    <div class="control-group">
+      <label for="topic-select">Topic:</label>
+      <select id="topic-select">
+        <option value="">-- Choose Topic --</option>
+      </select>
+    </div>
+    
+    <!-- CONFIGURATION SWITCH: Set order mode here or via toggle button -->
+    <div class="control-group">
+      <button id="mode-toggle" class="toggle-mode" title="Toggle between sequential and random order">Order: Sequential</button>
+    </div>
+  </div>
+
+  <!-- Top Student Pane (Inverted & Pale Blue) -->
+  <div id="top-pane" class="student-pane">
+    <div class="pane-header">
+      <span class="student-role">Student A</span>
+      <span class="counter-top">1 / 1</span>
+    </div>
+    <div class="prompt-display" id="prompt-top">Select a topic to begin.</div>
+    <div class="pane-footer">
+      <button class="next-btn" id="next-top">Next →</button>
+    </div>
+  </div>
+
+  <!-- Bottom Student Pane (Pale Green) -->
+  <div id="bottom-pane" class="student-pane">
+    <div class="pane-header">
+      <span class="student-role">Student B</span>
+      <span class="counter-bottom">1 / 1</span>
+    </div>
+    <div class="prompt-display" id="prompt-bottom">Select a topic to begin.</div>
+    <div class="pane-footer">
+      <button class="next-btn" id="next-bottom">Next →</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// Separate raw text data for Student A and Student B
+const rawDataA = `
+~Unit 1 Test
+Do you always study, or are you constantly and forever busy?
+What makes an awesome, amazing, and fantastic movie?
+How often do you do exercise, physical training, or a workout?
+Where do you find information, data, and knowledge online?
+What are you interested in, curious about, or drawn to?
+What magazine, journal, or publication do you read?
+Which museum, gallery, or exhibit center did you visit?
+Can you play a musical instrument, music tool, or gear?
+What do your parents, guardians, or mum and dad say?
+Do you have an uncle, relative, or family uncle living nearby?
+
+~Unit 2 Test
+Do you like crisps, potato chips, chips, or snacks?
+What is your favorite dessert, sweet food, sweet course, or pudding?
+Are these apples fresh, crisp, and newly made?
+What ingredients, elements, or components are in this dish?
+Do you put mayonnaise, mayo, or dressing on your salad?
+Did you buy a packet, pack, or sachet of cookies?
+How do you prepare, get ready, or assemble dinner?
+What restaurant would you recommend, advise, or put forward?
+How does the taste, flavour, or savour of this soup feel?
+Are you a vegetarian, plant-based eater, or non-meat eater?
+
+~Unit 3 Test
+What is your main duty, responsibility, task, or obligation?
+How do you earn, make income, or get paid for chores?
+Is the education, schooling, or training system improving?
+What does an engineer, technician, or specialist do?
+How does life experience, personal knowledge, or lived experience help you?
+Is this book fascinating, captivating, or gripping?
+What language, speech system, or communication method do you use?
+When do you call a plumber, pipe fitter, or repair worker?
+Why is it important to be responsible, dependable, and trustworthy?
+Have you ever worked as a volunteer, helper, or unpaid worker?
+
+~Unit 4 Test
+How do you change your appearance, looks, or outward form?
+Why is it good to be confident, self-assured, and bold?
+What makes a person creative, imaginative, inventive, and original?
+How do you stay energetic, lively, and dynamic all day?
+Are you flexible, adaptable, and versatile when plans change?
+Is your teacher generous, giving, and charitable?
+How do you show your humour, wit, or comedic sense?
+How would you describe your personality, character, temperament, and traits?
+Why do people dislike unfriendly, hostile, or cold behavior?
+Do you want to look well-built, muscular, and strong-built?
+
+~Unit 5 Test
+What do you buy at the school canteen, cafeteria, or refectory?
+What do you learn in Chemistry, chemical science, or chemistry subject?
+How do you concentrate, focus, and attend in class?
+What experiment, test, or trial did you do in lab?
+What do you study in Geography, earth studies, or mapping science?
+Do you remember kindergarten, preschool, or nursery school?
+What is your favorite lesson, class, or session today?
+How many books are in the library, reading room, or archive?
+What formulas do you study in Physics, physical science, or mechanics?
+Which university, college, or academy do you want to attend?
+
+~Unit 6 Test
+How did the caterpillar become, turn into, and develop into a butterfly?
+What have you always believed, accepted, and trusted as truth?
+Are you joining any competition, contest, or showdown this weekend?
+Do you enjoy cycling, biking, or riding a bicycle?
+Who explained, made clear, and broke down the math problem?
+Is every individual, single person, and one unit unique?
+Have you ever tried karate, combat sport, or striking art?
+What martial arts, combat training, or fighting systems do you know?
+Why is stretching, loosening, and extending your muscles important before running?
+What major success, achievement, victory, or triumph did you celebrate?
+
+~Unit 7 Test
+What adventure, expedition, or journey would you like to take?
+What is your dream destination, endpoint, or arrival place?
+How long is your flight, air journey, or flying trip?
+Where is your luggage, baggage, or suitcases?
+Are you a passenger, traveler, or rider on this train?
+Did you make a reservation, booking, or holding for the hotel?
+Are there many tourists, visitors, and sightseers in your town?
+What public transport, transit, or mobility system do you use?
+Have you ever taken a trip abroad, overseas travel, or international trip?
+Have you stayed at a youth hostel, backpacker lodge, or budget stay?
+
+~Unit 8 Test
+How does the climate, weather condition, or atmospheric state affect crops?
+Which continent, landmass, or major region do you live on?
+Why do some animals disappear, vanish, or fade out?
+How can we save energy, power, and force at home?
+How do we protect our environment, natural world, and habitat?
+Is pollution a global, international, or planetary problem?
+What is the natural habitat, ecosystem, or natural home of pandas?
+How does pollution, contamination, or fouling hurt rivers?
+How do you dispose of rubbish, waste, and garbage?
+Why are some chemicals toxic, hazardous, and venomous?
+
+~Signal Words
+Which time words like on, at, in, before, after, since, until, during, for, now, yesterday, today, tomorrow, later, then, when, while, or once do you use?
+How do addition words like and, also, too, with, plus, as well as, not only...but also, or both...and connect your ideas?
+What cause and effect words like because, so, since, because of, due to, as a result, therefore, or that’s why explain outcomes?
+How do comparison words like like, as, as...as, than, similar to, different from, more than, less than, the most, just as...so, whereas, or in contrast to compare things?
+When do you use contrast words like but, although, though, even though, however, yet, still, despite, instead, whereas, while, or on the other hand?
+How do frequency words like always, usually, often, sometimes, occasionally, rarely, never, every day, once a week, hardly ever, or from time to time show routines?
+What possibility words like maybe, probably, possibly, must, might, may, could, can, definitely, or certainly express certainty or doubt?
+How do advice words like must, must not, have to, don’t have to, should, ought to, had better, can, cannot, may, or could set rules?
+How do manner words like quickly, slowly, carefully, easily, well, badly, with, by, in a...way, or as describe actions?
+What place words like in, on, at, under, above, between, near, next to, here, there, everywhere, or anywhere tell locations?
+How do condition words like if, unless, in case, or on condition that set rules?
+Which emphasis words like only, just, even, especially, mainly, or particularly highlight key points?
+How do question words like how, when, where, or why start conversations?
+What relative words connect ideas about when, where, why, or how?
+Which direction and movement words like to, from, toward, away from, up, down, forward, or back show motion?
+How do affirmative and negative words like yes or no change a sentence?
+`;
+
+const rawDataB = `
+~Unit 1 Test
+Do you always study, or are you constantly and forever busy?
+What makes an awesome, amazing, and fantastic movie?
+How often do you do exercise, physical training, or a workout?
+Where do you find information, data, and knowledge online?
+What are you interested in, curious about, or drawn to?
+What magazine, journal, or publication do you read?
+Which museum, gallery, or exhibit center did you visit?
+Can you play a musical instrument, music tool, or gear?
+What do your parents, guardians, or mum and dad say?
+Do you have an uncle, relative, or family uncle living nearby?
+
+~Unit 2 Test
+Do you like crisps, potato chips, chips, or snacks?
+What is your favorite dessert, sweet food, sweet course, or pudding?
+Are these apples fresh, crisp, and newly made?
+What ingredients, elements, or components are in this dish?
+Do you put mayonnaise, mayo, or dressing on your salad?
+Did you buy a packet, pack, or sachet of cookies?
+How do you prepare, get ready, or assemble dinner?
+What restaurant would you recommend, advise, or put forward?
+How does the taste, flavour, or savour of this soup feel?
+Are you a vegetarian, plant-based eater, or non-meat eater?
+
+~Unit 3 Test
+What is your main duty, responsibility, task, or obligation?
+How do you earn, make income, or get paid for chores?
+Is the education, schooling, or training system improving?
+What does an engineer, technician, or specialist do?
+How does life experience, personal knowledge, or lived experience help you?
+Is this book fascinating, captivating, or gripping?
+What language, speech system, or communication method do you use?
+When do you call a plumber, pipe fitter, or repair worker?
+Why is it important to be responsible, dependable, and trustworthy?
+Have you ever worked as a volunteer, helper, or unpaid worker?
+
+~Unit 4 Test
+How do you change your appearance, looks, or outward form?
+Why is it good to be confident, self-assured, and bold?
+What makes a person creative, imaginative, inventive, and original?
+How do you stay energetic, lively, and dynamic all day?
+Are you flexible, adaptable, and versatile when plans change?
+Is your teacher generous, giving, and charitable?
+How do you show your humour, wit, or comedic sense?
+How would you describe your personality, character, temperament, and traits?
+Why do people dislike unfriendly, hostile, or cold behavior?
+Do you want to look well-built, muscular, and strong-built?
+
+~Unit 5 Test
+What do you buy at the school canteen, cafeteria, or refectory?
+What do you learn in Chemistry, chemical science, or chemistry subject?
+How do you concentrate, focus, and attend in class?
+What experiment, test, or trial did you do in lab?
+What do you study in Geography, earth studies, or mapping science?
+Do you remember kindergarten, preschool, or nursery school?
+What is your favorite lesson, class, or session today?
+How many books are in the library, reading room, or archive?
+What formulas do you study in Physics, physical science, or mechanics?
+Which university, college, or academy do you want to attend?
+
+~Unit 6 Test
+How did the caterpillar become, turn into, and develop into a butterfly?
+What have you always believed, accepted, and trusted as truth?
+Are you joining any competition, contest, or showdown this weekend?
+Do you enjoy cycling, biking, or riding a bicycle?
+Who explained, made clear, and broke down the math problem?
+Is every individual, single person, and one unit unique?
+Have you ever tried karate, combat sport, or striking art?
+What martial arts, combat training, or fighting systems do you know?
+Why is stretching, loosening, and extending your muscles important before running?
+What major success, achievement, victory, or triumph did you celebrate?
+
+~Unit 7 Test
+What adventure, expedition, or journey would you like to take?
+What is your dream destination, endpoint, or arrival place?
+How long is your flight, air journey, or flying trip?
+Where is your luggage, baggage, or suitcases?
+Are you a passenger, traveler, or rider on this train?
+Did you make a reservation, booking, or holding for the hotel?
+Are there many tourists, visitors, and sightseers in your town?
+What public transport, transit, or mobility system do you use?
+Have you ever taken a trip abroad, overseas travel, or international trip?
+Have you stayed at a youth hostel, backpacker lodge, or budget stay?
+
+~Unit 8 Test
+How does the climate, weather condition, or atmospheric state affect crops?
+Which continent, landmass, or major region do you live on?
+Why do some animals disappear, vanish, or fade out?
+How can we save energy, power, and force at home?
+How do we protect our environment, natural world, and habitat?
+Is pollution a global, international, or planetary problem?
+What is the natural habitat, ecosystem, or natural home of pandas?
+How does pollution, contamination, or fouling hurt rivers?
+How do you dispose of rubbish, waste, and garbage?
+Why are some chemicals toxic, hazardous, and venomous?
+
+~Signal Words
+Which time words like on, at, in, before, after, since, until, during, for, now, yesterday, today, tomorrow, later, then, when, while, or once do you use?
+How do addition words like and, also, too, with, plus, as well as, not only...but also, or both...and connect your ideas?
+What cause and effect words like because, so, since, because of, due to, as a result, therefore, or that’s why explain outcomes?
+How do comparison words like like, as, as...as, than, similar to, different from, more than, less than, the most, just as...so, whereas, or in contrast to compare things?
+When do you use contrast words like but, although, though, even though, however, yet, still, despite, instead, whereas, while, or on the other hand?
+How do frequency words like always, usually, often, sometimes, occasionally, rarely, never, every day, once a week, hardly ever, or from time to time show routines?
+What possibility words like maybe, probably, possibly, must, might, may, could, can, definitely, or certainly express certainty or doubt?
+How do advice words like must, must not, have to, don’t have to, should, ought to, had better, can, cannot, may, or could set rules?
+How do manner words like quickly, slowly, carefully, easily, well, badly, with, by, in a...way, or as describe actions?
+What place words like in, on, at, under, above, between, near, next to, here, there, everywhere, or anywhere tell locations?
+How do condition words like if, unless, in case, or on condition that set rules?
+Which emphasis words like only, just, even, especially, mainly, or particularly highlight key points?
+How do question words like how, when, where, or why start conversations?
+What relative words connect ideas about when, where, why, or how?
+Which direction and movement words like to, from, toward, away from, up, down, forward, or back show motion?
+How do affirmative and negative words like yes or no change a sentence?
+`;
+
+let topicsA = {};
+let topicsB = {};
+let activeListsA = {}; 
+let activeListsB = {}; 
+let currentTopicKey = "";
+let currentIndexTop = 0;
+let currentIndexBottom = 0;
+
+let isRandomMode = false; 
+
+function parseRawData(text, targetObj) {
+  const chunks = text.split(/\n(?=~+)/);
+  chunks.forEach(chunk => {
+    const lines = chunk.trim().split("\n");
+    if (lines.length === 0) return;
+    const headerLine = lines.shift().trim();
+    if (headerLine.startsWith("~")) {
+      const topicName = headerLine.replace(/^~+/, "").trim();
+      const prompts = lines
+        .map(l => l.replace(/^[•*-]\s*/, "").trim())
+        .filter(Boolean);
+      targetObj[topicName] = prompts;
+    }
+  });
+}
+
+parseRawData(rawDataA, topicsA);
+parseRawData(rawDataB, topicsB);
+
+function shuffleArray(array) {
+  let arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+function prepareActiveLists() {
+  activeListsA = {};
+  activeListsB = {};
+  
+  Object.keys(topicsA).forEach(topic => {
+    if (isRandomMode) {
+      activeListsA[topic] = shuffleArray(topicsA[topic]);
+    } else {
+      activeListsA[topic] = [...topicsA[topic]];
+    }
+  });
+
+  Object.keys(topicsB).forEach(topic => {
+    if (isRandomMode) {
+      activeListsB[topic] = shuffleArray(topicsB[topic]);
+    } else {
+      activeListsB[topic] = [...topicsB[topic]];
+    }
+  });
+}
+
+prepareActiveLists();
+
+const topicSelect = document.getElementById("topic-select");
+Object.keys(topicsA).forEach(topic => {
+  const option = document.createElement("option");
+  option.value = topic;
+  option.textContent = topic;
+  topicSelect.appendChild(option);
+});
+
+const promptTop = document.getElementById("prompt-top");
+const promptBottom = document.getElementById("prompt-bottom");
+const counterTop = document.querySelector(".counter-top");
+const counterBottom = document.querySelector(".counter-bottom");
+const modeToggleBtn = document.getElementById("mode-toggle");
+
+function updateModeButtonUI() {
+  if (isRandomMode) {
+    modeToggleBtn.textContent = "Order: Randomized";
+    modeToggleBtn.classList.add("active");
+  } else {
+    modeToggleBtn.textContent = "Order: Sequential";
+    modeToggleBtn.classList.remove("active");
+  }
+}
+updateModeButtonUI();
+
+function updateDisplays() {
+  if (!currentTopicKey) return;
+  
+  const listA = activeListsA[currentTopicKey];
+  const listB = activeListsB[currentTopicKey];
+
+  if (listA) {
+    promptTop.textContent = listA[currentIndexTop] || "End of list.";
+    counterTop.textContent = `${currentIndexTop + 1} / ${listA.length}`;
+  }
+
+  if (listB) {
+    promptBottom.textContent = listB[currentIndexBottom] || "End of list.";
+    counterBottom.textContent = `${currentIndexBottom + 1} / ${listB.length}`;
+  }
+}
+
+topicSelect.addEventListener("change", (e) => {
+  currentTopicKey = e.target.value;
+  currentIndexTop = 0;
+  currentIndexBottom = 0;
+  if (!currentTopicKey) {
+    promptTop.textContent = "Select a topic to begin.";
+    promptBottom.textContent = "Select a topic to begin.";
+    counterTop.textContent = "1 / 1";
+    counterBottom.textContent = "1 / 1";
+    return;
+  }
+  updateDisplays();
+});
+
+modeToggleBtn.addEventListener("click", () => {
+  isRandomMode = !isRandomMode;
+  updateModeButtonUI();
+  prepareActiveLists();
+  currentIndexTop = 0;
+  currentIndexBottom = 0;
+  if (currentTopicKey) {
+    updateDisplays();
+  }
+});
+
+document.getElementById("next-top").addEventListener("click", () => {
+  if (!currentTopicKey) return;
+  const listA = activeListsA[currentTopicKey];
+  if (currentIndexTop < listA.length - 1) {
+    currentIndexTop++;
+  } else {
+    currentIndexTop = 0; 
+  }
+  updateDisplays();
+});
+
+document.getElementById("next-bottom").addEventListener("click", () => {
+  if (!currentTopicKey) return;
+  const listB = activeListsB[currentTopicKey];
+  if (currentIndexBottom < listB.length - 1) {
+    currentIndexBottom++;
+  } else {
+    currentIndexBottom = 0; 
+  }
+  updateDisplays();
+});
+</script>
+
+</body>
+</html>

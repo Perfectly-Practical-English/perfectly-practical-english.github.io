@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Composition Book Word Wall</title>
+
+<style>
+:root{
+  --paper:#e9e9e9;
+  --outer:#b28ae8;
+  --rule:#3f74ad;
+  --red:#b82b2b;
+
+  --pageW:852px;
+  --pageH:1200px;
+
+  --row:34px;
+  --headerH:120px;
+  --topH:34px;
+
+  --leftW:135px;
+  --rightW:calc(var(--pageW) - var(--leftW));
+}
+
+*{box-sizing:border-box;}
+
+html,body{
+  margin:0;
+  background:#dff2ff;
+}
+
+body{
+  display:flex;
+  justify-content:center;
+}
+
+.frame{
+  background:var(--outer);
+  padding:8px;
+}
+
+.page{
+  position:relative;
+  width:var(--pageW);
+  height:var(--pageH);
+  background:var(--paper);
+  overflow:hidden;
+  font-family:"Comic Sans MS",cursive;
+}
+
+/* ================= HEADER LABEL AREA ================= */
+
+.headerArea{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:var(--headerH);
+  display:flex;
+  z-index:25;
+  border-bottom:2px solid var(--rule);
+  background:var(--paper);
+}
+
+#headerLeft{
+  width:var(--leftW);
+  height:100%;
+  resize:none;
+  font-family:inherit;
+  font-size:14px;
+  padding:8px;
+  border:none;
+  outline:none;
+  background:transparent;
+  white-space:pre-wrap;
+  overflow:hidden;
+}
+
+#headerRight{
+  flex:1;
+  height:100%;
+  resize:none;
+  font-family:inherit;
+  font-size:14px;
+  padding:8px;
+  border:none;
+  outline:none;
+  background:transparent;
+  white-space:pre-wrap;
+  overflow-y:auto;
+}
+
+.headerRed{
+  position:absolute;
+  left:var(--leftW);
+  top:0;
+  height:var(--headerH);
+  width:3px;
+  background:var(--red);
+  z-index:9999;
+  pointer-events:none;
+  box-shadow:0 0 6px rgba(184,43,43,.4);
+}
+
+/* ================= TOP BAR & INPUTS ================= */
+
+.topBar{
+  position:absolute;
+  top:var(--headerH);
+  left:0;
+  right:0;
+  height:var(--topH);
+  min-height:var(--row);
+  max-height:calc(var(--pageH) - var(--headerH) - 100px);
+  display:flex;
+  z-index:20;
+  border-bottom:2px solid var(--rule);
+  background:var(--paper);
+  resize:vertical;
+  overflow:hidden;
+}
+
+#leftInput{
+  width:var(--leftW);
+  height:100%;
+  resize:none;
+  font-family:inherit;
+  font-size:14px;
+  padding:6px;
+  border:none;
+  outline:none;
+  background:transparent;
+  overflow:hidden;
+}
+
+.fileToolbar {
+  width:var(--rightW);
+  height:100%;
+  display:flex;
+  position:relative;
+  background:transparent;
+  padding:0 6px;
+  font-size:12px;
+  overflow:hidden;
+}
+
+.buttonContainer {
+  position:absolute;
+  top:4px;
+  right:12px;
+  display:flex;
+  gap:8px;
+  z-index:10;
+}
+
+#loadTxtBtn, #saveTxtBtn{
+  background:#d4d4d4;
+  border:1px solid #999;
+  border-radius:4px;
+  padding:2px 8px;
+  cursor:pointer;
+  font-family:inherit;
+  font-size:12px;
+  flex-shrink:0;
+}
+
+#loadTxtBtn:hover, #saveTxtBtn:hover{
+  background:#c4c4c4;
+}
+
+/* Visible Textarea for raw text viewing and editing */
+#rightInput{
+  flex:1;
+  height:100%;
+  resize:none;
+  font-family:inherit;
+  font-size:12px;
+  padding:4px 6px;
+  border:none;
+  outline:none;
+  background:transparent;
+  white-space:pre-wrap;
+  overflow-y:auto;
+}
+
+/* ================= GRID ================= */
+
+.lines{
+  position:absolute;
+  inset:calc(var(--headerH) + var(--topH)) 0 0 0;
+
+  background:repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--row) - 1px),
+    var(--rule) calc(var(--row) - 1px),
+    var(--rule) var(--row)
+  );
+}
+
+.red{
+  position:absolute;
+  left:var(--leftW);
+  top:var(--headerH);
+  bottom:0;
+  width:3px;
+  background:var(--red);
+  z-index:9999;
+  pointer-events:none;
+  box-shadow:0 0 6px rgba(184,43,43,.4);
+}
+
+/* ================= SHEETS ================= */
+
+.sheet{
+  position:absolute;
+  top:calc(var(--headerH) + var(--topH));
+  bottom:0;
+  display:grid;
+  grid-auto-rows:var(--row);
+  align-content:start;
+}
+
+.leftSheet{
+  left:0;
+  width:var(--leftW);
+  grid-template-columns:var(--leftW);
+}
+
+.rightSheet{
+  left:var(--leftW);
+  width:var(--rightW);
+  grid-template-columns:repeat(6,1fr);
+}
+
+.cell{
+  display:flex;
+  align-items:center;
+  height: var(--row);
+  min-height: var(--row);
+  max-height: var(--row);
+  padding: 0 1px;
+  white-space: nowrap;
+  overflow: hidden;
+  user-select: none;
+  cursor: pointer;
+  border-right: 1px solid rgba(0,0,0,.35);
+  border-bottom: none;
+  margin: 0;
+}
+
+.leftSheet .cell {
+  border-right: none;
+  padding-left: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cell.selected{
+  background:rgba(90,160,255,.28);
+  outline:1px solid rgba(40,100,220,.8);
+}
+
+.tile{
+  display:flex;
+  align-items:center;
+  width:100%;
+  height:calc(100% - 4px);
+  padding:3px 8px;
+  border:1px solid #666;
+  border-radius:6px;
+  background:white;
+  cursor:grab;
+  user-select:none;
+  position:relative;
+  top:-1px;
+  overflow:hidden;
+}
+
+.color-Interjections { background:#8f8f8f; color:#ffffff; }
+.color-Verbs { background:#ffcccc; color:#333; }
+.color-Adjectives { background:#d9f7b2; color:#333; }
+.color-Adverbs { background:#ffd1dc; color:#333; }
+.color-Determiners { background:#c8f7c5; color:#333; }
+.color-Pronouns { background:#e0c3fc; color:#333; }
+.color-Prepositions { background:#ffd8b1; color:#333; }
+.color-Conjunctions { background:#cfe8ff; color:#333; }
+.color-Nouns { background:#ffeeba; color:#333; }
+</style>
+</head>
+
+<body>
+
+<div class="frame">
+<div class="page">
+
+<div class="headerArea">
+  <textarea id="headerLeft" placeholder="Page:"></textarea>
+  <textarea id="headerRight" placeholder="Title:&#10;Instructions:"></textarea>
+</div>
+<div class="headerRed"></div>
+
+<div class="topBar" id="topBarContainer">
+  <textarea id="leftInput" placeholder=""></textarea>
+  <div class="fileToolbar">
+    <div class="buttonContainer">
+      <input type="file" id="txtLoader" accept=".txt" style="display:none">
+      <button id="loadTxtBtn" type="button">Import</button>
+      <button id="saveTxtBtn" type="button">Export</button>
+    </div>
+    <textarea id="rightInput" placeholder="Content goes here..."></textarea>
+  </div>
+</div>
+
+<div class="lines" id="gridLines"></div>
+<div class="red"></div>
+
+<div class="sheet leftSheet" id="left"></div>
+<div class="sheet rightSheet" id="right"></div>
+
+</div>
+</div>
+
+<script>
+const ROWS = Math.ceil(1200 / 34);
+const COLS = 6;
+
+const leftEl = document.getElementById("left");
+const rightEl = document.getElementById("right");
+const leftInput = document.getElementById("leftInput");
+const rightInput = document.getElementById("rightInput");
+const headerLeft = document.getElementById("headerLeft");
+const headerRight = document.getElementById("headerRight");
+
+let dragging = false;
+let editing = false;
+let anchorCell = null;
+let focusCell = null;
+let tiles = [];
+let selectedTile = null;
+
+const cellText = Array.from({length:ROWS}, ()=>Array(COLS).fill(""));
+let leftRows = {};
+
+function parseHeaderFields(text){
+  text = text.replace(/\r/g,"");
+  let titleVal = "";
+  let pageVal = "";
+  let instVal = "";
+
+  const lines = text.split("\n");
+  for(let i=0; i<lines.length; i++){
+    const line = lines[i];
+    if(line.startsWith("Title:")){
+      titleVal = line.trim();
+    } else if(line.startsWith("Page:")){
+      pageVal = line;
+      let j = i + 1;
+      while(j < lines.length && !lines[j].startsWith("Instructions:") && !lines[j].startsWith("Cells:") && !lines[j].startsWith("Left Lines:") && !lines[j].startsWith("~")){
+        if(lines[j].trim() !== "") pageVal += "\n" + lines[j];
+        j++;
+      }
+    } else if(line.startsWith("Instructions:")){
+      instVal = line;
+      let j = i + 1;
+      while(j < lines.length && !lines[j].startsWith("Cells:") && !lines[j].startsWith("Left Lines:") && !lines[j].startsWith("~")){
+        if(lines[j].trim() !== "") instVal += "\n" + lines[j];
+        j++;
+      }
+    }
+  }
+
+  headerLeft.value = pageVal;
+  
+  let combinedRight = "";
+  if(titleVal) combinedRight += titleVal;
+  if(instVal) {
+    if(combinedRight) combinedRight += "\n";
+    combinedRight += instVal;
+  }
+  headerRight.value = combinedRight;
+}
+
+function parseFileContent(text){
+  text = text.replace(/\r/g,"");
+  const lines = text.split("\n");
+  
+  let mode = null;
+  let leftMap = {};
+  let currentLeftLineNum = null;
+
+  for(let i = 0; i < lines.length; i++){
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    if(trimmed.startsWith("Left Lines:")){
+      mode = "left";
+      continue;
+    } else if(trimmed.startsWith("Cells:") || trimmed.startsWith("Title:") || trimmed.startsWith("Page:") || trimmed.startsWith("Instructions:")){
+      mode = null;
+    }
+
+    if(mode === "left"){
+      const match = trimmed.match(/^Line\s+(\d+)\b(.*)/i);
+      if(match){
+        currentLeftLineNum = parseInt(match[1], 10) - 1;
+        const remainder = match[2].replace(/^[:\.]\s*/, "").trim();
+        leftMap[currentLeftLineNum] = remainder;
+      } else if(trimmed && currentLeftLineNum !== null){
+        leftMap[currentLeftLineNum] = (leftMap[currentLeftLineNum] ? leftMap[currentLeftLineNum] + "\n" : "") + line;
+      }
+    }
+  }
+  return leftMap;
+}
+
+function update(){
+  const content = rightInput.value;
+  parseHeaderFields(content);
+  leftRows = parseFileContent(content);
+  buildTiles(content);
+  render();
+  if(window.applyPOS) applyPOS();
+}
+
+rightInput.addEventListener("input", update);
+
+leftInput.addEventListener("input", () => {
+  const text = leftInput.value.replace(/\r/g, "");
+  const lines = text.split("\n");
+  leftRows = {};
+  lines.forEach(l => {
+    const trimmed = l.trim();
+    const match = trimmed.match(/^Line\s+(\d+)\b(.*)/i);
+    if(match){
+      const rNum = parseInt(match[1], 10) - 1;
+      const val = match[2].replace(/^[:\.]\s*/, "").trim();
+      if(rNum >= 0) leftRows[rNum] = val;
+    }
+  });
+  render();
+});
+
+// Dynamic resize sync for grid lines and sheets
+const topBarContainer = document.getElementById("topBarContainer");
+const gridLines = document.getElementById("gridLines");
+
+const resizeObserver = new ResizeObserver(entries => {
+  for (let entry of entries) {
+    const h = entry.contentRect.height;
+    document.documentElement.style.setProperty('--topH', h + 'px');
+    const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--headerH')) || 120;
+    const totalTop = headerH + h;
+    gridLines.style.inset = `${totalTop}px 0 0 0`;
+    leftEl.style.top = `${totalTop}px`;
+    rightEl.style.top = `${totalTop}px`;
+  }
+});
+resizeObserver.observe(topBarContainer);
+
+// File Loader & Saver Binding
+const loadTxtBtn = document.getElementById("loadTxtBtn");
+const txtLoader = document.getElementById("txtLoader");
+const saveTxtBtn = document.getElementById("saveTxtBtn");
+
+loadTxtBtn.onclick = () => txtLoader.click();
+
+txtLoader.onchange = (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    rightInput.value = event.target.result;
+    update();
+  };
+  reader.readAsText(file);
+};
+
+saveTxtBtn.onclick = () => {
+  const textContent = rightInput.value;
+  let exportContent = textContent.trim();
+
+  // Ensure Left Lines are appended or updated cleanly
+  let leftContentStr = "\n\nLeft Lines:\n\n";
+  let hasLeft = false;
+  for(let r = 0; r < ROWS; r++){
+    if(leftRows[r] !== undefined && leftRows[r] !== ""){
+      leftContentStr += `Line ${r + 1}. ${leftRows[r]}\n\n`;
+      hasLeft = true;
+    }
+  }
+
+  if(hasLeft){
+    // Strip old Left Lines section if it exists
+    const leftLinesIdx = exportContent.indexOf("Left Lines:");
+    if(leftLinesIdx !== -1){
+      exportContent = exportContent.substring(0, leftLinesIdx).trim();
+    }
+    exportContent += "\n\n" + leftContentStr.trim();
+  }
+
+  const firstLine = textContent.split("\n")[0] || "word-wall";
+  const safeName = firstLine.replace(/[<>:"/\\|?*]/g, "").trim() || "word-wall";
+  
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const dateStr = `${year}-${month}-${day}`;
+
+  const fileName = `${safeName}_${dateStr}.txt`;
+
+  const blob = new Blob([exportContent], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+/* ================= SELECTION & EDITING ================= */
+
+function clearSelection(){
+  document.querySelectorAll(".cell.selected").forEach(c=>c.classList.remove("selected"));
+}
+
+function renderSelection(){
+  clearSelection();
+  if(!anchorCell || !focusCell) return;
+  if(anchorCell.dataset.side !== focusCell.dataset.side) return;
+
+  const side = anchorCell.dataset.side;
+  const r1 = Math.min(+anchorCell.dataset.r, +focusCell.dataset.r);
+  const r2 = Math.max(+anchorCell.dataset.r, +focusCell.dataset.r);
+  const c1 = Math.min(+(anchorCell.dataset.c||0), +(focusCell.dataset.c||0));
+  const c2 = Math.max(+(anchorCell.dataset.c||0), +(focusCell.dataset.c||0));
+  const target = side === "L" ? leftEl : rightEl;
+
+  for(let r=r1;r<=r2;r++){
+    for(let c=c1;c<=c2;c++){
+      const el = side === "L"
+        ? target.querySelector(`[data-r="${r}"][data-side="L"]`)
+        : target.querySelector(`[data-r="${r}"][data-c="${c}"][data-side="R"]`);
+      if(el) el.classList.add("selected");
+    }
+  }
+}
+
+function setSelection(a, b, additive=false){
+  if(editing) return;
+  if(!additive || !anchorCell) anchorCell = a;
+  focusCell = b;
+  renderSelection();
+}
+
+function edit(cell){
+  editing = true;
+  dragging = false;
+  clearSelection();
+  cell.contentEditable = true;
+  cell.focus();
+  const range = document.createRange();
+  range.selectNodeContents(cell);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+
+  cell.onblur = () => {
+    if(cell.dataset.side==="R"){
+      const r=+cell.dataset.r;
+      const c=+cell.dataset.c;
+      cellText[r][c]=cell.textContent;
+    } else if(cell.dataset.side==="L"){
+      const r=+cell.dataset.r;
+      leftRows[r]=cell.textContent;
+    }
+    editing=false;
+    cell.contentEditable=false;
+  };
+}
+
+/* ================= RENDER ================= */
+
+function render(){
+  leftEl.innerHTML="";
+  rightEl.innerHTML="";
+
+  for(let r=0;r<ROWS;r++){
+    const L=document.createElement("div");
+    L.className="cell";
+    L.dataset.side="L";
+    L.dataset.r=r;
+    L.textContent=leftRows[r] || "";
+    
+    L.onpointerdown=(e)=>{ if(editing) return; dragging=true; setSelection(L,L,e.shiftKey); };
+    L.onpointerenter=()=>{ if(dragging && anchorCell?.dataset.side==="L"){ focusCell=L; renderSelection(); } };
+    L.ondblclick=()=>edit(L);
+    leftEl.appendChild(L);
+
+    for(let c=0;c<COLS;c++){
+      const R=document.createElement("div");
+      R.className="cell";
+      R.dataset.side="R";
+      R.dataset.r=r;
+      R.dataset.c=c;
+      
+      const tile = tiles.find(t => t.row===r && t.col===c);
+
+      if(tile){
+        const tileEl=document.createElement("div");
+        const cls = window.POS_COLORS_INDEX?.get((tile.text || "").trim().toLowerCase()) || "";
+        tileEl.className = "tile " + cls;
+        tileEl.textContent=tile.text;
+        
+        const len = tile.text.length;
+        const size = Math.max(8, 16 - (len - 10) * 0.5);
+        tileEl.style.fontSize = size + "px";
+
+        tileEl.onclick=(e)=>{
+          e.stopPropagation();
+          if(selectedTile===tile){
+            tileEl.contentEditable=true;
+            tileEl.focus();
+            const range=document.createRange();
+            range.selectNodeContents(tileEl);
+            window.getSelection().removeAllRanges();
+            window.getSelection().addRange(range);
+            tileEl.onblur=()=>{
+              tile.text=tileEl.textContent;
+              tileEl.contentEditable=false;
+              render();
+            };
+            return;
+          }
+          selectedTile=tile;
+        };
+
+        R.appendChild(tileEl);
+      } else {
+        R.textContent=cellText[r][c];
+      }
+
+      R.onpointerdown=(e)=>{
+        if(selectedTile){
+          const occupied = tiles.some(t => t !== selectedTile && t.row === r && t.col === c);
+          if(occupied){ selectedTile = null; return; }
+          selectedTile.row = r;
+          selectedTile.col = c;
+          selectedTile = null;
+          render();
+          return;
+        }
+        if(editing) return;
+        dragging = true;
+        setSelection(R,R,e.shiftKey);
+      };
+      
+      R.onpointerenter=()=>{
+        if(dragging && anchorCell?.dataset.side==="R"){
+          focusCell=R;
+          renderSelection();
+        }
+      };
+
+      R.ondblclick=()=>{
+        const occupied = tiles.some(t => t.row===r && t.col===c);
+        if(occupied) return;
+        edit(R);
+      };
+
+      rightEl.appendChild(R);
+    }
+  }
+}
+
+document.addEventListener("pointermove",(e)=>{
+  if(!dragging || !anchorCell) return;
+  const el=document.elementFromPoint(e.clientX,e.clientY);
+  if(!el || !el.classList.contains("cell")) return;
+  if(el.dataset.side!==anchorCell.dataset.side) return;
+  focusCell=el;
+  renderSelection();
+});
+
+document.addEventListener("pointerup",()=>{ dragging=false; });
+
+/* ================= PARSING SCRIPT ================= */
+(function(){
+  window.getTileSourceText = function getTileSourceText(){
+    return (rightInput.value || "").trim();
+  }
+
+  function parseSectionedText(text){
+    text = text.replace(/\r/g,"");
+    const sections = [];
+    let current = null;
+    text.split("\n").forEach(line => {
+      const trimmed = line.trim();
+      if(trimmed.startsWith("Cells:")){
+        current = { heading: "Cells:", body:[] };
+        sections.push(current);
+        const remainder = trimmed.replace("Cells:", "").trim();
+        if(remainder) current.body.push(remainder);
+        return;
+      }
+      if(trimmed.startsWith("~") || trimmed.startsWith("Left Lines:")){
+        current = { heading: trimmed.startsWith("~") ? trimmed.slice(1).trim() : "Left Lines:", body:[] };
+        sections.push(current);
+        return;
+      }
+      if(!current) return;
+      current.body.push(line);
+    });
+    return sections;
+  }
+
+  buildTiles = function(){
+    const sourceText = getTileSourceText();
+    const sections = parseSectionedText(sourceText);
+    const cellsSection = sections.find(section => /^Cells:/i.test(section.heading));
+
+    tiles = [];
+    let currentRow = 0;
+    let currentCol = 0;
+    
+    const rawLines = cellsSection ? cellsSection.body : sourceText.split("\n");
+
+    let joined = rawLines.join("\n");
+    const blocks = joined.split(/\n\s*\n+/);
+
+    blocks.forEach((block, blockIndex) => {
+      if(blockIndex > 0){
+        currentRow++;
+        currentCol = 0;
+      }
+
+      const lines = block.split("\n");
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if(!trimmed) return;
+        if(trimmed.startsWith("Cells:") || trimmed.startsWith("~") || trimmed.startsWith("Left Lines:")) return;
+        if(trimmed.startsWith("|") && trimmed.endsWith("|")) return;
+        if(trimmed.startsWith("Title:") || trimmed.startsWith("Page:") || trimmed.startsWith("Instructions:")) return;
+
+        const items = trimmed.split(",").map(i => i.trim()).filter(Boolean);
+        items.forEach(item => {
+          if(currentCol >= COLS){
+            currentRow++;
+            currentCol = 0;
+          }
+          tiles.push({
+            id: tiles.length,
+            text: item,
+            row: currentRow,
+            col: currentCol
+          });
+          currentCol++;
+        });
+      });
+
+      if(lines.length > 0){
+        currentRow++;
+        currentCol = 0;
+      }
+    });
+  };
+
+  update();
+})();
+
+/* ================= POS COLOR MAP ================= */
+(function(){
+  window.POS_COLORS = {
+    Nouns: "color-Nouns",
+    Verbs: "color-Verbs",
+    Adjectives: "color-Adjectives",
+    Adverbs: "color-Adverbs",
+    Determiners: "color-Determiners",
+    Pronouns: "color-Pronouns",
+    Prepositions: "color-Prepositions",
+    Conjunctions: "color-Conjunctions",
+    Interjections: "color-Interjections"
+  };
+
+  function parsePOSSections(text){
+    text = text.replace(/\r/g,"");
+    const sections = [];
+    let current = null;
+    text.split("\n").forEach(line => {
+      const t = line.trim();
+      if(!t) return;
+      if(t.startsWith("|") && t.endsWith("|")){
+        current = t.replaceAll("|","").trim();
+        return;
+      }
+      if(current) sections.push({ pos: current, word: t });
+    });
+    return sections;
+  }
+
+  function buildPOSMap(){
+    const sourceText = (typeof getTileSourceText === "function") ? getTileSourceText() : "";
+    const parsed = parsePOSSections(sourceText);
+    const map = new Map();
+    parsed.forEach(item => {
+      const phrases = (item.word || "").split(",").map(w => w.trim().toLowerCase()).filter(Boolean);
+      phrases.forEach(w => map.set(w, POS_COLORS[item.pos] || ""));
+    });
+    return map;
+  }
+
+  window.applyPOS = function applyPOS(){
+    const posMap = buildPOSMap();
+    window.POS_COLORS_INDEX = posMap;
+    document.querySelectorAll(".tile").forEach(tileEl => {
+      const word = (tileEl.textContent || "").trim().toLowerCase();
+      const cls = posMap.get(word);
+      tileEl.className = "tile " + (cls || "");
+    });
+  };
+
+  applyPOS();
+})();
+</script>
+
+</body>
+</html>

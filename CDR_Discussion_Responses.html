@@ -20,24 +20,65 @@
 
   body {
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
     padding: 10px;
   }
 
   .container {
     width: 100%;
     max-width: 800px;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .headerRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
   }
 
   h1 {
     font-size: 20px;
-    margin: 0 0 10px 0;
+    margin: 0;
     color: #222;
+  }
+
+  .downloadGroup {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  #classSelect, #downloadBtn {
+    padding: 6px 10px;
+    font-size: 14px;
+    border-radius: 6px;
+    border: 1px solid #aaa;
+  }
+
+  #classSelect {
+    background: #fff;
+    cursor: pointer;
+  }
+
+  #downloadBtn {
+    background: #007aff;
+    color: white;
+    border: none;
+    cursor: pointer;
+  }
+
+  #downloadBtn:hover {
+    background: #005bb5;
   }
 
   /* THREAD DISPLAY */
   #thread {
-    height: 90vh;
+    flex: 1;
+    height: 85vh;
     overflow-y: auto;
     border: 2px solid #39FF14;
     border-radius: 6px;
@@ -71,7 +112,7 @@
     white-space: pre-wrap;
   }
 
-  /* CLEAN SCROLLBAR (optional aesthetic) */
+  /* CLEAN SCROLLBAR */
   #thread::-webkit-scrollbar {
     width: 8px;
   }
@@ -86,7 +127,20 @@
 <body>
 
 <div class="container">
-  <h1>Live Class Thread</h1>
+  <div class="headerRow">
+    <h1>Live Class Thread</h1>
+    <div class="downloadGroup">
+      <select id="classSelect">
+        <option value="Select Class">Select Class</option>
+        <option value="11.1">11.1</option>
+        <option value="13.2">13.2</option>
+        <option value="14.1">14.1</option>
+        <option value="15.3">15.3</option>
+        <option value="16.2">16.2</option>
+      </select>
+      <button id="downloadBtn">Save</button>
+    </div>
+  </div>
   <div id="thread"></div>
 </div>
 
@@ -99,6 +153,10 @@ const supabaseClient = supabase.createClient(
 );
 
 const thread = document.getElementById("thread");
+const classSelect = document.getElementById("classSelect");
+const downloadBtn = document.getElementById("downloadBtn");
+
+let allPostsData = [];
 
 /* RENDER */
 function renderPost(p) {
@@ -126,26 +184,27 @@ function renderPost(p) {
   div.appendChild(body);
 
   thread.appendChild(div);
+  thread.scrollTop = thread.scrollHeight;
 }
 
 /* LOAD THREAD */
 async function loadThread() {
-
   const { data, error } = await supabaseClient
     .from("instant_input")
     .select("entry")
-    .order("id", { ascending: false });
+    .order("created_at", { ascending: true });
 
   if (error) {
     console.error("Load error:", error);
     return;
   }
 
+  allPostsData = data;
   thread.innerHTML = "";
 
   for (const row of data) {
     try {
-      const post = JSON.parse(row.entry);
+      const post = typeof row.entry === 'string' ? JSON.parse(row.entry) : row.entry;
       renderPost(post);
     } catch (e) {
       console.warn("Bad row:", row.entry);
@@ -153,9 +212,57 @@ async function loadThread() {
   }
 }
 
-/* INIT */
+/* DOWNLOAD HANDLER */
+downloadBtn.onclick = () => {
+  if (allPostsData.length === 0) {
+    alert("No posts available to download.");
+    return;
+  }
+
+  let fileContent = "";
+  for (const row of allPostsData) {
+    try {
+      const p = typeof row.entry === 'string' ? JSON.parse(row.entry) : row.entry;
+      fileContent += `[${p.time}] ${p.name} (${p.student_id}):\n${p.message}\n\n----------------------------------------\n\n`;
+    } catch (e) {
+      // Skip invalid rows
+    }
+  }
+
+  const selectedClass = classSelect.value.replace(/\s+/g, '');
+  const dateStr = new Date().toISOString().slice(0, 10);
+  const filename = `${selectedClass}_${dateStr}.txt`;
+
+  const blob = new Blob([fileContent], { type: 'text/plain;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+/* INIT & REALTIME SUBSCRIPTION */
 loadThread();
-setInterval(loadThread, 5000);
+
+supabaseClient
+  .channel('public:instant_input')
+  .on(
+    'postgres_changes',
+    { event: 'INSERT', schema: 'public', table: 'instant_input' },
+    (payload) => {
+      try {
+        allPostsData.push(payload.new);
+        const post = typeof payload.new.entry === 'string' ? JSON.parse(payload.new.entry) : payload.new.entry;
+        renderPost(post);
+      } catch (e) {
+        console.warn("Realtime parse error:", e);
+      }
+    }
+  )
+  .subscribe();
 </script>
 
 </body>

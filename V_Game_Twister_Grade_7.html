@@ -1,177 +1,327 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Twister</title>
-<style>
-:root {
-  --max-width: 380px;
-  --gutter: 12px;
-}
 
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Word Bubbles</title>
+<style>
+/* ==============================
+   GLOBAL RESET & BASE STYLES
+   ============================== */
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
-  font-family: Arial, sans-serif;
 }
 
-html, body {
-  height: 100%;
-  width: 100%;
-  max-width: none;
-  margin: 0 auto;
-  overflow-x: hidden;
-}
 
 body {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  background: #7fa9c6; /* fallback */
+  padding: 30px;
+  font-family: Arial, sans-serif;
+  background: black;
+  user-select: none;
 }
 
-
-/* ───────────────────────── TOP FIELDS ───────────────────────── */
-#topFields {
-  display: flex;
+/* ==============================
+   TOP + MID BARS
+   ============================== */
+#topBar,
+#midBar {
+  position: relative;
+  z-index: 10000;
+  align-items: center;
   gap: 6px;
-  margin-top: 20px;
-  justify-content: center;
-  align-items: center;
+  padding: 8px;
+  margin: 0 auto 16px auto;
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.6);
+  border-radius: 6px;
+  flex-wrap: nowrap;
   width: 100%;
-  max-width: 380px;       /* match section selector max-width */
-  margin-left: auto;
-  margin-right: auto;
-  z-index: 9999;
-  position: relative;
+  max-width: 100%;
 }
 
-#topFields input,
-#topFields button {
-  flex-shrink: 0; /* inputs and buttons won’t shrink below their width */
-
-  height: 36px;            /* match selector buttons */
-  font-size: 14px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  padding: 0 10px;
-  box-sizing: border-box;
+#topBar input[type="text"] {
+  flex: 1 1 0;
+  min-width: 70px;
+  max-width: 140px;
 }
 
-#topFields input {
-  width: 90px;
-}
-
-#topFields button {
-  background: #6B7280;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-#topFields button:disabled {
-  background: #888;
-  cursor: not-allowed;
-}
-
-#countdownOverlay {
-  min-width: 36px;
-  text-align: center;
-  font-weight: bold;
-  font-size: 16px;
-  color: #0288d1;
-  z-index: 9999;
-  position: relative;
-}
-
-/* ───────────────────────── SECTION SELECTOR ───────────────────────── */
-#sectionSelectorRow {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  max-width: 380px;
-  margin: 10px auto 0;
-  padding: 0;
-  box-sizing: border-box;
-  z-index: 9999;
-  position: relative;
-
-  /* nudge row 3px left to fix offset */
-  transform: translateX(-4px);
-}
-
-/* Buttons */
-#sectionUp,
-#sectionDown {
-  flex: 0 0 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  border-radius: 6px;
-  border: 1px solid transparent; /* match top inputs */
-  background: #6B7280;
-  color: white;
-  cursor: pointer;
-  transition: background 0.15s ease, transform 0.1s ease;
-  padding: 0;
-  margin: 0;
-}
-
-/* Wheel spacing using button margins */
-#sectionUp {
-  margin-right: 6px;
-}
-
-#sectionDown {
-  margin-left: 6px;
-}
-
-#sectionUp:hover,
-#sectionDown:hover {
-  background: #0277bd;
-}
-
-#sectionUp:active,
-#sectionDown:active {
-  transform: scale(0.97);
-}
-
-#sectionUp:disabled,
-#sectionDown:disabled {
-  background: #888;
-  cursor: not-allowed;
-}
-
-/* Wheel Container */
-#sectionWheelContainer {
-  flex: 0 0 260px;
-  height: 36px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 0 10px;  /* match top inputs */
-  box-sizing: border-box;
-  margin: 0;
-}
-
-.wheel {
-  flex: 1;
-  padding-left: 0;
-  font-size: 14px;
+#topBar button,
+#midBar button {
+  flex: 0 0 auto;
   white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  box-sizing: border-box;
+  padding-left: 10.5px;
+  padding-right: 10.5px;
 }
+
+/* ==============================
+   INPUTS & BUTTONS
+   ============================== */
+input[type="text"] {
+  padding: 6px 10px;
+  font-size: 16px;
+  width: 140px;
+  border: 1px solid #999;
+  border-radius: 4px;
+}
+
+button {
+  padding: 6px 12px;
+  font-size: 16px;
+  border-radius: 4px;
+  border: 1px solid #3f5d78;
+  background: #4f6f8f;
+  color: white;
+  cursor: pointer;
+  user-select: none;
+}
+
+button:hover {
+  background: #3f5d78;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* ==============================
+   SCOREBOARD & BUTTONS
+   ============================== */
+#scoreboardContainer {
+  transform: translateY(-260px);
+
+  margin: 30px 0 0 0;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 18px;
+  white-space: normal;
+}
+
+#scoreButtons {
+  position: relative;
+  z-index: 999999;
+
+  transform: translateY(-250px);
+
+  margin: 12px 0 24px 0;
+  display: none;
+  gap: 10px;
+  flex-wrap: wrap;
+
+  pointer-events: auto;
+}
+/* ==============================
+   INVISIBLE TYPING INPUT
+   ============================== */
+#typingInput {
+  position: fixed;
+  left: 5px;
+  top: 5px;
+  width: 24px;
+  height: 24px;
+  opacity: 0;
+  pointer-events: none;
+  background: transparent;
+  border: none;
+  z-index: 9999;
+  font-size: 18px;
+  color: black;
+  caret-color: transparent;
+}
+
+/* ==============================
+   FOOTER
+   ============================== */
+footer {
+  transform: translateY(-250px);
+
+  margin-top: 0px;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 10px;
+  color: #666;
+  background: #f0f8ff;
+  border-radius: 6px;
+
+  z-index: 1000;
+
+}
+
+/* ==============================
+   FORM ROWS & WHEEL
+   ============================== */
+.formRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#sectionWheelContainer {
+  height: 34px;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #999;
+  border-radius: 4px;
+  background: #fff;
+  position: relative;
+}
+
+#wheel,
+.wheel {
+  position: absolute;
+  top: 0;
+  width: 100%;
+  transition: transform 0.25s ease;
+}
+
+.wheelItem {
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  user-select: none;
+  font-size: 15px;
+  line-height: 1;
+}
+
+/* ==============================
+   RESPONSIVE & TOUCH ADJUSTMENTS
+   ============================== */
+@media (max-width: 480px) {
+  body { padding: 16px; }
+  input[type="text"] { width: 100px; }
+  button { padding: 4px 8px; font-size: 14px; }
+  #gameArea { height: 180px; }
+  .wheelItem { font-size: 13px; }
+}
+
+/* Sky field canvas */
+
+#blueCloudCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 300px;
+    pointer-events: none;
+    z-index: 130;
+}
+
+#topCloudCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 200px;
+    pointer-events: none;
+    z-index: 150;
+}
+
+
+#gameArea {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -50px;
+  width: calc(100% + 100px);
+  height: 100%;
+  display: block;
+}
+/* UFO / Tornado container */
+
+
+#ufoContainer {
+  position: absolute;
+  top: -40px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: -131;
+}
+
+
+#ufo {
+
+  font-size: 200px;
+
+  opacity: 0.8;  /* 20% transparent */
+  filter: brightness(0.65) contrast(1.15);
+  z-index: 131;
+
+  -webkit-mask-image:
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,1) 0%,
+      rgba(0,0,0,1) 75%,
+      rgba(0,0,0,0) 100%
+    );
+
+
+  mask-image:
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,1) 0%,
+      rgba(0,0,0,1) 75%,
+      rgba(0,0,0,0) 100%
+    );
+
+}
+
+.cow {
+  position: absolute;
+  display: block;
+  font-size: 80px;
+  z-index: 5000;
+  opacity: 0;
+  visibility: visible;
+  pointer-events: none;
+  transition: opacity 3s ease-in-out;
+}
+
+.cowIcon {
+
+  transform:scaleX(-1);
+
+  display:inline-block;
+
+  line-height:1;
+
+}
+
+
+#gameWrapper {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: visible;
+  background: transparent;
+  z-index:10;
+}
+
+#animalLayer {
+  position:absolute;
+  left:0;
+  width:100vw;
+  height:330px;
+  pointer-events:none;
+  overflow:visible;
+  z-index:1000;
+}
+#groundCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+
+    /* Behind everything except the body background */
+    z-index: -2;
+}
+
 #windCanvas {
   position: fixed;
   inset: 0;
@@ -184,642 +334,347 @@ body {
 }
 
 
-#gameArea {
-  position: relative;
-  width: 100%;
-  height: 240px;
-  overflow: visible;
-  background: transparent;
+/* Hide scrollbars but keep scrolling */
+
+html,
+body {
+    overflow-y: auto;
+    overflow-x: hidden;
+
+    /* Firefox */
+    scrollbar-width: none;
+
+    /* IE / old Edge */
+    -ms-overflow-style: none;
 }
 
-
-#ufoContainer {
-  position: absolute;
-  top: -60px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 10;
+/* Chrome, Safari, Edge, Opera */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    display: none;
 }
-
-#ufo {
-  font-size: 200px;
-}
-
-#beam {
-  position: absolute;
-  top: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 180px;
-  height: 230px;
-  background: radial-gradient(
-    ellipse at top,
-    rgba(255,255,150,0.6) 0%,
-    rgba(255,255,0,0.1) 80%
-  );
-  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-  opacity: 0;
-  transition: opacity 0.3s;
-}
-
-/* ───────────────────────── ANIMALS ───────────────────────── */
-
-.cow {
-  position: absolute;
-  bottom: 50px;                 /* anchor all animals to same ground */
-  display: flex;
-  align-items: flex-end;    /* align bottoms instead of centers */
-  gap: 6px;
-  font-size: 35px;
-  line-height: 1;           /* remove emoji vertical offset */
-  z-index: 20;
-}
-
-.cowIcon {
-  transform: scaleX(-1);
-  display: inline-block;    /* stabilizes emoji box */
-  line-height: 1;
-}
-
-.cowWord {
-  display: none;
-}
-/* ───────────────────────── INPUT AREA ───────────────────────── */
-
-#inputArea {
-  margin-top: -40px;
-  padding: 0 var(--gutter);
-  display: flex;
-  justify-content: center;
-}
-
-#wordInput {
-  width: 160px;
-  padding: 6px;
-  font-size: 14px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-}
-
-/* ───────────────────────── SCOREBOARD ───────────────────────── */
-
-#scoreboard {
-  position: absolute;
-  top: 325px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 100%;
-  max-width: 320px;
-  padding: 8px 12px;
-  background: rgba(255,255,255,0.95);
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 12px;
-  display: none;
-  z-index: 100;
-  box-sizing: border-box;
-}
-
-#scoreData {
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  max-width: 100%;
-}
-
-
-
-#scoreButtons {
-  display: flex;
-  gap: 4px;
-  margin-top: 4px;
-}
-
-#scoreButtons button {
-  padding: 6px 12px;
-  font-size: 14px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  background: #6B7280;
-  color: white;
-  cursor: pointer;
-
-  min-width: 90px;          /* 👈 visual balance when centered */
-  text-align: center;
-}
-
-
-/* ───────────────────────── FOOTER ───────────────────────── */
-
-footer {
-  text-align: center;
-  font-size: 12px;
-  margin: 8px;
-}
-
-/* ───────────────────────── EFFECTS ───────────────────────── */
-
-.beamOn {
-  opacity: 1;
-  box-shadow: 0 0 50px 20px rgba(255,255,180,0.6);
-}
-
-
-
-#skyCanvas {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-}
-
-#topCloudCanvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 115px;          /* 👈 controls how far it stretches down */
-  z-index: 20;             /* behind UI, above skyCanvas */
-  pointer-events: none;
-}
-
-
-#ufo {
-  filter: brightness(0.5) contrast(1.1);
-}
-
-#ufo {
-  filter: brightness(0.65) contrast(1.15);
-
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    rgba(0,0,0,1) 0%,
-    rgba(0,0,0,1) 75%,
-    rgba(0,0,0,0) 100%
-  );
-
-  mask-image: linear-gradient(
-    to bottom,
-    rgba(0,0,0,1) 0%,
-    rgba(0,0,0,1) 75%,
-    rgba(0,0,0,0) 100%
-  );
-}
-
-#hiddenInput {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-  height: 0;
-  width: 0;
-}
-
 
 </style>
-
 </head>
 <body>
 
+<div id="loadingCover"></div>
+
+<canvas id="groundCanvas"></canvas>
+
+
 <canvas id="topCloudCanvas"></canvas>
-<canvas id="skyCanvas"></canvas>
+<script>
+(function () {
+  const canvas = document.getElementById("topCloudCanvas");
+  const ctx = canvas.getContext("2d");
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = canvas.offsetHeight;
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  let t = 0;
+
+  function noise(x, y, t) {
+    return (
+      Math.sin(x * 0.02 + t) +
+      Math.sin(y * 0.04 + t * 1.3) +
+      Math.sin((x + y) * 0.01 - t)
+    );
+  }
+
+  function draw() {
+    const w = canvas.width;
+    const h = canvas.height;
+    const img = ctx.createImageData(w, h);
+    const d = img.data;
+
+    for (let y = 0; y < h; y++) {
+      const feather = Math.min(1, (h - y) / (h * 0.25));
+
+      for (let x = 0; x < w; x++) {
+        const n = noise(x, y, t);
+        const flicker = Math.random() < 0.0006 ? 80 : 0;
+
+        // dark storm greys
+        let v = 10 + n * 25 + flicker;
+        v = Math.max(0, Math.min(255, v));
+
+        const i = (y * w + x) * 4;
+
+        d[i]     = v;
+        d[i + 1] = v;
+        d[i + 2] = v;
+        d[i + 3] = Math.floor(255 * feather);
+      }
+    }
+
+    ctx.putImageData(img, 0, 0);
+
+    t += 0.03;
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+
+})();
+</script>
 
 
+<!--<canvas id="blueCloudCanvas"></canvas>-->
 
-<div id="topControls">
-  <!-- TOP FIELDS -->
-  <div id="topFields">
-    <input type="text" id="nameField" placeholder="Name">
-    <input type="text" id="idField" placeholder="ID">
-    <button id="startButton" class="controlsBtn">Start</button>
-    <button id="submitButton">Submit</button>
-    <div id="countdownOverlay">60</div>
-  </div>
+<!--<script>
+(function () {
+  const canvas = document.getElementById("blueCloudCanvas");
+  const ctx = canvas.getContext("2d");
 
-  <!-- SECTION SELECTOR -->
-  <div class="formRow" id="sectionSelectorRow">
-    <button id="sectionUp">▲</button>
-    <div id="sectionWheelContainer">
-      <div class="wheel"></div>
-    </div>
-    <button id="sectionDown">▼</button>
-  </div>
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = canvas.offsetHeight;
+  }
+
+  window.addEventListener("resize", resize);
+  resize();
+
+  let t = 0;
+
+  function noise(x, y, t) {
+    return (
+      Math.sin(x * 0.018 + t) +
+      Math.sin(y * 0.035 + t * 1.5) +
+      Math.sin((x - y) * 0.012 - t)
+    );
+  }
+
+  function draw() {
+    const w = canvas.width;
+    const h = canvas.height;
+    const img = ctx.createImageData(w, h);
+    const d = img.data;
+
+    for (let y = 0; y < h; y++) {
+      const feather = Math.min(1, (h - y) / (h * 0.3));
+
+      for (let x = 0; x < w; x++) {
+        const n = noise(x, y, t);
+
+        // soft moving slate-blue cloud variation
+        let v = 45 + n * 30;
+        v = Math.max(0, Math.min(255, v));
+
+        const i = (y * w + x) * 4;
+
+        // #3f5d78 slate blue palette
+        const intensity = 0.65 + (v / 255) * 0.55;
+
+        d[i]     = 63  * intensity; // red
+        d[i + 1] = 93  * intensity; // green
+        d[i + 2] = 120 * intensity; // blue
+
+        // fade at bottom edge
+        d[i + 3] = Math.floor(255 * feather);
+      }
+    }
+
+    ctx.putImageData(img, 0, 0);
+
+    t += 0.025;
+    requestAnimationFrame(draw);
+  }
+
+  draw();
+
+})();
+</script>-->
+
+<div id="topBar">
+  <input type="text" id="nameField" placeholder="Name">
+  <input type="text" id="idField" placeholder="ID">
+  <button id="startButton" disabled>Start</button>
+  <button id="submitButton" disabled>Submit</button>
 </div>
 
 
+<div id="midBar" class="formRow">
+
+  <button type="button" id="sectionUp">▲</button>
+
+  <div id="sectionWheelContainer">
+    <div class="wheel"></div>
+  </div>
+
+  <button type="button" id="sectionDown">▼</button>
+
+</div>
 
 
+<div id="gameWrapper">
+  <div id="animalLayer"></div>
 
-<div id="gameArea">
-<div id="topGradientBand"></div>
+  <canvas id="gameArea"
+    tabindex="0"
+    aria-label="Typing game area">
+  </canvas>
+
   <div id="ufoContainer">
     <div id="ufo">🌪️</div>
     <div id="beam"></div>
   </div>
 </div>
 
-
 <canvas id="windCanvas"></canvas>
 
+<audio
+  id="popSound"
+  src="bubble-pop-406640.mp3"
+  preload="auto">
+</audio>
 
-
-<div id="inputArea">
-  <!-- Hidden real input (captures mobile keyboard reliably) -->
-  <input type="text" id="hiddenInput" autocomplete="off" autocapitalize="none">
-
-  <!-- Visible display-only input -->
-  <input type="text" id="wordInput" placeholder="Type word here..." disabled>
-</div>
-
-<div id="scoreboard">
-  <pre id="scoreData"></pre>
-  <div id="scoreButtons">
-    <button id="copyBtn">Copy</button>
-    <button id="txtBtn">↓TXT</button>
-    <button id="pngBtn">↓PNG</button>
-  </div>
-</div>
-
+<input
+  id="typingInput"
+  type="text"
+  inputmode="text"
+  autocapitalize="off"
+  autocorrect="off"
+  spellcheck="false"
+  maxlength="20"
+  autocomplete="off"
+/>
 <footer>
   <p>© 2026 Perfectly Practical English™. All rights reserved.</p>
 </footer>
 
-<script>
-function parseVocabInput(rawText) {
-  if (!rawText) return [];
-  return rawText
-    .replace(/<br\s*\/?>/gi, "\n")
-    .split(/[\n,]+/)
-    .map(w =>
-      w.trim().toLowerCase().replace(/[^a-z0-9'-]/g, "")
-    )
-    .filter(Boolean)
-    .filter((word, index, array) => array.indexOf(word) === index);
-}
-</script>
+<div id="scoreboardContainer"></div>
+
+
+<div id="scoreButtons">
+
+  <button id="copyBtn">Copy</button>
+  <button id="downloadTxtBtn">↓Text</button>
+  <button id="downloadPngBtn">↓PNG</button>
+
+</div>
 
 <script>
-function parseSections(raw) {
-  const chunks = raw.split(/\n(?=~+)/);
+(() => {
+  const canvas = document.getElementById('gameArea');
+  const ctx = canvas.getContext('2d');
 
-  return chunks
-    .map(chunk => chunk.trim())
-    .filter(chunk => chunk.startsWith("~"))
-    .map(chunk => {
-      const lines = chunk.split("\n");
-      const name = lines.shift().replace(/^~+/, "").trim();
-      const text = lines.join("\n").trim();
-      return { name, text };
-    });
-}
-
-function extractWords(sectionText) {
-  const lines = sectionText
-    .replace(/<br\s*\/?>/gi, "\n")
-    .split("\n")
-    .map(l => l.trim())
-    .filter(Boolean);
-
-  const words = [];
-
-  lines.forEach(line => {
-    if (!line.startsWith("•")) return;
-
-    const vocabWord = line
-      .replace(/^•\s*/, "")      // remove bullet
-      .split(/[–—-]/)[0]         // remove description
-      .replace(/[^\p{L}\s]/gu, "") // strip emoji/symbols
-      .trim()
-      .toLowerCase()
-      .split(/\s+/)[0];          // first word only
-
-    if (vocabWord) words.push(vocabWord);
-  });
-
-  return words;
-}
-</script>
-
-
-
-<script>
-async function loadVocab(raw) {
-  // filename mode
-  if (
-    typeof raw === "string" &&
-    raw.trim().endsWith(".txt") &&
-    !raw.includes("\n") &&
-    !raw.includes(" ")
-  ) {
-    const res = await fetch(raw.trim());
-    const text = await res.text();
-    return parseVocabInput(text);
+  function resizeCanvas() {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
   }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
 
-  // embedded raw text mode
-  return parseVocabInput(raw);
-}
-</script>
+  const wordListText = `
 
-
-
-<script>
-const rawVocab = `
-
-~ Unit 1 – Review for Test
-
-• museums 🏛️ - exhibition place
-galleries, exhibit centers
-
-• interested in 🔍 - have interest
-curious about, drawn to
-
-• parents 👨‍👩‍👧 - mother and father
-guardians, mum and dad
-
-• musical instrument 🎸 - music tool
-instrument, gear
-
-• magazines 📖 - periodicals
-journals, publications
-
-• exercise 🏋️ - physical activity
-training, workout
-
-• uncle 👨 - parent’s brother
-relative, family uncle
-
-• typical 📘 - normal
-standard, ordinary
-
-• awesome 🌟 - excellent
-amazing, fantastic
-
-• information ℹ️ - facts/data
-data, knowledge
-
-~ Unit 1 – Family & Friends
+~ Unit 1 Test
 
 • always ⏰ - every time
 constantly, forever
 
-• never 🚫 - not ever
-at no point, not once
-
-• usually 📅 - generally
-commonly, mostly
-
-• sometimes 🔄 - occasionally
-at intervals, every so often
-
-• often 🔁 - many times
-frequently, regularly
-
-• rarely 🌙 - not often
-scarcely, infrequently
-
-• hardly ever 💤 - almost never
-seldom, almost not
-
-• rollerblading 🛼 - skating on wheels
-skating, blading
-
-• musical instrument 🎸 - music tool
-instrument, gear
-
-• magazines 📖 - periodicals
-journals, publications
-
-• dance class 💃 - dance lesson
-workshop, training session
-
-• acrobatics 🤸 - gymnastic performance
-tumbling, stunts
+• awesome 🌟 - excellent
+amazing, fantastic
 
 • exercise 🏋️ - physical activity
 training, workout
 
-• museums 🏛️ - exhibition place
-galleries, exhibit centers
-
-• be keen on ❤️ - like very much
-be into, be fond of
+• information ℹ️ - facts/data
+data, knowledge
 
 • interested in 🔍 - have interest
 curious about, drawn to
 
+• magazine 📖 - periodical
+journal, publication
+
+• museum 🏛️ - exhibition place
+gallery, exhibit center
+
+• musical instrument 🎸 - music tool
+instrument, gear
+
 • parents 👨‍👩‍👧 - mother and father
 guardians, mum and dad
-
-• cousin 👦 - uncle/aunt’s child
-relative, extended family member
-
-• aunt 👩 - parent’s sister
-relative, family auntie
 
 • uncle 👨 - parent’s brother
 relative, family uncle
 
-• typical 📘 - normal
-standard, ordinary
-
-• awesome 🌟 - excellent
-amazing, fantastic
-
-• brilliant 💡 - very smart
-outstanding, superb
-
-• experimental 🧪 - testing-based
-trial-based, test-phase
-
-• information ℹ️ - facts/data
-data, knowledge
-
-~Unit 2 – Food
-
-• onions 🧅 - vegetable
-bulbs, alliums
-
-• potatoes 🥔 - tuber
-spuds, tubers
-
-• sugar 🍬 - sweetener
-sweetener, sucrose
-
-• ketchup 🍅 - tomato sauce
-sauce, condiment
-
-• lemonade 🍋 - lemon drink
-citrus drink, soft drink
-
-• butter 🧈 - dairy spread
-spread, dairy fat
-
-• mayonnaise 🥫 - creamy sauce
-mayo, dressing
+~ Unit 2 Test
 
 • crisps 🍟 - potato chips
 chips, snacks
 
-• carton 📦 - box container
-container, pack box
-
-• jar 🫙 - glass container
-pot, storage jar
-
-• loaf 🍞 - bread shape
-bread block, bread unit
-
-• packet 📩 - small pack
-pack, sachet
-
-• tub 🪣 - plastic container
-container, bucket
-
-• take out 📤 - remove
-remove, extract
-
-• boil ♨️ - cook in water
-simmer, heat in water
-
-• chop 🔪 - cut
-slice, dice
-
-• fry 🍳 - cook in oil
-sauté, pan-cook
-
-• heat 🔥 - make hot
-warm, raise temperature
-
-• yummy 😋 - tasty
-delicious, scrumptious
+• dessert 🍰 - sweet food
+sweet course, pudding
 
 • fresh 🌿 - not old
 crisp, newly made
 
-• spicy 🌶️ - hot taste
-fiery, hot-flavoured
-
 • ingredients 🥣 - components
 elements, components
 
-• dessert 🍰 - sweet food
-sweet course, pudding
+• mayonnaise 🥫 - creamy sauce
+mayo, dressing
+
+• packet 📩 - small pack
+pack, sachet
 
 • prepare 👩‍🍳 - get ready
 get ready, assemble
 
-• olive oil 🫒 - oil
-cooking oil, oil extract
+• recommend 👍 - suggest
+advise, put forward
 
 • taste 👅 - flavour
 flavour, savour
 
-• grilled 🍖 - cooked over fire
-barbecued, flame-cooked
-
 • vegetarian 🥗 - no meat diet
 plant-based eater, non-meat eater
 
-• recommend 👍 - suggest
-advise, put forward
-
-• unhealthy ⚠️ - bad for health
-harmful, damaging
-
-~ Unit 3 – Work
-
-• accountant 🧾 - finance worker
-bookkeeper, finance clerk
-
-• architect 📐 - building designer
-designer, planner
-
-• astronaut 🚀 - space traveler
-space explorer, cosmonaut
-
-• builder 🧱 - construction worker
-constructor, tradesperson
-
-• engineer ⚙️ - technical worker
-technician, specialist
-
-• hairdresser ✂️ - hair cutter
-stylist, barber
-
-• journalist 📰 - news reporter
-reporter, correspondent
-
-• lawyer ⚖️ - legal expert
-solicitor, counsel
-
-• plumber 🚰 - pipe worker
-pipe fitter, repair worker
-
-• receptionist 🛎️ - front desk worker
-front-desk clerk, admin assistant
-
-• volunteer 🤝 - unpaid helper
-helper, unpaid worker
-
-• profession 💼 - job type
-occupation, career
-
-• company 🏢 - business
-firm, corporation
-
-• fascinating 🤩 - very interesting
-captivating, gripping
+~ Unit 3 Test
 
 • duty 📋 - responsibility
 task, obligation
 
-• earn money 💵 - get income
+• earn 💵 - get income
 make income, get paid
-
-• responsible ✅ - reliable
-dependable, trustworthy
 
 • education 🎓 - learning system
 schooling, training system
 
-• colleague 👥 - coworker
-coworker, associate
+• engineer ⚙️ - technical worker
+technician, specialist
 
-• life experience 🌍 - life knowledge
+• experience 🌍 - life knowledge
 personal knowledge, lived experience
+
+• fascinating 🤩 - very interesting
+captivating, gripping
 
 • language 🗣️ - communication system
 speech system, communication
 
-~ Unit 4 – People
+• plumber 🚰 - pipe worker
+pipe fitter, repair worker
 
-• personality 😊 - character
-temperament, traits
+• responsible ✅ - reliable
+dependable, trustworthy
 
-• unfriendly 😒 - not friendly
-hostile, cold
+• volunteer 🤝 - unpaid helper
+helper, unpaid worker
 
-• unkind 😠 - cruel
-mean, harsh
+~ Unit 4 Test
 
-• unsociable 🙍 - not social
-withdrawn, reserved
+• appearance 👀 - looks
+looks, outward form
 
-• flexible 🤹 - adaptable
-adaptable, versatile
-
-• calm 😌 - peaceful
-relaxed, composed
-
-• cheerful 😄 - happy
-joyful, upbeat
-
-• negative ☁️ - pessimistic
-pessimistic, gloomy
-
-• sense of humour 😂 - funny feeling
-wit, comedic sense
+• confident 😎 - self-assured
+self-assured, bold
 
 • creative 🎨 - imaginative
 inventive, original
@@ -827,365 +682,151 @@ inventive, original
 • energetic ⚡ - full of energy
 lively, dynamic
 
+• flexible 🤹 - adaptable
+adaptable, versatile
+
 • generous 🎁 - giving
 giving, charitable
 
-• confident 😎 - self-assured
-self-assured, bold
+• humour 😂 - funny feeling
+wit, comedic sense
 
-• appearance 👀 - looks
-looks, outward form
+• personality 😊 - character
+temperament, traits
 
-• good-looking 😍 - attractive
-attractive, appealing
-
-• bald 🪒 - no hair
-hairless, shaved-headed
-
-• ugly 😬 - not pretty
-unattractive, plain
+• unfriendly 😒 - not friendly
+hostile, cold
 
 • well-built 💪 - strong body
 muscular, strong-built
 
-• curly 🌀 - wavy hair
-ringleted, curled
-
-• wavy 🌊 - soft waves
-rippled, undulating
-
-• straight 📏 - not curly
-sleek, uncurled
-
-• spiky 🦔 - upright hair
-bristled, pointed
-
-• ponytail 🎀 - tied hair
-tied-back style, hair tie
-
-• shaved ✂️ - no hair
-bald-cut, clean-shaven
-
-~ Unit 5 – Education
-
-• kindergarten 🧸 - early school
-preschool, nursery
-
-• primary school 🏫 - first school
-elementary school, junior school
-
-• secondary school 🎒 - high school
-high school, senior school
-
-• university 🎓 - higher education
-college, academy
-
-• library 📚 - book place
-reading room, archive
+~ Unit 5 Test
 
 • canteen 🍽️ - food place
 cafeteria, refectory
 
-• corridor 🚪 - hallway
-hallway, passage
-
-• lessons 📝 - classes
-classes, sessions
-
-• on time ⏱️ - punctual
-punctual, timely
-
-• late ⌛ - not on time
-delayed, overdue
-
 • Chemistry ⚗️ - science subject
 chemical science, chemistry subject
-
-• Physics 🧲 - science subject
-physical science, mechanics
-
-• Biology 🧬 - life science
-life science, natural science
-
-• Geography 🌍 - Earth study
-earth studies, mapping science
-
-• experiments 🧪 - tests
-tests, trials
 
 • concentrate 🎯 - focus
 focus, attend
 
-• professor 👨‍🏫 - university teacher
-lecturer, academic
+• experiment 🧪 - test
+test, trial
 
-• grades 📊 - marks
-scores, marks
+• Geography 🌍 - Earth study
+earth studies, mapping science
 
-• was ⏳ - past be
-existed (past), happened (past)
+• kindergarten ⭒ - early school
+preschool, nursery
 
-• were 📜 - past plural be
-existed (plural), happened (plural)
+• lesson 📝 - class
+class, session
 
-• could 👍 - past ability
-was able to, had ability
+• library 📚 - book place
+reading room, archive
 
-~ Unit 6 – Health & Sport
+• Physics 🧲 - science subject
+physical science, mechanics
 
-• success 🏆 - achievement
-victory, triumph
+• university 🎓 - higher education
+college, academy
 
-• badminton 🏸 - sport
-shuttle sport, racket game
-
-• basketball 🏀 - sport
-court game, hoop sport
-
-• climbing 🧗 - climbing activity
-scaling, mount ascent
-
-• cycling 🚴 - bike riding
-biking, riding
-
-• stretching 🤲 - muscle exercise
-loosening, extending
-
-• yoga 🧘 - body exercise
-mindfulness exercise, body practice
-
-• karate 🥋 - martial art
-combat sport, striking art
-
-• kung fu 🐉 - martial art
-martial discipline, combat skill
-
-• martial arts ⚔️ - fighting arts
-combat training, fighting systems
-
-• skiing 🎿 - snow sport
-snow gliding, winter sport
-
-• kayaking 🚣 - paddling sport
-paddling, canoe sport
-
-• sailing ⛵ - boat sailing
-boating, wind navigation
-
-• skating ⛸️ - ice/wheel sport
-gliding sport, ice/wheel movement
-
-• gymnast 🤸‍♂️ - athlete
-athlete, acrobat
-
-• competition 🥇 - contest
-contest, showdown
-
-• explained 📖 - clarified
-made clear, broke down
-
-• got 📥 - obtained, received
-obtained, received
-- sǐa chii-wít
-• died 🕊️ - stopped living
-passed, perished
-
-• climbed 🧗‍♂️ - went up on something
-scaled, ascended
-
-• fell 🍂 - dropped down
-tumbled down
-
-• believed 🙏 - to have thought something was the truth
-accepted, trusted
-
-• reached 🏁 - stretched out to touch
-arrived, attained
-
-• thought 🤔 - to have processed information with your brain
-figured, reckoned
-
-• phoned 📞 - called by phone
-called, rang up
-
-• stopped 🛑 - ended
-ceased, terminated
-
-• tried 💪 - attempted to do something
-attempted, made effort
+~ Unit 6 Test
 
 • became 🔄 - changed into something else
 turned into, developed
 
-• went 🚶 - to have gone from one place to another
-traveled, headed
+• believed 🙏 - to have thought something was the truth
+accepted, trusted
 
-• drank 🥤 - to have swallowed liquid
-sipped, consumed
+• competition 🥇 - contest
+contest, showdown
 
-• had 📦 - to have possessed something
-possessed, experienced
+• cycling 🚴 - bike riding
+biking, riding
 
-• ran 🏃 - to have gone quickly by foot
-sprinted, dashed
-
-• said 🗨️ - to have expresssed something by speaking
-stated, voiced
-
-• took ✋ - to have gone away with something
-grabbed, collected
-
-• left 🚪 - departed, exited
-departed, exited
-
-• ate 🍽️ - to have swallowed food
-consumed, ate up
-
-• began ▶️ - to have started something
-initiated, started
-
-• met 🤝 - to have spent time talking with someone, possibly for the first time
-encountered, ran into
-
-• talked 💬 - to have spoken with someone
-chatted, spoke
-
-• did ✔️ - to have completed an action
-performed, carried out
+• explained 📖 - clarified
+made clear, broke down
 
 • individual 👤 - one of something or someone
 single person, one unit
 
-~ Unit 7 – Travel
+• karate 🥋 - martial art
+combat sport, striking art
 
-• activity 🎯 - action
-event, task
+• martial arts ⚔️ - fighting arts
+combat training, fighting systems
+
+• stretching 🤲 - muscle exercise
+loosening, extending
+
+• success 🏆 - achievement
+victory, triumph
+
+~ Unit 7 Test
 
 • adventure 🧭 - exciting trip
 expedition, journey
 
-• backpacking 🎒 - travel with backpack
-budget travel, backpack trip
+• destination 📍 - end place
+endpoint, arrival place
 
-• book a flight ✈️ - reserve flight
-reserve ticket, secure seat
-
-• accommodation 🏨 - place to stay
-lodging, stay place
-
-• excursion 🚌 - short trip
-outing, short journey
-
-• transport 🚆 - travel system
-transit, mobility system
-
-• reservation 📋 - booking
-booking, holding
-
-• arrangements 🗂️ - plans
-setup, organisation
-
-• package tour 🌍 - all-in tour
-bundled trip, organised holiday
-
-• see the sights 📸 - sightseeing
-sightseeing, touring
-
-• check-in desk 🛫 - airport desk
-airport counter, registration point
-
-• foreign country 🌎 - other country
-overseas nation, abroad
-
-• trip abroad 🧳 - overseas trip
-overseas travel, international trip
-
-• announcement 📢 - public message
-notice, public statement
+• flight ✈️ - air trip
+air journey, flying trip
 
 • luggage 🧳 - bags
 baggage, suitcases
 
-• brochure 📘 - information booklet
-leaflet, pamphlet
-
 • passenger 🧍 - traveler
 traveler, rider
+
+• reservation 📋 - booking
+booking, holding
 
 • tourist 🗺️ - visitor
 visitor, sightseer
 
-• destination 📍 - end place
-endpoint, arrival place
+• transport 🚆 - travel system
+transit, mobility system
+
+• trip abroad 🧳 - overseas trip
+overseas travel, international trip
 
 • youth hostel 🛏️ - cheap hostel
 backpacker lodge, budget stay
 
-~ Unit 8 – Nature
+~ Unit 8 Test
 
-• pollution 🏭 - environmental damage
-contamination, fouling
-
-• climate change 🌡️ - weather change
-climate shift, global shift
-
-• global warming 🔥 - Earth heating
-temperature rise, heating trend
-
-• protect the environment 🌱 - save nature
-conserve nature, safeguard planet
-
-• toxic waste ☣️ - poisonous waste
-hazardous material, dangerous waste
-
-• recycling ♻️ - reuse materials
-reuse process, material recovery
-
-• habitat 🌳 - animal home
-ecosystem, natural home
-
-• wildlife 🦁 - wild animals
-fauna, wild animals
-
-• disappear 👻 - vanish
-vanish, fade out
-
-• hunt 🏹 - chase animals
-track, pursue
-
-• melt 🧊 - turn to liquid
-liquefy, dissolve
-
-• predict 🔮 - forecast
-forecast, anticipate
-
-• rubbish 🗑️ - trash
-waste, garbage
-
-• public transport 🚍 - shared transport
-mass transit, shared travel
-
-• solve problems 🛠️ - fix issues
-fix issues, resolve matters
-
-• temperature 🌡️ - heat level
-heat level, warmth
-
-• degree 📏 - unit
-measurement unit, scale unit
+• climate 🌡️ - weather pattern
+weather condition, atmospheric state
 
 • continent 🌍 - land mass
 landmass, major region
 
+• disappear 👻 - vanish
+vanish, fade out
+
 • energy ⚡ - power
 power, force
 
-• intelligent 🧠 - smart
-clever, bright
+• environment 🌿 - surroundings
+natural world, habitat
 
-• evolution 🐒 - development over time
-gradual development, progression
+• global 🌐 - worldwide
+international, planetary
 
+• habitat 🌳 - animal home
+ecosystem, natural home
+
+• pollution 🏭 - environmental damage
+contamination, fouling
+
+• rubbish 🗑️ - trash
+waste, garbage
+
+• toxic ☣️ - poisonous
+hazardous, venomous
 
 ~Signal Words
 • Time ⏰ – words that tell when something happens<br>
@@ -1235,12 +876,60 @@ to, from, toward, away from, up, down, forward, back
 
 • Affirmative and Negative ✔️❌ – words that show yes or no<br>
 yes, no
-`;
+
+ `;
+async function loadVocab(source) {
+  let text = "";
+  // If it looks like a filename (ends with .txt), fetch it
+  if (source.trim().endsWith(".txt")) {
+    try {
+      const res = await fetch(source.trim());
+      if (!res.ok) throw new Error("Failed to load file");
+      text = await res.text();
+    } catch (err) {
+      console.error("Error loading vocab file:", err);
+      return [];
+    }
+  } else {
+    // Otherwise treat as raw text
+    text = source;
+  }
+  return [];
+}
+
+// Example usage:
+const rawVocabTextOrFilename = wordListText; // can also be pasted text
+loadVocab(rawVocabTextOrFilename).then(pairs => {
+  console.log("Loaded vocab pairs:", pairs);
+  // initialize flashcards here
+});
 
 
-// ───────────────────────── SECTION + WORD DATA ─────────────────────────
+function parseSections(raw) {
+  const chunks = raw.split(/\n(?=~+)/);
 
-const sections = parseSections(rawVocab);
+  return chunks
+    .map(chunk => chunk.trim())
+    .filter(chunk => chunk.startsWith("~"))
+    .map(chunk => {
+      const lines = chunk.split("\n");
+      const name = lines.shift().replace(/^~+/, "").trim();
+      const text = lines.join("\n").trim();
+      return { name, text };
+    });
+}
+
+function extractWords(sectionText) {
+  return sectionText
+    .split("\n")
+    .map(line => {
+      const match = line.match(/•\s*([^\s–]+)/);
+      return match ? match[1] : null;
+    })
+    .filter(Boolean);
+}
+
+const sections = parseSections(wordListText);
 
 const sectionData = [
   { name: "Select a category.", words: [] }, // ✅ placeholder
@@ -1250,620 +939,484 @@ const sectionData = [
   }))
 ];
 
+
+
+const sectionUp = document.getElementById("sectionUp");
+const sectionDown = document.getElementById("sectionDown");
+const wheel = document.querySelector("#sectionWheelContainer .wheel");
+
+
 let currentSectionIndex = 0;
-let activeSectionName = "";
-let words = [];
-
-const wheel = document.querySelector(".wheel");
-const sectionUpBtn = document.getElementById("sectionUp");
-const sectionDownBtn = document.getElementById("sectionDown");
-
-function renderSectionWheel() {
-  if (!sectionData.length) {
-    wheel.textContent = "";
-    return;
-  }
-  wheel.textContent = sectionData[currentSectionIndex].name;
-}
+window.wordList = [];
 
 
-// ───────────────────────── SECTION WHEEL LOGIC ─────────────────────────
+renderWheel();
 
 
-function updateSectionWheel() {
-  if (!sectionData.length) {
-    wheel.textContent = "";
-    return;
-  }
-  wheel.textContent = sectionData[currentSectionIndex].name;
-}
+function renderWheel() {
+  wheel.innerHTML = '';
 
-// initialize wheel on load
-updateSectionWheel();
-
-
-sectionUpBtn.addEventListener("click", () => {
-  if (!sectionData.length || gameStarted) return;
-  currentSectionIndex =
-    (currentSectionIndex - 1 + sectionData.length) % sectionData.length;
-  updateSectionWheel();
-});
-
-sectionDownBtn.addEventListener("click", () => {
-  if (!sectionData.length || gameStarted) return;
-  currentSectionIndex =
-    (currentSectionIndex + 1) % sectionData.length;
-  updateSectionWheel();
-});
-
-
-
-const gameArea = document.getElementById('gameArea');
-const wordInput = document.getElementById('wordInput');
-const hiddenInput = document.getElementById('hiddenInput');
-const countdownOverlay = document.getElementById('countdownOverlay');
-const beam = document.getElementById('beam');
-const scoreboard = document.getElementById('scoreboard');
-const scoreData = document.getElementById('scoreData');
-const scoreButtons = document.getElementById('scoreButtons');
-const nameField = document.getElementById('nameField');
-const idField = document.getElementById('idField');
-const startButton = document.getElementById('startButton');
-const submitButton = document.getElementById('submitButton');
-
-let cows = [];
-let score = 0;
-let attempts = 0;
-let timer = 120;//change timer two or more places//
-let timerInterval;
-let gameStarted = false;
-let pendingAbduction = false;
-let currentWordIndex = 0;
-
-const ufoContainer = document.getElementById('ufoContainer');
-let swayAmplitude = 50;
-let swaySpeed = 0.01;
-let swayTime = 0;
-
-
-function syncDisplay() {
-  wordInput.value = hiddenInput.value;
-}
-
-
-function animateUFO() {
-  swayTime += 1;
-  const offsetX = Math.sin(swayTime * swaySpeed) * swayAmplitude;
-  ufoContainer.style.left = `calc(50% + ${offsetX}px)`;
-  requestAnimationFrame(animateUFO);
-}
-requestAnimationFrame(animateUFO);
-
-function checkFields() {
-  const ok = nameField.value.trim() && idField.value.trim();
-  startButton.disabled = !ok || gameStarted;
-  submitButton.disabled = !ok || !gameStarted;
-}
-nameField.addEventListener("input", checkFields);
-idField.addEventListener("input", checkFields);
-
-// ───────────────────────── ANIMAL TRAIN CONFIG ─────────────────────────
-const animalPattern = ["🐄","🐖","🐓","🐖","🐓","🐄","🐄","🐖","🐓","🐖","🐓","🐄","🐄","🐖","🐓","🐖","🐓","🐄",];
-const spacingPattern = [50, 75, 100, 50]; // spacing between animals
-const cowSpeed = 1.2;  // pixels per frame
-let nextTrainStartX = -100;
-let trainInProgress = false;
-
-function spawnCowTrain() {
-  trainInProgress = true;
-  let trainCows = [];
-
-  let currentX = nextTrainStartX;
-
-  // create each animal, positioned relative to the previous one
-  animalPattern.forEach((emoji, i) => {
-    const cow = document.createElement("div");
-    cow.className = "cow";
-    cow.style.position = "absolute";
-    cow.style.left = `${currentX}px`;
-    cow.style.bottom = "50px";
-    cow.innerHTML = `<span class="cowIcon">${emoji}</span>`;
-    gameArea.appendChild(cow);
-    cows.push(cow);
-    trainCows.push(cow);
-
-    // move currentX forward for the next cow
-    let spacing = spacingPattern[i % spacingPattern.length];
-    currentX -= spacing; // animals go off-screen to the left initially
+  sectionData.forEach((sec) => {
+    const div = document.createElement('div');
+    div.className = 'wheelItem';
+    div.textContent = sec.name;
+    wheel.appendChild(div);
   });
 
-  // move entire train as a unit
-  const moveTrain = setInterval(() => {
-    trainCows.forEach(cow => {
-      let x = parseFloat(cow.style.left);
-      x += cowSpeed;
-      cow.style.left = x + "px";
-
-      const ufoRect = ufoContainer.getBoundingClientRect();
-      const cowRect = cow.getBoundingClientRect();
-      const cowCenterX = cowRect.left + cowRect.width / 2;
-
-      if (pendingAbduction && Math.abs(cowCenterX - (ufoRect.left + ufoRect.width/2)) < 20) {
-        pendingAbduction = false;
-        beam.classList.add('beamOn');
-        suckCowToUFO(cow);
-        setTimeout(() => beam.classList.remove('beamOn'), 1000);
-      }
-
-      if (x > window.innerWidth + 150) {
-        cow.remove();
-        cows = cows.filter(c => c !== cow);
-      }
-    });
-
-    if (!trainCows.some(c => gameArea.contains(c))) {
-      clearInterval(moveTrain);
-      trainInProgress = false;
-    }
-  }, 20);
+  updateWheel();
 }
 
-// spawn first train
-spawnCowTrain();
+function updateWheel() {
+  const offset = -currentSectionIndex * 34;
+  wheel.style.transform = `translateY(${offset}px)`;
 
-// spawn subsequent trains only after previous train leaves
-setInterval(() => {
-  if (gameStarted && !trainInProgress) {
-    nextTrainStartX = -100;
-    spawnCowTrain();
-  }
-}, 500);
-function suckCowToUFO(cow) {
-  clearInterval(cow.moveInterval);
-  const ufoRect = ufoContainer.getBoundingClientRect();
-  const cowRect = cow.getBoundingClientRect();
-  const distX = (ufoRect.left + ufoRect.width / 2) - (cowRect.left + cowRect.width / 2);
-  const distY = (ufoRect.top + ufoRect.height / 2) - (cowRect.top + cowRect.height / 2);
-
-  cow.style.transition = "transform 1.5s linear, opacity 1.2s linear";
-  requestAnimationFrame(() => {
-    cow.style.transform = `translate(${distX}px, ${distY}px)`;
-    cow.style.opacity = "0";
-  });
-
-  setTimeout(() => {
-    cow.remove();
-    cows = cows.filter(c => c !== cow);
-  }, 1500);
+  wordList = sectionData[currentSectionIndex]?.words || [];
 }
 
-function updatePlaceholder() {
-  wordInput.placeholder = words[currentWordIndex];
-  hiddenInput.placeholder = words[currentWordIndex];
-}
-hiddenInput.addEventListener("input", () => {
-  if (!gameStarted) return;
-
-  const val = hiddenInput.value.trim().toLowerCase();
-  syncDisplay();
-
-  if (val.length > 0) attempts++;
-
-  if (words[currentWordIndex] === val) {
-    pendingAbduction = true;
-
-    hiddenInput.value = "";
-    syncDisplay();
-
-    score++;
-    currentWordIndex++;
-
-    if (currentWordIndex < words.length) {
-      updatePlaceholder();
-    } else {
-      endGame();
-    }
+sectionUp.addEventListener('click', () => {
+  if (currentSectionIndex > 0) {
+    currentSectionIndex--;
+    updateWheel();
   }
 });
-function startTimer() {
-  clearInterval(timerInterval);
-  timer = 120; //change time limit//
-  countdownOverlay.textContent = timer;
-  timerInterval = setInterval(() => {
-    timer--;
-    countdownOverlay.textContent = timer;
-    if (timer <= 0) { clearInterval(timerInterval); endGame(); }
-  }, 1000);
-}
 
-function endGame() {
-  wordInput.disabled = true;
-  gameStarted = false;
-  checkFields();const now = new Date();
-const pad = n => n.toString().padStart(2, '0');
-
-const dateString = 
-    `${pad(now.getDate())}${pad(now.getMonth()+1)}${now.getFullYear()}, ` +
-    `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
-
-
-  const filename = window.location.pathname.split('/').pop() || 'unknown.html';
-  const name = nameField.value.trim() || 'Anonymous';
-  const id = idField.value.trim() || 'N/A';
-
-  const totalWords = words.length;
-  const scoreCount = score; // number of correctly typed words
-  const percentage = totalWords > 0 ? Math.round((scoreCount / totalWords) * 100) : 0;
-
-// Final scoreboard string, no spaces around |
-const resultText = `${filename}|${name}|${id}|${dateString}|${scoreCount}/${totalWords}|${percentage}%`;
-
-scoreData.textContent = resultText;
-scoreboard.style.display = 'block';
-scoreButtons.style.display = 'flex';
-
-saveResult(resultText);
-}
-startButton.addEventListener("click", () => {
-  if (!sectionData.length) {
-    alert("No sections loaded yet.");
-    return;
+sectionDown.addEventListener('click', () => {
+  if (currentSectionIndex < sectionData.length - 1) {
+    currentSectionIndex++;
+    updateWheel();
   }
-
-  // 🔒 lock section for this run (SAMPLE BEHAVIOR)
-  words = [...sectionData[currentSectionIndex].words];
-  activeSectionName = sectionData[currentSectionIndex].name;
-
-  if (!words.length) {
-    alert("This section has no entries.");
-    return;
-  }
-
-  if (gameStarted) return;
-  gameStarted = true;
-  score = 0;
-  attempts = 0;
-  currentWordIndex = 0;
-
-  scoreboard.style.display = "none";
-  scoreButtons.style.display = "none";
-
-  // reset inputs properly
-  wordInput.disabled = false;
-  hiddenInput.disabled = false;
-
-  wordInput.value = "";
-  hiddenInput.value = "";
-  syncDisplay();
-
-  updatePlaceholder();
-  startTimer();
-
-  // single source of focus = hidden input
-  hiddenInput.focus({ preventScroll: true });
-
-  startButton.disabled = true;
-  submitButton.disabled = false;
 });
 
 
-submitButton.addEventListener("click", endGame);
+
+let activeSectionName = '';
 
 
-function scheduleNextCow() {
-  const delay = 1200 + Math.random() * 4000;
+  let activeBubbles = [];
+  let ambientBubbles = [];
+  let explodingBubbles = []; // store bubbles in spinning pop animation
+  window.gameStarted = false;
+let gameStopped = false;
+  let currentTypedWord = null;
+nextWordIndex = 0;
+correctWords = 0;
+totalWords = wordList.length;
 
-  setTimeout(() => {
-    if (gameStarted && currentWordIndex < words.length) {
+const popSound   = document.getElementById('popSound');
+const typingInput = document.getElementById('typingInput');
 
-      if (!trainInProgress) {
-        nextTrainStartX = -100;
-        spawnCowTrain();
-      }
+const startBtn   = document.getElementById('startButton');
+const submitBtn  = document.getElementById('submitButton');
 
-    }
+const nameInput  = document.getElementById('nameField');
+const idInput    = document.getElementById('idField');
 
-    scheduleNextCow();
-  }, delay);
-}
-window.addEventListener("load", scheduleNextCow);
-
-
-document.getElementById("copyBtn").addEventListener("click", async () => {
-  try {
-    await navigator.clipboard.writeText(scoreData.textContent);
-    alert("Score copied to clipboard!");
-  } catch (err) {
-    alert("Clipboard error.");
-  }
-});
-document.getElementById("txtBtn").addEventListener("click", () => {
-  const blob = new Blob([scoreData.textContent], { type: "text/plain" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "score.txt";
-  a.click();
-});
-
-document.getElementById("pngBtn").addEventListener("click", () => {
-  const text = scoreData.textContent;
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-
-  const fontSize = 12;
-  const lineHeight = 18;
-  const padding = 12;
-
-  ctx.font = `${fontSize}px Arial`;
-
-  // Match narrow iPhone scoreboard width
-  const maxTextWidth =
-  scoreboard.getBoundingClientRect().width - padding * 2;
+  const scoreboardContainer = document.getElementById('scoreboardContainer');
+  const scoreButtons = document.getElementById('scoreButtons');
+  const copyBtn = document.getElementById('copyBtn');
+  const downloadTxtBtn = document.getElementById('downloadTxtBtn');
+  const downloadPngBtn = document.getElementById('downloadPngBtn');
 
 
-function wrapText(text, maxWidth) {
-  const lines = [];
-  let line = "";
-
-  for (const char of text) {
-    const test = line + char;
-    if (ctx.measureText(test).width > maxWidth) {
-      lines.push(line);
-      line = char;
-    } else {
-      line = test;
-    }
-  }
-
-  if (line) lines.push(line);
-  return lines;
+// Enable Start button when Name + ID are filled
+function updateStartButtonState() {
+  startBtn.disabled = !(
+    nameInput.value.trim() &&
+    idInput.value.trim()
+  );
 }
 
-  const wrappedLines = wrapText(text, maxTextWidth);
-
-  canvas.width = maxTextWidth + padding * 2;
-  canvas.height = wrappedLines.length * lineHeight + padding * 2;
-
-  ctx.fillStyle = "white";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.fillStyle = "black";
-  wrappedLines.forEach((line, i) => {
-    ctx.fillText(
-      line,
-      padding,
-      padding + fontSize + i * lineHeight
-    );
-  });
-
-  const img = canvas.toDataURL("image/png");
-  const a = document.createElement("a");
-  a.href = img;
-  a.download = "score.png";
-  a.click();
-});
+nameInput.addEventListener('input', updateStartButtonState);
+idInput.addEventListener('input', updateStartButtonState);
+updateStartButtonState(); // <-- REQUIRED
 
 
-</script>
-
-<script>
-  const borderDiv = document.createElement("div");
-  borderDiv.style.position = "fixed";
-  borderDiv.style.inset = "0";
-  borderDiv.style.border = "10px solid #39FF14";
-  borderDiv.style.boxSizing = "border-box";
-  borderDiv.style.zIndex = "9999";
-  borderDiv.style.pointerEvents = "none";
-  document.body.appendChild(borderDiv);
-</script>
-
-
-
-
-
-<script>
-(function () {
-  const canvas = document.getElementById("skyCanvas");
-  const ctx = canvas.getContext("2d");
-
-  function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-  }
-  window.addEventListener("resize", resize);
-  resize();
-
-  let t = 0;
-
-  function noise(x, y, t) {
-    return (
-      Math.sin(x * 0.008 + t) +
-      Math.sin(y * 0.012 + t * 1.2) +
-      Math.sin((x + y) * 0.006 - t * 0.7)
-    ) / 3;
+  function brightColor(alpha=0.35) {
+    const hue = Math.random()*360;
+    return `hsla(${hue},90%,65%,${alpha})`;
   }
 
-function draw() {
-  const w = canvas.width;
-  const h = canvas.height;
-  const img = ctx.createImageData(w, h);
-  const d = img.data;
+  function darkVariant(color) {
+    const match = color.match(/hsla\((\d+),\s*(\d+)%,\s*(\d+)%,\s*([\d.]+)\)/);
+    if(!match) return 'rgba(0,0,0,0.5)';
+    const h = match[1], s = match[2], l = Math.max(0, match[3]-35), a = match[4];
+    return `hsla(${h},${s}%,${l}%,${a})`;
+  }
 
-  const groundStart = h * 0.42;     // where ground begins
-  const featherHeight = h * 0.08;   // softness of the blend
-
-  for (let y = 0; y < h; y++) {
-    for (let x = 0; x < w; x++) {
-
-      // ── Feather blend factor (0 = sky, 1 = ground)
-      let blend;
-      if (y < groundStart) {
-        blend = 0;
-      } else if (y > groundStart + featherHeight) {
-        blend = 1;
+  class Bubble {
+    constructor(word=null) {
+      this.word = word;
+      this.typedIndex = 0;
+      this.exploded = false;
+      if(word){
+        this.radius = 50 + Math.random()*40;
+        this.color = brightColor(0.35);
       } else {
-        blend = (y - groundStart) / featherHeight;
+        this.radius = 10 + Math.random()*30;
+        this.color = brightColor(0.2);
+      }
+      this.shadowColor = darkVariant(this.color);
+      this.x = canvas.width / 2;
+      this.y = canvas.height / 2;
+      this.speed = (word ? 0.6 : 0.2) + Math.random()*0.6;
+      this.swayAmplitude = (word ? 20 : 10) + Math.random()*20;
+      this.swaySpeed = Math.random()*0.02 + 0.01;
+      this.swayPhase = Math.random()*Math.PI*2;
+    }
+
+    draw() {
+      const offsetX = this.word ? 0 : Math.sin(this.swayPhase + this.y*this.swaySpeed) * this.swayAmplitude;
+
+      const gradient = ctx.createRadialGradient(
+        this.x - this.radius*0.2 + offsetX,
+        this.y - this.radius*0.2,
+        this.radius*0.05,
+        this.x + offsetX,
+        this.y,
+        this.radius*1.8
+      );
+      gradient.addColorStop(0, 'rgba(255,255,255,0.2)');
+      gradient.addColorStop(0.3, this.color);
+      gradient.addColorStop(1, this.color);
+
+
+if(this.word){
+ctx.font = `bold 32px Arial`;
+ctx.textAlign = 'left';
+ctx.textBaseline = 'middle';
+
+let typed = this.typedIndex || 0;
+let totalWidth = ctx.measureText(this.word).width;
+let startX = this.x + offsetX - totalWidth / 2;
+
+for(let i = 0; i < this.word.length; i++){
+
+  ctx.fillStyle = i < typed ? 'red' : 'white';
+
+  let char = this.word[i];
+  ctx.fillText(
+    char,
+    startX,
+    this.y
+  );
+
+  startX += ctx.measureText(char).width;
+}
+
+ctx.shadowBlur = 0;
+}    }
+
+    update() {
+if (!this.word) {
+if (!this.word) this.y -= this.speed;}      if(this.y + this.radius < 0) this.exploded = true;
+    }
+  }
+
+  class ExplodingBubble {
+    constructor(bubble) {
+      this.x = bubble.x;
+      this.y = bubble.y;
+      this.radius = bubble.radius;
+      this.color = bubble.color;
+      this.shadowColor = bubble.shadowColor;
+      this.word = bubble.word;
+      this.startTime = performance.now();
+      this.duration = 400; // ms
+    }
+
+    draw(time) {
+      const elapsed = time - this.startTime;
+      const t = Math.min(elapsed / this.duration, 1);
+
+      const scale = 1 + 1.5 * t; // scale up
+      const rotation = 2 * Math.PI * 2 * t; // 720 deg
+      const alpha = 1 - t;
+
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(rotation);
+      ctx.scale(scale, scale);
+
+      const gradient = ctx.createRadialGradient(0,0,this.radius*0.05,0,0,this.radius*1.8);
+      gradient.addColorStop(0, 'rgba(255,255,255,0.2)');
+      gradient.addColorStop(0.3, this.color);
+      gradient.addColorStop(1, this.color);
+
+      ctx.beginPath();
+      ctx.arc(0,0,this.radius,0,Math.PI*2);
+      ctx.fillStyle = gradient;
+      ctx.globalAlpha = alpha;
+      ctx.fill();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.stroke();
+
+      if(this.word){
+        ctx.font = `bold ${Math.floor(this.radius/2.5)}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'white';
+ctx.shadowBlur = 0;
+ctx.fillText(this.word,0,0);
       }
 
-      // 🌤️ SKY COLOR (clean, no fog)
-      const skyR = 150;
-      const skyG = 190;
-      const skyB = 220;
+      ctx.restore();
+    }
 
-      // 🌪️ BOILING GROUND NOISE
-      const n =
-        noise(x, y, t) +
-        noise(x * 0.5, y * 0.5, t * 0.9);
-
-      const swirl = Math.sin(n * 4 + y * 0.015);
-
-      // dark wheat
-      const wr = 170, wg = 160, wb = 105;
-      // dark green
-      const gr = 65, gg = 100, gb = 60;
-
-      const mix = swirl * 0.5 + 0.5;
-
-      const groundR = gr * mix + wr * (1 - mix);
-      const groundG = gg * mix + wg * (1 - mix);
-      const groundB = gb * mix + wb * (1 - mix);
-
-      // 🌫️ Final feathered color
-      const r = skyR * (1 - blend) + groundR * blend;
-      const g = skyG * (1 - blend) + groundG * blend;
-      const b = skyB * (1 - blend) + groundB * blend;
-
-      const i = (y * w + x) * 4;
-      d[i]     = r;
-      d[i + 1] = g;
-      d[i + 2] = b;
-      d[i + 3] = 255;
+    isDone(time) {
+      return time - this.startTime >= this.duration;
     }
   }
 
-  ctx.putImageData(img, 0, 0);
-  t += 0.02;
-  requestAnimationFrame(draw);
+function spawnNextWord() {
+  if (nextWordIndex >= wordList.length) return;
+  const bubble = new Bubble(wordList[nextWordIndex]);
+  activeBubbles.push(bubble);
+  nextWordIndex++;
 }
 
-draw();
-
-})();
-</script>
-
-<script>
-(function () {
-  const canvas = document.getElementById("topCloudCanvas");
-  const ctx = canvas.getContext("2d");
-
-  function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = canvas.offsetHeight;
-  }
-  window.addEventListener("resize", resize);
-  resize();
-
-  let t = 0;
-
-  function noise(x, y, t) {
-    return (
-      Math.sin(x * 0.02 + t) +
-      Math.sin(y * 0.04 + t * 1.3) +
-      Math.sin((x + y) * 0.01 - t)
-    );
+  function spawnAmbientBurst() {
+    const count = 5 + Math.floor(Math.random()*6);
+    for(let i=0;i<count;i++){
+      ambientBubbles.push(new Bubble());
+    }
   }
 
-  function draw() {
-    const w = canvas.width;
-    const h = canvas.height;
-    const img = ctx.createImageData(w, h);
-    const d = img.data;
+  function floatBubbles(time) {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
 
-    for (let y = 0; y < h; y++) {
-      const feather = Math.min(1, (h - y) / (h * 0.25));
+    ambientBubbles.forEach(b=>{b.update(); b.draw();});
+    ambientBubbles = ambientBubbles.filter(b=>!b.exploded);
+
+    activeBubbles.forEach(bubble=>{bubble.update(); bubble.draw();});
+    activeBubbles = activeBubbles.filter(b=>!b.exploded);
+
+    explodingBubbles.forEach(b=>b.draw(time));
+    explodingBubbles = explodingBubbles.filter(b=>!b.isDone(time));
+
+    
+    if(!gameStopped && activeBubbles.length === 0) spawnNextWord();
+
+    requestAnimationFrame(floatBubbles);
+  }
+
+  function handleTypingInput(e) {
+  if(!window.gameStarted || gameStopped) return;
+  if(activeBubbles.length === 0) return;
+
+  let wordToType = currentTypedWord;
+
+  if(!wordToType){
+    wordToType = activeBubbles.find(b => !b.exploded);
+    if(!wordToType) return;
+    currentTypedWord = wordToType;
+  }
 
 
-      for (let x = 0; x < w; x++) {
-        const n = noise(x, y, t);
-        const flicker = Math.random() < 0.0006 ? 80 : 0;
+  // BACKSPACE CORRECTION
+  if(e.inputType === "deleteContentBackward") {
 
-        // dark storm greys
-        let v = 60 + n * 25 + flicker;
-        v = Math.max(0, Math.min(255, v));
-
-        const i = (y * w + x) * 4;
-        d[i]     = v;
-        d[i + 1] = v;
-        d[i + 2] = v;
-        d[i + 3] = Math.floor(255 * feather);
-      }
+    if(wordToType.typedIndex > 0) {
+      wordToType.typedIndex--;
     }
 
-    ctx.putImageData(img, 0, 0);
-    t += 0.03;
-    requestAnimationFrame(draw);
+    typingInput.value = "";
+    return;
   }
 
-  draw();
-})();
-</script>
 
-<script>
-const windCanvas = document.getElementById("windCanvas");
-const ctx = windCanvas.getContext("2d");
+  const key = e.data || e.key;
 
-function resize() {
-  windCanvas.width = window.innerWidth;
-  windCanvas.height = window.innerHeight;
+  if(!key) {
+    typingInput.value = "";
+    return;
+  }
+
+
+  const lowerKey = key.toLowerCase();
+
+  if(!/^[a-z]$/.test(lowerKey)) {
+    typingInput.value = "";
+    return;
+  }
+
+
+  const expected =
+    wordToType.word[wordToType.typedIndex]?.toLowerCase();
+
+
+  // WRONG LETTER
+  if(lowerKey !== expected) {
+    typingInput.value = "";
+    return;
+  }
+
+
+// CORRECT LETTER
+wordToType.typedIndex++;
+
+
+if(wordToType.typedIndex === wordToType.word.length) {
+
+  explodeWord(wordToType,true);
+
+  // UFOEffects.wordCompleted();
+
+  abductClosestRandomAnimal();
+
+  currentTypedWord = null;
 }
-resize();
-window.addEventListener("resize", resize);
 
-// ── fast particulate wind ──
-const COUNT = 1800;
-const particles = [];
 
-for (let i = 0; i < COUNT; i++) {
-  particles.push(spawn());
+  typingInput.value = "";
 }
 
-function spawn() {
-  return {
-    x: Math.random() * windCanvas.width,
-    y: Math.random() * windCanvas.height,
+function explodeWord(bubble, success){
+  if(bubble.exploded) return;
+  bubble.exploded = true;
 
-    w: 10 + Math.random() * 3,   // hyphen width
-    h: 1 + Math.random(),      // thin
-
-    vx: 15 + Math.random() * 6, // 🔥 FAST left → right
-    vy: (Math.random() - 0.5) * 0.3, // tiny vertical jitter
-
-    a: 0.04 + Math.random() * 0.05,
-    g: 215 + Math.random() * 25
-  };
+  if(success) correctWords++;
 }
 
-function draw() {
-  ctx.clearRect(0, 0, windCanvas.width, windCanvas.height);
+function startGame(){
+  if(window.gameStarted) return;
 
-  for (const p of particles) {
-    p.x += p.vx;
-    p.y += p.vy;
+  if(!nameInput.value.trim() || !idInput.value.trim()){
+    alert('Please enter your Name and ID Number before starting.');
+    return;
+  }
 
-    // wrap quickly → streaky feel
-    if (p.x > windCanvas.width + p.w || p.y < -10 || p.y > windCanvas.height + 10) {
-      Object.assign(p, spawn(), { x: -p.w });
+// ===== STEP 8: LOCK SECTION INTO THIS RUN =====
+wordList = [...sectionData[currentSectionIndex].words];
+activeSectionName = sectionData[currentSectionIndex].name;
+
+sectionUp.disabled = true;
+sectionDown.disabled = true;
+// =============================================
+
+window.gameStarted = true;
+gameStopped = false;
+
+startBtn.disabled = true;
+submitBtn.disabled = false;
+
+
+scoreboardContainer.textContent = '';
+scoreButtons.style.display = 'none';
+
+activeBubbles = [];
+ambientBubbles = [];
+explodingBubbles = [];
+
+currentTypedWord = null;
+nextWordIndex = 0;
+correctWords = 0;
+
+// 🔒 lock total count once (number of bullet entries)
+totalWords = wordList.length;
+
+spawnNextWord();
+floatBubbles();
+typingInput.focus();
+}
+
+
+function stopGame(){ 
+  if(!window.gameStarted || gameStopped) return;
+  gameStopped = true;
+window.gameStarted = false;
+  startBtn.disabled = false;
+  submitBtn.disabled = false;
+}
+
+async function submitResults(){ 
+    if(!window.gameStarted) return;
+
+    stopGame();
+
+    const pct =
+      totalWords
+        ? Math.round((correctWords / totalWords) * 100)
+        : 0;
+
+    const now = new Date();
+
+    const dateStr =
+      String(now.getDate()).padStart(2, '0') + '/' +
+      String(now.getMonth() + 1).padStart(2, '0') + '/' +
+      now.getFullYear() + ' ' +
+      String(now.getHours()).padStart(2, '0') + ':' +
+      String(now.getMinutes()).padStart(2, '0');
+
+    // SAFER filename extraction
+    let currentFile = window.location.pathname.split('/').pop() || 'unknown.html';
+
+    // remove query strings/fragments if present
+    currentFile = currentFile.split('?')[0].split('#')[0];
+
+    // Build ONE complete line
+    const scoreLine =
+      currentFile + "|" +
+      activeSectionName + "|" +
+      nameInput.value.trim() + "|" +
+      idInput.value.trim() + "|" +
+      dateStr + "|" +
+      correctWords + "/" + totalWords + "|" +
+      pct + "%";
+
+    // Display scoreboard
+    scoreboardContainer.textContent = scoreLine;
+    scoreButtons.style.display = 'flex';
+
+    // Upload EXACT same text to Supabase
+    try {
+
+      await saveResult(scoreLine);
+
+      console.log("✅ Score uploaded to Supabase");
+
+    } catch(err) {
+
+      console.error("❌ Upload failed:", err);
+
     }
-
-    ctx.fillStyle = `rgba(${p.g},${p.g},${p.g},${p.a})`;
-    ctx.fillRect(p.x, p.y, p.w, p.h);
-  }
-
-  requestAnimationFrame(draw);
 }
 
-draw();
-</script>
+startBtn.addEventListener('click', startGame);  submitBtn.addEventListener('click', submitResults);
+  typingInput.addEventListener('input', handleTypingInput);
+
+typingInput.addEventListener('keydown', function(e) {
+  if(e.key === "Backspace") {
+    e.preventDefault();
+    handleTypingInput({
+      inputType: "deleteContentBackward"
+    });
+  }
+});
+  canvas.addEventListener('click', ()=>{
+
+if(window.gameStarted && !gameStopped)
+
+ typingInput.focus();});
+
+
+})();</script>
+
+
+
+  <script>
+    // Green border
+    const borderDiv = document.createElement('div');
+    borderDiv.style.position = 'fixed';
+    borderDiv.style.inset = '0';
+    borderDiv.style.border = '10px solid #39FF14';
+    borderDiv.style.boxSizing = 'border-box';
+    borderDiv.style.zIndex = '9999';
+    borderDiv.style.pointerEvents = 'none';
+    borderDiv.style.backgroundColor = 'transparent';
+    document.body.appendChild(borderDiv);
+  </script>
+
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -2144,32 +1697,7 @@ adjustBodyPadding();
 window.addEventListener("resize", adjustBodyPadding);
 
 })();
-
 </script>
-
-<script>
-  // Grab the elements
-  const gameArea = document.getElementById("gameArea");
-  const wordInput = document.getElementById("wordInput");
-
-  // Focus input on touch or click inside game area
-gameArea.addEventListener("pointerdown", () => {
-  if (!hiddenInput.disabled) {
-    hiddenInput.focus({ preventScroll: true });
-  }
-});
-// Keep mobile keyboard pinned to hidden input
-hiddenInput.addEventListener("blur", () => {
-  setTimeout(() => {
-    if (
-      document.activeElement !== hiddenInput &&
-      !hiddenInput.disabled &&
-      gameStarted
-    ) {
-      hiddenInput.focus({ preventScroll: true });
-    }
-  }, 50);
-});</script>
 
 <script>
 (function() {
@@ -2199,13 +1727,150 @@ hiddenInput.addEventListener("blur", () => {
 })();
 </script>
 
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<script>
+(async function() {
+  'use strict';
+
+  // Sanitize filenames to remove illegal characters
+  function sanitizeFilename(name) {
+    return name.trim()
+      .replace(/[\\/:*?"<>|]+/g, '_')
+      .replace(/[\r\n]+/g, '_')
+      .slice(0, 200) || 'score';
+  }
+
+  // Generic download function
+  function downloadBlob(blob, filename) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    }, 2000);
+  }
+
+  // Convert scoreboard to PNG using html2canvas
+  async function downloadScoreAsPNG(text, filename) {
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = text.replace(/\n/g, '<br>');
+
+  /* MATCH SCOREBOARD APPEARANCE */
+  wrapper.style.display = 'inline-block';
+  wrapper.style.whiteSpace = 'pre-wrap';
+  wrapper.style.fontFamily = 'monospace';
+  wrapper.style.fontWeight = 'bold';
+  wrapper.style.fontSize = '18px';
+  wrapper.style.lineHeight = '1.2';
+  wrapper.style.padding = '6px 8px';
+  wrapper.style.backgroundColor = '#fff';
+  wrapper.style.color = '#000';
+
+  document.body.appendChild(wrapper);
+
+  try {
+if (!window.html2canvas) {
+  alert("html2canvas library is not loaded.");
+  return;
+}
+    const canvas = await html2canvas(wrapper, {
+      scale: 2,
+      backgroundColor: '#fff',
+      width: wrapper.offsetWidth,
+      height: wrapper.offsetHeight
+    });
+
+const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+
+if (!blob) {
+  throw new Error("PNG conversion failed");
+}
+
+downloadBlob(blob, filename);
+  } catch (err) {
+    console.error(err);
+    alert('PNG download failed');
+  } finally {
+    wrapper.remove();
+  }
+}
+
+
+  // Hijack a download button
+  function hijackDownloadButton(button, getScoreText, getFilename, isText) {
+    if (!button) return;
+
+    const newBtn = button.cloneNode(true);
+    button.parentNode.replaceChild(newBtn, button);
+
+    newBtn.addEventListener('click', async e => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      const scoreText = getScoreText();
+      if (!scoreText) {
+        alert('No scoreboard data found. Submit first.');
+        return;
+      }
+
+      const filename = sanitizeFilename(getFilename());
+      if (isText) {
+        downloadBlob(new Blob([scoreText], { type: 'text/plain' }), filename + '.txt');
+      } else {
+        await downloadScoreAsPNG(scoreText, filename + '.png');
+      }
+    }, true);
+  }
+
+  // Grab scoreboard and buttons
+  const scoreboard = document.getElementById('scoreboardContainer');
+
+const copyBtn = document.getElementById('copyBtn');
+
+copyBtn?.addEventListener('click', async () => {
+  const score = scoreboard.textContent.trim();
+
+  if (!score) {
+    alert("No scoreboard data found. Submit first.");
+    return;
+  }
+
+  await navigator.clipboard.writeText(score);
+  alert("Score copied.");
+});
+  const downloadTxtBtn = document.getElementById('downloadTxtBtn');
+  const downloadPngBtn = document.getElementById('downloadPngBtn');
+const nameInput = document.getElementById('nameField');
+const idInput = document.getElementById('idField');
+
+  if (scoreboard) {
+    const getFilename = () => {
+      const htmlFile = window.location.pathname.split('/').pop() || 'index.html';
+      const name = nameInput?.value.trim() || 'Student';
+      const id = idInput?.value.trim() || 'ID';
+      const now = new Date();
+      const dateStr = `${String(now.getDate()).padStart(2,'0')}${String(now.getMonth()+1).padStart(2,'0')}${now.getFullYear()}`;
+      return `${htmlFile}_${name}_${id}_${dateStr}`;
+    };
+
+    hijackDownloadButton(downloadTxtBtn, () => scoreboard.textContent.trim(), getFilename, true);
+    hijackDownloadButton(downloadPngBtn, () => scoreboard.textContent.trim(), getFilename, false);
+  }
+
+})();
+</script>
+
 
 <!-- SUPABASE LIBRARY -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
 
-const supabaseClient = window.supabase.createClient(
+const supabaseClient = window.supabase?.createClient(
   'https://etwwriloppklhhkmswpr.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
 );
@@ -2214,7 +1879,7 @@ if (!supabaseClient) {
   console.error("❌ Supabase failed to initialize");
 }
 
-let lastUploadedScore = null;
+window.lastUploadedScore = null;
 
 window.saveResult = async function saveResult(text) {
 
@@ -2223,19 +1888,16 @@ window.saveResult = async function saveResult(text) {
     return;
   }
 
-  // ======================
-  // NORMALIZE INPUT
-  // ======================
   let cleaned;
 
   try {
-    cleaned = (typeof text === "string")
-      ? text
-      : JSON.stringify(text);
 
-    cleaned = cleaned.replace(/\s+/g, " ").trim();
+    cleaned = String(text)
+      .replace(/\s+/g, " ")
+      .trim();
 
   } catch (err) {
+
     console.error("❌ Normalize error:", err);
     return;
   }
@@ -2252,26 +1914,718 @@ window.saveResult = async function saveResult(text) {
 
   lastUploadedScore = cleaned;
 
-  console.log("📤 INSERTING INTO scoreboard_raw:", cleaned);
+  console.log("📤 INSERTING:", cleaned);
+
+  // Parse existing score line
+  const parts = cleaned.split("|");
+
+  const file_name      = parts[0] || "";
+  const category       = parts[1] || "";
+  const student_name   = parts[2] || "";
+  const student_id     = parts[3] || "";
+  const datetime       = parts[4] || "";
+
+  let score_correct = null;
+  let score_total   = null;
+  let score_percent = null;
+
+  // Parse 12/30
+  if (parts[5]) {
+
+    const scoreMatch = parts[5].match(/^(\d+)\/(\d+)$/);
+
+    if (scoreMatch) {
+      score_correct = Number(scoreMatch[1]);
+      score_total   = Number(scoreMatch[2]);
+    }
+  }
+
+  // Parse 40%
+  if (parts[6]) {
+
+    const pctMatch = parts[6].match(/^(\d+)%$/);
+
+    if (pctMatch) {
+      score_percent = Number(pctMatch[1]);
+    }
+  }
 
   const { data, error } = await supabaseClient
-    .from("scoreboard_raw")
-    .insert([
-      { result_text: cleaned }
-    ])
-    .select();
+  .from("scoreboard_raw")
+  .insert([
+    {
+      result_text: cleaned
+    }
+  ])
+  .select();
 
   if (error) {
-    console.error("❌ INSERT FAILED FULL ERROR:", error);
+    console.error("❌ INSERT FAILED:", error);
     return;
   }
 
   console.log("✅ INSERT SUCCESS:", data);
 };
+</script>
+
+<script>
+
+const ufoContainer = document.getElementById("ufoContainer");
+const beam = document.getElementById("beam");
+const animalLayer = document.getElementById("animalLayer");
+
+
+// ───────────────────────── UFO MOVEMENT ─────────────────────────
+
+let swayAmplitude = 50;
+let swaySpeed = 0.01;
+let swayTime = 0;
+
+
+function animateUFO(){
+
+  if(!ufoContainer) return;
+
+  swayTime++;
+
+  const offsetX =
+    Math.sin(swayTime * swaySpeed) *
+    swayAmplitude;
+
+
+  ufoContainer.style.left =
+    `calc(50% + ${offsetX}px)`;
+
+
+  requestAnimationFrame(animateUFO);
+
+}
+
+
+animateUFO();
+
+// ───────────────────────── ANIMAL SYSTEM ─────────────────────────
+
+
+let cows = [];
+let pendingAbduction = false;
+
+// ───────────────────────── PICK ANIMAL TO ABDUCT ─────────────────────────
+
+// ───────────────────────── PICK ANIMAL TO ABDUCT ─────────────────────────
+
+function abductClosestRandomAnimal(){
+
+  if(cows.length === 0){
+    return;
+  }
+
+  pendingAbduction = true;
+
+}
+
+const animalPattern = [
+  "🐄","🐖","🐓","🐖",
+  "🐓","🐄","🐄","🐖",
+  "🐓","🐖","🐓","🐄",
+  "🐄","🐖","🐓","🐖",
+  "🐓","🐄"
+];
+
+
+const spacingPattern = [
+  90,120,140,90
+];
+
+
+const cowSpeed = 3;
+
+
+let nextTrainStartX = -100;
+let trainInProgress = false;
+
+
+
+// ───────────────────────── SPAWN TRAIN ─────────────────────────
+
+
+function spawnCowTrain(){
+
+  if(!animalLayer) return;
+
+  trainInProgress = true;
+
+  let trainCows = [];
+
+  let currentX = (window.innerWidth / 2) - 100;
+
+
+
+  animalPattern.forEach((emoji,i)=>{
+
+
+    const cow = document.createElement("div");
+
+
+    cow.className = "cow";
+
+
+    // force correct positioning
+    cow.style.position = "absolute";
+
+
+    cow.style.left =
+      `${currentX}px`;
+
+
+    // tornado ground baseline
+    cow.style.top =
+  `${animalLayer.clientHeight - 200}px`;
+
+
+    cow.innerHTML =
+    `
+      <span class="cowIcon">
+        ${emoji}
+      </span>
+    `;
+
+
+ animalLayer.appendChild(cow);
+
+
+cows.push(cow);
+
+trainCows.push(cow);
+
+
+// fade in immediately
+requestAnimationFrame(() => {
+  setTimeout(() => {
+  cow.style.opacity = "1";
+}, 50);
+});
+
+
+
+    currentX -=
+      spacingPattern[
+        i % spacingPattern.length
+      ];
+
+  });
+
+
+
+  const moveTrain = setInterval(()=>{
+
+
+    trainCows.forEach(cow=>{
+
+
+      if(!animalLayer.contains(cow))
+        return;
+
+
+
+if(cow.dataset.abducting === "true"){
+  return;
+}
+
+let x =
+  parseFloat(cow.style.left);
+
+x += cowSpeed;
+
+cow.style.left =
+  x + "px";
+
+
+
+      // ───────── ABDUCTION CHECK ─────────
+
+      if(pendingAbduction){
+
+
+        const ufoRect =
+          ufoContainer.getBoundingClientRect();
+
+
+        const cowRect =
+          cow.getBoundingClientRect();
+
+
+
+        const cowCenter =
+          cowRect.left +
+          cowRect.width / 2;
+
+
+        const ufoCenter =
+          ufoRect.left +
+          ufoRect.width / 2;
+
+
+
+if(
+  Math.abs(cowCenter - ufoCenter) < 35
+){
+
+          pendingAbduction = false;
+
+
+          if(beam){
+            beam.classList.add("beamOn");
+          }
+
+
+          suckCowToUFO(cow);
+
+
+
+          setTimeout(()=>{
+
+            if(beam){
+              beam.classList.remove("beamOn");
+            }
+
+          },1000);
+
+
+        }
+
+      }
+
+
+
+      // remove when off screen
+      if(
+        x > window.innerWidth + 150
+      ){
+
+        cow.remove();
+
+        cows =
+          cows.filter(c=>c!==cow);
+
+      }
+
+
+    });
+
+
+
+    if(
+      !trainCows.some(c =>
+        animalLayer.contains(c)
+      )
+    ){
+
+      clearInterval(moveTrain);
+
+      trainInProgress=false;
+
+    }
+
+
+  },2);
+
+
+}
+
+
+
+// ───────────────────────── ABDUCTION ─────────────────────────
+
+
+function suckCowToUFO(cow){
+cow.dataset.abducting = "true";
+
+  const ufoRect =
+    ufoContainer.getBoundingClientRect();
+
+
+  const cowRect =
+    cow.getBoundingClientRect();
+
+
+
+const targetX =
+  ufoRect.left +
+  ufoRect.width / 2;
+
+const targetY =
+  ufoRect.top +
+  ufoRect.height * 0.70;
+
+const distX =
+  targetX -
+  (
+    cowRect.left +
+    cowRect.width / 2
+  );
+
+const distY =
+  targetY -
+  (
+    cowRect.top +
+    cowRect.height / 2
+  );
+
+
+  cow.style.transition =
+    "transform 1.5s linear, opacity 1.2s linear";
+
+
+
+  requestAnimationFrame(()=>{
+
+
+cow.style.transform =
+  `translateX(-50%) translate(${distX}px, ${distY - 80}px)`;
+
+    cow.style.opacity="0";
+
+
+  });
+
+
+
+  setTimeout(()=>{
+
+
+    cow.remove();
+
+
+    cows =
+      cows.filter(c=>c!==cow);
+
+
+  },1500);
+
+
+}
+
+
+
+// ───────────────────────── START TRAIN LOOP ─────────────────────────
+
+
+function scheduleNextCow(){
+
+
+  const delay =
+    1200 +
+    Math.random()*4000;
+
+
+
+  setTimeout(()=>{
+
+
+if (
+window.gameStarted &&
+  typeof wordList !== "undefined" &&
+  wordList.length > 0
+){
+
+
+      if(!trainInProgress){
+
+        nextTrainStartX=-100;
+
+        spawnCowTrain();
+
+      }
+
+
+    }
+
+
+
+    scheduleNextCow();
+
+
+
+  },delay);
+
+
+}
+
+
+
+window.addEventListener(
+  "load",
+  scheduleNextCow
+);
 
 </script>
 
+<script>
+(function () {
+
+  const canvas = document.getElementById("groundCanvas");
+  const ctx = canvas.getContext("2d");
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+
+  window.addEventListener("resize", resize);
+  resize();
+
+  let t = 0;
+
+
+  function noise(x, y, t) {
+    return (
+      Math.sin(x * 0.008 + t) +
+      Math.sin(y * 0.012 + t * 1.2) +
+      Math.sin((x + y) * 0.006 - t * 0.7)
+    ) / 3;
+  }
+
+
+  function draw() {
+
+    const w = canvas.width;
+    const h = canvas.height;
+
+    const img = ctx.createImageData(w, h);
+    const d = img.data;
+
+
+    const groundStart = h * 0.42;
+    const featherHeight = h * 0.08;
+
+
+    for (let y = 0; y < h; y++) {
+
+      for (let x = 0; x < w; x++) {
+
+
+        let blend;
+
+        if (y < groundStart) {
+          blend = 0;
+        } else if (y > groundStart + featherHeight) {
+          blend = 1;
+        } else {
+          blend = (y - groundStart) / featherHeight;
+        }
+
+
+        // 🌪️ BOILING GROUND NOISE
+        const n =
+          noise(x, y, t) +
+          noise(x * 0.5, y * 0.5, t * 0.9);
+
+
+        const swirl = Math.sin(n * 4 + y * 0.015);
+
+
+        // dark wheat
+        const wr = 170, wg = 160, wb = 105;
+
+        // dark green
+        const gr = 65, gg = 100, gb = 60;
+
+
+        const mix = swirl * 0.5 + 0.5;
+
+
+        const groundR = gr * mix + wr * (1 - mix);
+        const groundG = gg * mix + wg * (1 - mix);
+        const groundB = gb * mix + wb * (1 - mix);
+
+
+        const i = (y * w + x) * 4;
+
+        d[i]     = groundR;
+        d[i + 1] = groundG;
+        d[i + 2] = groundB;
+
+        // preserve original feather
+d[i + 3] = 255;
+      }
+    }
+
+
+    ctx.putImageData(img, 0, 0);
+
+    t += 0.02;
+
+    requestAnimationFrame(draw);
+
+  }
+
+
+  draw();
+
+
+})();
+</script>
+
+
+<script>
+(function () {
+
+const windCanvas = document.getElementById("windCanvas");
+const ctx = windCanvas.getContext("2d");
+
+function resize() {
+  windCanvas.width = window.innerWidth;
+  windCanvas.height = window.innerHeight;
+}
+
+resize();
+window.addEventListener("resize", resize);
+
+
+// ─────────────────────────
+// TORNADO WIND PARTICLES
+// ─────────────────────────
+
+const COUNT =800;
+const particles = [];
+
+for (let i = 0; i < COUNT; i++) {
+  particles.push(spawn());
+}
+
+
+function spawn() {
+  return {
+    x: Math.random() * windCanvas.width,
+    y: Math.random() * windCanvas.height,
+
+    // short horizontal debris particles
+    w: 3 + Math.random() * 5,
+    h: 2 + Math.random() * 1.5,
+
+    // fast side wind
+    vx: 8 + Math.random() * 12,
+    vy: (Math.random() - 0.5) * 0.8,
+
+    a: 0.03 + Math.random() * 0.08,
+    g: 190 + Math.random() * 40,
+
+    drift: Math.random() * Math.PI * 2
+  };
+}
+
+
+function draw() {
+
+  ctx.clearRect(
+    0,
+    0,
+    windCanvas.width,
+    windCanvas.height
+  );
+
+
+  for (const p of particles) {
+
+    p.x += p.vx;
+
+    // slight chaotic wind movement
+    p.drift += 0.02;
+
+    p.y +=
+      p.vy +
+      Math.sin(p.drift) * 0.25;
+
+
+    // recycle particles
+    if (
+      p.x > windCanvas.width + 20 ||
+      p.y < -20 ||
+      p.y > windCanvas.height + 20
+    ) {
+      Object.assign(
+        p,
+        spawn(),
+        {
+          x: -10,
+          y: Math.random() * windCanvas.height
+        }
+      );
+    }
+
+
+    ctx.fillStyle =
+      `rgba(${p.g},${p.g},${p.g},${p.a})`;
+
+    ctx.fillRect(
+      p.x,
+      p.y,
+      p.w,
+      p.h
+    );
+
+  }
+
+
+  requestAnimationFrame(draw);
+
+}
+
+draw();
+
+})();
+</script>
+
+<script>
+(function(){
+
+  const wobbleSettings = {
+    maxAngle: 2,       // degrees left/right
+    speed: 0.08,       // wobble speed
+    randomOffset: true
+  };
+
+
+  function animateAnimalWobble(){
+
+    const animals = document.querySelectorAll(".cow");
+
+    const time = performance.now() * wobbleSettings.speed;
+
+
+animals.forEach((animal,index)=>{
+
+  if(animal.dataset.abducting === "true"){
+    return;
+  }
+
+  // give each animal its own timing offset
+  const offset = wobbleSettings.randomOffset ? index * 1.7 : 0;
+
+  const angle =
+    Math.sin(time + offset) *
+    wobbleSettings.maxAngle;
+
+  animal.style.transform =
+    `translateX(-50%) rotate(${angle}deg)`;
+
+});
+    requestAnimationFrame(animateAnimalWobble);
+
+  }
+
+
+  animateAnimalWobble();
+
+
+})();
+</script>
 
 </body>
 </html>
+
+
+
+
 

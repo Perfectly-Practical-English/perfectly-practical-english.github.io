@@ -1664,7 +1664,7 @@ Technology solves all problems
 <button id="signalwordsBtn">Signals</button>
 <!-- <button id="goBtn">Go</button> -->
 
-<button onclick="goToNextQuiz()">Go to Quiz</button>
+<button onclick="goToNextQuiz()">Quiz</button>
 
       </div>
     </div>
@@ -1716,7 +1716,7 @@ Technology solves all problems
     if (line && !urlRegex.test(line) && urlRegex.test(next)) {
 
       htmlResult.push(
-        `<a href="${next}" target="_blank" rel="noopener">${line}</a>`
+        `<a href="${next}" target="_self" rel="noopener">${line}</a>`
       );
 
       speechChunks.push(line);
@@ -1727,7 +1727,7 @@ Technology solves all problems
 
     // INLINE URL HANDLING
     const htmlLine = line.replace(urlAnywhere, url =>
-      `<a href="${url}" target="_blank" rel="noopener">${url}</a>`
+      `<a href="${url}" target="_self" rel="noopener">${url}</a>`
     );
 
     htmlResult.push(htmlLine);

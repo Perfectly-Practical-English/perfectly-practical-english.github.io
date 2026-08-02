@@ -1896,7 +1896,7 @@ BLANK
     if (line && !urlRegex.test(line) && urlRegex.test(next)) {
 
       htmlResult.push(
-        `<a href="${next}" target="_blank" rel="noopener">${line}</a>`
+        `<a href="${next}" target="_self" rel="noopener">${line}</a>`
       );
 
       speechChunks.push(line);
@@ -4436,7 +4436,7 @@ function goToNextQuiz(){
 
   if(!container) return;
 
-  const originalLabel = goBtn?.textContent || "Go to Quiz";
+  const originalLabel = goBtn?.textContent || "Quiz";
 
   function showNoQuizEmoji(){
 

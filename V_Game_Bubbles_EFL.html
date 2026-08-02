@@ -234,7 +234,7 @@ footer {
   <input type="text" id="idField" placeholder="ID">
   <button id="startButton" disabled>Start</button>
   <button id="submitButton" disabled>Submit</button>
-  <div id="countdownOverlay">120</div>
+  <!-- <div id="countdownOverlay">120</div> -->
 </div>
 
 <div id="midBar" class="formRow">
@@ -258,8 +258,7 @@ footer {
 <canvas id="gameArea" tabindex="0" aria-label="Typing game area"></canvas>
 
 <audio id="popSound" src="bubble-pop-406640.mp3" preload="auto"></audio>
-<input id="typingInput" type="text" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="1" autocomplete="off" />
-
+<input id="typingInput" type="text" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="20" autocomplete="off" />
 <footer>
   <p>© 2026 Perfectly Practical English™. All rights reserved.</p>
 </footer>
@@ -1465,10 +1464,33 @@ updateStartButtonState(); // <-- REQUIRED
         ctx.font = `bold ${Math.floor(this.radius/2.5)}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillStyle = 'white';
-        ctx.shadowColor = this.shadowColor;
-        ctx.shadowBlur = 20;
-        ctx.fillText(this.word, this.x + offsetX, this.y);
+ctx.shadowColor = this.shadowColor;
+ctx.shadowBlur = 20;
+
+let startX = this.x + offsetX;
+
+ctx.font = `bold ${Math.floor(this.radius/2.5)}px Arial`;
+ctx.textAlign = 'left';
+ctx.textBaseline = 'middle';
+
+for (let i = 0; i < this.word.length; i++) {
+
+  if (i < this.typedIndex) {
+    ctx.fillStyle = 'red'; // typed letters green
+  } else {
+    ctx.fillStyle = 'white';   // remaining letters
+  }
+
+  ctx.fillText(
+    this.word[i],
+    startX - ctx.measureText(this.word).width / 2,
+    this.y
+  );
+
+  startX += ctx.measureText(this.word[i]).width;
+}
+
+ctx.shadowBlur = 0;
         ctx.shadowBlur = 0;
       }
     }
@@ -1570,25 +1592,69 @@ function spawnNextWord() {
   }
 
   function handleTypingInput(e) {
-    if(!gameStarted || gameStopped) return;
-    const key = e.data || e.key;
-    if(!key) return;
-    const lowerKey = key.toLowerCase();
-    if(!/^[a-z]$/.test(lowerKey)) return;
-    if(activeBubbles.length === 0) return;
+  if(!gameStarted || gameStopped) return;
+  if(activeBubbles.length === 0) return;
 
-    let wordToType = currentTypedWord;
-    const canTypeWord = (b)=>!b.exploded && b.typedIndex < b.word.length && b.word[b.typedIndex].toLowerCase()===lowerKey;
-    if(!wordToType || !canTypeWord(wordToType)){
-      const candidate = activeBubbles.find(canTypeWord);
-      if(candidate){ currentTypedWord = candidate; wordToType = candidate; }
-      else { typingInput.value=''; return; }
+  let wordToType = currentTypedWord;
+
+  if(!wordToType){
+    wordToType = activeBubbles.find(b => !b.exploded);
+    if(!wordToType) return;
+    currentTypedWord = wordToType;
+  }
+
+
+  // BACKSPACE CORRECTION
+  if(e.inputType === "deleteContentBackward") {
+
+    if(wordToType.typedIndex > 0) {
+      wordToType.typedIndex--;
     }
 
-    wordToType.typedIndex++;
-    if(wordToType.typedIndex === wordToType.word.length) explodeWord(wordToType,true);
-    typingInput.value='';
+    typingInput.value = "";
+    return;
   }
+
+
+  const key = e.data || e.key;
+
+  if(!key) {
+    typingInput.value = "";
+    return;
+  }
+
+
+  const lowerKey = key.toLowerCase();
+
+  if(!/^[a-z]$/.test(lowerKey)) {
+    typingInput.value = "";
+    return;
+  }
+
+
+  const expected =
+    wordToType.word[wordToType.typedIndex]?.toLowerCase();
+
+
+  // WRONG LETTER
+  if(lowerKey !== expected) {
+    typingInput.value = "";
+    return;
+  }
+
+
+  // CORRECT LETTER
+  wordToType.typedIndex++;
+
+
+  if(wordToType.typedIndex === wordToType.word.length) {
+    explodeWord(wordToType,true);
+    currentTypedWord = null;
+  }
+
+
+  typingInput.value = "";
+}
 
   function explodeWord(bubble, success){
     if(bubble.exploded) return;
@@ -1703,6 +1769,14 @@ async function submitResults(){
 
 startBtn.addEventListener('click', startGame);  submitBtn.addEventListener('click', submitResults);
   typingInput.addEventListener('input', handleTypingInput);
+
+typingInput.addEventListener('keydown', function(e) {
+  if(e.key === "Backspace") {
+    handleTypingInput({
+      inputType: "deleteContentBackward"
+    });
+  }
+});
   canvas.addEventListener('click', ()=>{if(gameStarted && !gameStopped) typingInput.focus();});
 
   copyBtn.addEventListener('click', ()=>{if(!scoreboardContainer.textContent) return; navigator.clipboard.writeText(scoreboardContainer.textContent).then(()=>alert('Scoreboard copied.'));});

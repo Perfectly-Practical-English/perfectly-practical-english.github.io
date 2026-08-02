@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Mobile Mini Crossword</title>
+  <style>
+    :root {
+      --bg-color: #f4f6f9;
+      --card-bg: #ffffff;
+      --primary: #4f46e5;
+      --primary-light: #e0e7ff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --border: #d1d5db;
+      --success-bg: #d1fae5;
+      --success-text: #065f46;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(to bottom, #a0e0ff 0%, #ffffff 95%);
+      color: var(--text-main);
+      height: 100vh;
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+      padding: 6px;
+      gap: 4px;
+    }
+
+    header {
+      width: 100%;
+      max-width: min(92vw, 420px);
+      padding: 4px;
+      text-align: center;
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      font-weight: 700;
+      font-size: 0.9rem;
+      color: var(--primary);
+      border-radius: 6px 6px 0 0;
+    }
+
+    .app-width-container {
+      width: 100%;
+      max-width: min(92vw, 420px);
+      box-sizing: border-box;
+    }
+
+    #topControlBar {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      padding: 4px;
+      background: #f0f8ff;
+      border: 1px solid var(--border);
+      border-radius: 0 0 6px 6px;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    #topControlBar input[type="text"] {
+      flex: 1 1 0;
+      min-width: 0;
+      padding: 4px;
+      font-size: 11px;
+      border: 1px solid #999;
+      border-radius: 4px;
+    }
+
+    button {
+      padding: 4px 6px;
+      font-size: 11px;
+      border-radius: 4px;
+      border: 1px solid #777;
+      background: #eef6fb;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+
+    #sectionWheelContainer {
+      height: 24px;
+      flex: 1.1 1 0;
+      min-width: 0;
+      overflow: hidden;
+      border: 1px solid #999;
+      border-radius: 4px;
+      background: #fff;
+      position: relative;
+    }
+
+    .wheel {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      transition: transform 0.25s ease;
+    }
+
+    .wheelItem {
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 11px;
+      line-height: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      padding: 0 2px;
+    }
+
+    .wheel-controls {
+      display: flex;
+      gap: 1px;
+    }
+
+    .wheel-controls button {
+      padding: 4px;
+      font-size: 10px;
+    }
+
+    #grid-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 4px;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      width: 100%;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(20, minmax(0, 1fr));
+      grid-template-rows: repeat(20, minmax(0, 1fr));
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #ffffff;
+      gap: 1px;
+      border: 2px solid #333;
+    }
+
+    .cell {
+      background: #ffffff;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      font-size: calc(min(92vw, 420px) / 36);
+      text-transform: uppercase;
+      border: 1px solid #e5e7eb;
+    }
+
+    .cell.active {
+      background: #ffffff;
+      border: 1px solid #000000;
+      cursor: pointer;
+    }
+
+    .cell.selected {
+      background: var(--primary-light) !important;
+      border: 1px solid #000000 !important;
+    }
+
+    .cell.correct {
+      background: var(--success-bg) !important;
+      color: var(--success-text) !important;
+      border: 1px solid #065f46 !important;
+    }
+
+    .cell-number {
+      position: absolute;
+      top: 0px;
+      left: 1px;
+      font-size: calc(min(92vw, 420px) / 55);
+      line-height: 1;
+      font-weight: bold;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .cell input {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: transparent;
+      text-align: center;
+      font-size: inherit;
+      font-weight: inherit;
+      text-transform: uppercase;
+      color: inherit;
+      outline: none;
+      cursor: pointer;
+      pointer-events: none;
+    }
+
+    #prompt-panel {
+      flex: 1;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+      width: 100%;
+    }
+
+    .carousel {
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+      gap: 4px;
+      padding: 4px 8px;
+      align-items: center;
+      height: 100%;
+      list-style: none;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .carousel::-webkit-scrollbar {
+      display: none;
+    }
+
+    .prompt-card {
+      scroll-snap-align: center;
+      scroll-snap-stop: always;
+      flex: 0 0 42px;
+      width: 100%;
+      background: var(--bg-color);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 3px 6px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .prompt-card.active-prompt {
+      border-color: var(--primary);
+      background: var(--card-bg);
+      box-shadow: 0 1px 3px rgba(79, 70, 229, 0.15);
+    }
+
+    .prompt-card.completed-prompt {
+      border-color: var(--success-text);
+      background: var(--success-bg);
+    }
+
+    .prompt-header {
+      font-size: 0.55rem;
+      font-weight: 600;
+      color: var(--primary);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .prompt-card.completed-prompt .prompt-header {
+      color: var(--success-text);
+    }
+
+    .prompt-text {
+      font-size: 0.58rem;
+      color: var(--text-main);
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    #gboard-trigger {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+      bottom: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-width-container">
+    <div id="topControlBar">
+      <input type="text" id="nameInput" placeholder="Name" autocomplete="off" />
+      <input type="text" id="idInput" placeholder="ID" autocomplete="off" />
+      <div id="sectionWheelContainer">
+        <div class="wheel" id="sectionWheel"></div>
+      </div>
+      <div class="wheel-controls">
+        <button type="button" id="sectionUp">▲</button>
+        <button type="button" id="sectionDown">▼</button>
+      </div>
+      <button id="startBtn">Start</button>
+    </div>
+  </div>
+
+  <div class="app-width-container" id="grid-container">
+    <div class="grid" id="crossword-grid"></div>
+  </div>
+
+  <div class="app-width-container" id="prompt-panel">
+    <ul class="carousel" id="prompt-carousel"></ul>
+  </div>
+
+  <input type="text" id="gboard-trigger" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+
+  <script>
+    (function() {
+      function preventPinch(e) { if (e.touches.length > 1) e.preventDefault(); }
+      let lastTouchTime = 0;
+      function preventDoubleTap(e) {
+        const now = Date.now();
+        if (now - lastTouchTime < 300) e.preventDefault();
+        lastTouchTime = now;
+      }
+      document.addEventListener('touchstart', preventPinch, { passive: false });
+      document.addEventListener('touchend', preventDoubleTap, { passive: false });
+      document.addEventListener('gesturestart', (e) => e.preventDefault(), { passive: false });
+    })();
+
+    const GRID_SIZE = 20;
+
+    function parseVocabAndGenerateSections(rawText) {
+      const sections = [{ name: "Select a topic", words: [] }];
+      const blocks = rawText.split('~').slice(1);
+
+      blocks.forEach(block => {
+        const lines = block.trim().split('\n');
+        const sectionName = lines[0].trim();
+        const words = [];
+
+        for (let i = 1; i < lines.length; i++) {
+          const line = lines[i].trim();
+          if (!line) continue;
+          const cleanLine = line.replace(/^[•\-]\s*/, '');
+          const parts = cleanLine.split(/[–-]/);
+          if (parts.length >= 2) {
+            let w = parts[0].replace(/[\u{1F000}-\u{1F9FF}]/gu, '').trim().toUpperCase().split('/')[0].trim();
+            let c = parts[1].split(',')[0].trim();
+            if (w.length > 1 && w.length <= 14) {
+              words.push({ answer: w, clue: c });
+            }
+          }
+        }
+
+        const uniqueWords = [];
+        const seen = new Set();
+        words.forEach(w => {
+          if (!seen.has(w.answer)) {
+            seen.add(w.answer);
+            uniqueWords.push(w);
+          }
+        });
+
+        if (uniqueWords.length >= 2) {
+          const crosswordWords = generateMaxDensityLayout(uniqueWords);
+          sections.push({ name: sectionName, words: crosswordWords });
+        }
+      });
+
+      return sections;
+    }
+
+    function generateMaxDensityLayout(wordsList) {
+      const sortedWords = [...wordsList].sort((a, b) => b.answer.length - a.answer.length);
+      let bestPlacement = [];
+      let maxPlacedCount = -1;
+
+      const attempts = Math.min(sortedWords.length, 10);
+
+      for (let attempt = 0; attempt < attempts; attempt++) {
+        const pool = [...sortedWords];
+        if (attempt > 0) {
+          const item = pool.shift();
+          pool.push(item);
+        }
+
+        const placed = [];
+        const gridMatrix = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(''));
+
+        for (let index = 0; index < pool.length; index++) {
+          const item = pool[index];
+          const word = item.answer.replace(/[^A-Z]/g, '');
+          if (word.length < 2) continue;
+
+          if (placed.length === 0) {
+            const r = Math.floor(GRID_SIZE / 2);
+            const c = Math.max(2, Math.floor((GRID_SIZE - word.length) / 2));
+            if (c + word.length <= GRID_SIZE - 2) {
+              let canFit = true;
+              for (let i = 0; i < word.length; i++) {
+                if (gridMatrix[r][c + i] !== '') canFit = false;
+              }
+              for (let i = 0; i < word.length; i++) {
+                if (gridMatrix[r - 1][c + i] !== '' || gridMatrix[r + 1][c + i] !== '') {
+                  canFit = false;
+                  break;
+                }
+              }
+
+              if (canFit) {
+                for (let i = 0; i < word.length; i++) {
+                  gridMatrix[r][c + i] = word[i];
+                }
+                placed.push({
+                  id: placed.length + 1,
+                  answer: word,
+                  clue: item.clue,
+                  row: r,
+                  col: c,
+                  direction: "across"
+                });
+              }
+            }
+          } else {
+            let placedSuccessfully = false;
+
+            for (let pIndex = 0; pIndex < placed.length; pIndex++) {
+              if (placedSuccessfully) break;
+              const existing = placed[pIndex];
+
+              for (let i = 0; i < word.length; i++) {
+                if (placedSuccessfully) break;
+                const charToMatch = word[i];
+
+                for (let j = 0; j < existing.answer.length; j++) {
+                  if (existing.answer[j] === charToMatch) {
+                    let newRow, newCol, newDir;
+
+                    if (existing.direction === "across") {
+                      newDir = "down";
+                      newCol = existing.col + j;
+                      newRow = existing.row - i;
+                    } else {
+                      newDir = "across";
+                      newRow = existing.row + j;
+                      newCol = existing.col - i;
+                    }
+
+                    if (newRow >= 2 && newCol >= 2 && newRow < GRID_SIZE - 2 && newCol < GRID_SIZE - 2) {
+                      let canFit = true;
+
+                      if (newDir === "across") {
+                        if (newCol + word.length > GRID_SIZE - 2) continue;
+                        for (let k = 0; k < word.length; k++) {
+                          const currR = newRow;
+                          const currC = newCol + k;
+                          const existingChar = gridMatrix[currR][currC];
+
+                          if (existingChar !== '' && existingChar !== word[k]) {
+                            canFit = false;
+                            break;
+                          }
+
+                          if (existingChar === '') {
+                            if (gridMatrix[currR - 1][currC] !== '' || gridMatrix[currR + 1][currC] !== '') {
+                              canFit = false;
+                              break;
+                            }
+                          }
+                        }
+
+                        if (canFit) {
+                          if (gridMatrix[newRow][newCol - 1] !== '' || gridMatrix[newRow][newCol + word.length] !== '') {
+                            canFit = false;
+                          }
+                        }
+
+                        if (canFit) {
+                          for (let k = 0; k < word.length; k++) {
+                            gridMatrix[newRow][newCol + k] = word[k];
+                          }
+                          placed.push({
+                            id: placed.length + 1,
+                            answer: word,
+                            clue: item.clue,
+                            row: newRow,
+                            col: newCol,
+                            direction: newDir
+                          });
+                          placedSuccessfully = true;
+                          break;
+                        }
+
+                      } else {
+                        if (newRow + word.length > GRID_SIZE - 2) continue;
+                        for (let k = 0; k < word.length; k++) {
+                          const currR = newRow + k;
+                          const currC = newCol;
+                          const existingChar = gridMatrix[currR][currC];
+
+                          if (existingChar !== '' && existingChar !== word[k]) {
+                            canFit = false;
+                            break;
+                          }
+
+                          if (existingChar === '') {
+                            if (gridMatrix[currR][currC - 1] !== '' || gridMatrix[currR][currC + 1] !== '') {
+                              canFit = false;
+                              break;
+                            }
+                          }
+                        }
+
+                        if (canFit) {
+                          if (gridMatrix[newRow - 1][newCol] !== '' || gridMatrix[newRow + word.length][newCol] !== '') {
+                            canFit = false;
+                          }
+                        }
+
+                        if (canFit) {
+                          for (let k = 0; k < word.length; k++) {
+                            gridMatrix[newRow + k][newCol] = word[k];
+                          }
+                          placed.push({
+                            id: placed.length + 1,
+                            answer: word,
+                            clue: item.clue,
+                            row: newRow,
+                            col: newCol,
+                            direction: newDir
+                          });
+                          placedSuccessfully = true;
+                          break;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
+        if (placed.length > maxPlacedCount) {
+          maxPlacedCount = placed.length;
+          bestPlacement = placed;
+        }
+      }
+
+      bestPlacement.forEach((w, idx) => {
+        w.id = idx + 1;
+      });
+
+      return bestPlacement;
+    }
+
+    const rawVocabText = `
+~ Unit 1 Test
+
+• always  – happening every time.
+
+• awesome  – extremely good or impressive.
+
+• exercise  – physical activity that helps keep your body healthy.
+
+• information  – facts or details about something.
+
+• interested in  – wanting to learn more about something.
+
+• magazine  – a book-like publication with articles and pictures.
+
+• museum  – a place where interesting objects are displayed.
+
+• musical instrument  – something used to make music.
+
+• parents  – the people who raise and care for you.
+
+• uncle  – your mother's or father's brother.
+
+~ Unit 2 Test
+
+• crisps  – thin slices of potato cooked until crunchy.
+
+• dessert  – sweet food eaten after a meal.
+
+• fresh  – recently made, picked, or prepared.
+
+• ingredients  – the foods or items used to make a dish.
+
+• mayonnaise  – a thick, creamy sauce often used in sandwiches and salads.
+
+• packet  – a small bag or package for holding something.
+
+• prepare  – to get something ready.
+
+• recommend  – to say that something is good to try or use.
+
+• taste  – the flavour of food or drink.
+
+• vegetarian  – a person who does not eat meat.
+
+~ Unit 3 Test
+
+• duty  – something you are expected to do.
+
+• earn  – to receive money for your work.
+
+• education  – the process of learning at school or college.
+
+• engineer  – a person who designs or builds machines and structures.
+
+• experience  – knowledge gained by doing or seeing things.
+
+• fascinating  – extremely interesting.
+
+• language  – a system of words used for communication.
+
+• plumber  – a person who fixes water pipes.
+
+• responsible  – someone who can be trusted to do the right thing.
+
+• volunteer  – a person who works without being paid.
+
+~ Unit 4 Test
+
+• appearance  – the way someone or something looks.
+
+• confident  – believing in your own abilities.
+
+• creative  – good at thinking of new ideas.
+
+• energetic  – full of energy and activity.
+
+• flexible  – able to change or adapt easily.
+
+• generous  – willing to give or share with others.
+
+• humour  – the ability to make people laugh.
+
+• personality  – the way a person usually thinks and behaves.
+
+• unfriendly  – not kind or welcoming to others.
+
+• well-built  – having a strong and healthy body.
+
+~ Unit 5 Test
+
+• canteen  – a place where people buy and eat meals at school or work.
+
+• Chemistry  – the school subject about substances and how they change.
+
+• concentrate  – to give your full attention to something.
+
+• experiment  – a scientific test to learn something new.
+
+• Geography  – the study of the Earth and its places.
+
+• kindergarten  – a school for very young children.
+
+• lesson  – a period of learning in school.
+
+• library  – a place where people can borrow or read books.
+
+• Physics  – the study of matter, energy, and forces.
+
+• university  – a place where people study after finishing school.
+
+~ Unit 6 Test
+
+• became  – changed into something different.
+
+• believed  – thought something was true.
+
+• competition  – an event where people try to win.
+
+• cycling  – riding a bicycle.
+
+• explained  – made something easier to understand.
+
+• individual  – one single person.
+
+• karate  – a sport and martial art that uses punches and kicks.
+
+• martial arts  – sports that teach fighting skills.
+
+• stretching  – exercises that help make your muscles flexible.
+
+• success  – achieving something you worked for.
+
+~ Unit 7 Test
+
+• adventure  – an exciting and unusual experience.
+
+• destination  – the place where a journey ends.
+
+• flight  – a journey by airplane.
+
+• luggage  – the bags you take when travelling.
+
+• passenger  – a person travelling in a vehicle.
+
+• reservation  – an arrangement to keep a seat or room for you.
+
+• tourist  – a person who travels to visit places.
+
+• transport  – vehicles used to move people or goods.
+
+• trip abroad  – a journey to another country.
+
+• youth hostel  – a low-cost place where travellers can stay.
+
+~ Unit 8 Test
+
+• climate  – the usual weather in a place over many years.
+
+• continent  – one of the Earth's large land areas.
+
+• disappear  – to stop being seen.
+
+• energy  – power used to do work or make things happen.
+
+• environment  – the natural world around us.
+
+• global  – relating to the whole world.
+
+• habitat  – the natural place where a plant or animal lives.
+
+• pollution  – harmful waste that damages the environment.
+
+• rubbish  – things that have been thrown away.
+
+• toxic  – poisonous or harmful to living things.
+
+~ Signal Words
+Time 
+
+Words used to show when something happens.
+
+on, at, in, before, after, since, until, during, for, now, yesterday, today, tomorrow, later, then, when, while, once
+
+Addition 
+
+Words used to add another idea.
+
+and, also, too, with, plus, as well as, not only...but also, both...and
+
+Cause / Effect 
+
+Words used to give a reason or show a result.
+
+because, so, since, because of, due to, as a result, therefore, that's why
+
+Comparison 
+
+Words used to compare people or things.
+
+like, as, as...as, than, similar to, different from, more than, less than, the most, just as...so, whereas, in contrast to
+
+Contrast 
+
+Words used to show a difference between ideas.
+
+but, although, though, even though, however, yet, still, despite, instead, whereas, while, on the other hand
+
+Frequency 
+
+Words used to show how often something happens.
+
+always, usually, often, sometimes, occasionally, rarely, never, every day, once a week, hardly ever, from time to time
+
+Possibility / Certainty 
+
+Words used to show how sure something is.
+
+maybe, probably, possibly, must, might, may, could, can, definitely, certainly
+
+Advice / Obligation / Permission 
+
+Words used to give advice, rules, or permission.
+
+must, must not, have to, don't have to, should, ought to, had better, can, cannot, may, could
+
+Manner 
+
+Words used to show how something is done.
+
+quickly, slowly, carefully, easily, well, badly, with, by, in a...way, as
+
+Place / Location 
+
+Words used to show where something is.
+
+in, on, at, under, above, between, near, next to, here, there, everywhere, anywhere
+
+Condition 
+
+Words used to show that one thing depends on another.
+
+if, unless, in case, on condition that
+
+Emphasis 
+
+Words used to make an idea stronger or more important.
+
+only, just, even, especially, mainly, particularly
+
+Questions 
+
+Words used to ask for information.
+
+how, when, where, why
+
+Relative Words
+
+Words used to connect ideas about time, place, reason, or manner.
+
+when, where, why, how
+
+Direction / Movement 
+
+Words used to show movement from one place to another.
+
+to, from, toward, away from, up, down, forward, back
+
+Affirmative and Negative 
+
+Words used to show yes or no.
+
+yes, no
+`;
+
+    const sectionsData = parseVocabAndGenerateSections(rawVocabText);
+
+    let currentSectionIndex = 0;
+    let gridData = [];
+    let activeCell = null;
+    let activeWordId = null;
+
+    const wheelEl = document.getElementById('sectionWheel');
+    const gridEl = document.getElementById('crossword-grid');
+    const carouselEl = document.getElementById('prompt-carousel');
+    const gboardTrigger = document.getElementById('gboard-trigger');
+
+    function initWheel() {
+      wheelEl.innerHTML = '';
+      sectionsData.forEach((sec) => {
+        const item = document.createElement('div');
+        item.className = 'wheelItem';
+        item.textContent = sec.name;
+        wheelEl.appendChild(item);
+      });
+      updateWheelPosition();
+    }
+
+    function updateWheelPosition() {
+      wheelEl.style.transform = `translateY(${-currentSectionIndex * 24}px)`;
+    }
+
+    function loadSection(index) {
+      currentSectionIndex = index;
+      updateWheelPosition();
+      
+      if (index === 0) {
+        gridEl.innerHTML = '';
+        carouselEl.innerHTML = '';
+        return;
+      }
+
+      buildGrid();
+      buildPrompts();
+    }
+
+    function buildGrid() {
+      gridEl.innerHTML = '';
+      gridEl.style.gridTemplateColumns = `repeat(${GRID_SIZE}, minmax(0, 1fr))`;
+      gridEl.style.gridTemplateRows = `repeat(${GRID_SIZE}, minmax(0, 1fr))`;
+      
+      gridData = Array(GRID_SIZE).fill(null).map(() => Array(GRID_SIZE).fill(null));
+      const section = sectionsData[currentSectionIndex];
+
+      section.words.forEach((wObj) => {
+        const { answer, row, col, direction, id } = wObj;
+        for (let i = 0; i < answer.length; i++) {
+          const r = direction === 'across' ? row : row + i;
+          const c = direction === 'across' ? col + i : col;
+          
+          if (!gridData[r][c]) {
+            gridData[r][c] = {
+              letter: answer[i],
+              number: (i === 0) ? id : null,
+              words: []
+            };
+          } else if (i === 0 && !gridData[r][c].number) {
+            gridData[r][c].number = id;
+          }
+          gridData[r][c].words.push(wObj);
+        }
+      });
+
+      for (let r = 0; r < GRID_SIZE; r++) {
+        for (let c = 0; c < GRID_SIZE; c++) {
+          const cellDiv = document.createElement('div');
+          cellDiv.className = 'cell';
+          cellDiv.dataset.row = r;
+          cellDiv.dataset.col = c;
+
+          const cellInfo = gridData[r][c];
+          if (cellInfo) {
+            cellDiv.classList.add('active');
+            if (cellInfo.number) {
+              const numSpan = document.createElement('span');
+              numSpan.className = 'cell-number';
+              numSpan.textContent = cellInfo.number;
+              cellDiv.appendChild(numSpan);
+            }
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.maxLength = 1;
+            cellDiv.appendChild(input);
+
+            cellDiv.addEventListener('click', () => selectCell(cellDiv));
+          }
+          gridEl.appendChild(cellDiv);
+        }
+      }
+    }
+
+    function buildPrompts() {
+      carouselEl.innerHTML = '';
+      const section = sectionsData[currentSectionIndex];
+      section.words.forEach((wObj) => {
+        const li = document.createElement('li');
+        li.className = 'prompt-card';
+        li.dataset.wordId = wObj.id;
+        
+        li.innerHTML = `
+          <div style="display: flex; flex-direction: column; width: 100%; justify-content: center; gap: 1px;">
+            <span class="prompt-header">${wObj.id}. ${wObj.direction.toUpperCase()}</span>
+            <span class="prompt-text">${wObj.clue}</span>
+          </div>
+        `;
+        
+        li.addEventListener('click', () => {
+          activeWordId = wObj.id;
+          highlightWordPrompts(wObj.id);
+          const firstCellEl = gridEl.querySelector(`[data-row='${wObj.row}'][data-col='${wObj.col}']`);
+          if (firstCellEl) selectCell(firstCellEl);
+        });
+        carouselEl.appendChild(li);
+      });
+    }
+
+    function selectCell(cellDiv) {
+      if (!cellDiv.classList.contains('active')) return;
+      document.querySelectorAll('.cell').forEach(c => c.classList.remove('selected'));
+      cellDiv.classList.add('selected');
+      activeCell = cellDiv;
+
+      const r = parseInt(cellDiv.dataset.row);
+      const c = parseInt(cellDiv.dataset.col);
+      const cellInfo = gridData[r][c];
+      
+      if (cellInfo && cellInfo.words.length > 0) {
+        let targetWord = cellInfo.words.find(w => w.id === activeWordId);
+        if (!targetWord) {
+          targetWord = cellInfo.words[0];
+          activeWordId = targetWord.id;
+        }
+        highlightWordPrompts(activeWordId);
+      }
+
+      gboardTrigger.focus();
+    }
+
+    function highlightWordPrompts(wordId) {
+      document.querySelectorAll('.prompt-card').forEach(card => {
+        if (parseInt(card.dataset.wordId) === wordId) {
+          card.classList.add('active-prompt');
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          card.classList.remove('active-prompt');
+        }
+      });
+    }
+
+    function updateCellValidation(cellDiv) {
+      const r = parseInt(cellDiv.dataset.row);
+      const c = parseInt(cellDiv.dataset.col);
+      const cellInfo = gridData[r][c];
+      const input = cellDiv.querySelector('input');
+      
+      if (!input || !cellInfo) return;
+      
+      const typedVal = input.value.toUpperCase();
+      if (typedVal && typedVal === cellInfo.letter) {
+        cellDiv.classList.add('correct');
+      } else {
+        cellDiv.classList.remove('correct');
+      }
+    }
+
+    document.getElementById('sectionUp').addEventListener('click', () => {
+      if (currentSectionIndex > 0) {
+        loadSection(currentSectionIndex - 1);
+      }
+    });
+
+    document.getElementById('sectionDown').addEventListener('click', () => {
+      if (currentSectionIndex < sectionsData.length - 1) {
+        loadSection(currentSectionIndex + 1);
+      }
+    });
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+      if (currentSectionIndex === 0) {
+        alert("Please select a topic from the wheel first!");
+        return;
+      }
+      loadSection(currentSectionIndex);
+    });
+
+    let scrollTimeout = null;
+    carouselEl.addEventListener('touchend', () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        const cards = Array.from(carouselEl.querySelectorAll('.prompt-card'));
+        if (cards.length === 0) return;
+
+        const containerRect = carouselEl.getBoundingClientRect();
+        const containerCenter = containerRect.top + containerRect.height / 2;
+
+        let closestCard = cards[0];
+        let minDistance = Infinity;
+
+        cards.forEach(card => {
+          const cardRect = card.getBoundingClientRect();
+          const cardCenter = cardRect.top + cardRect.height / 2;
+          const distance = Math.abs(containerCenter - cardCenter);
+          if (distance < minDistance) {
+            minDistance = distance;
+            closestCard = card;
+          }
+        });
+
+        closestCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    });
+
+    gboardTrigger.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && activeCell) {
+        e.preventDefault();
+        const input = activeCell.querySelector('input');
+        if (input && input.value) {
+          input.value = '';
+          activeCell.classList.remove('correct');
+        } else {
+          const section = sectionsData[currentSectionIndex];
+          const wObj = section.words.find(w => w.id === activeWordId);
+          if (wObj) {
+            const r = parseInt(activeCell.dataset.row);
+            const c = parseInt(activeCell.dataset.col);
+            const currentIndex = wObj.direction === 'across' ? c - wObj.col : r - wObj.row;
+            if (currentIndex > 0) {
+              const prevIndex = currentIndex - 1;
+              const prevR = wObj.direction === 'across' ? wObj.row : wObj.row + prevIndex;
+              const prevC = wObj.direction === 'across' ? wObj.col + prevIndex : wObj.col;
+              const prevCellEl = gridEl.querySelector(`[data-row='${prevR}'][data-col='${prevC}']`);
+              if (prevCellEl) {
+                selectCell(prevCellEl);
+                const prevInput = prevCellEl.querySelector('input');
+                if (prevInput) {
+                  prevInput.value = '';
+                  prevCellEl.classList.remove('correct');
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+
+    gboardTrigger.addEventListener('input', (e) => {
+      if (!activeCell) return;
+      const val = e.target.value.toUpperCase();
+      e.target.value = '';
+      if (val) {
+        const input = activeCell.querySelector('input');
+        if (input) {
+          input.value = val;
+          updateCellValidation(activeCell);
+        }
+        
+        const section = sectionsData[currentSectionIndex];
+        const wObj = section.words.find(w => w.id === activeWordId);
+        
+        if (wObj) {
+          const r = parseInt(activeCell.dataset.row);
+          const c = parseInt(activeCell.dataset.col);
+          const nextIndex = wObj.direction === 'across' ? c - wObj.col + 1 : r - wObj.row + 1;
+          
+          if (nextIndex < wObj.answer.length) {
+            const nextR = wObj.direction === 'across' ? wObj.row : wObj.row + nextIndex;
+            const nextC = wObj.direction === 'across' ? wObj.col + nextIndex : wObj.col;
+            const nextCellEl = gridEl.querySelector(`[data-row='${nextR}'][data-col='${nextC}']`);
+            if (nextCellEl) selectCell(nextCellEl);
+          }
+        }
+      }
+    });
+
+    initWheel();
+    loadSection(0);
+  </script>
+</body>
+</html>
