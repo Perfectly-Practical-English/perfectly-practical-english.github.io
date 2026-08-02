@@ -23,39 +23,39 @@ body {
   user-select: none;
 }
 
-/* ==============================
-   TOP + MID BARS
-   ============================== */
 #topBar,
 #midBar {
   position: relative;
   z-index: 10000;
+  display: flex;
   align-items: center;
   gap: 6px;
   padding: 8px;
   margin: 0 auto 16px auto;
-  background: transparent;
+  background: rgba(0, 0, 0, 0.75);
   border: 1px solid rgba(255,255,255,0.6);
   border-radius: 6px;
   flex-wrap: nowrap;
   width: 100%;
-  max-width: 100%;
+  max-width: 600px;
+  box-sizing: border-box;
 }
 
 #topBar input[type="text"] {
   flex: 1 1 0;
-  min-width: 70px;
-  max-width: 140px;
+  min-width: 60px;
+  max-width: 120px;
+  padding: 6px 8px;
+  font-size: 14px;
 }
 
 #topBar button,
 #midBar button {
   flex: 0 0 auto;
   white-space: nowrap;
-  padding-left: 10.5px;
-  padding-right: 10.5px;
+  padding: 6px 10px;
+  font-size: 14px;
 }
-
 /* ==============================
    INPUTS & BUTTONS
    ============================== */
