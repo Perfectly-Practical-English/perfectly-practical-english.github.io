@@ -5,85 +5,88 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>index</title>
 
-  <style>
-    * { box-sizing: border-box; }
+<style>
+    /* Universal Box Model Reset & Containment */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
 
-/* Universal box-sizing lock to prevent padding from expanding past the screen width */
-*, *::before, *::after {
-  box-sizing: border-box;
-}
+    html {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      max-width: 100vw;
+      overflow-x: hidden;
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
 
-html {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
-}
+    body {
+      width: 100%;
+      min-height: 100%;
+      margin: 0;
+      padding-left: 15px;
+      padding-right: 15px;
+      padding-bottom: 120px; 
+      font-family: Arial, sans-serif;
+      background: #fff;
+      color: #111;
+      line-height: 1.5;
+      max-width: 100vw;
+      overflow-x: hidden;
+      overflow-y: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
 
-body {
-  width: 100%;
-  min-height: 100%;
-  margin: 0;
-  font-family: Arial, sans-serif;
-  padding-left: 15px;
-  padding-right: 15px;
-  padding-bottom: 120px; 
-  background: #fff;
-  color: #111;
-  line-height: 1.5;
-  overflow-x: hidden;
-  overflow-y: auto;
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE/Edge */
-}
-/* Hide scrollbars across all modern browsers cleanly */
-html::-webkit-scrollbar,
-body::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-}
+    /* Hide scrollbars completely and eliminate side stripes */
+    html::-webkit-scrollbar,
+    body::-webkit-scrollbar,
+    *::-webkit-scrollbar {
+      display: none !important;
+      width: 0 !important;
+      height: 0 !important;
+    }
 
     h1 { color: #222; margin-bottom: 0.3em; margin-left: 0.3em; }
     h2 { color: #222; margin-bottom: 0.1em; margin-left: 0.4em; }
     p { color: #222; margin-left: 0.6em; }
     a { color: #007acc; text-decoration: none; word-break: break-word; }
     a:hover, a:focus { text-decoration: underline; }
-    .section { margin-bottom: 2em; }
-.collapsible {
-  width: 100%;
-  display: block;
+    .section { margin-bottom: 2em; width: 100%; max-width: 100%; }
 
-  font-size: 1.2em;
-  cursor: pointer;
-  user-select: none;
-
-  padding-left: .5em;
-
-  color: #222;
-  background: #f0f0f0;
-  border-radius: 4px;
-
-  transition: background 0.2s;
-}
+    .collapsible {
+      width: 100%;
+      max-width: 100%;
+      display: block;
+      font-size: 1.2em;
+      cursor: pointer;
+      user-select: none;
+      padding-left: .5em;
+      color: #222;
+      background: #f0f0f0;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
     .collapsible:hover { background: #e0e0e0; }
-.content {
+
+    .content {
       display: none;
       margin-top: 0;
-      padding-left: 0; /* Align flush with the left edge of collapsible bars */
+      padding-left: 0;
       white-space: pre-wrap;
       font-family: inherit;
       min-height: 40px; 
+      width: 100%;
+      max-width: 100%;
     }
 
     .collapsible.active + .content { display: block; }
 
-    /* Tighter Grid Styling for Buttons */
-.games-grid {
+    /* Strict Grid Layout Fitting */
+    .games-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
       gap: 6px;
@@ -105,8 +108,6 @@ body::-webkit-scrollbar {
       text-decoration: none;
       word-break: normal;
       line-height: 1.15;
-
-      /* Polished Stone Button Look */
       background: linear-gradient(145deg, #eee3ff, #bca1f5);
       border-radius: 12px;
       border: 1px solid rgba(255, 255, 255, 0.7);
@@ -115,7 +116,6 @@ body::-webkit-scrollbar {
         0 1px 2px rgba(0, 0, 0, 0.1),
         inset 0 1px 1px rgba(255, 255, 255, 0.8),
         inset 0 -2px 3px rgba(0, 0, 0, 0.1);
-
       transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
     }
 
@@ -123,24 +123,17 @@ body::-webkit-scrollbar {
       text-decoration: none;
       background: linear-gradient(145deg, #f3ebff, #c5acfa);
       transform: translateY(-2px);
-      box-shadow: 
-        0 5px 8px rgba(0, 0, 0, 0.2),
-        0 2px 3px rgba(0, 0, 0, 0.1),
-        inset 0 1px 1px rgba(255, 255, 255, 0.9),
-        inset 0 -2px 3px rgba(0, 0, 0, 0.1);
     }
 
     .games-grid a.game-btn:active {
       transform: translateY(1px);
-      box-shadow: 
-        0 2px 2px rgba(0, 0, 0, 0.2),
-        inset 0 2px 3px rgba(0, 0, 0, 0.15);
     }
 
-@media (max-width: 600px) {
-  body { font-size: 1.05em; margin: 0.5em; }
-  .collapsible { width: 100%; font-size: 1.2em; padding-left: .6em; }
-}
+    @media (max-width: 600px) {
+      body { font-size: 1.05em; margin: 0; padding-left: 10px; padding-right: 10px; }
+      .collapsible { width: 100%; font-size: 1.2em; padding-left: .6em; }
+    }
+
     footer {
       position: fixed;
       bottom: 10px;
@@ -164,31 +157,21 @@ body::-webkit-scrollbar {
       margin-left: 0.6em;
     }
 
-#qrBox {
-  width: 220px;
-  margin: 2em auto 4em auto; /* center + space above footer */
-  text-align: center;
-}
+    #qrBox {
+      width: 220px;
+      margin: 2em auto 4em auto;
+      text-align: center;
+    }
 
-#qrBox img {
-  width: 100%;
-  display: block;
-  margin-bottom: 0.5em;
-
-  filter:
-    drop-shadow(0 0 6px rgba(0,0,0,0.9))
-    drop-shadow(0 0 14px rgba(0,0,0,0.7))
-    drop-shadow(0 0 28px rgba(0,0,0,0.5));
-}
-
-
-*::-webkit-scrollbar {
-  display: none !important;
-  width: 0 !important;
-  height: 0 !important;
-}
-
-
+    #qrBox img {
+      width: 100%;
+      display: block;
+      margin-bottom: 0.5em;
+      filter:
+        drop-shadow(0 0 6px rgba(0,0,0,0.9))
+        drop-shadow(0 0 14px rgba(0,0,0,0.7))
+        drop-shadow(0 0 28px rgba(0,0,0,0.5));
+    }
   </style>
 </head>
 <body>
@@ -679,8 +662,7 @@ document.addEventListener("DOMContentLoaded", function () {
     position: "fixed",
     top: "0",
     left: "0",
-    right: "0",
-    bottom: "0",
+    width: "100vw",
     border: "10px solid #39FF14",
     boxSizing: "border-box",
     zIndex: "2147483647",
@@ -688,37 +670,18 @@ document.addEventListener("DOMContentLoaded", function () {
     background: "transparent"
   });
 
+  // Dynamically lock height to actual visible window innerHeight to prevent mobile address bar cutoff
+  function updateHeight() {
+    borderDiv.style.height = window.innerHeight + "px";
+  }
+
+  updateHeight();
+  window.addEventListener("resize", updateHeight);
+  window.addEventListener("orientationchange", updateHeight);
+
   document.documentElement.appendChild(borderDiv);
 })();
 </script>
-<script>
-(function() {
-  // Prevent pinch-to-zoom
-  function preventPinch(e) {
-    if (e.touches.length > 1) e.preventDefault();
-  }
-
-  // Prevent double-tap zoom
-  let lastTouchTime = 0;
-  function preventDoubleTap(e) {
-    const now = Date.now();
-    if (now - lastTouchTime < 300) {
-      e.preventDefault();
-    }
-    lastTouchTime = now;
-  }
-
-  // Block gesture events on iOS
-  function preventGesture(e) {
-    e.preventDefault();
-  }
-
-  document.addEventListener('touchstart', preventPinch, { passive: false });
-  document.addEventListener('touchend', preventDoubleTap, { passive: false });
-  document.addEventListener('gesturestart', preventGesture, { passive: false });
-})();
-</script>
-
 <style>
 #david-corner {
     position: fixed;
