@@ -8,29 +8,30 @@
   <style>
     * { box-sizing: border-box; }
 
-html, body {
+html {
   width: 100%;
   height: 100%;
-  overflow: hidden;
-}
-
-body {
-  font-family: Arial, sans-serif;
-  margin: 0;
-  padding-left: 15px;
-  padding-right: 15px;
-  background: #fff;
-  color: #111;
-  line-height: 1.5;
-  max-width: 100vw;
-
-  overflow-y: auto;
   overflow-x: hidden;
-
   scrollbar-width: none;
   -ms-overflow-style: none;
 }
 
+body {
+  width: 100%;
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding-left: 15px;
+  padding-right: 15px;
+  /* Add bottom padding so fixed elements never cover content */
+  padding-bottom: 120px; 
+  background: #fff;
+  color: #111;
+  line-height: 1.5;
+  max-width: 100vw;
+  overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
 html {
   overflow-x: hidden;
   overflow-y: scroll;
@@ -65,13 +66,17 @@ html::-webkit-scrollbar {
   transition: background 0.2s;
 }
     .collapsible:hover { background: #e0e0e0; }
-    .content {
+.content {
       display: none;
       margin-top: 0;
       padding-left: 1em;
       white-space: pre-wrap; /* preserves line breaks */
       font-family: inherit;
+      /* Reserves a stable block area to prevent layout jumps when JS loads */
+      min-height: 40px; 
     }
+
+
     .collapsible.active + .content { display: block; }
 
     /* Tighter Grid Styling for Buttons */
@@ -667,14 +672,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
   const borderDiv = document.createElement("div");
 
-  Object.assign(borderDiv.style, {
+Object.assign(borderDiv.style, {
     position: "fixed",
     top: "0",
     left: "0",
     width: "100vw",
-    height: "100vh",
+    height: "100dvh", /* Adapts smoothly to mobile browser bar resizing */
     border: "10px solid #39FF14",
-    boxSizing: "box-sizing",
+    boxSizing: "border-box",
     zIndex: "2147483647",
     pointerEvents: "none",
     background: "transparent"
@@ -721,14 +726,13 @@ document.addEventListener("DOMContentLoaded", function () {
     bottom: 0;
     transform: translateY(-20px);
 
-
-    width: 20vw;        /* about one-fifth of the window width */
-    max-width: 320px;  /* don't let it get too large */
-    min-width: 140px;  /* don't let it get too small */
+    width: 90px;         /* Use a stable pixel width on mobile screens */
+    max-width: 150px;  
+    min-width: 70px;  
 
     height: auto;
 
-    pointer-events: none; /* clicks pass through the image */
+    pointer-events: none; 
     user-select: none;
     z-index: 9999;
 }
