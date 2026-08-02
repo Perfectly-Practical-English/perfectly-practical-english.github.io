@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -236,4 +237,244 @@ function toggleAutoAdvance() {
 </script>
 
 </body>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>My Personal Profile Writing Lesson</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        background: #111;
+        font-family: Arial, Helvetica, sans-serif;
+        height: 100vh;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    #slide-container {
+        width: 95vw;
+        height: 85vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        border-radius: 12px;
+        box-shadow: 0 0 25px rgba(0,0,0,0.6);
+        transition: opacity 0.4s ease;
+    }
+
+    #controls {
+        margin-top: 20px;
+        display: flex;
+        align-items: center;
+        gap: 20px;
+    }
+
+    button {
+        font-size: 22px;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        background: white;
+        color: #333;
+    }
+
+    button:hover {
+        background: #ddd;
+    }
+
+    #counter {
+        color: white;
+        font-size: 22px;
+        min-width: 100px;
+        text-align: center;
+    }
+
+    #title {
+        position: absolute;
+        top: 15px;
+        color: white;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .fade {
+        opacity: 0;
+    }
+
+</style>
+</head>
+
+<body>
+
+<div id="slide-container">
+    <img id="slide" alt="Lesson Slide">
+</div>
+
+<div id="controls">
+    <button onclick="previousSlide()">◀ Previous</button>
+
+    <div id="counter">
+        1 / 4
+    </div>
+
+    <button onclick="nextSlide()">Next ▶</button>
+
+    <button onclick="toggleFullScreen()">⛶ Full Screen</button>
+</div>
+
+
+<script>
+
+const images = `
+Speaking_Exam_1.png
+Speaking_Exam_2.png
+Speaking_Exam_3.png
+Speaking_Exam_4.png
+
+
+
+`
+.trim()
+.split("\n")
+.map(name => name.trim());
+
+let current = 0;
+
+const slide = document.getElementById("slide");
+const counter = document.getElementById("counter");
+
+
+function showSlide(index) {
+
+    slide.classList.add("fade");
+
+    setTimeout(() => {
+
+        current = index;
+
+        slide.src = images[current];
+
+        counter.textContent =
+            (current + 1) + " / " + images.length;
+
+        slide.classList.remove("fade");
+
+    }, 200);
+}
+
+
+function nextSlide() {
+
+    let next = current + 1;
+
+    if (next >= images.length) {
+        next = 0;
+    }
+
+    showSlide(next);
+}
+
+
+function previousSlide() {
+
+    let prev = current - 1;
+
+    if (prev < 0) {
+        prev = images.length - 1;
+    }
+
+    showSlide(prev);
+}
+
+
+// Keyboard controls
+document.addEventListener("keydown", function(event){
+
+    if(event.key === "ArrowRight" || event.key === " ") {
+        nextSlide();
+    }
+
+    if(event.key === "ArrowLeft") {
+        previousSlide();
+    }
+
+});
+
+
+// Full screen classroom mode
+function toggleFullScreen(){
+
+    if (!document.fullscreenElement){
+
+        document.documentElement.requestFullscreen();
+
+    } else {
+
+        document.exitFullscreen();
+
+    }
+
+}
+
+showSlide(0);
+
+</script>
+
+<script>
+// ===== Auto Advance Add-on =====
+
+const AUTO_INTERVAL = 8000; // 8 seconds
+let autoTimer = null;
+let autoRunning = false;
+
+// Create the button automatically
+const autoBtn = document.createElement("button");
+autoBtn.textContent = "▶ Auto";
+autoBtn.onclick = toggleAutoAdvance;
+
+// Insert before the Full Screen button
+const controls = document.getElementById("controls");
+controls.insertBefore(autoBtn, controls.lastElementChild);
+
+function toggleAutoAdvance() {
+
+    if (autoRunning) {
+
+        clearInterval(autoTimer);
+        autoTimer = null;
+        autoRunning = false;
+        autoBtn.textContent = "▶ Auto";
+
+    } else {
+
+        autoRunning = true;
+        autoBtn.textContent = "⏸ Stop Auto";
+
+        autoTimer = setInterval(() => {
+            nextSlide();
+        }, AUTO_INTERVAL);
+
+    }
+}
+</script>
+
+</body>
+>>>>>>> 42e2e1d604fdc85e8f57635ec75b21af83e42b99
 </html>

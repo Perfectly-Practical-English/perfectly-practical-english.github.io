@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1075,4 +1076,1083 @@
 })();
 </script>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jelly Bean Jar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            touch-action: none;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        html, body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            overscroll-behavior: none;
+            background: #f2f2f2;
+            font-family: Arial, Helvetica, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        #app {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            padding: 16px;
+            gap: 16px;
+        }
+
+        /* Jar Container with Fixed Canvas Coordinates */
+        #jarContainer {
+            position: relative;
+            width: 520px;
+            height: 760px;
+            max-width: 90vw;
+            max-height: 72vh;
+            aspect-ratio: 520 / 760;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: visible; /* Allows lid to be dragged freely anywhere outside */
+        }
+
+        #jarBack {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        #beanCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+        }
+
+        /* Glass Reflection Overlay */
+        #jarGlassOverlay {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        /* Lid - Positioned lowered over jar mouth */
+        #jarLid {
+            position: absolute;
+            width: 52%;
+            left: 24%;
+            top: 10.8%;
+            cursor: grab;
+            z-index: 100;
+            pointer-events: auto;
+            touch-action: none;
+            transition: transform 0.05s ease-out;
+        }
+
+        #jarLid:active {
+            cursor: grabbing;
+        }
+
+/* Hotspot for Adding Beans */
+#mouthHotspot {
+    position: absolute;
+    width: calc(50% + 5px); /* Expanded width by 5px total */
+    height: 14%;
+    left: calc(25% - 2.5px); /* Offset by 2.5px to keep it centered */
+    top: 8%;
+    z-index: 30;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0);
+}
+
+#scoreDisplay {
+    position: absolute;
+    left: 50%;
+    top: 52%;
+    transform: translate(-50%, -50%);
+    
+    /* Dimensions: Narrower (20% down from 28%) and Taller (13% up from 9%) */
+    width: 20%;
+    height: 13%;
+    
+    /* Corner Radius: Reduced from 40px to create a rounded rectangle */
+    border-radius: 12px;
+    
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: clamp(20px, 4vw, 34px);
+    font-weight: bold;
+    color: #222;
+    cursor: pointer;
+    z-index: 40;
+    transition: transform 0.1s ease, background 0.1s ease;
+}
+
+        #scoreDisplay:active {
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(255, 240, 180, 0.95);
+        }
+
+        /* Controls Section */
+        #controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            z-index: 150;
+        }
+
+        #classSelect {
+            font-size: 16px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
+        button {
+            padding: 8px 18px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 6px;
+            border: 1px solid #aaa;
+            background-color: #ffffff;
+            transition: background-color 0.15s ease;
+        }
+
+        button:hover {
+            background-color: #e6e6e6;
+        }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="jarContainer">
+        <!-- Background Layer -->
+        <img id="jarBack" src="Jar_Background.png" draggable="false" alt="Jar Back">
+
+        <!-- Dynamic Bean Canvas Layer -->
+        <canvas id="beanCanvas" width="520" height="760"></canvas>
+
+        <!-- SVG Overlay -->
+        <svg id="jarGlassOverlay" viewBox="0 0 520 760">
+            <path d="M150,180 Q130,220 130,620 Q130,660 170,660 L350,660 Q390,660 390,620 Q390,220 370,180 Z" 
+                  fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="8"/>
+            <path d="M155,200 Q142,250 142,600" 
+                  fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="6" stroke-linecap="round"/>
+        </svg>
+
+        <!-- Draggable Lid -->
+        <img id="jarLid" src="Jar_Lid.png" draggable="false" alt="Jar Lid">
+
+        <!-- Mouth Hotspot -->
+        <div id="mouthHotspot"></div>
+
+        <!-- Score Display & Hotspot for Removing Beans -->
+        <div id="scoreDisplay">0</div>
+    </div>
+
+    <div id="controls">
+        <select id="classSelect">
+            <option>11.1</option>
+            <option>11.2</option>
+            <option>11.3</option>
+            <option>12.1</option>
+            <option>12.2</option>
+            <option>12.3</option>
+            <option>13.1</option>
+            <option>13.2</option>
+            <option>13.3</option>
+        </select>
+
+        <button id="saveButton">Save Jelly Beans</button>
+        <input type="file" id="fileInput" accept=".txt" hidden>
+        <button id="browseButton">Update</button>
+    </div>
+</div>
+
+<!-- ==========================================================
+     FULL FEATURE JELLY BEAN JAR MODAL (STANDALONE SCRIPT)
+========================================================== -->
+<style>
+  /* Full screen transparent overlay — lets clicks pass through */
+  #jellyBeanModalContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 50000;
+    display: none;
+  }
+
+  /* Main Floating Modal Box */
+  #jbJarWrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    pointer-events: auto; /* Re-enable pointer events for the modal itself */
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Jar Container scaled for modal overlay */
+  #jbJarContainer {
+    position: relative;
+    width: 380px;
+    height: 555px;
+    aspect-ratio: 520 / 760;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: visible;
+  }
+
+  #jbJarBack {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  #jbBeanCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+  }
+
+  #jbJarGlassOverlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  #jbJarLid {
+    position: absolute;
+    width: 52%;
+    left: 24%;
+    top: 10.8%;
+    cursor: grab;
+    z-index: 100;
+    pointer-events: auto;
+    touch-action: none;
+    transition: transform 0.05s ease-out;
+  }
+
+  #jbJarLid:active {
+    cursor: grabbing;
+  }
+
+  #jbMouthHotspot {
+    position: absolute;
+    width: calc(50% + 5px);
+    height: 14%;
+    left: calc(25% - 2.5px);
+    top: 8%;
+    z-index: 30;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0);
+  }
+
+  #jbScoreDisplay {
+    position: absolute;
+    left: 50%;
+    top: 52%;
+    transform: translate(-50%, -50%);
+    width: 22%;
+    height: 12%;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 26px;
+    font-weight: bold;
+    color: #222;
+    cursor: pointer;
+    z-index: 40;
+    transition: transform 0.1s ease, background 0.1s ease;
+  }
+
+  #jbScoreDisplay:active {
+    transform: translate(-50%, -50%) scale(0.9);
+    background: rgba(255, 240, 180, 0.95);
+  }
+
+  /* Bottom Controls Bar */
+  #jbControls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    z-index: 150;
+  }
+
+  #jbClassSelect {
+    font-size: 14px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #fff;
+  }
+
+  .jb-btn {
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: background-color 0.15s ease;
+  }
+
+  .jb-btn:hover {
+    background-color: #f0f0f0;
+  }
+
+  .jb-drag-handle {
+    width: 100%;
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: #555;
+    cursor: move;
+    padding-bottom: 2px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+  }
+</style>
+
+<!-- MODAL HTML STRUCTURE -->
+<div id="jellyBeanModalContainer">
+  <div id="jbJarWrapper">
+    <div class="jb-drag-handle" id="jbHeaderDrag">🫘 JELLY BEAN JAR (DRAG HERE)</div>
+    
+    <div id="jbJarContainer">
+      <!-- Background Layer -->
+      <img id="jbJarBack" src="Jar_Background.png" draggable="false" alt="Jar Back">
+
+      <!-- Dynamic Bean Canvas Layer -->
+      <canvas id="jbBeanCanvas" width="520" height="760"></canvas>
+
+      <!-- SVG Glass Reflection Overlay -->
+      <svg id="jbJarGlassOverlay" viewBox="0 0 520 760">
+        <path d="M150,180 Q130,220 130,620 Q130,660 170,660 L350,660 Q390,660 390,620 Q390,220 370,180 Z" 
+              fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="8"/>
+        <path d="M155,200 Q142,250 142,600" 
+              fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="6" stroke-linecap="round"/>
+      </svg>
+
+      <!-- Draggable Lid -->
+      <img id="jbJarLid" src="Jar_Lid.png" draggable="false" alt="Jar Lid">
+
+      <!-- Hotspots -->
+      <div id="jbMouthHotspot" title="Click to Add Bean"></div>
+      <div id="jbScoreDisplay" title="Click to Remove Bean">0</div>
+    </div>
+
+    <!-- Controls Row -->
+    <div id="jbControls">
+      <select id="jbClassSelect">
+        <option>11.1</option>
+        <option>11.2</option>
+        <option>11.3</option>
+        <option>12.1</option>
+        <option>12.2</option>
+        <option>12.3</option>
+        <option>13.1</option>
+        <option>13.2</option>
+        <option>13.3</option>
+      </select>
+
+      <button id="jbSaveButton" class="jb-btn">Save</button>
+      <input type="file" id="jbFileInput" accept=".txt" hidden>
+      <button id="jbBrowseButton" class="jb-btn">Update</button>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================
+     JELLY BEAN JAR MODAL SYSTEM (STANDALONE SCRIPT)
+     Toggled by your existing left and right sidebar buttons
+========================================================== -->
+<style>
+  /* Full-screen transparent, click-through overlay */
+  #jellyBeanModalContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; /* Allows clicks to pass through to the spread underneath */
+    z-index: 50000;
+    display: none;
+  }
+
+  /* Main Floating Modal Box */
+  #jbJarWrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.4);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+    pointer-events: auto; /* Re-enable pointer events inside the modal */
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Jar Container scaled for modal overlay */
+  #jbJarContainer {
+    position: relative;
+    width: 380px;
+    height: 555px;
+    aspect-ratio: 520 / 760;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: visible;
+  }
+
+  #jbJarBack {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  #jbBeanCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+  }
+
+  #jbJarGlassOverlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  #jbJarLid {
+    position: absolute;
+    width: 52%;
+    left: 24%;
+    top: 10.8%;
+    cursor: grab;
+    z-index: 100;
+    pointer-events: auto;
+    touch-action: none;
+    transition: transform 0.05s ease-out;
+  }
+
+  #jbJarLid:active {
+    cursor: grabbing;
+  }
+
+  #jbMouthHotspot {
+    position: absolute;
+    width: calc(50% + 5px);
+    height: 14%;
+    left: calc(25% - 2.5px);
+    top: 8%;
+    z-index: 30;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0);
+  }
+
+  #jbScoreDisplay {
+    position: absolute;
+    left: 50%;
+    top: 52%;
+    transform: translate(-50%, -50%);
+    width: 22%;
+    height: 12%;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 26px;
+    font-weight: bold;
+    color: #222;
+    cursor: pointer;
+    z-index: 40;
+    transition: transform 0.1s ease, background 0.1s ease;
+  }
+
+  #jbScoreDisplay:active {
+    transform: translate(-50%, -50%) scale(0.9);
+    background: rgba(255, 240, 180, 0.95);
+  }
+
+  /* Bottom Controls Bar */
+  #jbControls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    z-index: 150;
+  }
+
+  #jbClassSelect {
+    font-size: 14px;
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #fff;
+  }
+
+  .jb-btn {
+    padding: 6px 14px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: background-color 0.15s ease;
+  }
+
+  .jb-btn:hover {
+    background-color: #f0f0f0;
+  }
+
+  .jb-drag-handle {
+    width: 100%;
+    text-align: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: #555;
+    cursor: move;
+    padding-bottom: 2px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+  }
+</style>
+
+<!-- MODAL HTML STRUCTURE -->
+<div id="jellyBeanModalContainer">
+  <div id="jbJarWrapper">
+    <div class="jb-drag-handle" id="jbHeaderDrag">🫘 JELLY BEAN JAR (DRAG HERE)</div>
+    
+    <div id="jbJarContainer">
+      <!-- Background Layer -->
+      <img id="jbJarBack" src="Jar_Background.png" draggable="false" alt="Jar Back">
+
+      <!-- Dynamic Bean Canvas Layer -->
+      <canvas id="jbBeanCanvas" width="520" height="760"></canvas>
+
+      <!-- SVG Glass Reflection Overlay -->
+      <svg id="jbJarGlassOverlay" viewBox="0 0 520 760">
+        <path d="M150,180 Q130,220 130,620 Q130,660 170,660 L350,660 Q390,660 390,620 Q390,220 370,180 Z" 
+              fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="8"/>
+        <path d="M155,200 Q142,250 142,600" 
+              fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="6" stroke-linecap="round"/>
+      </svg>
+
+      <!-- Draggable Lid -->
+      <img id="jbJarLid" src="Jar_Lid.png" draggable="false" alt="Jar Lid">
+
+      <!-- Hotspots -->
+      <div id="jbMouthHotspot" title="Click to Add Bean"></div>
+      <div id="jbScoreDisplay" title="Click to Remove Bean">0</div>
+    </div>
+
+    <!-- Controls Row -->
+    <div id="jbControls">
+      <select id="jbClassSelect">
+        <option>11.1</option>
+        <option>11.2</option>
+        <option>11.3</option>
+        <option>12.1</option>
+        <option>12.2</option>
+        <option>12.3</option>
+        <option>13.1</option>
+        <option>13.2</option>
+        <option>13.3</option>
+      </select>
+
+      <button id="jbSaveButton" class="jb-btn">Save</button>
+      <input type="file" id="jbFileInput" accept=".txt" hidden>
+      <button id="jbBrowseButton" class="jb-btn">Update</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  let modalOpen = false;
+
+  // DOM Elements
+  const modalContainer = document.getElementById("jellyBeanModalContainer");
+  const jarWrapper = document.getElementById("jbJarWrapper");
+  const headerDrag = document.getElementById("jbHeaderDrag");
+  const jarContainer = document.getElementById("jbJarContainer");
+  const beanCanvas = document.getElementById("jbBeanCanvas");
+  const ctx = beanCanvas.getContext("2d");
+
+  const scoreDisplay = document.getElementById("jbScoreDisplay");
+  const mouthHotspot = document.getElementById("jbMouthHotspot");
+  const jarLid = document.getElementById("jbJarLid");
+
+  const saveButton = document.getElementById("jbSaveButton");
+  const browseButton = document.getElementById("jbBrowseButton");
+  const fileInput = document.getElementById("jbFileInput");
+  const classSelect = document.getElementById("jbClassSelect");
+
+  // Physics & Calibration Constants
+  const MAX_BEANS = 500;
+  const GRAVITY = 0.6;
+  const BEAN_RADIUS = 11;
+
+  const jarBounds = {
+    left: 185,
+    right: 335,
+    top: 175,
+    bottom: 645
+  };
+
+  beanCanvas.width = 520;
+  beanCanvas.height = 760;
+
+  // Game State
+  let beans = [];
+  let score = 0;
+  let animationRunning = true;
+  let loadingBeans = false;
+
+  // Color Palette
+  const BEAN_COLORS = [
+    { fill: "#E74C3C" }, // Red
+    { fill: "#F1C40F" }, // Yellow
+    { fill: "#E84393" }, // Pink
+    { fill: "#2ECC71" }, // Green
+    { fill: "#9B59B6" }, // Purple
+    { fill: "#E67E22" }, // Orange
+    { fill: "#3498DB" }  // Blue
+  ];
+
+  function randomBeanColor() {
+    return BEAN_COLORS[Math.floor(Math.random() * BEAN_COLORS.length)];
+  }
+
+  function updateScore() {
+    scoreDisplay.textContent = score;
+  }
+
+  // Toggle Modal Open/Close
+  function toggleModal() {
+    modalOpen = !modalOpen;
+    modalContainer.style.display = modalOpen ? "block" : "none";
+  }
+
+  // Grid Target Calculator
+  function getTargetPosition(index) {
+    let col, row, maxCols, targetX, targetY;
+
+    if (index < 25) { // Base tier (5 cols x 5 rows)
+      maxCols = 5;
+      col = index % maxCols;
+      row = Math.floor(index / maxCols);
+
+      const narrowLeft = jarBounds.left + 22;
+      const narrowRight = jarBounds.right - 22;
+      const availableWidth = narrowRight - narrowLeft - (BEAN_RADIUS * 2);
+      const colSpacing = availableWidth / (maxCols - 1);
+
+      targetX = narrowLeft + BEAN_RADIUS + (col * colSpacing);
+      targetY = (jarBounds.bottom + 10) - BEAN_RADIUS - (row * (BEAN_RADIUS * 1.2));
+    } else { // Upper tiers (7 cols)
+      const adjustedIndex = index - 25;
+      maxCols = 7;
+      col = adjustedIndex % maxCols;
+      row = Math.floor(adjustedIndex / maxCols);
+
+      const topTierLeft = jarBounds.left + 3.5;
+      const topTierRight = jarBounds.right - 3.5;
+      const availableWidth = topTierRight - topTierLeft - (BEAN_RADIUS * 2);
+      const colSpacing = availableWidth / (maxCols - 1);
+
+      targetX = topTierLeft + BEAN_RADIUS + (col * colSpacing);
+      const phase1Height = 5 * (BEAN_RADIUS * 1.2);
+      targetY = (jarBounds.bottom + 10) - phase1Height - BEAN_RADIUS - (row * (BEAN_RADIUS * 1.2));
+    }
+
+    return { targetX, targetY };
+  }
+
+  // Bean Creation & Physics
+  function createBean() {
+    if (score >= MAX_BEANS) return;
+
+    const { targetX, targetY } = getTargetPosition(beans.length);
+    const offsetX = (Math.random() - 0.5) * 14;
+    const offsetY = (Math.random() - 0.5) * 8;
+
+    const bean = {
+      x: (jarBounds.left + jarBounds.right) / 2 + (Math.random() - 0.5) * 20,
+      y: jarBounds.top + 10,
+      baseTargetX: targetX,
+      baseTargetY: targetY,
+      targetX: targetX + offsetX,
+      targetY: targetY + offsetY,
+      vx: (Math.random() - 0.5) * 1.5,
+      vy: 2,
+      angle: (Math.random() - 0.5) * 0.8,
+      color: randomBeanColor(),
+      alpha: 1,
+      removing: false,
+      settled: false,
+      offsetX: offsetX,
+      offsetY: offsetY
+    };
+
+    beans.push(bean);
+    score++;
+    updateScore();
+  }
+
+  function removeBean() {
+    if (score <= 0) return;
+
+    let selectedBean = null;
+    for (let i = beans.length - 1; i >= 0; i--) {
+      if (!beans[i].removing) {
+        selectedBean = beans[i];
+        break;
+      }
+    }
+
+    if (!selectedBean) return;
+
+    selectedBean.removing = true;
+    selectedBean.settled = false;
+    selectedBean.x = (jarBounds.left + jarBounds.right) / 2;
+    selectedBean.y = jarBounds.top + 10;
+    selectedBean.vx = (Math.random() - 0.5) * 4;
+    selectedBean.vy = -9;
+    selectedBean.alpha = 1;
+
+    score--;
+    updateScore();
+
+    let activeIdx = 0;
+    for (const bean of beans) {
+      if (!bean.removing) {
+        const { targetX, targetY } = getTargetPosition(activeIdx);
+        bean.targetX = targetX + (bean.offsetX || 0);
+        bean.targetY = targetY + (bean.offsetY || 0);
+        if (bean.settled) {
+          bean.settled = false;
+        }
+        activeIdx++;
+      }
+    }
+  }
+
+  function updateBeans() {
+    for (const bean of beans) {
+      if (bean.removing) {
+        bean.x += bean.vx;
+        bean.y += bean.vy;
+        bean.vy += GRAVITY;
+        bean.alpha -= 0.03;
+        continue;
+      }
+
+      if (bean.settled) {
+        bean.vx = 0;
+        bean.vy = 0;
+        bean.x = bean.targetX;
+        bean.y = bean.targetY;
+        continue;
+      }
+
+      bean.vy += GRAVITY;
+      bean.y += bean.vy;
+
+      const dx = bean.targetX - bean.x;
+      bean.x += dx * 0.15;
+
+      if (bean.y >= bean.targetY) {
+        bean.y = bean.targetY;
+        bean.x = bean.targetX;
+        bean.vx = 0;
+        bean.vy = 0;
+        bean.settled = true;
+      }
+    }
+
+    beans = beans.filter(b => b.alpha > 0);
+  }
+
+  function drawBeans() {
+    ctx.clearRect(0, 0, beanCanvas.width, beanCanvas.height);
+
+    for (const bean of beans) {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, bean.alpha);
+      ctx.translate(bean.x, bean.y);
+      ctx.rotate(bean.angle);
+
+      ctx.beginPath();
+      ctx.moveTo(-9, -3);
+      ctx.bezierCurveTo(-11, -10, 9, -12, 11, -3);
+      ctx.bezierCurveTo(13, 5, -2, 12, -9, 7);
+      ctx.bezierCurveTo(-12, 4, -11, 0, -9, -3);
+      ctx.closePath();
+
+      ctx.fillStyle = bean.color.fill;
+      ctx.fill();
+
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.12)";
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.ellipse(-2, -4, 4, 1.8, Math.PI / 4, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
+      ctx.fill();
+
+      ctx.restore();
+    }
+  }
+
+  function animate() {
+    if (animationRunning && modalOpen) {
+      updateBeans();
+      drawBeans();
+    }
+    requestAnimationFrame(animate);
+  }
+
+  // Draggable Lid Mechanics
+  let lidDragging = false;
+  let lidOffsetX = 0;
+  let lidOffsetY = 0;
+
+  jarLid.addEventListener("pointerdown", (event) => {
+    event.stopPropagation();
+    lidDragging = true;
+    jarLid.setPointerCapture(event.pointerId);
+    const rect = jarLid.getBoundingClientRect();
+    lidOffsetX = event.clientX - rect.left;
+    lidOffsetY = event.clientY - rect.top;
+  });
+
+  jarLid.addEventListener("pointermove", (event) => {
+    if (!lidDragging) return;
+    const containerRect = jarContainer.getBoundingClientRect();
+    const newLeft = event.clientX - containerRect.left - lidOffsetX;
+    const newTop = event.clientY - containerRect.top - lidOffsetY;
+
+    jarLid.style.left = newLeft + "px";
+    jarLid.style.top = newTop + "px";
+  });
+
+  const stopLidDrag = (event) => {
+    if (lidDragging) {
+      lidDragging = false;
+      try { jarLid.releasePointerCapture(event.pointerId); } catch (e) {}
+    }
+  };
+  jarLid.addEventListener("pointerup", stopLidDrag);
+  jarLid.addEventListener("pointercancel", stopLidDrag);
+
+  // File & Save Mechanics
+  function getDateString() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  saveButton.addEventListener("pointerdown", () => {
+    const selectedClass = classSelect.value;
+    const filename = `${selectedClass}_${getDateString()}.txt`;
+    const blob = new Blob([score.toString()], { type: "text/plain" });
+
+    const downloadLink = document.createElement("a");
+    downloadLink.href = URL.createObjectURL(blob);
+    downloadLink.download = filename;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    URL.revokeObjectURL(downloadLink.href);
+  });
+
+  browseButton.addEventListener("pointerdown", () => fileInput.click());
+
+  fileInput.addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const loadedScore = parseInt(e.target.result.trim());
+      if (isNaN(loadedScore) || loadedScore < 0) {
+        alert("Invalid score file.");
+        return;
+      }
+
+      beans = [];
+      score = 0;
+      updateScore();
+
+      const amountToLoad = Math.min(loadedScore, MAX_BEANS);
+      loadBeansAnimated(amountToLoad);
+    };
+    reader.readAsText(file);
+  });
+
+  function loadBeansAnimated(amount) {
+    if (loadingBeans) return;
+    loadingBeans = true;
+    let loaded = 0;
+
+    const loader = setInterval(() => {
+      if (loaded >= amount) {
+        clearInterval(loader);
+        loadingBeans = false;
+        return;
+      }
+      createBean();
+      loaded++;
+    }, 30);
+  }
+
+  // Draggable Modal Shell
+  function makeModalDraggable(dragHandle, el) {
+    let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+    dragHandle.onpointerdown = (e) => {
+      e.stopPropagation();
+      pos3 = e.clientX;
+      pos4 = e.clientY;
+
+      document.onpointermove = (ev) => {
+        pos1 = pos3 - ev.clientX;
+        pos2 = pos4 - ev.clientY;
+        pos3 = ev.clientX;
+        pos4 = ev.clientY;
+        el.style.top = (el.offsetTop - pos2) + "px";
+        el.style.left = (el.offsetLeft - pos1) + "px";
+        el.style.transform = "none";
+      };
+
+      document.onpointerup = () => {
+        document.onpointermove = null;
+        document.onpointerup = null;
+      };
+    };
+  }
+
+  // Initial Bindings
+  document.addEventListener("DOMContentLoaded", () => {
+    // Bind your left and right sidebar control columns to toggle the modal
+    const leftControlColumn = document.getElementById("leftBtn");
+    const rightControlColumn = document.getElementById("rightBtn");
+
+    if (leftControlColumn) {
+      leftControlColumn.onclick = (e) => {
+        e.stopPropagation();
+        toggleModal();
+      };
+    }
+
+    if (rightControlColumn) {
+      rightControlColumn.onclick = (e) => {
+        e.stopPropagation();
+        toggleModal();
+      };
+    }
+
+    // Hotspot Binding
+    mouthHotspot.addEventListener("pointerdown", () => createBean());
+    scoreDisplay.addEventListener("pointerdown", (e) => {
+      e.stopPropagation();
+      removeBean();
+    });
+
+    makeModalDraggable(headerDrag, jarWrapper);
+    updateScore();
+    animate();
+  });
+})();
+</script>
+</body>
+>>>>>>> 42e2e1d604fdc85e8f57635ec75b21af83e42b99
 </html>

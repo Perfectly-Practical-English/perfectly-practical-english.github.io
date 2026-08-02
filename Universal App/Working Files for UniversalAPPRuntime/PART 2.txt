@@ -1,0 +1,457 @@
+/* =========================================================
+
+   UNIVERSAL APP RUNTIME (UAR)
+
+   PART 2
+   VIEWPORT & SCALING ENGINE
+
+   Requires:
+   PART 1 CORE ENGINE
+
+========================================================= */
+
+
+(function(window){
+
+"use strict";
+
+
+if(!window.UAR){
+
+    console.error(
+        "UAR Part 2 requires Part 1"
+    );
+
+    return;
+
+}
+
+
+const UAR = window.UAR;
+
+
+
+/* =========================================================
+   VIEWPORT OBJECT
+========================================================= */
+
+UAR.viewport = {
+
+
+    width:0,
+
+    height:0,
+
+    scale:1,
+
+    offsetX:0,
+
+    offsetY:0,
+
+
+    visualWidth:0,
+
+    visualHeight:0,
+
+
+    orientation:"",
+
+
+    root:null,
+
+
+    initialized:false
+
+};
+
+
+
+
+
+/* =========================================================
+   GET REAL VIEWPORT
+========================================================= */
+
+function updateViewport(){
+
+
+    let width;
+    let height;
+
+
+    if(
+        window.visualViewport
+    ){
+
+        width =
+        window.visualViewport.width;
+
+        height =
+        window.visualViewport.height;
+
+    }
+
+    else{
+
+        width =
+        window.innerWidth;
+
+        height =
+        window.innerHeight;
+
+    }
+
+
+
+    UAR.viewport.width =
+    width;
+
+
+    UAR.viewport.height =
+    height;
+
+
+
+    UAR.viewport.visualWidth =
+    width;
+
+
+    UAR.viewport.visualHeight =
+    height;
+
+
+
+    UAR.viewport.orientation =
+    width > height
+    ?
+    "landscape"
+    :
+    "portrait";
+
+
+
+}
+
+
+
+
+
+/* =========================================================
+   FIND APPLICATION ROOT
+========================================================= */
+
+function findRoot(){
+
+
+    if(
+        UAR.config.rootSelector
+    ){
+
+        return document.querySelector(
+            UAR.config.rootSelector
+        );
+
+    }
+
+
+
+    const candidates=[
+
+        "#app",
+
+        "#main",
+
+        "#wrapper",
+
+        ".app",
+
+        ".container"
+
+    ];
+
+
+
+    for(
+        let selector of candidates
+    ){
+
+        const el =
+        document.querySelector(selector);
+
+
+        if(el){
+
+            return el;
+
+        }
+
+    }
+
+
+
+    return null;
+
+
+}
+
+
+
+
+
+/* =========================================================
+   SCALE APPLICATION
+========================================================= */
+
+UAR.viewport.fit=function(){
+
+
+
+    const root =
+    UAR.viewport.root;
+
+
+
+    if(!root){
+
+        UAR.utils.warn(
+            "No application root found"
+        );
+
+        return;
+
+    }
+
+
+
+    const rect =
+    root.getBoundingClientRect();
+
+
+
+    const appWidth =
+    root.offsetWidth;
+
+
+    const appHeight =
+    root.offsetHeight;
+
+
+
+    if(
+        !appWidth ||
+        !appHeight
+    ){
+
+        return;
+
+    }
+
+
+
+    const scale =
+    Math.min(
+
+        UAR.viewport.width /
+        appWidth,
+
+
+        UAR.viewport.height /
+        appHeight
+
+    );
+
+
+
+    UAR.viewport.scale =
+    scale;
+
+
+
+    const x =
+    (
+        UAR.viewport.width -
+        (appWidth * scale)
+    )
+    /2;
+
+
+
+    const y =
+    (
+        UAR.viewport.height -
+        (appHeight * scale)
+    )
+    /2;
+
+
+
+    UAR.viewport.offsetX=x;
+
+    UAR.viewport.offsetY=y;
+
+
+
+    root.style.transformOrigin =
+    "top left";
+
+
+    root.style.transform =
+    `
+    translate(${x}px,${y}px)
+    scale(${scale})
+    `;
+
+
+
+};
+
+
+
+
+
+/* =========================================================
+   APPLY DYNAMIC HEIGHT VARIABLE
+========================================================= */
+
+function updateCSSVariables(){
+
+
+    document.documentElement
+    .style
+    .setProperty(
+
+        "--uar-vh",
+
+        UAR.viewport.height+"px"
+
+    );
+
+
+
+    document.documentElement
+    .style
+    .setProperty(
+
+        "--uar-vw",
+
+        UAR.viewport.width+"px"
+
+    );
+
+
+}
+
+
+
+
+
+/* =========================================================
+   INITIALIZATION
+========================================================= */
+
+function initializeViewport(){
+
+
+    UAR.viewport.root =
+    findRoot();
+
+
+
+    updateViewport();
+
+    updateCSSVariables();
+
+
+    UAR.viewport.initialized=true;
+
+
+
+    if(
+        UAR.viewport.root
+    ){
+
+        UAR.viewport.fit();
+
+    }
+
+
+
+}
+
+
+
+
+
+/* =========================================================
+   EVENT HANDLERS
+========================================================= */
+
+
+const refresh =
+UAR.utils.debounce(
+
+    function(){
+
+        updateViewport();
+
+        updateCSSVariables();
+
+        UAR.viewport.fit();
+
+    },
+
+    100
+
+);
+
+
+
+window.addEventListener(
+    "resize",
+    refresh
+);
+
+
+window.addEventListener(
+    "orientationchange",
+    refresh
+);
+
+
+
+if(
+    window.visualViewport
+){
+
+    window.visualViewport
+    .addEventListener(
+        "resize",
+        refresh
+    );
+
+
+    window.visualViewport
+    .addEventListener(
+        "scroll",
+        refresh
+    );
+
+}
+
+
+
+/* =========================================================
+   START
+========================================================= */
+
+initializeViewport();
+
+
+
+UAR.utils.log(
+    "Viewport Engine loaded"
+);
+
+
+
+})(window);

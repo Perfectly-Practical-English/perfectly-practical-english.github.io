@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3729,3 +3730,3736 @@ window.saveResult = async function saveResult(text) {
 
 
 
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vocabulary Tiles</title>
+<script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+* { box-sizing: border-box; }
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 12px; /* Default font size for everything */
+  margin: 0;
+  padding: 0;
+  background: #f7fdfb;
+  color: #222;
+}
+
+#layout::before {
+  content: "";
+  display: block;
+  height: 10px;
+}
+#layout {
+
+  max-width: 400px;      /* use EXACT value your game area needs */
+  margin: 0 auto;
+  padding: 0 6px;
+  box-sizing: border-box;
+}
+
+
+.header-bar {
+  font-size: 18px; /* Larger for headers */
+  font-weight: bold;
+  color: #1976d2;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+section {
+  margin-bottom: 16px;
+  padding: 8px;
+  background: #f0f8ff;
+  border-radius: 6px;
+  border: 1px solid #9aaed1;
+  font-size: 12px; /* Ensure section text is 12px */
+}
+
+#sectionStart {
+  flex: 0 0 92px;  /* was 72px → now +20px */
+}
+
+h3 {
+  margin-top: 0;
+  margin-bottom: 6px;
+  color: #1976d2;
+  font-size: 12px;
+}
+
+.top-bar {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+input[type="text"] {
+  flex: 1;
+  min-width: 90px;
+  height: 36px;
+  padding: 0 8px;
+  font-size: 12px;
+  border: 1px solid #c4d3eb;
+  border-radius: 4px;
+}
+
+button {
+  flex: 0 0 auto;
+  height: 36px;
+  width: 111px;
+  font-size: 12px;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+button:hover:not(:disabled) { background: #1565c0; }
+button:active:not(:disabled) { transform: scale(0.97); }
+button:disabled { background: #9fbfe4; cursor: not-allowed; }
+
+
+/* ============================================================
+   SHARED: Reading Text / Ghost Writing / Reading–Speaking /
+           Writing–Speaking (SAFE CONSOLIDATION BLOCK)
+   ============================================================ */
+
+/* Shared section container */
+#writingSectionGhostWriting,
+#instructionsSectionReadingSpeaking,
+#instructionsSectionWritingSpeaking,
+#dynamicInputsReadingSpeaking,
+#dynamicInputsWritingSpeaking,
+#outputContainerWritingSpeaking,
+#inputSectionReadingSpeaking,
+#inputSectionWritingSpeaking {
+  background: #f0f8ff;
+  border: 1px solid #9aaed1;
+  border-radius: 6px;
+  padding: 14px;
+  margin-bottom: 16px;
+  font-size: 12px;
+}
+
+/* Shared inline input rows */
+#writingSectionGhostWriting .inline-inputs,
+#inputSectionReadingSpeaking .inline-inputs,
+#inputSectionWritingSpeaking .inline-inputs {
+  display: flex;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+
+/* Shared inline input sizing */
+#writingSectionGhostWriting .inline-inputs input,
+#writingSectionGhostWriting .inline-inputs button,
+#inputSectionReadingSpeaking .inline-inputs input,
+#inputSectionReadingSpeaking .inline-inputs button,
+#inputSectionWritingSpeaking .inline-inputs input,
+#inputSectionWritingSpeaking .inline-inputs button {
+  flex: 1 1 0;
+  min-width: 80px;
+  height: 34px;
+  padding: 0 8px;
+  font-size: 12px;
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+/* Shared textarea wrapper */
+.textarea-wrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+/* GHOST WRITING — local tweaks */
+#writingSectionGhostWriting .header-bar h3 {
+  margin: 0;
+}
+
+.textarea-wrapper textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #9aaed1;
+  border-radius: 8px;
+  resize: none;
+  font-family: inherit;
+  font-size: 12px;
+  min-height: 100px;
+  background: #fff;
+  outline: none;
+  line-height: 1.4;
+  box-sizing: border-box;
+  overflow: hidden;
+  height: auto;
+}
+
+.textarea-wrapper .counter {
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  font-size: 12px;
+  font-family: monospace;
+  color: #666;
+  background: rgba(255,255,255,0.85);
+  padding: 1px 4px;
+  border-radius: 4px;
+  pointer-events: none;
+  min-width: 16ch;
+  text-align: right;
+}
+
+/* Shared output button containers */
+#outputContainerWritingSpeaking .button-container,
+#outputContainerReadingSpeaking .button-container {
+  margin-top: 15px;
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+
+
+#text1 {
+  width: 100%;
+  border: 1px solid #9aaed1;
+  border-radius: 6px;
+  padding: 8px;
+  white-space: pre-wrap;
+  overflow: hidden;
+  font-size: 12px;
+}
+
+#readingCounter {
+  font-size: 10px;
+  font-family: monospace;
+  color: #666;
+  background: transparent;
+  padding: 1px 4px;
+  border-radius: 4px;
+  float: right;
+  margin-top: -18px;
+}
+
+.scoreboard {
+  display: none;
+  font-family: monospace;
+  font-size: 12px;
+  background: #fff;
+  border-radius: 6px;
+  padding: 10px;
+  margin-top: 8px;
+  border: 1px solid #ccc;
+  overflow-x: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.scoreboard pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.action-buttons {
+  margin-top: 8px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.action-buttons button { width: 95px; }
+
+.word-tile {
+  display: inline-block;
+  padding: 4px 8px;
+  margin: 2px;
+  border: 1px solid #1976d2;
+  border-radius: 4px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 12px;
+}
+
+.word-tile.selected { background: #cce0ff; }
+
+#writingInput {
+  width: 100%;
+  min-height: 160px;
+  box-sizing: border-box;
+  padding: 8px 8px 28px 8px;
+  overflow: hidden;
+  resize: none;
+  font-size: 12px;
+}
+
+#instructionsSectionReadingSpeaking h3,
+#dynamicInputSectionReadingSpeaking h3,
+#dynamicInputsReadingSpeaking h3,
+#instructionsSectionWritingSpeaking h3,
+#dynamicInputsWritingSpeaking h3 {
+  color: #000 !important;
+  font-weight: normal;
+  font-size: 12px;
+  line-height: 1.4;
+  margin: 6px 0 4px 0;
+  white-space: pre-wrap;
+}
+
+
+
+
+.textarea-wrapper {
+  position: relative;
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.textarea-wrapper textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #9aaed1;
+  border-radius: 8px;
+  resize: none;
+  font-family: inherit;
+  font-size: 12px;
+  min-height: 100px;
+  background: #fff;
+  outline: none;
+  line-height: 1.4;
+  box-sizing: border-box;
+  overflow: hidden;
+  height: auto;
+}
+
+.textarea-wrapper .counter {
+  position: absolute;
+  bottom: 8px;
+  right: 10px;
+  font-size: 12px;
+  font-family: monospace;
+  color: #666;
+  background: rgba(255, 255, 255, 0.85);
+  padding: 1px 4px;
+  border-radius: 4px;
+  pointer-events: none;
+  min-width: 16ch;
+  text-align: right;
+}
+
+/* Writing Scoreboard */
+#writingScoreboard {
+  display: none;
+  background: #fff;
+  border: 1px solid #9aaed1;
+  border-radius: 6px;
+  padding: 14px;
+  margin-top: 20px;
+  font-size: 12px;
+}
+
+#writingScoreboard pre {
+  white-space: pre-wrap; /* Allow text to wrap */
+  word-wrap: break-word; /* Break long words */
+  word-break: break-word; /* Ensure the text breaks properly */
+  color: #333;
+  margin: 0;
+  font-family: monospace;
+}
+
+/* Button Container */
+/* Writing Scoreboard Button Container */
+#writingScoreboard .button-container {
+  margin-top: 15px;
+  display: flex;
+  justify-content: flex-start;
+  flex-wrap: wrap;               /* Allow wrapping if space is limited */
+  gap: 3px;                     /* Add a bit more space between buttons */
+  max-width: 100%;                /* Make sure buttons don't overflow */
+}
+
+/* Scoreboard buttons */
+#writingScoreboard .button-container button {
+  flex: 1 1 auto;                 /* Allow buttons to resize but keep their width reasonable */
+  max-width: 95px;                /* Set a max width to keep them from stretching too much */
+  min-width: 80px;                /* Set a minimum width to avoid them getting too small */
+  height: 34px;                   /* Keep consistent button height */
+  padding: 0 12px;                /* Consistent padding */
+  font-size: 12px;                /* Consistent font size */
+  background: #1976d2;            /* Button background */
+  color: #fff;                    /* White text */
+  border: none;                   /* No border */
+  border-radius: 6px;             /* Rounded corners */
+  cursor: pointer;               /* Pointer cursor */
+  transition: background 0.15s, transform 0.1s;  /* Button transitions */
+}
+
+/* Hover effect */
+#writingScoreboard .button-container button:hover {
+  background: #1565c0;            /* Slightly darker blue on hover */
+}
+
+/* Active (click) effect */
+#writingScoreboard .button-container button:active {
+  transform: scale(0.97);         /* Shrink button on click */
+}
+
+/* Disabled state */
+#writingScoreboard .button-container button:disabled {
+  background: #9fbfe4;            /* Light blue background for disabled */
+  cursor: not-allowed;            /* Disable pointer cursor */
+}
+
+/* Responsive adjustments */
+@media(max-width:480px){
+  #layout { max-width: 95%; padding: 8px; }
+  input[type="text"] { height: 34px; }
+  button { height: 34px; font-size: 12px; }
+}
+
+/* Word tile styles */
+/* Basic Tile Styling */
+/* Basic Styling for sentence text (ensure consistency in font and size) */
+.sentence {
+  font-size: 14px; /* Match the font size of the word */
+  line-height: 1.6;
+  color: #555;
+  font-family: Arial, sans-serif; /* Or the font you're using for the rest of the text */
+}
+
+
+
+#scoreboardContainer {
+  width: 100%;
+  max-width: 400px; /* Limit width */
+  margin: 20px auto; /* Center the container */
+  padding: 14px; /* Padding for container */
+  background: #fff; /* White background */
+  border-radius: 6px; /* Rounded corners */
+  border: 1px solid #ccc; /* Light border */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow */
+}
+
+.scoreboard {
+  font-family: monospace;
+  font-size: 12px;
+  overflow-x: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.scoreboard pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+/* Styling for Grammar */
+
+.word {
+  display: inline;
+  cursor: pointer;
+  font-size: inherit;
+  font-family: inherit;
+  font-weight: inherit;
+  color: inherit;          /* ✅ THIS IS THE KEY LINE */
+  background-color: transparent;
+  user-select: text;
+}
+
+/* Hover Effect */
+.word:hover {
+  background-color: rgba(26, 115, 232, 0.2);
+  box-shadow: 0 0 5px rgba(21, 101, 192, 0.5);
+}
+
+/* Active (Clicked) Word */
+.word:active {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Exercise Container Styling */
+.exercise-container {
+  font-family: 'Arial', sans-serif; /* Consistent font family */
+  font-size: 14px; /* Normal font size */
+  line-height: 1.5; /* Line height */
+  color: #333; /* Text color */
+  word-wrap: break-word; /* Ensure the sentence can wrap */
+  overflow-wrap: break-word; /* Allow long words to break */
+  max-width: 100%; /* Prevent overflow */
+  white-space: normal; /* Allow sentences to wrap */
+  padding: 10px; /* Add padding inside the container */
+  background: transparent; /* Ensure background is transparent to see underlying text */
+  border-radius: 8px; /* Optional rounded corners */
+}
+
+/* Reset margin and padding for headings, paragraphs, and divs within exercise container */
+.exercise-container p, .exercise-container div, .exercise-container h1, .exercise-container h2, .exercise-container h3 {
+  margin: 0;
+  padding: 0;
+}
+
+/* Sentence Styling */
+.sentence {
+  display: inline-block;
+  padding: 0;
+  margin: 0;
+  border: none;
+  font-family: 'Arial', sans-serif; /* Consistent font family */
+  font-size: 14px; /* Normal font size */
+  line-height: 1.5; /* Line height */
+  color: #333; /* Text color */
+  white-space: normal; /* Allow word wrapping */
+}
+
+/* Styling for Action Buttons */
+#scoreboardBtns {
+  display: flex;
+  justify-content: left;
+  margin-top: 20px;
+  gap: 10px;
+}
+
+/* Styling for Action Buttons (matching blue buttons, same height) */
+.action-buttons button {
+  padding: 0 12px; /* Consistent padding */
+  height: 36px; /* Same height as other buttons */
+  font-size: 12px; /* Standard text size */
+  cursor: pointer;
+  background-color: #1976d2; /* Blue background */
+  color: white; /* White text */
+  border: none; /* No border */
+  border-radius: 6px; /* Rounded corners */
+  transition: background-color 0.15s, transform 0.1s ease, box-shadow 0.3s ease;
+}
+
+.action-buttons button:hover {
+  background-color: #1565c0; /* Darker blue on hover */
+}
+
+.action-buttons button:active {
+  transform: scale(0.97); /* Shrink effect on click */
+}
+
+.action-buttons button:disabled {
+  background-color: #9fbfe4; /* Light blue background for disabled state */
+  cursor: not-allowed;
+}
+
+/* Make the numbers black */
+.tile-number {
+  color: #000; /* Set the numbers to black */
+  font-weight: bold; /* Make numbers bold */
+}
+
+/* VOCAB SECTION */
+#vocabSection {
+  background: #f0f8ff;
+  border: 1px solid #9aaed1;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+  font-size: 12px;
+}
+
+.game-board {
+  min-height: 150px; /* or whatever works */
+
+  display: grid;
+  grid-template-columns: 1fr 1fr; /* always two equal-width columns */
+  gap: 12px;                      /* space between columns */
+  margin-top: 8px;
+  align-items: start;             /* keeps top alignment */
+}
+
+.column {
+  background: #fff;
+  border: 1px solid #c4d3eb;
+  border-radius: 6px;
+  padding: 10px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+.column h4 {
+  margin-top: 0;
+  font-size: 10px;
+  text-align: center;
+  color: #1976d2;
+  margin-bottom: 6px;
+}
+
+/* Targeting Column 2 */
+.column:nth-child(2) .tile {
+  height: 42px;  /* Set a fixed height for tiles in Column 2 */
+  padding: 3px 5px;  /* Increase padding to make the tile larger */
+}
+
+.tile {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 2px 6px;
+  margin: 4px 0;
+  background: #eaf6ff;
+  border: 1px solid #9aaed1;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+  user-select: none;
+  font-size: 10px;
+  position: relative;
+  height: 42px; /* ✅ fixed height ensures rows line up perfectly */
+  box-sizing: border-box;
+}
+
+.tile-number {
+  position: absolute;
+  left: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+  color: #123;
+}
+.tile-number::after { content: '.'; }
+
+.tile-input {
+  margin-left: 16px; /* Adjusted margin to make space more compact */
+  width: calc(100% - 16px); /* Adjusted width to match the new margin */
+  height: 15px; /* Reduced input height */
+  padding: 0px 0px;
+  border-radius: 6px;
+  border: 1px solid #bfcfe6;
+  font-size: 10px; /* Reduced font size for the input */
+  line-height: .5;
+  box-sizing: border-box;
+  background-color: #fff;
+}
+
+
+.tile-input::placeholder { 
+  font-style: regular; 
+  color: #999; 
+  font-size: 10px; /* Reduced placeholder font size */
+}
+
+.tile.valid { background: #CFF3D6; }
+.tile.invalid { background: #F8D1D1; }
+.tile.scored { box-shadow: 0 0 0 3px rgba(34,139,34,0.15) inset; }
+
+#vocabScoreboard {
+  display: none;
+  font-family: monospace;
+  font-size: 12px;
+  background: #fff;
+  border-radius: 6px;
+  padding: 10px;
+  margin-top: 8px;
+  border: 1px solid #ccc;
+  overflow-x: auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#vocabScoreOutput {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+
+
+#outputContainerWritingSpeaking .button-container,
+#outputContainerReadingSpeaking .button-container {
+  margin-top: 15px; /* extra spacing between scoreboard text and buttons */
+  display: flex;
+  justify-content: flex-start; /* align buttons to the left */
+  flex-wrap: wrap;
+  gap: 2px; /* space between buttons */
+}
+
+#outputContainerWritingSpeaking .button-container button,
+#outputContainerReadingSpeaking .button-container button {
+  height: 34px;
+  padding: 0 12px;
+  font-size: 12px;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+#outputContainerWritingSpeaking .button-container button:hover,
+#instructionsSectionReadingSpeaking .button-container button:hover { background: #1565c0; }
+#outputContainerWritingSpeaking .button-container button:active,
+#instructionsSectionReadingSpeaking .button-container button:active { transform: scale(0.97); }
+#outputContainerWritingSpeaking .button-container button:disabled,
+#instructionsSectionReadingSpeaking .button-container button:disabled { background: #9fbfe4; cursor: not-allowed; }
+
+/* Responsive adjustments */
+@media(max-width:480px){
+  #layout { max-width: 95%; padding: 8px; }
+  input[type="text"] { height: 34px; }
+  button { height: 34px; font-size: 12px; }
+  .game-board { flex-direction: column; }
+  .column { padding: 8px; overflow: hidden; }
+}
+
+/* Copyright text styling */
+.footer-note.copyright {
+  margin: 0;
+  padding: 0;
+}
+
+
+
+/* Fixed bottom control bar for reading/highlighting/copy buttons */
+#readaloudControls {
+  position: fixed;         /* float above content */
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #f0f8ff;
+  border: 1px solid #1976d2;
+  border-radius: 6px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 4px;
+  z-index: 9999;
+  max-width: 400px;        /* match main container width */
+  width: calc(100% - 40px); /* responsive for smaller screens */
+  box-sizing: border-box;
+  justify-content: space-between; /* spread buttons nicely */
+}
+
+#readaloudControls {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;                /* center the bar horizontally */
+  transform: translateX(-50%);
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  background: #f0f0f0;
+  padding: 2px 6px;
+  border-radius: 6px;
+  box-shadow: 0 0 6px rgba(0,0,0,0.15);
+  z-index: 999;
+
+  max-width: 375px;         /* match your container width */
+  width: calc(100% - 20px); /* inset 10px each side */
+  height: 30px;             /* keeps the bar 30px tall */
+}
+
+#readaloudControls button {
+  height: 20px;             /* slightly smaller than bar height */
+  font-size: 12px;
+  padding: 0 6px;
+  flex: 1 1 auto;           /* distribute buttons evenly */
+  max-width: 70px;          /* optional max width per button */
+}
+
+/* Highlight style for selected text */
+.highlighted-selection {
+  background-color: yellow;
+  color: black;
+}
+
+/* Highlighted text selection shows green */
+span.highlighted {
+  background-color: #fffa65; /* yellow when not selected */
+}
+
+/* Highlighted text while selected */
+span.highlighted::selection {
+  background-color: #a0e7a0; /* green */
+  color: #000;               /* optional for contrast */
+}
+
+/* ============================================================
+   FORCE READALOUD CONTAINER BORDER (JS-SAFE)
+   ============================================================ */
+
+#readaloudControls {
+  background: #f0f8ff !important;
+  border: none !important;              /* JS keeps killing this */
+  outline: 1px solid #9aaed1;           /* <-- this survives */
+  outline-offset: -1px;                /* aligns like a border */
+  border-radius: 6px !important;
+
+  max-width: 400px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+
+  box-shadow: none !important;
+}
+
+
+#readaloudControls {
+  background: #f0f8ff !important;
+  border: 1px solid #9aaed1 !important;
+  border-radius: 6px !important;
+  box-shadow: none !important;
+
+  max-width: 400px !important;
+  width: 100% !important;
+  box-sizing: border-box !important;
+
+  left: 50% !important;
+  transform: translateX(-50%) !important;
+}
+
+/* ===============================
+   FORM ROW (shared layout)
+   =============================== */
+
+.formRow {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  gap: 6px;
+
+  width: 100%;
+  height: 38px;              /* single shared height */
+  margin-bottom: 10px;
+
+  align-items: stretch;     /* children fill the row */
+}
+
+/* All direct children share the same box */
+.formRow > * {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* Buttons in the row */
+.formRow > button {
+  flex: 0 0 38px;
+  padding: 0;
+  margin: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 14px;
+  line-height: 1;
+}
+
+/* Selector field behaves like an input */
+.formRow > #sectionWheelContainer {
+  flex: 1 1 auto;
+  min-width: 0;
+
+  padding: 0 10px;
+  background: #fff;
+  border: 1px solid #999;
+  border-radius: 6px;
+
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* SECTION WHEEL TEXT */
+#sectionWheelContainer .wheel {
+  flex: 1;
+  font-size: 12px;
+  line-height: 1;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  user-select: none;
+  pointer-events: none;
+}
+
+/* ===============================
+   WORD BASELINE (NO JUMPING)
+   =============================== */
+
+.word {
+  display: inline-block;               /* stabilizes inline sizing */
+  padding: 0 2px;                      /* reserve space */
+  border-radius: 4px;
+  box-shadow: 0 0 0 2px transparent;   /* reserve halo space */
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+/* ===============================
+   SELECTED STATE (BLUE + HALO)
+   =============================== */
+
+.word.selected-word {
+  background-color: rgba(25, 118, 210, 0.25); /* faded blue */
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.35);
+}
+
+/* Keep exact same look after submit */
+.word.selected-word.correct,
+.word.selected-word.incorrect {
+  background-color: rgba(25, 118, 210, 0.25);
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.35);
+}
+
+/* Optional correctness feedback without layout shift */
+.word.correct {
+  outline: 1px solid rgba(46, 125, 50, 0.6);
+}
+
+.word.incorrect {
+  outline: 1px solid rgba(198, 40, 40, 0.6);
+}
+
+/* Copyright text styling */
+.footer-note.copyright {
+  margin: 0;
+  padding: 0;
+}
+
+/* Footer styles */
+#copyrightSection {
+  width: 100%;
+  text-align: left;
+  padding: 10px;
+  font-size: 8px;
+}
+
+
+/* Game board hidden before start */
+.game-board {
+  visibility: hidden;
+  height: 0;
+  min-height: 0;
+  padding: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.game-board.active {
+  visibility: visible;
+  height: auto;
+}
+
+function parseVocabInput(text){
+  const lines = text.trim().split('\n');
+  const pairs = [];
+
+  // Broad but SAFE emoji range (no Unicode properties)
+  const EMOJI_REGEX = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu;
+
+  for(let i = 0; i < lines.length; i++){
+    const line = lines[i].trim();
+    if(!line) continue;
+
+if(/[-–]/.test(line)){      let [wordPart, defPart] = line.split(/\s*[-–]\s*/);
+
+      // Remove bullet + emojis ONLY from word
+      wordPart = wordPart
+        .replace(/^•\s*/, '')
+        .replace(EMOJI_REGEX, '')
+        .trim();
+
+      const definition = defPart.split('<br>')[0].trim();
+
+      pairs.push({ word: wordPart, definition });
+    }
+  }
+
+  return pairs;
+}
+
+
+</style>
+
+</head>
+<body>
+
+<!-- <span style="display: inline-block; transform: scaleX(-1);">🛵</span> -->
+
+
+
+<div id="layout">
+  <!--<div class="header-bar">Lesson</div> -->
+
+  <!-- Vocabulary Tiles -->
+
+
+<section id="vocabSection">
+  <div class="header-bar"><h3>Vocabulary Quiz</h3></div>
+
+  <div class="top-bar">
+    <input type="text" id="vocabName" placeholder="Name">
+    <input type="text" id="vocabStudentId" placeholder="ID Number">
+    <button id="vocabSubmitBtn" disabled>Submit</button>
+  </div>
+
+
+
+<div class="formRow">
+  <button type="button" id="sectionUp">▲</button>
+
+  <div id="sectionWheelContainer">
+    <div class="wheel"></div>
+  </div>
+
+  <button type="button" id="sectionDown">▼</button>
+
+    <button
+      type="button"
+      id="sectionStart"
+      disabled
+    >Start</button>
+</div>
+
+  <div id="vocabScoreboard">
+    <pre id="vocabScoreOutput"></pre>
+    <div class="action-buttons">
+      <button id="vocabCopyBtn">Copy</button>
+      <button id="vocabDownloadTextBtn">↓TXT</button>
+      <button id="vocabDownloadPngBtn">↓PNG</button>
+    </div>
+  </div>
+
+  <div class="game-board">
+    <div class="column" id="wordTiles"></div>
+    <div class="column" id="definitionTiles"></div>
+  </div>
+
+
+</section>
+
+
+
+  <!-- Copyright Footer Section -->
+  <section id="copyrightSection">
+    <div class="footer-note copyright">© 2026 Perfectly Practical English™. All rights reserved.</div>
+  </section>
+
+<!-- Floating read-aloud control bar -->
+<!-- <div id="readaloudControls">
+  <button id="highlightSelected">Highlight</button>
+  <button id="copySelected">Copy</button>
+  <button id="restartBtn">&#x25C0;</button>
+  <button id="pauseResumeBtn">||</button>
+  <button id="startBtn">&#x25B6;</button>
+</div> -->
+
+<script>
+/* =========================================
+   UNIVERSAL RAW TEXT RESOLVER (PER BLOCK)
+   ========================================= */
+
+/**
+ * resolveRaw(source)
+ * - If source is a filename (single line, no newlines), load it
+ * - Otherwise treat source as literal raw text
+ */
+async function resolveRaw(source) {
+  if (typeof source === "string" && !source.includes("\n")) {
+    try {
+      const res = await fetch(source, { cache: "no-store" });
+      if (res.ok) return await res.text();
+    } catch {}
+  }
+  return source;
+}
+</script>
+
+<script>
+/* =========================================================
+   STANDALONE SECTION VISIBILITY PATCH
+   (NO HTML MODIFICATIONS REQUIRED)
+   ========================================================= */
+
+(function () {
+
+  /* 🔗 Declare dependencies here (ONE place, declarative) */
+  const SECTION_DEPENDENCIES = {
+    readingSection: ["#text1"],
+    mcSection: ["#mcContainer"],
+    fibSection: ["#fibContainer"],
+    scrambleSection: ["#scrambleContainer"],
+    sequenceSection: ["#sequenceContainer"],
+
+    instructionsSectionReadingSpeaking: [
+      "#instructionsContainerReadingSpeaking"
+    ],
+    instructionsSectionWritingSpeaking: [
+      "#instructionsContainerWritingSpeaking"
+    ],
+
+    vocabSection: ["#wordTiles", "#definitionTiles"],
+    posSection: ["#instructions", "#exercises"]
+  };
+
+  function hasContent(el) {
+    return el && el.textContent.trim().length > 0;
+  }
+
+  function update(sectionId, selectors) {
+    const section = document.getElementById(sectionId);
+    if (!section) return;
+
+    const visible = selectors.some(sel =>
+      hasContent(document.querySelector(sel))
+    );
+
+    section.style.display = visible ? "" : "none";
+  }
+
+  function observe(sectionId, selectors) {
+    selectors.forEach(sel => {
+      const target = document.querySelector(sel);
+      if (!target) return;
+
+      new MutationObserver(() =>
+        update(sectionId, selectors)
+      ).observe(target, {
+        childList: true,
+        subtree: true,
+        characterData: true
+      });
+    });
+  }
+
+  function init() {
+    Object.entries(SECTION_DEPENDENCIES).forEach(
+      ([sectionId, selectors]) => {
+        update(sectionId, selectors);
+        observe(sectionId, selectors);
+      }
+    );
+  }
+
+  document.addEventListener("DOMContentLoaded", init);
+})();
+</script>
+
+
+
+<script>
+// ---------------------- UTILITIES ----------------------
+function enableButtonOnFill(nameInput, idInput, btn){
+  function check(){ btn.disabled = !(nameInput.value.trim() && idInput.value.trim()); }
+  nameInput.addEventListener('input', check);
+  idInput.addEventListener('input', check);
+  check();
+}
+function setupCopyDownload(scoreOutput,copyBtn,txtBtn,pngBtn,filename){
+  copyBtn.addEventListener('click',()=>navigator.clipboard.writeText(scoreOutput.textContent).then(()=>alert('Copied!')));
+  txtBtn.addEventListener('click',()=>{
+    const blob = new Blob([scoreOutput.textContent], {type:'text/plain'});
+    const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=filename+'.txt'; a.click();
+  });
+pngBtn.addEventListener('click', () => {
+  // Capture the scoreboard with an additional 10px margin
+  html2canvas(scoreOutput, {
+    x: -10,  // Add 10px margin on the left
+    y: -10,  // Add 10px margin on the top
+    width: scoreOutput.offsetWidth + 20,  // Increase width by 10px on both sides
+    height: scoreOutput.offsetHeight + 20,  // Increase height by 10px on top and bottom
+  }).then(canvas => canvas.toBlob(blob => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename + '.png';
+    a.click();
+  }));
+});
+}
+</script>
+
+<script>
+const rawVocabTextSource = `
+
+~Hobbies
+
+• activity  – something you do for enjoyment or interest
+pastime, action, leisure activity
+
+• achievement  – something you succeed in doing well
+success, accomplishment, goal
+
+• fun  – enjoyment or pleasure
+enjoyment, pleasure
+
+• game  – an activity with rules played for fun
+match, competition
+
+• hobby  – an activity you do in your free time
+pastime, leisure interest
+
+• interest  – something you like or care about
+liking, curiosity
+
+• practice  – time spent learning or improving a skill
+training, repetition
+
+• skill  – an ability to do something well
+ability, talent
+
+• sport  – a physical competitive activity
+athletic activity, competition
+
+• time  – hours or moments spent doing something
+period, moment
+
+• do  – to perform an activity
+perform, carry out
+
+• enjoy  – to like something and feel pleasure
+like, take pleasure in
+
+• have  – to take part in or experience something
+experience, take part in
+
+• like  – to feel good about something
+enjoy, appreciate
+
+• learn  – to gain knowledge or a new skill
+study, pick up
+
+• make  – to create or produce something
+create, build
+
+• play  – to take part in a game or activity
+participate, take part
+
+• practice  – to repeat something to improve
+train, rehearse
+
+• try  – to attempt to do something new
+attempt, test
+
+• watch  – to look at something for enjoyment
+observe, view
+
+• easy  – not difficult to do
+simple, not hard
+
+• exciting  – making you feel interested or happy
+thrilling, stimulating
+
+• fun  – enjoyable and pleasant
+enjoyable, pleasant
+
+• interesting  – holding your attention
+engaging, fascinating
+
+• relaxing  – helping you feel calm
+calming, restful
+
+• carefully  – in a slow and thoughtful way
+cautiously, attentively
+
+• easily  – without difficulty
+simply, effortlessly
+
+• smoothly  – without problems or stops
+effortlessly, without trouble
+
+• well  – in a good or correct way
+properly, correctly
+
+• slowly  – not fast
+gradually, at a low speed
+
+~Helping Others
+
+• action  – something done to help someone
+step, effort
+
+• family  – people you are related to
+relatives, household
+
+• friend  – a person you like and trust
+buddy, companion
+
+• help  – support or assistance
+aid, assistance
+
+• kindness  – being friendly and caring
+compassion, generosity
+
+• moment  – a short time
+instant, short time
+
+• need  – something required or wanted
+necessity, requirement
+
+• person  – a human being
+individual, human
+
+• support  – help given to someone
+assistance, backing
+
+• time  – when something happens
+period, moment
+
+• assist  – to help someone
+aid, support
+
+• care  – to feel concern for someone
+look after, care for
+
+• give  – to provide something
+offer, provide
+
+• help  – to make something easier for someone
+assist, support
+
+• listen  – to pay attention to someone speaking
+hear, pay attention
+
+• lend  – to give something for a short time
+loan, let someone use
+
+• share  – to give part of something to others
+divide, give
+
+• support  – to help someone emotionally or physically
+encourage, back
+
+• talk  – to speak with someone
+speak, chat
+
+• teach  – to help someone learn
+instruct, educate
+
+• friendly  – kind and pleasant
+welcoming, nice
+
+• good  – kind or helpful
+kind, positive
+
+• helpful  – ready to help
+supportive, useful
+
+• kind  – caring and thoughtful
+caring, gentle
+
+• nice  – pleasant and friendly
+pleasant, kind
+
+• carefully  – with attention
+cautiously, attentively
+
+• kindly  – in a gentle way
+gently, politely
+
+• easily  – without difficulty
+simply, without trouble
+
+• patiently  – calmly waiting or helping
+calmly, without rushing
+
+• well  – in a good way
+properly, correctly
+
+~Heroes
+
+• advice  – helpful ideas or suggestions
+guidance, recommendation
+
+• friend  – someone who supports you
+companion, ally
+
+• hero  – a person who helps or saves others
+role model, protector
+
+• help  – support given to others
+aid, assistance
+
+• kindness  – caring behavior
+compassion, generosity
+
+• mentor  – a person who guides others
+guide, coach
+
+• person  – a human being
+individual, human
+
+• support  – help and encouragement
+assistance, encouragement
+
+• teacher  – someone who helps others learn
+educator, instructor
+
+• wisdom  – knowledge and good judgment
+understanding, insight
+
+• care  – to look after others
+protect, look after
+
+• give  – to offer help or support
+provide, offer
+
+• guide  – to lead or show the way
+lead, direct
+
+• help  – to assist someone
+aid, assist
+
+• inspire  – to make others feel motivated
+motivate, encourage
+
+• protect  – to keep someone safe
+guard, defend
+
+• show  – to demonstrate something
+demonstrate, display
+
+• support  – to stand by someone
+back, stand by
+
+• teach  – to help someone learn
+educate, instruct
+
+• encourage  – to give confidence
+motivate, support
+
+• brave  – not afraid
+fearless, courageous
+
+• good  – kind and helpful
+kind, positive
+
+• kind  – caring and nice
+caring, gentle
+
+• strong  – powerful or brave
+powerful, tough
+
+• wise  – showing good judgment
+smart, thoughtful
+
+• always  – at all times
+forever, constantly
+
+• bravely  – in a courageous way
+courageously, fearlessly
+
+• helpfully  – in a useful way
+usefully, supportively
+
+• kindly  – in a caring way
+gently, politely
+
+• patiently  – without rushing
+calmly, steadily
+
+~My Best Friend
+
+• bond  – a close connection
+connection, tie
+
+• friend  – someone you like and trust
+buddy, companion
+
+• friendship  – a close relationship
+bond, connection
+
+• memory  – something you remember
+recollection, experience
+
+• person  – a human being
+individual, human
+
+• relationship  – a connection between people
+connection, bond
+
+• support  – help and care
+help, encouragement
+
+• time  – moments spent together
+period, moments
+
+• trust  – belief in someone
+confidence, faith
+
+• laugh  – a sound of happiness
+giggle, chuckle
+
+• care  – to like and protect someone
+look after, protect
+
+• laugh  – to show happiness
+smile, giggle
+
+• like  – to enjoy someone
+enjoy, appreciate
+
+• love  – strong caring feelings
+affection, care
+
+• meet  – to see someone
+see, get together
+
+• play  – to do fun activities
+have fun, spend time
+
+• share  – to give something to another
+give, exchange
+
+• talk  – to speak with someone
+chat, speak
+
+• trust  – to believe in someone
+rely on, believe in
+
+• best  – better than all others
+closest, favorite
+
+• close  – having a strong connection
+near, connected
+
+• friendly  – kind and pleasant
+nice, welcoming
+
+• fun  – enjoyable
+enjoyable, pleasant
+
+• good  – kind or nice
+kind, positive
+
+• really  – very
+very, truly
+
+• together  – with each other
+with one another, jointly
+
+• carefully  – with thought
+gently, attentively
+
+• openly  – honestly and freely
+honestly, freely
+
+• well  – in a good way
+properly, nicely
+
+~Dream Job
+
+• career  – a long-term job path
+profession, working life
+
+• dream  – a strong hope for the future
+wish, hope
+
+• future  – time after now
+later, coming time
+
+• goal  – something you want to achieve
+aim, target
+
+• job  – paid work
+employment, position
+
+• plan  – an idea for the future
+idea, strategy
+
+• task  – a piece of work
+duty, assignment
+
+• work  – effort done for a job
+labor, effort
+
+• company  – a business organization
+business, firm
+
+• become  – to change into something
+turn into, grow into
+
+• decide  – to choose
+choose, make a decision
+
+• dream  – to hope for something
+hope, imagine
+
+• enjoy  – to like doing something
+like, take pleasure in
+
+• help  – to assist others
+support, aid
+
+• like  – to feel good about something
+enjoy, appreciate
+
+• plan  – to prepare for the future
+prepare, organize
+
+• want  – to wish for something
+wish, hope for
+
+• work  – to do your job
+do your job, labor
+
+• exciting  – making you feel interested
+thrilling, stimulating
+
+• fun  – enjoyable
+enjoyable, pleasant
+
+• good  – positive or nice
+positive, helpful
+
+• important  – having value
+necessary, valuable
+
+• interesting  – holding attention
+engaging, fascinating
+
+• efficiently  – in a fast and smart way
+effectively, productively
+
+• hard  – with a lot of effort
+intensely, with effort
+
+• really  – very
+very, truly
+
+• slowly  – not fast
+gradually, little by little
+
+• well  – in a good way
+properly, correctly
+
+~Healthy Food
+
+• dish  – prepared food
+meal, serving
+
+• food  – things people eat
+nourishment, meals
+
+• fruit  – sweet healthy food from plants
+produce, fresh fruit
+
+• health  – the state of being well
+wellness, fitness
+
+• lunch  – a midday meal
+midday meal
+
+• meal  – food eaten at one time
+serving, course
+
+• recipe  – instructions for cooking
+instructions, method
+
+• snack  – small amount of food
+bite, light meal
+
+• taste  – the flavor of food
+flavor, quality
+
+• vegetable  – healthy plant food
+greens, produce
+
+• cook  – to prepare food
+prepare, heat
+
+• eat  – to have food
+consume, have
+
+• enjoy  – to like food
+like, appreciate
+
+• make  – to prepare food
+prepare, create
+
+• prepare  – to get food ready
+ready, organize
+
+• serve  – to give food to others
+offer, present
+
+• taste  – to try food
+sample, try
+
+• try  – to test food
+sample, taste
+
+• delicious  – very tasty
+tasty, flavorful
+
+• fresh  – newly made
+new, crisp
+
+• good  – healthy or nice
+healthy, beneficial
+
+• healthy  – good for the body
+nutritious, good for you
+
+• tasty  – having a good flavor
+flavorful, delicious
+
+• carefully  – with attention
+gently, attentively
+
+• happily  – with joy
+gladly, cheerfully
+
+• simply  – in an easy way
+easily, plainly
+
+• slowly  – not fast
+calmly, gradually
+
+• well  – in a good way
+properly, nicely
+
+~Famous Places
+
+• city  – a large town
+large town, urban area
+
+• country  – a nation
+nation, state
+
+• dream  – a place you want to visit
+wish, hope
+
+• journey  – a long trip
+trip, travel
+
+• location  – where something is
+place, position
+
+• place  – a specific area
+spot, location
+
+• trip  – a short journey
+journey, travel
+
+• vacation  – time off for travel
+holiday, break
+
+• visit  – a short stay
+stay, trip
+
+• enjoy  – to like an experience
+like, appreciate
+
+• explore  – to discover places
+discover, travel around
+
+• feel  – to have emotions
+experience, sense
+
+• go  – to move somewhere
+travel, move
+
+• learn  – to gain knowledge
+study, find out
+
+• look  – to see
+watch, view
+
+• see  – to notice with your eyes
+view, notice
+
+• travel  – to go to places
+journey, move around
+
+• visit  – to go see a place
+see, go to
+
+• want  – to wish for something
+wish, hope for
+
+• beautiful  – very nice to look at
+pretty, attractive
+
+• big  – large in size
+large, huge
+
+• exciting  – fun and interesting
+thrilling, stimulating
+
+• famous  – known by many people
+well-known, popular
+
+• interesting  – making you curious
+engaging, fascinating
+
+• easily  – without trouble
+simply, smoothly
+
+• really  – very
+very, truly
+
+• smoothly  – without problems
+easily, without trouble
+
+• well  – in a good way
+properly, nicely
+
+• carefully  – with attention
+cautiously, attentively
+
+~The Future
+
+• change  – becoming different
+difference, transformation
+
+• family  – people related to you
+relatives, household
+
+• friends  – people you like
+buddies, companions
+
+• future  – time that has not happened yet
+later, coming time
+
+• house  – a place to live
+home, building
+
+• life  – being alive
+living, existence
+
+• technology  – machines and tools
+tech, machines
+
+• work  – jobs and effort
+employment, labor
+
+• world  – the Earth and its people
+Earth, globe
+
+• be  – to exist or become
+exist, remain
+
+• change  – to become different
+transform, alter
+
+• decide  – to choose
+choose, select
+
+• grow  – to develop
+develop, increase
+
+• help  – to assist
+support, aid
+
+• live  – to have a life
+exist, reside
+
+• make  – to create
+create, produce
+
+• see  – to understand or notice
+notice, realize
+
+• start  – to begin
+begin, launch
+
+• work  – to do a job
+labor, work at
+
+• different  – not the same
+not the same, changed
+
+• exciting  – interesting and fun
+thrilling, stimulating
+
+• important  – having value
+necessary, valuable
+
+• new  – not old
+fresh, recent
+
+• big  – large or important
+large, major
+
+• carefully  – with thought
+thoughtfully, attentively
+
+• easily  – without difficulty
+simply, smoothly
+
+• really  – very
+very, truly
+
+• smoothly  – without problems
+easily, steadily
+
+• well  – in a good way
+properly, correctly
+
+~Survival
+
+• danger  – risk of harm
+risk, threat
+
+• decision  – a choice
+choice, decision-making
+
+• help  – support or aid
+assistance, aid
+
+• life  – being alive
+living, existence
+
+• moment  – a short time
+instant, short time
+
+• person  – a human being
+individual, human
+
+• risk  – chance of danger
+danger, threat
+
+• situation  – what is happening
+condition, circumstance
+
+• time  – when something happens
+moment, period
+
+• escape  – to get away
+flee, get away
+
+• face  – to deal with something
+confront, deal with
+
+• fight  – to struggle
+battle, struggle
+
+• help  – to assist
+aid, support
+
+• decide  – to choose
+choose, make a choice
+
+• run  – to move fast
+hurry, sprint
+
+• save  – to protect from harm
+rescue, protect
+
+• survive  – to stay alive
+stay alive, live
+
+• think  – to use your mind
+consider, reflect
+
+• avoid  – to stay away from
+prevent, keep away from
+
+• brave  – not afraid
+fearless, courageous
+
+• dangerous  – not safe
+risky, unsafe
+
+• hard  – very difficult
+tough, challenging
+
+• important  – very necessary
+necessary, vital
+
+• scary  – causing fear
+frightening, fearful
+
+• bravely  – with courage
+courageously, fearlessly
+
+• carefully  – with caution
+cautiously, attentively
+
+• quickly  – very fast
+fast, rapidly
+
+• safely  – without danger
+securely, without harm
+
+• slowly  – not fast
+gradually, carefully
+
+~Tourists
+
+• activity  – something done for fun
+event, pastime
+
+• adventure  – an exciting experience
+journey, experience
+
+• city  – a large town
+large town, urban area
+
+• festival  – a special celebration
+celebration, event
+
+• food  – things to eat
+meals, dishes
+
+• location  – where something is
+place, position
+
+• market  – place to buy things
+shop, marketplace
+
+• place  – a location
+spot, area
+
+• temple  – a religious building
+shrine, place of worship
+
+• trip  – a journey
+travel, journey
+
+• eat  – to have food
+consume, have
+
+• enjoy  – to like something
+like, appreciate
+
+• explore  – to discover places
+discover, look around
+
+• go  – to move somewhere
+travel, move
+
+• like  – to enjoy something
+enjoy, appreciate
+
+• see  – to look at
+view, notice
+
+• try  – to test something new
+attempt, sample
+
+• visit  – to go to a place
+see, go to
+
+• learn  – to gain knowledge
+study, find out
+
+• beautiful  – nice to look at
+pretty, attractive
+
+• big  – large
+large, huge
+
+• exciting  – fun and interesting
+thrilling, stimulating
+
+• fun  – enjoyable
+enjoyable, pleasant
+
+• interesting  – holding attention
+engaging, fascinating
+
+• carefully  – with attention
+cautiously, attentively
+
+• eagerly  – with excitement
+excitedly, enthusiastically
+
+• really  – very
+very, truly
+
+• smoothly  – without problems
+easily, steadily
+
+• happily  – with joy
+cheerfully, gladly
+
+~Cryptids
+
+• creature  – a living being, often unknown or unusual
+cryptid, monster, beast, animal, being, entity
+
+• sightings  – moments when a cryptid is seen or reported
+sighting, encounter, report, observation, witness account
+
+• habitat  – the place where a cryptid is believed to live
+forest, lake, swamp, mountains, cave, river, wilderness
+
+• behavior  – the way a cryptid acts
+nocturnal, shy, aggressive, elusive, mysterious, territorial
+
+• evidence  – proof or signs that suggest existence
+footprint, track, hair, photograph, video, sound
+
+• myth / legend  – traditional stories about cryptids
+legend, myth, folklore, tale, story, lore
+
+• investigation  – the study or search for cryptids
+research, expedition, tracking, study, observation
+
+• hoax / skepticism  – doubt or false information
+hoax, fake, fraud, disbelief, doubt, unverified
+
+• classification  – ways cryptids are grouped or described
+humanoid, aquatic, reptilian, winged, animal-like, hybrid
+
+• folklore regions  – places known for cryptid stories
+north america, asia, europe, africa, remote areas, wilderness
+
+~Signal Words
+• Time  – words that tell when something happens<br>
+on, at, in, before, after, since, until, during, for, now, yesterday, today, tomorrow, later, then, when, while, once
+
+• Addition  – words that add ideas together<br>
+and, also, too, with, plus, as well as, not only...but also, both...and
+
+• Cause / Effect  – words that show a reason or result<br>
+because, so, since, because of, due to, as a result, therefore, that’s why
+
+• Comparison / Similarity / Difference  – words that compare things<br>
+like, as, as...as, than, similar to, different from, more than, less than, the most, just as...so, whereas, in contrast to
+
+• Contrast / Opposition  – words that show differences<br>
+but, although, though, even though, however, yet, still, despite, instead, whereas, while, on the other hand
+
+• Frequency  – words that tell how often something happens<br>
+always, usually, often, sometimes, occasionally, rarely, never, every day, once a week, hardly ever, from time to time
+
+• Possibility / Certainty  – words that show how possible or sure something is<br>
+maybe, probably, possibly, must, might, may, could, can, definitely, certainly
+
+• Advice / Obligation / Permission  – words that tell rules or give guidance<br>
+must, must not, have to, don’t have to, should, ought to, had better, can, cannot, may, could
+
+• Manner  – words that tell how something is done<br>
+quickly, slowly, carefully, easily, well, badly, with, by, in a...way, as
+
+• Place / Location  – words that tell where something is<br>
+in, on, at, under, above, between, near, next to, here, there, everywhere, anywhere
+
+• Condition  – words that show something depends on something else<br>
+if, unless, in case, on condition that
+
+• Emphasis / Focus  – words that make something stronger or more important<br>
+only, just, even, especially, mainly, particularly
+
+• Questions (Interrogatives)  – words used to ask questions<br>
+how, when, where, why
+
+• Relative Words  – words that connect ideas about time, place, reason, or manner<br>
+when, where, why, how
+
+• Direction / Movement  – words that show movement or direction<br>
+to, from, toward, away from, up, down, forward, back
+
+• Affirmative and Negative  – words that show yes or no<br>
+yes, no
+
+
+
+`;
+// ===== CONFIGURABLE TOGGLES =====
+const lockInputs = false;
+const showPlaceholders = true;
+const useShuffledPlaceholders = true;
+// =================================
+
+function parseVocabInput(text){
+  const lines = text.trim().split('\n');
+  const pairs = [];
+
+  // Broad but SAFE emoji range (no Unicode properties)
+  const EMOJI_REGEX = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu;
+
+  for(let i = 0; i < lines.length; i++){
+    const line = lines[i].trim();
+    if(!line) continue;
+
+if(/[-–]/.test(line)){      let [wordPart, defPart] = line.split(/\s*[-–]\s*/);
+
+      // Remove bullet + emojis ONLY from word
+      wordPart = wordPart
+        .replace(/^•\s*/, '')
+        .replace(EMOJI_REGEX, '')
+        .trim();
+
+      const definition = defPart.split('<br>')[0].trim();
+
+      pairs.push({ word: wordPart, definition });
+    }
+  }
+
+  return pairs;
+}
+
+
+
+function applyPlaceholders(){
+  if(!showPlaceholders) return;
+  const inputs = document.querySelectorAll('.tile-input');
+
+  if(useShuffledPlaceholders){
+    // Use first example if available, otherwise main word
+    const placeholders = shuffle(
+      vocabPairs.map(p => {
+        if(p.examples){
+          return p.examples.split(',')[0].trim();
+        } else {
+          return p.word;
+        }
+      })
+    );
+    inputs.forEach((i, idx) => i.placeholder = placeholders[idx] || '');
+  } else {
+    inputs.forEach(i => i.placeholder = 'Type the word...');
+  }
+}
+
+function shuffle(array){
+  const arr = [...array];
+  for(let i = arr.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ================= CORE STATE =================
+let vocabPairs = [];
+let selectedTile = null;
+// ==============================================
+
+let currentSectionIndex = 0;
+
+function createVocabTile(index){
+  const tile = document.createElement('div');
+  tile.className = 'tile';
+  tile.dataset.index = index;
+
+  const num = document.createElement('div');
+  num.className = 'tile-number';
+  num.textContent = index + 1;
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'tile-input';
+
+  tile.append(num, input);
+
+  if(lockInputs){
+    input.readOnly = true;
+    input.style.color = 'darkgreen';
+    input.style.caretColor = 'transparent';
+  } else {
+    input.addEventListener('input', () => {
+      const v = input.value.trim().toLowerCase();
+      if(v === ''){
+        tile.classList.remove('valid','invalid');
+        return;
+      }
+      const matchesAny = vocabPairs.some(p => p.word.toLowerCase() === v);
+      tile.classList.toggle('valid', matchesAny);
+      tile.classList.toggle('invalid', !matchesAny);
+    });
+  }
+
+  tile.addEventListener('click', ev => handleTileClick(tile, ev));
+  return tile;
+}
+
+// ===== TILE REORDER LOGIC =====
+function handleTileClick(tile, event){
+  if(event.target.tagName === 'INPUT') return;
+
+  if(!selectedTile){
+    selectedTile = tile;
+    tile.classList.add('selected-tile');
+    return;
+  }
+
+  if(selectedTile === tile){
+    tile.classList.remove('selected-tile');
+    selectedTile = null;
+    return;
+  }
+
+  const parent = tile.parentNode;
+  const tiles = Array.from(parent.children);
+  const a = tiles.indexOf(selectedTile);
+  const b = tiles.indexOf(tile);
+
+  parent.insertBefore(
+    selectedTile,
+    a < b ? tile.nextSibling : tile
+  );
+
+  selectedTile.classList.remove('selected-tile');
+  selectedTile = null;
+}
+// =============================
+
+
+
+function setupVocabGame(){
+  const wordCol = document.getElementById('wordTiles');
+  const defCol = document.getElementById('definitionTiles');
+
+  wordCol.innerHTML = '';
+  defCol.innerHTML = '';
+
+  vocabPairs.forEach((_, i) => wordCol.appendChild(createVocabTile(i)));
+  vocabPairs.forEach(p => {
+    const d = document.createElement('div');
+    d.className = 'tile';
+    d.textContent = p.definition;
+    defCol.appendChild(d);
+  });
+
+  applyPlaceholders();
+  document.getElementById('vocabScoreboard').style.display = 'none';
+}
+
+function handleVocabSubmit(){
+  const wordCol = document.getElementById('wordTiles');
+  let score = 0;
+
+  vocabPairs.forEach((p, i) => {
+    const input = wordCol.children[i]?.querySelector('input');
+    if(!input) return;
+
+    if(input.value.trim().toLowerCase() === p.word.toLowerCase()){
+      wordCol.children[i].classList.add('valid','scored');
+      score++;
+    } else {
+      wordCol.children[i].classList.add('invalid');
+    }
+  });
+
+  const nameEl = document.getElementById('vocabName');
+const idEl = document.getElementById('vocabStudentId');
+
+const name = nameEl ? nameEl.value.trim() : "";
+const id = idEl ? idEl.value.trim() : "";
+  const dt = new Date().toLocaleString('en-GB',{hour12:false});
+  const file = location.pathname.split('/').pop();
+
+const total = Array.isArray(vocabPairs) ? vocabPairs.length : 0;
+const percent = total === 0 ? 0 : Math.round((score / total) * 100);
+
+const resultText =
+  `${file}|Vocabulary|${name}|${id}|${dt}|${score}/${total}|${percent}%`;
+
+document.getElementById('vocabScoreOutput').textContent = resultText;
+document.getElementById('vocabScoreboard').style.display = 'block';
+
+if (typeof saveResult === "function") {
+  saveResult(resultText);
+} else {
+  console.warn("⚠️ saveResult not available");
+}
+
+}
+
+function parseSections(raw) {
+  const chunks = raw
+    .split(/\n(?=~+)/)
+    .map(c => c.trim())
+    .filter(c => c.startsWith("~"));
+
+  return chunks.map(chunk => {
+    const lines = chunk.split("\n");
+    const name = lines.shift().replace(/^~+/, "").trim();
+    const text = lines.join("\n").trim();
+    return { name, text };
+  });
+}
+
+function detectSectionType(sectionText) {
+  if (/<br>/.test(sectionText)) return "signal";
+  if (sectionText.includes("•")) return "vocab";
+  return "unknown";
+}
+
+
+
+
+
+// ===== SAFE INIT =====
+document.addEventListener('DOMContentLoaded', () => {
+  // Use internal raw text directly
+  const sections = parseSections(rawVocabTextSource);
+
+const sectionData = sections.map(sec => ({
+  name: sec.name,
+  type: detectSectionType(sec.text),
+  pairs: parseVocabInput(sec.text)
+}));
+
+  const btn = document.getElementById('vocabSubmitBtn');
+  const name = document.getElementById('vocabName');
+  const id = document.getElementById('vocabStudentId');
+
+  const check = () => btn.disabled = !(name.value.trim() && id.value.trim());
+  name.addEventListener('input', check);
+  id.addEventListener('input', check);
+  btn.addEventListener('click', handleVocabSubmit);
+
+  // Wire copy/download buttons
+  setupCopyDownload(
+    document.getElementById('vocabScoreOutput'),
+    document.getElementById('vocabCopyBtn'),
+    document.getElementById('vocabDownloadTextBtn'),
+    document.getElementById('vocabDownloadPngBtn'),
+    'vocab_score'
+  );
+
+// ===== SECTION WHEEL DISPLAY =====
+const wheel = document.querySelector('.wheel');
+let currentSectionIndex = null; // start with no selection
+
+function updateWheel() {
+  if (currentSectionIndex === null) {
+    wheel.textContent = "Select a category."; // placeholder text
+    document.getElementById('sectionStart').disabled = true;
+  } else {
+    wheel.textContent = sectionData[currentSectionIndex].name;
+    document.getElementById('sectionStart').disabled =
+      sectionData[currentSectionIndex].pairs.length === 0;
+  }
+}
+
+// Initial display
+updateWheel();
+
+// ===== SECTION NAVIGATION BUTTONS =====
+document.getElementById('sectionUp').addEventListener('click', () => {
+  if (currentSectionIndex === null) currentSectionIndex = 0;
+  else currentSectionIndex =
+    (currentSectionIndex - 1 + sectionData.length) % sectionData.length;
+  updateWheel();
+});
+
+document.getElementById('sectionDown').addEventListener('click', () => {
+  if (currentSectionIndex === null) currentSectionIndex = 0;
+  else currentSectionIndex =
+    (currentSectionIndex + 1) % sectionData.length;
+  updateWheel();
+});
+  // ===== SECTION START BUTTON =====
+document.getElementById('sectionStart').addEventListener('click', () => {
+  const activeSection = sectionData[currentSectionIndex];
+
+  vocabPairs = activeSection.pairs;
+
+  setupVocabGame();
+
+  // show the vocab board only now
+  const board = document.querySelector('.game-board');
+if (board) board.classList.add('active');
+
+
+  // lock section controls
+  document.getElementById('sectionUp').disabled = true;
+  document.getElementById('sectionDown').disabled = true;
+  document.getElementById('sectionStart').disabled = true;
+});
+
+
+
+});
+
+
+
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+
+  /* ========= MINIMUM REQUIREMENTS ========= */
+
+  const MIN_CHARS = 50;
+  const MIN_END_PUNCT = 3;
+
+  function meetsMinimums() {
+    const text = Array.from(
+      document.querySelectorAll('[id^="writingInput_"]')
+    ).map(ta => ta.value).join('\n');
+
+    const chars = text.length;
+    const punct = (text.match(/[.!?]/g) || []).length;
+
+    return chars >= MIN_CHARS && punct >= MIN_END_PUNCT;
+  }
+
+  /* ========= SPACING / ALIGN HELPERS ========= */
+
+  function applySpacing(el) {
+    el.style.marginTop = '5px';
+    el.style.marginBottom = '5px';
+  }
+
+  function flushLeft(el) {
+    el.style.textAlign = 'left';
+  }
+
+  /* ========= RAW PROMPT TEXT ========= */
+
+  const rawGhostWriting = `
+|Ghost Writing Instructions: Read carefully.|
+
+[Prompt]
+Write a short ghostwritten paragraph in first person.
+
+[Extra]
+Stay in character. Do not mention names.
+
+[Prompt]
+Rewrite the paragraph in third person.
+
+[Extra]
+Change sentence structure. Avoid repetition.
+
+[Prompt]
+Add a concluding paragraph.
+`;
+
+  /* ========= PARSER ========= */
+
+  function parseRaw(raw) {
+    const blocks = raw.split(/\n\s*\n/).map(b => b.trim()).filter(Boolean);
+    const parsed = { header: null, prompts: [] };
+    let current = null;
+
+    blocks.forEach(b => {
+      if (b.startsWith('|') && b.endsWith('|')) {
+        parsed.header = b.slice(1, -1);
+      } else if (b.startsWith('[Prompt]')) {
+        current = { text: b.replace('[Prompt]', '').trim(), extra: null };
+        parsed.prompts.push(current);
+      } else if (b.startsWith('[Extra]') && current) {
+        current.extra = b.replace('[Extra]', '').trim();
+      }
+    });
+
+    return parsed;
+  }
+
+  const parsed = parseRaw(rawGhostWriting);
+
+  /* ========= TARGET STRUCTURE ========= */
+
+  const section = document.getElementById('writingSectionGhostWriting');
+  const inlineInputs = section.querySelector('.inline-inputs');
+  applySpacing(inlineInputs);
+
+  const oldWrapper = section.querySelector('.textarea-wrapper');
+  if (oldWrapper) oldWrapper.remove();
+
+  const insertPoint = inlineInputs.nextSibling;
+
+  /* ========= HEADER INSTRUCTIONS ========= */
+
+  if (parsed.header) {
+    const instr = document.createElement('div');
+    instr.className = 'instructions';
+    instr.textContent = parsed.header;
+    flushLeft(instr);
+    applySpacing(instr);
+    section.insertBefore(instr, insertPoint);
+  }
+
+  /* ========= PROMPTS + INPUTS ========= */
+
+  let submitted = false;
+
+  parsed.prompts.forEach((prompt, i) => {
+
+    const h3 = document.createElement('h3');
+    h3.textContent = prompt.text;
+    flushLeft(h3);
+    applySpacing(h3);
+    section.insertBefore(h3, insertPoint);
+
+    if (prompt.extra) {
+      const extra = document.createElement('div');
+      extra.className = 'instructions extra-text';
+      extra.textContent = prompt.extra;
+      flushLeft(extra);
+      applySpacing(extra);
+      section.insertBefore(extra, insertPoint);
+    }
+
+    const wrapper = document.createElement('div');
+    wrapper.className = 'textarea-wrapper';
+    applySpacing(wrapper);
+
+    const ta = document.createElement('textarea');
+    ta.id = `writingInput_${i + 1}`;
+    ta.placeholder = 'Start writing here...';
+    ta.style.userSelect = 'text';
+
+    wrapper.appendChild(ta);
+
+    const counter = document.createElement('div');
+    counter.className = 'counter';
+    counter.textContent = '0 characters | ~0 sentences';
+    wrapper.appendChild(counter);
+
+    ta.addEventListener('input', () => {
+      const text = ta.value;
+      const chars = text.length;
+      const sentences = (text.match(/[.!?]+/g) || []).length;
+      counter.textContent = `${chars} characters | ~${sentences} sentences`;
+
+      ta.style.height = 'auto';
+      ta.style.height = ta.scrollHeight + 'px';
+
+      if (submitted) buildScoreboard();
+    });
+
+    section.insertBefore(wrapper, insertPoint);
+  });
+
+  /* ========= SUBMIT ENABLE ========= */
+
+  const nameInput = document.getElementById('writingName');
+  const idInput   = document.getElementById('writingId');
+  const submitBtn = document.getElementById('writingSubmitBtn');
+
+  function updateSubmitState() {
+    submitBtn.disabled = !(nameInput.value.trim() && idInput.value.trim());
+  }
+
+  nameInput.addEventListener('input', updateSubmitState);
+  idInput.addEventListener('input', updateSubmitState);
+  updateSubmitState();
+
+  /* ========= SCOREBOARD ========= */
+
+  const scoreOutput = document.getElementById('writingScoreOutput');
+  const scoreboard  = document.getElementById('writingScoreboard');
+
+  function buildScoreboard() {
+    const filename = window.location.pathname.split('/').pop();
+    const nm = nameInput.value.trim();
+    const id = idInput.value.trim();
+
+    const dateStr = new Date().toLocaleString('en-GB', {
+      day: '2-digit',
+      month: '2-digit',
+      year: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false
+    });
+
+    const paragraphs = Array.from(
+      section.querySelectorAll('[id^="writingInput_"]')
+    )
+    .map(ta => ta.value.trim())
+    .filter(Boolean);
+
+    const bodyText = paragraphs.join('\n\n');
+    const chars = bodyText.length;
+    const sentences = (bodyText.match(/[.!?]+/g) || []).length;
+
+scoreOutput.textContent =
+`${filename}|Section:Writing|Name:${nm}|ID:${id}|Date:${dateStr}|Characters:${chars}|Sentences:${sentences}`;
+
+${bodyText}`;
+  }
+
+  /* ========= SUBMIT (WITH WARNING ONLY) ========= */
+
+  submitBtn.addEventListener('click', () => {
+
+    if (!meetsMinimums()) {
+      alert(
+        `Minimum requirements not met:\n` +
+        `• At least ${MIN_CHARS} characters\n` +
+        `• At least ${MIN_END_PUNCT} end punctuation marks (. ! ?)`
+      );
+      return;
+    }
+
+    submitted = true;
+    buildScoreboard();
+    scoreboard.style.display = 'block';
+    submitBtn.disabled = true;
+  });
+
+  /* ========= COPY ========= */
+
+  document.getElementById('writingCopyBtn').addEventListener('click', async () => {
+    await navigator.clipboard.writeText(scoreOutput.textContent);
+  });
+
+  /* ========= DOWNLOAD TEXT ========= */
+
+  document.getElementById('writingDownloadTextBtn').addEventListener('click', () => {
+    const blob = new Blob([scoreOutput.textContent], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'ghost_writing.txt';
+    a.click();
+    URL.revokeObjectURL(a.href);
+  });
+
+  /* ========= DOWNLOAD PNG ========= */
+
+  document.getElementById('writingDownloadPngBtn').addEventListener('click', () => {
+    html2canvas(scoreOutput, { backgroundColor: '#ffffff' }).then(canvas => {
+      const padded = document.createElement('canvas');
+      padded.width = canvas.width + 20;
+      padded.height = canvas.height + 20;
+      const ctx = padded.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(0, 0, padded.width, padded.height);
+      ctx.drawImage(canvas, 10, 10);
+
+      const a = document.createElement('a');
+      a.href = padded.toDataURL('image/png');
+      a.download = 'ghost_writing.png';
+      a.click();
+    });
+  });
+
+});
+</script>
+
+
+
+
+
+
+<script>
+
+    // Green border
+    const borderDiv = document.createElement("div");
+    borderDiv.style.position = "fixed";
+    borderDiv.style.inset = "0";
+    borderDiv.style.border = "10px solid #39FF14";
+    borderDiv.style.boxSizing = "border-box";
+    borderDiv.style.zIndex = "9999";
+    borderDiv.style.pointerEvents = "none";
+    document.body.appendChild(borderDiv);
+  </script>
+
+
+
+
+<script>
+/* =========================
+   Buttons
+========================= */
+const highlightBtn = document.getElementById('highlightSelected');
+const copyBtn = document.getElementById('copySelected');
+const restartBtn = document.getElementById('restartBtn');
+const pauseResumeBtn = document.getElementById('pauseResumeBtn');
+const startBtn = document.getElementById('startBtn');
+
+/* =========================
+   State & Voices
+========================= */
+let isPaused = false;
+let teacherVoice = null;
+let studentVoice = null;
+
+/* =========================
+   Load voices (teacher = Zira/Samantha/US Female, student = Aria/Victoria/UK Female)
+========================= */
+function loadVoices() {
+  const voices = speechSynthesis.getVoices();
+  if (!voices.length) return;
+
+  // Teacher: en-US Zira (Windows), Google US English Female (Chrome), Samantha (Mac)
+  teacherVoice =
+    voices.find(v => v.name === "Microsoft Zira" && v.lang === "en-US") ||
+    voices.find(v => v.name === "Google US English Female") ||
+    voices.find(v => v.name === "Samantha") ||
+    voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("female")) ||
+    voices[0];
+
+  // Student: en-GB Aria (Windows), Google UK English (Chrome), Victoria (Mac)
+  studentVoice =
+    voices.find(v => v.name === "Microsoft Aria" && v.lang === "en-GB") ||
+    voices.find(v => v.name === "Google UK English") ||
+    voices.find(v => v.name === "Victoria") ||
+    voices.find(v => v.lang.startsWith("en") && v.name.toLowerCase().includes("female")) ||
+    voices[0];
+}
+
+// Load voices dynamically
+speechSynthesis.onvoiceschanged = loadVoices;
+loadVoices();
+
+/* =========================
+   Selection helpers
+========================= */
+function getSelectedText() {
+  return window.getSelection().toString().trim();
+}
+
+function getReadableFromCaret() {
+  const sel = window.getSelection();
+  if (!sel.rangeCount) return null;
+
+  const range = sel.getRangeAt(0);
+
+  let node = range.startContainer;
+  if (node.nodeType === 3) node = node.parentElement;
+
+  const block = node.closest('p, div, li, article, section');
+  if (!block) return null;
+
+  const subRange = document.createRange();
+  subRange.selectNodeContents(block);
+  subRange.setStart(range.startContainer, range.startOffset);
+
+  const text = subRange.toString().trim();
+  return text || null; // return null only if empty
+}
+
+
+/* =========================
+   Highlight toggle
+========================= */
+highlightBtn.addEventListener('click', () => {
+  const selection = window.getSelection();
+  if (!selection.rangeCount) return;
+
+  const range = selection.getRangeAt(0);
+  if (range.collapsed) return;
+
+  let alreadyHighlighted = false;
+  const spans = range.commonAncestorContainer.querySelectorAll
+    ? range.commonAncestorContainer.querySelectorAll('span.highlighted')
+    : [];
+
+  spans.forEach(span => {
+    if (selection.containsNode(span, true)) {
+      alreadyHighlighted = true;
+    }
+  });
+
+  if (!alreadyHighlighted) {
+    const span = document.createElement('span');
+    span.className = 'highlighted';
+    range.surroundContents(span);
+  } else {
+    const contents = range.cloneContents();
+    const frag = document.createDocumentFragment();
+
+    Array.from(contents.childNodes).forEach(node => {
+      if (node.nodeType === 1 && node.classList.contains('highlighted')) {
+        while (node.firstChild) frag.appendChild(node.firstChild);
+      } else {
+        frag.appendChild(node.cloneNode(true));
+      }
+    });
+
+    range.deleteContents();
+    range.insertNode(frag);
+  }
+
+  selection.removeAllRanges();
+  selection.addRange(range);
+});
+
+/* =========================
+   Copy selected text
+========================= */
+copyBtn.addEventListener('click', async () => {
+  const text = getSelectedText();
+  if (!text) return alert('No text selected');
+
+  try {
+    await navigator.clipboard.writeText(text);
+    alert('Copied to clipboard!');
+  } catch (err) {
+    alert('Copy failed');
+  }
+});
+
+/* =========================
+   Speech functions
+========================= */
+function speakTeacher(text) {
+  const u = new SpeechSynthesisUtterance(text);
+  u.voice = teacherVoice;
+  u.rate = 0.88;    // slightly slower, more mature
+  u.pitch = 1.15;   // slightly lower for adult warmth
+  u.volume = 0.95;
+  u.text = text.replace(/([,.!?])/g, "$1 "); // slight pause after punctuation
+  speechSynthesis.speak(u);
+}
+
+
+function speakStudent(text) {
+  const u = new SpeechSynthesisUtterance(text);
+  u.voice = studentVoice;
+  u.rate = 0.98;
+  u.pitch = 1.50;
+  u.volume = 0.80;
+  speechSynthesis.speak(u);
+}
+
+
+function speakDialog(text) {
+  const lines = text.split(/\n+/).map(l => l.trim()).filter(Boolean);
+
+  lines.forEach(line => {
+    if (/^teacher:/i.test(line)) {
+      speakTeacher(line.replace(/^teacher:\s*/i, ""));
+    } else if (/^student:/i.test(line)) {
+      speakStudent(line.replace(/^student:\s*/i, ""));
+    } else {
+      speakTeacher(line);
+    }
+  });
+}
+
+/* =========================
+   START
+========================= */
+startBtn.addEventListener('click', () => {
+  speechSynthesis.cancel();
+  isPaused = false;
+  pauseResumeBtn.textContent = '⏸';
+
+  const selectedText = getSelectedText();
+  if (selectedText) {
+    speakStudent(selectedText);
+    return;
+  }
+
+  const caretText = getReadableFromCaret();
+  if (!caretText) {
+    alert("Place the cursor inside readable text.");
+    return;
+  }
+
+  speakDialog(caretText);
+});
+
+/* =========================
+   Pause / Resume
+========================= */
+pauseResumeBtn.addEventListener('click', () => {
+  if (!speechSynthesis.speaking) return;
+
+  if (!isPaused) {
+    speechSynthesis.pause();
+    isPaused = true;
+    pauseResumeBtn.textContent = '▶';
+  } else {
+    speechSynthesis.resume();
+    isPaused = false;
+    pauseResumeBtn.textContent = '⏸';
+  }
+});
+
+/* =========================
+   Restart
+========================= */
+restartBtn.addEventListener('click', () => {
+  speechSynthesis.cancel();
+  isPaused = false;
+  pauseResumeBtn.textContent = '⏸';
+  startBtn.click();
+});
+</script>
+
+<!--<script>
+  window.OVERLAY_ENABLED = false;
+
+  (function(){
+    if (window.OVERLAY_ENABLED === true) return; // <<< stops the overlay from running
+
+    /* =========================================
+       1. RAW TEXT BLOCK — organized by team
+       ========================================= */
+
+    const rawText = (function(){/*
+    ~Team A List~
+    |Team A|11Phapmuan|12Piyanun|13Chinpasut|15Theetat|17Pasit/Patit|
+    |Team A|11Piyawarin|12Thanatphat|13Warawat|15Thanakorn|17Ronnakrit|
+    |Team A|11Thanisorn|12Papon|13Supasan|15Nunthapat|17Thanatthat|
+    |Team A|11Nanon|12Phunakorn|13Kuariwin|15Noppathorn|17Korrerk|
+    |Team A|11Chayakarn|12Sukhaphat|13Patawee|15Krittaphat|17Pothsawee|
+    |Team A|11Arichai|12Athiwat|13Kawinpob|15Pudh|17Korapat|
+    |Team A|11Withawich|12Teerapich|13Chinnawat|15Tanaphat|17Pakorn|
+    |Team A|11Theeraphat|12Akkhardwin|13Phattadon|15Nop|17Tashtada|
+
+    ~Team B List~
+    |Team B|11KornKamol|12Achiravit|13Pavee|15Pitchayapoom|17Denthanat|
+    |Team B|11Karn/Atis|12Puttipat|13Tanaphon|15Pannathorn|17Phurithat|
+    |Team B|11Songsathit|12Wongsapat|13Nathavee|15Thanadech|17Sanant|
+    |Team B|11Prachaya|12Supatat|13Kantaphon|15Supakorn|17Theetat|
+    |Team B|11Thanapat|12Parnasarn|13Kittitee|15Nuttapong|17Kanoknat|
+    |Team B|11Puripat|12Akrit|13Phuthaninphat|15Aritouch|17Krittitee|
+    |Team B|11Papeem|12Techin|13Phupa|15Mangkorn|17Kanapos|
+    */}).toString()
+    .replace(/^[^\/]+\/\*!?/, '')
+    .replace(/\*\/[^\/]+$/, '')
+    .trim();
+
+
+    /* =========================================
+       2. Parse teams
+       ========================================= */
+
+    const teamA = [];
+    const teamB = [];
+    let currentTeam = null;
+
+    rawText.split(/\r?\n/).forEach(line => {
+      line = line.trim();
+      if (!line) return;
+
+      if (/~Team A List~/i.test(line)) currentTeam = "A";
+      else if (/~Team B List~/i.test(line)) currentTeam = "B";
+      else if (currentTeam === "A") teamA.push(line.replace(/\//g,"•"));
+      else if (currentTeam === "B") teamB.push(line.replace(/\//g,"•"));
+    });
+
+    const allLines = teamA.concat(teamB);
+
+
+    /* =========================================
+       3. OVERLAY EXCLUSION CONFIG
+       ========================================= */
+
+    const RAW_EXCLUDED_DIVS = `
+    <div id="dynamicInputsReadingSpeaking">
+    <div id="instructionsContainerReadingSpeaking">
+    <div id="dynamicInputsWritingSpeaking">
+    <div id="instructionsContainerWritingSpeaking">
+    <div id="outputContainerReadingSpeaking">
+    <div id="outputContainerWritingSpeaking">
+    `;
+
+    const OVERLAY_EXCLUSIONS = [
+      ...RAW_EXCLUDED_DIVS.matchAll(/id="([^"]+)"/g)
+    ].map(m => `#${m[1]}`);
+
+
+    /* =========================================
+       4. Overlay engine
+       ========================================= */
+
+    const numberPattern = /^(?:Question\s*)?\d+[\.\)\:\-]/i;
+
+    function isExcluded(el) {
+      if (OVERLAY_EXCLUSIONS.some(sel => el.closest(sel))) return true;
+      if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') return true;
+      return false;
+    }
+
+    function createOverlay(numberEl, line) {
+      if (numberEl.dataset.overlayApplied) return;
+
+      const overlayDiv = document.createElement("div");
+      overlayDiv.style.fontSize = "10px";
+      overlayDiv.style.lineHeight = "10px";
+      overlayDiv.style.color = "#1976d2";
+      overlayDiv.style.fontWeight = "bold";
+      overlayDiv.style.pointerEvents = "none";
+      overlayDiv.style.marginBottom = "2px";
+      overlayDiv.textContent = line;
+
+      numberEl.parentNode.insertBefore(overlayDiv, numberEl);
+      numberEl.dataset.overlayApplied = "1";
+    }
+
+    function scanAndAssignOverlays() {
+      const numberEls = [];
+
+      document.querySelectorAll("body *").forEach(el => {
+        if (isExcluded(el)) return;
+        if (el.childElementCount !== 0) return;
+
+        const text = el.textContent.trim();
+        if (!numberPattern.test(text)) return;
+
+        numberEls.push(el);
+      });
+
+      numberEls.forEach((el, index) => {
+        const line =
+          (teamA.length && teamB.length)
+            ? (index % 2 === 0
+                ? teamA[Math.floor(Math.random() * teamA.length)]
+                : teamB[Math.floor(Math.random() * teamB.length)])
+            : allLines[Math.floor(Math.random() * allLines.length)];
+
+        createOverlay(el, line);
+      });
+    }
+
+
+    /* =========================================
+       5. Run
+       ========================================= */
+
+    scanAndAssignOverlays();
+    setInterval(scanAndAssignOverlays, 700);
+
+  })();
+</script>-->
+
+
+<script>
+
+const sectionList = `
+readingSection
+writingSectionGhostWriting
+mcSection
+mc2Section
+fibSection
+scrambleSection
+sequenceSection
+posSection
+vocabSection
+footerNoteSection
+copyrightSection
+
+`;
+
+function applySectionVisibility(list) {
+  const lines = list.split('\n').map(line => line.trim()).filter(line => line !== '');
+  
+  lines.forEach(line => {
+    let hide = false;
+    let id = line;
+    if (line.startsWith('~')) {
+      hide = true;
+      id = line.slice(1).trim();
+    }
+    
+    const el = document.getElementById(id);
+    if (el) {
+      // Hide/show the element itself
+      el.style.display = hide ? 'none' : '';
+      // Also hide/show all its child elements
+      if (hide) {
+        el.querySelectorAll('*').forEach(child => child.style.display = 'none');
+      }
+    } else {
+      console.warn(`Element with ID "${id}" not found.`);
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  applySectionVisibility(sectionList);
+});
+</script>
+
+<script>
+// == USER HIGHLIGHT TOOL ==
+
+// Add highlight / unhighlight stylesheet
+const style = document.createElement('style');
+style.textContent = `
+  .highlight {
+    background-color: yellow;
+  }
+`;
+document.head.appendChild(style);
+
+// Create the highlight button
+const highlightBtn = document.createElement('button');
+highlightBtn.textContent = 'Highlight/Unhighlight';
+highlightBtn.style.position = 'fixed';
+highlightBtn.style.bottom = '20px';
+highlightBtn.style.right = '20px';
+highlightBtn.style.zIndex = '9999';
+highlightBtn.style.padding = '6px 12px';
+highlightBtn.style.background = '#007bff';
+highlightBtn.style.color = '#fff';
+highlightBtn.style.border = 'none';
+highlightBtn.style.borderRadius = '4px';
+highlightBtn.style.cursor = 'pointer';
+
+document.body.appendChild(highlightBtn);
+
+// Highlight toggle function
+highlightBtn.addEventListener('click', () => {
+  const selection = window.getSelection();
+
+  if (selection.isCollapsed) {
+    alert('Select some text first!');
+    return;
+  }
+
+  const range = selection.getRangeAt(0);
+  const selectedText = range.toString();
+
+  if (!selectedText.trim()) {
+    alert('No visible text selected.');
+    return;
+  }
+
+  // Check if selection is already highlighted
+  const parentSpan = range.startContainer.parentNode.closest('.highlight');
+
+  if (parentSpan) {
+    // Unhighlight: unwrap nodes
+    const text = selection.toString();
+    const unhighlighted = document.createTextNode(text);
+
+    parentSpan.replaceWith(unhighlighted);
+    selection.removeAllRanges();
+    return;
+  }
+
+  // Wrap new highlight
+  const span = document.createElement('span');
+  span.className = 'highlight';
+  range.surroundContents(span);
+
+  selection.removeAllRanges();
+});
+</script>
+
+<script>
+// ---------------------- UNIVERSAL PIPE-BASED FEEDBACK ----------------------
+document.addEventListener("DOMContentLoaded", () => {
+
+  // --- Web Audio context ---
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const audioCtx = new AudioContext();
+
+  function playCorrect() {
+    audioCtx.resume().then(() => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(800, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.25);
+    });
+  }
+
+  function playWrong() {
+    audioCtx.resume().then(() => {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(450, audioCtx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.25);
+      gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.25);
+    });
+  }
+
+  // --- normalize strings for comparison ---
+  function normalize(str) {
+    return str.trim().toLowerCase().replace(/\s+/g, ' ');
+  }
+
+  // --- feedback for multiple-choice (radio/checkbox) ---
+  function handleSelection(exercise, selectedValues) {
+    const correct = exercise.dataset.correct.split('|').map(normalize);
+    let isCorrect;
+
+    if (exercise.querySelectorAll('input[type="checkbox"]').length > 0) {
+      // Checkbox / multi-select: all selected must match all correct
+      const normalizedSelected = selectedValues.map(normalize).sort();
+      isCorrect = normalizedSelected.join('|') === correct.sort().join('|');
+    } else {
+      // Single choice or fill-in-the-blank
+      isCorrect = normalize(selectedValues[0]) === correct[0];
+    }
+
+    // Remove old emoji
+    exercise.querySelectorAll('.mc-emoji').forEach(span => span.remove());
+
+    // Add emoji for radio/checkbox labels
+    exercise.querySelectorAll('input').forEach(input => {
+      const lbl = input.closest('label');
+      if (!lbl) return;
+
+      const inputValue = normalize(input.value || input.value);
+      const span = document.createElement('span');
+      span.className = 'mc-emoji';
+      span.style.marginLeft = "8px";
+      if (input.checked) span.textContent = isCorrect ? "😊" : "😢";
+      else span.textContent = '';
+      lbl.appendChild(span);
+    });
+
+    // Play sound
+    if (isCorrect) playCorrect();
+    else playWrong();
+  }
+
+  // --- universal event listener ---
+  document.body.addEventListener('change', e => {
+    const input = e.target;
+    const exercise = input.closest('.exercise');
+    if (!exercise) return;
+
+    if (input.type === 'radio' || input.type === 'checkbox') {
+      const selected = Array.from(exercise.querySelectorAll('input:checked')).map(inp => inp.value);
+      handleSelection(exercise, selected);
+    } else if (input.tagName === 'INPUT' || input.tagName === 'TEXTAREA') {
+      // For FIB / text input: compare value
+      handleSelection(exercise, [input.value]);
+    }
+  });
+
+  console.log("✅ Universal pipe-based emoji + audio feedback initialized.");
+});
+</script>
+
+
+<script>
+(function () {
+  const style = document.createElement('style');
+  style.textContent = `
+    /* Hide scrollbar but keep scrolling */
+    html {
+      scrollbar-width: none;          /* Firefox */
+    }
+
+    body {
+      -ms-overflow-style: none;       /* IE / Edge legacy */
+    }
+
+    body::-webkit-scrollbar {
+      width: 0;
+      height: 0;
+      display: none;                  /* Chrome / Safari */
+    }
+  `;
+  document.head.appendChild(style);
+})();
+</script>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Get filename only
+    let filename = window.location.pathname.split("/").pop();
+
+    // Remove .html
+    filename = filename.replace(/\.html$/i, "");
+
+    // Remove everything up to and including the first underscore
+    // (treats that as the prefix)
+    filename = filename.replace(/^[^_]*_/, "");
+
+    // Convert underscores to spaces
+    const title = filename.replace(/_/g, " ");
+
+    // Replace the first <h1>
+    const h1 = document.querySelector("h1");
+    if (h1) {
+        h1.textContent = title;
+    }
+});
+</script>
+
+<script>
+
+(function(){
+
+/* =========================
+   RAW INSTRUCTIONS TEXT
+========================= */
+
+const RAW_TEXT = `
+
+How to use this page...
+
+1. Enter Name and ID.
+2. Select a category to view the main list.
+3. If placeholder text is enabled, type the word into each tile.
+4. If tiles are blank, type each word the instructor reads into each tile.
+5. Correct spelling turns a tile green. A red tile is incorrectly spelled.
+6. You must match the tiles with the correct definition.
+6. Click on the tiles to select and click where you want them to go, from top to bottom.
+7. Click Submit to see your score.
+8. Click to copy or download your score.
+
+`;
+
+
+/* =========================
+   RAW TEXT PARSER
+========================= */
+
+function parseRawInstructions(text){
+
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+
+  lines.forEach(line => {
+
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
+
+    html.push(`<p>${line}</p>`);
+  });
+
+  return html.join("");
+}
+
+
+/* =========================
+   CREATE STYLE
+========================= */
+
+const style = document.createElement("style");
+
+style.textContent = `
+#instructionsBtn{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  padding:10px 16px;
+  background:#2e8b57;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 4px 8px rgba(0,0,0,0.6);
+  z-index:99998;
+}
+
+#instructionsBtn:hover{
+  background:#257047;
+}
+
+#instructionsRoot{
+  position:fixed;
+  inset:0;
+  display:none;
+  z-index:99999;
+}
+
+#instructionsBackdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.35);
+}
+
+#instructionsModal{
+  position:absolute;
+  top:25px;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(650px,90vw);
+  max-height:90vh;
+  background:#fff;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+#instructionsHeader{
+  padding:12px 16px;
+  border-bottom:1px solid #ddd;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+#instructionsTitle{
+  color:#1976d2;
+  font-weight:600;
+  font-size:1.1em;
+}
+
+#instructionsBack{
+  border:none;
+  background:none;
+  font-size:20px;
+  cursor:pointer;
+  color:#1976d2;
+  font-weight:600;
+}
+
+#instructionsContent{
+  padding:2px 18px 18px 18px;
+  overflow-y:auto;
+  line-height:1.6;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+
+#instructionsContent::-webkit-scrollbar{
+  display:none;
+}
+
+#instructionsContent h3{
+  color:#1976d2;
+  margin:12px 0 4px 0;
+  font-weight:600;
+}
+
+#instructionsContent p{
+  margin:4px 0;
+}
+
+#instructionsContent hr{
+  margin:12px 0;
+}
+`;
+
+document.head.appendChild(style);
+
+
+/* =========================
+   CREATE BUTTON
+========================= */
+
+const btn = document.createElement("button");
+btn.id = "instructionsBtn";
+btn.textContent = "Instructions";
+
+document.body.appendChild(btn);
+
+
+/* =========================
+   CREATE MODAL
+========================= */
+
+const root = document.createElement("div");
+root.id = "instructionsRoot";
+
+root.innerHTML = `
+<div id="instructionsBackdrop"></div>
+
+<div id="instructionsModal">
+
+  <div id="instructionsHeader">
+    <button id="instructionsBack">←</button>
+    <span id="instructionsTitle">Instructions</span>
+  </div>
+
+  <div id="instructionsContent">
+    ${parseRawInstructions(RAW_TEXT)}
+  </div>
+
+</div>
+`;
+
+document.body.appendChild(root);
+
+
+/* =========================
+   SCROLL LOCK
+========================= */
+
+const modalContent = document.getElementById("instructionsContent");
+
+modalContent.addEventListener("wheel", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+modalContent.addEventListener("touchmove", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+
+/* =========================
+   OPEN / CLOSE
+========================= */
+
+function openModal(){
+  root.style.display="block";
+  document.body.style.overflow="hidden";
+  document.documentElement.style.overflow="hidden";
+}
+
+function closeModal(){
+  root.style.display="none";
+  document.body.style.overflow="";
+  document.documentElement.style.overflow="";
+}
+
+btn.onclick = openModal;
+
+document.getElementById("instructionsBack").onclick = closeModal;
+document.getElementById("instructionsBackdrop").onclick = closeModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape") closeModal();
+});
+
+/* =========================
+   DYNAMIC BODY PADDING FOR BUTTON
+========================= */
+
+function adjustBodyPadding(){
+  const btnHeight = btn.offsetHeight + -25; // include some gap
+  document.body.style.paddingBottom = `${btnHeight}px`;
+}
+
+// Initial adjustment
+adjustBodyPadding();
+
+// Update if window is resized (responsive)
+window.addEventListener("resize", adjustBodyPadding);
+
+})();
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+
+<script src="/supabase-ingest.js"></script>
+
+
+<!-- SUPABASE LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const supabaseClient = window.supabase?.createClient(
+  'https://etwwriloppklhhkmswpr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+);
+
+if (!supabaseClient) {
+  console.error("❌ Supabase failed to initialize");
+}
+
+let lastUploadedScore = null;
+
+window.saveResult = async function saveResult(text) {
+
+  if (!supabaseClient) {
+    console.error("❌ No Supabase client");
+    return;
+  }
+
+  // ======================
+  // NORMALIZE INPUT
+  // ======================
+  let cleaned;
+
+  try {
+    cleaned = (typeof text === "string")
+      ? text
+      : JSON.stringify(text);
+
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+
+  } catch (err) {
+    console.error("❌ Normalize error:", err);
+    return;
+  }
+
+  if (!cleaned) {
+    console.error("❌ Empty value blocked");
+    return;
+  }
+
+  if (cleaned === lastUploadedScore) {
+    console.log("⚠️ Duplicate blocked");
+    return;
+  }
+
+  lastUploadedScore = cleaned;
+
+  console.log("📤 INSERTING INTO scoreboard_raw:", cleaned);
+
+  const { data, error } = await supabaseClient
+    .from("scoreboard_raw")
+    .insert([
+      { result_text: cleaned }
+    ])
+    .select();
+
+  if (error) {
+    console.error("❌ INSERT FAILED FULL ERROR:", error);
+    return;
+  }
+
+  console.log("✅ INSERT SUCCESS:", data);
+};
+
+</script>
+
+
+
+</body>
+</html>
+
+
+
+
+
+
+>>>>>>> 42e2e1d604fdc85e8f57635ec75b21af83e42b99

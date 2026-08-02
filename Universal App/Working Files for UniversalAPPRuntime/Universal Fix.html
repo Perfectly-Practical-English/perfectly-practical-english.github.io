@@ -1,0 +1,29 @@
+<script>
+(function(){
+
+const app = document.getElementById("app");
+
+if(!app || !window.visualViewport) return;
+
+const BASE_W = 1200;
+const BASE_H = 800;
+
+function fit(){
+
+    const scale = Math.min(
+        visualViewport.width / BASE_W,
+        visualViewport.height / BASE_H
+    );
+
+    app.style.transform = `scale(${scale})`;
+    app.style.transformOrigin = "top left";
+
+}
+
+fit();
+
+visualViewport.addEventListener("resize", fit);
+window.addEventListener("orientationchange", fit);
+
+})();
+</script>

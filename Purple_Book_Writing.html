@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -601,4 +602,609 @@ function render(){
 </script>
 
 </body>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Composition Book Line Text Viewer</title>
+
+<style>
+:root{
+  --paper:#e9e9e9;
+  --outer:#b28ae8;
+  --rule:#3f74ad;
+  --red:#b82b2b;
+
+  --pageW:852px;
+  --pageH:1200px;
+
+  --row:34px;
+  --headerH:120px;
+  --topH:34px;
+
+  --leftW:135px;
+  --rightW:calc(var(--pageW) - var(--leftW));
+}
+
+*{box-sizing:border-box;}
+
+html,body{
+  margin:0;
+  background:#dff2ff;
+}
+
+body{
+  display:flex;
+  justify-content:center;
+}
+
+.frame{
+  background:var(--outer);
+  padding:8px;
+}
+
+.page{
+  position:relative;
+  width:var(--pageW);
+  height:var(--pageH);
+  background:var(--paper);
+  overflow:hidden;
+  font-family:"Comic Sans MS",cursive;
+}
+
+/* ================= HEADER LABEL AREA ================= */
+
+.headerArea{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:var(--headerH);
+  display:flex;
+  z-index:25;
+  border-bottom:2px solid var(--rule);
+  background:var(--paper);
+}
+
+#headerLeft{
+  width:var(--leftW);
+  height:100%;
+  resize:none;
+  font-family:inherit;
+  font-size:14px;
+  padding:8px;
+  border:none;
+  outline:none;
+  background:transparent;
+  white-space:pre-wrap;
+  overflow:hidden;
+}
+
+#headerRight{
+  flex:1;
+  height:100%;
+  resize:none;
+  font-family:inherit;
+  font-size:14px;
+  padding:8px;
+  border:none;
+  outline:none;
+  background:transparent;
+  white-space:pre-wrap;
+  overflow-y:auto;
+}
+
+.headerRed{
+  position:absolute;
+  left:var(--leftW);
+  top:0;
+  height:var(--headerH);
+  width:3px;
+  background:var(--red);
+  z-index:9999;
+  pointer-events:none;
+  box-shadow:0 0 6px rgba(184,43,43,.4);
+}
+
+/* ================= TOP BAR & INPUTS ================= */
+
+.topBar{
+  position:absolute;
+  top:var(--headerH);
+  left:0;
+  right:0;
+  height:var(--topH);
+  min-height:var(--row);
+  max-height:calc(var(--pageH) - var(--headerH) - 100px);
+  display:flex;
+  z-index:20;
+  border-bottom:2px solid var(--rule);
+  background:var(--paper);
+  resize:vertical;
+  overflow:hidden;
+}
+
+#leftInput{
+  width:var(--leftW);
+  height:100%;
+  resize:none;
+  font-family:inherit;
+  font-size:14px;
+  padding:6px;
+  border:none;
+  outline:none;
+  background:transparent;
+  overflow:hidden;
+}
+
+.fileToolbar {
+  width:var(--rightW);
+  height:100%;
+  display:flex;
+  position:relative;
+  background:transparent;
+  padding:0 6px;
+  font-size:12px;
+  overflow:hidden;
+}
+
+.buttonContainer {
+  position:absolute;
+  top:4px;
+  right:12px;
+  display:flex;
+  gap:8px;
+  z-index:10;
+}
+
+#loadTxtBtn, #saveTxtBtn{
+  background:#d4d4d4;
+  border:1px solid #999;
+  border-radius:4px;
+  padding:2px 8px;
+  cursor:pointer;
+  font-family:inherit;
+  font-size:12px;
+  flex-shrink:0;
+}
+
+#loadTxtBtn:hover, #saveTxtBtn:hover{
+  background:#c4c4c4;
+}
+
+#rightInput{
+  flex:1;
+  height:100%;
+  resize:none;
+  font-family:inherit;
+  font-size:12px;
+  padding:4px 6px;
+  border:none;
+  outline:none;
+  background:transparent;
+  white-space:pre-wrap;
+  overflow-y:auto;
+}
+
+/* ================= GRID ================= */
+
+.lines{
+  position:absolute;
+  inset:calc(var(--headerH) + var(--topH)) 0 0 0;
+
+  background:repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--row) - 1px),
+    var(--rule) calc(var(--row) - 1px),
+    var(--rule) var(--row)
+  );
+}
+
+.red{
+  position:absolute;
+  left:var(--leftW);
+  top:var(--headerH);
+  bottom:0;
+  width:3px;
+  background:var(--red);
+  z-index:9999;
+  pointer-events:none;
+  box-shadow:0 0 6px rgba(184,43,43,.4);
+}
+
+/* ================= SHEETS ================= */
+
+.sheet{
+  position:absolute;
+  top:calc(var(--headerH) + var(--topH));
+  bottom:0;
+  display:flex;
+  flex-direction:column;
+}
+
+.leftSheet{
+  left:0;
+  width:var(--leftW);
+}
+
+.rightSheet{
+  left:var(--leftW);
+  width:var(--rightW);
+}
+
+.line-row {
+  display: flex;
+  align-items: center;
+  height: var(--row);
+  min-height: var(--row);
+  max-height: var(--row);
+  padding: 0 8px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 15px;
+  line-height: var(--row);
+  user-select: text;
+  cursor: text;
+  border: none;
+  margin: 0;
+}
+
+.leftSheet .line-row {
+  padding-left: 8px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.rightSheet .line-row {
+  outline: none;
+}
+
+.rightSheet .line-row:focus {
+  background: rgba(90,160,255,.2);
+}
+
+.color-Interjections { background:#8f8f8f; color:#ffffff; }
+.color-Verbs { background:#ffcccc; color:#333; }
+.color-Adjectives { background:#d9f7b2; color:#333; }
+.color-Adverbs { background:#ffd1dc; color:#333; }
+.color-Determiners { background:#c8f7c5; color:#333; }
+.color-Pronouns { background:#e0c3fc; color:#333; }
+.color-Prepositions { background:#ffd8b1; color:#333; }
+.color-Conjunctions { background:#cfe8ff; color:#333; }
+.color-Nouns { background:#ffeeba; color:#333; }
+</style>
+</head>
+
+<body>
+
+<div class="frame">
+<div class="page">
+
+<div class="headerArea">
+  <textarea id="headerLeft" placeholder="Page:"></textarea>
+  <textarea id="headerRight" placeholder="Title:&#10;Instructions:"></textarea>
+</div>
+<div class="headerRed"></div>
+
+<div class="topBar" id="topBarContainer">
+  <textarea id="leftInput" placeholder=""></textarea>
+  <div class="fileToolbar">
+    <div class="buttonContainer">
+      <input type="file" id="txtLoader" accept=".txt" style="display:none">
+      <button id="loadTxtBtn" type="button">Import</button>
+      <button id="saveTxtBtn" type="button">Export</button>
+    </div>
+    <textarea id="rightInput" placeholder="Content goes here..."></textarea>
+  </div>
+</div>
+
+<div class="lines" id="gridLines"></div>
+<div class="red"></div>
+
+<div class="sheet leftSheet" id="left"></div>
+<div class="sheet rightSheet" id="right"></div>
+
+</div>
+</div>
+
+<script>
+const ROWS = Math.ceil(1081 / 34);
+
+const leftEl = document.getElementById("left");
+const rightEl = document.getElementById("right");
+const leftInput = document.getElementById("leftInput");
+const rightInput = document.getElementById("rightInput");
+const headerLeft = document.getElementById("headerLeft");
+const headerRight = document.getElementById("headerRight");
+
+let lineTexts = [];
+let leftRows = {};
+
+function parseHeaderFields(text){
+  text = text.replace(/\r/g,"");
+  let titleVal = "";
+  let pageVal = "";
+  let instVal = "";
+
+  const lines = text.split("\n");
+  for(let i=0; i<lines.length; i++){
+    const line = lines[i];
+    if(line.startsWith("Title:")){
+      titleVal = line;
+    } else if(line.startsWith("Page:")){
+      pageVal = line;
+      let j = i + 1;
+      while(j < lines.length && !lines[j].startsWith("Instructions:") && !lines[j].startsWith("Right Lines:") && !lines[j].startsWith("Left Lines:") && !lines[j].startsWith("~")){
+        if(lines[j].trim() !== "") pageVal += "\n" + lines[j];
+        j++;
+      }
+    } else if(line.startsWith("Instructions:")){
+      instVal = line;
+      let j = i + 1;
+      while(j < lines.length && !lines[j].startsWith("Right Lines:") && !lines[j].startsWith("Left Lines:") && !lines[j].startsWith("~")){
+        if(lines[j].trim() !== "") instVal += "\n" + lines[j];
+        j++;
+      }
+    }
+  }
+
+  headerLeft.value = pageVal;
+  
+  let combinedRight = "";
+  if(titleVal) combinedRight += titleVal;
+  if(instVal) {
+    if(combinedRight) combinedRight += "\n";
+    combinedRight += instVal;
+  }
+  headerRight.value = combinedRight;
+}
+
+function parseFileContent(text){
+  text = text.replace(/\r/g,"");
+  const lines = text.split("\n");
+  
+  let mode = null;
+  let rightBuffer = [];
+  let leftMap = {};
+  let currentLeftLineNum = null;
+
+  for(let i = 0; i < lines.length; i++){
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    if(trimmed.startsWith("Right Lines:")){
+      mode = "right";
+      continue;
+    } else if(trimmed.startsWith("Left Lines:")){
+      mode = "left";
+      continue;
+    }
+
+    if(mode === "right"){
+      rightBuffer.push(line);
+    } else if(mode === "left"){
+      const match = trimmed.match(/^Line\s+(\d+)\b(.*)/i);
+      if(match){
+        currentLeftLineNum = parseInt(match[1], 10) - 1;
+        const remainder = match[2].replace(/^[:\.]\s*/, "").trim();
+        leftMap[currentLeftLineNum] = remainder;
+      } else if(trimmed && currentLeftLineNum !== null){
+        leftMap[currentLeftLineNum] = (leftMap[currentLeftLineNum] ? leftMap[currentLeftLineNum] + "\n" : "") + line;
+      }
+    }
+  }
+
+  if(Object.keys(leftMap).length === 0 && rightBuffer.length === 0){
+    rightBuffer = text.split("\n");
+  }
+
+  return { rightBuffer, leftMap };
+}
+
+function update(){
+  const content = rightInput.value;
+  parseHeaderFields(content);
+  
+  const parsed = parseFileContent(content);
+  
+  const rightClean = [];
+  parsed.rightBuffer.forEach(line => {
+    const trimmed = line.trim();
+    if(trimmed.startsWith("Title:") || trimmed.startsWith("Page:") || trimmed.startsWith("Instructions:")) return;
+    rightClean.push(line);
+  });
+  lineTexts = rightClean;
+
+  leftRows = parsed.leftMap;
+
+  // Keep leftInput text area blank as requested (do not populate raw text format here)
+  leftInput.value = "";
+
+  render();
+}
+
+leftInput.addEventListener("input", () => {
+  const text = leftInput.value.replace(/\r/g, "");
+  const lines = text.split("\n");
+  leftRows = {};
+  lines.forEach(l => {
+    const trimmed = l.trim();
+    const match = trimmed.match(/^Line\s+(\d+)\b(.*)/i);
+    if(match){
+      const rNum = parseInt(match[1], 10) - 1;
+      const val = match[2].replace(/^[:\.]\s*/, "").trim();
+      if(rNum >= 0) leftRows[rNum] = val;
+    }
+  });
+  render();
+});
+
+rightInput.addEventListener("input", update);
+
+const topBarContainer = document.getElementById("topBarContainer");
+const gridLines = document.getElementById("gridLines");
+
+const resizeObserver = new ResizeObserver(entries => {
+  for (let entry of entries) {
+    const h = entry.contentRect.height;
+    document.documentElement.style.setProperty('--topH', h + 'px');
+    const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--headerH')) || 120;
+    const totalTop = headerH + h;
+    gridLines.style.inset = `${totalTop}px 0 0 0`;
+    leftEl.style.top = `${totalTop}px`;
+    rightEl.style.top = `${totalTop}px`;
+  }
+});
+resizeObserver.observe(topBarContainer);
+
+const loadTxtBtn = document.getElementById("loadTxtBtn");
+const txtLoader = document.getElementById("txtLoader");
+const saveTxtBtn = document.getElementById("saveTxtBtn");
+
+loadTxtBtn.onclick = () => txtLoader.click();
+
+txtLoader.onchange = (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    rightInput.value = event.target.result;
+    update();
+  };
+  reader.readAsText(file);
+};
+
+saveTxtBtn.onclick = () => {
+  const titleVal = headerRight.value.split("\n")[0] || "document";
+  const safeName = titleVal.replace(/^Title:\s*/, "").replace(/[<>:"/\\|?*]/g, "").trim() || "document";
+  
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const dateStr = `${year}-${month}-${day}`;
+
+  const fileName = `${safeName}_${dateStr}.txt`;
+
+  let exportContent = "";
+  const pageVal = headerLeft.value.trim();
+  const titleInstVal = headerRight.value.trim();
+
+  if(titleInstVal) exportContent += titleInstVal + "\n\n";
+  if(pageVal) exportContent += pageVal + "\n\n";
+
+  exportContent += "Right Lines:\n\n" + lineTexts.join("\n") + "\n\n";
+  
+  exportContent += "Left Lines:\n\n";
+  for(let r = 0; r < ROWS; r++){
+    if(leftRows[r] !== undefined && leftRows[r] !== ""){
+      exportContent += `Line ${r + 1}. ${leftRows[r]}\n\n`;
+    }
+  }
+
+  const blob = new Blob([exportContent.trim()], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+function render(){
+  leftEl.innerHTML="";
+  rightEl.innerHTML="";
+
+  for(let r=0; r<ROWS; r++){
+    const L = document.createElement("div");
+    L.className = "line-row";
+    L.contentEditable = true;
+    L.dataset.r = r;
+    L.textContent = leftRows[r] || "";
+
+    L.addEventListener("input", () => {
+      leftRows[r] = L.textContent;
+    });
+
+    leftEl.appendChild(L);
+
+    const R = document.createElement("div");
+    R.className = "line-row";
+    R.contentEditable = true;
+    R.dataset.r = r;
+    R.textContent = lineTexts[r] || "";
+
+    R.addEventListener("input", () => {
+      lineTexts[r] = R.textContent;
+    });
+
+    rightEl.appendChild(R);
+  }
+
+  if(window.applyPOS) window.applyPOS();
+}
+
+(function(){
+  window.POS_COLORS = {
+    Nouns: "color-Nouns",
+    Verbs: "color-Verbs",
+    Adjectives: "color-Adjectives",
+    Adverbs: "color-Adverbs",
+    Determiners: "color-Determiners",
+    Pronouns: "color-Pronouns",
+    Prepositions: "color-Prepositions",
+    Conjunctions: "color-Conjunctions",
+    Interjections: "color-Interjections"
+  };
+
+  function parsePOSSections(text){
+    text = text.replace(/\r/g,"");
+    const sections = [];
+    let current = null;
+    text.split("\n").forEach(line => {
+      const t = line.trim();
+      if(!t) return;
+      if(t.startsWith("|") && t.endsWith("|")){
+        current = t.replaceAll("|","").trim();
+        return;
+      }
+        if(current) sections.push({ pos: current, word: t });
+    });
+    return sections;
+  }
+
+  function buildPOSMap(){
+    const sourceText = (typeof getTileSourceText === "function") ? getTileSourceText() : "";
+    const parsed = parsePOSSections(sourceText);
+    const map = new Map();
+    parsed.forEach(item => {
+      map.set((item.word || "").trim().toLowerCase(), POS_COLORS[item.pos] || "");
+    });
+    return map;
+  }
+
+  window.applyPOS = function applyPOS(){
+    const posMap = buildPOSMap();
+    document.querySelectorAll(".rightSheet .line-row").forEach(rowEl => {
+      const text = (rowEl.textContent || "").trim().toLowerCase();
+      const cls = posMap.get(text);
+      rowEl.className = "line-row " + (cls || "");
+    });
+  };
+
+  window.getTileSourceText = function(){
+    return (rightInput.value || "").trim();
+  };
+
+  update();
+})();
+</script>
+
+</body>
+>>>>>>> 42e2e1d604fdc85e8f57635ec75b21af83e42b99
 </html>

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html>
 <head>
@@ -372,4 +373,380 @@ img.style.zIndex = "9999";
 </script>
 
 </body>
+=======
+<!DOCTYPE html>
+<html>
+<head>
+<title>Infinite Soft Serve Extrusion Stream</title>
+<style>
+html,body{
+margin:0;
+height:100%;
+overflow:hidden;
+background:#dff5ff;
+}
+canvas{display:block;}
+
+#pageTitle {
+    position: fixed;
+
+    top: calc(20% + 30px);
+left: calc(28% + 50px);
+    transform: translate(calc(-50% + 50px), -50%);
+
+    font-family: "Comic Sans MS", "Trebuchet MS", Arial, sans-serif;
+    font-size: 25px;
+    font-weight: bold;
+    color: #5a2a82;
+
+    z-index: 20000;
+    pointer-events: none;
+    white-space: normal;
+    text-align: left;
+    width: 600px;
+
+    text-shadow: 2px 3px 4px rgba(0,0,0,0.2);
+}
+
+.mainLine {
+    font-size: 34px;
+    font-weight: 900;
+}
+
+#creamMask {
+
+    position: fixed;
+
+    left:50%;
+    top:calc(50% + 100px);
+
+    width:250px;
+    height:140px;
+
+    transform:translate(-50%,0);
+
+    background:black;
+border-radius:50px;
+    z-index:13000;
+
+    pointer-events:none;
+
+
+    /* softer fade on all outside edges */
+    filter:blur(22px);
+
+
+    /* softer circular bite edge */
+    -webkit-mask-image:
+    radial-gradient(
+        circle 78px at center top,
+        transparent 0 65px,
+        rgba(0,0,0,0.15) 70px,
+        black 82px
+    );
+
+    mask-image:
+    radial-gradient(
+        circle 78px at center top,
+        transparent 0 65px,
+        rgba(0,0,0,0.15) 70px,
+        black 82px
+    );
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="pageTitle">
+    <span class="mainLine">ENJOY DELICIOUS<br>ICE CREAM!!</span><br><br>
+    Non-stop 5-year supply!!<br>
+    Only 236.5 million baht!!
+</div>
+
+<div id="creamMask"></div>
+
+<script type="module">
+
+import * as THREE from
+"https://cdn.jsdelivr.net/npm/three@0.160/build/three.module.js";
+
+
+const scene=new THREE.Scene();
+scene.background=null;
+
+
+const camera=new THREE.PerspectiveCamera(
+40,
+innerWidth/innerHeight,
+0.1,
+100
+);
+
+camera.position.set(
+2.8,
+0,
+7
+);
+
+camera.lookAt(0,0,0);
+
+
+const renderer=
+new THREE.WebGLRenderer({
+antialias:true,
+alpha:true
+});
+renderer.setSize(
+innerWidth,
+innerHeight
+);
+
+// Put Three.js canvas in front of the gargoyle
+
+renderer.domElement.style.position = "fixed";
+renderer.domElement.style.top = "0";
+renderer.domElement.style.left = "0";
+renderer.domElement.style.zIndex = "12000";
+renderer.domElement.style.pointerEvents = "none";
+
+document.body.appendChild(renderer.domElement);
+scene.add(
+new THREE.AmbientLight(
+0xffffff,
+1.8
+)
+);
+
+
+let sun=new THREE.DirectionalLight(
+0xffffff,
+2
+);
+
+sun.position.set(3,5,4);
+scene.add(sun);
+
+
+
+function makeCream(){
+
+let geo=new THREE.BufferGeometry();
+
+let vertices=[];
+let faces=[];
+
+
+const height=4.5;
+const rings=300;
+const slices=120;
+
+
+for(let i=0;i<=rings;i++){
+
+    let t=1-(i/rings);
+
+let y =
+  -(height/2 -
+  height*t);
+
+
+    for(let j=0;j<slices;j++){
+
+let theta =
+  j/slices*Math.PI*2
+  - 
+  t*Math.PI*12;
+
+
+        // soft serve body
+        let baseRadius =
+          0.65;
+
+
+        // helical folds
+        let fold =
+          0.09 *
+          Math.sin(
+            theta*5 +
+            t*Math.PI*16
+          );
+
+
+        // slight natural wobble
+        let r =
+          baseRadius+
+          fold;
+
+
+        vertices.push(
+            r*Math.cos(theta),
+            y,
+            r*Math.sin(theta)
+        );
+
+    }
+}
+
+
+for(let i=0;i<rings;i++){
+
+for(let j=0;j<slices;j++){
+
+let a=i*slices+j;
+let b=i*slices+(j+1)%slices;
+let c=(i+1)*slices+(j+1)%slices;
+let d=(i+1)*slices+j;
+
+
+faces.push(
+a,b,c,
+a,c,d
+);
+
+}
+
+}
+
+
+geo.setAttribute(
+"position",
+new THREE.Float32BufferAttribute(
+vertices,3
+)
+);
+
+geo.setIndex(faces);
+
+geo.computeVertexNormals();
+
+
+return new THREE.Mesh(
+geo,
+new THREE.MeshStandardMaterial({
+color:0xffefc9,
+roughness:0.9
+})
+);
+
+}
+
+
+let cream=makeCream();
+
+scene.add(cream);
+
+
+
+let time=0;
+
+function animate(){
+
+requestAnimationFrame(animate);
+
+
+time+=0.01;
+
+
+// simulate downward flowing swirl
+cream.rotation.y=time;
+
+
+cream.position.y =
+.5 + Math.sin(time)*0.15;
+
+renderer.render(
+scene,
+camera
+);
+
+}
+
+animate();
+
+
+onresize=()=>{
+
+camera.aspect=
+innerWidth/innerHeight;
+
+camera.updateProjectionMatrix();
+
+renderer.setSize(
+innerWidth,
+innerHeight
+);
+
+};
+
+</script>
+
+<script>
+
+// === Floating PNG Position Script ===
+// File: 85311.png should be in the same folder as this HTML file
+
+(function () {
+    const img = document.createElement("img");
+
+    img.src = "Gargoyle.png";
+    img.id = "floatingPNG";
+
+    // Adjustable offsets
+    let offsetX = -18;   // 50px to the right   // 40px left of center
+    let offsetY = -105;  // 50px higher    // vertical adjustment
+
+    img.style.position = "fixed";
+    img.style.bottom = offsetY + "px";
+    img.style.left = "calc(50% + " + offsetX + "px)";
+img.style.zIndex = "9999";
+    img.style.pointerEvents = "none";
+
+    // Reduce size by half and keep centered correctly
+    img.style.transform = "translateX(-50%) scale(0.6)";
+    img.style.transformOrigin = "bottom center";
+
+    document.body.appendChild(img);
+
+})();
+</script>
+
+<script>
+
+// === Floating BCC Logo Position Script ===
+// File: Bangkok_Christian_College_logo.png should be in the same folder as this HTML file
+
+(function () {
+    const logo = document.createElement("img");
+
+    logo.src = "";
+    logo.id = "bccLogo";
+
+    // Adjustable position offsets
+    let offsetX = 350;   // + moves right, - moves left
+    let offsetY = 50;  // + moves down, - moves up
+
+    logo.style.position = "fixed";
+
+    // Start from center and offset to the right
+    logo.style.left = "calc(50% + " + offsetX + "px)";
+    logo.style.bottom = offsetY + "px";
+
+    logo.style.zIndex = "15000";
+    logo.style.pointerEvents = "none";
+
+    // Reduce logo size
+    logo.style.transform = "translateX(-50%) scale(1.25)";
+    logo.style.transformOrigin = "bottom center";
+
+    document.body.appendChild(logo);
+
+})();
+
+</script>
+
+</body>
+>>>>>>> 42e2e1d604fdc85e8f57635ec75b21af83e42b99
 </html>

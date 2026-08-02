@@ -9,8 +9,7 @@
 <style>
 
 *{
-    box-sizing:border-box;draggable
-
+    box-sizing:border-box;
 }
 
 html,body{
@@ -27,51 +26,70 @@ html,body{
 
 #main{
     display:flex;
-    height:calc(100vh - 58px);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 124px; /* Stops the control columns right where the tiles bar begins on load */
 }
-
 /* ==========================
    LEFT COLUMN
 ========================== */
 
 #leftColumn{
-    width:58px;
-    min-width:58px;
+    width:90px;
+    min-width:90px;
     background:#ececec;
     border-right:1px solid #999;
     display:flex;
     flex-direction:column;
 }
 
-#clearBoardBtn{
+/* ==========================
+   RIGHT COLUMN
+========================== */
+
+#rightColumn{
+    width:90px;
+    min-width:90px;
+    background:#ececec;
+    border-left:1px solid #999;
+    display:flex;
+    flex-direction:column;
+}
+
+
+#clearBoardBtn,
+#clearBoardBtnRight{
     height:24px;
     font-size:10px;
     border:none;
     border-bottom:1px solid #999;
     cursor:pointer;
 }
-
-#pageList{
+#pageList,
+#pageListRight{
     flex:1;
     overflow-y:auto;
 }
+
 
 .pageBtn{
     width:100%;
     height:18px;
     border:none;
-    border-bottom:1px solid #ddd;
+    border-bottom:1px solid #000;
     font-size:10px;
     cursor:pointer;
     padding:0;
     background:#f7f7f7;
 }
 
+
 .pageBtn.active{
     background:#4a90e2;
     color:white;
 }
-
 /* ==========================
    VIEWER
 ========================== */
@@ -151,9 +169,44 @@ html,body{
    TILES
 ========================== */
 
+#tilesBar{
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 24px;
+    height: 100px;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid #999;
+    background: #ececec;
+    z-index: 9998;
+    box-sizing: border-box;
+}#toggleTiles{
+
+    width:24px;
+
+    border:none;
+
+    border-right:1px solid #999;
+
+    cursor:pointer;
+
+    background:#ececec;
+
+    font-size:12px;
+
+    padding:0;
+
+}
+
 #tiles{
-    height:58px;
-    background:#333;
+
+    flex:1;
+
+    height:100%;
+
+    background:white;
+
 
     display:flex;
     flex-wrap:wrap;
@@ -164,10 +217,11 @@ html,body{
 
     overflow:auto;
 
-    align-content: flex-start;  /* IMPORTANT */
-    justify-content: flex-start;
-}
+    align-content:flex-start;
 
+    justify-content:flex-start;
+
+}
 .tile{
     min-width:8ch;
     height:14px;
@@ -197,51 +251,51 @@ html,body{
     color:white;
 }
 
+#tilesResizeBar{
+
+    height:8px;
+
+    width:100%;
+
+    background:#999;
+
+    cursor:ns-resize;
+
+    flex-shrink:0;
+
+}
+
+
+
+
 /* ==========================
    DRAGGABLES
 ========================== */
 
-.draggable{
-
-    position:absolute;
-
-    z-index:9999;
-
-    cursor:move;
-
-    user-select:none;
-
-}
-
-.overlayPng{
-    position:absolute;
-
-    width:140px;
-    height:auto;
-
-    background:transparent !important;
-    border:none !important;
-    padding:0 !important;
-    margin:0 !important;
-
-    display:block;
-
-    pointer-events:auto;
-
-    object-fit:contain;
-}
-
 .draggable {
-    position:absolute;
-    z-index:9999;
-    cursor:default;
-    user-select:none;
+    position: absolute;
+    z-index: 9999;
+    cursor: move;
+    user-select: none;
     -webkit-user-drag: none;
     touch-action: none;
-    transform: none;
-
+    transition: none !important;
+    animation: none !important;
+    filter: none !important;
+    transform: none !important;
 }
-
+.overlayPng {
+    position: absolute;
+    width: 140px;
+    height: auto;
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    display: block;
+    pointer-events: auto;
+    object-fit: contain;
+}
 
 
 img {
@@ -296,15 +350,11 @@ img {
     pointer-events: none;
 }
 
-.draggable.overlayPng{
-    transform:none;
-}
 
 
 .tileAnchor {
-    transform: translate(-100%, -100%);
+    transform: none !important;
 }
-
 
 .draggable.tile{
     min-width:6ch;
@@ -313,25 +363,82 @@ img {
 }
 
 
-#undoBtn {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-
-    z-index: 2147483647; /* max practical z-index */
-
-    font-size: 10px;
-    padding: 6px 10px;
-
-    background: white;
-    border: 1px solid #999;
-    cursor: pointer;
-
-    box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+#deleteBtn,
+#deleteBtnRight {
+    width:100%;
+    height:24px;
+    font-size:10px;
+    border:none;
+    border-bottom:1px solid #999;
+    cursor:pointer;
+    background:#f7f7f7;
 }
 
 #scriptBar{
 
+    position:fixed;
+
+    left:0;
+    right:0;
+    bottom:0;
+
+    height:24px;
+
+    display:flex;
+    flex-direction:row;
+    align-items:stretch;
+
+    border-top:1px solid #999;
+
+    background:#ececec;
+    z-index:10000;
+
+}
+
+#scriptResizeBar{
+
+    position:absolute;
+
+    top:-8px;
+
+    left:0;
+
+    width:100%;
+
+    height:8px;
+
+    background:#999;
+
+    cursor:ns-resize;
+
+    z-index:10001;
+
+}
+#worksheetScript{
+
+    flex:1;
+
+    height:22px;
+
+    resize:none;
+
+    overflow:auto;
+
+    font:10px Consolas,monospace;
+
+    white-space:pre;
+
+    border:none;
+
+    outline:none;
+
+    scrollbar-width:none;   /* Firefox */
+
+}
+
+#scriptBar{
+
+<<<<<<< HEAD
     position:fixed;
 
     left:0;
@@ -366,6 +473,40 @@ img {
     outline:none;
 }
 
+=======
+#worksheetScript::-webkit-scrollbar{
+
+    display:none;           /* Chrome / Edge */
+
+}
+
+#downloadTxtBtn{
+
+    width:32px;
+
+    height:22px;
+
+    font-size:10px;
+
+    border:none;
+
+    border-left:1px solid #999;
+
+    background:#f7f7f7;
+
+    cursor:pointer;
+
+    padding:0;
+
+}
+
+
+#downloadTxtBtn:hover{
+
+    background:#ddd;
+
+}
+>>>>>>> 42e2e1d604fdc85e8f57635ec75b21af83e42b99
 #scriptBar.expanded{
 
     height:220px;
@@ -379,11 +520,503 @@ img {
 #viewer{
     touch-action:none;
 }
+<<<<<<< HEAD
+=======
+
+
+/* ==========================
+   MP3 BUTTONS
+========================== */
+
+.mp3Tile{
+    min-width:8ch;
+    height:14px;
+    line-height:14px;
+    font-size:9px;
+
+    padding:0 4px;
+    margin:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+    white-space:nowrap;
+    user-select:none;
+    cursor:pointer;
+
+    background:#7CCB6A;
+    border:1px solid #4F9E43;
+    color:#111;
+}
+
+.mp3Tile.selected{
+    background:#2E7D32;
+    border-color:#1B5E20;
+    color:white;
+}
+
+
+/* ==========================
+   SECONDARY ~S AUDIO BUTTONS
+========================== */
+
+.soundTile{
+
+    min-width:8ch;
+    height:14px;
+    line-height:14px;
+    font-size:9px;
+
+    padding:0 4px;
+    margin:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-align:center;
+    white-space:nowrap;
+    user-select:none;
+    cursor:pointer;
+
+    background:#F6C58B;      /* pastel orange */
+    border:1px solid #D99A4A;
+    color:#222;
+
+}
+
+
+.soundTile.selected{
+
+    background:#E67E22;      /* clicked orange */
+    border-color:#B85C00;
+    color:white;
+
+}
+
+
+
+.placedTile {
+    background: rgba(255,255,255,0.85);
+    border: none;
+    color: red;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+#deleteBtn,
+#deleteBtnRight {
+    width:100%;
+    height:24px;
+    font-size:10px;
+    border:none;
+    border-bottom:1px solid #999;
+    cursor:pointer;
+    background:#f7f7f7;
+}
+
+.classSelect{
+
+    width:100%;
+    height:24px;
+    font-size:10px;
+    text-align:center;
+    text-align-last:center;
+
+}
+
+
+.studentTile{
+
+    width:100%;
+    height:28px;
+
+    font-size:10px;
+
+    margin:2px 0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    overflow:hidden;
+
+    cursor:pointer;
+
+}
+
+.breakBtn{
+    height:24px;
+    font-size:10px;
+    border:none;
+    border-bottom:1px solid #999;
+    background:#ffd27f;
+    cursor:pointer;
+}
+
+
+/* ==========================
+   BREAK MODAL
+========================== */
+
+#breakModal{
+
+    position:absolute;
+
+    width:260px;
+    height:180px;
+
+    left:50%;
+    top:50%;
+
+    transform:translate(-50%,-50%);
+
+background:#000;
+
+    border-radius:15px;
+
+    color:white;
+
+    z-index:50000;
+
+    display:none;
+
+    box-shadow:
+        0 0 30px rgba(0,0,0,.6);
+
+    backdrop-filter:blur(4px);
+
+    cursor:move;
+
+    user-select:none;
+}
+
+
+#breakContent{
+
+    height:100%;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    justify-content:center;
+
+    text-align:center;
+
+}
+
+
+#breakContent h1{
+
+    font-size:32px;
+
+    margin:0;
+
+    text-shadow:
+        0 0 20px black;
+
+}
+
+
+#breakTimer{
+
+    margin-top:5px;
+
+    font-size:34px;
+
+    color:orange;
+
+    text-shadow:
+        0 0 15px black;
+
+}
+
+
+#breakStart{
+
+    margin-top:20px;
+
+    transform:translateY(-15px);
+
+
+    padding:8px 18px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:orange;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+}
+
+
+
+.breakControls{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    gap:12px;
+
+    margin-top:5px;
+
+}
+
+
+#breakStart{
+
+    transform:translateY(-15px);
+
+}
+
+
+.breakArrow{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    color:orange;
+
+    font-size:24px;
+
+    cursor:pointer;
+
+    user-select:none;
+
+    height:40px;
+
+}
+
+.breakControls button{
+
+    margin:0;
+
+    padding:8px 10px;
+
+    font-size:12px;
+
+    border:none;
+
+    border-radius:6px;
+
+    background:orange;
+
+    cursor:pointer;
+
+    font-weight:bold;
+
+}
+
+
+.breakControls button:hover{
+
+    background:#ffb347;
+
+}
+
+.breakArrow{
+
+    color:orange;
+
+    font-size:24px;
+
+    cursor:pointer;
+
+    user-select:none;
+
+    line-height:1;
+
+}
+
+
+.breakArrow:hover{
+
+    color:#ffb347;
+
+}
+
+.breakArrow{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    color:orange;
+
+    font-size:24px;
+
+    cursor:pointer;
+
+    user-select:none;
+
+    height:40px;
+
+    transform:translateY(-5px);
+
+}
+
+.spinnerAssembly{
+    position:absolute;
+    z-index:9999;
+    pointer-events:none;
+}
+
+.spinnerButton{
+
+    width:100%;
+    height:24px;
+
+    font-size:10px;
+    font-family:Arial,sans-serif;
+
+    border:none;
+    border-bottom:1px solid #999;
+
+    background:#f7f7f7;
+
+    cursor:pointer;
+
+    padding:0;
+
+    pointer-events:auto;
+}
+
+.imageTile{
+
+    background:#888;
+    border:1px solid #666;
+    color:white;
+
+}
+
+.imageTile.selected{
+
+    background:#555;
+    border-color:#333;
+    color:white;
+
+}
+
+#tallymanLeftBtn,
+#tallymanRightBtn{
+
+height:24px;
+width:100%;
+
+font-size:10px;
+
+border:none;
+border-bottom:1px solid #999;
+
+cursor:pointer;
+
+}
+
+#leftColumn *,
+#rightColumn * {
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+/* Set the default white background for buttons, inputs, selects, and flyouts */
+#leftColumn button,
+#rightColumn button,
+#leftColumn input,
+#rightColumn input,
+#leftColumn select,
+#rightColumn select,
+#leftColumn .breakBtn,
+#rightColumn .breakBtn,
+#leftColumn .spinnerButton,
+#rightColumn .spinnerButton,
+#leftColumn .flyout,
+#leftColumn [class*="flyout"],
+#rightColumn .flyout,
+#rightColumn [class*="flyout"] {
+    background: #ffffff !important;
+    color: #222 !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: none !important;
+    transition: background 0.2s ease;
+}
+
+/* Pastel orange when clicked / active */
+#leftColumn button:active,
+#rightColumn button:active,
+#leftColumn button.active,
+#rightColumn button.active,
+#leftColumn .breakBtn:active,
+#rightColumn .breakBtn:active,
+#leftColumn .spinnerButton:active,
+#rightColumn .spinnerButton:active {
+    background: #ffdab9 !important; /* Pastel orange */
+    color: #111 !important;
+}
+
+#leftColumn button:hover,
+#rightColumn button:hover {
+    background: #fdfdfd !important;
+}
+
+#leftBtn,
+#rightBtn {
+    width: 100%;
+    height: 24px;
+    font-size: 10px;
+    border: none;
+    border-bottom: 1px solid #999;
+    cursor: pointer;
+    background: #f7f7f7;
+    padding: 0;
+}
+
+
+.control-column, .sidebar-column {
+    height: 100vh; /* Or a specific fixed height like 600px */
+    min-height: 600px;
+    max-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto; /* Handles overflow cleanly without shifting layout */
+}
+
+
+.tile-container-wrapper {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: flex-start;
+}
+
+.tile-drag-bar {
+    flex-shrink: 0; /* Prevents the drag bar from compressing or moving */
+}
+>>>>>>> 42e2e1d604fdc85e8f57635ec75b21af83e42b99
 </style>
 </head>
 <body>
 
-<button id="undoBtn">Undo</button>
 
 <input
     type="file"
@@ -391,14 +1024,56 @@ img {
     accept=".png"
     hidden>
 
+<input
+    type="file"
+    id="txtLoader"
+    accept=".txt"
+    hidden>
+
+
 <div id="main">
 
+    <!-- ==========================
+         LEFT CONTROLS
+    ========================== -->
     <div id="leftColumn">
 
-        <button id="clearBoardBtn">Clear</button>
+<select
+id="ppLauncher"
+style="
+height:24px;
+width:100%;
+font-size:10px;
+border:none;
+border-bottom:1px solid #999;
+cursor:pointer;
+text-align-last:center;
+">
 
-        <div style="padding:4px; border-bottom:1px solid #999;">
-            <select id="zoomSelect" style="width:100%; font-size:10px;">
+<option selected>PPE</option>
+<option value="iframe">Local</option>
+<option value="online">Online</option>
+
+</select><button class="breakBtn" onclick="openBreakModal()">Break</button>
+
+<!-- LOAD TXT -->
+<button id="loadTxtBtn"
+style="
+height:24px;
+width:100%;
+font-size:10px;
+border:none;
+border-bottom:1px solid #999;
+cursor:pointer;
+">
+Browse
+</button>
+
+
+        <!-- ZOOM -->
+        <div style="height:24px; padding:2px; border-bottom:1px solid #999;">
+<select id="zoomSelect" style="width:100%; height:20px; font-size:10px; text-align:center; text-align-last:center;">
+
                 <option value="1">100%</option>
                 <option value="1.8">180%</option>
                 <option value="2.0">200%</option>
@@ -409,15 +1084,47 @@ img {
             </select>
         </div>
 
-        <button id="panLockBtn" style="width:100%; font-size:10px; margin-top:4px;">
-            Lock
-        </button>
+    <select class="classSelect">
+    <option value="">Class</option>
+</select>
 
+<div class="studentTile tile">
+    Student
+</div>
+
+<button id="spinnerBtn" class="spinnerButton">
+    Spinner
+</button>
+
+<button id="tallymanLeftBtn">
+Tallyman
+</button>
+
+     <button id="leftBtn">Jelly Beans</button>
+
+
+
+<!-- CLEAR -->
+<button id="clearBoardBtn">
+    Clear
+</button>
+
+<!-- DELETE -->
+<button id="deleteBtn">
+    Delete
+</button>
+
+<!-- PLAYLIST BUTTON -->
+<button id="playlistBtnLeft" class="playlistBtn">Playlist</button>
+
+        <!-- PAGE BUTTONS -->
         <div id="pageList"></div>
 
     </div>
 
-
+    <!-- ==========================
+         VIEWER
+    ========================== -->
     <div id="viewer">
 
         <div id="spread">
@@ -440,10 +1147,132 @@ img {
 
     </div>
 
+<!-- ==========================
+     RIGHT CONTROLS
+========================== -->
+<div id="rightColumn">
+
+<select
+id="ppLauncherRight"
+style="
+height:24px;
+width:100%;
+font-size:10px;
+border:none;
+border-bottom:1px solid #999;
+cursor:pointer;
+text-align-last:center;
+">
+
+<option selected>PPE</option>
+<option value="iframe">Local</option>
+<option value="online">Online</option>
+
+</select><button class="breakBtn" onclick="openBreakModal()">Break</button>
+
+<!-- LOAD TXT -->
+<button id="loadTxtBtnRight"
+style="
+height:24px;
+width:100%;
+font-size:10px;
+border:none;
+border-bottom:1px solid #999;
+cursor:pointer;
+">
+Browse
+</button>
+
+    <!-- ZOOM -->
+    <div style="height:24px; padding:2px; border-bottom:1px solid #999;">
+<select id="zoomSelectRight" style="width:100%; height:20px; font-size:10px; text-align:center; text-align-last:center;">
+
+            <option value="1">100%</option>
+            <option value="1.8">180%</option>
+            <option value="2.0">200%</option>
+            <option value="2.25">225%</option>
+            <option value="2.5">250%</option>
+            <option value="2.75">275%</option>
+            <option value="3.0">300%</option>
+        </select>
+    </div>
+
+    <select class="classSelect">
+    <option value="">Class</option>
+</select>
+
+    <div class="studentTile tile">
+        Student
+    </div>
+
+<button id="spinnerBtnRight" class="spinnerButton">
+    Spinner
+</button>
+
+<button id="tallymanRightBtn">
+Tallyman
+</button>
+
+     <button id="rightBtn">Jelly Beans</button>
+
+
+<!-- CLEAR -->
+<button id="clearBoardBtnRight">
+    Clear
+</button>
+    <!-- DELETE -->
+    <button id="deleteBtnRight">
+        Delete
+    </button>
+
+<!-- PLAYLIST BUTTON -->
+<button id="playlistBtnRight" class="playlistBtn">Playlist</button>
+
+    <!-- PAGE BUTTONS -->
+    <div id="pageListRight"></div>
+
+</div>
 </div>
 
+<<<<<<< HEAD
 
 <div id="tiles"></div>
+=======
+<div id="tilesBar">
+
+    
+
+<div id="tilesResizeBar"></div>
+
+<div id="tiles">
+</div>
+
+</div>
+
+<div id="scriptBar">
+    <div id="scriptResizeBar"></div>
+    <textarea id="worksheetScript"></textarea>
+    <button id="downloadTxtBtn">TXT</button>
+</div>
+
+<div id="breakModal">
+    <div id="breakContent">
+        <h1>A Brief Pause</h1>
+        <div id="breakTimer">
+            5:00
+        </div>
+        <div class="breakControls">
+            <span id="breakMinus" class="breakArrow">▼</span>
+            <button id="breakStart">Restart</button>
+            <span id="breakPlus" class="breakArrow">▲</span>
+        </div>
+    </div>
+</div>
+
+    </div>
+
+</div>
+>>>>>>> 42e2e1d604fdc85e8f57635ec75b21af83e42b99
 
 <div id="scriptBar">
 
@@ -463,9 +1292,6 @@ img {
 
 const spreads = [
 
-    [-0, 0],
-    [32, 33],
-    [34, 35],
     [36, 37],
     [38, 39],
     [40, 41],
@@ -542,6 +1368,8 @@ spreads.forEach(([left, right]) => {
 
     btn.onclick = () => {
 
+    playLetsGo();
+
         document.querySelectorAll(".pageBtn")
             .forEach(b => b.classList.remove("active"));
 
@@ -561,11 +1389,11 @@ function loadSpread(page){
     `Focus (${page+1}).jpg`;
 }
 
-loadSpread(2);
+// Start with a blank viewer
 
-document
-.querySelector(".pageBtn")
-.classList.add("active");
+leftImage.removeAttribute("src");
+rightImage.removeAttribute("src");
+
 
 /* ==========================
    PNG LOADER
@@ -620,19 +1448,18 @@ document
 let viewerScale = 1;
 
 const zoomSelect = document.getElementById("zoomSelect");
-const panLockBtn = document.getElementById("panLockBtn");
 
-panLockBtn.onclick = () => {
-    panLocked = !panLocked;
-    panLockBtn.textContent = panLocked ? "Unlock" : "Lock";
-};
+if(zoomSelect){
 
+    zoomSelect.addEventListener("change", function(){
 
-zoomSelect.addEventListener("change", function(){
-    viewerScale = parseFloat(this.value);
-    updateTransform();
-});
+        viewerScale = Number(this.value);
 
+        updateTransform();
+
+    });
+
+}
 let panX = 0;
 let panY = 0;
 let panLocked = false;
@@ -675,9 +1502,16 @@ viewer.addEventListener("pointerdown", (e) => {
     lastX = e.clientX;
     lastY = e.clientY;
 
+<<<<<<< HEAD
 viewer.setPointerCapture(e.pointerId);
 
 }, true);
+=======
+    viewer.setPointerCapture(e.pointerId);
+
+});
+>>>>>>> 42e2e1d604fdc85e8f57635ec75b21af83e42b99
+
 
 viewer.addEventListener("pointermove", (e) => {
     if (panLocked) return;   // 🔒 ADD THIS LINE
@@ -785,6 +1619,7 @@ let answerItems = [];
 function parseAnswers(raw){
 
     answerItems = [];
+<<<<<<< HEAD
 
     const lines = raw.split(/\r?\n/);
 
@@ -928,6 +1763,180 @@ function buildAnswerTiles(){
         };
 
 
+=======
+
+    const lines = raw.split(/\r?\n/);
+
+
+lines.forEach(line=>{
+
+    line = line.trim();
+
+    if(!line.startsWith("~")) return;
+
+    // IGNORE SOUND CATEGORY DESIGNATIONS
+    if(/^~S/i.test(line)){
+        return;
+    }
+
+
+line = line.substring(1).trim();
+
+
+
+/*
+    IMAGE INPUT
+
+    Format:
+
+    ~I - filename.png
+    ~IA - filename.jpg
+    ~SB - filename.png
+    ~SC - filename.png
+    ~I1 - filename.png
+
+*/
+
+let imageMatch =
+line.match(/^([A-Za-z0-9]+)\s*-\s*(.+\.(png|jpg|jpeg))$/i);
+
+
+if(imageMatch){
+
+    let filename =
+        imageMatch[2].trim();
+
+
+    let label =
+        filename
+        .replace(/\.(png|jpg|jpeg)$/i,"")
+        .trim();
+
+
+    answerItems.push({
+
+        label: label,
+
+        type: "image",
+
+        value: filename
+
+    });
+
+
+    return;
+
+}
+
+
+
+
+        /*
+            TEXT INPUT
+
+            Everything before "-"
+            becomes button label.
+
+            Everything after "-"
+            becomes placed answer.
+
+        */
+
+        let dashMatch =
+        line.match(/^(.+?)\s*-\s*(.+)$/);
+
+
+        if(dashMatch){
+
+            answerItems.push({
+
+                label:
+                dashMatch[1].trim(),
+
+                type:"text",
+
+                value:
+                dashMatch[2].trim()
+
+            });
+
+            return;
+
+        }
+
+
+    });
+
+}
+
+
+
+/* ==========================
+   BUILD TILES
+========================== */
+
+function buildAnswerTiles(){
+
+
+    const tileArea =
+    document.getElementById("tiles");
+
+
+    tileArea.innerHTML="";
+
+
+answerItems.forEach(item=>{
+
+    const tile =
+    document.createElement("div");
+
+
+    if(item.type === "image"){
+
+        tile.className = "tile imageTile";
+
+    }
+    else{
+
+        tile.className = "tile";
+
+    }
+
+
+    tile.textContent =
+    item.label;
+
+
+
+        tile.onclick=function(){
+
+
+            document
+            .querySelectorAll("#tiles .tile")
+            .forEach(t=>
+                t.classList.remove("selected")
+            );
+
+
+            tile.classList.add("selected");
+
+
+            placeMode={
+
+                type:item.type,
+
+                value:item.value
+
+            };
+
+
+            selectedEl=null;
+
+
+        };
+
+
+>>>>>>> 42e2e1d604fdc85e8f57635ec75b21af83e42b99
         tileArea.appendChild(tile);
 
 
@@ -968,11 +1977,19 @@ function(){
    PLACE ON SPREAD
 ========================== */
 
+<<<<<<< HEAD
 spread.addEventListener(
+=======
+viewer.addEventListener(
+>>>>>>> 42e2e1d604fdc85e8f57635ec75b21af83e42b99
 "pointerdown",
 function(e){
 
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 42e2e1d604fdc85e8f57635ec75b21af83e42b99
     const target = e.target;
 
 
@@ -1025,6 +2042,13 @@ function(e){
         IMAGE ANSWER
     */
 
+<<<<<<< HEAD
+=======
+    /*
+        IMAGE ANSWER
+    */
+
+>>>>>>> 42e2e1d604fdc85e8f57635ec75b21af83e42b99
     if(placeMode.type === "image"){
 
 
@@ -1048,6 +2072,7 @@ function(e){
 
 
     /*
+<<<<<<< HEAD
         TEXT ANSWER
     */
 
@@ -1092,6 +2117,47 @@ function(e){
 
     placeMode = null;
 
+=======
+/*
+        TEXT ANSWER
+    */
+
+else{
+
+
+        obj = document.createElement("div");
+
+        obj.className = "draggable tile tileAnchor placedTile";
+
+        obj.textContent = placeMode.value;
+
+
+    }
+
+
+    obj.style.left =
+    x + "px";
+
+
+    obj.style.top =
+    y + "px";
+
+
+
+    spread.appendChild(obj);
+
+
+
+    enableDragging(obj);
+
+
+
+    selectedEl = obj;
+
+
+    placeMode = null;
+
+>>>>>>> 42e2e1d604fdc85e8f57635ec75b21af83e42b99
 
 });
 
@@ -1193,6 +2259,7 @@ function enableDragging(el){
 
 }
 /* ==========================
+<<<<<<< HEAD
    DELETE SELECTED
 ========================== */
 
@@ -1215,47 +2282,61 @@ function(e){
 
 });
 
+=======
+   UNIFIED DELETE ENGINE
+========================== */
+
+function deleteSelectedTile() {
+    if (!selectedEl) return;
+    
+    // Instantly strip all styles, classes, and filters so the element vanishes with zero animation frames
+    selectedEl.className = "";
+    selectedEl.style = "";
+    selectedEl.remove();
+    selectedEl = null;
+}
+// Button Clicks
+document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("deleteBtn");
+    if (btn) btn.onclick = deleteSelectedTile;
+    
+    const btnRight = document.getElementById("deleteBtnRight");
+    if (btnRight) btnRight.onclick = deleteSelectedTile;
+});
+
+// Keyboard Delete / Backspace
+window.addEventListener("keydown", function (e) {
+    if (e.key === "Delete" || e.key === "Backspace") {
+        if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") return;
+        deleteSelectedTile();
+    }
+});
+>>>>>>> 42e2e1d604fdc85e8f57635ec75b21af83e42b99
 
 </script>
 
 <script>
 
-let undoStack = [];
-
 /* =========================
-   REGISTER TILE FOR UNDO
+   DELETE SELECTED TILE
 ========================= */
-function registerUndo(el) {
-    undoStack.push(el);
-}
 
-/* =========================
-   UNDO LAST PLACED TILE
-========================= */
-function undo() {
-
-    const last = undoStack.pop();
-
-    if (!last) return;
-
-    // safety check in case element already removed
-    if (last && last.parentNode) {
-        last.remove();
-    }
-}
-
-/* =========================
-   BUTTON HOOK (SAFE INIT)
-========================= */
 window.addEventListener("DOMContentLoaded", () => {
 
-    const btn = document.getElementById("undoBtn");
+    const btn = document.getElementById("deleteBtn");
 
     if (!btn) return;
 
-    btn.onclick = undo;
-});
+    btn.onclick = function(){
 
+        if(!selectedEl) return;
+
+        selectedEl.remove();
+        selectedEl = null;
+
+    };
+
+});
 </script>
 
 <script>
@@ -1340,6 +2421,7 @@ Circleoverlay.png-->
 
 <script>
 
+<<<<<<< HEAD
 const toggleScriptBtn = document.getElementById("toggleScript");
 const scriptBar = document.getElementById("scriptBar");
 const worksheetScript = document.getElementById("worksheetScript");
@@ -1368,5 +2450,5294 @@ toggleScriptBtn.addEventListener("click", function(){
 });
 
 </script>
+=======
+<script>
+
+/* =========================================
+   MP3 BUTTON ENGINE
+========================================= */
+
+
+
+
+/* =========================================
+   PLAY MP3
+========================================= */
+
+function playMP3(file){
+
+    let audioPath = file;
+
+    if(/^[A-Z]:\\/i.test(audioPath)){
+
+        audioPath =
+            "file:///" +
+            audioPath.replace(/\\/g,"/");
+
+    }
+
+    window.open(audioPath);
+
+}
+/* =========================================
+   SCAN SCRIPT
+========================================= */
+
+function scanMP3References(){
+
+    const tiles = document.getElementById("tiles");
+
+    tiles.querySelectorAll(".mp3Tile").forEach(t=>t.remove());
+
+    const lines =
+        document
+        .getElementById("worksheetScript")
+        .value
+        .split(/\r?\n/);
+
+lines.forEach(line=>{
+
+    line = line.trim();
+
+
+    if(!line.startsWith("~")) return;
+
+
+    // IGNORE SOUND CATEGORY DESIGNATIONS
+    if(/^~S/i.test(line)){
+        return;
+    }
+
+// DO NOT MAKE ANSWER BUTTONS FROM ~S LINES
+if(line.startsWith("~S")){
+    return;
+}
+
+
+line = line.substring(1).trim();
+
+        const match =
+            line.match(/^(.+?)\s*[-–—]\s*(.+?\.mp3)\s*$/i);
+
+        if(!match) return;
+
+        const label = match[1].trim();
+        const file  = match[2].trim();
+
+        const tile = document.createElement("div");
+
+        tile.className = "tile mp3Tile";
+        tile.textContent = label;
+
+        tile.onclick = function(){
+
+            playMP3(file);
+
+        };
+
+        tiles.appendChild(tile);
+
+    });
+
+}
+
+/* =========================================
+   STARTUP
+========================================= */
+
+document
+.getElementById("worksheetScript")
+.addEventListener("input", scanMP3References);
+
+scanMP3References();
+
+</script>
+
+<script>
+
+/* ==========================================================
+   LEFT / RIGHT CONTROL PANEL COORDINATOR
+   Put this LAST script in the file.
+========================================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const leftZoom  = document.getElementById("zoomSelect");
+    const rightZoom = document.getElementById("zoomSelectRight");
+
+    const leftClear  = document.getElementById("clearBoardBtn");
+    const rightClear = document.getElementById("clearBoardBtnRight");
+
+const leftDelete  = document.getElementById("deleteBtn");
+const rightDelete = document.getElementById("deleteBtnRight");
+
+const leftBrowser  = document.getElementById("loadTxtBtn");
+const rightBrowser = document.getElementById("loadTxtBtnRight");
+
+const leftSpinner  = document.getElementById("spinnerBtn");
+const rightSpinner = document.getElementById("spinnerBtnRight");
+
+    const leftPages  = document.getElementById("pageList");
+    const rightPages = document.getElementById("pageListRight");
+
+    if(!leftPages || !rightPages) return;
+
+    /* ==========================================
+       ZOOM
+    ========================================== */
+
+    if(leftZoom && rightZoom){
+
+        rightZoom.value = leftZoom.value;
+
+        leftZoom.addEventListener("change", () => {
+            rightZoom.value = leftZoom.value;
+        });
+
+        rightZoom.addEventListener("change", () => {
+
+            leftZoom.value = rightZoom.value;
+
+            leftZoom.dispatchEvent(
+                new Event("change",{bubbles:true})
+            );
+
+        });
+
+    }
+
+    /* ==========================================
+       CLEAR
+    ========================================== */
+
+    if(rightClear && leftClear){
+
+        rightClear.addEventListener("click", () => {
+            leftClear.click();
+        });
+
+    }
+
+    /* ==========================================
+       DELETE
+    ========================================== */
+
+    if(rightDelete && leftDelete){
+
+        rightDelete.addEventListener("click", () => {
+            leftDelete.click();
+        });
+
+    }
+
+    /* ==========================================
+       BUILD RIGHT PAGE BUTTONS
+    ========================================== */
+
+function syncPageButtons(){
+
+    rightPages.innerHTML = "";
+
+    const buttons =
+        leftPages.querySelectorAll(".pageBtn");
+
+
+    buttons.forEach((btn,index)=>{
+
+        const clone =
+            document.createElement("button");
+
+
+        // FORCE IDENTICAL BUTTON STYLE
+        clone.className = "pageBtn";
+
+
+        // FORCE IDENTICAL TEXT
+        clone.innerHTML = btn.innerHTML;
+
+
+        // MATCH ACTIVE STATE
+        if(btn.classList.contains("active")){
+            clone.classList.add("active");
+        }
+
+
+        clone.onclick = function(){
+
+            buttons[index].click();
+
+        };
+
+
+        rightPages.appendChild(clone);
+
+    });
+
+}
+    syncPageButtons();
+
+    /* ==========================================
+       WATCH FOR PAGE BUTTON CHANGES
+    ========================================== */
+
+    const observer = new MutationObserver(syncPageButtons);
+
+    observer.observe(leftPages,{
+        childList:true,
+        subtree:true,
+        attributes:true,
+        attributeFilter:["class"]
+    });
+
+});
+
+</script>
+
+<script>
+
+/* =====================================
+   LOCAL TXT BROWSER LOADER
+===================================== */
+
+const loadTxtBtn =
+document.getElementById("loadTxtBtn");
+
+const txtLoader =
+document.getElementById("txtLoader");
+
+
+loadTxtBtn.onclick = function(){
+
+    txtLoader.click();
+
+};
+
+
+const loadTxtBtnRight =
+document.getElementById("loadTxtBtnRight");
+
+
+if(loadTxtBtnRight){
+
+    loadTxtBtnRight.onclick = function(){
+
+        txtLoader.click();
+
+    };
+
+}
+
+txtLoader.addEventListener(
+"change",
+function(){
+
+    const file =
+    this.files[0];
+
+    if(!file) return;
+
+
+    const reader =
+    new FileReader();
+
+
+    reader.onload =
+    function(e){
+
+        const text =
+        e.target.result;
+
+
+        worksheetScript.value =
+        text;
+
+
+        worksheetScript.dispatchEvent(
+            new Event("input")
+        );
+
+    };
+
+
+    reader.readAsText(file);
+
+
+});
+
+</script>
+
+<script>
+
+/* ==========================
+   STUDENT PICKER WITH COLORS
+========================== */
+
+
+const RAW_TEXT = `
+
+~11.1	
+Blue	Thanawat
+Blue	Warawut
+Blue	Phawat
+Green	Suphajak
+Green	Kallapapruek
+Green	Soraphat
+Orange	Nacharot
+Orange	Paphawin
+Orange	Pattaradorn
+Orange	Theerapith
+Red	Thannakorn
+Red	Khemmanat
+Red	Pannawit
+Red	Chatchanok
+Purple	Tarzan
+~13.2	
+Blue	Patiphan
+Blue	Katanyu
+Blue	Suthimont
+Green	Korravit
+Green	Machat
+Green	Phoomipat
+Orange	Ingkrit
+Orange	Pachara
+Orange	Khanaphot
+Orange	Napol
+Red	Kannaphat
+Red	Natthapakorn
+Red	Phurit
+Red	Pawarut
+Purple	Tarzan
+~14.1	
+Blue	Krittanart
+Blue	Natthanan
+Blue	Nanaruchote
+Green	Phutthiphat
+Green	Boonraksa
+Green	Kronpanod
+Orange	Phudit
+Orange	Dhatsawitt
+Orange	Nonthapat
+Orange	Chayangkoon
+Orange	Punyawee
+Red	Yuttanin
+Red	Photsawee
+Red	Jommanut
+Red	Phurarit
+Purple	Tarzan
+~15.3	
+Blue	Akkravich
+Blue	Thanakorn
+Blue	Punnawatz
+Green	Puri
+Green	Api Cha
+Green	Panyarat
+Orange	Nakarin
+Orange	Chananon
+Orange	Rachchavich
+Orange	Phumiphat
+Red	Naravich
+Red	Preedipat 
+Red	Archawin
+Red	Worawit
+Purple	Tarzan
+~16.2	
+Blue	Vachirasak
+Blue	Chutipan
+Blue	Pakornpat
+Green	Panpuris
+Green	Koonwich
+Green	Nutphalod
+Green	Jirayu
+Orange	Setthawut
+Orange	Theerapatch
+Orange	Theeraphat
+Orange	Pannatat
+Red	Thanakrit
+Red	Nakhun
+Red	Boonpipon
+Red	Warawat
+Purple	Tarzan
+
+`;
+
+
+/* TEAM COLORS */
+
+const studentColors = {
+
+    Blue:"#93c5fd",
+
+    Green:"#86efac",
+
+    Orange:"#fdba74",
+
+    Red:"#fca5a5"
+
+};
+
+
+
+/* PARSE DATA */
+
+function parseStudents(raw){
+
+
+    const blocks =
+    raw.split(/(?=~)/g);
+
+
+    const result={};
+
+
+    blocks.forEach(block=>{
+
+
+        block=block.trim();
+
+
+        if(!block.startsWith("~"))
+            return;
+
+
+        const lines =
+        block.split("\n")
+        .map(x=>x.trim())
+        .filter(Boolean);
+
+
+
+        const className =
+        lines[0]
+        .replace("~","")
+        .trim();
+
+
+
+        result[className]=[];
+
+
+
+        for(let i=1;i<lines.length;i++){
+
+
+            const parts =
+            lines[i].split(/\s+/);
+
+
+
+            const team =
+            parts.shift();
+
+
+
+            const name =
+            parts.join(" ");
+
+
+
+result[className].push({
+
+    name:name,
+
+    team:team,
+
+    color:studentColors[team]
+
+});
+
+        }
+
+
+    });
+
+
+    return result;
+
+}
+
+
+
+const studentData =
+parseStudents(RAW_TEXT);
+
+
+
+const classSelectors =
+document.querySelectorAll(".classSelect");
+
+
+const studentTiles =
+document.querySelectorAll(".studentTile");
+
+
+
+let colorQueues = {};
+let currentColor = 0;
+
+const colorOrder = [
+    "Blue",
+    "Green",
+    "Orange",
+    "Red"
+];
+
+function shuffle(array){
+
+    return [...array]
+    .sort(()=>Math.random()-0.5);
+
+}
+
+function loadClass(className){
+
+    colorQueues = {};
+
+    colorOrder.forEach(color=>{
+
+        colorQueues[color] =
+            shuffle(
+                studentData[className]
+                .filter(s=>s.team===color)
+            );
+
+    });
+
+    currentColor = 0;
+
+}
+
+
+/* NEXT STUDENT */
+
+function nextStudent(){
+
+    const className =
+        classSelectors[0].value;
+
+    const color =
+        colorOrder[currentColor];
+
+    if(colorQueues[color].length===0){
+
+        colorQueues[color] =
+            shuffle(
+                studentData[className]
+                .filter(s=>s.team===color)
+            );
+
+    }
+
+    const student =
+        colorQueues[color].shift();
+
+    studentTiles.forEach(tile=>{
+
+        tile.textContent =
+            student.name;
+
+        tile.style.background =
+            student.color;
+
+    });
+
+    currentColor =
+        (currentColor+1) %
+        colorOrder.length;
+
+}
+
+/* BUILD DROPDOWNS */
+
+Object.keys(studentData)
+.forEach(className=>{
+
+
+    classSelectors.forEach(select=>{
+
+
+        const option =
+        document.createElement("option");
+
+
+        option.value =
+        className;
+
+
+        option.textContent =
+        className;
+
+
+        select.appendChild(option);
+
+
+    });
+
+
+});
+
+
+
+/* SYNC CLASS SELECTORS */
+
+classSelectors.forEach(select=>{
+
+
+    select.addEventListener(
+    "change",
+    function(){
+
+
+        classSelectors.forEach(other=>{
+
+            other.value =
+            this.value;
+
+        });
+
+
+
+        loadClass(
+            this.value
+        );
+
+
+        nextStudent();
+
+
+    });
+
+
+});
+
+
+
+/* CLICK STUDENT TILE */
+
+studentTiles.forEach(tile=>{
+
+
+    tile.onclick=function(){
+
+        nextStudent();
+
+    };
+
+
+});
+
+
+
+/* START */
+
+if(classSelectors.length){
+
+
+    loadClass(
+        classSelectors[0].value
+    );
+
+
+    nextStudent();
+
+
+}
+
+
+</script>
+
+<script>
+
+(function(){
+
+const Wheel={
+
+    overlay:null,
+    panel:null,
+    canvas:null,
+    ctx:null,
+
+    students:[],
+    angle:0,
+
+    currentName:null,
+
+    spinning:false,
+    queuedName:null,
+    size:0,
+    radius:0,
+    duration:2000
+};
+/* ==========================
+   CREATE WHEEL
+========================== */
+
+function createWheel(){
+
+    if(Wheel.overlay) return;
+
+
+    const style=document.createElement("style");
+
+    style.textContent=`
+
+:root{
+--wheel-size:350px;
+}
+
+#studentWheelOverlay{
+
+position:fixed;
+inset:0;
+
+display:none;
+
+align-items:center;
+justify-content:center;
+
+background:transparent;
+
+pointer-events:none;
+
+z-index:999999;
+
+}
+
+
+#studentWheelPanel{
+
+position:relative;
+
+width:calc(var(--wheel-size) + 120px);
+height:calc(var(--wheel-size) + 120px);
+
+cursor:move;
+
+pointer-events:auto;
+
+    touch-action:none;
+
+
+display:flex;
+align-items:center;
+justify-content:center;
+
+}
+#studentWheelCanvas{
+
+display:block;
+
+width:var(--wheel-size);
+height:var(--wheel-size);
+
+transform:none;
+
+background:transparent;
+
+pointer-events:auto;
+cursor:pointer;
+
+}`;
+
+document.head.appendChild(style);
+
+
+
+Wheel.overlay=document.createElement("div");
+
+Wheel.overlay.id="studentWheelOverlay";
+
+
+
+Wheel.panel=document.createElement("div");
+
+Wheel.panel.id="studentWheelPanel";
+
+
+
+Wheel.canvas=document.createElement("canvas");
+
+Wheel.canvas.id="studentWheelCanvas";
+
+Wheel.size = parseInt(
+    getComputedStyle(document.documentElement)
+        .getPropertyValue("--wheel-size")
+);
+
+Wheel.radius = Wheel.size / 2 - 10;
+
+const extraSpace = 40;
+
+Wheel.canvas.width = Wheel.size + extraSpace;
+Wheel.canvas.height = Wheel.size + extraSpace;
+Wheel.ctx =
+Wheel.canvas.getContext("2d");
+Wheel.panel.appendChild(Wheel.canvas);
+
+Wheel.overlay.appendChild(Wheel.panel);
+
+document.body.appendChild(Wheel.overlay);
+
+
+
+/* drag wheel */
+
+let dragging=false;
+let ox=0;
+let oy=0;
+
+
+Wheel.panel.addEventListener("pointerdown",e=>{
+
+    // If clicking the center hub, let the click handler handle it instead of dragging
+    const canvasRect = Wheel.canvas.getBoundingClientRect();
+    const extraSpace = 40;
+    const cx = (Wheel.size / 2) + extraSpace / 2;
+    const cy = (Wheel.size / 2) + extraSpace / 2;
+    const scaleX = Wheel.canvas.width / canvasRect.width;
+    const scaleY = Wheel.canvas.height / canvasRect.height;
+    const internalX = (e.clientX - canvasRect.left) * scaleX;
+    const internalY = (e.clientY - canvasRect.top) * scaleY;
+    const dx = internalX - cx;
+    const dy = internalY - cy;
+
+    if(Math.sqrt(dx * dx + dy * dy) <= 28){
+        return; // Don't initiate drag on center hub
+    }
+
+    dragging=true;
+
+    const r=Wheel.panel.getBoundingClientRect();
+
+    ox=e.clientX-r.left;
+    oy=e.clientY-r.top;
+
+    Wheel.panel.setPointerCapture(e.pointerId);
+
+});
+
+
+Wheel.panel.addEventListener("pointermove",e=>{
+
+if(!dragging)return;
+
+
+Wheel.panel.style.position="fixed";
+
+Wheel.panel.style.left=
+(e.clientX-ox)+"px";
+
+Wheel.panel.style.top=
+(e.clientY-oy)+"px";
+
+
+Wheel.panel.style.transform="none";
+
+
+});
+
+
+Wheel.panel.addEventListener("pointerup",()=>{
+
+dragging=false;
+
+});
+
+
+
+/* Overlay is now click-through.
+   Spinner button opens/closes it. */
+
+}
+
+
+
+/* ==========================
+   LOAD STUDENTS
+========================== */
+
+function loadWheelStudents(){
+
+    const className =
+        document.querySelector(".classSelect").value;
+
+
+    Wheel.students =
+        studentData[className].map(s => ({...s}));
+
+
+    /*
+        Rearrange students so identical colors
+        are spread apart whenever possible.
+    */
+
+    const colorGroups = {};
+
+    Wheel.students.forEach(student=>{
+
+        const color = student.color || "#ddd";
+
+        if(!colorGroups[color]){
+            colorGroups[color] = [];
+        }
+
+        colorGroups[color].push(student);
+
+    });
+
+
+    const groups = Object.values(colorGroups);
+
+
+    Wheel.students = [];
+
+    let lastColor = null;
+
+
+    while(groups.some(g => g.length)){
+
+        // Find the largest remaining group
+        groups.sort((a,b)=>b.length-a.length);
+
+
+        let selected =
+            groups.find(g =>
+                g.length &&
+                (g[0].color || "#ddd") !== lastColor
+            );
+
+
+        // If no different color exists, use whatever remains
+        if(!selected){
+            selected =
+                groups.find(g=>g.length);
+        }
+
+
+        const student =
+            selected.shift();
+
+
+        Wheel.students.push(student);
+
+        lastColor =
+            student.color || "#ddd";
+
+    }
+
+
+    const tile =
+        document.querySelector(".studentTile");
+
+
+    if(tile){
+
+        Wheel.currentName =
+            tile.textContent.trim();
+
+    }
+
+}
+/* ==========================
+   DRAW
+========================== */
+function drawWheel(){
+
+const ctx = Wheel.ctx;
+
+/* COMPLETE CANVAS RESET */
+ctx.setTransform(1,0,0,1,0,0);
+
+ctx.globalAlpha = 1;
+
+ctx.shadowColor = "transparent";
+ctx.shadowBlur = 0;
+ctx.shadowOffsetX = 0;
+ctx.shadowOffsetY = 0;
+
+ctx.clearRect(
+    0,
+    0,
+    Wheel.canvas.width,
+    Wheel.canvas.height
+);
+const extraSpace = 40;
+
+const cx = (Wheel.size/2) + extraSpace/2;
+const cy = (Wheel.size/2) + extraSpace/2;
+
+ctx.save();
+
+ctx.shadowColor = "transparent";
+ctx.shadowBlur = 0;
+
+const students=Wheel.students;
+
+
+if(!students.length)return;
+
+
+const slice=
+Math.PI*2/students.length;
+
+
+
+students.forEach((s,i)=>{
+
+
+const start=
+Wheel.angle+i*slice;
+
+
+const end=start+slice;
+
+
+ctx.beginPath();
+
+ctx.moveTo(cx,cy);
+
+ctx.arc(
+cx,
+cy,
+Wheel.radius,
+start,
+end
+);
+
+ctx.closePath();
+
+
+ctx.fillStyle =
+    s.color || "#ddd";
+
+ctx.fill();
+
+
+ctx.strokeStyle="#000";
+
+ctx.lineWidth=.25;
+
+ctx.stroke();
+
+
+
+const mid=(start+end)/2;
+
+
+ctx.save();
+
+
+/* Move the label closer to the rim */
+
+const labelRadius = Wheel.radius - 15; 
+
+// first letter 25px from crust
+ctx.translate(
+
+    cx + Math.cos(mid) * labelRadius,
+
+    cy + Math.sin(mid) * labelRadius
+
+);
+
+/* Keep the text vertical relative to its slice */
+
+ctx.rotate(mid + Math.PI);
+
+
+ctx.fillStyle="#111";
+
+ctx.font = (Wheel.size * 0.035) + "px Arial";
+ctx.textAlign="left";
+
+ctx.textBaseline="middle";
+
+
+ctx.fillText(
+    s.name,
+    0,
+    0
+);
+
+ctx.restore();
+
+
+});
+
+ctx.restore();
+
+
+
+/* Soft slice seams */
+
+const fuzzySlice =
+    (Math.PI * 2) / Wheel.students.length;
+
+
+ctx.shadowColor = "rgba(0,0,0,0.35)";
+ctx.shadowBlur = 3;
+
+ctx.strokeStyle = "rgba(60,40,15,0.35)";
+ctx.lineWidth = 1;
+
+
+Wheel.students.forEach((s,i)=>{
+
+    const seamAngle =
+        Wheel.angle + i * fuzzySlice;
+
+
+    ctx.beginPath();
+
+    ctx.moveTo(cx,cy);
+
+    ctx.lineTo(
+        cx + Math.cos(seamAngle) * Wheel.radius,
+        cy + Math.sin(seamAngle) * Wheel.radius
+    );
+
+    ctx.stroke();
+
+});
+
+
+ctx.restore();
+
+
+/* ==========================
+   BRASS METALLIC OUTER RIM
+========================== */
+
+ctx.save();
+
+const rimWidth = 10;
+
+const rimGradient = ctx.createRadialGradient(
+    cx,
+    cy,
+    Wheel.radius - rimWidth,
+    cx,
+    cy,
+    Wheel.radius + 5
+);
+
+rimGradient.addColorStop(0, "#5c3900");
+rimGradient.addColorStop(0.25, "#d8a62a");
+rimGradient.addColorStop(0.45, "#fff2a6");
+rimGradient.addColorStop(0.65, "#c58a16");
+rimGradient.addColorStop(0.85, "#8b5a05");
+rimGradient.addColorStop(1, "#3b2400");
+
+
+ctx.beginPath();
+
+ctx.arc(
+    cx,
+    cy,
+    Wheel.radius,
+    0,
+    Math.PI * 2
+);
+
+ctx.strokeStyle = rimGradient;
+ctx.lineWidth = rimWidth;
+
+ctx.stroke();
+
+
+/* Fine highlight edge */
+
+ctx.beginPath();
+
+ctx.arc(
+    cx,
+    cy,
+    Wheel.radius - rimWidth/2,
+    0,
+    Math.PI * 2
+);
+
+ctx.strokeStyle = "rgba(255,240,150,0.8)";
+ctx.lineWidth = 1;
+
+ctx.stroke();
+
+
+ctx.restore();
+
+
+
+
+
+/* ==========================
+   FUZZY WHEEL FINISHING PASS
+========================== */
+
+ctx.save();
+
+ctx.globalAlpha = 1;
+
+/* Soft outer perimeter */
+
+ctx.beginPath();
+
+ctx.arc(
+    cx,
+    cy,
+    Wheel.radius + 3,
+    0,
+    Math.PI * 2
+);
+
+ctx.strokeStyle = "rgba(40,25,5,0.45)";
+ctx.lineWidth = 8;
+ctx.shadowColor = "rgba(40,25,5,0.65)";
+ctx.shadowBlur = 12;
+
+ctx.stroke();
+
+
+/* Brass glow around rim */
+
+ctx.beginPath();
+
+ctx.arc(
+    cx,
+    cy,
+    Wheel.radius,
+    0,
+    Math.PI * 2
+);
+
+ctx.strokeStyle = "rgba(255,190,50,0.5)";
+ctx.lineWidth = 5;
+ctx.shadowColor = "rgba(255,190,50,0.8)";
+ctx.shadowBlur = 8;
+
+ctx.stroke();
+
+/* pointer */
+
+ctx.beginPath();
+
+ctx.moveTo(cx,35);
+
+ctx.lineTo(cx-10,18);
+
+ctx.lineTo(cx+10,18);
+
+ctx.closePath();
+
+ctx.fillStyle="red";
+
+ctx.fill();
+
+
+/* Brass cone hub */
+
+const hubX = cx;
+const hubY = cy;
+
+ctx.save();
+
+/* Shadow under cone */
+ctx.beginPath();
+ctx.arc(
+    hubX + 3,
+    hubY + 5,
+    28,
+    0,
+    Math.PI * 2
+);
+
+ctx.fillStyle = "rgba(0,0,0,0.35)";
+ctx.fill();
+
+
+/* Cone body - radial metallic brass */
+const brass = ctx.createRadialGradient(
+    hubX - 8,
+    hubY - 10,
+    3,
+    hubX,
+    hubY,
+    30
+);
+
+brass.addColorStop(0, "#fff2a6");   // bright brass reflection
+brass.addColorStop(0.15, "#ffd34e");
+brass.addColorStop(0.35, "#c58a16");
+brass.addColorStop(0.65, "#8b5a05");
+brass.addColorStop(0.85, "#d8a62a");
+brass.addColorStop(1, "#5c3900");
+
+
+ctx.beginPath();
+
+ctx.arc(
+    hubX,
+    hubY,
+    28,
+    0,
+    Math.PI * 2
+);
+
+ctx.fillStyle = brass;
+ctx.fill();
+
+
+/* Cone rim */
+ctx.beginPath();
+
+ctx.arc(
+    hubX,
+    hubY,
+    28,
+    0,
+    Math.PI * 2
+);
+
+ctx.strokeStyle = "#5a3500";
+ctx.lineWidth = 2;
+ctx.stroke();
+
+
+/* Top bevel ring */
+ctx.beginPath();
+
+ctx.arc(
+    hubX,
+    hubY,
+    20,
+    0,
+    Math.PI * 2
+);
+
+ctx.strokeStyle = "rgba(255,240,150,0.8)";
+ctx.lineWidth = 2;
+ctx.stroke();
+
+
+/* Center shine */
+ctx.beginPath();
+
+ctx.arc(
+    hubX - 7,
+    hubY - 8,
+    7,
+    0,
+    Math.PI * 2
+);
+
+ctx.fillStyle = "rgba(255,255,220,0.55)";
+ctx.fill();
+
+
+ctx.restore();
+
+
+
+
+}
+
+
+
+/* ==========================
+   SPIN
+========================== */
+
+function spinWheel(){
+
+
+if(Wheel.spinning){
+
+    return;
+
+}
+
+Wheel.spinning=true;
+
+if(window.startSpinnerSound){
+    startSpinnerSound();
+}
+loadWheelStudents();
+
+
+if(!Wheel.students.length){
+
+Wheel.spinning=false;
+if(window.stopSpinnerSound) stopSpinnerSound();
+
+return;
+
+}
+
+
+
+let start=
+performance.now();
+
+
+let startAngle=
+Wheel.angle;
+
+
+
+const slice =
+    (Math.PI * 2) / Wheel.students.length;
+
+
+// Trigger the control panel selection logic (same as clicking the control panel button or student tile)
+const mainGenBtn = document.querySelector("#randomBtn, .random-btn, [data-random-student], #generateBtn, .studentTile");
+if(mainGenBtn && typeof mainGenBtn.click === "function" && !mainGenBtn.classList.contains("studentTile")){
+    mainGenBtn.click();
+} else if(typeof window.nextStudent === "function"){
+    window.nextStudent();
+}
+
+const tile = document.querySelector(".studentTile");
+if(tile){
+    Wheel.currentName = tile.textContent.trim();
+}
+
+
+
+/*
+   Aim the CENTER of the student's slice
+   at the pointer.
+*/
+
+const targetIndex =
+    Wheel.students.findIndex(
+        s => s.name === Wheel.currentName
+    );
+
+
+if(targetIndex < 0){
+
+    Wheel.spinning=false;
+    if(window.stopSpinnerSound) stopSpinnerSound();
+    return;
+
+}
+
+
+const studentAngle =
+    (targetIndex * slice) +
+    (slice / 2);
+
+const pointerAngle =
+    -Math.PI / 2;
+
+/* Angle needed to line the student's slice up
+   with the pointer. */
+let offset =
+    pointerAngle - studentAngle - startAngle;
+
+/* Keep it positive so we never spin backwards. */
+offset =
+    ((offset % (Math.PI * 2)) + (Math.PI * 2)) %
+    (Math.PI * 2);
+
+/* Always spin at least 3 complete turns first. */
+const minimumTurns = 7;
+
+let target =
+    startAngle +
+    (minimumTurns * Math.PI * 2) +
+    offset;
+function animate(now){
+
+
+let p=
+(now-start)/Wheel.duration;
+
+
+if(p>1)p=1;
+
+
+let ease=
+1-Math.pow(1-p,5);
+
+
+Wheel.angle=
+startAngle+
+(target-startAngle)*ease;
+
+
+drawWheel();
+
+
+
+if(p<1){
+
+requestAnimationFrame(animate);
+
+}
+
+else{
+
+Wheel.spinning=false;
+
+if(window.stopSpinnerSound){
+    stopSpinnerSound();
+}
+
+/* Advance to the same student
+   the wheel just landed on */
+
+loadWheelStudents();
+
+drawWheel();
+
+}
+}
+
+
+requestAnimationFrame(animate);
+
+
+}
+
+
+/* ==========================
+   SHOW / HIDE
+========================== */
+
+function showWheel(){
+
+    createWheel();
+
+    Wheel.overlay.style.display="flex";
+
+
+    /* Load current student tile as starting position */
+
+    const tile =
+        document.querySelector(".studentTile");
+
+    if(tile){
+
+        const name =
+            tile.textContent.trim();
+
+        if(name && name !== "Student"){
+
+            Wheel.currentName = name;
+
+        }
+        else{
+
+            /*
+               No selected student:
+               allow spinner to choose normally
+            */
+
+            Wheel.currentName = null;
+
+        }
+
+    }
+
+
+    loadWheelStudents();
+
+
+    /*
+       Align current student with pointer
+       when wheel opens.
+    */
+
+    const targetIndex =
+        Wheel.students.findIndex(
+            s => s.name === Wheel.currentName
+        );
+
+
+    if(targetIndex >= 0 && Wheel.students.length){
+
+        const slice =
+            (Math.PI * 2) / Wheel.students.length;
+
+
+        const studentCenter =
+            (targetIndex * slice) + (slice / 2);
+
+
+        /*
+           Pointer is at top (-90 degrees)
+        */
+
+        Wheel.angle =
+            (-Math.PI / 2) - studentCenter;
+
+    }
+
+
+    drawWheel();
+
+}
+function hideWheel(){
+
+if(Wheel.overlay){
+
+Wheel.overlay.style.display="none";
+
+}
+
+}
+
+
+
+/* ==========================
+   BUTTON
+========================== */
+
+
+function toggleSpinner(){
+
+    if(
+        Wheel.overlay &&
+        Wheel.overlay.style.display === "flex"
+    ){
+        hideWheel();
+    }
+    else{
+        showWheel();
+    }
+
+}
+
+const leftSpinner =
+document.getElementById("spinnerBtn");
+
+if(leftSpinner){
+    leftSpinner.onclick = toggleSpinner;
+}
+
+const rightSpinner =
+document.getElementById("spinnerBtnRight");
+
+if(rightSpinner){
+    rightSpinner.onclick = toggleSpinner;
+}
+
+/* make available */
+
+window.spinWheel = spinWheel;
+window.hideWheel = hideWheel;
+
+/* ---------------------------------------
+   BRASS HUB CENTER CLICK HOTSPOT
+--------------------------------------- */
+
+document.addEventListener("click", function(e){
+    if(!Wheel.overlay || Wheel.overlay.style.display !== "flex") return;
+    if(e.target !== Wheel.canvas) return;
+
+    const canvasRect = Wheel.canvas.getBoundingClientRect();
+    const extraSpace = 40;
+    const cx = (Wheel.size / 2) + extraSpace / 2;
+    const cy = (Wheel.size / 2) + extraSpace / 2;
+
+    const scaleX = Wheel.canvas.width / canvasRect.width;
+    const scaleY = Wheel.canvas.height / canvasRect.height;
+    const internalX = (e.clientX - canvasRect.left) * scaleX;
+    const internalY = (e.clientY - canvasRect.top) * scaleY;
+
+    const dx = internalX - cx;
+    const dy = internalY - cy;
+
+    // Center hub radius is 28px
+    if(Math.sqrt(dx * dx + dy * dy) <= 28){
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        spinWheel();
+    }
+}, true);
+
+/* ---------------------------------------
+   WATCH STUDENT TILE CLICKS
+--------------------------------------- */
+
+document.addEventListener("click", function(e){
+
+    if(
+        e.target.classList.contains("studentTile")
+    ){
+
+        /* BLOCK TILE ADVANCE WHILE SPINNER IS RUNNING */
+        if(Wheel.spinning){
+
+            e.stopImmediatePropagation();
+            e.preventDefault();
+
+            return;
+
+        }
+
+
+        if(
+            Wheel.overlay &&
+            Wheel.overlay.style.display==="flex"
+        ){
+
+            setTimeout(()=>{
+
+                loadWheelStudents();
+
+                spinWheel();
+
+            },50);
+
+        }
+
+    }
+
+}, true);
+})();
+
+</script>
+<script>
+
+/* ==========================
+   BREAK TIMER MODAL
+========================== */
+
+
+let breakInterval=null;
+let breakRemaining=300;
+
+
+function openBreakModal(){
+
+    const modal = document.getElementById("breakModal");
+
+
+    if(modal.style.display === "block"){
+
+        // hide modal
+        modal.style.display = "none";
+
+        // optionally stop timer
+        clearInterval(breakInterval);
+        breakInterval = null;
+
+        return;
+    }
+
+
+    // show modal
+    modal.style.display = "block";
+
+    startBreak();
+
+}
+
+function renderBreak(){
+
+    let m=Math.floor(breakRemaining/60);
+
+    let s=String(breakRemaining%60)
+        .padStart(2,"0");
+
+    document.getElementById("breakTimer")
+        .textContent=`${m}:${s}`;
+
+}
+
+function adjustBreakTime(amount){
+
+    /*
+       If timer is finished,
+       start a new countdown.
+    */
+
+    if(breakRemaining <= 0){
+
+        startBreak(amount);
+
+    }
+    else{
+
+        /*
+           Add time to current countdown.
+        */
+
+        breakRemaining += amount;
+
+        renderBreak();
+
+    }
+
+
+    /*
+       Restart audio whenever + button is clicked.
+    */
+
+    if(typeof restartMusicAfterExtension === "function"){
+
+        restartMusicAfterExtension();
+
+    }
+
+}
+
+
+
+function startBreak(duration=300){
+
+    clearInterval(breakInterval);
+
+
+    /*
+       Start new countdown duration.
+       Works after Time's up.
+    */
+
+    breakRemaining = duration;
+
+    renderBreak();
+
+
+    breakInterval = setInterval(()=>{
+
+        breakRemaining--;
+
+        renderBreak();
+
+
+        if(breakRemaining <= 0){
+
+            clearInterval(breakInterval);
+
+            breakInterval = null;
+
+
+            document
+            .getElementById("breakTimer")
+            .textContent = "Time's up!";
+
+
+            /*
+               Keep value at zero so
+               next + click starts a new break.
+            */
+
+            breakRemaining = 0;
+
+        }
+
+    },1000);
+
+}
+
+document
+.getElementById("breakStart")
+.onclick=()=>startBreak();
+
+document
+.getElementById("breakPlus")
+.onclick=()=>adjustBreakTime(60);
+
+
+document
+.getElementById("breakMinus")
+.onclick=()=>adjustBreakTime(-60);
+
+
+
+/* ==========================
+   DRAGGABLE BREAK MODAL
+========================== */
+
+(function(){
+
+let modal=document.getElementById("breakModal");
+
+let dragging=false;
+
+let offsetX=0;
+let offsetY=0;
+
+
+modal.addEventListener("mousedown",e=>{
+
+    dragging=true;
+
+    offsetX=e.clientX-modal.offsetLeft;
+    offsetY=e.clientY-modal.offsetTop;
+
+});
+
+
+document.addEventListener("mousemove",e=>{
+
+    if(!dragging)return;
+
+
+    modal.style.left=
+        (e.clientX-offsetX)+"px";
+
+
+    modal.style.top=
+        (e.clientY-offsetY)+"px";
+
+
+    modal.style.transform="none";
+
+});
+
+
+document.addEventListener("mouseup",()=>{
+
+    dragging=false;
+
+});
+
+
+})();
+
+</script>
+
+
+
+
+<script>
+
+/* ==========================================================
+   SOUND CATEGORY ENGINE
+   PART 1
+========================================================== */
+
+(function(){
+
+/* ==========================================
+   PLAYLIST STORAGE
+========================================== */
+
+const SoundEngine = {
+
+    buttons:[],    // all ~S sound buttons
+
+    volume:0.80,
+    currentAudio:null
+
+};
+
+/* ==========================================
+   PLAY ONE SOUND
+========================================== */
+
+let audioUnlocked = false;
+let pendingSound = null;
+
+function playSound(file){
+
+    if(!file) return;
+
+    let player =
+        document.getElementById("soundPlayer");
+
+    if(!player){
+
+        player =
+            document.createElement("audio");
+
+        player.id = "soundPlayer";
+        player.style.display = "none";
+
+        document.body.appendChild(player);
+
+    }
+
+    function startPlayback(){
+
+        player.pause();
+
+        player.currentTime = 0;
+
+        console.log("Loading audio:", file);
+
+player.src = file;
+
+        player.volume = SoundEngine.volume;
+
+        player.load();
+
+        player.play().catch(function(err){
+
+            console.log(
+                "Sound playback failed:",
+                file,
+                err
+            );
+
+        });
+
+    }
+
+    if(audioUnlocked){
+
+        startPlayback();
+        return;
+
+    }
+
+    pendingSound = file;
+
+}
+
+
+/* ==========================================
+   CLEAR PLAYLISTS
+========================================== */
+
+function clearPlaylists(){
+
+    SoundEngine.buttons=[];
+
+}
+/* ==========================================
+   SCAN WORKSHEET FOR SOUND COMMANDS
+========================================== */
+
+function scanSoundScript(){
+
+    console.log("SoundEngine scan started");
+
+    clearPlaylists();
+    const input =
+        document.getElementById(
+            "worksheetScript"
+        );
+
+    if(!input) return;
+
+    const lines =
+        input.value.split(/\r?\n/);
+
+    lines.forEach(function(line){
+
+        line = line.trim();
+
+if(!/^~S/i.test(line))
+    return;
+/*
+    Expected format:
+
+    ~S - Label - filename.mp3
+*/
+/* ==========================
+   LABELLED SOUND BUTTON
+   ~S - Dog - dog.mp3
+========================== */
+
+const buttonMatch =
+    line.match(
+        /^~S\S*\s*-\s*(.+?\.(?:mp3|wav|ogg|m4a))\s*$/i
+    );
+
+if(buttonMatch){
+
+    const file =
+        buttonMatch[1].trim();
+
+    const label =
+        file.replace(/\.[^.]+$/,"");
+
+    SoundEngine.buttons.push({
+
+        label: label,
+
+        file: file
+
+    });
+
+    return;
+
+}
+
+return;    });
+
+    buildSoundTiles();
+
+}
+
+
+/* ==========================================
+   BUILD SOUND TILES
+========================================== */
+
+function buildSoundTiles(){
+
+    const tileArea =
+        document.getElementById("tiles");
+
+    if(!tileArea) return;
+
+    /* Remove old sound tiles */
+
+    tileArea
+        .querySelectorAll(".soundTile")
+        .forEach(function(tile){
+
+            tile.remove();
+
+        });
+
+
+    /* Friendly category names */
+
+/* Build labelled ~S buttons */
+
+console.log("S BUTTON COUNT:", SoundEngine.buttons.length);
+
+SoundEngine.buttons.forEach(function(sound){
+
+    const tile =
+        document.createElement("button");
+
+    tile.type="button";
+
+    tile.className =
+        "tile soundTile";
+
+    tile.textContent =
+        sound.label;
+
+tile.onclick=function(){
+
+    const player =
+        document.getElementById("soundPlayer");
+
+
+    /*
+       Click same button again = STOP
+    */
+
+    if(
+        tile.classList.contains("selected") &&
+        player &&
+        !player.paused
+    ){
+
+        player.pause();
+
+        player.currentTime = 0;
+
+        tile.classList.remove("selected");
+
+        return;
+
+    }
+
+
+    /*
+       Turn off other selected sound buttons
+    */
+
+    document
+    .querySelectorAll(".soundTile.selected")
+    .forEach(t=>{
+
+        t.classList.remove("selected");
+
+    });
+
+
+    tile.classList.add("selected");
+
+
+    playSound(sound.file);
+
+};
+    tileArea.appendChild(tile);
+
+
+});
+
+}
+
+
+/* ==========================================
+   UNLOCK AUDIO ON FIRST USER ACTION
+========================================== */
+
+function unlockAudio(){
+
+    if(audioUnlocked) return;
+
+    audioUnlocked = true;
+
+    if(pendingSound){
+
+        const sound = pendingSound;
+
+        pendingSound = null;
+
+        playSound(sound);
+
+    }
+
+}
+
+document.addEventListener(
+    "pointerdown",
+    unlockAudio,
+    { once:true }
+);
+
+document.addEventListener(
+    "keydown",
+    unlockAudio,
+    { once:true }
+);
+
+
+
+
+
+/* ==========================================
+   AUTO REBUILD WHEN SCRIPT CHANGES
+========================================== */
+
+const worksheetScript =
+    document.getElementById("worksheetScript");
+
+if(worksheetScript){
+
+    worksheetScript.addEventListener(
+        "input",
+        scanSoundScript
+    );
+
+}
+
+
+/* ==========================================
+   INITIAL SCAN
+========================================== */
+
+scanSoundScript();
+
+
+/* ==========================================
+   OPTIONAL DEBUG
+========================================== */
+
+window.SoundEngine = SoundEngine;
+
+
+/* ==========================================
+   END ENGINE
+========================================== */
+
+})();
+
+
+</script>
+
+<script>
+
+/* =====================================
+   DOWNLOAD SCRIPT TXT
+===================================== */
+
+(function(){
+
+const btn =
+document.getElementById("downloadTxtBtn");
+
+const field =
+document.getElementById("worksheetScript");
+
+
+if(!btn || !field) return;
+
+
+btn.onclick=function(){
+
+    const blob =
+    new Blob(
+        [field.value],
+        {type:"text/plain;charset=utf-8"}
+    );
+
+
+    const a =
+    document.createElement("a");
+
+
+    a.href =
+    URL.createObjectURL(blob);
+
+
+    a.download =
+    "Worksheet.txt";
+
+
+    a.click();
+
+
+    URL.revokeObjectURL(a.href);
+
+};
+
+})();
+
+</script>
+
+<script>
+
+(function(){
+
+const bar =
+document.getElementById("tilesResizeBar");
+
+const tiles =
+document.getElementById("tiles");
+
+const script =
+document.getElementById("scriptBar");
+
+let dragging=false;
+
+
+bar.addEventListener("pointerdown",e=>{
+
+    dragging=true;
+
+    bar.setPointerCapture(e.pointerId);
+
+});
+
+
+bar.addEventListener("pointermove",e=>{
+
+    if(!dragging) return;
+
+
+    const y=e.clientY;
+
+    const height =
+        window.innerHeight - y - script.offsetHeight;
+
+
+if(height > 40){
+
+    document.getElementById("tilesBar").style.height =
+        height + "px";
+
+}
+
+});
+
+
+bar.addEventListener("pointerup",()=>{
+
+    dragging=false;
+
+});
+
+
+})();
+
+</script>
+
+<script>
+
+(function(){
+
+const handle =
+document.getElementById("scriptResizeBar");
+
+const scriptBar =
+document.getElementById("scriptBar");
+
+const textarea =
+document.getElementById("worksheetScript");
+
+const txt =
+document.getElementById("downloadTxtBtn");
+
+let resizing=false;
+
+
+handle.addEventListener("pointerdown", e=>{
+
+    resizing=true;
+
+    handle.setPointerCapture(e.pointerId);
+
+});
+
+
+handle.addEventListener("pointermove", e=>{
+
+    if(!resizing) return;
+
+
+const y = Math.max(40, e.clientY);
+
+let height =
+        window.innerHeight - y;
+
+
+    if(height < 24)
+        height = 24;
+
+
+    scriptBar.style.height =
+        height + "px";
+
+
+    textarea.style.height =
+        height + "px";
+
+
+});
+
+
+handle.addEventListener("pointerup",()=>{
+
+    resizing=false;
+
+});
+
+
+})();
+
+</script>
+
+<script>
+
+(function(){
+
+const bar =
+document.getElementById("tilesResizeBar");
+
+const tilesBar =
+document.getElementById("tilesBar");
+
+const scriptBar =
+document.getElementById("scriptBar");
+
+const leftColumn =
+document.getElementById("leftColumn");
+
+let dragging=false;
+
+let minTop=0;
+
+
+/* SET INITIAL POSITION */
+
+function setTileLimit(){
+
+    if(!leftColumn) return;
+
+    minTop =
+        leftColumn.offsetHeight;
+
+    tilesBar.style.top =
+        minTop + "px";
+
+    tilesBar.style.bottom =
+        scriptBar.offsetHeight + "px";
+
+}
+
+
+window.addEventListener(
+"load",
+setTileLimit
+);
+
+
+window.addEventListener(
+"resize",
+setTileLimit
+);
+
+
+
+/* DRAG */
+
+bar.addEventListener("pointerdown",e=>{
+
+    dragging=true;
+
+    bar.setPointerCapture(e.pointerId);
+
+});
+
+
+bar.addEventListener("pointermove",e=>{
+
+    if(!dragging) return;
+
+
+    let newTop =
+        e.clientY;
+
+
+    // NEVER move below page buttons
+    if(newTop > minTop){
+        newTop = minTop;
+    }
+
+
+    // never off the top
+    if(newTop < 0){
+        newTop = 0;
+    }
+
+
+    tilesBar.style.top =
+        newTop + "px";
+
+
+    tilesBar.style.bottom =
+        scriptBar.offsetHeight + "px";
+
+
+});
+
+
+bar.addEventListener("pointerup",()=>{
+
+    dragging=false;
+
+});
+
+
+})();
+
+</script>
+
+<script>
+
+(function(){
+
+const bar =
+document.getElementById("tilesResizeBar");
+
+const tilesBar =
+document.getElementById("tilesBar");
+
+const scriptBar =
+document.getElementById("scriptBar");
+
+const leftColumn =
+document.getElementById("leftColumn");
+
+let dragging=false;
+
+let maxY=0;
+
+
+function setTileLimit(){
+
+    if(!leftColumn) return;
+
+    maxY =
+        leftColumn.offsetHeight;
+
+    // initial position
+    const startHeight =
+        window.innerHeight -
+        maxY -
+        scriptBar.offsetHeight;
+
+    tilesBar.style.height =
+        startHeight + "px";
+
+}
+
+
+window.addEventListener(
+"load",
+setTileLimit
+);
+
+
+window.addEventListener(
+"resize",
+setTileLimit
+);
+
+
+
+bar.addEventListener("pointerdown",e=>{
+
+    dragging=true;
+
+    bar.setPointerCapture(e.pointerId);
+
+});
+
+
+bar.addEventListener("pointermove",e=>{
+
+    if(!dragging) return;
+
+
+    let y = e.clientY;
+
+
+    // splitter cannot go lower
+    if(y > maxY){
+        y = maxY;
+    }
+
+
+    // splitter cannot go above top
+    if(y < 0){
+        y = 0;
+    }
+
+
+    const newHeight =
+        window.innerHeight -
+        y -
+        scriptBar.offsetHeight;
+
+
+    tilesBar.style.height =
+        newHeight + "px";
+
+
+});
+
+
+bar.addEventListener("pointerup",()=>{
+
+    dragging=false;
+
+});
+
+
+})();
+
+</script>
+
+<script>
+
+(function(){
+
+/* ==========================================
+   TILE PLACEMENT SOUND ENGINE
+========================================== */
+
+
+const PlacementSound = {
+
+    audio:null,
+
+    file:"bubble-pop-406640.mp3",
+
+    volume:0.5
+
+};
+
+
+/* ==========================================
+   CREATE AUDIO
+========================================== */
+
+function initSound(){
+
+    if(PlacementSound.audio)
+        return;
+
+
+    PlacementSound.audio =
+    document.createElement("audio");
+
+
+    PlacementSound.audio.src =
+        PlacementSound.file;
+
+
+    PlacementSound.audio.volume =
+        PlacementSound.volume;
+
+
+    PlacementSound.audio.preload="auto";
+
+
+    document.body.appendChild(
+        PlacementSound.audio
+    );
+
+}
+
+
+
+/* ==========================================
+   PLAY SOUND
+========================================== */
+
+function playPlacementSound(){
+
+    initSound();
+
+
+    PlacementSound.audio.pause();
+
+
+    PlacementSound.audio.currentTime=0;
+
+
+    PlacementSound.audio.play()
+    .catch(err=>{
+
+        console.log(
+            "Placement sound waiting for user interaction"
+        );
+
+    });
+
+}
+
+
+
+/* ==========================================
+   WATCH FOR NEW TILES
+========================================== */
+
+function startWatcher(){
+
+
+    const spread =
+        document.getElementById("spread");
+
+
+    if(!spread)
+        return;
+
+
+
+    const observer =
+    new MutationObserver(function(records){
+
+
+        records.forEach(record=>{
+
+
+            record.addedNodes.forEach(node=>{
+
+
+                if(
+                    node.nodeType === 1 &&
+                    node.classList.contains("draggable")
+                ){
+
+                    playPlacementSound();
+
+                }
+
+
+            });
+
+
+        });
+
+
+    });
+
+
+
+    observer.observe(
+        spread,
+        {
+            childList:true
+        }
+    );
+
+
+}
+
+
+
+/* ==========================================
+   START
+========================================== */
+
+window.addEventListener(
+"DOMContentLoaded",
+startWatcher
+);
+
+
+
+/* expose control */
+
+window.PlacementSound =
+    PlacementSound;
+
+
+})();
+
+</script>
+
+<script>
+/* ==========================================
+   SPINNER MP3 PLAYER
+   Standalone
+========================================== */
+
+(function () {
+
+    const spinnerSound = new Audio("freesound_community-spinner-sound-36693.mp3");
+
+    spinnerSound.loop = true;
+    spinnerSound.preload = "auto";
+    spinnerSound.volume = .05;
+
+    let isPlaying = false;
+
+    function startSpinnerSound() {
+
+        if (isPlaying) return;
+
+        isPlaying = true;
+
+        spinnerSound.pause();
+        spinnerSound.currentTime = 0;
+
+        const playPromise = spinnerSound.play();
+
+        if (playPromise !== undefined) {
+            playPromise.catch(err => {
+                console.error("Spinner sound failed:", err);
+                isPlaying = false;
+            });
+        }
+
+    }
+
+    function stopSpinnerSound() {
+
+        if (!isPlaying) return;
+
+        isPlaying = false;
+
+        spinnerSound.pause();
+        spinnerSound.currentTime = 0;
+
+    }
+
+    /* Optional: preload once after the first user interaction */
+    function unlockAudio() {
+
+        spinnerSound.play()
+            .then(() => {
+                spinnerSound.pause();
+                spinnerSound.currentTime = 0;
+            })
+            .catch(() => {});
+
+        document.removeEventListener("pointerdown", unlockAudio);
+    }
+
+    document.addEventListener("pointerdown", unlockAudio, { once: true });
+
+    window.startSpinnerSound = startSpinnerSound;
+    window.stopSpinnerSound = stopSpinnerSound;
+
+})();
+</script>
+
+<script>
+/* ==========================================
+   COFFEE BREAK MUSIC PLAYER
+   Standalone
+========================================== */
+
+(function () {
+
+    const breakMusic = new Audio(
+        "musicalmix2020-bossa-nova-summer-instrumental-brazil-7969.mp3"
+    );
+
+    breakMusic.loop = true;
+    breakMusic.preload = "auto";
+    breakMusic.volume = 0.15;
+
+
+    let musicTimer = null;
+
+
+
+    function playMusicFromStart(){
+
+        breakMusic.pause();
+
+        breakMusic.currentTime = 0;
+
+
+        breakMusic.play()
+        .then(()=>{
+
+            console.log(
+                "Coffee music restarted"
+            );
+
+        })
+        .catch(err=>{
+
+            console.log(
+                "Coffee music blocked:",
+                err
+            );
+
+        });
+
+
+        watchBreakTimer();
+
+    }
+
+
+
+    function startBreakMusic(){
+
+        if(!breakMusic.paused){
+            return;
+        }
+
+
+        playMusicFromStart();
+
+    }
+
+
+
+    function restartBreakMusic(){
+
+        /*
+           Restart button
+        */
+
+        playMusicFromStart();
+
+    }
+
+
+
+    function restartMusicAfterExtension(){
+
+        /*
+           Up button:
+           Timer has already been increased elsewhere.
+           We only restart audio.
+        */
+
+        playMusicFromStart();
+
+    }
+
+
+
+    function stopBreakMusic(){
+
+        breakMusic.pause();
+
+        breakMusic.currentTime = 0;
+
+
+        clearInterval(musicTimer);
+
+        musicTimer = null;
+
+    }
+
+
+
+    function watchBreakTimer(){
+
+        clearInterval(musicTimer);
+
+
+        musicTimer = setInterval(()=>{
+
+
+            if(
+                typeof breakRemaining !== "undefined" &&
+                breakRemaining <= 0
+            ){
+
+                stopBreakMusic();
+
+            }
+
+
+        },500);
+
+    }
+
+
+
+    /*
+       Existing Break modal connection
+    */
+
+    const oldOpenBreakModal =
+        window.openBreakModal;
+
+
+    window.openBreakModal = function(){
+
+
+        const modal =
+            document.getElementById("breakModal");
+
+
+        if(
+            modal &&
+            modal.style.display === "block"
+        ){
+
+            stopBreakMusic();
+
+        }
+        else{
+
+            startBreakMusic();
+
+        }
+
+
+        oldOpenBreakModal();
+
+    };
+
+
+
+    /*
+       Global controls
+    */
+
+    window.startBreakMusic =
+        startBreakMusic;
+
+
+    window.stopBreakMusic =
+        stopBreakMusic;
+
+
+    window.restartBreakMusic =
+        restartBreakMusic;
+
+
+    window.restartMusicAfterExtension =
+        restartMusicAfterExtension;
+
+
+
+})();
+</script>
+
+<script>
+(function(){
+
+"use strict";
+
+/*==================================================
+  TALLYMAN STANDALONE (COLOR SYNC)
+  PART 1: Floating Launcher + Modal Shell
+==================================================*/
+
+const TM = {
+  version:"1.3",
+  width:360,
+  height:420
+};
+
+const style=document.createElement("style");
+style.textContent=`
+#tmWindow{
+  position:fixed;
+  right:100px;
+  bottom:130px;
+  width:${TM.width}px;
+  height:${TM.height}px;
+  display:none;
+  background:transparent;
+  z-index:2147483646;
+  font-family:system-ui,sans-serif;
+}
+#tmWindow.tmOpen{
+  display:block;
+}
+#tmPanel{
+  position:absolute;
+  inset:0;
+  background:#dbeafe;
+  border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.30);
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+}
+#tmDrag{
+  height:16px;
+  cursor:move;
+  background:#f2f2f2;
+  position:relative;
+  user-select:none;
+}
+#tmClose{
+  position:absolute;
+  right:4px;
+  top:1px;
+  width:14px;
+  height:14px;
+  border:none;
+  border-radius:50%;
+  background:#000;
+  color:#fff;
+  font-size:10px;
+  cursor:pointer;
+  padding:0;
+  line-height:14px;
+}
+#tmContent{
+  flex:1;
+  overflow:auto;
+  padding:12px;
+}
+`;
+document.head.appendChild(style);
+
+const win=document.createElement("div");
+win.id="tmWindow";
+win.innerHTML=`
+<div id="tmPanel">
+  <div id="tmDrag">
+    <button id="tmClose">×</button>
+  </div>
+  <div id="tmContent">
+    <h3 style="margin-top:0;">Tallyman</h3>
+    <div id="tmApp"></div>
+  </div>
+</div>
+`;
+document.body.appendChild(win);
+
+function openTallyman(){
+  win.classList.add("tmOpen");
+}
+
+document.addEventListener("click",function(e){
+    const trigger = e.target.closest("#tallymanLeftBtn, #tallymanRightBtn, [data-open-tallyman]");
+    if(trigger){
+        openTallyman();
+    }
+});
+
+document.getElementById("tmClose").addEventListener("click",function(e){
+    e.stopPropagation();
+    win.classList.remove("tmOpen");
+});
+
+function drag(target,handle){
+  let dragging=false;
+  let ox=0;
+  let oy=0;
+  handle.addEventListener("mousedown",function(e){
+    dragging=true;
+    ox=e.clientX-target.offsetLeft;
+    oy=e.clientY-target.offsetTop;
+  });
+  document.addEventListener("mousemove",function(e){
+    if(!dragging)return;
+    target.style.left=(e.clientX-ox)+"px";
+    target.style.top=(e.clientY-oy)+"px";
+    target.style.right="auto";
+    target.style.bottom="auto";
+  });
+  document.addEventListener("mouseup",function(){
+    dragging=false;
+  });
+}
+
+drag(win, document.getElementById("tmDrag"));
+
+/*==================================================
+  PART 2: Interface Setup
+==================================================*/
+
+const app=document.getElementById("tmApp");
+app.innerHTML=`
+<div id="tmWrapper">
+  <div id="tmTile">Select or generate a student</div>
+  <div id="tmScoreboard">
+    <div class="tmTeam">
+      <div class="tmHeader">Blue</div>
+      <div class="tmTallies" data-team="Blue"></div>
+      <div class="tmScore" id="tmScoreBlue">0</div>
+      <button class="tmDelete" data-team="Blue">Delete</button>
+    </div>
+    <div class="tmTeam">
+      <div class="tmHeader">Green</div>
+      <div class="tmTallies" data-team="Green"></div>
+      <div class="tmScore" id="tmScoreGreen">0</div>
+      <button class="tmDelete" data-team="Green">Delete</button>
+    </div>
+    <div class="tmTeam">
+      <div class="tmHeader">Orange</div>
+      <div class="tmTallies" data-team="Orange"></div>
+      <div class="tmScore" id="tmScoreOrange">0</div>
+      <button class="tmDelete" data-team="Orange">Delete</button>
+    </div>
+    <div class="tmTeam">
+      <div class="tmHeader">Red</div>
+      <div class="tmTallies" data-team="Red"></div>
+      <div class="tmScore" id="tmScoreRed">0</div>
+      <button class="tmDelete" data-team="Red">Delete</button>
+    </div>
+  </div>
+</div>
+`;
+
+style.textContent+=`
+#tmWrapper{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+#tmTile{
+  height:48px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:16px;
+  font-weight:700;
+  border-radius:8px;
+  background:#ececec;
+  color:#111;
+  transition:background .25s, color .25s;
+  user-select:none;
+  cursor:pointer;
+  padding: 0 8px;
+  text-align: center;
+}
+#tmScoreboard{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+}
+.tmTeam{
+  border:1px solid #ccc;
+  border-radius:6px;
+  background:#fff;
+  display:grid;
+  grid-template-rows:auto 1fr auto;
+}
+.tmHeader{
+  font-size:10px;
+  font-weight:700;
+  text-align:center;
+  padding:3px;
+}
+.tmTallies{
+  min-height:54px;
+  padding:4px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+  cursor:pointer;
+}
+.tmGroup{
+  position:relative;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:3px;
+  width:100%;
+}
+.tmGroup svg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+}
+.tmStick{
+  width:2px;
+  height:14px;
+  background:#111;
+}
+.tmScore{
+  border-top:1px solid #ddd;
+  text-align:center;
+  font-size:10px;
+  font-weight:700;
+  padding:2px;
+}
+.tmDelete{
+  width:100%;
+  border:none;
+  border-top:1px solid #ddd;
+  background:#f3f3f3;
+  font-size:10px;
+  padding:3px 0;
+  cursor:pointer;
+}
+.tmDelete:hover{
+  background:#ffd7d7;
+}
+`;
+
+/*==================================================
+  PART 3 & 4: Global Logic, Name & Color Sync
+==================================================*/
+
+const tmTile = document.getElementById("tmTile");
+
+function tmTriggerExternalNext() {
+    if (typeof window.nextStudent === "function") {
+        window.nextStudent();
+    } else {
+        const mainGenBtn = document.querySelector("#randomBtn, .random-btn, [data-random-student], #generateBtn");
+        if (mainGenBtn) mainGenBtn.click();
+    }
+}
+
+// Determines if a background color is dark to automatically adjust text color for contrast
+function isColorDark(colorStr) {
+    let rgb = colorStr.match(/\d+/g);
+    if (!rgb || rgb.length < 3) return false;
+    let brightness = (Number(rgb[0]) * 299 + Number(rgb[1]) * 587 + Number(rgb[2]) * 114) / 1000;
+    return brightness < 125;
+}
+
+// Scans the main page control column / UI for the active student element, updating text and styling color
+function updateTmTileFromControlColumn() {
+    try {
+        const controlCol = document.querySelector("#controlColumn, .control-column, aside, .sidebar") || document.body;
+        const candidates = controlCol.querySelectorAll("div, span, h1, h2, h3, h4");
+        
+        for (let el of candidates) {
+            if (el.id === "tmWindow" || el.closest("#tmWindow")) continue;
+            
+            const idClass = (el.id + " " + el.className).toLowerCase();
+            if (idClass.includes("student") || idClass.includes("name") || idClass.includes("display") || idClass.includes("tile")) {
+                const text = el.textContent.trim();
+                if (text && text.length > 0 && text.length < 35 && !text.includes("Tallyman") && !text.includes("Scoreboard")) {
+                    tmTile.textContent = text;
+                    
+                    // Extract background style/color from the matched student element in the main logic
+                    const computed = window.getComputedStyle(el);
+                    const bg = computed.backgroundColor;
+                    
+                    if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") {
+                        tmTile.style.background = bg;
+                        tmTile.style.color = isColorDark(bg) ? "#ffffff" : "#111111";
+                    } else {
+                        // Fallback if background is on an inline style attribute
+                        const inlineBg = el.style.backgroundColor || el.style.background;
+                        if (inlineBg) {
+                            tmTile.style.background = inlineBg;
+                            tmTile.style.color = isColorDark(inlineBg) ? "#ffffff" : "#111111";
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    } catch(e) {
+        // Fail silently to keep application stable
+    }
+}
+
+// Continuous check to sync name and color instantly
+setInterval(updateTmTileFromControlColumn, 250);
+
+tmTile.addEventListener("click", function() {
+    tmTriggerExternalNext();
+    setTimeout(updateTmTileFromControlColumn, 100);
+});
+
+const tmScores = { Blue:0, Green:0, Orange:0, Red:0 };
+
+function tmAddTally(team){
+    tmScores[team]++;
+    const area = document.querySelector('.tmTallies[data-team="'+team+'"]');
+    if(!area) return;
+
+    let groups = area.querySelectorAll(".tmGroup");
+    let group = groups[groups.length-1];
+
+    if(!group || Number(group.dataset.count)>=5){
+        group = document.createElement("div");
+        group.className = "tmGroup";
+        group.dataset.count = 0;
+        area.appendChild(group);
+    }
+
+    let count = Number(group.dataset.count);
+    if(count<4){
+        const stick = document.createElement("div");
+        stick.className = "tmStick";
+        group.appendChild(stick);
+    }
+    count++;
+
+    if(count===5){
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", "0 0 20 20");
+        svg.innerHTML=`<line x1="2" y1="2" x2="18" y2="18" stroke="#111" stroke-width="2" stroke-linecap="round"/>`;
+        group.appendChild(svg);
+    }
+
+    group.dataset.count = count;
+    document.getElementById("tmScore"+team).textContent = tmScores[team];
+}
+
+function tmDeleteTally(team){
+    if(tmScores[team]===0) return;
+    tmScores[team]--;
+    const area = document.querySelector('.tmTallies[data-team="'+team+'"]');
+    if(!area) return;
+
+    const groups = area.querySelectorAll(".tmGroup");
+    if(!groups.length) return;
+
+    const group = groups[groups.length-1];
+    let count = Number(group.dataset.count);
+
+    if(count===5){
+        const svg = group.querySelector("svg");
+        if(svg) svg.remove();
+    } else {
+        const sticks = group.querySelectorAll(".tmStick");
+        if(sticks.length) sticks[sticks.length-1].remove();
+    }
+
+    count--;
+    group.dataset.count = count;
+    if(count===0){
+        group.remove();
+    }
+    document.getElementById("tmScore"+team).textContent = tmScores[team];
+}
+
+function tmResetScores(){
+    Object.keys(tmScores).forEach(team=>{
+        tmScores[team]=0;
+        document.getElementById("tmScore"+team).textContent = 0;
+        const area = document.querySelector('.tmTallies[data-team="'+team+'"]');
+        if(area) area.innerHTML="";
+    });
+}
+
+document.querySelectorAll(".tmTallies").forEach(panel=>{
+    panel.addEventListener("click", function(){
+        tmAddTally(panel.dataset.team);
+    });
+});
+
+document.querySelectorAll(".tmDelete").forEach(btn=>{
+    btn.addEventListener("click", function(e){
+        e.stopPropagation();
+        tmDeleteTally(btn.dataset.team);
+    });
+});
+
+/*==================================================
+  PART 5: Initialization & Shortcuts
+==================================================*/
+
+window.tmAddTally = tmAddTally;
+window.Tallyman = {
+    version: "1.3",
+    add: tmAddTally,
+    reset: tmResetScores,
+    scores: tmScores
+};
+
+document.addEventListener("keydown", function(e){
+    if(!win.classList.contains("tmOpen")) return;
+    switch(e.key){
+        case " ":
+            e.preventDefault();
+            tmTriggerExternalNext();
+            setTimeout(updateTmTileFromControlColumn, 100);
+            break;
+        case "1": tmAddTally("Blue"); break;
+        case "2": tmAddTally("Green"); break;
+        case "3": tmAddTally("Orange"); break;
+        case "4": tmAddTally("Red"); break;
+    }
+});
+
+const leftBtn = document.getElementById("tallymanLeftBtn");
+if(leftBtn) {
+    leftBtn.addEventListener("dblclick", function(){
+        tmResetScores();
+    });
+}
+
+win.classList.remove("tmOpen");
+console.log("Tallyman Standalone Loaded (Name & Color Synced)");
+
+})();
+</script>
+<script>
+(function(){
+
+"use strict";
+
+/*========================================
+ TALLYMAN AUDIO OBSERVER
+ No Tallyman edits required
+========================================*/
+
+let count = -1;
+let audio = null;
+
+function initAudio(){
+    if(!audio){
+        audio = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if(audio.state==="suspended"){
+        audio.resume();
+    }
+}
+
+/*========================================
+ PENCIL SCRATCH
+========================================*/
+
+function pencilScratch(){
+    initAudio();
+    const ctx=audio;
+    const duration=.18;
+
+    const buffer = ctx.createBuffer(
+        1,
+        ctx.sampleRate*duration,
+        ctx.sampleRate
+    );
+
+    const data = buffer.getChannelData(0);
+
+    for(let i=0;i<data.length;i++){
+        data[i]=
+        (Math.random()*2-1)
+        *
+        (1-i/data.length)
+        *
+        .35;
+    }
+
+    const source = ctx.createBufferSource();
+    const filter = ctx.createBiquadFilter();
+    const gain = ctx.createGain();
+
+    filter.type="bandpass";
+    filter.frequency.value=2800;
+
+    gain.gain.value=.35;
+
+    source.buffer=buffer;
+
+    source
+    .connect(filter)
+    .connect(gain)
+    .connect(ctx.destination);
+
+    source.start();
+}
+
+/*========================================
+ WATCH TALLY STROKES
+========================================*/
+
+const observer = new MutationObserver(function(){
+    const groups = document.querySelectorAll(".tmGroup");
+    let total = 0;
+
+    groups.forEach(group=>{
+        total += Number(group.dataset.count || 0);
+    });
+
+    if(total !== count){
+        // Only trigger scratch if the total is increasing (a tally mark was made)
+        if(total > count && count !== -1){
+            pencilScratch();
+        }
+        count = total;
+    }
+});
+
+function start(){
+    const board = document.querySelector("#tmScoreboard");
+
+    if(!board){
+        setTimeout(start,500);
+        return;
+    }
+
+    observer.observe(
+        board,
+        {
+            childList:true,
+            subtree:true
+        }
+    );
+
+    console.log(
+        "Tallyman audio observer loaded"
+    );
+}
+
+start();
+
+})();
+</script>
+
+<script>
+
+(function(){
+
+"use strict";
+
+/*==================================================
+ TALLYMAN SOUND FX ADD-ON
+ Pencil Scratch + Fairy Dust
+==================================================*/
+
+
+const TMSoundFX = {
+
+
+
+audio:null,
+
+
+init:function(){
+
+    if(!this.audio){
+
+        this.audio =
+        new (window.AudioContext ||
+             window.webkitAudioContext)();
+
+    }
+
+
+    if(this.audio.state==="suspended"){
+
+        this.audio.resume();
+
+    }
+
+},
+
+
+
+/*----------------------------------
+ SINGLE PENCIL SCRATCH
+----------------------------------*/
+
+pencil:function(){
+
+    this.init();
+
+    const ctx=this.audio;
+
+
+    const duration=0.22;
+
+
+    const buffer =
+    ctx.createBuffer(
+        1,
+        ctx.sampleRate * duration,
+        ctx.sampleRate
+    );
+
+
+    const data =
+    buffer.getChannelData(0);
+
+
+
+    for(let i=0;i<data.length;i++){
+
+        const fade =
+        1 - (i/data.length);
+
+
+        data[i] =
+        (Math.random()*2-1)
+        *
+        fade
+        *
+        0.35;
+
+    }
+
+
+
+    const source =
+    ctx.createBufferSource();
+
+
+    const filter =
+    ctx.createBiquadFilter();
+
+
+    const gain =
+    ctx.createGain();
+
+
+
+    filter.type="bandpass";
+
+    filter.frequency.value=2800;
+
+    filter.Q.value=2.5;
+
+
+
+    gain.gain.setValueAtTime(
+        0.001,
+        ctx.currentTime
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.35,
+        ctx.currentTime+0.015
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        ctx.currentTime+duration
+    );
+
+
+
+    source.buffer=buffer;
+
+
+    source
+    .connect(filter)
+    .connect(gain)
+    .connect(ctx.destination);
+
+
+
+    source.start();
+
+},
+
+
+
+
+/*----------------------------------
+ FAIRY DUST BLING
+----------------------------------*/
+
+fairy:function(){
+
+    this.init();
+
+
+    const ctx=this.audio;
+
+
+    const notes=[
+        1200,
+        1600,
+        2200
+    ];
+
+
+    notes.forEach((freq,index)=>{
+
+
+        const osc =
+        ctx.createOscillator();
+
+
+        const gain =
+        ctx.createGain();
+
+
+
+        osc.type="sine";
+
+
+        osc.frequency.value=freq;
+
+
+
+        gain.gain.setValueAtTime(
+            0.001,
+            ctx.currentTime
+        );
+
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.18,
+            ctx.currentTime+0.02+(index*.04)
+        );
+
+
+        gain.gain.exponentialRampToValueAtTime(
+            0.001,
+            ctx.currentTime+0.35+(index*.05)
+        );
+
+
+
+        osc
+        .connect(gain)
+        .connect(ctx.destination);
+
+
+
+        osc.start(
+            ctx.currentTime+(index*.04)
+        );
+
+
+        osc.stop(
+            ctx.currentTime+0.5
+        );
+
+
+    });
+
+}
+
+
+
+};
+
+
+
+/*==================================================
+ WAIT FOR TALLYMAN
+==================================================*/
+
+
+function attachSound(){
+
+
+if(!window.tmAddTally){
+
+    console.warn(
+    "Tallyman add function not found"
+    );
+
+    return;
+
+}
+
+
+
+const originalAdd =
+window.tmAddTally;
+
+
+
+window.tmAddTally =
+function(team){
+
+
+    originalAdd(team);
+
+
+
+/* Scratch */
+
+TMSoundFX.pencil();
+
+/* Look at the real score */
+
+const score =
+window.Tallyman.scores[team];
+
+if(score > 0 && score % 5 === 0){
+
+    TMSoundFX.fairy();
+
+}
+
+
+console.log(
+"Tallyman Sound FX Loaded"
+);
+
+
+}
+
+
+
+attachSound();
+
+
+
+})();
+
+</script>
+
+<script>
+
+/* ==========================
+   PAGE BUTTON SOUND
+   PLAYS EVERY CLICK
+========================== */
+
+function playLetsGo(){
+
+    const audio =
+    new Audio(
+    "8e8118_counter_strike_go_go_go_sound_effect.mp3"
+    );
+
+
+    audio.volume = 1.0;
+
+
+    audio.play()
+    .catch(error => {
+
+        console.log(
+            "Sound error:",
+            error
+        );
+
+    });
+
+}
+
+</script>
+
+<script>
+
+/* ==========================
+   MINI TIMER STANDALONE
+========================== */
+
+(function(){
+
+const style = document.createElement("style");
+
+style.textContent = `
+
+#miniTimer{
+
+    position:fixed;
+
+    top:2px;
+
+    right:92px;
+
+    width:80px;
+
+    height:20px;
+
+    background:#ff9900;
+
+    border:1px solid #cc6600;
+
+    border-radius:4px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:10px;
+
+    font-weight:bold;
+
+    color:black;
+
+    z-index:100000;
+
+    user-select:none;
+
+    font-family:Arial,sans-serif;
+
+}
+
+
+#miniTimer span{
+
+    cursor:pointer;
+
+    font-size:12px;
+
+    line-height:20px;
+
+    padding:0 3px;
+
+}
+
+
+#miniTimerTime{
+
+    min-width:25px;
+
+    text-align:center;
+
+}
+
+`;
+
+document.head.appendChild(style);
+
+
+
+const timer = document.createElement("div");
+
+timer.id="miniTimer";
+
+
+timer.innerHTML=`
+
+<span id="miniDown">▼</span>
+
+<span id="miniTimerTime">00:00</span>
+
+<span id="miniUp">▲</span>
+
+`;
+
+
+document.body.appendChild(timer);
+
+
+
+let seconds = 0;
+
+let interval = null;
+
+
+
+const display =
+document.getElementById("miniTimerTime");
+
+
+
+let audioCtx = null;
+
+
+
+function initAudio(){
+
+    if(!audioCtx){
+
+        audioCtx =
+        new (window.AudioContext || window.webkitAudioContext)();
+
+    }
+
+
+    if(audioCtx.state === "suspended"){
+
+        audioCtx.resume();
+
+    }
+
+}
+
+
+
+/* ==========================
+   UPDATE DISPLAY
+========================== */
+
+function update(){
+
+    let m=Math.floor(seconds/60);
+
+    let s=seconds%60;
+
+
+    display.textContent =
+    String(m).padStart(2,"0")
+    +":"
+    +String(s).padStart(2,"0");
+
+}
+
+
+
+/* ==========================
+   ELECTRONIC BUZZER
+========================== */
+
+function playBuzzer(){
+
+    if(!audioCtx)
+        return;
+
+
+    const osc =
+    audioCtx.createOscillator();
+
+
+    const gain =
+    audioCtx.createGain();
+
+
+    osc.type="square";
+
+    osc.frequency.value=900;
+
+
+    gain.gain.setValueAtTime(
+        0.3,
+        audioCtx.currentTime
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        audioCtx.currentTime + 0.8
+    );
+
+
+    osc.connect(gain);
+
+    gain.connect(audioCtx.destination);
+
+
+    osc.start();
+
+    osc.stop(
+        audioCtx.currentTime + 0.8
+    );
+
+}
+
+
+
+/* ==========================
+   START COUNTDOWN
+========================== */
+
+function start(){
+
+    if(interval)
+        clearInterval(interval);
+
+
+    interval=setInterval(()=>{
+
+
+        seconds--;
+
+        update();
+
+
+        if(seconds<=0){
+
+
+            clearInterval(interval);
+
+            interval=null;
+
+
+            seconds=0;
+
+            update();
+
+
+            playBuzzer();
+
+
+        }
+
+
+    },1000);
+
+}
+
+
+
+/* ==========================
+   CONTROLS
+========================== */
+
+
+document.getElementById("miniUp")
+.onclick=function(){
+
+    initAudio();
+
+
+    seconds+=60;
+
+
+    update();
+
+
+    start();
+
+};
+
+
+
+document.getElementById("miniDown")
+.onclick=function(){
+
+    initAudio();
+
+
+    seconds-=60;
+
+
+    if(seconds<0)
+        seconds=0;
+
+
+    update();
+
+
+    if(seconds>0)
+        start();
+
+};
+
+
+
+update();
+
+
+
+})();
+
+</script>
+<script>
+
+/*==========================================
+ PERFECTLY PRACTICAL LAUNCHER
+ Standalone
+==========================================*/
+
+/*==========================================
+ PERFECTLY PRACTICAL LAUNCHER
+ Standalone
+==========================================*/
+
+(function(){
+
+"use strict";
+
+/*------------------------------------------
+ Configuration
+------------------------------------------*/
+
+const LOCAL_URL="file:///C:/Users/User/Documents/perfectly-practical-english.github.io/index.html";
+
+const ONLINE_URL="https://perfectly-practical-english.github.io/";
+
+
+/*------------------------------------------
+ Init
+------------------------------------------*/
+
+initLauncher("ppLauncher");
+initLauncher("ppLauncherRight");
+
+/*------------------------------------------
+ Launcher
+------------------------------------------*/
+
+function initLauncher(id){
+
+    const sel=document.getElementById(id);
+
+    if(!sel) return;
+
+    sel.selectedIndex=0;
+
+    sel.addEventListener("change",()=>{
+
+        switch(sel.value){
+
+            case "iframe":
+                window.open(
+                    LOCAL_URL,
+                    "_blank"
+                );
+                break;
+
+            case "online":
+                window.open(
+                    ONLINE_URL,
+                    "_blank"
+                );
+                break;
+
+        }
+
+        sel.selectedIndex=0;
+
+    });
+
+}
+
+})();</script>
+
+<!-- ==========================================================
+     JELLY BEAN JAR MODAL SYSTEM (STANDALONE SCRIPT)
+     Controlled by #leftBtn (toggle) and #rightBtn (toggle)
+========================================================== -->
+<style>
+  /* Full-screen transparent, click-through overlay */
+  #jellyBeanModalContainer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: transparent;
+    pointer-events: none;
+    z-index: 50000;
+    display: none;
+  }
+
+  /* Main Floating Modal Box - Draggable anywhere inside its background area */
+  #jbJarWrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.4); /* Ready for future transparency changes */
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 2px solid rgba(255, 255, 255, 0.7);
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    pointer-events: auto;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    cursor: move;
+  }
+
+  /* Jar Container */
+  #jbJarContainer {
+    position: relative;
+    width: 320px;
+    height: 468px;
+    aspect-ratio: 520 / 760;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: visible;
+  }
+
+  #jbJarBack, #jbBeanCanvas, #jbJarGlassOverlay {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+  }
+
+  #jbJarBack { z-index: 1; }
+  #jbBeanCanvas { z-index: 2; }
+  #jbJarGlassOverlay { z-index: 5; }
+
+  /* Lid Image at full original size and position */
+  #jbJarLid {
+    position: absolute;
+    width: 98%;
+    left: 1%;
+    top: 0;
+    margin-top: 55px;
+transform: translateX(3px); /* Shifts it precisely 10px right */
+    object-fit: contain;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  /* Lid Hitbox precisely matching the full visible dimensions of the lid asset */
+  #jbLidHitbox {
+    position: absolute;
+    width: 98%;
+    left: 1%;
+    top: 0;
+    height: 22%; /* Covers the full vertical height of the lid asset */
+    margin-top: 55px;
+transform: translateX(3px); /* Keeps hitbox aligned with the image */
+    cursor: grab;
+    z-index: 105;
+    pointer-events: auto;
+    touch-action: none;
+    background: rgba(0, 0, 0, 0);
+  }
+
+  #jbLidHitbox:active {
+    cursor: grabbing;
+  }
+
+  #jbMouthHotspot {
+    position: absolute;
+    width: calc(50% + 5px);
+    height: 14%;
+    left: calc(25% - 2.5px);
+    top: 8%;
+    z-index: 30;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0);
+  }
+
+  #jbScoreDisplay {
+    position: absolute;
+    left: 50%;
+    top: 52%;
+    transform: translate(-50%, -50%);
+    width: 22%;
+    height: 12%;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.92);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 22px;
+    font-weight: bold;
+    color: #222;
+    cursor: pointer;
+    z-index: 40;
+    transition: transform 0.1s ease, background 0.1s ease;
+  }
+
+  #jbScoreDisplay:active {
+    transform: translate(-50%, -50%) scale(0.9);
+    background: rgba(255, 240, 180, 0.95);
+  }
+
+  /* Bottom Controls Bar */
+  #jbControls {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    z-index: 150;
+  }
+
+  #jbClassSelect {
+    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background: #fff;
+  }
+
+.jb-btn {
+    font-family: inherit; /* Ensures it matches the rest of your text/buttons */
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 6px;
+    border: 1px solid #bbb;
+    background-color: #ffffff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: background-color 0.15s ease;
+  }
+
+  .jb-btn:hover {
+    background-color: #f0f0f0;
+  }
+
+
+.draggable.disappearing,
+.draggable:not(:hover):not(:active) {
+    /* Ensures no interpolation happens on removal */
+    transition: none !important;
+}
+
+.playlistBtn {
+    width: 100%;
+    height: 24px;
+    font-size: 10px;
+    font-family: Arial, sans-serif;
+    border: none;
+    border-bottom: 1px solid #999;
+    background: #f7f7f7;
+    cursor: pointer;
+    padding: 0;
+    text-align: center;
+}
+
+.playlistBtn:hover {
+    background: #ddd;
+}
+</style>
+
+<!-- MODAL HTML STRUCTURE -->
+<div id="jellyBeanModalContainer">
+  <div id="jbJarWrapper">
+    <div id="jbJarContainer">
+<!-- Background Layer -->
+      <img id="jbJarBack" src="Jar_Background.png" draggable="false" alt="Jar Back">
+
+      <!-- Cosmetic Background Animation Canvas Layer -->
+      <canvas id="jbAnimCanvas" width="520" height="760" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:1.5;"></canvas>
+
+      <!-- Dynamic Bean Canvas Layer -->
+      <canvas id="jbBeanCanvas" width="520" height="760" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:2;"></canvas>
+
+      <!-- SVG Glass Reflection Overlay -->
+      <svg id="jbJarGlassOverlay" viewBox="0 0 520 760">
+        <path d="M150,180 Q130,220 130,620 Q130,660 170,660 L350,660 Q390,660 390,620 Q390,220 370,180 Z" 
+              fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="8"/>
+        <path d="M155,200 Q142,250 142,600" 
+              fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="6" stroke-linecap="round"/>
+      </svg>
+
+      <!-- Draggable Lid & Full-Coverage Hitbox -->
+      <img id="jbJarLid" src="Jar_Lid.png" draggable="false" alt="Jar Lid">
+      <div id="jbLidHitbox" title="Drag Lid"></div>
+
+      <!-- Hotspots -->
+      <div id="jbMouthHotspot" title="Click to Add Bean"></div>
+      <div id="jbScoreDisplay" title="Click to Remove Bean">0</div>
+    </div>
+
+    <!-- Controls Row -->
+    <div id="jbControls">
+      <select id="jbClassSelect">
+        <option>11.1</option>
+        <option>11.2</option>
+        <option>11.3</option>
+        <option>12.1</option>
+        <option>12.2</option>
+        <option>12.3</option>
+        <option>13.1</option>
+        <option>13.2</option>
+        <option>13.3</option>
+      </select>
+
+      <button id="jbSaveButton" class="jb-btn">Save</button>
+      <input type="file" id="jbFileInput" accept=".txt" hidden>
+      <button id="jbBrowseButton" class="jb-btn">Update</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  let modalOpen = false;
+
+  const modalContainer = document.getElementById("jellyBeanModalContainer");
+  const jarWrapper = document.getElementById("jbJarWrapper");
+  const jarContainer = document.getElementById("jbJarContainer");
+  const beanCanvas = document.getElementById("jbBeanCanvas");
+  const ctx = beanCanvas.getContext("2d");
+
+  const scoreDisplay = document.getElementById("jbScoreDisplay");
+  const mouthHotspot = document.getElementById("jbMouthHotspot");
+  const jarLid = document.getElementById("jbJarLid");
+  const lidHitbox = document.getElementById("jbLidHitbox");
+
+  const saveButton = document.getElementById("jbSaveButton");
+  const browseButton = document.getElementById("jbBrowseButton");
+  const fileInput = document.getElementById("jbFileInput");
+  const classSelect = document.getElementById("jbClassSelect");
+
+  const MAX_BEANS = 350;
+  const BEAN_RADIUS = 20.9;
+
+  const jarBounds = {
+    left: 135,
+    right: 385,
+    top: 175,
+    bottom: 645
+  };
+
+  beanCanvas.width = 520;
+  beanCanvas.height = 760;
+
+  let beans = [];
+  let score = 0;
+
+  const BEAN_COLORS = [
+    { fill: "#E74C3C" },
+    { fill: "#F1C40F" },
+    { fill: "#E84393" },
+    { fill: "#2ECC71" },
+    { fill: "#9B59B6" },
+    { fill: "#E67E22" },
+    { fill: "#3498DB" }
+  ];
+
+  function randomBeanColor() {
+    return BEAN_COLORS[Math.floor(Math.random() * BEAN_COLORS.length)];
+  }
+
+  function updateScore() {
+    scoreDisplay.textContent = score;
+  }
+
+  function toggleModal() {
+    modalOpen = !modalOpen;
+    modalContainer.style.display = modalOpen ? "block" : "none";
+  }
+
+  function getTargetPosition(index) {
+    const maxCols = 6;
+    const col = index % maxCols;
+    const row = Math.floor(index / maxCols);
+
+    const availableWidth = (jarBounds.right - 10) - (jarBounds.left + 10) - (BEAN_RADIUS * 2);
+    const colSpacing = availableWidth / (maxCols - 1);
+
+    const baseTargetX = (jarBounds.left + 10) + BEAN_RADIUS + (col * colSpacing);
+    const baseFloor = (jarBounds.bottom - 5) + 15;
+    const baseTargetY = baseFloor - BEAN_RADIUS - (row * (BEAN_RADIUS * 1.3));
+
+    const jarCenterX = (jarBounds.left + jarBounds.right) / 2;
+    const distanceFromCenter = Math.abs(baseTargetX - jarCenterX);
+    const maxDistanceFromCenter = (jarBounds.right - jarBounds.left) / 2;
+    const edgeCurveFactor = Math.min(1, distanceFromCenter / maxDistanceFromCenter);
+    const edgeLift = (row === 0) ? (edgeCurveFactor * 8) : 0;
+
+    const jitterX = Math.sin(index * 12.9898) * 12;
+    const jitterY = Math.cos(index * 78.233) * 6;
+
+    return { 
+      targetX: baseTargetX + jitterX, 
+      targetY: (baseTargetY - edgeLift) + jitterY 
+    };
+  }
+
+  function createBean() {
+    if (score >= MAX_BEANS) return;
+
+    const { targetX, targetY } = getTargetPosition(beans.length);
+    const angleJitter = (Math.sin(beans.length * 43.11) * 0.6) + ((Math.random() - 0.5) * 0.4);
+
+    const bean = {
+      x: targetX,
+      y: targetY,
+      targetX: targetX,
+      targetY: targetY,
+      angle: angleJitter,
+      color: randomBeanColor(),
+      alpha: 1,
+      removing: false
+    };
+
+    beans.push(bean);
+    score++;
+    updateScore();
+  }
+
+  function removeBean() {
+    if (score <= 0) return;
+
+    let selectedBean = null;
+    for (let i = beans.length - 1; i >= 0; i--) {
+      if (!beans[i].removing) {
+        selectedBean = beans[i];
+        break;
+      }
+    }
+
+    if (!selectedBean) return;
+
+    selectedBean.removing = true;
+    selectedBean.alpha = 1;
+
+    score--;
+    updateScore();
+
+    let activeIdx = 0;
+    for (const bean of beans) {
+      if (!bean.removing) {
+        const { targetX, targetY } = getTargetPosition(activeIdx);
+        bean.targetX = targetX;
+        bean.targetY = targetY;
+        bean.x = targetX;
+        bean.y = targetY;
+        activeIdx++;
+      }
+    }
+  }
+
+function updateBeans() {
+    // Instantly remove beans without flying up or moving positions
+    beans = beans.filter(b => !b.removing);
+  }
+
+  function drawBeans() {
+    ctx.clearRect(0, 0, beanCanvas.width, beanCanvas.height);
+
+    for (const bean of beans) {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, bean.alpha);
+      ctx.translate(bean.x, bean.y);
+      ctx.rotate(bean.angle);
+
+      ctx.beginPath();
+      ctx.moveTo(-19, -6);
+      ctx.bezierCurveTo(-24, -22, 19, -25, 24, -6);
+      ctx.bezierCurveTo(28, 11, -4, 25, -19, 15);
+      ctx.bezierCurveTo(-26, 9, -24, 0, -19, -6);
+      ctx.closePath();
+
+      ctx.fillStyle = bean.color.fill;
+      ctx.fill();
+
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.12)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.ellipse(-5, -9, 9, 3.5, Math.PI / 4, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
+      ctx.fill();
+
+      ctx.restore();
+    }
+  }
+
+  // --- Lid Dragging Logic ---
+  let lidDragging = false;
+  let lidOffsetX = 0;
+  let lidOffsetY = 0;
+  let currentLidX = 0;
+  let currentLidY = 55;
+  let targetLidX = 0;
+  let targetLidY = 55;
+
+  lidHitbox.addEventListener("pointerdown", (event) => {
+    event.stopPropagation();
+    lidDragging = true;
+    lidHitbox.setPointerCapture(event.pointerId);
+
+    const containerRect = jarContainer.getBoundingClientRect();
+    const lidRect = jarLid.getBoundingClientRect();
+    
+    lidOffsetX = event.clientX - lidRect.left;
+    lidOffsetY = event.clientY - lidRect.top;
+    
+    targetLidX = lidRect.left - containerRect.left;
+    targetLidY = lidRect.top - containerRect.top;
+  });
+
+  lidHitbox.addEventListener("pointermove", (event) => {
+    if (!lidDragging) return;
+    event.stopPropagation();
+    const containerRect = jarContainer.getBoundingClientRect();
+    targetLidX = event.clientX - containerRect.left - lidOffsetX;
+    targetLidY = event.clientY - containerRect.top - lidOffsetY;
+  });
+
+  const stopLidDrag = (event) => {
+    if (lidDragging) {
+      lidDragging = false;
+      try { lidHitbox.releasePointerCapture(event.pointerId); } catch (e) {}
+    }
+  };
+  lidHitbox.addEventListener("pointerup", stopLidDrag);
+  lidHitbox.addEventListener("pointercancel", stopLidDrag);
+
+  function animate() {
+    if (modalOpen) {
+      currentLidX += (targetLidX - currentLidX) * 0.25;
+      currentLidY += (targetLidY - currentLidY) * 0.25;
+
+      jarLid.style.left = currentLidX + "px";
+      jarLid.style.top = currentLidY + "px";
+      jarLid.style.margin = "0";
+
+      lidHitbox.style.left = currentLidX + "px";
+      lidHitbox.style.top = currentLidY + "px";
+      lidHitbox.style.margin = "0";
+
+      updateBeans();
+      drawBeans();
+    }
+    requestAnimationFrame(animate);
+  }
+
+  function getDateString() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+
+  saveButton.addEventListener("pointerdown", (e) => {
+    e.stopPropagation();
+    const selectedClass = classSelect.value;
+    const filename = `${selectedClass}_${getDateString()}.txt`;
+    const blob = new Blob([score.toString()], { type: "text/plain" });
+
+    const downloadLink = document.createElement("a");
+    downloadLink.href = URL.createObjectURL(blob);
+    downloadLink.download = filename;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+    URL.revokeObjectURL(downloadLink.href);
+  });
+
+  browseButton.addEventListener("pointerdown", (e) => {
+    e.stopPropagation();
+    fileInput.click();
+  });
+
+  fileInput.addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const loadedScore = parseInt(e.target.result.trim());
+      if (isNaN(loadedScore) || loadedScore < 0) {
+        alert("Invalid score file.");
+        return;
+      }
+
+      beans = [];
+      score = 0;
+      updateScore();
+
+      const amountToLoad = Math.min(loadedScore, MAX_BEANS);
+      for (let i = 0; i < amountToLoad; i++) {
+        createBean();
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  // Modal Dragging centered on grab point
+  function makeModalDraggable(el) {
+    el.onpointerdown = (e) => {
+      if (e.target.closest('#jbControls') || e.target.closest('#jbLidHitbox') || e.target.closest('#jbJarLid') || e.target.closest('#jbScoreDisplay') || e.target.closest('#jbMouthHotspot')) {
+        return;
+      }
+
+      // Initialize positioning using pixel offsets if currently using CSS translate center transform
+      const rect = el.getBoundingClientRect();
+      if (el.style.transform.includes("translate")) {
+        el.style.transform = "none";
+        el.style.left = rect.left + "px";
+        el.style.top = rect.top + "px";
+      }
+
+      const startX = e.clientX;
+      const startY = e.clientY;
+      const initialLeft = el.offsetLeft;
+      const initialTop = el.offsetTop;
+
+      document.onpointermove = (ev) => {
+        const deltaX = ev.clientX - startX;
+        const deltaY = ev.clientY - startY;
+        el.style.left = (initialLeft + deltaX) + "px";
+        el.style.top = (initialTop + deltaY) + "px";
+      };
+
+      document.onpointerup = () => {
+        document.onpointermove = null;
+        document.onpointerup = null;
+      };
+    };
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    let leftBtn = document.getElementById("leftBtn");
+    let rightBtn = document.getElementById("rightBtn");
+
+    if (!leftBtn) {
+      leftBtn = document.createElement("button");
+      leftBtn.id = "leftBtn";
+      leftBtn.textContent = "Jelly Beans";
+      leftBtn.style.cssText = "position:fixed; left:10px; top:50%; transform:translateY(-50%); z-index:49999; padding:10px 14px; cursor:pointer;";
+      document.body.appendChild(leftBtn);
+    } else {
+      leftBtn.textContent = "Jelly Beans";
+    }
+
+    if (!rightBtn) {
+      rightBtn = document.createElement("button");
+      rightBtn.id = "rightBtn";
+      rightBtn.textContent = "Jelly Beans";
+      rightBtn.style.cssText = "position:fixed; right:10px; top:50%; transform:translateY(-50%); z-index:49999; padding:10px 14px; cursor:pointer;";
+      document.body.appendChild(rightBtn);
+    } else {
+      rightBtn.textContent = "Jelly Beans";
+    }
+
+    leftBtn.onclick = (e) => {
+      e.stopPropagation();
+      toggleModal();
+    };
+
+    rightBtn.onclick = (e) => {
+      e.stopPropagation();
+      toggleModal();
+    };
+
+    mouthHotspot.addEventListener("pointerdown", (e) => {
+      e.stopPropagation();
+      createBean();
+    });
+
+    scoreDisplay.addEventListener("pointerdown", (e) => {
+      e.stopPropagation();
+      removeBean();
+    });
+
+    makeModalDraggable(jarWrapper);
+    updateScore();
+    animate();
+  });
+})();
+</script>
+
+
+<script>
+/* ==========================================================
+   PPE HOTSPOT IMAGE BUTTON (Standalone Script)
+========================================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    // 1. Create and insert the button in the Left Column
+    const leftColumn = document.getElementById("leftColumn");
+    if (leftColumn) {
+        const leftBtn = document.createElement("button");
+        leftBtn.id = "ppeLeftBtn";
+        leftBtn.textContent = "QR";
+        leftBtn.style.cssText = "height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;";
+        
+        const jellyBeansLeft = document.getElementById("leftBtn");
+        if (jellyBeansLeft) {
+            leftColumn.insertBefore(leftBtn, jellyBeansLeft);
+        } else {
+            leftColumn.appendChild(leftBtn);
+        }
+
+        leftBtn.onclick = togglePpeHotspot;
+    }
+
+    // 2. Create and insert the button in the Right Column
+    const rightColumn = document.getElementById("rightColumn");
+    if (rightColumn) {
+        const rightBtn = document.createElement("button");
+        rightBtn.id = "ppeRightBtn";
+        rightBtn.textContent = "QR";
+        rightBtn.style.cssText = "height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;";
+        
+        const jellyBeansRight = document.getElementById("rightBtn");
+        if (jellyBeansRight) {
+            rightColumn.insertBefore(rightBtn, jellyBeansRight);
+        } else {
+            rightColumn.appendChild(rightBtn);
+        }
+
+        rightBtn.onclick = togglePpeHotspot;
+    }
+
+    // 3. Toggle Function: Spawns if missing, removes if already open
+    function togglePpeHotspot() {
+        const viewer = document.getElementById("viewer");
+        if (!viewer) return;
+
+        const existing = viewer.querySelector(".ppeHotspotImg");
+        if (existing) {
+            if (selectedEl === existing) {
+                selectedEl = null;
+            }
+            existing.remove();
+            return; // Exit so it turns off instead of respawning
+        }
+
+        const img = document.createElement("img");
+        img.src = "PerfectlyPracticalEnglish_with_Hotspot.app.jpg";
+        img.className = "draggable overlayPng ppeHotspotImg";
+        
+        // Fixed dimensions and appearance (keeping your custom tweaks)
+        img.style.position = "absolute";
+        img.style.width = "190px";
+        img.style.zIndex = "10005";
+        img.style.boxShadow = "3px 15px 30px 10px rgba(0, 0, 0, 0.8)";
+        
+        // Fixed positioning from the top-right of the viewport / control column boundary
+        img.style.right = "20px";
+        img.style.top = "40px";
+
+        viewer.appendChild(img);
+
+        if (typeof enableDragging === "function") {
+            enableDragging(img);
+        }
+
+        selectedEl = img;
+    }
+
+    // 4. Handle clicking off the PPE hotspot image to make it disappear
+    const viewer = document.getElementById("viewer");
+    if (viewer) {
+        viewer.addEventListener("pointerdown", (e) => {
+            if (e.target === viewer || e.target.id === "spread" || e.target.id === "centerBar" || e.target.classList.contains("pageImage")) {
+                if (selectedEl && selectedEl.classList.contains("ppeHotspotImg")) {
+                    selectedEl.remove();
+                    selectedEl = null;
+                }
+            }
+        });
+    }
+
+});
+</script>
+
+
+<script>
+/* ==========================================================
+    MP3 BUZZER TOGGLE BUTTON (Standalone Script)
+========================================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    // 1. Preload the Audio Object
+    const buzzerAudio = new Audio("floraphonic-buzzer-13-187755.mp3");
+    buzzerAudio.preload = "auto";
+
+    // Toggle Function: Plays if paused/ended, stops if currently playing
+    function toggleBuzzer() {
+        if (buzzerAudio.paused) {
+            buzzerAudio.currentTime = 0;
+            buzzerAudio.play().catch(error => {
+                console.log("Audio playback prevented or failed:", error);
+            });
+        } else {
+            buzzerAudio.pause();
+            buzzerAudio.currentTime = 0;
+        }
+    }
+
+    // 2. Create and insert the button in the Left Column
+    const leftColumn = document.getElementById("leftColumn");
+    if (leftColumn) {
+        const leftBtn = document.createElement("button");
+        leftBtn.id = "buzzerLeftBtn";
+        leftBtn.textContent = "Buzzer";
+        leftBtn.style.cssText = "height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;";
+        
+        const jellyBeansLeft = document.getElementById("leftBtn");
+        if (jellyBeansLeft) {
+            leftColumn.insertBefore(leftBtn, jellyBeansLeft);
+        } else {
+            leftColumn.appendChild(leftBtn);
+        }
+
+        leftBtn.onclick = toggleBuzzer;
+    }
+
+    // 3. Create and insert the button in the Right Column
+    const rightColumn = document.getElementById("rightColumn");
+    if (rightColumn) {
+        const rightBtn = document.createElement("button");
+        rightBtn.id = "buzzerRightBtn";
+        rightBtn.textContent = "Buzzer";
+        rightBtn.style.cssText = "height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;";
+        
+        const jellyBeansRight = document.getElementById("rightBtn");
+        if (jellyBeansRight) {
+            rightColumn.insertBefore(rightBtn, jellyBeansRight);
+        } else {
+            rightColumn.appendChild(rightBtn);
+        }
+
+        rightBtn.onclick = toggleBuzzer;
+    }
+
+});
+</script>
+
+<!-- ==========================================================
+     STANDALONE NEUTRAL GREY FALLING BEAN SYSTEM
+     A blurred bean shape that drops in a neutral grey tone
+========================================================== -->
+<script>
+(function() {
+  window.addEventListener("DOMContentLoaded", () => {
+    const jarContainer = document.getElementById("jbJarContainer");
+    const beanCanvas = document.getElementById("jbBeanCanvas");
+    const scoreDisplay = document.getElementById("jbScoreDisplay");
+    
+    if (!jarContainer || !beanCanvas || !scoreDisplay) return;
+
+    // 1. Create standalone cosmetic blur canvas positioned right behind the beans (z-index: 4)
+    const blurCanvas = document.createElement("canvas");
+    blurCanvas.id = "jbBlurCanvas";
+    blurCanvas.width = 520;
+    blurCanvas.height = 760;
+    blurCanvas.style.cssText = "position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:4;";
+    
+    beanCanvas.style.zIndex = "3";
+    jarContainer.appendChild(blurCanvas);
+    const blurCtx = blurCanvas.getContext("2d");
+
+    let impressionisticTrails = [];
+    let lastKnownScore = parseInt(scoreDisplay.textContent) || 0;
+
+    const jarBounds = { left: 135, right: 385, top: 175, bottom: 645 };
+    const BEAN_RADIUS = 20.9;
+    const maxCols = 6;
+    
+    // Fallback neutral grey color for the dropping bean
+    const NEUTRAL_GREY = "#95A5A6";
+
+    function getBeanCoordinates(scoreIndex) {
+      const targetIndex = Math.max(0, scoreIndex);
+      const col = targetIndex % maxCols;
+      const row = Math.floor(targetIndex / maxCols);
+
+      const availableWidth = (jarBounds.right - 10) - (jarBounds.left + 10) - (BEAN_RADIUS * 2);
+      const colSpacing = availableWidth / (maxCols - 1);
+      const baseTargetX = (jarBounds.left + 10) + BEAN_RADIUS + (col * colSpacing);
+      const baseFloor = (jarBounds.bottom - 5) + 15;
+      const baseTargetY = baseFloor - BEAN_RADIUS - (row * (BEAN_RADIUS * 1.3));
+
+      const jarCenterX = (jarBounds.left + jarBounds.right) / 2;
+      const edgeCurveFactor = Math.min(1, Math.abs(baseTargetX - jarCenterX) / ((jarBounds.right - jarBounds.left) / 2));
+      const edgeLift = (row === 0) ? (edgeCurveFactor * 8) : 0;
+
+      return {
+        x: baseTargetX + (Math.sin(targetIndex * 12.9898) * 12),
+        y: (baseTargetY - edgeLift) + (Math.cos(targetIndex * 78.233) * 6)
+      };
+    }
+
+    // 2. Monitor score changes and use neutral grey for the falling/rising bean trail
+    const observer = new MutationObserver(() => {
+      const currentScore = parseInt(scoreDisplay.textContent) || 0;
+      if (currentScore === lastKnownScore) return;
+
+      const centerX = (jarBounds.left + jarBounds.right) / 2;
+      const startY = jarBounds.top - 15;
+      
+      const targetScoreIndex = currentScore > lastKnownScore ? currentScore - 1 : currentScore;
+      const targetCoord = getBeanCoordinates(targetScoreIndex);
+      const endY = targetCoord.y;
+
+      if (currentScore > lastKnownScore) {
+        impressionisticTrails.push({
+          x: centerX,
+          y: startY,
+          targetY: endY,
+          color: NEUTRAL_GREY,
+          alpha: 0.35,
+          life: 1.0,
+          decay: 0.015
+        });
+      } else if (currentScore < lastKnownScore) {
+        impressionisticTrails.push({
+          x: centerX,
+          y: endY,
+          targetY: startY,
+          color: NEUTRAL_GREY,
+          alpha: 0.35,
+          life: 1.0,
+          decay: 0.015
+        });
+      }
+
+      lastKnownScore = currentScore;
+    });
+
+    observer.observe(scoreDisplay, { childList: true, characterData: true, subtree: true });
+
+    // 3. Render the neutral grey blurred bean trail right behind the main beans layer
+    function renderBlurTrails() {
+      blurCtx.clearRect(0, 0, blurCanvas.width, blurCanvas.height);
+
+      for (let i = impressionisticTrails.length - 1; i >= 0; i--) {
+        let trail = impressionisticTrails[i];
+        
+        trail.y += (trail.targetY - trail.y) * 0.12;
+        trail.life -= trail.decay;
+
+        if (trail.life <= 0 || Math.abs(trail.targetY - trail.y) < 1) {
+          impressionisticTrails.splice(i, 1);
+          continue;
+        }
+
+        blurCtx.save();
+        blurCtx.globalAlpha = trail.alpha * trail.life;
+        
+        blurCtx.shadowColor = trail.color;
+        blurCtx.shadowBlur = 35;
+        
+        blurCtx.translate(trail.x, trail.y);
+
+        blurCtx.beginPath();
+        blurCtx.moveTo(-19, -6);
+        blurCtx.bezierCurveTo(-24, -22, 19, -25, 24, -6);
+        blurCtx.bezierCurveTo(28, 11, -4, 25, -19, 15);
+        blurCtx.bezierCurveTo(-26, 9, -24, 0, -19, -6);
+        blurCtx.closePath();
+
+        blurCtx.fillStyle = trail.color;
+        blurCtx.fill();
+
+        blurCtx.restore();
+      }
+
+      requestAnimationFrame(renderBlurTrails);
+    }
+
+    renderBlurTrails();
+  });
+})();
+</script>
+
+<script>
+
+document.addEventListener("DOMContentLoaded", () => {
+    const playlistBtnLeft = document.getElementById("playlistBtnLeft");
+    const playlistBtnRight = document.getElementById("playlistBtnRight");
+    const targetFile = "A_Audio_Links.html";
+
+    function openPlaylist() {
+        window.open(targetFile, "_blank");
+    }
+
+    if (playlistBtnLeft) {
+        playlistBtnLeft.addEventListener("click", openPlaylist);
+    }
+
+    if (playlistBtnRight) {
+        playlistBtnRight.addEventListener("click", openPlaylist);
+    }
+});
+
+</script>
+
+>>>>>>> 42e2e1d604fdc85e8f57635ec75b21af83e42b99
 </body>
 </html>
