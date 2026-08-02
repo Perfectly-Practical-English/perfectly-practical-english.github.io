@@ -8,16 +8,13 @@
 * { margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
 html, body { height: 100%; width: 100%; }
 body {
-background: linear-gradient(to bottom, #dcdcdc 0%, #2f2f2f 45%, #dcdcdc 100%);
-  
-
-display: flex;
+  background: linear-gradient(to bottom, #dcdcdc 0%, #2f2f2f 45%, #dcdcdc 100%);
+  display: flex;
   flex-direction: column;
   align-items: center;
   padding: 0;
   overflow-x: hidden;
 }
-
 
 /* ===============================
    GLOBAL BUTTON STYLE (MASTER)
@@ -60,8 +57,8 @@ button:disabled { background:#888; cursor:not-allowed; }
   justify-content: center;
   margin-top:20px;
   margin-bottom:10px;
-  width: 100%;
-  max-width: 400px;
+  width: calc(100% - 10px); /* ⬅ Decreased by 10px total (5px each side) */
+  max-width: 390px;         /* ⬅ Reduced from 400px by 10px */
 }
 
 #topFields input {
@@ -85,10 +82,10 @@ button:disabled { background:#888; cursor:not-allowed; }
    =============================== */
 #conveyorContainer {
   position: relative;
-  overflow: visible;         /* allow taller content */
+  overflow: visible;          /* allow taller content */
   margin-top: 10px;
 
-  height: 90px;              /* ⬅ taller container */
+  height: 90px;               /* ⬅ taller container */
 
   width: 100vw;
   display: flex;
@@ -202,8 +199,8 @@ button:disabled { background:#888; cursor:not-allowed; }
   display: flex;
   align-items: center;
   gap: 6px;
-  width: 100%;
-  max-width: 400px;         /* match #topFields max-width */
+  width: calc(100% - 10px); /* ⬅ Decreased by 10px total (5px each side) */
+  max-width: 390px;         /* ⬅ Reduced from 400px by 10px */
   margin-bottom: 10px;
   justify-content: space-between;
 }
@@ -274,9 +271,9 @@ button:disabled { background:#888; cursor:not-allowed; }
    =============================== */
 @media (max-width: 500px) {
   #topFields, #sectionSelector {
-    margin-left: 0;
-    margin-right: 0;
-    width: 100%;
+    margin-left: 5px;   /* ⬅ Added 5px breathing room on left */
+    margin-right: 5px;  /* ⬅ Added 5px breathing room on right */
+    width: calc(100% - 10px);
     max-width: none;
     padding-left: 12px;
     padding-right: 12px;
@@ -294,15 +291,15 @@ button:disabled { background:#888; cursor:not-allowed; }
   }
 }
 
-  footer {
-    margin-top: 16px;
-    padding: 10px 12px;
-    text-align: left;
-    font-size: 10px;
-    color: #666;
-    background: #none;
-    border-radius: 6px;
-  }
+footer {
+  margin-top: 16px;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 10px;
+  color: #666;
+  background: none;
+  border-radius: 6px;
+}
 
 #skyline {
   position: fixed;
@@ -312,10 +309,6 @@ button:disabled { background:#888; cursor:not-allowed; }
 }
 
 </style>
-</head>
-<body>
-</body>
-</html>
 </head>
 <body>
 

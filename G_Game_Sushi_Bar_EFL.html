@@ -86,8 +86,8 @@ button:disabled { background:#A0B4C3; cursor:not-allowed; }
   justify-content: center;
   margin-top:20px;
   margin-bottom:10px;
-  width: 100%;
-  max-width: 400px;
+  width: calc(100% - 10px);
+  max-width: 390px;
 }
 
 #topFields input {
@@ -237,10 +237,10 @@ button:disabled { background:#A0B4C3; cursor:not-allowed; }
   display: flex;
   align-items: center;
   gap: 6px;
-  width: 100%;
-  max-width: 400px;
+  width: calc(100% - 10px);
+  max-width: 390px;
   margin-bottom: 10px;
-  justify-content: center;
+  justify-content: space-between;
 }
 
 /* ▲ ▼ ONLY */
@@ -287,7 +287,8 @@ button:disabled { background:#A0B4C3; cursor:not-allowed; }
 
 /* START button */
 #startButton {
-  min-width: 90px;
+  min-width: 70px;
+  width: auto;
 }
 
 /* ===============================
@@ -310,9 +311,9 @@ button:disabled { background:#A0B4C3; cursor:not-allowed; }
    =============================== */
 @media (max-width: 500px) {
   #topFields, #sectionSelector {
-    margin-left: 0;
-    margin-right: 0;
-    width: 100%;
+    margin-left: 5px;
+    margin-right: 5px;
+    width: calc(100% - 10px);
     max-width: none;
     padding-left: 12px;
     padding-right: 12px;
@@ -336,73 +337,10 @@ footer {
   text-align: left;
   font-size: 10px;
   color: #666;
-  background: #none;
+  background: none;
   border-radius: 6px;
 }
-
-.wheel-item.selected {
-  color: #999;
-  font-weight: 500;
-}
-
-/* ===============================
-   INSTRUCTIONS MODAL & TEMPLATE
-   =============================== */
-#instructionsBackdrop {
-  position: fixed;
-  top:0;
-  left:0;
-  width:100vw;
-  height:100vh;
-  background: rgba(0,0,0,0.5);
-  display:none;
-  align-items:center;
-  justify-content:center;
-  z-index: 1000;
-}
-
-#instructionsModal {
-  background:#fff;
-  border-radius:8px;
-  padding: 20px;
-  max-width: 500px;
-  width: 90%;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
-  text-align: left;
-}
-
-#instructionsModal h2 {
-  margin-top:0;
-  font-size:18px;
-  margin-bottom:12px;
-}
-
-#instructionsModal p {
-  font-size:14px;
-  margin-bottom:8px;
-}
-
-#instructionsModal button {
-  margin-top:16px;
-  float:right;
-}
-
-/* add fade-in animation */
-#instructionsBackdrop.show {
-  display:flex;
-  animation: fadeIn 0.2s ease forwards;
-}
-
-@keyframes fadeIn {
-  from { opacity:0; }
-  to { opacity:1; }
-}
-
 </style>
-</head>
-<body>
-</body>
-</html>
 </head>
 <body>
 
