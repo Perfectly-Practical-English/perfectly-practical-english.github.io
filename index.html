@@ -89,15 +89,18 @@
 
     .collapsible.active + .content { display: block; }
 
-    /* Shrunk Grid Layout with 5px margins on left and right */
+    /* Shrunk Grid Layout with 5px offset on left and 5px margin on right */
     .games-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
       gap: 6px;
+      margin-left: 5px;
+      margin-right: 5px;
       padding: 6px 0;
-      width: 100%;
-      max-width: 100%;
+      width: calc(100% - 10px);
+      max-width: calc(100% - 10px);
     }
+
     .games-grid a.game-btn {
       display: flex;
       align-items: center;
@@ -134,7 +137,23 @@
 
     @media (max-width: 600px) {
       body { font-size: 1.05em; margin: 0; padding-left: 10px; padding-right: 10px; }
-      .collapsible { width: 100%; font-size: 1.2em; padding-left: .6em; }
+      .collapsible { 
+        width: calc(100% - 10px); 
+        margin-left: 5px; 
+        margin-right: 5px; 
+        font-size: 1.2em; 
+        padding-left: .6em; 
+      }
+      .content {
+        width: calc(100% - 10px);
+        margin-left: 5px;
+        margin-right: 5px;
+      }
+      .games-grid {
+        width: calc(100% - 10px);
+        margin-left: 5px;
+        margin-right: 5px;
+      }
     }
 
     footer {
