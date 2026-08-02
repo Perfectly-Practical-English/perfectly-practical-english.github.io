@@ -58,9 +58,10 @@
     .section { margin-bottom: 2em; width: 100%; max-width: 100%; }
 
 .collapsible {
-      width: calc(100% - 5px);
+      width: calc(100% - 10px);
       margin-left: 5px;
-      max-width: calc(100% - 5px);
+      margin-right: 5px;
+      max-width: calc(100% - 10px);
       display: block;
       font-size: 1.2em;
       cursor: pointer;
@@ -77,22 +78,23 @@
       display: none;
       margin-top: 0;
       margin-left: 5px;
+      margin-right: 5px;
       padding-left: 0;
       white-space: pre-wrap;
       font-family: inherit;
       min-height: 40px; 
-      width: calc(100% - 5px);
-      max-width: calc(100% - 5px);
+      width: calc(100% - 10px);
+      max-width: calc(100% - 10px);
     }
 
     .collapsible.active + .content { display: block; }
 
-    /* Narrower Grid Layout with 5px inset on both sides */
+    /* Shrunk Grid Layout with 5px margins on left and right */
     .games-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
       gap: 6px;
-      padding: 6px 5px;
+      padding: 6px 0;
       width: 100%;
       max-width: 100%;
     }
