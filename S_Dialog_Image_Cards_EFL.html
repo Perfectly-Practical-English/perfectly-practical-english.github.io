@@ -1,195 +1,771 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
-<title>Dual-Student Conversation App (Image-Based)</title>
+
+<title>Dual-Student Conversation App — Image Vocabulary Match</title>
+
 <style>
-  /* Base & Reset */
-  body { 
-    font-family: Arial, sans-serif; 
-    margin: 0; 
-    padding: 0; 
-    background: #eef2f5; 
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    overflow: hidden;
+
+/* =========================================================
+   BASE
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #eef2f5;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#app-container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* =========================================================
+   CONTROL BAR
+   ========================================================= */
+
+#control-bar {
+  width: 100%;
+  height: 52px;
+  flex: 0 0 52px;
+
+  background: white;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 18px;
+
+  border-bottom: 1px solid #ccc;
+
+  box-shadow:
+    0 2px 5px rgba(0,0,0,0.12);
+
+  z-index: 2000;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  font-size: 13px;
+  font-weight: bold;
+}
+
+select,
+button.toggle-mode {
+  padding: 6px 10px;
+
+  font-size: 13px;
+
+  border-radius: 6px;
+
+  border: 1px solid #999;
+
+  background: white;
+
+  cursor: pointer;
+}
+
+button.toggle-mode.active {
+  background: #2e7d32;
+  color: white;
+  border-color: #1b5e20;
+}
+
+
+/* =========================================================
+   STUDENT PANES
+   ========================================================= */
+
+.student-pane {
+  flex: 1;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  padding: 10px 16px 12px;
+
+  position: relative;
+
+  overflow: hidden;
+
+  border-bottom: 2px dashed #bbb;
+}
+
+
+/* Student A */
+
+#top-pane {
+  background: #eaf2f8;
+
+  /*
+    Everything inside Student A is inverted together.
+    This includes the header, buttons, image and Next button.
+  */
+  transform: rotate(180deg);
+}
+
+
+/* Student B */
+
+#bottom-pane {
+  background: #eafaf1;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.pane-header {
+  flex: 0 0 44px;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  font-size: 14px;
+
+  font-weight: bold;
+
+  color: #333;
+
+  min-width: 0;
+}
+
+
+/* Student label */
+
+.student-role {
+  flex: 0 0 auto;
+
+  white-space: nowrap;
+
+  min-width: 70px;
+}
+
+
+/* Counter */
+
+.counter-top,
+.counter-bottom {
+  flex: 0 0 auto;
+
+  min-width: 45px;
+
+  text-align: right;
+
+  white-space: nowrap;
+
+  font-size: 12px;
+
+  color: #555;
+}
+
+
+/* =========================================================
+   ANSWER BUTTON CONTAINER
+   ========================================================= */
+
+.answer-buttons {
+  flex: 1;
+
+  min-width: 0;
+
+  display: grid;
+
+  grid-template-columns:
+    repeat(6, minmax(45px, 1fr));
+
+  gap: 5px;
+
+  align-items: center;
+}
+
+
+/* =========================================================
+   ADJECTIVE BUTTON
+   ========================================================= */
+
+.answer-btn {
+  height: 28px;
+
+  min-width: 0;
+
+  padding: 2px 5px;
+
+  border-radius: 6px;
+
+  border: 1px solid #888;
+
+  background: #fff;
+
+  color: #222;
+
+  font-size: 10px;
+
+  font-weight: bold;
+
+  line-height: 1;
+
+  cursor: pointer;
+
+  white-space: nowrap;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  box-shadow:
+    0 1px 3px rgba(0,0,0,0.18);
+
+  transition:
+    background 0.15s,
+    transform 0.1s,
+    box-shadow 0.15s,
+    opacity 0.15s;
+}
+
+.answer-btn:hover {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 3px 5px rgba(0,0,0,0.22);
+}
+
+.answer-btn:active {
+  transform: scale(0.95);
+}
+
+
+/* =========================================================
+   CORRECT ANSWER
+   ========================================================= */
+
+.answer-btn.correct {
+  background: #4caf50;
+
+  border-color: #2e7d32;
+
+  color: white;
+
+  box-shadow:
+    0 0 6px rgba(76,175,80,0.9),
+    0 0 12px rgba(76,175,80,0.55);
+
+  animation:
+    correctFlash 0.5s ease-out;
+}
+
+
+/* =========================================================
+   INCORRECT ANSWER
+   ========================================================= */
+
+.answer-btn.incorrect {
+  background: #ef5350;
+
+  border-color: #c62828;
+
+  color: white;
+
+  animation:
+    wrongFlash 0.35s ease-out;
+}
+
+
+/* =========================================================
+   FOUND ANSWER
+   ========================================================= */
+
+.answer-btn.found {
+  opacity: 0.55;
+
+  cursor: default;
+}
+
+
+/* =========================================================
+   IMAGE AREA
+   ========================================================= */
+
+.prompt-display {
+  flex: 1;
+
+  min-height: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  padding: 10px;
+
+  background:
+    rgba(255,255,255,0.6);
+
+  border-radius: 8px;
+
+  margin: 5px 0 7px;
+
+  border:
+    1px solid rgba(0,0,0,0.05);
+
+  overflow: hidden;
+}
+
+.prompt-display img {
+  max-width: 100%;
+  max-height: 100%;
+
+  object-fit: contain;
+
+  border-radius: 4px;
+}
+
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+
+.pane-footer {
+  flex: 0 0 38px;
+
+  display: flex;
+
+  justify-content: flex-end;
+
+  align-items: center;
+}
+
+.next-btn {
+  padding: 6px 15px;
+
+  font-size: 13px;
+
+  font-weight: bold;
+
+  border: none;
+
+  border-radius: 6px;
+
+  background: #1976d2;
+
+  color: white;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 2px 4px rgba(0,0,0,0.1);
+
+  transition:
+    background 0.15s,
+    transform 0.1s;
+}
+
+.next-btn:hover {
+  background: #115293;
+}
+
+.next-btn:active {
+  transform: scale(0.96);
+}
+
+
+/* =========================================================
+   CORRECT FLASH
+   ========================================================= */
+
+@keyframes correctFlash {
+
+  0% {
+    transform: scale(1);
   }
 
-  #app-container {
-    display: flex;
-    flex-direction: column;
-    width: 100vw;
-    height: 100vh;
-    box-sizing: border-box;
+  35% {
+    transform: scale(1.15);
   }
 
-  /* Half-Screen Styles */
-  .student-pane {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 16px;
-    box-sizing: border-box;
-    overflow-y: auto;
-    position: relative;
-    border-bottom: 2px dashed #bbb;
+  65% {
+    transform: scale(0.97);
   }
 
-  /* Top Half (Pale Blue & Inverted) */
-  #top-pane {
-    background: #eaf2f8;
-    transform: rotate(180deg);
+  100% {
+    transform: scale(1);
   }
 
-  /* Bottom Half (Pale Green) */
-  #bottom-pane {
-    background: #eafaf1;
+}
+
+
+/* =========================================================
+   WRONG FLASH
+   ========================================================= */
+
+@keyframes wrongFlash {
+
+  0% {
+    transform: translateX(0);
   }
 
-  .pane-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 14px;
-    font-weight: bold;
-    color: #333;
-    margin-bottom: 8px;
+  25% {
+    transform: translateX(-4px);
   }
 
-  .prompt-display {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 10px;
-    background: rgba(255, 255, 255, 0.6);
-    border-radius: 8px;
-    margin: 8px 0;
-    border: 1px solid rgba(0,0,0,0.05);
-    overflow: hidden;
+  50% {
+    transform: translateX(4px);
   }
 
-  .prompt-display img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    border-radius: 4px;
+  75% {
+    transform: translateX(-3px);
   }
 
-  .pane-footer {
-    display: flex;
-    justify-content: flex-end;
+  100% {
+    transform: translateX(0);
   }
 
-  .next-btn {
-    padding: 8px 16px;
-    font-size: 14px;
-    font-weight: bold;
-    border: none;
-    border-radius: 6px;
-    background: #1976d2;
-    color: white;
-    cursor: pointer;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    transition: background 0.2s;
+}
+
+
+/* =========================================================
+   COMPLETION PULSE
+   ========================================================= */
+
+.answer-btn.complete {
+  animation:
+    completionPulse 0.7s ease-in-out;
+}
+
+@keyframes completionPulse {
+
+  0% {
+    transform: scale(1);
   }
 
-  .next-btn:hover {
-    background: #115293;
+  35% {
+    transform: scale(1.15);
   }
 
-  /* Control Bar Overlay */
+  65% {
+    transform: scale(0.97);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 850px) {
+
   #control-bar {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 1000;
-    background: white;
-    padding: 10px 16px;
-    border-radius: 30px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border: 1px solid #ccc;
+    height: 46px;
+    flex-basis: 46px;
+    gap: 8px;
   }
 
   .control-group {
-    display: flex;
-    align-items: center;
+    font-size: 11px;
+  }
+
+  select,
+  button.toggle-mode {
+    padding: 5px 7px;
+    font-size: 11px;
+  }
+
+  .student-pane {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .pane-header {
     gap: 6px;
-    font-size: 13px;
-    font-weight: bold;
   }
 
-  select, button.toggle-mode {
-    padding: 6px 10px;
-    font-size: 13px;
-    border-radius: 6px;
-    border: 1px solid #999;
-    background: #fff;
-    cursor: pointer;
+  .student-role {
+    min-width: 58px;
+    font-size: 12px;
   }
 
-  button.toggle-mode.active {
-    background: #2e7d32;
-    color: white;
-    border-color: #1b5e20;
+  .answer-buttons {
+    gap: 3px;
   }
+
+  .answer-btn {
+    height: 25px;
+    padding: 2px 3px;
+    font-size: 9px;
+    border-radius: 5px;
+  }
+
+  .counter-top,
+  .counter-bottom {
+    font-size: 10px;
+    min-width: 35px;
+  }
+
+}
+
+
+@media (max-width: 600px) {
+
+  .pane-header {
+    gap: 4px;
+  }
+
+  .student-role {
+    min-width: 50px;
+    font-size: 11px;
+  }
+
+  .answer-buttons {
+    grid-template-columns:
+      repeat(6, minmax(32px, 1fr));
+
+    gap: 2px;
+  }
+
+  .answer-btn {
+    height: 23px;
+
+    padding:
+      1px 2px;
+
+    font-size: 8px;
+  }
+
+  .counter-top,
+  .counter-bottom {
+    font-size: 9px;
+    min-width: 30px;
+  }
+
+}
+
 </style>
 </head>
+
+
 <body>
 
 <div id="app-container">
-  
-  <!-- Central Control Bar -->
+
+
+  <!-- =====================================================
+       CONTROL BAR
+       ===================================================== -->
+
   <div id="control-bar">
+
     <div class="control-group">
-      <label for="topic-select">Topic:</label>
+
+      <label for="topic-select">
+        Topic:
+      </label>
+
       <select id="topic-select">
-        <option value="">-- Choose Topic --</option>
+
+        <option value="">
+          -- Choose Topic --
+        </option>
+
       </select>
+
     </div>
-    
-    <!-- CONFIGURATION SWITCH: Set order mode here or via toggle button -->
+
+
     <div class="control-group">
-      <button id="mode-toggle" class="toggle-mode" title="Toggle between sequential and random order">Order: Sequential</button>
+
+      <button
+        id="mode-toggle"
+        class="toggle-mode"
+        title="Toggle between sequential and random order">
+
+        Order: Sequential
+
+      </button>
+
     </div>
+
   </div>
 
-  <!-- Top Student Pane (Inverted & Pale Blue) -->
-  <div id="top-pane" class="student-pane">
+
+
+  <!-- =====================================================
+       STUDENT A
+       ===================================================== -->
+
+  <div
+    id="top-pane"
+    class="student-pane">
+
+
+    <!-- HEADER -->
+
     <div class="pane-header">
-      <span class="student-role">Student A</span>
-      <span class="counter-top">1 / 1</span>
+
+      <span class="student-role">
+        Student A
+      </span>
+
+
+      <!-- SIX STUDENT A BUTTONS -->
+
+      <div
+        id="answer-buttons-top"
+        class="answer-buttons">
+
+        <button class="answer-btn"></button>
+        <button class="answer-btn"></button>
+        <button class="answer-btn"></button>
+        <button class="answer-btn"></button>
+        <button class="answer-btn"></button>
+        <button class="answer-btn"></button>
+
+      </div>
+
+
+      <span class="counter-top">
+        1 / 1
+      </span>
+
     </div>
-    <div class="prompt-display" id="prompt-top">Select a topic to begin.</div>
+
+
+    <!-- IMAGE -->
+
+    <div
+      class="prompt-display"
+      id="prompt-top">
+
+      Select a topic to begin.
+
+    </div>
+
+
+    <!-- FOOTER -->
+
     <div class="pane-footer">
-      <button class="next-btn" id="next-top">Next →</button>
+
+      <button
+        class="next-btn"
+        id="next-top">
+
+        Next →
+
+      </button>
+
     </div>
+
   </div>
 
-  <!-- Bottom Student Pane (Pale Green) -->
-  <div id="bottom-pane" class="student-pane">
+
+
+  <!-- =====================================================
+       STUDENT B
+       ===================================================== -->
+
+  <div
+    id="bottom-pane"
+    class="student-pane">
+
+
+    <!-- HEADER -->
+
     <div class="pane-header">
-      <span class="student-role">Student B</span>
-      <span class="counter-bottom">1 / 1</span>
+
+      <span class="student-role">
+        Student B
+      </span>
+
+
+      <!-- SIX STUDENT B BUTTONS -->
+
+      <div
+        id="answer-buttons-bottom"
+        class="answer-buttons">
+
+        <button class="answer-btn"></button>
+        <button class="answer-btn"></button>
+        <button class="answer-btn"></button>
+        <button class="answer-btn"></button>
+        <button class="answer-btn"></button>
+        <button class="answer-btn"></button>
+
+      </div>
+
+
+      <span class="counter-bottom">
+        1 / 1
+      </span>
+
     </div>
-    <div class="prompt-display" id="prompt-bottom">Select a topic to begin.</div>
+
+
+    <!-- IMAGE -->
+
+    <div
+      class="prompt-display"
+      id="prompt-bottom">
+
+      Select a topic to begin.
+
+    </div>
+
+
+    <!-- FOOTER -->
+
     <div class="pane-footer">
-      <button class="next-btn" id="next-bottom">Next →</button>
+
+      <button
+        class="next-btn"
+        id="next-bottom">
+
+        Next →
+
+      </button>
+
     </div>
+
   </div>
 
 </div>
 
+
+
 <script>
-// Separate raw image filename references for Student A and Student B
+
+/* =========================================================
+   RAW DATA
+   ========================================================= */
+
 const rawDataA = `
 
 ~Unit 4 People
@@ -223,26 +799,25 @@ IMU4_Teacher.png
 
 ~Cryptids
 
-
 ~Signal Words
-
 
 ~Clothing
 
 `;
 
+
 const rawDataB = `
 
 ~Unit 4 People
 
-IMU4_Actress.png
-IMU4_Astronaut.png
-IMU4_Businessman.png
-IMU4_Pirate.png
-IMU4_Rock_Star.png
-IMU4_Scientist.png
-IMU4_Soldier.png
-IMU4_Teacher.png
+IMU4_Actress.png - beautiful, elegant, famous
+IMU4_Astronaut.png - brave, calm, fit
+IMU4_Businessman.png - rich, busy, successful
+IMU4_Pirate.png - dirty, dangerous, greedy
+IMU4_Rock_Star.png - cool, loud, popular
+IMU4_Scientist.png - intelligent, strange, crazy
+IMU4_Soldier.png - fearless, strict, powerful
+IMU4_Teacher.png - kind, quiet, helpful
 
 ~Hobbies
 
@@ -264,184 +839,1645 @@ IMU4_Teacher.png
 
 ~Cryptids
 
-
 ~Signal Words
-
 
 ~Clothing
 
 `;
 
+
+/* =========================================================
+   STATE
+   ========================================================= */
+
 let topicsA = {};
 let topicsB = {};
-let activeListsA = {}; 
-let activeListsB = {}; 
+
+let activeListsA = {};
+let activeListsB = {};
+
 let currentTopicKey = "";
+
 let currentIndexTop = 0;
 let currentIndexBottom = 0;
 
-let isRandomMode = false; 
+let isRandomMode = false;
+
+
+/*
+   Each student has their own set of found answers.
+*/
+
+let foundAnswersTop = new Set();
+let foundAnswersBottom = new Set();
+
+let puzzleCompletedTop = false;
+let puzzleCompletedBottom = false;
+
+
+/* =========================================================
+   CONTROLLED DISTRACTORS
+   =========================================================
+
+   These are deliberately chosen so that the distractors
+   come from other characters but do not create obvious
+   synonym / alternative-answer problems.
+*/
+
+const safeDistractors = {
+
+  "IMU4_Actress.png": [
+    "dirty",
+    "dangerous",
+    "greedy",
+    "brave",
+    "calm",
+    "fit"
+  ],
+
+  "IMU4_Astronaut.png": [
+    "dirty",
+    "dangerous",
+    "greedy",
+    "elegant",
+    "loud",
+    "crazy"
+  ],
+
+  "IMU4_Businessman.png": [
+    "dirty",
+    "dangerous",
+    "greedy",
+    "brave",
+    "calm",
+    "strange"
+  ],
+
+  "IMU4_Pirate.png": [
+    "elegant",
+    "calm",
+    "fit",
+    "intelligent",
+    "kind",
+    "quiet"
+  ],
+
+  "IMU4_Rock_Star.png": [
+    "brave",
+    "calm",
+    "fit",
+    "dirty",
+    "dangerous",
+    "intelligent"
+  ],
+
+  "IMU4_Scientist.png": [
+    "elegant",
+    "dirty",
+    "dangerous",
+    "loud",
+    "kind",
+    "powerful"
+  ],
+
+  "IMU4_Soldier.png": [
+    "beautiful",
+    "elegant",
+    "famous",
+    "rich",
+    "busy",
+    "strange"
+  ],
+
+  "IMU4_Teacher.png": [
+    "dirty",
+    "dangerous",
+    "greedy",
+    "loud",
+    "crazy",
+    "powerful"
+  ]
+
+};
+
+
+/* =========================================================
+   PARSE RAW DATA
+   ========================================================= */
 
 function parseRawData(text, targetObj) {
-  const chunks = text.split(/\n(?=~+)/);
+
+  const chunks =
+    text.split(/\n(?=~+)/);
+
+
   chunks.forEach(chunk => {
-    const lines = chunk.trim().split("\n");
-    if (lines.length === 0) return;
-    const headerLine = lines.shift().trim();
-    if (headerLine.startsWith("~")) {
-      const topicName = headerLine.replace(/^~+/, "").trim();
-      const prompts = lines
-        .map(l => l.replace(/^[•*-]\s*/, "").trim())
-        .filter(Boolean);
-      targetObj[topicName] = prompts;
+
+    const lines =
+      chunk.trim().split("\n");
+
+
+    if (!lines.length) {
+      return;
     }
+
+
+    const headerLine =
+      lines.shift().trim();
+
+
+    if (headerLine.startsWith("~")) {
+
+      const topicName =
+        headerLine
+          .replace(/^~+/, "")
+          .trim();
+
+
+      const prompts =
+        lines
+          .map(line =>
+            line
+              .replace(/^[•*-]\s*/, "")
+              .trim()
+          )
+          .filter(Boolean);
+
+
+      targetObj[topicName] =
+        prompts;
+
+    }
+
   });
+
 }
 
-parseRawData(rawDataA, topicsA);
-parseRawData(rawDataB, topicsB);
+
+parseRawData(
+  rawDataA,
+  topicsA
+);
+
+parseRawData(
+  rawDataB,
+  topicsB
+);
+
+
+/* =========================================================
+   SHUFFLE
+   ========================================================= */
 
 function shuffleArray(array) {
-  let arr = [...array];
-  for (let i = arr.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+
+  const arr = [...array];
+
+
+  for (
+    let i = arr.length - 1;
+    i > 0;
+    i--
+  ) {
+
+    const j =
+      Math.floor(
+        Math.random() * (i + 1)
+      );
+
+
+    [
+      arr[i],
+      arr[j]
+    ] = [
+      arr[j],
+      arr[i]
+    ];
+
   }
+
+
   return arr;
+
 }
+
+
+/* =========================================================
+   PREPARE ACTIVE LISTS
+   ========================================================= */
 
 function prepareActiveLists() {
+
   activeListsA = {};
   activeListsB = {};
-  
-  Object.keys(topicsA).forEach(topic => {
-    if (isRandomMode) {
-      activeListsA[topic] = shuffleArray(topicsA[topic]);
-    } else {
-      activeListsA[topic] = [...topicsA[topic]];
-    }
-  });
 
-  Object.keys(topicsB).forEach(topic => {
-    if (isRandomMode) {
-      activeListsB[topic] = shuffleArray(topicsB[topic]);
-    } else {
-      activeListsB[topic] = [...topicsB[topic]];
-    }
-  });
+
+  Object.keys(topicsA)
+    .forEach(topic => {
+
+      activeListsA[topic] =
+        isRandomMode
+          ? shuffleArray(topicsA[topic])
+          : [...topicsA[topic]];
+
+    });
+
+
+  Object.keys(topicsB)
+    .forEach(topic => {
+
+      activeListsB[topic] =
+        isRandomMode
+          ? shuffleArray(topicsB[topic])
+          : [...topicsB[topic]];
+
+    });
+
 }
+
 
 prepareActiveLists();
 
-const topicSelect = document.getElementById("topic-select");
-Object.keys(topicsA).forEach(topic => {
-  const option = document.createElement("option");
-  option.value = topic;
-  option.textContent = topic;
-  topicSelect.appendChild(option);
-});
 
-const promptTop = document.getElementById("prompt-top");
-const promptBottom = document.getElementById("prompt-bottom");
-const counterTop = document.querySelector(".counter-top");
-const counterBottom = document.querySelector(".counter-bottom");
-const modeToggleBtn = document.getElementById("mode-toggle");
+/* =========================================================
+   DOM
+   ========================================================= */
+
+const topicSelect =
+  document.getElementById(
+    "topic-select"
+  );
+
+
+const promptTop =
+  document.getElementById(
+    "prompt-top"
+  );
+
+
+const promptBottom =
+  document.getElementById(
+    "prompt-bottom"
+  );
+
+
+const counterTop =
+  document.querySelector(
+    ".counter-top"
+  );
+
+
+const counterBottom =
+  document.querySelector(
+    ".counter-bottom"
+  );
+
+
+const modeToggleBtn =
+  document.getElementById(
+    "mode-toggle"
+  );
+
+
+const topButtons =
+  document.querySelectorAll(
+    "#answer-buttons-top .answer-btn"
+  );
+
+
+const bottomButtons =
+  document.querySelectorAll(
+    "#answer-buttons-bottom .answer-btn"
+  );
+
+
+/* =========================================================
+   TOPIC LIST
+   ========================================================= */
+
+Object.keys(topicsA)
+  .forEach(topic => {
+
+    const option =
+      document.createElement(
+        "option"
+      );
+
+
+    option.value =
+      topic;
+
+
+    option.textContent =
+      topic;
+
+
+    topicSelect.appendChild(
+      option
+    );
+
+  });
+
+
+/* =========================================================
+   MODE BUTTON
+   ========================================================= */
 
 function updateModeButtonUI() {
+
   if (isRandomMode) {
-    modeToggleBtn.textContent = "Order: Randomized";
-    modeToggleBtn.classList.add("active");
+
+    modeToggleBtn.textContent =
+      "Order: Randomized";
+
+    modeToggleBtn.classList.add(
+      "active"
+    );
+
   } else {
-    modeToggleBtn.textContent = "Order: Sequential";
-    modeToggleBtn.classList.remove("active");
+
+    modeToggleBtn.textContent =
+      "Order: Sequential";
+
+    modeToggleBtn.classList.remove(
+      "active"
+    );
+
   }
+
 }
+
+
 updateModeButtonUI();
 
-function renderImageOrText(container, filename) {
-  container.innerHTML = "";
-  if (!filename) {
-    container.textContent = "End of list.";
-    return;
+
+/* =========================================================
+   CLEAN FILENAME
+   ========================================================= */
+
+function getImageFilename(value) {
+
+  if (!value) {
+    return "";
   }
-  const ext = filename.split('.').pop().toLowerCase();
-  if (ext === 'jpg' || ext === 'jpeg' || ext === 'png' || ext === 'gif' || ext === 'webp') {
-    const img = document.createElement('img');
-    // Change the path prefix below if your images are in a specific subfolder (e.g., 'images/' + filename)
-    img.src = filename;
-    img.alt = filename;
-    img.onerror = () => {
-      container.textContent = `[Image not found: ${filename}]`;
-    };
-    container.appendChild(img);
-  } else {
-    container.textContent = filename;
-  }
+
+
+  return value
+    .split(/\s+-\s+/)[0]
+    .trim();
+
 }
+
+
+/* =========================================================
+   NORMALIZE WORD
+   ========================================================= */
+
+function normalizeWord(word) {
+
+  return word
+    .trim()
+    .toLowerCase();
+
+}
+
+
+/* =========================================================
+   GET CHARACTER
+   ========================================================= */
+
+function getCharacterForStudent(
+  student
+) {
+
+  const list =
+    student === "A"
+      ? activeListsA[currentTopicKey]
+      : activeListsB[currentTopicKey];
+
+
+  const index =
+    student === "A"
+      ? currentIndexTop
+      : currentIndexBottom;
+
+
+  if (!list) {
+    return "";
+  }
+
+
+  return getImageFilename(
+    list[index]
+  );
+
+}
+
+
+/* =========================================================
+   GET CORRECT ANSWERS
+   ========================================================= */
+
+function getCorrectAnswers(filename) {
+
+  const entry =
+    topicsB["Unit 4 People"] || [];
+
+
+  const matchingEntry =
+    entry.find(line => {
+
+      return (
+        getImageFilename(line)
+          .toLowerCase() ===
+        filename.toLowerCase()
+      );
+
+    });
+
+
+  if (!matchingEntry) {
+    return [];
+  }
+
+
+  const adjectivePart =
+    matchingEntry
+      .split(/\s+-\s+/)
+      .slice(1)
+      .join(" - ");
+
+
+  return adjectivePart
+    .split(",")
+    .map(word =>
+      normalizeWord(word)
+    )
+    .filter(Boolean);
+
+}
+
+
+/* =========================================================
+   GET OPTIONS
+   ========================================================= */
+
+function getOptions(filename) {
+
+  const correctAnswers =
+    getCorrectAnswers(filename);
+
+
+  if (correctAnswers.length !== 3) {
+    return [];
+  }
+
+
+  const distractors =
+    shuffleArray(
+      safeDistractors[filename] || []
+    ).slice(0, 3);
+
+
+  return shuffleArray([
+    ...correctAnswers,
+    ...distractors
+  ]);
+
+}
+
+
+/* =========================================================
+   POPULATE STUDENT BUTTONS
+   ========================================================= */
+
+function populateStudentButtons(
+  buttons,
+  filename,
+  student
+) {
+
+  const options =
+    getOptions(filename);
+
+
+  const foundSet =
+    student === "A"
+      ? foundAnswersTop
+      : foundAnswersBottom;
+
+
+  const completed =
+    student === "A"
+      ? puzzleCompletedTop
+      : puzzleCompletedBottom;
+
+
+  buttons.forEach(
+    (button, index) => {
+
+      const word =
+        options[index] || "";
+
+
+      button.textContent =
+        word;
+
+
+      button.dataset.answer =
+        word;
+
+
+      button.disabled =
+        !word;
+
+
+      button.classList.remove(
+        "correct",
+        "incorrect",
+        "found",
+        "complete"
+      );
+
+
+      if (
+        foundSet.has(word)
+      ) {
+
+        button.classList.add(
+          "correct",
+          "found"
+        );
+
+
+        button.disabled =
+          true;
+
+      }
+
+    }
+  );
+
+}
+
+
+/* =========================================================
+   CLEAR STUDENT BUTTONS
+   ========================================================= */
+
+function clearStudentButtons(buttons) {
+
+  buttons.forEach(button => {
+
+    button.textContent =
+      "";
+
+    button.dataset.answer =
+      "";
+
+    button.disabled =
+      true;
+
+    button.classList.remove(
+      "correct",
+      "incorrect",
+      "found",
+      "complete"
+    );
+
+  });
+
+}
+
+
+/* =========================================================
+   RENDER IMAGE / TEXT
+   ========================================================= */
+
+function renderImageOrText(
+  container,
+  filename
+) {
+
+  container.innerHTML =
+    "";
+
+
+  if (!filename) {
+
+    container.textContent =
+      "End of list.";
+
+    return;
+
+  }
+
+
+  const cleanFilename =
+    getImageFilename(filename);
+
+
+  const ext =
+    cleanFilename
+      .split(".")
+      .pop()
+      .toLowerCase();
+
+
+  if (
+    ext === "jpg" ||
+    ext === "jpeg" ||
+    ext === "png" ||
+    ext === "gif" ||
+    ext === "webp"
+  ) {
+
+    const img =
+      document.createElement(
+        "img"
+      );
+
+
+    img.src =
+      cleanFilename;
+
+
+    img.alt =
+      cleanFilename;
+
+
+    img.onerror =
+      () => {
+
+        container.textContent =
+          `[Image not found: ${cleanFilename}]`;
+
+      };
+
+
+    container.appendChild(
+      img
+    );
+
+  } else {
+
+    container.textContent =
+      filename;
+
+  }
+
+}
+
+
+/* =========================================================
+   UPDATE ALL DISPLAYS
+   ========================================================= */
 
 function updateDisplays() {
-  if (!currentTopicKey) return;
-  
-  const listA = activeListsA[currentTopicKey];
-  const listB = activeListsB[currentTopicKey];
+
+  if (!currentTopicKey) {
+
+    clearStudentButtons(
+      topButtons
+    );
+
+    clearStudentButtons(
+      bottomButtons
+    );
+
+    return;
+
+  }
+
+
+  const listA =
+    activeListsA[
+      currentTopicKey
+    ];
+
+
+  const listB =
+    activeListsB[
+      currentTopicKey
+    ];
+
+
+  /* Student A */
 
   if (listA) {
-    renderImageOrText(promptTop, listA[currentIndexTop]);
-    counterTop.textContent = `${currentIndexTop + 1} / ${listA.length}`;
+
+    const filenameA =
+      getImageFilename(
+        listA[currentIndexTop]
+      );
+
+
+    renderImageOrText(
+      promptTop,
+      filenameA
+    );
+
+
+    counterTop.textContent =
+      `${currentIndexTop + 1} / ${listA.length}`;
+
+
+    foundAnswersTop =
+      new Set();
+
+
+    puzzleCompletedTop =
+      false;
+
+
+    populateStudentButtons(
+      topButtons,
+      filenameA,
+      "A"
+    );
+
   }
+
+
+  /* Student B */
 
   if (listB) {
-    renderImageOrText(promptBottom, listB[currentIndexBottom]);
-    counterBottom.textContent = `${currentIndexBottom + 1} / ${listB.length}`;
+
+    const filenameB =
+      getImageFilename(
+        listB[currentIndexBottom]
+      );
+
+
+    renderImageOrText(
+      promptBottom,
+      filenameB
+    );
+
+
+    counterBottom.textContent =
+      `${currentIndexBottom + 1} / ${listB.length}`;
+
+
+    foundAnswersBottom =
+      new Set();
+
+
+    puzzleCompletedBottom =
+      false;
+
+
+    populateStudentButtons(
+      bottomButtons,
+      filenameB,
+      "B"
+    );
+
   }
+
 }
 
-topicSelect.addEventListener("change", (e) => {
-  currentTopicKey = e.target.value;
-  currentIndexTop = 0;
-  currentIndexBottom = 0;
-  if (!currentTopicKey) {
-    promptTop.textContent = "Select a topic to begin.";
-    promptBottom.textContent = "Select a topic to begin.";
-    counterTop.textContent = "1 / 1";
-    counterBottom.textContent = "1 / 1";
+
+/* =========================================================
+   AUDIO ENGINE
+   ========================================================= */
+
+let audioContext = null;
+
+
+function getAudioContext() {
+
+  if (!audioContext) {
+
+    audioContext =
+      new (
+        window.AudioContext ||
+        window.webkitAudioContext
+      )();
+
+  }
+
+
+  if (
+    audioContext.state ===
+    "suspended"
+  ) {
+
+    audioContext.resume();
+
+  }
+
+
+  return audioContext;
+
+}
+
+
+/* =========================================================
+   CORRECT BLING
+   ========================================================= */
+
+function playCorrectBling() {
+
+  try {
+
+    const ctx =
+      getAudioContext();
+
+
+    const now =
+      ctx.currentTime;
+
+
+    const notes = [
+      {
+        frequency: 880,
+        start: 0,
+        duration: 0.32,
+        volume: 0.25
+      },
+
+      {
+        frequency: 1320,
+        start: 0.07,
+        duration: 0.38,
+        volume: 0.20
+      },
+
+      {
+        frequency: 1760,
+        start: 0.14,
+        duration: 0.42,
+        volume: 0.16
+      }
+    ];
+
+
+    notes.forEach(note => {
+
+      const osc =
+        ctx.createOscillator();
+
+
+      const gain =
+        ctx.createGain();
+
+
+      const start =
+        now + note.start;
+
+
+      osc.type =
+        "sine";
+
+
+      osc.frequency.setValueAtTime(
+        note.frequency,
+        start
+      );
+
+
+      gain.gain.setValueAtTime(
+        0.0001,
+        start
+      );
+
+
+      gain.gain.exponentialRampToValueAtTime(
+        note.volume,
+        start + 0.015
+      );
+
+
+      gain.gain.exponentialRampToValueAtTime(
+        0.0001,
+        start + note.duration
+      );
+
+
+      osc.connect(gain);
+
+      gain.connect(
+        ctx.destination
+      );
+
+
+      osc.start(start);
+
+      osc.stop(
+        start + note.duration + 0.03
+      );
+
+    });
+
+  } catch (error) {
+
+    console.warn(
+      "Bling unavailable:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   WRONG SOUND
+   ========================================================= */
+
+function playWrongSound() {
+
+  try {
+
+    const ctx =
+      getAudioContext();
+
+
+    const now =
+      ctx.currentTime;
+
+
+    const osc =
+      ctx.createOscillator();
+
+
+    const gain =
+      ctx.createGain();
+
+
+    osc.type =
+      "square";
+
+
+    osc.frequency.setValueAtTime(
+      180,
+      now
+    );
+
+
+    osc.frequency.exponentialRampToValueAtTime(
+      100,
+      now + 0.15
+    );
+
+
+    gain.gain.setValueAtTime(
+      0.0001,
+      now
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+      0.10,
+      now + 0.01
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+      0.0001,
+      now + 0.18
+    );
+
+
+    osc.connect(gain);
+
+    gain.connect(
+      ctx.destination
+    );
+
+
+    osc.start(now);
+
+    osc.stop(
+      now + 0.2
+    );
+
+  } catch (error) {
+
+    console.warn(
+      "Wrong-answer sound unavailable:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   COMPLETION BLING
+   ========================================================= */
+
+function playCompletionSound() {
+
+  try {
+
+    const ctx =
+      getAudioContext();
+
+
+    const now =
+      ctx.currentTime;
+
+
+    const notes = [
+      880,
+      1100,
+      1320,
+      1760
+    ];
+
+
+    notes.forEach(
+      (frequency, index) => {
+
+        const osc =
+          ctx.createOscillator();
+
+
+        const gain =
+          ctx.createGain();
+
+
+        const start =
+          now + index * 0.09;
+
+
+        osc.type =
+          "sine";
+
+
+        osc.frequency.setValueAtTime(
+          frequency,
+          start
+        );
+
+
+        gain.gain.setValueAtTime(
+          0.0001,
+          start
+        );
+
+
+        gain.gain.exponentialRampToValueAtTime(
+          0.25,
+          start + 0.015
+        );
+
+
+        gain.gain.exponentialRampToValueAtTime(
+          0.0001,
+          start + 0.28
+        );
+
+
+        osc.connect(gain);
+
+        gain.connect(
+          ctx.destination
+        );
+
+
+        osc.start(start);
+
+        osc.stop(
+          start + 0.32
+        );
+
+      }
+    );
+
+  } catch (error) {
+
+    console.warn(
+      "Completion sound unavailable:",
+      error
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   HANDLE ANSWER
+   ========================================================= */
+
+function handleAnswer(
+  button,
+  student
+) {
+
+  const selected =
+    normalizeWord(
+      button.dataset.answer
+    );
+
+
+  if (!selected) {
     return;
   }
-  updateDisplays();
+
+
+  const filename =
+    getCharacterForStudent(
+      student
+    );
+
+
+  const correctAnswers =
+    getCorrectAnswers(
+      filename
+    );
+
+
+  const foundSet =
+    student === "A"
+      ? foundAnswersTop
+      : foundAnswersBottom;
+
+
+  if (
+    foundSet.has(selected)
+  ) {
+
+    return;
+
+  }
+
+
+  /* =====================================================
+     CORRECT
+     ===================================================== */
+
+  if (
+    correctAnswers.includes(
+      selected
+    )
+  ) {
+
+    foundSet.add(
+      selected
+    );
+
+
+    button.classList.remove(
+      "incorrect"
+    );
+
+
+    button.classList.add(
+      "correct",
+      "found"
+    );
+
+
+    button.disabled =
+      true;
+
+
+    playCorrectBling();
+
+
+    if (
+      foundSet.size ===
+      correctAnswers.length
+    ) {
+
+      completeStudentPuzzle(
+        student
+      );
+
+    }
+
+  }
+
+
+  /* =====================================================
+     INCORRECT
+     ===================================================== */
+
+  else {
+
+    button.classList.remove(
+      "incorrect"
+    );
+
+
+    void button.offsetWidth;
+
+
+    button.classList.add(
+      "incorrect"
+    );
+
+
+    playWrongSound();
+
+
+    setTimeout(
+      () => {
+
+        button.classList.remove(
+          "incorrect"
+        );
+
+      },
+      400
+    );
+
+  }
+
+}
+
+
+/* =========================================================
+   COMPLETE STUDENT PUZZLE
+   ========================================================= */
+
+function completeStudentPuzzle(
+  student
+) {
+
+  if (student === "A") {
+
+    if (puzzleCompletedTop) {
+      return;
+    }
+
+
+    puzzleCompletedTop =
+      true;
+
+    topButtons.forEach(
+      button => {
+
+        button.classList.add(
+          "complete"
+        );
+
+      }
+    );
+
+  } else {
+
+    if (puzzleCompletedBottom) {
+      return;
+    }
+
+
+    puzzleCompletedBottom =
+      true;
+
+    bottomButtons.forEach(
+      button => {
+
+        button.classList.add(
+          "complete"
+        );
+
+      }
+    );
+
+  }
+
+
+  playCompletionSound();
+
+}
+
+
+/* =========================================================
+   BUTTON EVENT LISTENERS
+   ========================================================= */
+
+topButtons.forEach(button => {
+
+  button.addEventListener(
+    "click",
+    () => {
+
+      handleAnswer(
+        button,
+        "A"
+      );
+
+    }
+  );
+
 });
 
-modeToggleBtn.addEventListener("click", () => {
-  isRandomMode = !isRandomMode;
-  updateModeButtonUI();
-  prepareActiveLists();
-  currentIndexTop = 0;
-  currentIndexBottom = 0;
-  if (currentTopicKey) {
+
+bottomButtons.forEach(button => {
+
+  button.addEventListener(
+    "click",
+    () => {
+
+      handleAnswer(
+        button,
+        "B"
+      );
+
+    }
+  );
+
+});
+
+
+/* =========================================================
+   TOPIC CHANGE
+   ========================================================= */
+
+topicSelect.addEventListener(
+  "change",
+  event => {
+
+    currentTopicKey =
+      event.target.value;
+
+
+    currentIndexTop =
+      0;
+
+
+    currentIndexBottom =
+      0;
+
+
+    foundAnswersTop =
+      new Set();
+
+
+    foundAnswersBottom =
+      new Set();
+
+
+    puzzleCompletedTop =
+      false;
+
+
+    puzzleCompletedBottom =
+      false;
+
+
+    if (!currentTopicKey) {
+
+      promptTop.textContent =
+        "Select a topic to begin.";
+
+
+      promptBottom.textContent =
+        "Select a topic to begin.";
+
+
+      counterTop.textContent =
+        "1 / 1";
+
+
+      counterBottom.textContent =
+        "1 / 1";
+
+
+      clearStudentButtons(
+        topButtons
+      );
+
+
+      clearStudentButtons(
+        bottomButtons
+      );
+
+
+      return;
+
+    }
+
+
     updateDisplays();
-  }
-});
 
-document.getElementById("next-top").addEventListener("click", () => {
-  if (!currentTopicKey) return;
-  const listA = activeListsA[currentTopicKey];
-  if (currentIndexTop < listA.length - 1) {
-    currentIndexTop++;
-  } else {
-    currentIndexTop = 0; 
   }
-  updateDisplays();
-});
+);
 
-document.getElementById("next-bottom").addEventListener("click", () => {
-  if (!currentTopicKey) return;
-  const listB = activeListsB[currentTopicKey];
-  if (currentIndexBottom < listB.length - 1) {
-    currentIndexBottom++;
-  } else {
-    currentIndexBottom = 0; 
+
+/* =========================================================
+   RANDOM / SEQUENTIAL
+   ========================================================= */
+
+modeToggleBtn.addEventListener(
+  "click",
+  () => {
+
+    isRandomMode =
+      !isRandomMode;
+
+
+    updateModeButtonUI();
+
+
+    prepareActiveLists();
+
+
+    currentIndexTop =
+      0;
+
+
+    currentIndexBottom =
+      0;
+
+
+    if (currentTopicKey) {
+
+      updateDisplays();
+
+    }
+
   }
-  updateDisplays();
-});
+);
+
+
+/* =========================================================
+   NEXT — STUDENT A
+   ========================================================= */
+
+document
+  .getElementById("next-top")
+  .addEventListener(
+    "click",
+    () => {
+
+      if (!currentTopicKey) {
+        return;
+      }
+
+
+      const listA =
+        activeListsA[
+          currentTopicKey
+        ];
+
+
+      if (
+        currentIndexTop <
+        listA.length - 1
+      ) {
+
+        currentIndexTop++;
+
+      } else {
+
+        currentIndexTop = 0;
+
+      }
+
+
+      updateStudentA();
+
+    }
+  );
+
+
+/* =========================================================
+   NEXT — STUDENT B
+   ========================================================= */
+
+document
+  .getElementById("next-bottom")
+  .addEventListener(
+    "click",
+    () => {
+
+      if (!currentTopicKey) {
+        return;
+      }
+
+
+      const listB =
+        activeListsB[
+          currentTopicKey
+        ];
+
+
+      if (
+        currentIndexBottom <
+        listB.length - 1
+      ) {
+
+        currentIndexBottom++;
+
+      } else {
+
+        currentIndexBottom = 0;
+
+      }
+
+
+      updateStudentB();
+
+    }
+  );
+
+
+/* =========================================================
+   UPDATE STUDENT A ONLY
+   ========================================================= */
+
+function updateStudentA() {
+
+  const listA =
+    activeListsA[
+      currentTopicKey
+    ];
+
+
+  if (!listA) {
+    return;
+  }
+
+
+  const filename =
+    getImageFilename(
+      listA[currentIndexTop]
+    );
+
+
+  renderImageOrText(
+    promptTop,
+    filename
+  );
+
+
+  counterTop.textContent =
+    `${currentIndexTop + 1} / ${listA.length}`;
+
+
+  foundAnswersTop =
+    new Set();
+
+
+  puzzleCompletedTop =
+    false;
+
+
+  populateStudentButtons(
+    topButtons,
+    filename,
+    "A"
+  );
+
+}
+
+
+/* =========================================================
+   UPDATE STUDENT B ONLY
+   ========================================================= */
+
+function updateStudentB() {
+
+  const listB =
+    activeListsB[
+      currentTopicKey
+    ];
+
+
+  if (!listB) {
+    return;
+  }
+
+
+  const filename =
+    getImageFilename(
+      listB[currentIndexBottom]
+    );
+
+
+  renderImageOrText(
+    promptBottom,
+    filename
+  );
+
+
+  counterBottom.textContent =
+    `${currentIndexBottom + 1} / ${listB.length}`;
+
+
+  foundAnswersBottom =
+    new Set();
+
+
+  puzzleCompletedBottom =
+    false;
+
+
+  populateStudentButtons(
+    bottomButtons,
+    filename,
+    "B"
+  );
+
+}
+
 </script>
 
 </body>
