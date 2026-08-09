@@ -145,7 +145,11 @@ button.toggle-mode.active {
 
   align-items: center;
 
-  gap: 6px;
+  /*
+    Keep the A/B label extremely close to the
+    answer buttons.
+  */
+  gap: 2px;
 
   font-size: 14px;
 
@@ -160,20 +164,24 @@ button.toggle-mode.active {
 /* =========================================================
    STUDENT LABEL
 
-   A / B now use only a small amount of space.
-   The answer buttons automatically take the remaining
-   horizontal space.
+   A / B use only their natural text width.
+   There is NO fixed-width box around the label.
    ========================================================= */
 
 .student-role {
-  flex: 0 0 24px;
+  flex: 0 0 auto;
 
-  width: 24px;
-  min-width: 24px;
+  width: auto;
+  min-width: 0;
+
+  padding: 0;
+  margin: 0;
 
   text-align: left;
 
   white-space: nowrap;
+
+  font-size: inherit;
 }
 
 
@@ -524,13 +532,17 @@ button.toggle-mode.active {
   }
 
   .pane-header {
-    gap: 4px;
+    gap: 2px;
   }
 
+  /*
+    IMPORTANT:
+    Do not give A/B a fixed width here.
+  */
   .student-role {
-    flex: 0 0 20px;
-    width: 20px;
-    min-width: 20px;
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
     font-size: 12px;
   }
 
@@ -557,13 +569,17 @@ button.toggle-mode.active {
 @media (max-width: 600px) {
 
   .pane-header {
-    gap: 3px;
+    gap: 2px;
   }
 
+  /*
+    Keep the label tight against the first button
+    even on small screens.
+  */
   .student-role {
-    flex: 0 0 16px;
-    width: 16px;
-    min-width: 16px;
+    flex: 0 0 auto;
+    width: auto;
+    min-width: 0;
     font-size: 11px;
   }
 
@@ -1035,6 +1051,7 @@ parseRawData(
   rawDataA,
   topicsA
 );
+
 
 parseRawData(
   rawDataB,
