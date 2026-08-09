@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile Board Game Shell</title>
+    <style>
+        :root {
+            --blue: #2196F3;
+            --green: #4CAF50;
+            --orange: #FF9800;
+            --red: #F44336;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #121212;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 4px;
+            box-sizing: border-box;
+            gap: 4px;
+        }
+
+        h2 {
+            margin: 0;
+            display: none;
+        }
+
+        .controls-panel {
+            background: #1e1e1e;
+            padding: 3px 0px;
+            border-radius: 6px;
+            width: 100%;
+            max-width: 430px;
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 3px;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 20;
+        }
+
+        select, button.action-btn {
+            padding: 4px 6px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            background: #2d2d2d;
+            color: #fff;
+            font-size: 0.75rem;
+            cursor: pointer;
+            box-sizing: border-box;
+            text-align: center;
+            white-space: nowrap;
+            height: 28px;
+        }
+
+        #dice-count-select {
+            flex: 0 0 auto;
+            width: 58px;
+        }
+
+        .dropdown-select {
+            flex: 0 0 auto;
+            width: 105px;
+            font-size: 0.7rem;
+            text-overflow: ellipsis;
+        }
+
+        .tray-pieces {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+            justify-content: flex-start;
+            background: #2d2d2d;
+            padding: 2px 4px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            height: 28px;
+            width: 85px;
+            box-sizing: border-box;
+            flex: 0 0 auto;
+            overflow: hidden;
+        }
+
+        .tray-piece {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        #dice-slot-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            position: relative;
+            height: 28px;
+            flex: 1;
+        }
+
+        #dice-corner {
+            background: #2d2d2d;
+            padding: 2px 4px;
+            border-radius: 4px;
+            display: flex;
+            gap: 3px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 1px solid #444;
+            height: 28px;
+            box-sizing: border-box;
+        }
+
+        .dice {
+            width: 20px;
+            height: 20px;
+            background: #fdfdfd;
+            color: #111;
+            border-radius: 3px;
+            display: grid;
+            grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+            padding: 1px;
+            box-sizing: border-box;
+            box-shadow: inset 0 0 1px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .dice.rolling {
+            animation: shake 0.4s ease infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-10deg) scale(1.1); }
+            50% { transform: rotate(10deg) scale(0.9); }
+            75% { transform: rotate(-5deg) scale(1.05); }
+            100% { transform: rotate(0deg) scale(1); }
+        }
+
+        .dot {
+            background: #111;
+            border-radius: 50%;
+            align-self: center;
+            justify-self: center;
+            width: 3.5px;
+            height: 3.5px;
+            display: none;
+        }
+
+        .dice[data-value="1"] .dot.center { display: block; }
+        .dice[data-value="2"] .dot.top-right, .dice[data-value="2"] .dot.bottom-left { display: block; }
+        .dice[data-value="3"] .dot.top-right, .dice[data-value="3"] .dot.center, .dice[data-value="3"] .dot.bottom-left { display: block; }
+        .dice[data-value="4"] .dot.top-left, .dice[data-value="4"] .dot.top-right, .dice[data-value="4"] .dot.bottom-left, .dice[data-value="4"] .dot.bottom-right { display: block; }
+        .dice[data-value="5"] .dot.top-left, .dice[data-value="5"] .dot.top-right, .dice[data-value="5"] .dot.center, .dice[data-value="5"] .dot.bottom-left, .dice[data-value="5"] .dot.bottom-right { display: block; }
+        .dice[data-value="6"] .dot.top-left, .dice[data-value="6"] .dot.top-right, .dice[data-value="6"] .dot.middle-left, .dice[data-value="6"] .dot.middle-right, .dice[data-value="6"] .dot.bottom-left, .dice[data-value="6"] .dot.bottom-right { display: block; }
+
+        .top-left { grid-row: 1; grid-column: 1; }
+        .top-right { grid-row: 1; grid-column: 3; }
+        .middle-left { grid-row: 2; grid-column: 1; }
+        .center { grid-row: 2; grid-column: 2; }
+        .middle-right { grid-row: 2; grid-column: 3; }
+        .bottom-left { grid-row: 3; grid-column: 1; }
+        .bottom-right { grid-row: 3; grid-column: 3; }
+
+        #floating-spinner-wrapper {
+            position: absolute;
+            bottom: -39px;
+            right: 27px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--blue) 0deg 90deg, 
+                var(--green) 90deg 180deg, 
+                var(--orange) 180deg 270deg, 
+                var(--red) 270deg 360deg
+            );
+            border: 2.5px solid #fff;
+            box-sizing: border-box;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.7);
+            cursor: pointer;
+            z-index: 50;
+            display: none;
+        }
+
+        #spinner-diagonal-arrow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 3.5px;
+            height: 40px;
+            transform: translate(-50%, -50%) rotate(45deg);
+            transform-origin: center center;
+            transition: transform 1.2s cubic-bezier(0.15, 0.9, 0.2, 1);
+            pointer-events: none;
+            background: #fff;
+            border: 0.5px solid rgba(0,0,0,0.4);
+        }
+
+        #spinner-diagonal-arrow::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 10px solid #fff;
+            filter: drop-shadow(0 -1px 1px rgba(0,0,0,0.3));
+        }
+
+        #spinner-diagonal-arrow::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 3px;
+            background: #fff;
+        }
+
+        .spinner-center-cap {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 9px;
+            height: 9px;
+            background: #111;
+            border: 1.5px solid #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 52;
+            pointer-events: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 430px;
+            aspect-ratio: 9 / 16;
+            flex: 1;
+            max-height: calc(100vh - 45px);
+            background: #2d2d2d;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #444;
+            box-sizing: border-box;
+        }
+
+        #board-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+
+        .placeholder-text {
+            color: #777;
+            text-align: center;
+            padding: 20px;
+            z-index: 1;
+            font-size: 0.9rem;
+        }
+
+        #board-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .game-piece {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            transform: translate(-50%, -50%);
+            pointer-events: auto;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        .game-piece.selected {
+            transform: translate(-50%, -50%) scale(1.25);
+            box-shadow: 0 0 10px #ffeb3b;
+            border-color: #ffeb3b;
+            z-index: 10;
+        }
+
+        #card-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 112px;
+            background: #fff;
+            color: #111;
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            z-index: 100;
+            cursor: grab;
+            user-select: none;
+            padding: 6px;
+            box-sizing: border-box;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border: 1px solid rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        #card-modal:active {
+            cursor: grabbing;
+        }
+
+        #card-content {
+            font-size: 0.65rem;
+            font-weight: 700;
+            line-height: 1.15;
+            margin: 0;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 6;
+            -webkit-box-orient: vertical;
+        }
+    </style>
+</head>
+<body>
+
+    <h2></h2>
+
+    <!-- Controls Panel -->
+    <div class="controls-panel">
+        <!-- Unified Board Selection Dropdown -->
+        <select id="online-board-select" class="dropdown-select">
+            <option value="">Select Board</option>
+            <option value="LOCAL_FILE_TRIGGER" style="color: #4CAF50; font-weight: bold;">📁 Load Local...</option>
+            <option disabled>----------------</option>
+        </select>
+        <input type="file" id="hidden-local-board-input" accept="image/*" style="display: none;">
+
+        <!-- Unified Card Selection Dropdown -->
+        <select id="online-cards-select" class="dropdown-select">
+            <option value="">Select Cards</option>
+            <option value="LOCAL_FILE_TRIGGER" style="color: #4CAF50; font-weight: bold;">📁 Load Local...</option>
+            <option disabled>----------------</option>
+        </select>
+        <input type="file" id="hidden-local-cards-input" accept=".txt, text/plain" style="display: none;">
+
+        <!-- Dice Count / Spinner Selector -->
+        <select id="dice-count-select">
+            <option value="" disabled selected>Dice</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="spinner">Spin</option>
+        </select>
+
+        <div class="tray-pieces" id="tray-container" title="Piece Tray"></div>
+
+        <div id="dice-slot-container">
+            <div id="dice-corner" title="Tap to Roll Dice">
+                <div id="dice-box" style="display: flex; gap: 2px;"></div>
+            </div>
+            <div id="floating-spinner-wrapper" title="Tap to Spin">
+                <div id="spinner-diagonal-arrow"></div>
+                <div class="spinner-center-cap"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Game Board Container -->
+    <div id="game-container">
+        <div class="placeholder-text" id="placeholder" style="position:relative; top:40%;">Select a board or load locally</div>
+        <img id="board-image" alt="">
+        <div id="board-layer"></div>
+    </div>
+
+    <!-- Card Modal -->
+    <div id="card-modal" title="Tap card for next prompt">
+        <div id="card-content">No prompts loaded</div>
+    </div>
+
+    <script>
+        // ==========================================
+        // INTERNAL MANIFESTS
+        // ==========================================
+        const internalBoardManifest = `
+            !!GB_Save_the_City_Board_Game.png | Save the City
+            !!GB_Ludo.png | Ludo Classic
+            !!GB_Chess.jpg | Chess Game
+            !!GB_Snakes.png | Snakes & Ladders
+        `;
+
+        const internalCardsManifest = `
+            !!GB_Trivia_Questions.txt | Trivia Prompts
+            !!GB_Action_Cards.txt | Action Prompts
+        `;
+
+        const colors = ['var(--blue)', 'var(--green)', 'var(--orange)', 'var(--red)'];
+        let pieces = [];
+        let selectedPieceId = null;
+        let currentNeedleAngle = 45;
+        let lastColorIndex = null; // Tracks the last chosen quadrant index (0 to 3)
+
+        const pastelColors = [
+            '#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF', '#E8C5FF',
+            '#FFC5EC', '#C5FFEC', '#F4FFC5', '#FFCBC1', '#D4C5FF', '#C5F6FF'
+        ];
+
+        let cardPrompts = [];
+        let cardQueue = [];
+
+        const onlineBoardSelect = document.getElementById('online-board-select');
+        const hiddenLocalBoardInput = document.getElementById('hidden-local-board-input');
+        
+        const onlineCardsSelect = document.getElementById('online-cards-select');
+        const hiddenLocalCardsInput = document.getElementById('hidden-local-cards-input');
+
+        const boardImage = document.getElementById('board-image');
+        const placeholder = document.getElementById('placeholder');
+        const gameContainer = document.getElementById('game-container');
+        const boardLayer = document.getElementById('board-layer');
+        const trayContainer = document.getElementById('tray-container');
+        const diceCountSelect = document.getElementById('dice-count-select');
+        const diceBox = document.getElementById('dice-box');
+        const diceCorner = document.getElementById('dice-corner');
+        const floatingSpinner = document.getElementById('floating-spinner-wrapper');
+        const spinnerArrow = document.getElementById('spinner-diagonal-arrow');
+
+        const cardModal = document.getElementById('card-modal');
+        const cardContent = document.getElementById('card-content');
+
+        function initDropdowns() {
+            // Populate Boards
+            const boardLines = internalBoardManifest.trim().split(/\r?\n/);
+            boardLines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+                let filename, label;
+                if (line.includes('|')) {
+                    const parts = line.split('|');
+                    filename = parts[0].trim();
+                    label = parts[1].trim();
+                } else {
+                    filename = line;
+                    label = filename.replace(/^!!GB_/, '').replace(/\.[^/.]+$/, '').replace(/_/g, ' ');
+                }
+                const option = document.createElement('option');
+                option.value = filename;
+                option.textContent = label;
+                onlineBoardSelect.appendChild(option);
+            });
+
+            // Populate Cards
+            const cardLines = internalCardsManifest.trim().split(/\r?\n/);
+            cardLines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+                let filename, label;
+                if (line.includes('|')) {
+                    const parts = line.split('|');
+                    filename = parts[0].trim();
+                    label = parts[1].trim();
+                } else {
+                    filename = line;
+                    label = filename.replace(/^!!GB_/, '').replace(/\.[^/.]+$/, '').replace(/_/g, ' ');
+                }
+                const option = document.createElement('option');
+                option.value = filename;
+                option.textContent = label;
+                onlineCardsSelect.appendChild(option);
+            });
+        }
+
+        function loadAndDisplayImageSource(srcString) {
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                if (img.width > img.height) {
+                    canvas.width = img.height;
+                    canvas.height = img.width;
+
+                    ctx.translate(canvas.width / 2, canvas.height / 2);
+                    ctx.rotate(-Math.PI / 2); 
+                    ctx.drawImage(img, -img.width / 2, -img.height / 2);
+                } else {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
+                }
+
+                boardImage.src = canvas.toDataURL('image/jpeg');
+                boardImage.style.display = 'block';
+                placeholder.style.display = 'none';
+            };
+            img.onerror = function() {
+                alert("Could not load the board image automatically from the server folder.");
+            };
+            img.src = srcString;
+        }
+
+        function processCardText(text, sourceName) {
+            const hasValidPrefix = sourceName.toUpperCase().startsWith('!!GB_');
+            if (!hasValidPrefix || !sourceName.toLowerCase().endsWith('.txt')) {
+                alert('Invalid file selection!\n\nCard text files must:\n1. Be a .txt file.\n2. Start with the "!!GB_" prefix.');
+                onlineCardsSelect.value = '';
+                return;
+            }
+
+            cardPrompts = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+            
+            if (cardPrompts.length === 0) {
+                alert('The text file contained no valid prompts.');
+                return;
+            }
+
+            resetCardQueue();
+            showNextCard();
+            cardModal.style.display = 'flex';
+        }
+
+        // Board Selection Handler
+        onlineBoardSelect.addEventListener('change', (e) => {
+            const selectedVal = e.target.value;
+            if (!selectedVal) return;
+
+            if (selectedVal === 'LOCAL_FILE_TRIGGER') {
+                hiddenLocalBoardInput.click();
+            } else {
+                loadAndDisplayImageSource(selectedVal);
+            }
+        });
+
+        hiddenLocalBoardInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    loadAndDisplayImageSource(event.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                onlineBoardSelect.value = '';
+            }
+        });
+
+        // Cards Selection Handler
+        onlineCardsSelect.addEventListener('change', (e) => {
+            const selectedVal = e.target.value;
+            if (!selectedVal) return;
+
+            if (selectedVal === 'LOCAL_FILE_TRIGGER') {
+                hiddenLocalCardsInput.click();
+            } else {
+                fetch(selectedVal)
+                    .then(response => {
+                        if (!response.ok) throw new Error("Network response was not ok");
+                        return response.text();
+                    })
+                    .then(text => {
+                        processCardText(text, selectedVal);
+                    })
+                    .catch(error => {
+                        alert("Could not load the cards text file automatically from the server folder.");
+                        onlineCardsSelect.value = '';
+                    });
+            }
+        });
+
+        hiddenLocalCardsInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    processCardText(event.target.result, file.name);
+                };
+                reader.readAsText(file);
+            } else {
+                onlineCardsSelect.value = '';
+            }
+        });
+
+        function resetCardQueue() {
+            cardQueue = [...cardPrompts];
+            for (let i = cardQueue.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cardQueue[i], cardQueue[j]] = [cardQueue[j], cardQueue[i]];
+            }
+        }
+
+        function showNextCard() {
+            if (cardQueue.length === 0) {
+                resetCardQueue();
+            }
+            const promptText = cardQueue.pop();
+            cardContent.textContent = promptText;
+
+            const randomColor = pastelColors[Math.floor(Math.random() * pastelColors.length)];
+            cardModal.style.backgroundColor = randomColor;
+        }
+
+        let isDragging = false;
+        let hasMoved = false;
+        let startX, startY, initialLeft, initialTop;
+
+        cardModal.addEventListener('pointerdown', (e) => {
+            isDragging = true;
+            hasMoved = false;
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            const rect = cardModal.getBoundingClientRect();
+            cardModal.style.transform = 'none';
+            cardModal.style.left = `${rect.left}px`;
+            cardModal.style.top = `${rect.top}px`;
+            
+            initialLeft = rect.left;
+            initialTop = rect.top;
+            
+            cardModal.setPointerCapture(e.pointerId);
+        });
+
+        cardModal.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+
+            if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+                hasMoved = true;
+            }
+
+            cardModal.style.left = `${initialLeft + dx}px`;
+            cardModal.style.top = `${initialTop + dy}px`;
+        });
+
+        cardModal.addEventListener('pointerup', (e) => {
+            if (isDragging && !hasMoved) {
+                if (cardPrompts.length > 0) {
+                    showNextCard();
+                }
+            }
+            isDragging = false;
+            cardModal.releasePointerCapture(e.pointerId);
+        });
+
+        function initPieces() {
+            pieces = [];
+            for (let p = 0; p < 4; p++) {
+                pieces.push({
+                    id: p,
+                    colorIndex: p,
+                    color: colors[p],
+                    x: null, 
+                    y: null
+                });
+            }
+            selectedPieceId = null;
+            renderGame();
+        }
+
+        function renderGame() {
+            trayContainer.innerHTML = '';
+            boardLayer.innerHTML = '';
+
+            pieces.forEach(piece => {
+                if (piece.x === null && piece.y === null) {
+                    const el = document.createElement('div');
+                    el.className = 'tray-piece';
+                    el.style.backgroundColor = piece.color;
+                    if (piece.id === selectedPieceId) {
+                        el.style.border = '2px solid #ffeb3b';
+                        el.style.transform = 'scale(1.15)';
+                    }
+                    el.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        selectedPieceId = piece.id;
+                        renderGame();
+                    });
+                    trayContainer.appendChild(el);
+                } else {
+                    const el = document.createElement('div');
+                    el.className = 'game-piece';
+                    el.style.backgroundColor = piece.color;
+                    el.style.left = `${piece.x}%`;
+                    el.style.top = `${piece.y}%`;
+                    if (piece.id === selectedPieceId) {
+                        el.classList.add('selected');
+                    }
+                    el.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        selectedPieceId = piece.id;
+                        renderGame();
+                    });
+                    boardLayer.appendChild(el);
+                }
+            });
+        }
+
+        gameContainer.addEventListener('click', (e) => {
+            if (selectedPieceId === null) return;
+            if (e.target.closest('#dice-slot-container')) return;
+
+            const rect = gameContainer.getBoundingClientRect();
+            let xClick = e.clientX - rect.left;
+            let yClick = e.clientY - rect.top;
+
+            let xNorm = xClick / rect.width;
+            let yNorm = yClick / rect.height;
+
+            xNorm = Math.max(0, Math.min(1, xNorm));
+            yNorm = Math.max(0, Math.min(1, yNorm));
+
+            const piece = pieces.find(p => p.id === selectedPieceId);
+            if (piece) {
+                piece.x = xNorm * 100;
+                piece.y = yNorm * 100;
+                selectedPieceId = null;
+                renderGame();
+            }
+        });
+
+        function renderDiceStructure() {
+            diceBox.innerHTML = '';
+            const val = diceCountSelect.value;
+            
+            if (val === 'spinner') {
+                diceCorner.style.display = 'none';
+                floatingSpinner.style.display = 'block';
+            } else if (!val) {
+                diceCorner.style.display = 'none';
+                floatingSpinner.style.display = 'none';
+            } else {
+                floatingSpinner.style.display = 'none';
+                diceCorner.style.display = 'flex';
+                diceCorner.title = "Tap to Roll Dice";
+                
+                const count = parseInt(val);
+                for (let i = 0; i < count; i++) {
+                    const die = document.createElement('div');
+                    die.className = 'dice';
+                    die.setAttribute('data-value', '6');
+                    die.innerHTML = `
+                        <div class="dot top-left"></div><div class="dot top-right"></div>
+                        <div class="dot middle-left"></div><div class="dot center"></div><div class="dot middle-right"></div>
+                        <div class="dot bottom-left"></div><div class="dot bottom-right"></div>
+                    `;
+                    diceBox.appendChild(die);
+                }
+            }
+        }
+
+        function spinWheel() {
+            let newColorIndex;
+            // Keep picking a random color index (0 to 3) until it differs from the last one
+            do {
+                newColorIndex = Math.floor(Math.random() * 4);
+            } while (newColorIndex === lastColorIndex && colors.length > 1);
+
+            lastColorIndex = newColorIndex;
+
+            // Calculate target angle matching the chosen color quadrant (90 degrees per slice)
+            const randomExtraTurns = (Math.floor(Math.random() * 3) + 4) * 360;
+            const sliceAngle = (newColorIndex * 90) + Math.floor(Math.random() * 70) + 10;
+            
+            currentNeedleAngle += randomExtraTurns + (sliceAngle - (currentNeedleAngle % 360));
+            spinnerArrow.style.transform = `translate(-50%, -50%) rotate(${currentNeedleAngle}deg)`;
+        }
+
+        function rollDice() {
+            const diceElements = diceBox.querySelectorAll('.dice');
+            diceElements.forEach(die => die.classList.add('rolling'));
+
+            setTimeout(() => {
+                diceElements.forEach(die => {
+                    die.classList.remove('rolling');
+                    const randomVal = Math.floor(Math.random() * 6) + 1;
+                    die.setAttribute('data-value', randomVal);
+                });
+            }, 400);
+        }
+
+        diceCorner.addEventListener('click', rollDice);
+        floatingSpinner.addEventListener('click', spinWheel);
+        diceCountSelect.addEventListener('change', renderDiceStructure);
+
+        initDropdowns();
+        initPieces();
+        renderDiceStructure();
+    </script>
+</body>
+</html>
