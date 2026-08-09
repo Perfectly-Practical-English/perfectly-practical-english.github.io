@@ -110,7 +110,9 @@ button.toggle-mode.active {
 }
 
 
-/* Student A */
+/* =========================================================
+   STUDENT A
+   ========================================================= */
 
 #top-pane {
   background: #eaf2f8;
@@ -123,7 +125,9 @@ button.toggle-mode.active {
 }
 
 
-/* Student B */
+/* =========================================================
+   STUDENT B
+   ========================================================= */
 
 #bottom-pane {
   background: #eafaf1;
@@ -141,7 +145,7 @@ button.toggle-mode.active {
 
   align-items: center;
 
-  gap: 10px;
+  gap: 6px;
 
   font-size: 14px;
 
@@ -153,24 +157,35 @@ button.toggle-mode.active {
 }
 
 
-/* Student label */
+/* =========================================================
+   STUDENT LABEL
+
+   A / B now use only a small amount of space.
+   The answer buttons automatically take the remaining
+   horizontal space.
+   ========================================================= */
 
 .student-role {
-  flex: 0 0 auto;
+  flex: 0 0 24px;
+
+  width: 24px;
+  min-width: 24px;
+
+  text-align: left;
 
   white-space: nowrap;
-
-  min-width: 70px;
 }
 
 
-/* Counter */
+/* =========================================================
+   COUNTER
+   ========================================================= */
 
 .counter-top,
 .counter-bottom {
   flex: 0 0 auto;
 
-  min-width: 45px;
+  min-width: 38px;
 
   text-align: right;
 
@@ -184,20 +199,25 @@ button.toggle-mode.active {
 
 /* =========================================================
    ANSWER BUTTON CONTAINER
+
+   The six buttons fill ALL remaining horizontal space.
    ========================================================= */
 
 .answer-buttons {
-  flex: 1;
+  flex: 1 1 auto;
+
+  width: 100%;
   min-width: 0;
 
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+
+  grid-template-columns:
+    repeat(6, minmax(0, 1fr));
 
   gap: 3px;
 
   align-items: center;
 }
-
 
 
 /* =========================================================
@@ -210,7 +230,6 @@ button.toggle-mode.active {
   min-width: 0;
   width: 100%;
 
-  /* Minimal internal padding so adjectives have maximum room */
   padding: 1px 1px;
 
   border-radius: 5px;
@@ -228,7 +247,6 @@ button.toggle-mode.active {
 
   cursor: pointer;
 
-  /* Keep the complete adjective on one line */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -291,6 +309,7 @@ button.toggle-mode.active {
   animation:
     wrongFlash 0.35s ease-out;
 }
+
 
 /* =========================================================
    FOUND ANSWER
@@ -505,11 +524,13 @@ button.toggle-mode.active {
   }
 
   .pane-header {
-    gap: 6px;
+    gap: 4px;
   }
 
   .student-role {
-    min-width: 58px;
+    flex: 0 0 20px;
+    width: 20px;
+    min-width: 20px;
     font-size: 12px;
   }
 
@@ -519,7 +540,7 @@ button.toggle-mode.active {
 
   .answer-btn {
     height: 25px;
-    padding: 2px 3px;
+    padding: 1px 1px;
     font-size: 9px;
     border-radius: 5px;
   }
@@ -536,17 +557,19 @@ button.toggle-mode.active {
 @media (max-width: 600px) {
 
   .pane-header {
-    gap: 4px;
+    gap: 3px;
   }
 
   .student-role {
-    min-width: 50px;
+    flex: 0 0 16px;
+    width: 16px;
+    min-width: 16px;
     font-size: 11px;
   }
 
   .answer-buttons {
     grid-template-columns:
-      repeat(6, minmax(32px, 1fr));
+      repeat(6, minmax(0, 1fr));
 
     gap: 2px;
   }
@@ -555,7 +578,7 @@ button.toggle-mode.active {
     height: 23px;
 
     padding:
-      1px 2px;
+      1px 1px;
 
     font-size: 8px;
   }
@@ -876,12 +899,7 @@ let puzzleCompletedBottom = false;
 
 /* =========================================================
    CONTROLLED DISTRACTORS
-   =========================================================
-
-   These are deliberately chosen so that the distractors
-   come from other characters but do not create obvious
-   synonym / alternative-answer problems.
-*/
+   ========================================================= */
 
 const safeDistractors = {
 
@@ -1364,12 +1382,6 @@ function populateStudentButtons(
     student === "A"
       ? foundAnswersTop
       : foundAnswersBottom;
-
-
-  const completed =
-    student === "A"
-      ? puzzleCompletedTop
-      : puzzleCompletedBottom;
 
 
   buttons.forEach(
@@ -2109,6 +2121,7 @@ function completeStudentPuzzle(
     puzzleCompletedTop =
       true;
 
+
     topButtons.forEach(
       button => {
 
@@ -2128,6 +2141,7 @@ function completeStudentPuzzle(
 
     puzzleCompletedBottom =
       true;
+
 
     bottomButtons.forEach(
       button => {
