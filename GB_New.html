@@ -71,12 +71,12 @@
 
         #dice-count-select {
             flex: 0 0 auto;
-            width: 68px;
+            width: 58px;
         }
 
         #online-board-select {
             flex: 0 0 auto;
-            width: 105px;
+            width: 95px;
             font-size: 0.7rem;
             text-overflow: ellipsis;
         }
@@ -90,12 +90,12 @@
             background: #2d2d2d;
             border: 1px solid #444;
             border-radius: 4px;
-            padding: 4px 8px;
-            font-size: 0.7rem;
+            padding: 2px 4px;
+            font-size: 0.65rem;
             cursor: pointer;
             text-align: center;
             white-space: nowrap;
-            width: 85px;
+            width: 75px;
             height: 28px;
             box-sizing: border-box;
             text-overflow: ellipsis;
@@ -111,10 +111,6 @@
             cursor: pointer;
         }
 
-        button.action-btn:active {
-            background: #444;
-        }
-
         .tray-pieces {
             display: flex;
             gap: 3px;
@@ -125,7 +121,7 @@
             border-radius: 4px;
             border: 1px solid #444;
             height: 28px;
-            width: 115px;
+            width: 95px;
             box-sizing: border-box;
             flex: 0 0 auto;
             overflow: hidden;
@@ -402,21 +398,28 @@
 
     <!-- Controls Panel -->
     <div class="controls-panel">
-        <!-- Online Board Dropdown List (Populated automatically from internal raw text) -->
+        <!-- Online/Manifest Board Selection Dropdown -->
         <select id="online-board-select">
             <option value="">Select Board</option>
         </select>
 
+        <!-- Fallback Local File Picker Button -->
+        <div class="file-upload-wrapper" id="board-label-text" title="Fallback Local Board Load">
+            Local Board
+            <input type="file" id="board-file-input" accept="image/*">
+        </div>
+
         <select id="dice-count-select">
-            <option value="1">1 Dice</option>
-            <option value="2" selected>2 Dice</option>
-            <option value="3">3 Dice</option>
-            <option value="spinner">Spinner</option>
+            <option value="1">1</option>
+            <option value="2" selected>2</option>
+            <option value="3">3</option>
+            <option value="spinner">Spin</option>
         </select>
+
         <div class="tray-pieces" id="tray-container" title="Piece Tray"></div>
         
-        <div class="file-upload-wrapper" id="cards-label-text" style="width: 85px;">
-            Load Cards
+        <div class="file-upload-wrapper" id="cards-label-text">
+            Cards
             <input type="file" id="cards-input" accept=".txt, text/plain">
         </div>
 
@@ -433,7 +436,7 @@
 
     <!-- Game Board Container -->
     <div id="game-container">
-        <div class="placeholder-text" id="placeholder" style="position:relative; top:40%;">Select a board from the dropdown</div>
+        <div class="placeholder-text" id="placeholder" style="position:relative; top:40%;">Select a board or load locally</div>
         <img id="board-image" alt="">
         <div id="board-layer"></div>
     </div>
@@ -446,7 +449,6 @@
     <script>
         // ==========================================
         // INTERNAL RAW TEXT MANIFEST
-        // Add your filenames and readable labels here!
         // ==========================================
         const internalBoardManifest = `
             !!GB_Save_the_City_Board_Game.png | Save the City
@@ -469,6 +471,8 @@
         let cardQueue = [];
 
         const onlineBoardSelect = document.getElementById('online-board-select');
+        const boardFileInput = document.getElementById('board-file-input');
+        const boardLabelText = document.getElementById('board-label-text');
         const boardImage = document.getElementById('board-image');
         const placeholder = document.getElementById('placeholder');
         const gameContainer = document.getElementById('game-container');
@@ -485,7 +489,7 @@
         const cardModal = document.getElementById('card-modal');
         const cardContent = document.getElementById('card-content');
 
-        // Parse internal raw text manifest and build the dropdown options dynamically
+        // Populate dropdown from manifest text
         function initBoardDropdown() {
             const lines = internalBoardManifest.trim().split(/\r?\n/);
             lines.forEach(line => {
@@ -499,7 +503,6 @@
                     label = parts[1].trim();
                 } else {
                     filename = line;
-                    // Format a readable name automatically from the filename if no label is provided
                     label = filename.replace(/^!!GB_/, '').replace(/\.[^/.]+$/, '').replace(/_/g, ' ');
                 }
 
@@ -510,11 +513,8 @@
             });
         }
 
-        // Online Folder Selection Handler
-        onlineBoardSelect.addEventListener('change', (e) => {
-            const fileName = e.target.value;
-            if (!fileName) return;
-
+        // Helper function to process and display images cleanly with rotation correction
+        function loadAndDisplayImageSource(srcString) {
             const img = new Image();
             img.crossOrigin = "Anonymous";
             img.onload = function() {
@@ -539,9 +539,32 @@
                 placeholder.style.display = 'none';
             };
             img.onerror = function() {
-                alert("Could not load " + fileName + " from the server folder.");
+                alert("Could not load the board image automatically. Try using the 'Local Board' button next to it.");
             };
-            img.src = fileName;
+            img.src = srcString;
+        }
+
+        // 1. Online / Manifest Dropdown Handler
+        onlineBoardSelect.addEventListener('change', (e) => {
+            const fileName = e.target.value;
+            if (!fileName) return;
+            boardFileInput.value = ''; // Reset local file picker state
+            boardLabelText.childNodes[0].nodeValue = 'Local Board';
+            loadAndDisplayImageSource(fileName);
+        });
+
+        // 2. Local File Picker Fallback Handler (Bypasses local CORS blocks)
+        boardFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                onlineBoardSelect.value = ''; // Reset dropdown state
+                boardLabelText.childNodes[0].nodeValue = 'Loaded';
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    loadAndDisplayImageSource(event.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
         });
 
         cardsInput.addEventListener('change', (e) => {
@@ -553,7 +576,7 @@
                 if (!hasValidPrefix || !file.name.toLowerCase().endsWith('.txt')) {
                     alert('Invalid file selection!\n\nCard text files must:\n1. Be a .txt file.\n2. Start with the "!!GB_" prefix.');
                     cardsInput.value = '';
-                    cardsLabelText.childNodes[0].nodeValue = 'Load Cards';
+                    cardsLabelText.childNodes[0].nodeValue = 'Cards';
                     return;
                 }
 
