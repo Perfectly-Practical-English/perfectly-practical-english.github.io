@@ -71,41 +71,14 @@
 
         #dice-count-select {
             flex: 0 0 auto;
-            width: 68px;
+            width: 58px;
         }
 
-        .file-upload-wrapper {
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #2d2d2d;
-            border: 1px solid #444;
-            border-radius: 4px;
-            padding: 4px 8px;
+        .dropdown-select {
+            flex: 0 0 auto;
+            width: 105px;
             font-size: 0.7rem;
-            cursor: pointer;
-            text-align: center;
-            white-space: nowrap;
-            width: 90px;
-            height: 28px;
-            box-sizing: border-box;
             text-overflow: ellipsis;
-        }
-
-        .file-upload-wrapper input[type="file"] {
-            position: absolute;
-            left: 0;
-            top: 0;
-            opacity: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
-
-        button.action-btn:active {
-            background: #444;
         }
 
         .tray-pieces {
@@ -118,7 +91,7 @@
             border-radius: 4px;
             border: 1px solid #444;
             height: 28px;
-            width: 115px;
+            width: 85px;
             box-sizing: border-box;
             flex: 0 0 auto;
             overflow: hidden;
@@ -346,7 +319,6 @@
             z-index: 10;
         }
 
-        /* Card Size: 80px Wide x 112px Tall (Proportional) */
         #card-modal {
             display: none;
             position: fixed;
@@ -388,10 +360,6 @@
             -webkit-line-clamp: 6;
             -webkit-box-orient: vertical;
         }
-
-        .card-close-hint {
-            display: none;
-        }
     </style>
 </head>
 <body>
@@ -400,22 +368,32 @@
 
     <!-- Controls Panel -->
     <div class="controls-panel">
-        <div class="file-upload-wrapper" id="file-label-text">
-            Load Game
-            <input type="file" id="board-input" accept=".jpg, .jpeg, .png, image/jpeg, image/png">
-        </div>
-        <select id="dice-count-select">
-            <option value="1">1 Dice</option>
-            <option value="2" selected>2 Dice</option>
-            <option value="3">3 Dice</option>
-            <option value="spinner">Spinner</option>
+        <!-- Unified Board Selection Dropdown -->
+        <select id="online-board-select" class="dropdown-select">
+            <option value="">Select Board</option>
+            <option value="LOCAL_FILE_TRIGGER" style="color: #4CAF50; font-weight: bold;">📁 Load Local...</option>
+            <option disabled>----------------</option>
         </select>
+        <input type="file" id="hidden-local-board-input" accept="image/*" style="display: none;">
+
+        <!-- Unified Card Selection Dropdown -->
+        <select id="online-cards-select" class="dropdown-select">
+            <option value="">Select Cards</option>
+            <option value="LOCAL_FILE_TRIGGER" style="color: #4CAF50; font-weight: bold;">📁 Load Local...</option>
+            <option disabled>----------------</option>
+        </select>
+        <input type="file" id="hidden-local-cards-input" accept=".txt, text/plain" style="display: none;">
+
+        <!-- Dice Count / Spinner Selector -->
+        <select id="dice-count-select">
+            <option value="" disabled selected>Dice</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="spinner">Spin</option>
+        </select>
+
         <div class="tray-pieces" id="tray-container" title="Piece Tray"></div>
-        
-        <div class="file-upload-wrapper" id="cards-label-text" style="width: 85px;">
-            Load Cards
-            <input type="file" id="cards-input" accept=".txt, text/plain">
-        </div>
 
         <div id="dice-slot-container">
             <div id="dice-corner" title="Tap to Roll Dice">
@@ -430,7 +408,7 @@
 
     <!-- Game Board Container -->
     <div id="game-container">
-        <div class="placeholder-text" id="placeholder" style="position:relative; top:40%;">Tap Board to upload image</div>
+        <div class="placeholder-text" id="placeholder" style="position:relative; top:40%;">Select a board or load locally</div>
         <img id="board-image" alt="">
         <div id="board-layer"></div>
     </div>
@@ -441,10 +419,26 @@
     </div>
 
     <script>
+        // ==========================================
+        // INTERNAL MANIFESTS
+        // ==========================================
+        const internalBoardManifest = `
+            !!GB_Save_the_City_Board_Game.png | Save the City
+            !!GB_Ludo.png | Ludo Classic
+            !!GB_Chess.jpg | Chess Game
+            !!GB_Snakes.png | Snakes & Ladders
+        `;
+
+        const internalCardsManifest = `
+            !!GB_Trivia_Questions.txt | Trivia Prompts
+            !!GB_Action_Cards.txt | Action Prompts
+        `;
+
         const colors = ['var(--blue)', 'var(--green)', 'var(--orange)', 'var(--red)'];
         let pieces = [];
         let selectedPieceId = null;
         let currentNeedleAngle = 45;
+        let lastColorIndex = null; // Tracks the last chosen quadrant index (0 to 3)
 
         const pastelColors = [
             '#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF', '#E8C5FF',
@@ -454,7 +448,12 @@
         let cardPrompts = [];
         let cardQueue = [];
 
-        const boardInput = document.getElementById('board-input');
+        const onlineBoardSelect = document.getElementById('online-board-select');
+        const hiddenLocalBoardInput = document.getElementById('hidden-local-board-input');
+        
+        const onlineCardsSelect = document.getElementById('online-cards-select');
+        const hiddenLocalCardsInput = document.getElementById('hidden-local-cards-input');
+
         const boardImage = document.getElementById('board-image');
         const placeholder = document.getElementById('placeholder');
         const gameContainer = document.getElementById('game-container');
@@ -463,96 +462,162 @@
         const diceCountSelect = document.getElementById('dice-count-select');
         const diceBox = document.getElementById('dice-box');
         const diceCorner = document.getElementById('dice-corner');
-        const fileLabelText = document.getElementById('file-label-text');
         const floatingSpinner = document.getElementById('floating-spinner-wrapper');
         const spinnerArrow = document.getElementById('spinner-diagonal-arrow');
 
-        const cardsInput = document.getElementById('cards-input');
-        const cardsLabelText = document.getElementById('cards-label-text');
         const cardModal = document.getElementById('card-modal');
         const cardContent = document.getElementById('card-content');
 
-        boardInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const fileName = file.name;
-                const fileType = file.type;
-                
-                const hasValidPrefix = fileName.toUpperCase().startsWith('!!GB_');
-                const isValidFormat = fileType === 'image/jpeg' || fileType === 'image/png' || 
-                                      fileName.toLowerCase().endsWith('.jpg') || 
-                                      fileName.toLowerCase().endsWith('.jpeg') || 
-                                      fileName.toLowerCase().endsWith('.png');
+        function initDropdowns() {
+            // Populate Boards
+            const boardLines = internalBoardManifest.trim().split(/\r?\n/);
+            boardLines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+                let filename, label;
+                if (line.includes('|')) {
+                    const parts = line.split('|');
+                    filename = parts[0].trim();
+                    label = parts[1].trim();
+                } else {
+                    filename = line;
+                    label = filename.replace(/^!!GB_/, '').replace(/\.[^/.]+$/, '').replace(/_/g, ' ');
+                }
+                const option = document.createElement('option');
+                option.value = filename;
+                option.textContent = label;
+                onlineBoardSelect.appendChild(option);
+            });
 
-                if (!hasValidPrefix || !isValidFormat) {
-                    alert('Invalid file selection!\n\nBoard files must:\n1. Be a PNG or JPG image.\n2. Start with the "!!GB_" prefix (e.g., !!GB_Ludo.png).');
-                    boardInput.value = '';
-                    fileLabelText.childNodes[0].nodeValue = 'Load Game';
-                    return;
+            // Populate Cards
+            const cardLines = internalCardsManifest.trim().split(/\r?\n/);
+            cardLines.forEach(line => {
+                line = line.trim();
+                if (!line) return;
+                let filename, label;
+                if (line.includes('|')) {
+                    const parts = line.split('|');
+                    filename = parts[0].trim();
+                    label = parts[1].trim();
+                } else {
+                    filename = line;
+                    label = filename.replace(/^!!GB_/, '').replace(/\.[^/.]+$/, '').replace(/_/g, ' ');
+                }
+                const option = document.createElement('option');
+                option.value = filename;
+                option.textContent = label;
+                onlineCardsSelect.appendChild(option);
+            });
+        }
+
+        function loadAndDisplayImageSource(srcString) {
+            const img = new Image();
+            img.crossOrigin = "Anonymous";
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+
+                if (img.width > img.height) {
+                    canvas.width = img.height;
+                    canvas.height = img.width;
+
+                    ctx.translate(canvas.width / 2, canvas.height / 2);
+                    ctx.rotate(-Math.PI / 2); 
+                    ctx.drawImage(img, -img.width / 2, -img.height / 2);
+                } else {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    ctx.drawImage(img, 0, 0);
                 }
 
-                fileLabelText.childNodes[0].nodeValue = 'Game Loaded';
-                
-                const reader = new FileReader();
-                reader.onload = function(event) {
-                    const img = new Image();
-                    img.onload = function() {
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
+                boardImage.src = canvas.toDataURL('image/jpeg');
+                boardImage.style.display = 'block';
+                placeholder.style.display = 'none';
+            };
+            img.onerror = function() {
+                alert("Could not load the board image automatically from the server folder.");
+            };
+            img.src = srcString;
+        }
 
-                        if (img.width > img.height) {
-                            canvas.width = img.height;
-                            canvas.height = img.width;
+        function processCardText(text, sourceName) {
+            const hasValidPrefix = sourceName.toUpperCase().startsWith('!!GB_');
+            if (!hasValidPrefix || !sourceName.toLowerCase().endsWith('.txt')) {
+                alert('Invalid file selection!\n\nCard text files must:\n1. Be a .txt file.\n2. Start with the "!!GB_" prefix.');
+                onlineCardsSelect.value = '';
+                return;
+            }
 
-                            ctx.translate(canvas.width / 2, canvas.height / 2);
-                            ctx.rotate(-Math.PI / 2); 
-                            ctx.drawImage(img, -img.width / 2, -img.height / 2);
-                        } else {
-                            canvas.width = img.width;
-                            canvas.height = img.height;
-                            ctx.drawImage(img, 0, 0);
-                        }
+            cardPrompts = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+            
+            if (cardPrompts.length === 0) {
+                alert('The text file contained no valid prompts.');
+                return;
+            }
 
-                        boardImage.src = canvas.toDataURL('image/jpeg');
-                        boardImage.style.display = 'block';
-                        placeholder.style.display = 'none';
-                    };
-                    img.src = event.target.result;
-                };
-                reader.readAsDataURL(file);
+            resetCardQueue();
+            showNextCard();
+            cardModal.style.display = 'flex';
+        }
+
+        // Board Selection Handler
+        onlineBoardSelect.addEventListener('change', (e) => {
+            const selectedVal = e.target.value;
+            if (!selectedVal) return;
+
+            if (selectedVal === 'LOCAL_FILE_TRIGGER') {
+                hiddenLocalBoardInput.click();
+            } else {
+                loadAndDisplayImageSource(selectedVal);
             }
         });
 
-        cardsInput.addEventListener('change', (e) => {
+        hiddenLocalBoardInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                const fileName = file.name;
-                const hasValidPrefix = fileName.toUpperCase().startsWith('!!GB_');
-
-                if (!hasValidPrefix || !file.name.toLowerCase().endsWith('.txt')) {
-                    alert('Invalid file selection!\n\nCard text files must:\n1. Be a .txt file.\n2. Start with the "!!GB_" prefix.');
-                    cardsInput.value = '';
-                    cardsLabelText.childNodes[0].nodeValue = 'Load Cards';
-                    return;
-                }
-
-                cardsLabelText.childNodes[0].nodeValue = 'Loaded';
-
                 const reader = new FileReader();
                 reader.onload = function(event) {
-                    const text = event.target.result;
-                    cardPrompts = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
-                    
-                    if (cardPrompts.length === 0) {
-                        alert('The text file contained no valid prompts.');
-                        return;
-                    }
+                    loadAndDisplayImageSource(event.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                onlineBoardSelect.value = '';
+            }
+        });
 
-                    resetCardQueue();
-                    showNextCard();
-                    cardModal.style.display = 'flex';
+        // Cards Selection Handler
+        onlineCardsSelect.addEventListener('change', (e) => {
+            const selectedVal = e.target.value;
+            if (!selectedVal) return;
+
+            if (selectedVal === 'LOCAL_FILE_TRIGGER') {
+                hiddenLocalCardsInput.click();
+            } else {
+                fetch(selectedVal)
+                    .then(response => {
+                        if (!response.ok) throw new Error("Network response was not ok");
+                        return response.text();
+                    })
+                    .then(text => {
+                        processCardText(text, selectedVal);
+                    })
+                    .catch(error => {
+                        alert("Could not load the cards text file automatically from the server folder.");
+                        onlineCardsSelect.value = '';
+                    });
+            }
+        });
+
+        hiddenLocalCardsInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    processCardText(event.target.result, file.name);
                 };
                 reader.readAsText(file);
+            } else {
+                onlineCardsSelect.value = '';
             }
         });
 
@@ -702,6 +767,9 @@
             if (val === 'spinner') {
                 diceCorner.style.display = 'none';
                 floatingSpinner.style.display = 'block';
+            } else if (!val) {
+                diceCorner.style.display = 'none';
+                floatingSpinner.style.display = 'none';
             } else {
                 floatingSpinner.style.display = 'none';
                 diceCorner.style.display = 'flex';
@@ -723,9 +791,19 @@
         }
 
         function spinWheel() {
+            let newColorIndex;
+            // Keep picking a random color index (0 to 3) until it differs from the last one
+            do {
+                newColorIndex = Math.floor(Math.random() * 4);
+            } while (newColorIndex === lastColorIndex && colors.length > 1);
+
+            lastColorIndex = newColorIndex;
+
+            // Calculate target angle matching the chosen color quadrant (90 degrees per slice)
             const randomExtraTurns = (Math.floor(Math.random() * 3) + 4) * 360;
-            const randomSliceAngle = Math.floor(Math.random() * 4) * 90 + Math.floor(Math.random() * 70) + 10;
-            currentNeedleAngle += randomExtraTurns + randomSliceAngle;
+            const sliceAngle = (newColorIndex * 90) + Math.floor(Math.random() * 70) + 10;
+            
+            currentNeedleAngle += randomExtraTurns + (sliceAngle - (currentNeedleAngle % 360));
             spinnerArrow.style.transform = `translate(-50%, -50%) rotate(${currentNeedleAngle}deg)`;
         }
 
@@ -746,6 +824,7 @@
         floatingSpinner.addEventListener('click', spinWheel);
         diceCountSelect.addEventListener('change', renderDiceStructure);
 
+        initDropdowns();
         initPieces();
         renderDiceStructure();
     </script>
