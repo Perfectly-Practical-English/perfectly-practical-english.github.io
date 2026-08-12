@@ -85,22 +85,22 @@
 
         .dropdown-select {
             flex: 0 0 auto;
-            width: 105px;
+            width: 74px;
             font-size: 0.7rem;
             text-overflow: ellipsis;
         }
 
         .tray-pieces {
             display: flex;
-            gap: 3px;
+            gap: 4px;
             align-items: center;
             justify-content: flex-start;
             background: #2d2d2d;
-            padding: 2px 4px;
+            padding: 1px 3px;
             border-radius: 4px;
             border: 1px solid #444;
             height: 28px;
-            width: 85px;
+            width: 32px;
             box-sizing: border-box;
             flex: 0 0 auto;
             overflow: hidden;
@@ -263,37 +263,37 @@
             pointer-events: none;
         }
 
-        /* FLEXBOX CENTERING FIX APPLIED HERE */
-#game-container {
+        #game-container {
             position: relative;
             width: 100%;
-            height: calc(100vh - 55px);
-            max-height: 844px;
+            height: calc(100vh - 45px);
+            max-height: 750px;
             background: #2d2d2d;
             border-radius: 8px;
             overflow: hidden;
-            display: grid;
-            place-items: center; /* Centers items perfectly in both directions */
+            display: flex;
+            align-items: center;
+            justify-content: center;
             border: none;
             box-sizing: border-box;
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
+            padding: 0;
         }
 
         .board-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(10, 1fr);
             gap: 0px;
             background: transparent;
             width: 82%;
             max-width: 330px;
             height: auto;
-            aspect-ratio: 4 / 10;
             box-sizing: border-box;
-            margin: 0; /* Removes auto margins completely */
+            margin: 0;
         }
+
         .path-tile {
             background: #ffffff;
             box-sizing: border-box;
@@ -407,14 +407,14 @@
     <div class="game-wrapper">
         <div class="controls-panel">
             <select id="online-board-select" class="dropdown-select">
-                <option value="">Select Board</option>
+                <option value="">Boards</option>
                 <option value="LOCAL_FILE_TRIGGER" style="color: #4CAF50; font-weight: bold;">📁 Load Local...</option>
                 <option disabled>----------------</option>
             </select>
             <input type="file" id="hidden-local-board-input" accept="image/*" style="display: none;">
 
             <select id="online-cards-select" class="dropdown-select">
-                <option value="">Select Cards</option>
+                <option value="">Cards</option>
                 <option value="LOCAL_FILE_TRIGGER" style="color: #4CAF50; font-weight: bold;">📁 Load Local...</option>
                 <option disabled>----------------</option>
             </select>
@@ -455,8 +455,9 @@
     <script>
         const gameBoardTemplates = {
             "template_1": {
-                name: "Template Board 1",
+                name: "Board 1 (5 High, 1 Down - Moved Up)",
                 backgroundImage: "https://picsum.photos/id/1015/800/1200",
+                // Board 1 was 2 squares down (r starting at 2). Moving up 1 square means starting at r index 1.
                 layout: [{"r":1,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":2,"c":1,"radius":"0 0 0 15px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":2,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":2,"c":3,"radius":"0 15px 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":3,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":4,"c":0,"radius":"15px 0 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":4,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":4,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":4,"c":3,"radius":"0 0 15px 0","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":5,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":6,"c":0,"radius":"0 0 0 15px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":6,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":6,"c":2,"radius":"0 15px 0 0","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":7,"c":2,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}}],
                 squaresRawText: [
                     "https://picsum.photos/id/10/100/100", "https://picsum.photos/id/20/100/100", "https://picsum.photos/id/30/100/100", "https://picsum.photos/id/40/100/100", "https://picsum.photos/id/50/100/100", "https://picsum.photos/id/60/100/100",
@@ -466,18 +467,18 @@
                 cardsRawText: "Template 1: Advance 3 spaces.\nDraw another card.\nLose a turn.\nTake 100 points.\nGo back to start."
             },
             "template_2": {
-                name: "Template Board 2",
+                name: "Board 2 (7 High, 1 Down)",
                 backgroundImage: "https://picsum.photos/id/1025/800/1200",
-                layout: [{"r":1,"c":0,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":1,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":1,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":1,"c":3,"radius":"0 15px 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":2,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":3,"c":0,"radius":"15px 0 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":3,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":3,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":3,"c":3,"radius":"0 0 15px 0","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":4,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":5,"c":0,"radius":"0 0 0 15px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":5,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":5,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":5,"c":3,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}}],
+                layout: [{"r":1,"c":0,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":1,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":1,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":1,"c":3,"radius":"0 15px 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":2,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":3,"c":0,"radius":"15px 0 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":3,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":3,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":3,"c":3,"radius":"0 0 15px 0","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":4,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":5,"c":0,"radius":"0 0 0 15px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":5,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":5,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":5,"c":3,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":6,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":7,"c":3,"radius":"0 0 15px 0","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}}],
                 squaresRawText: [
                     "https://picsum.photos/id/101/100/100", "https://picsum.photos/id/102/100/100", "https://picsum.photos/id/103/100/100", "https://picsum.photos/id/104/100/100", "https://picsum.photos/id/105/100/100", "https://picsum.photos/id/106/100/100",
                     "https://picsum.photos/id/107/100/100", "https://picsum.photos/id/108/100/100", "https://picsum.photos/id/109/100/100", "https://picsum.photos/id/110/100/100", "https://picsum.photos/id/111/100/100", "https://picsum.photos/id/112/100/100",
-                    "https://picsum.photos/id/113/100/100", "https://picsum.photos/id/114/100/100"
+                    "https://picsum.photos/id/113/100/100", "https://picsum.photos/id/114/100/100", "https://picsum.photos/id/115/100/100", "https://picsum.photos/id/116/100/100"
                 ],
                 cardsRawText: "Template 2: Special Event!\nSwap places with any player.\nTake another turn."
             },
             "template_3": {
-                name: "Template Board 3",
+                name: "Board 3",
                 backgroundImage: "https://picsum.photos/id/1035/800/1200",
                 layout: [{"r":2,"c":0,"radius":"15px 0 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":2,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":2,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":2,"c":3,"radius":"0 15px 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":3,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":3,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":4,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":4,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":4,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":4,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":5,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":5,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":6,"c":0,"radius":"0 0 0 15px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":6,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":6,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":6,"c":3,"radius":"0 0 15px 0","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}}],
                 squaresRawText: [
@@ -488,9 +489,10 @@
                 cardsRawText: "Template 3: Pillar Loop\nMove forward 2 spaces.\nSkip your next roll.\nDraw a bonus card."
             },
             "template_4": {
-                name: "Template Board 4",
+                name: "Board 4 (Moved Down 1 Square)",
                 backgroundImage: "https://picsum.photos/id/1043/800/1200",
-                layout: [{"r":1,"c":0,"radius":"15px 0 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":1,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":1,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":1,"c":3,"radius":"0 15px 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":2,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":2,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":3,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":3,"c":2,"radius":"15px 0 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":3,"c":3,"radius":"0 0 15px 0","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":4,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":4,"c":2,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":5,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":5,"c":2,"radius":"0 0 0 15px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":5,"c":3,"radius":"0 0 15px 0","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}}],
+                // Board 4 was starting at r: 1. Moving down 1 square means shifting all row indices (r) + 1.
+                layout: [{"r":2,"c":0,"radius":"15px 0 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":2,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":2,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":2,"c":3,"radius":"0 15px 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":3,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":3,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":4,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":4,"c":2,"radius":"15px 0 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":4,"c":3,"radius":"0 0 15px 0","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":5,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":5,"c":2,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":6,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":6,"c":2,"radius":"0 0 0 15px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":6,"c":3,"radius":"0 0 15px 0","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}}],
                 squaresRawText: [
                     "https://picsum.photos/id/150/100/100", "https://picsum.photos/id/151/100/100", "https://picsum.photos/id/152/100/100", "https://picsum.photos/id/153/100/100", "https://picsum.photos/id/154/100/100", "https://picsum.photos/id/155/100/100",
                     "https://picsum.photos/id/156/100/100", "https://picsum.photos/id/157/100/100", "https://picsum.photos/id/158/100/100", "https://picsum.photos/id/159/100/100", "https://picsum.photos/id/160/100/100", "https://picsum.photos/id/161/100/100",
@@ -564,14 +566,21 @@
 
             gameContainer.style.backgroundImage = `url('${template.backgroundImage}')`;
 
+            const maxRow = 9;
+
             const boardGrid = document.createElement('div');
             boardGrid.className = 'board-grid';
+            boardGrid.style.gridTemplateRows = `repeat(${maxRow}, 1fr)`;
 
-            let gridMatrix = Array(10).fill().map(() => Array(4).fill(null));
-            template.layout.forEach(item => { gridMatrix[item.r][item.c] = item; });
+            let gridMatrix = Array(maxRow).fill().map(() => Array(4).fill(null));
+            template.layout.forEach(item => { 
+                if (item.r < maxRow) {
+                    gridMatrix[item.r][item.c] = item; 
+                }
+            });
 
             let textIndex = 0;
-            for (let r = 0; r < 10; r++) {
+            for (let r = 0; r < maxRow; r++) {
                 for (let c = 0; c < 4; c++) {
                     const cellData = gridMatrix[r][c];
                     const div = document.createElement('div');
