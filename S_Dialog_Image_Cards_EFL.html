@@ -535,10 +535,6 @@ button.toggle-mode.active {
     gap: 2px;
   }
 
-  /*
-    IMPORTANT:
-    Do not give A/B a fixed width here.
-  */
   .student-role {
     flex: 0 0 auto;
     width: auto;
@@ -572,10 +568,6 @@ button.toggle-mode.active {
     gap: 2px;
   }
 
-  /*
-    Keep the label tight against the first button
-    even on small screens.
-  */
   .student-role {
     flex: 0 0 auto;
     width: auto;
@@ -801,85 +793,175 @@ button.toggle-mode.active {
 <script>
 
 /* =========================================================
-   RAW DATA
+   RAW DATA (Unified Format for Both Students)
    ========================================================= */
 
-const rawDataA = `
+const sharedRawData = `
 
 ~Unit 4 People
 
-IMU4_Actress.png
-IMU4_Astronaut.png
-IMU4_Businessman.png
-IMU4_Pirate.png
-IMU4_Rock_Star.png
-IMU4_Scientist.png
-IMU4_Soldier.png
-IMU4_Teacher.png
+[Row 1] IMU4_Actress.png - beautiful, elegant, famous
+[Row 1] IMU4_Pirate.png - dirty, dangerous, greedy
+[Row 2] IMU4_Businessman.png - rich, busy, successful
+[Row 2] IMU4_Teacher.png - kind, quiet, helpful
+[Row 3] IMU4_Astronaut.png - brave, calm, fit
+[Row 3] IMU4_Rock_Star.png - cool, loud, popular
+[Row 4] IMU4_Scientist.png - smart, strange, crazy
+[Row 4] IMU4_Soldier.png - fearless, strict, powerful
 
-~Hobbies
-
-~Helping Others
-
-~Heroes
-
-~Dream Job
-
-~Healthy Food
-
-~Famous Places
-
-~The Future
-
-~Survival
-
-~Tourists
-
+~Animals
+[Row 1] ANU_Rhino.png - big, strong, heavy
+[Row 1] ANU_Gorilla.png - hairy, friendly, muscular
+[Row 2] ANU_Elephant.png - huge, gray, smart
+[Row 2] ANU_Lion.png - brave, loud, wild
+[Row 3] ANU_Monkey.png - funny, small, active
+[Row 3] ANU_Polar_Bear.png - white, cold, hungry
+[Row 4] ANU_Giraffe.png - tall, gentle, graceful
+[Row 4] ANU_Tiger.png - orange, striped, scary
+[Row 5] ANU_Wolf.png - gray, fast, loyal
+[Row 5] ANU_Penguin.png - cute, waddling, aquatic
+[Row 6] ANU_Whale.png - enormous, blue, peaceful
+[Row 6] ANU_Shark.png - dangerous, quick, predatory
 ~Cryptids
+[Row 1] CRU_Bigfoot.png - tall, hairy, mysterious
+[Row 1] CRU_Loch_Ness.png - green, shy, legendary
+[Row 2] CRU_Yeti.png - furry, white, wild
+[Row 2] CRU_Worm.png - red, poisonous, disgusting
+[Row 3] CRU_Megalodon.png - prehistoric, gigantic, extinct
+[Row 3] CRU_Kraken.png - huge, slimy, monstrous
+~Clothing
+[Row 1] CLU_T_shirt.png - casual, soft, colorful
+[Row 1] CLU_Jeans.png - blue, tough, durable
+[Row 2] CLU_Space_suit.png - protective, white, bulky
+[Row 2] CLU_Jacket.png - warm, zipped, stylish
+[Row 3] CLU_Sneakers.png - athletic, comfy, fast
+[Row 3] CLU_Baseball_cap.png - shaded, cool, casual
+[Row 4] CLU_Uniform_shirt.png - formal, neat, matching
+[Row 4] CLU_Uniform_shorts.png - standard, short, pleated
+[Row 5] CLU_Scuba_gear.png - deep, watery, equipped
+[Row 5] CLU_Helmet.png - safe, hard, protective
+~Transport
+[Row 1] TRU_Car.png - fast, four-wheeled, roady
+[Row 1] TRU_Bus.png - large, public, crowded
+[Row 2] TRU_Train.png - metallic, long, chugging
+[Row 2] TRU_Airplane.png - high, flying, winged
+[Row 3] TRU_Bicycle.png - pedaled, two-wheeled, quiet
+[Row 3] TRU_Vespa.png - retro, Italian, scooting
+[Row 4] TRU_Boat.png - floating, wavy, nautical
+[Row 4] TRU_Helicopter.png - spinning, hovering, loud
+[Row 5] TRU_Motorcycle.png - loud, sleek, speeding
+[Row 5] TRU_Submarine.png - deep, submerged, stealthy
+~Hobbies
+[Row 1] HOU_Reading.png - quiet, bookish, smart
+[Row 1] HOU_Sports.png - active, sweaty, athletic
+[Row 2] HOU_Drawing.png - artistic, creative, colorful
+[Row 2] HOU_Cooking.png - tasty, kitchen, delicious
+[Row 3] HOU_Photography.png - snap, focused, visual
+[Row 3] HOU_Fishing.png - patient, watery, hooked
+[Row 4] HOU_Gardening.png - green, floral, growing
+[Row 4] HOU_Music.png - melodic, rhythmic, loud
+[Row 5] HOU_Video_games.png - digital, fun, virtual
+~Chores
+[Row 1] CHU_Cook_dinner.png - hot, stove, hungry
+[Row 1] CHU_Wash_dishes.png - soapy, clean, wet
+[Row 2] CHU_Wash_clothes.png - bubbly, fresh, folded
+[Row 2] CHU_Sweep.png - broom, dusty, floor
+[Row 3] CHU_Mop.png - watery, shiny, slipping
+[Row 3] CHU_Vacuum.png - loud, sucking, carpet
+[Row 4] CHU_Wash_windows.png - clear, glassy, shining
+[Row 4] CHU_Tidy_up.png - neat, organized, tidy
+[Row 5] CHU_Feed_dog.png - barking, hungry, bowl
+[Row 5] CHU_Feed_cat.png - purring, whiskered, meowing
+[Row 6] CHU_Mow_lawn.png - grassy, buzzing, green
+[Row 6] CHU_Wash_car.png - shiny, soapy, wheeled
+[Row 7] CHU_Clean_toilet.png - sanitary, scrubbing, sparkling
+[Row 7] CHU_Take_out_trash.png - smelly, bin, heavy
+~Helping Others
+[Row 1] HEO_Elderly.png - kind, supportive, respectful
+[Row 1] HEO_Children.png - playful, guiding, helpful
+[Row 2] HEO_Donate_food.png - generous, canned, sharing
+[Row 2] HEO_Donate_clothes.png - warm, charitable, giving
+[Row 3] HEO_Clean_park.png - green, litter-free, active
+[Row 3] HEO_Clean_beach.png - sandy, tidy, eco-friendly
+[Row 4] HEO_Recycle.png - sorting, plastic, green
+[Row 4] HEO_Homework.png - smart, tutoring, academic
+~Heroes
+[Row 1] HEU_Commando.png - tactical, stealthy, ready
+[Row 1] HEU_Firefighter.png - smoky, brave, rescuing
+[Row 2] HEU_Police_officer.png - badge, lawful, protecting
+[Row 2] HEU_Doctor.png - medical, healing, caring
+[Row 3] HEU_Nurse.png - attentive, helpful, gentle
+[Row 3] HEU_Teacher.png - educational, guiding, patient
+[Row 4] HEU_Lifeguard.png - pool-side, watchful, saving
+[Row 4] HEU_Search_rescue.png - tracking, lost, finding
+~Friends
+[Row 1] FRU_Talking.png - chatty, communicative, friendly
+[Row 1] FRU_Laughing.png - joyful, smiling, happy
+[Row 2] FRU_Sports.png - teamy, active, cooperative
+[Row 2] FRU_Studying.png - focused, bookish, shared
+[Row 3] FRU_Eating.png - hungry, sharing, lunch
+[Row 3] FRU_Photo.png - snapshot, posing, smiling
+[Row 4] FRU_Helping.png - cooperative, kind, mutual
+[Row 4] FRU_Celebrating.png - festive, party, cheering
+~Dream Job
+[Row 1] DJU_Doctor.png - stethoscope, clinical, expert
+[Row 1] DJU_Football_player.png - cleats, scoring, athletic
+[Row 2] DJU_Pilot.png - airborne, cockpit, flying
+[Row 2] DJU_Chef.png - culinary, apron, delicious
+[Row 3] DJU_Teacher.png - board, lessons, instructing
+[Row 3] DJU_Engineer.png - blueprints, building, smart
+[Row 4] DJU_Police_officer.png - patrol, community, safety
+[Row 4] DJU_Game_designer.png - coded, pixelated, creative
+~Food
+[Row 1] FOU_Pizza.png - cheesy, slice, baked
+[Row 1] FOU_Hamburger.png - meaty, bun, stacked
+[Row 2] FOU_Fried_chicken.png - crispy, golden, savory
+[Row 2] FOU_Noodles.png - long, slurpy, broth
+[Row 3] FOU_Sushi.png - raw, fishy, rolled
+[Row 3] FOU_Ice_cream.png - sweet, cold, melting
+[Row 4] FOU_Sandwich.png - layered, bready, lunch
+[Row 4] FOU_Fruit.png - juicy, fresh, healthy
+~Famous Places
+[Row 1] FPU_Eiffel_Tower.png - Parisian, tall, lattice
+[Row 1] FPU_Statue_of_Liberty.png - copper, torch, harbor
+[Row 2] FPU_Great_Wall.png - ancient, stone, winding
+[Row 2] FPU_Leaning_Tower.png - tilted, Italian, bell
+[Row 3] FPU_Pyramids_of_Giza.png - desert, sandy, pharaoh
+[Row 3] FPU_Big_Ben.png - London, ticking, clockwork
+[Row 4] FPU_Angkor_Wat.png - jungle, temple, ancient
+[Row 4] FPU_Easter_Island.png - stone, statues, heads
+~The Future
+[Row 1] FUT_Robot.png - metallic, automated, gears
+[Row 1] FUT_Flying_car.png - airborne, sleek, futuristic
+[Row 2] FUT_Space_travel.png - cosmic, rocket, stellar
+[Row 2] FUT_Floating_city.png - sky-high, clouds, suspended
+[Row 3] FUT_Robot_assistant.png - helpful, electronic, droid
+[Row 3] FUT_Alien_invasion.png - extraterrestrial, green, saucer
+[Row 4] FUT_Underwater_city.png - aquatic, dome, deep
+[Row 4] FUT_Mars_colony.png - red, dusty, martian
+~Survival
+[Row 1] SUU_Tent.png - zippered, fabric, camping
+[Row 1] SUU_Campfire.png - crackling, glowing, smoky
+[Row 2] SUU_Water.png - hydrating, bottled, clear
+[Row 2] SUU_Food.png - rationed, energy, snacks
+[Row 3] SUU_First_aid.png - medical, bandage, red-cross
+[Row 3] SUU_Compass.png - directional, magnetic, north
+[Row 4] SUU_Flashlight.png - glowing, battery, beam
+[Row 4] SUU_Multi_tool.png - handy, pocket, metal
+~Dinosaurs
+[Row 1] DIU_T_rex.png - fierce, toothy, bipedal
+[Row 1] DIU_Triceratops.png - horned, armored, tri-peak
+[Row 2] DIU_Stegosaurus.png - plated, spiked, herbivorous
+[Row 2] DIU_Brontosaurus.png - long-necked, massive, gentle
+[Row 3] DIU_Plesiosaurus.png - flippered, swimming, marine
+[Row 3] DIU_Elasmosaurus.png - serpent-necked, diving, ancient
+[Row 4] DIU_Ankylosaurus.png - club-tailed, armored, heavy
+[Row 4] DIU_Dimetrodon.png - fin-backed, prehistoric, scaly
+[Row 5] DIU_Pteranodon.png - winged, soaring, prehistoric
+
 
 ~Signal Words
 
-~Clothing
-
-`;
-
-
-const rawDataB = `
-
-~Unit 4 People
-
-IMU4_Actress.png - beautiful, elegant, famous
-IMU4_Astronaut.png - brave, calm, fit
-IMU4_Businessman.png - rich, busy, successful
-IMU4_Pirate.png - dirty, dangerous, greedy
-IMU4_Rock_Star.png - cool, loud, popular
-IMU4_Scientist.png - intelligent, strange, crazy
-IMU4_Soldier.png - fearless, strict, powerful
-IMU4_Teacher.png - kind, quiet, helpful
-
-~Hobbies
-
-~Helping Others
-
-~Heroes
-
-~Dream Job
-
-~Healthy Food
-
-~Famous Places
-
-~The Future
-
-~Survival
-
-~Tourists
-
-~Cryptids
-
-~Signal Words
-
-~Clothing
 
 `;
 
@@ -914,91 +996,10 @@ let puzzleCompletedBottom = false;
 
 
 /* =========================================================
-   CONTROLLED DISTRACTORS
+   PARSE RAW DATA (Handles unified input for A and B)
    ========================================================= */
 
-const safeDistractors = {
-
-  "IMU4_Actress.png": [
-    "dirty",
-    "dangerous",
-    "greedy",
-    "brave",
-    "calm",
-    "fit"
-  ],
-
-  "IMU4_Astronaut.png": [
-    "dirty",
-    "dangerous",
-    "greedy",
-    "elegant",
-    "loud",
-    "crazy"
-  ],
-
-  "IMU4_Businessman.png": [
-    "dirty",
-    "dangerous",
-    "greedy",
-    "brave",
-    "calm",
-    "strange"
-  ],
-
-  "IMU4_Pirate.png": [
-    "elegant",
-    "calm",
-    "fit",
-    "intelligent",
-    "kind",
-    "quiet"
-  ],
-
-  "IMU4_Rock_Star.png": [
-    "brave",
-    "calm",
-    "fit",
-    "dirty",
-    "dangerous",
-    "intelligent"
-  ],
-
-  "IMU4_Scientist.png": [
-    "elegant",
-    "dirty",
-    "dangerous",
-    "loud",
-    "kind",
-    "powerful"
-  ],
-
-  "IMU4_Soldier.png": [
-    "beautiful",
-    "elegant",
-    "famous",
-    "rich",
-    "busy",
-    "strange"
-  ],
-
-  "IMU4_Teacher.png": [
-    "dirty",
-    "dangerous",
-    "greedy",
-    "loud",
-    "crazy",
-    "powerful"
-  ]
-
-};
-
-
-/* =========================================================
-   PARSE RAW DATA
-   ========================================================= */
-
-function parseRawData(text, targetObj) {
+function parseRawData(text, targetObj, isStudentA = false) {
 
   const chunks =
     text.split(/\n(?=~+)/);
@@ -1027,18 +1028,55 @@ function parseRawData(text, targetObj) {
           .trim();
 
 
-      const prompts =
-        lines
-          .map(line =>
-            line
-              .replace(/^[•*-]\s*/, "")
-              .trim()
-          )
-          .filter(Boolean);
+      targetObj[topicName] = {};
 
 
-      targetObj[topicName] =
-        prompts;
+      lines.forEach(line => {
+
+        const cleaned =
+          line
+            .replace(/^[•*-]\s*/, "")
+            .trim();
+
+
+        if (!cleaned) {
+          return;
+        }
+
+
+        const rowMatch =
+          cleaned.match(/\[Row\s*(\d+)\]/i);
+
+
+        const rowNum =
+          rowMatch ? rowMatch[1] : "1";
+
+
+        let content =
+          cleaned
+            .replace(/\[Row\s*\d+\]/i, "")
+            .trim();
+
+
+        if (!content) {
+          return;
+        }
+
+
+        // If parsing for Student A, strip out the hyphen and adjectives
+        if (isStudentA) {
+          content = content.split(/\s+-\s+/)[0].trim();
+        }
+
+
+        if (!targetObj[topicName][rowNum]) {
+          targetObj[topicName][rowNum] = [];
+        }
+
+
+        targetObj[topicName][rowNum].push(content);
+
+      });
 
     }
 
@@ -1048,14 +1086,16 @@ function parseRawData(text, targetObj) {
 
 
 parseRawData(
-  rawDataA,
-  topicsA
+  sharedRawData,
+  topicsA,
+  true
 );
 
 
 parseRawData(
-  rawDataB,
-  topicsB
+  sharedRawData,
+  topicsB,
+  false
 );
 
 
@@ -1097,7 +1137,7 @@ function shuffleArray(array) {
 
 
 /* =========================================================
-   PREPARE ACTIVE LISTS
+   PREPARE ACTIVE LISTS (Flattens rows into a single topic array)
    ========================================================= */
 
 function prepareActiveLists() {
@@ -1109,10 +1149,17 @@ function prepareActiveLists() {
   Object.keys(topicsA)
     .forEach(topic => {
 
+      const rowObjA = topicsA[topic] || {};
+      let flatA = [];
+
+      Object.keys(rowObjA).sort().forEach(r => {
+        flatA.push(...rowObjA[r]);
+      });
+
       activeListsA[topic] =
         isRandomMode
-          ? shuffleArray(topicsA[topic])
-          : [...topicsA[topic]];
+          ? shuffleArray(flatA)
+          : [...flatA];
 
     });
 
@@ -1120,10 +1167,17 @@ function prepareActiveLists() {
   Object.keys(topicsB)
     .forEach(topic => {
 
+      const rowObjB = topicsB[topic] || {};
+      let flatB = [];
+
+      Object.keys(rowObjB).sort().forEach(r => {
+        flatB.push(...rowObjB[r]);
+      });
+
       activeListsB[topic] =
         isRandomMode
-          ? shuffleArray(topicsB[topic])
-          : [...topicsB[topic]];
+          ? shuffleArray(flatB)
+          : [...flatB];
 
     });
 
@@ -1309,25 +1363,47 @@ function getCharacterForStudent(
 
 
 /* =========================================================
+   GET ROW FOR FILENAME
+   ========================================================= */
+
+function getRowForFilename(filename, topicKey) {
+  const rowObj = topicsB[topicKey] || {};
+  for (const rowNum in rowObj) {
+    const found = rowObj[rowNum].some(line => 
+      getImageFilename(line).toLowerCase() === filename.toLowerCase()
+    );
+    if (found) {
+      return rowNum;
+    }
+  }
+  return "1";
+}
+
+
+/* =========================================================
    GET CORRECT ANSWERS
    ========================================================= */
 
 function getCorrectAnswers(filename) {
 
-  const entry =
-    topicsB["Unit 4 People"] || [];
+  const rowObj =
+    topicsB[currentTopicKey] || {};
 
+  let matchingEntry = null;
 
-  const matchingEntry =
-    entry.find(line => {
-
+  for (const rowNum in rowObj) {
+    const entry = rowObj[rowNum].find(line => {
       return (
         getImageFilename(line)
           .toLowerCase() ===
         filename.toLowerCase()
       );
-
     });
+    if (entry) {
+      matchingEntry = entry;
+      break;
+    }
+  }
 
 
   if (!matchingEntry) {
@@ -1353,7 +1429,7 @@ function getCorrectAnswers(filename) {
 
 
 /* =========================================================
-   GET OPTIONS
+   GET OPTIONS (Opposite Parity Pairing for Contrasting Themes)
    ========================================================= */
 
 function getOptions(filename) {
@@ -1367,9 +1443,45 @@ function getOptions(filename) {
   }
 
 
+  const currentRow = getRowForFilename(filename, currentTopicKey);
+  const rowObj = topicsB[currentTopicKey] || {};
+  
+  let distractorPool = [];
+
+  // Pair current row with opposite parity rows to contrast themes and prevent confusion
+  const isOdd = parseInt(currentRow) % 2 !== 0;
+
+  Object.keys(rowObj).forEach(rowNum => {
+    const rNumInt = parseInt(rowNum);
+    const rowIsOdd = rNumInt % 2 !== 0;
+
+    // Only pull from rows that have the OPPOSITE parity
+    if (rowIsOdd !== isOdd) {
+      rowObj[rowNum].forEach(line => {
+        const fname = getImageFilename(line);
+        if (fname.toLowerCase() !== filename.toLowerCase()) {
+          distractorPool.push(...getCorrectAnswers(fname));
+        }
+      });
+    }
+  });
+
+  // Fallback if pool is empty (e.g. if all elements are in the same parity row)
+  if (distractorPool.length === 0) {
+    Object.keys(rowObj).forEach(rowNum => {
+      rowObj[rowNum].forEach(line => {
+        const fname = getImageFilename(line);
+        if (fname.toLowerCase() !== filename.toLowerCase()) {
+          distractorPool.push(...getCorrectAnswers(fname));
+        }
+      });
+    });
+  }
+
+
   const distractors =
     shuffleArray(
-      safeDistractors[filename] || []
+      [...new Set(distractorPool)]
     ).slice(0, 3);
 
 

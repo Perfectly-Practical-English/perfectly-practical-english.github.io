@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Board Path Designer - Pipe Style with Undo/Redo</title>
+    <style>
+        body {
+            margin: 0;
+            background: #000000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-family: sans-serif;
+            overflow: hidden;
+        }
+        #toolbar {
+            margin-bottom: 10px;
+            display: flex;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        button {
+            padding: 8px 16px;
+            background: #ffffff;
+            color: #000000;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover { background: #dddddd; }
+        button:disabled { background: #555555; color: #888888; cursor: not-allowed; }
+        
+        #board-container {
+            width: 90vw;
+            height: calc(100vh - 70px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            overflow: auto;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(6, 48px);
+            grid-template-rows: repeat(10, 48px);
+            gap: 0px;
+            background-color: transparent;
+        }
+        .cell {
+            width: 48px;
+            height: 48px;
+            background-color: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+        .cell.active {
+            background-color: #ffffff;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toolbar">
+        <button id="undoBtn" onclick="undo()" disabled>Undo</button>
+        <button id="redoBtn" onclick="redo()" disabled>Redo</button>
+        <button onclick="exportBoard()">Export Board</button>
+    </div>
+
+    <div id="board-container">
+        <div class="grid" id="grid"></div>
+    </div>
+
+    <script>
+        const cols = 6;
+        const rows = 10;
+        const gridEl = document.getElementById('grid');
+        const cells = [];
+
+        let historyStack = [];
+        let redoStack = [];
+
+        for (let r = 0; r < rows; r++) {
+            cells[r] = [];
+            for (let c = 0; c < cols; c++) {
+                const cell = document.createElement('div');
+                cell.classList.add('cell');
+                cell.dataset.row = r;
+                cell.dataset.col = c;
+                cell.addEventListener('click', () => {
+                    saveState();
+                    toggleCell(r, c);
+                });
+                gridEl.appendChild(cell);
+                cells[r][c] = { element: cell, active: false };
+            }
+        }
+
+        function saveState() {
+            let currentState = [];
+            for (let r = 0; r < rows; r++) {
+                currentState[r] = [];
+                for (let c = 0; c < cols; c++) {
+                    currentState[r][c] = cells[r][c].active;
+                }
+            }
+            historyStack.push(currentState);
+            redoStack = [];
+            updateToolbarButtons();
+        }
+
+        function undo() {
+            if (historyStack.length === 0) return;
+
+            let currentState = [];
+            for (let r = 0; r < rows; r++) {
+                currentState[r] = [];
+                for (let c = 0; c < cols; c++) {
+                    currentState[r][c] = cells[r][c].active;
+                }
+            }
+            redoStack.push(currentState);
+
+            let prevState = historyStack.pop();
+            applyState(prevState);
+            updateToolbarButtons();
+        }
+
+        function redo() {
+            if (redoStack.length === 0) return;
+
+            let currentState = [];
+            for (let r = 0; r < rows; r++) {
+                currentState[r] = [];
+                for (let c = 0; c < cols; c++) {
+                    currentState[r][c] = cells[r][c].active;
+                }
+            }
+            historyStack.push(currentState);
+
+            let nextState = redoStack.pop();
+            applyState(nextState);
+            updateToolbarButtons();
+        }
+
+        function applyState(stateMatrix) {
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    cells[r][c].active = stateMatrix[r][c];
+                    cells[r][c].element.classList.toggle('active', cells[r][c].active);
+                }
+            }
+            updateLivePreview();
+        }
+
+        function updateToolbarButtons() {
+            document.getElementById('undoBtn').disabled = historyStack.length === 0;
+            document.getElementById('redoBtn').disabled = redoStack.length === 0;
+        }
+
+        function toggleCell(r, c) {
+            cells[r][c].active = !cells[r][c].active;
+            cells[r][c].element.classList.toggle('active', cells[r][c].active);
+            updateLivePreview();
+        }
+
+        function calculateTileProperties(r, c) {
+            const hasTop = r > 0 && cells[r - 1][c].active;
+            const hasBottom = r < rows - 1 && cells[r + 1][c].active;
+            const hasLeft = c > 0 && cells[r][c - 1].active;
+            const hasRight = c < cols - 1 && cells[r][c + 1].active;
+
+            const neighborCount = (hasTop ? 1 : 0) + (hasBottom ? 1 : 0) + (hasLeft ? 1 : 0) + (hasRight ? 1 : 0);
+
+            const borderTop = hasTop ? '1px solid #000000' : '2px solid #000000';
+            const borderBottom = hasBottom ? '1px solid #000000' : '2px solid #000000';
+            const borderLeft = hasLeft ? '1px solid #000000' : '2px solid #000000';
+            const borderRight = hasRight ? '1px solid #000000' : '2px solid #000000';
+
+            let radiusStyle = '0px';
+
+            if (neighborCount === 2) {
+                if (!((hasLeft && hasRight) || (hasTop && hasBottom))) {
+                    if (hasRight && hasBottom) {
+                        radiusStyle = '15px 0 0 0';
+                    } else if (hasLeft && hasBottom) {
+                        radiusStyle = '0 15px 0 0';
+                    } else if (hasLeft && hasTop) {
+                        radiusStyle = '0 0 15px 0';
+                    } else if (hasRight && hasTop) {
+                        radiusStyle = '0 0 0 15px';
+                    }
+                }
+            }
+
+            return {
+                radius: radiusStyle,
+                borders: { top: borderTop, bottom: borderBottom, left: borderLeft, right: borderRight }
+            };
+        }
+
+        function updateLivePreview() {
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const cellObj = cells[r][c];
+                    if (cellObj.active) {
+                        const props = calculateTileProperties(r, c);
+                        cellObj.element.style.borderRadius = props.radius;
+                        cellObj.element.style.borderTop = props.borders.top;
+                        cellObj.element.style.borderBottom = props.borders.bottom;
+                        cellObj.element.style.borderLeft = props.borders.left;
+                        cellObj.element.style.borderRight = props.borders.right;
+                    } else {
+                        cellObj.element.style.borderRadius = '0px';
+                        cellObj.element.style.border = '1px solid rgba(255, 255, 255, 0.05)';
+                    }
+                }
+            }
+        }
+
+        function exportBoard() {
+            let pathData = [];
+            
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    if (cells[r][c].active) {
+                        const props = calculateTileProperties(r, c);
+                        pathData.push({ 
+                            r, 
+                            c, 
+                            radius: props.radius,
+                            borders: props.borders
+                        });
+                    }
+                }
+            }
+
+            if (pathData.length === 0) {
+                alert("Please select some squares for your path first!");
+                return;
+            }
+
+            const exportHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Generated Game Board</title>
+    <style>
+        body { background: #000000; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .board-grid { display: grid; grid-template-columns: repeat(6, 54px); grid-template-rows: repeat(10, 54px); gap: 0px; background: transparent; }
+        .path-tile { width: 54px; height: 54px; background: #ffffff; box-sizing: border-box; overflow: hidden; display: flex; align-items: center; justify-content: center; }
+        .path-tile img { width: 100%; height: 100%; object-fit: cover; }
+    </style>
+</head>
+<body>
+    <div class="board-grid" id="gameBoard"></div>
+    <script>
+        const layout = ${JSON.stringify(pathData)};
+        const boardEl = document.getElementById('gameBoard');
+        
+        let gridMatrix = Array(10).fill().map(() => Array(6).fill(null));
+        layout.forEach(item => { gridMatrix[item.r][item.c] = item; });
+
+        for (let r = 0; r < 10; r++) {
+            for (let c = 0; c < 6; c++) {
+                const cellData = gridMatrix[r][c];
+                const div = document.createElement('div');
+                if (cellData) {
+                    div.className = 'path-tile';
+                    div.style.borderRadius = cellData.radius;
+                    div.style.borderTop = cellData.borders.top;
+                    div.style.borderBottom = cellData.borders.bottom;
+                    div.style.borderLeft = cellData.borders.left;
+                    div.style.borderRight = cellData.borders.right;
+                }
+                boardEl.appendChild(div);
+            }
+        }
+    <\/script>
+</body>
+</html>`;
+
+            const blob = new Blob([exportHTML], { type: 'text/html' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'game_board.html';
+            link.click();
+        }
+    </script>
+</body>
+</html>
