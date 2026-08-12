@@ -1,0 +1,871 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile Board Game Shell</title>
+    <style>
+        :root {
+            --blue: #2196F3;
+            --green: #4CAF50;
+            --orange: #FF9800;
+            --red: #F44336;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #121212;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 4px;
+            box-sizing: border-box;
+            gap: 4px;
+        }
+
+        h2 {
+            margin: 0;
+            display: none;
+        }
+
+        .game-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 430px;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .controls-panel {
+            background: #1e1e1e;
+            padding: 3px 0px;
+            border-radius: 6px;
+            width: 100%;
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 3px;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 20;
+        }
+
+        select, button.action-btn {
+            padding: 4px 6px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            background: #2d2d2d;
+            color: #fff;
+            font-size: 0.75rem;
+            cursor: pointer;
+            box-sizing: border-box;
+            text-align: center;
+            white-space: nowrap;
+            height: 28px;
+        }
+
+        #dice-count-select {
+            flex: 0 0 auto;
+            width: 58px;
+        }
+
+        .dropdown-select {
+            flex: 0 0 auto;
+            width: 105px;
+            font-size: 0.7rem;
+            text-overflow: ellipsis;
+        }
+
+        .tray-pieces {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+            justify-content: flex-start;
+            background: #2d2d2d;
+            padding: 2px 4px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            height: 28px;
+            width: 85px;
+            box-sizing: border-box;
+            flex: 0 0 auto;
+            overflow: hidden;
+        }
+
+        .tray-piece {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        #dice-slot-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            position: relative;
+            height: 28px;
+            flex: 1;
+        }
+
+        #dice-corner {
+            background: #2d2d2d;
+            padding: 2px 4px;
+            border-radius: 4px;
+            display: flex;
+            gap: 3px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 1px solid #444;
+            height: 28px;
+            box-sizing: border-box;
+        }
+
+        .dice {
+            width: 20px;
+            height: 20px;
+            background: #fdfdfd;
+            color: #111;
+            border-radius: 3px;
+            display: grid;
+            grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+            padding: 1px;
+            box-sizing: border-box;
+            box-shadow: inset 0 0 1px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .dice.rolling {
+            animation: shake 0.4s ease infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-10deg) scale(1.1); }
+            50% { transform: rotate(10deg) scale(0.9); }
+            75% { transform: rotate(-5deg) scale(1.05); }
+            100% { transform: rotate(0deg) scale(1); }
+        }
+
+        .dot {
+            background: #111;
+            border-radius: 50%;
+            align-self: center;
+            justify-self: center;
+            width: 3.5px;
+            height: 3.5px;
+            display: none;
+        }
+
+        .dice[data-value="1"] .dot.center { display: block; }
+        .dice[data-value="2"] .dot.top-right, .dice[data-value="2"] .dot.bottom-left { display: block; }
+        .dice[data-value="3"] .dot.top-right, .dice[data-value="3"] .dot.center, .dice[data-value="3"] .dot.bottom-left { display: block; }
+        .dice[data-value="4"] .dot.top-left, .dice[data-value="4"] .dot.top-right, .dice[data-value="4"] .dot.bottom-left, .dice[data-value="4"] .dot.bottom-right { display: block; }
+        .dice[data-value="5"] .dot.top-left, .dice[data-value="5"] .dot.top-right, .dice[data-value="5"] .dot.center, .dice[data-value="5"] .dot.bottom-left, .dice[data-value="5"] .dot.bottom-right { display: block; }
+        .dice[data-value="6"] .dot.top-left, .dice[data-value="6"] .dot.top-right, .dice[data-value="6"] .dot.middle-left, .dice[data-value="6"] .dot.middle-right, .dice[data-value="6"] .dot.bottom-left, .dice[data-value="6"] .dot.bottom-right { display: block; }
+
+        .top-left { grid-row: 1; grid-column: 1; }
+        .top-right { grid-row: 1; grid-column: 3; }
+        .middle-left { grid-row: 2; grid-column: 1; }
+        .center { grid-row: 2; grid-column: 2; }
+        .middle-right { grid-row: 2; grid-column: 3; }
+        .bottom-left { grid-row: 3; grid-column: 1; }
+        .bottom-right { grid-row: 3; grid-column: 3; }
+
+        #floating-spinner-wrapper {
+            position: absolute;
+            bottom: -39px;
+            right: 27px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--blue) 0deg 90deg, 
+                var(--green) 90deg 180deg, 
+                var(--orange) 180deg 270deg, 
+                var(--red) 270deg 360deg
+            );
+            border: 2.5px solid #fff;
+            box-sizing: border-box;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.7);
+            cursor: pointer;
+            z-index: 50;
+            display: none;
+        }
+
+        #spinner-diagonal-arrow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 3.5px;
+            height: 40px;
+            transform: translate(-50%, -50%) rotate(45deg);
+            transform-origin: center center;
+            transition: transform 1.2s cubic-bezier(0.15, 0.9, 0.2, 1);
+            pointer-events: none;
+            background: #fff;
+            border: 0.5px solid rgba(0,0,0,0.4);
+        }
+
+        #spinner-diagonal-arrow::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 10px solid #fff;
+            filter: drop-shadow(0 -1px 1px rgba(0,0,0,0.3));
+        }
+
+        #spinner-diagonal-arrow::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 3px;
+            background: #fff;
+        }
+
+        .spinner-center-cap {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 9px;
+            height: 9px;
+            background: #111;
+            border: 1.5px solid #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 52;
+            pointer-events: none;
+        }
+
+        /* FLEXBOX CENTERING FIX APPLIED HERE */
+#game-container {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 55px);
+            max-height: 844px;
+            background: #2d2d2d;
+            border-radius: 8px;
+            overflow: hidden;
+            display: grid;
+            place-items: center; /* Centers items perfectly in both directions */
+            border: none;
+            box-sizing: border-box;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 0px;
+            background: transparent;
+            width: 82%;
+            max-width: 330px;
+            height: auto;
+            aspect-ratio: 4 / 10;
+            box-sizing: border-box;
+            margin: 0; /* Removes auto margins completely */
+        }
+        .path-tile {
+            background: #ffffff;
+            box-sizing: border-box;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 1 / 1;
+        }
+
+        .path-tile img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #board-image {
+            max-width: calc(100% - 30px);
+            max-height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+
+        .placeholder-text {
+            color: #777;
+            text-align: center;
+            padding: 20px;
+            z-index: 1;
+            font-size: 0.9rem;
+        }
+
+        #board-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .game-piece {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            transform: translate(-50%, -50%);
+            pointer-events: auto;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        .game-piece.selected {
+            transform: translate(-50%, -50%) scale(1.25);
+            box-shadow: 0 0 10px #ffeb3b;
+            border-color: #ffeb3b;
+            z-index: 10;
+        }
+
+        #card-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 112px;
+            background: #fff;
+            color: #111;
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            z-index: 100;
+            cursor: grab;
+            user-select: none;
+            padding: 6px;
+            box-sizing: border-box;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border: 1px solid rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        #card-modal:active {
+            cursor: grabbing;
+        }
+
+        #card-content {
+            font-size: 0.65rem;
+            font-weight: 700;
+            line-height: 1.15;
+            margin: 0;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 6;
+            -webkit-box-orient: vertical;
+        }
+    </style>
+</head>
+<body>
+
+    <h2></h2>
+
+    <div class="game-wrapper">
+        <div class="controls-panel">
+            <select id="online-board-select" class="dropdown-select">
+                <option value="">Select Board</option>
+                <option value="LOCAL_FILE_TRIGGER" style="color: #4CAF50; font-weight: bold;">📁 Load Local...</option>
+                <option disabled>----------------</option>
+            </select>
+            <input type="file" id="hidden-local-board-input" accept="image/*" style="display: none;">
+
+            <select id="online-cards-select" class="dropdown-select">
+                <option value="">Select Cards</option>
+                <option value="LOCAL_FILE_TRIGGER" style="color: #4CAF50; font-weight: bold;">📁 Load Local...</option>
+                <option disabled>----------------</option>
+            </select>
+            <input type="file" id="hidden-local-cards-input" accept=".txt, text/plain" style="display: none;">
+
+            <select id="dice-count-select">
+                <option value="" disabled selected>Dice</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="spinner">Spin</option>
+            </select>
+
+            <div class="tray-pieces" id="tray-container" title="Piece Tray"></div>
+
+            <div id="dice-slot-container">
+                <div id="dice-corner" title="Tap to Roll Dice">
+                    <div id="dice-box" style="display: flex; gap: 2px;"></div>
+                </div>
+                <div id="floating-spinner-wrapper" title="Tap to Spin">
+                    <div id="spinner-diagonal-arrow"></div>
+                    <div class="spinner-center-cap"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-container">
+            <div class="placeholder-text" id="placeholder">Select a board or load locally</div>
+            <img id="board-image" alt="">
+            <div id="board-layer"></div>
+        </div>
+    </div>
+
+    <div id="card-modal" title="Tap card for next prompt">
+        <div id="card-content">No prompts loaded</div>
+    </div>
+
+    <script>
+        const gameBoardTemplates = {
+            "template_1": {
+                name: "Template Board 1",
+                backgroundImage: "https://picsum.photos/id/1015/800/1200",
+                layout: [{"r":1,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":2,"c":1,"radius":"0 0 0 15px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":2,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":2,"c":3,"radius":"0 15px 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":3,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":4,"c":0,"radius":"15px 0 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":4,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":4,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":4,"c":3,"radius":"0 0 15px 0","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":5,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":6,"c":0,"radius":"0 0 0 15px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":6,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":6,"c":2,"radius":"0 15px 0 0","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":7,"c":2,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}}],
+                squaresRawText: [
+                    "https://picsum.photos/id/10/100/100", "https://picsum.photos/id/20/100/100", "https://picsum.photos/id/30/100/100", "https://picsum.photos/id/40/100/100", "https://picsum.photos/id/50/100/100", "https://picsum.photos/id/60/100/100",
+                    "https://picsum.photos/id/61/100/100", "https://picsum.photos/id/62/100/100", "https://picsum.photos/id/63/100/100", "https://picsum.photos/id/64/100/100", "https://picsum.photos/id/65/100/100", "https://picsum.photos/id/66/100/100",
+                    "https://picsum.photos/id/67/100/100", "https://picsum.photos/id/68/100/100"
+                ],
+                cardsRawText: "Template 1: Advance 3 spaces.\nDraw another card.\nLose a turn.\nTake 100 points.\nGo back to start."
+            },
+            "template_2": {
+                name: "Template Board 2",
+                backgroundImage: "https://picsum.photos/id/1025/800/1200",
+                layout: [{"r":1,"c":0,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":1,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":1,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":1,"c":3,"radius":"0 15px 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":2,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":3,"c":0,"radius":"15px 0 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":3,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":3,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":3,"c":3,"radius":"0 0 15px 0","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":4,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":5,"c":0,"radius":"0 0 0 15px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":5,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":5,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":5,"c":3,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}}],
+                squaresRawText: [
+                    "https://picsum.photos/id/101/100/100", "https://picsum.photos/id/102/100/100", "https://picsum.photos/id/103/100/100", "https://picsum.photos/id/104/100/100", "https://picsum.photos/id/105/100/100", "https://picsum.photos/id/106/100/100",
+                    "https://picsum.photos/id/107/100/100", "https://picsum.photos/id/108/100/100", "https://picsum.photos/id/109/100/100", "https://picsum.photos/id/110/100/100", "https://picsum.photos/id/111/100/100", "https://picsum.photos/id/112/100/100",
+                    "https://picsum.photos/id/113/100/100", "https://picsum.photos/id/114/100/100"
+                ],
+                cardsRawText: "Template 2: Special Event!\nSwap places with any player.\nTake another turn."
+            },
+            "template_3": {
+                name: "Template Board 3",
+                backgroundImage: "https://picsum.photos/id/1035/800/1200",
+                layout: [{"r":2,"c":0,"radius":"15px 0 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":2,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":2,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":2,"c":3,"radius":"0 15px 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":3,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":3,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":4,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":4,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":4,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":4,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":5,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":5,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":6,"c":0,"radius":"0 0 0 15px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":6,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":6,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":6,"c":3,"radius":"0 0 15px 0","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}}],
+                squaresRawText: [
+                    "https://picsum.photos/id/130/100/100", "https://picsum.photos/id/131/100/100", "https://picsum.photos/id/132/100/100", "https://picsum.photos/id/133/100/100", "https://picsum.photos/id/134/100/100", "https://picsum.photos/id/135/100/100",
+                    "https://picsum.photos/id/136/100/100", "https://picsum.photos/id/137/100/100", "https://picsum.photos/id/138/100/100", "https://picsum.photos/id/139/100/100", "https://picsum.photos/id/140/100/100", "https://picsum.photos/id/141/100/100",
+                    "https://picsum.photos/id/142/100/100", "https://picsum.photos/id/143/100/100", "https://picsum.photos/id/144/100/100", "https://picsum.photos/id/145/100/100"
+                ],
+                cardsRawText: "Template 3: Pillar Loop\nMove forward 2 spaces.\nSkip your next roll.\nDraw a bonus card."
+            },
+            "template_4": {
+                name: "Template Board 4",
+                backgroundImage: "https://picsum.photos/id/1043/800/1200",
+                layout: [{"r":1,"c":0,"radius":"15px 0 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":1,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":1,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":1,"c":3,"radius":"0 15px 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":2,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":2,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":3,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":3,"c":2,"radius":"15px 0 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":3,"c":3,"radius":"0 0 15px 0","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":4,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":4,"c":2,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":5,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":5,"c":2,"radius":"0 0 0 15px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":5,"c":3,"radius":"0 0 15px 0","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}}],
+                squaresRawText: [
+                    "https://picsum.photos/id/150/100/100", "https://picsum.photos/id/151/100/100", "https://picsum.photos/id/152/100/100", "https://picsum.photos/id/153/100/100", "https://picsum.photos/id/154/100/100", "https://picsum.photos/id/155/100/100",
+                    "https://picsum.photos/id/156/100/100", "https://picsum.photos/id/157/100/100", "https://picsum.photos/id/158/100/100", "https://picsum.photos/id/159/100/100", "https://picsum.photos/id/160/100/100", "https://picsum.photos/id/161/100/100",
+                    "https://picsum.photos/id/162/100/100", "https://picsum.photos/id/163/100/100", "https://picsum.photos/id/164/100/100", "https://picsum.photos/id/165/100/100", "https://picsum.photos/id/166/100/100"
+                ],
+                cardsRawText: "Template 4: Snake Bridge\nTake a shortcut ahead.\nMove back 1 space.\nRoll again immediately."
+            }
+        };
+
+        const colors = ['var(--blue)', 'var(--green)', 'var(--orange)', 'var(--red)'];
+        let pieces = [];
+        let selectedPieceId = null;
+        let currentNeedleAngle = 45;
+        let lastColorIndex = null;
+
+        const pastelColors = [
+            '#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF', '#E8C5FF',
+            '#FFC5EC', '#C5FFEC', '#F4FFC5', '#FFCBC1', '#D4C5FF', '#C5F6FF'
+        ];
+
+        let cardPrompts = [];
+        let cardQueue = [];
+
+        const onlineBoardSelect = document.getElementById('online-board-select');
+        const hiddenLocalBoardInput = document.getElementById('hidden-local-board-input');
+        
+        const onlineCardsSelect = document.getElementById('online-cards-select');
+        const hiddenLocalCardsInput = document.getElementById('hidden-local-cards-input');
+
+        const boardImage = document.getElementById('board-image');
+        const placeholder = document.getElementById('placeholder');
+        const gameContainer = document.getElementById('game-container');
+        const boardLayer = document.getElementById('board-layer');
+        const trayContainer = document.getElementById('tray-container');
+        const diceCountSelect = document.getElementById('dice-count-select');
+        const diceBox = document.getElementById('dice-box');
+        const diceCorner = document.getElementById('dice-corner');
+        const floatingSpinner = document.getElementById('floating-spinner-wrapper');
+        const spinnerArrow = document.getElementById('spinner-diagonal-arrow');
+
+        const cardModal = document.getElementById('card-modal');
+        const cardContent = document.getElementById('card-content');
+
+        function initDropdowns() {
+            Object.keys(gameBoardTemplates).forEach(key => {
+                const board = gameBoardTemplates[key];
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = board.name;
+                onlineBoardSelect.appendChild(option);
+            });
+
+            Object.keys(gameBoardTemplates).forEach(key => {
+                const board = gameBoardTemplates[key];
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = board.name + " Cards";
+                onlineCardsSelect.appendChild(option);
+            });
+        }
+
+        function renderBoardTemplate(templateKey) {
+            const template = gameBoardTemplates[templateKey];
+            if (!template) return;
+
+            const existingGrid = gameContainer.querySelector('.board-grid');
+            if (existingGrid) existingGrid.remove();
+
+            boardImage.style.display = 'none';
+            placeholder.style.display = 'none';
+
+            gameContainer.style.backgroundImage = `url('${template.backgroundImage}')`;
+
+            const boardGrid = document.createElement('div');
+            boardGrid.className = 'board-grid';
+
+            let gridMatrix = Array(10).fill().map(() => Array(4).fill(null));
+            template.layout.forEach(item => { gridMatrix[item.r][item.c] = item; });
+
+            let textIndex = 0;
+            for (let r = 0; r < 10; r++) {
+                for (let c = 0; c < 4; c++) {
+                    const cellData = gridMatrix[r][c];
+                    const div = document.createElement('div');
+                    if (cellData) {
+                        div.className = 'path-tile';
+                        div.style.borderRadius = cellData.radius;
+                        div.style.borderTop = cellData.borders.top;
+                        div.style.borderBottom = cellData.borders.bottom;
+                        div.style.borderLeft = cellData.borders.left;
+                        div.style.borderRight = cellData.borders.right;
+
+                        const rawArray = template.squaresRawText;
+                        const imgUrl = rawArray[textIndex % rawArray.length];
+                        textIndex++;
+
+                        const img = document.createElement('img');
+                        img.src = imgUrl;
+                        img.alt = "tile";
+                        div.appendChild(img);
+                    }
+                    boardGrid.appendChild(div);
+                }
+            }
+
+            gameContainer.insertBefore(boardGrid, boardLayer);
+        }
+
+        function processCardText(text, sourceName) {
+            cardPrompts = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+            
+            if (cardPrompts.length === 0) {
+                alert('The text file contained no valid prompts.');
+                return;
+            }
+
+            resetCardQueue();
+            showNextCard();
+            cardModal.style.display = 'flex';
+        }
+
+        onlineBoardSelect.addEventListener('change', (e) => {
+            const selectedVal = e.target.value;
+            if (!selectedVal) return;
+
+            if (selectedVal === 'LOCAL_FILE_TRIGGER') {
+                hiddenLocalBoardInput.click();
+            } else {
+                renderBoardTemplate(selectedVal);
+            }
+        });
+
+        hiddenLocalBoardInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const existingGrid = gameContainer.querySelector('.board-grid');
+                    if (existingGrid) existingGrid.remove();
+
+                    gameContainer.style.backgroundImage = 'none';
+                    boardImage.src = event.target.result;
+                    boardImage.style.display = 'block';
+                    placeholder.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                onlineBoardSelect.value = '';
+            }
+        });
+
+        onlineCardsSelect.addEventListener('change', (e) => {
+            const selectedVal = e.target.value;
+            if (!selectedVal) return;
+
+            if (selectedVal === 'LOCAL_FILE_TRIGGER') {
+                hiddenLocalCardsInput.click();
+            } else if (gameBoardTemplates[selectedVal]) {
+                processCardText(gameBoardTemplates[selectedVal].cardsRawText, "!!GB_Cards.txt");
+            }
+        });
+
+        hiddenLocalCardsInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    processCardText(event.target.result, file.name);
+                };
+                reader.readAsText(file);
+            } else {
+                onlineCardsSelect.value = '';
+            }
+        });
+
+        function resetCardQueue() {
+            cardQueue = [...cardPrompts].reverse();
+        }
+
+        function showNextCard() {
+            if (cardQueue.length === 0) {
+                resetCardQueue();
+            }
+            const promptText = cardQueue.pop();
+            cardContent.textContent = promptText;
+
+            const randomColor = pastelColors[Math.floor(Math.random() * pastelColors.length)];
+            cardModal.style.backgroundColor = randomColor;
+        }
+
+        let isDragging = false;
+        let hasMoved = false;
+        let startX, startY, initialLeft, initialTop;
+
+        cardModal.addEventListener('pointerdown', (e) => {
+            isDragging = true;
+            hasMoved = false;
+            startX = e.clientX;
+            startY = e.clientY;
+            
+            const rect = cardModal.getBoundingClientRect();
+            cardModal.style.transform = 'none';
+            cardModal.style.left = `${rect.left}px`;
+            cardModal.style.top = `${rect.top}px`;
+            
+            initialLeft = rect.left;
+            initialTop = rect.top;
+            
+            cardModal.setPointerCapture(e.pointerId);
+        });
+
+        cardModal.addEventListener('pointermove', (e) => {
+            if (!isDragging) return;
+            const dx = e.clientX - startX;
+            const dy = e.clientY - startY;
+
+            if (Math.abs(dx) > 4 || Math.abs(dy) > 4) {
+                hasMoved = true;
+            }
+
+            cardModal.style.left = `${initialLeft + dx}px`;
+            cardModal.style.top = `${initialTop + dy}px`;
+        });
+
+        cardModal.addEventListener('pointerup', (e) => {
+            if (isDragging && !hasMoved) {
+                if (cardPrompts.length > 0) {
+                    showNextCard();
+                }
+            }
+            isDragging = false;
+            cardModal.releasePointerCapture(e.pointerId);
+        });
+
+        function initPieces() {
+            pieces = [];
+            for (let p = 0; p < 4; p++) {
+                pieces.push({
+                    id: p,
+                    colorIndex: p,
+                    color: colors[p],
+                    x: null, 
+                    y: null
+                });
+            }
+            selectedPieceId = null;
+            renderGame();
+        }
+
+        function renderGame() {
+            trayContainer.innerHTML = '';
+            boardLayer.innerHTML = '';
+
+            pieces.forEach(piece => {
+                if (piece.x === null && piece.y === null) {
+                    const el = document.createElement('div');
+                    el.className = 'tray-piece';
+                    el.style.backgroundColor = piece.color;
+                    if (piece.id === selectedPieceId) {
+                        el.style.border = '2px solid #ffeb3b';
+                        el.style.transform = 'scale(1.15)';
+                    }
+                    el.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        selectedPieceId = piece.id;
+                        renderGame();
+                    });
+                    trayContainer.appendChild(el);
+                } else {
+                    const el = document.createElement('div');
+                    el.className = 'game-piece';
+                    el.style.backgroundColor = piece.color;
+                    el.style.left = `${piece.x}%`;
+                    el.style.top = `${piece.y}%`;
+                    if (piece.id === selectedPieceId) {
+                        el.classList.add('selected');
+                    }
+                    el.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        selectedPieceId = piece.id;
+                        renderGame();
+                    });
+                    boardLayer.appendChild(el);
+                }
+            });
+        }
+
+        gameContainer.addEventListener('click', (e) => {
+            if (selectedPieceId === null) return;
+            if (e.target.closest('#dice-slot-container')) return;
+
+            const rect = gameContainer.getBoundingClientRect();
+            let xClick = e.clientX - rect.left;
+            let yClick = e.clientY - rect.top;
+
+            let xNorm = xClick / rect.width;
+            let yNorm = yClick / rect.height;
+
+            xNorm = Math.max(0, Math.min(1, xNorm));
+            yNorm = Math.max(0, Math.min(1, yNorm));
+
+            const piece = pieces.find(p => p.id === selectedPieceId);
+            if (piece) {
+                piece.x = xNorm * 100;
+                piece.y = yNorm * 100;
+                selectedPieceId = null;
+                renderGame();
+            }
+        });
+
+        function renderDiceStructure() {
+            diceBox.innerHTML = '';
+            const val = diceCountSelect.value;
+            
+            if (val === 'spinner') {
+                diceCorner.style.display = 'none';
+                floatingSpinner.style.display = 'block';
+            } else if (!val) {
+                diceCorner.style.display = 'none';
+                floatingSpinner.style.display = 'none';
+            } else {
+                floatingSpinner.style.display = 'none';
+                diceCorner.style.display = 'flex';
+                diceCorner.title = "Tap to Roll Dice";
+                
+                const count = parseInt(val);
+                for (let i = 0; i < count; i++) {
+                    const die = document.createElement('div');
+                    die.className = 'dice';
+                    die.setAttribute('data-value', '6');
+                    die.innerHTML = `
+                        <div class="dot top-left"></div><div class="dot top-right"></div>
+                        <div class="dot middle-left"></div><div class="dot center"></div><div class="dot middle-right"></div>
+                        <div class="dot bottom-left"></div><div class="dot bottom-right"></div>
+                    `;
+                    diceBox.appendChild(die);
+                }
+            }
+        }
+
+        function spinWheel() {
+            let newColorIndex;
+            do {
+                newColorIndex = Math.floor(Math.random() * 4);
+            } while (newColorIndex === lastColorIndex && colors.length > 1);
+
+            lastColorIndex = newColorIndex;
+
+            const randomExtraTurns = (Math.floor(Math.random() * 3) + 4) * 360;
+            const sliceAngle = (newColorIndex * 90) + Math.floor(Math.random() * 70) + 10;
+            
+            currentNeedleAngle += randomExtraTurns + (sliceAngle - (currentNeedleAngle % 360));
+            spinnerArrow.style.transform = `translate(-50%, -50%) rotate(${currentNeedleAngle}deg)`;
+        }
+
+        function rollDice() {
+            const diceElements = diceBox.querySelectorAll('.dice');
+            diceElements.forEach(die => die.classList.add('rolling'));
+
+            setTimeout(() => {
+                diceElements.forEach(die => {
+                    die.classList.remove('rolling');
+                    const randomVal = Math.floor(Math.random() * 6) + 1;
+                    die.setAttribute('data-value', randomVal);
+                });
+            }, 400);
+        }
+
+        diceCorner.addEventListener('click', rollDice);
+        floatingSpinner.addEventListener('click', spinWheel);
+        diceCountSelect.addEventListener('change', renderDiceStructure);
+
+        initDropdowns();
+        initPieces();
+        renderDiceStructure();
+    </script>
+</body>
+</html>
