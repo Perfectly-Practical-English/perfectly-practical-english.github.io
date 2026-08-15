@@ -30,8 +30,9 @@ html,body{
     top: 0;
     left: 0;
     right: 0;
-    bottom: 124px; /* Stops the control columns right where the tiles bar begins on load */
+    bottom: 124px;
 }
+
 /* ==========================
    LEFT COLUMN
 ========================== */
@@ -39,11 +40,12 @@ html,body{
 #leftColumn{
     width:90px;
     min-width:90px;
-    background:#ececec;
+    background:black !important;
     border-right:1px solid #999;
     display:flex;
     flex-direction:column;
     justify-content:flex-start;
+    position: relative;
 }
 
 /* ==========================
@@ -53,11 +55,12 @@ html,body{
 #rightColumn{
     width:90px;
     min-width:90px;
-    background:#ececec;
+    background:black !important;
     border-left:1px solid #999;
     display:flex;
     flex-direction:column;
     justify-content:flex-start;
+    position: relative;
 }
 
 #clearBoardBtn,
@@ -68,32 +71,81 @@ html,body{
     border-bottom:1px solid #999;
     cursor:pointer;
 }
-#pageList,
-#pageListRight{
-    height: 85px !important;
-    min-height: 85px !important;
-    max-height: 85px !important;
-    flex-grow: 0 !important;
-    flex-shrink: 0 !important;
+
+/* ==========================
+   UNIT FOLDERS & FLYOUTS
+========================== */
+.unitFolderContainer {
+    position: static;
+    width: 100%;
+}
+
+.unitFolderBtn {
+    width: 100%;
+    height: 22px;
+    font-size: 9px;
+    background: black;
+    color: white;
+    border: none;
+    border-bottom: 1px solid #333;
+    cursor: pointer;
+    text-align: center;
+}
+
+.unitFolderBtn:hover {
+    background: #fdfdfd !important;
+    color: #111 !important;
+}
+
+.spreadFlyout {
+    display: none;
+    position: absolute;
+    left: 90px;
+    top: 0;
+    width: 140px;
+    max-height: calc(100vh - 124px);
+    background: black;
+    border: 1px solid #555;
+    z-index: 20000;
     overflow-y: auto;
+    box-shadow: 2px 2px 10px rgba(0,0,0,0.8);
 }
 
-.pageBtn{
-    width:100%;
-    height:18px;
-    border:none;
-    border-bottom:1px solid #000;
-    font-size:10px;
-    cursor:pointer;
-    padding:0;
-    background:#f7f7f7;
+#rightColumn .spreadFlyout {
+    left: auto;
+    right: 90px;
 }
 
-
-.pageBtn.active{
-    background:#4a90e2;
-    color:white;
+.spreadFlyout.active {
+    display: flex;
+    flex-direction: column;
 }
+
+.spreadFlyoutItem {
+    padding: 6px 8px;
+    font-size: 10px;
+    color: white;
+    background: black;
+    border-bottom: 1px solid #222;
+    cursor: pointer;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.spreadFlyoutItem:hover {
+    background: #4a90e2 !important;
+    color: white !important;
+}
+
+/* Unit Grid Layout Container (2 columns) */
+.unitGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1px;
+    background: #333;
+    padding: 1px;
+}
+
 /* ==========================
    VIEWER
 ========================== */
@@ -104,8 +156,8 @@ html,body{
     background:black;
     position:relative;
     cursor: move;
+    touch-action:none;
 }
-
 
 #spread{
     position:absolute;
@@ -115,6 +167,7 @@ html,body{
     white-space:nowrap;
     font-size:0;
 }
+
 /* ==========================
    PAGES
 ========================== */
@@ -135,40 +188,20 @@ html,body{
     display:block;
     height:100%;
     width:auto;
+    pointer-events: none;
 }
-
-/* left page */
 
 .leftPage{
-
     left:0;
-
-    width:calc(100% + 2px);
-
-    clip-path: inset(
-        0px
-        14px
-        0px
-        0
-    );
+    width:100%;
+    clip-path: none;
 }
-
-/* right page */
 
 .rightPage{
-
-    left:-15px;
-
-    width:calc(100% + 2px);
-
-    clip-path: inset(
-        0px
-        14px
-        0px
-        0
-    );
+    left:0;
+    width:100%;
+    clip-path: none;
 }
-
 /* ==========================
    TILES
 ========================== */
@@ -182,95 +215,83 @@ html,body{
     display: flex;
     flex-direction: column;
     border-top: 1px solid #999;
-    background: #ececec;
+    background: black;
     z-index: 9998;
     box-sizing: border-box;
-}#toggleTiles{
-
-    width:24px;
-
-    border:none;
-
-    border-right:1px solid #999;
-
-    cursor:pointer;
-
-    background:#ececec;
-
-    font-size:12px;
-
-    padding:0;
-
 }
 
 #tiles{
-
     flex:1;
-
     height:100%;
-
-    background:white;
-
-
+    background:black !important;
     display:flex;
     flex-wrap:wrap;
-
     gap:2px;
-
     padding:1px;
-
     overflow:auto;
-
     align-content:flex-start;
-
     justify-content:flex-start;
-
 }
+
 .tile{
     min-width:8ch;
     height:14px;
     line-height:14px;
     font-size:9px;
-
     padding:0 4px;
     margin:0;
-
     display:flex;
     align-items:center;
     justify-content:center;
-
     text-align:center;
     background:#E8D8B5;
     border:1px solid #B99F6B;
     color:#222;
-
     cursor:pointer;
     white-space:nowrap;
     user-select:none;
 }
 
 .tile.selected{
-    background:#4a90e2;
+    background:#4a90e2 !important;
     border-color:#2f6fb7;
-    color:white;
+    color:white !important;
+}
+
+/* Designated Prefix Tile Colors */
+.tile[data-prefix="~I"] {
+    background: #e74c3c !important;
+    border-color: #c0392b !important;
+    color: white !important;
+}
+
+/* Emoji (~E) -> Orange */
+.tile[data-prefix="~E"] {
+    background: #e67e22 !important;
+    border-color: #d35400 !important;
+    color: white !important;
+}
+
+.tile[data-prefix="~SP"] {
+    background: #2ecc71 !important;
+    border-color: #27ae60 !important;
+    color: white !important;
+}
+
+/* Sound Effects (~SX) -> Green */
+.tile[data-prefix="~SX"] {
+    background: #2ecc71 !important;
+    border-color: #27ae60 !important;
+    color: white !important;
 }
 
 #tilesResizeBar{
-
     height:8px;
-
     width:100%;
-
     background:#999;
-
     cursor:ns-resize;
-
     flex-shrink:0;
-
 }
-
-
-
 
 /* ==========================
    DRAGGABLES
@@ -288,6 +309,7 @@ html,body{
     filter: none !important;
     transform: none !important;
 }
+
 .overlayPng {
     position: absolute;
     width: 140px;
@@ -301,7 +323,6 @@ html,body{
     object-fit: contain;
 }
 
-
 img {
     -webkit-user-drag: none;
     -webkit-touch-callout: none;
@@ -313,24 +334,6 @@ img {
     -ms-user-select: none;
 }
 
-
-.pageImage {
-    pointer-events: none;
-}
-
-
-
-.tileAnchor {
-    transform: none !important;
-}
-
-.draggable.tile{
-    min-width:6ch;
-    height:10px;
-    font-size:6px;
-}
-
-
 #deleteBtn,
 #deleteBtnRight {
     width:100%;
@@ -339,489 +342,175 @@ img {
     border:none;
     border-bottom:1px solid #999;
     cursor:pointer;
-    background:#f7f7f7;
+    background:black;
+    color:white;
 }
 
 #scriptBar{
-
     position:fixed;
-
     left:0;
     right:0;
     bottom:0;
-
     height:24px;
-
     display:flex;
     flex-direction:row;
     align-items:stretch;
-
     border-top:1px solid #999;
-
-    background:#ececec;
+    background:black;
     z-index:10000;
-
 }
 
 #scriptResizeBar{
-
     position:absolute;
-
     top:-8px;
-
     left:0;
-
     width:100%;
-
     height:8px;
-
     background:#999;
-
     cursor:ns-resize;
-
     z-index:10001;
-
 }
+
 #worksheetScript{
-
     flex:1;
-
     height:22px;
-
     resize:none;
-
     overflow:auto;
-
     font:10px Consolas,monospace;
-
     white-space:pre;
-
     border:none;
-
     outline:none;
-
-    scrollbar-width:none;   /* Firefox */
-
+    background: black !important;
+    color: white !important;
+    scrollbar-width:none;
 }
-
 
 #worksheetScript::-webkit-scrollbar{
-
-    display:none;           /* Chrome / Edge */
-
+    display:none;
 }
 
 #downloadTxtBtn{
-
     width:32px;
-
     height:22px;
-
     font-size:10px;
-
     border:none;
-
     border-left:1px solid #999;
-
-    background:#f7f7f7;
-
+    background:black;
+    color:white;
     cursor:pointer;
-
     padding:0;
-
 }
-
 
 #downloadTxtBtn:hover{
-
-    background:#ddd;
-
+    background:#333;
 }
-#scriptBar.expanded{
 
+#scriptBar.expanded{
     height:220px;
 }
 
 #scriptBar.expanded #worksheetScript{
-
     height:218px;
-}
-
-#viewer{
-    touch-action:none;
-}
-
-
-/* ==========================
-   MP3 BUTTONS
-========================== */
-
-.mp3Tile{
-    min-width:8ch;
-    height:14px;
-    line-height:14px;
-    font-size:9px;
-
-    padding:0 4px;
-    margin:0;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    text-align:center;
-    white-space:nowrap;
-    user-select:none;
-    cursor:pointer;
-
-    background:#7CCB6A;
-    border:1px solid #4F9E43;
-    color:#111;
-}
-
-.mp3Tile.selected{
-    background:#2E7D32;
-    border-color:#1B5E20;
-    color:white;
-}
-
-
-/* ==========================
-   SECONDARY ~S AUDIO BUTTONS
-========================== */
-
-.soundTile{
-
-    min-width:8ch;
-    height:14px;
-    line-height:14px;
-    font-size:9px;
-
-    padding:0 4px;
-    margin:0;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    text-align:center;
-    white-space:nowrap;
-    user-select:none;
-    cursor:pointer;
-
-    background:#F6C58B;      /* pastel orange */
-    border:1px solid #D99A4A;
-    color:#222;
-
-}
-
-
-.soundTile.selected{
-
-    background:#E67E22;      /* clicked orange */
-    border-color:#B85C00;
-    color:white;
-
-}
-
-
-
-.placedTile {
-    background: rgba(255,255,255,0.85);
-    border: none;
-    color: red;
-    font-weight: bold;
-    padding: 2px 8px;
-    border-radius: 4px;
-}
-
-#deleteBtn,
-#deleteBtnRight {
-    width:100%;
-    height:24px;
-    font-size:10px;
-    border:none;
-    border-bottom:1px solid #999;
-    cursor:pointer;
-    background:#f7f7f7;
-}
-
-.classSelect{
-
-    width:100%;
-    height:24px;
-    font-size:10px;
-    text-align:center;
-    text-align-last:center;
-
-}
-
-
-.studentTile{
-
-    width:100%;
-    height:28px;
-
-    font-size:10px;
-
-    margin:2px 0;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    overflow:hidden;
-
-    cursor:pointer;
-
-}
-
-.breakBtn{
-    height:24px;
-    font-size:10px;
-    border:none;
-    border-bottom:1px solid #999;
-    background:#ffd27f;
-    cursor:pointer;
-}
-
-
-/* ==========================
+}/* ==========================
    BREAK MODAL
 ========================== */
 
 #breakModal{
-
     position:absolute;
-
     width:260px;
     height:180px;
-
     left:50%;
     top:50%;
-
     transform:translate(-50%,-50%);
-
-background:#000;
-
+    background:#000;
     border-radius:15px;
-
     color:white;
-
     z-index:50000;
-
     display:none;
-
-    box-shadow:
-        0 0 30px rgba(0,0,0,.6);
-
+    box-shadow: 0 0 30px rgba(0,0,0,.6);
     backdrop-filter:blur(4px);
-
     cursor:move;
-
     user-select:none;
 }
-
 
 #breakContent{
-
     height:100%;
-
     display:flex;
-
     flex-direction:column;
-
     align-items:center;
-
     justify-content:center;
-
     text-align:center;
-
 }
-
 
 #breakContent h1{
-
     font-size:32px;
-
     margin:0;
-
-    text-shadow:
-        0 0 20px black;
-
+    text-shadow: 0 0 20px black;
 }
-
 
 #breakTimer{
-
     margin-top:5px;
-
     font-size:34px;
-
     color:orange;
-
-    text-shadow:
-        0 0 15px black;
-
+    text-shadow: 0 0 15px black;
 }
-
 
 #breakStart{
-
     margin-top:20px;
-
     transform:translateY(-15px);
-
-
     padding:8px 18px;
-
     border:none;
-
     border-radius:8px;
-
     background:orange;
-
     font-weight:bold;
-
     cursor:pointer;
-
 }
-
-
 
 .breakControls{
-
     display:flex;
-
     align-items:center;
-
     justify-content:center;
-
     gap:12px;
-
     margin-top:5px;
-
 }
-
-
-#breakStart{
-
-    transform:translateY(-15px);
-
-}
-
 
 .breakArrow{
-
     display:flex;
-
     align-items:center;
-
     justify-content:center;
-
     color:orange;
-
     font-size:24px;
-
     cursor:pointer;
-
     user-select:none;
-
     height:40px;
-
+    transform:translateY(-5px);
 }
 
 .breakControls button{
-
     margin:0;
-
     padding:8px 10px;
-
     font-size:12px;
-
     border:none;
-
     border-radius:6px;
-
     background:orange;
-
     cursor:pointer;
-
     font-weight:bold;
-
 }
-
 
 .breakControls button:hover{
-
     background:#ffb347;
-
 }
-
-.breakArrow{
-
-    color:orange;
-
-    font-size:24px;
-
-    cursor:pointer;
-
-    user-select:none;
-
-    line-height:1;
-
-}
-
 
 .breakArrow:hover{
-
     color:#ffb347;
-
-}
-
-.breakArrow{
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    color:orange;
-
-    font-size:24px;
-
-    cursor:pointer;
-
-    user-select:none;
-
-    height:40px;
-
-    transform:translateY(-5px);
-
-}
-
-.spinnerAssembly{
-    position: absolute;
-    z-index: 5001; /* Adjusted to sit nicely above Tallyman (5000) */
-    pointer-events: none;
 }
 
 .spinnerAssembly{
     position: absolute;
     z-index: 5001;
-    pointer-events: none; /* The outer assembly stays click-through */
+    pointer-events: none;
 }
 
-/* 1. Make the background / empty space around the pizza click-through */
-#studentWheelOverlay, #studentWheelPanel {
-    pointer-events: none !important;
-}
-
-/* 2. Re-enable clicks ONLY on the actual pizza wheel canvas and controls */
-#studentWheelCanvas {
-    pointer-events: auto !important;
-}
 .spinnerButton{
     width: 100%;
     height: 24px;
@@ -829,51 +518,31 @@ background:#000;
     font-family: Arial, sans-serif;
     border: none;
     border-bottom: 1px solid #999;
-    background: #f7f7f7;
+    background: black;
+    color: white;
     cursor: pointer;
     padding: 0;
     pointer-events: auto;
 }
 
-.imageTile{
-
-    background:#888;
-    border:1px solid #666;
-    color:white;
-
-}
-
-.imageTile.selected{
-
-    background:#555;
-    border-color:#333;
-    color:white;
-
-}
-
 #tallymanLeftBtn,
 #tallymanRightBtn{
-
-height:24px;
-width:100%;
-
-font-size:10px;
-
-border:none;
-border-bottom:1px solid #999;
-
-cursor:pointer;
-
+    height:24px;
+    width:100%;
+    font-size:10px;
+    border:none;
+    border-bottom:1px solid #999;
+    cursor:pointer;
+    background:black;
+    color:white;
 }
 
 #leftColumn *,
 #rightColumn * {
-    border: none !important;
     outline: none !important;
     box-shadow: none !important;
 }
 
-/* Set the default black background for columns, buttons, inputs, selects, and flyouts */
 #leftColumn,
 #rightColumn {
     background: black !important;
@@ -884,38 +553,18 @@ cursor:pointer;
 #leftColumn input,
 #rightColumn input,
 #leftColumn select,
-#rightColumn select,
-#leftColumn .breakBtn,
-#rightColumn .breakBtn,
-#leftColumn .spinnerButton,
-#rightColumn .spinnerButton,
-#leftColumn .flyout,
-#leftColumn [class*="flyout"],
-#rightColumn .flyout,
-#rightColumn [class*="flyout"] {
+#rightColumn select {
     background: black !important;
     color: white !important;
     border: none !important;
     outline: none !important;
     box-shadow: none !important;
-    transition: background 0.2s ease;
-}
-/* Pastel orange when clicked / active */
-#leftColumn button:active,
-#rightColumn button:active,
-#leftColumn button.active,
-#rightColumn button.active,
-#leftColumn .breakBtn:active,
-#rightColumn .breakBtn:active,
-#leftColumn .spinnerButton:active,
-#rightColumn .spinnerButton:active {
-    background: #ffdab9 !important; /* Pastel orange */
-    color: #111 !important;
 }
 
 #leftColumn button:hover,
 #rightColumn button:hover {
     background: #fdfdfd !important;
+    color: #111 !important;
 }
 
 #leftBtn,
@@ -926,99 +575,10 @@ cursor:pointer;
     border: none;
     border-bottom: 1px solid #999;
     cursor: pointer;
-    background: #f7f7f7;
+    background: black;
+    color: white;
     padding: 0;
 }
-
-
-.control-column, .sidebar-column {
-    height: 100vh; /* Or a specific fixed height like 600px */
-    min-height: 600px;
-    max-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    flex-shrink: 0;
-    overflow-y: auto; /* Handles overflow cleanly without shifting layout */
-}
-
-
-.tile-container-wrapper {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    justify-content: flex-start;
-}
-
-.tile-drag-bar {
-    flex-shrink: 0; /* Prevents the drag bar from compressing or moving */
-}
-
-/* Base styling for elements */
-.item-wrapper {
-  position: relative;
-}
-
-/* Standard numbers stay below the white strip */
-.item-wrapper.standard {
-  z-index: 1; 
-}
-
-/* The white strip sits in the middle layer */
-.white-strip {
-  position: relative;
-  z-index: 5;
-}
-
-/* Boosted 'a' images/elements sit above the white strip */
-.item-wrapper.has-a {
-  z-index: 10; 
-}
-
-
-/* Your other styles... */
-
-  .viewer-container {
-      position: relative; /* Crucial so the center bar anchors to the container */
-  }
-
-  /* Center Bar Styling */
-  #centerBar {
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 50%;
-      width: 35px;
-      transform: translateX(-50%);
-      pointer-events: none;
-      z-index: 9999;
-
-      /* solid-ish white, slightly see-through */
-      background: rgba(255, 255, 255, 0.85);
-
-      /* soft edge glow instead of transparency */
-      box-shadow:
-          0 0 10px rgba(255, 255, 255, 0.35),
-          0 0 25px rgba(255, 255, 255, 0.15);
-
-      /* subtle edge fade (not full transparency) */
-      -webkit-mask-image: linear-gradient(
-          to right,
-          transparent 0%,
-          black 15%,
-          black 85%,
-          transparent 100%
-      );
-
-      mask-image: linear-gradient(
-          to right,
-          transparent 0%,
-          black 15%,
-          black 85%,
-          transparent 100%
-      );
-  }
-
-
 
 #loadAnswerBtn, #loadAnswerBtnRight {
     height: 24px;
@@ -1027,115 +587,100 @@ cursor:pointer;
     border: none;
     border-bottom: 1px solid #999;
     cursor: pointer;
-    background-color: #f0f0f0;
+    background-color: black;
+    color: white;
 }
 #loadAnswerBtn:hover, #loadAnswerBtnRight:hover {
-    background-color: #e0e0e0;
+    background-color: #333;
 }
 
-/* Force all text fields, code areas, and inputs inside the columns to be black with white text */
-#leftColumn input,
-#rightColumn input,
-#leftColumn textarea,
-#rightColumn textarea,
-#leftColumn code,
-#rightColumn code,
-#leftColumn pre,
-#rightColumn pre,
-#leftColumn .CodeMirror,
-#rightColumn .CodeMirror,
-#leftColumn .ace_editor,
-#rightColumn .ace_editor {
-    background: black !important;
+
+.tile.mp3Tile {
+    background: #4a90e2;
+    color: black !important;
+}
+
+.tile.soundTile.soundSX {
+    background: #4caf50;
+    color: black !important;
+}
+
+/* Force all tiles, including image and audio titles/text, to be black */
+#tiles .tile,
+#tiles .tile *,
+#tiles .mp3Tile,
+#tiles .soundTile,
+#tiles .imageTile,
+#tiles .emojiTile,
+.tile,
+.mp3Tile,
+.soundTile,
+.imageTile,
+.emojiTile {
+    color: black !important;
+}
+
+/* Emoji Tiles (~E) -> White */
+.tile.emojiTile[data-prefix="~E"],
+.tile[data-prefix="~E"] {
+    background: white !important;
+    border-color: grey !important;
+    color: black !important;
+}
+
+/* Image Tiles (~I) -> Pastel Orange */
+.tile.imageTile[data-prefix="~I"],
+.tile[data-prefix="~I"] {
+    background: #f8c471 !important;
+    border-color: #f39c12 !important;
+    color: black !important;
+}
+
+/* Audio Tiles (~P) -> Pastel Green */
+.tile[data-prefix="~P"] {
+    background: #a9dfbf !important;
+    border-color: #52be80 !important;
+    color: black !important;
+}
+
+
+
+/* Audio Path Tiles (~SP) -> Green */
+.tile[data-prefix="~SP"] {
+    background: #2ecc71 !important;
+    border-color: #27ae60 !important;
     color: white !important;
-    border: 1px solid #333 !important;
 }
-
-/* ==========================
-   MAKE SCRIPT AREA BLACK
-========================== */
-#worksheetScript {
-    background: black !important;
+/* Sound Effects (~SX) -> Dark Green */
+.tile[data-prefix="~SX"],
+.tile.soundTile.soundSX {
+background: #76d7c4 !important;
+    border-color: #45b39d !important;
     color: white !important;
 }
 
 
-/* ==========================
-   MAKE TILES CONTAINER & RENDERED BUTTONS BLACK
-========================== */
-#tiles {
-    background: black !important;
-}
-
-#tiles {
-    background: black !important;
-}
-
-#tiles .tile.selected,
-#tiles .mp3Tile.selected,
-#tiles .soundTile.selected,
-#tiles .imageTile.selected {
-    background: #4a90e2 !important;
-    color: white !important;
-}
-#tiles .tile.selected,
-#tiles .mp3Tile.selected,
-#tiles .soundTile.selected,
-#tiles .imageTile.selected {
-    background: #4a90e2 !important;
-    color: white !important;
-}
 
 
 </style>
 </head>
 <body>
 
-
-<input
-    type="file"
-    id="pngLoader"
-    accept=".png"
-    hidden>
-
-<input
-    type="file"
-    id="txtLoader"
-    accept=".txt"
-    hidden>
-
-
 <div id="main">
 
-    <!-- ==========================
-         LEFT CONTROLS
-    ========================== -->
+    <!-- LEFT CONTROLS -->
     <div id="leftColumn">
-
-        <!-- PPE -->
-        <select
-        id="ppLauncher"
-        style="
-        height:24px;
-        width:100%;
-        font-size:10px;
-        border:none;
-        border-bottom:1px solid #999;
-        cursor:pointer;
-        text-align-last:center;
-        ">
-        <option selected>PPE</option>
-        <option value="iframe">Local</option>
-        <option value="online">Online</option>
+        <select id="ppLauncher" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer; text-align-last:center;">
+            <option selected>PPE</option>
+            <option value="iframe">Local</option>
+            <option value="online">Online</option>
         </select>
 
-        <!-- QR / BREAK -->
         <button class="breakBtn" onclick="openBreakModal()">Break</button>
 
-        <!-- PAGE NUMBERS -->
-        <div id="pageList"></div>
+        <!-- UNIT FOLDERS GRID CONTAINER (Left) -->
+        <div id="unitGridContainerLeft" class="unitGrid"></div>
 
-        <!-- PERCENT (ZOOM) -->
         <div style="height:24px; padding:2px; border-bottom:1px solid #999;">
             <select id="zoomSelect" style="width:100%; height:20px; font-size:10px; text-align:center; text-align-last:center;">
                 <option value="1">100%</option>
@@ -1148,125 +693,48 @@ cursor:pointer;
             </select>
         </div>
 
-        <!-- BROWSE -->
-        <button id="loadTxtBtn"
-        style="
-        height:24px;
-        width:100%;
-        font-size:10px;
-        border:none;
-        border-bottom:1px solid #999;
-        cursor:pointer;
-        ">
-        Browse
-        </button>
-
-        <!-- ANSWERS -->
-        <button id="loadAnswerBtn"
-        style="
-        height:24px;
-        width:100%;
-        font-size:10px;
-        border:none;
-        border-bottom:1px solid #999;
-        cursor:pointer;
-        ">
-        Answer
-        </button>
-
-        <!-- DELETE -->
-        <button id="deleteBtn">
-            Delete
-        </button>
-
-        <!-- CLEAR -->
-        <button id="clearBoardBtn">
-            Clear
-        </button>
-
-        <!-- PLAYLIST -->
+        <button id="loadTxtBtn" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer;">Browse</button>
+        <button id="loadAnswerBtn">Answer</button>
+        <button id="deleteBtn">Delete</button>
+        <button id="clearBoardBtn">Clear</button>
         <button id="playlistBtnLeft" class="playlistBtn" onclick="window.open('A_Audio_Links.html', '_blank')">Playlist</button>
-
-        <!-- CLASS -->
-        <select class="classSelect">
-            <option value="">Class</option>
-        </select>
-
-        <!-- STUDENT -->
-        <div class="studentTile tile">
-            Student
-        </div>
-
-        <!-- SPINNER -->
-        <button id="spinnerBtn" class="spinnerButton">
-            Spinner
-        </button>
-
-        <!-- TALLYMAN -->
-        <button id="tallymanLeftBtn">
-        Tallyman
-        </button>
-
-        <!-- JELLY BEANS -->
+        <select class="classSelect"><option value="">Class</option></select>
+        <div class="studentTile tile">Student</div>
+        <button id="spinnerBtn" class="spinnerButton">Spinner</button>
+        <button id="tallymanLeftBtn">Tallyman</button>
         <button id="leftBtn">Jelly Beans</button>
-
-        <!-- BUZZER (Placeholder if needed, add ID/Class as required) -->
-        <button id="buzzerLeftBtn" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer; background:#f7f7f7;">Buzzer</button>
-
+        <button id="qrLeftBtn" onclick="toggleQrHotspot()" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;">QR</button>
+        <button id="hsLeftBtn" onclick="toggleHsHotspot()" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;">HS</button>
+        <button id="buzzerLeftBtn" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer; background:black; color:white;">Buzzer</button>
     </div>
 
-    <!-- ==========================
-         VIEWER
-    ========================== -->
+    <!-- VIEWER -->
     <div id="viewer">
 
-        <div id="spread">
-
-            <div class="imagePanel">
-                <div class="imgWrap">
-                    <img id="leftImage" class="pageImage leftPage">
-                </div>
-            </div>
-
-            <div class="imagePanel">
-                <div class="imgWrap">
-                    <img id="rightImage" class="pageImage rightPage">
-                </div>
-            </div>
-
-        </div>
+        <div id="spread"><!--
+            --><div class="imagePanel">
+                <div class="imgWrap"><img id="leftImage" class="pageImage leftPage"></div>
+            </div><!--
+            --><div class="imagePanel">
+                <div class="imgWrap"><img id="rightImage" class="pageImage rightPage"></div>
+            </div><!--
+        --></div>
 
     </div>
 
-    <!-- ==========================
-         RIGHT CONTROLS
-    ========================== -->
+    <!-- RIGHT CONTROLS -->
     <div id="rightColumn">
-
-        <!-- PPE -->
-        <select
-        id="ppLauncherRight"
-        style="
-        height:24px;
-        width:100%;
-        font-size:10px;
-        border:none;
-        border-bottom:1px solid #999;
-        cursor:pointer;
-        text-align-last:center;
-        ">
-        <option selected>PPE</option>
-        <option value="iframe">Local</option>
-        <option value="online">Online</option>
+        <select id="ppLauncherRight" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer; text-align-last:center;">
+            <option selected>PPE</option>
+            <option value="iframe">Local</option>
+            <option value="online">Online</option>
         </select>
 
-        <!-- QR / BREAK -->
         <button class="breakBtn" onclick="openBreakModal()">Break</button>
 
-        <!-- PAGE NUMBERS -->
-        <div id="pageListRight"></div>
+        <!-- UNIT FOLDERS GRID CONTAINER (Right) -->
+        <div id="unitGridContainerRight" class="unitGrid"></div>
 
-        <!-- PERCENT (ZOOM) -->
         <div style="height:24px; padding:2px; border-bottom:1px solid #999;">
             <select id="zoomSelectRight" style="width:100%; height:20px; font-size:10px; text-align:center; text-align-last:center;">
                 <option value="1">100%</option>
@@ -1279,79 +747,26 @@ cursor:pointer;
             </select>
         </div>
 
-        <!-- BROWSE -->
-        <button id="loadTxtBtnRight"
-        style="
-        height:24px;
-        width:100%;
-        font-size:10px;
-        border:none;
-        border-bottom:1px solid #999;
-        cursor:pointer;
-        ">
-        Browse
-        </button>
-
-        <!-- ANSWERS -->
-        <button id="loadAnswerBtnRight"
-        style="
-        height:24px;
-        width:100%;
-        font-size:10px;
-        border:none;
-        border-bottom:1px solid #999;
-        cursor:pointer;
-        ">
-        Answer
-        </button>
-
-        <!-- DELETE -->
-        <button id="deleteBtnRight">
-            Delete
-        </button>
-
-        <!-- CLEAR -->
-        <button id="clearBoardBtnRight">
-            Clear
-        </button>
-
-        <!-- PLAYLIST -->
+        <button id="loadTxtBtnRight" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer;">Browse</button>
+        <button id="loadAnswerBtnRight">Answer</button>
+        <button id="deleteBtnRight">Delete</button>
+        <button id="clearBoardBtnRight">Clear</button>
         <button id="playlistBtnRight" class="playlistBtn" onclick="window.open('A_Audio_Links.html', '_blank')">Playlist</button>
-
-        <!-- CLASS -->
-        <select class="classSelect">
-            <option value="">Class</option>
-        </select>
-
-        <!-- STUDENT -->
-        <div class="studentTile tile">
-            Student
-        </div>
-
-        <!-- SPINNER -->
-        <button id="spinnerBtnRight" class="spinnerButton">
-            Spinner
-        </button>
-
-        <!-- TALLYMAN -->
-        <button id="tallymanRightBtn">
-        Tallyman
-        </button>
-
-        <!-- JELLY BEANS -->
+        <select class="classSelect"><option value="">Class</option></select>
+        <div class="studentTile tile">Student</div>
+        <button id="spinnerBtnRight" class="spinnerButton">Spinner</button>
+        <button id="tallymanRightBtn">Tallyman</button>
         <button id="rightBtn">Jelly Beans</button>
-
-        <!-- BUZZER -->
-        <button id="buzzerRightBtn" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer; background:#f7f7f7;">Buzzer</button>
-
+        <button id="qrRightBtn" onclick="toggleQrHotspot()" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;">QR</button>
+        <button id="hsRightBtn" onclick="toggleHsHotspot()" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;">HS</button>
+        <button id="buzzerRightBtn" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer; background:black; color:white;">Buzzer</button>
     </div>
 
 </div>
 
 <div id="tilesBar">
     <div id="tilesResizeBar"></div>
-    <div id="tiles">
-    </div>
+    <div id="tiles"></div>
 </div>
 
 <div id="scriptBar">
@@ -1363,9 +778,7 @@ cursor:pointer;
 <div id="breakModal">
     <div id="breakContent">
         <h1>A Brief Pause</h1>
-        <div id="breakTimer">
-            5:00
-        </div>
+        <div id="breakTimer">5:00</div>
         <div class="breakControls">
             <span id="breakMinus" class="breakArrow">▼</span>
             <button id="breakStart">Restart</button>
@@ -1374,229 +787,1081 @@ cursor:pointer;
     </div>
 </div>
 
+<input type="file" id="txtLoader" accept=".txt" style="display:none;">
+
 <script>
+
 /* ==========================
-   SHARED DATA & HELPERS
+   MINI TIMER STANDALONE
 ========================== */
 
-const spreads = [
+(function(){
 
-    [36, 37],
-    ["36a", "Blank"],
-    [38, 39],
-    ["38a", "Blank"],
-    ["38b", "Blank"],
-    ["38c", "Blank"],
-    ["38d", "Blank"],
-    [40, 41],
-    [42, 43],
-    [44, 45],
-    [46, 47],
-  ["48b", "Blank"],
-    [48, 49],
-    [50, 51],
-    [52, 53],
-    [54, 55],
-    [56, 57],
-    [58, 59],
-    [60, 61],
-    [62, 63],
-    [64, 65],
-    [66, 67],
-    [68, 69],
-    [70, 71],
-    [72, 73],
-    [74, 75],
-    [76, 77],
-    [78, 79],
-    [80, 81],
-    [82, 83],
-    [84, 85],
-    [86, 87],
-    [88, 89],
-    [90, 91],
-    [92, 93],
-    [94, 95],
-    [96, 97],
-    [98, 99],
-    [100, 101],
-    [102, 103],
-    [104, 105],
-    [106, 107],
-    [108, 109],
-    [110, 111],
-    [112, 113],
-    [114, 115],
-    [116, 117],
-    [118, 119],
-    [120, 121],
-    [122, 123],
-    [124, 125],
-    [126, 127],
-    [128, 129],
-    [130, 131],
-    [132, 133],
-    [134, 135],
-    [136, 137],
-    [138, 139],
-    [140, 141],
-    [142, 143],
-    [2, 3],
-    [4, 5],
-    [6, 7],
-    [8, 9],
-    [10, 11],
-    [12, 13],
-    [14, 15],
-    [16, 17],
-    [18, 19],
-    [20, 21],
-    [22, 23],
-    [24, 25]
-];
+const style = document.createElement("style");
 
-// Helper to determine image filename based on naming pattern
-function getFilename(page) {
-    if (page === "Blank") return "Blank.png";
-    
-    if (String(page).toLowerCase().includes("a") ||  
-        String(page).toLowerCase().includes("b") ||  
-        String(page).toLowerCase().includes("c") ||  
-        String(page).toLowerCase().includes("d")) {
-      return `Focus (${page}).jpg`;
-    }
-    
-    return `${page}.png`;
+style.textContent = `
+
+#miniTimer{
+
+    position:fixed;
+
+    top:2px;
+
+    right:92px;
+
+    width:80px;
+
+    height:20px;
+
+    background:#ff9900;
+
+    border:1px solid #cc6600;
+
+    border-radius:4px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:10px;
+
+    font-weight:bold;
+
+    color:black;
+
+    z-index:100000;
+
+    user-select:none;
+
+    font-family:Arial,sans-serif;
+
 }
 
 
+#miniTimer span{
+
+    cursor:pointer;
+
+    font-size:12px;
+
+    line-height:20px;
+
+    padding:0 3px;
+
+}
+
+
+#miniTimerTime{
+
+    min-width:25px;
+
+    text-align:center;
+
+}
+
+`;
+
+document.head.appendChild(style);
+
+
+
+const timer = document.createElement("div");
+
+timer.id="miniTimer";
+
+
+timer.innerHTML=`
+
+<span id="miniDown">▼</span>
+
+<span id="miniTimerTime">00:00</span>
+
+<span id="miniUp">▲</span>
+
+`;
+
+
+document.body.appendChild(timer);
+
+
+
+let seconds = 0;
+
+let interval = null;
+
+
+
+const display =
+document.getElementById("miniTimerTime");
+
+
+
+let audioCtx = null;
+
+
+
+function initAudio(){
+
+    if(!audioCtx){
+
+        audioCtx =
+        new (window.AudioContext || window.webkitAudioContext)();
+
+    }
+
+
+    if(audioCtx.state === "suspended"){
+
+        audioCtx.resume();
+
+    }
+
+}
+
+
+
 /* ==========================
-   FEATURE 1: INTERACTIVE VIEWER
+   UPDATE DISPLAY
 ========================== */
 
-const pageList = document.getElementById("pageList");
-const leftImage = document.getElementById("leftImage");
-const rightImage = document.getElementById("rightImage");
+function update(){
 
-if (pageList && leftImage && rightImage) {
-    pageList.innerHTML = ""; // Clear list safely
+    let m=Math.floor(seconds/60);
 
-const placeholder = document.createElement("div");
-    placeholder.className = "pageBtn disabled-header";
-    placeholder.textContent = "Pages";
-    placeholder.style.pointerEvents = "none";
-    placeholder.style.opacity = "1";
-    placeholder.style.textAlign = "center";
-    placeholder.style.backgroundColor = "black";
-    placeholder.style.color = "white";
-    pageList.appendChild(placeholder);
+    let s=seconds%60;
 
-    spreads.forEach(([left, right]) => {        const btn = document.createElement("button");
-        btn.className = "pageBtn";
-        btn.textContent = `${left}-${right}`;
 
-        btn.onclick = () => {
-            if (typeof playLetsGo === "function") playLetsGo();
+    display.textContent =
+    String(m).padStart(2,"0")
+    +":"
+    +String(s).padStart(2,"0");
 
-            document.querySelectorAll(".pageBtn")
-                .forEach(b => b.classList.remove("active"));
+}
 
-            btn.classList.add("active");
 
-            loadSpread(left);
-        };
 
-        pageList.appendChild(btn);
+/* ==========================
+   ELECTRONIC BUZZER
+========================== */
+
+function playBuzzer(){
+
+    if(!audioCtx)
+        return;
+
+
+    const osc =
+    audioCtx.createOscillator();
+
+
+    const gain =
+    audioCtx.createGain();
+
+
+    osc.type="square";
+
+    osc.frequency.value=900;
+
+
+    gain.gain.setValueAtTime(
+        0.3,
+        audioCtx.currentTime
+    );
+
+
+    gain.gain.exponentialRampToValueAtTime(
+        0.001,
+        audioCtx.currentTime + 0.8
+    );
+
+
+    osc.connect(gain);
+
+    gain.connect(audioCtx.destination);
+
+
+    osc.start();
+
+    osc.stop(
+        audioCtx.currentTime + 0.8
+    );
+
+}
+
+
+
+/* ==========================
+   START COUNTDOWN
+========================== */
+
+function start(){
+
+    if(interval)
+        clearInterval(interval);
+
+
+    interval=setInterval(()=>{
+
+
+        seconds--;
+
+        update();
+
+
+        if(seconds<=0){
+
+
+            clearInterval(interval);
+
+            interval=null;
+
+
+            seconds=0;
+
+            update();
+
+
+            playBuzzer();
+
+
+        }
+
+
+    },1000);
+
+}
+
+
+
+/* ==========================
+   CONTROLS
+========================== */
+
+
+document.getElementById("miniUp")
+.onclick=function(){
+
+    initAudio();
+
+
+    seconds+=60;
+
+
+    update();
+
+
+    start();
+
+};
+
+
+
+document.getElementById("miniDown")
+.onclick=function(){
+
+    initAudio();
+
+
+    seconds-=60;
+
+
+    if(seconds<0)
+        seconds=0;
+
+
+    update();
+
+
+    if(seconds>0)
+        start();
+
+};
+
+
+
+update();
+
+
+
+})();
+
+</script>
+
+<script>
+
+/*==========================================
+ PERFECTLY PRACTICAL LAUNCHER
+ Standalone
+==========================================*/
+
+/*==========================================
+ PERFECTLY PRACTICAL LAUNCHER
+ Standalone
+==========================================*/
+
+(function(){
+
+"use strict";
+
+/*------------------------------------------
+ Configuration
+------------------------------------------*/
+
+const LOCAL_URL="file:///C:/Users/User/Documents/perfectly-practical-english.github.io/perfectly-practical-english.github.io/index.html";
+
+const ONLINE_URL="https://perfectly-practical-english.github.io/";
+
+
+/*------------------------------------------
+ Init
+------------------------------------------*/
+
+initLauncher("ppLauncher");
+initLauncher("ppLauncherRight");
+
+/*------------------------------------------
+ Launcher
+------------------------------------------*/
+
+function initLauncher(id){
+
+    const sel=document.getElementById(id);
+
+    if(!sel) return;
+
+    sel.selectedIndex=0;
+
+    sel.addEventListener("change",()=>{
+
+        switch(sel.value){
+
+            case "iframe":
+                window.open(
+                    LOCAL_URL,
+                    "_blank"
+                );
+                break;
+
+            case "online":
+                window.open(
+                    ONLINE_URL,
+                    "_blank"
+                );
+                break;
+
+        }
+
+        sel.selectedIndex=0;
+
     });
 
-function loadSpread(leftPage){
-        leftImage.src = getFilename(leftPage);
-        
-        let rightPage;
-        if (typeof leftPage === "number") {
-            rightPage = leftPage + 1;
-        } else {
-            const foundSpread = spreads.find(s => s[0] === leftPage);
-            rightPage = foundSpread ? foundSpread[1] : "Blank";
-        }
-        rightImage.src = getFilename(rightPage);
+}
+
+})();
+
+</script>
+
+
+<script>
+
+/* ==========================
+   BREAK TIMER MODAL
+========================== */
+
+
+let breakInterval=null;
+let breakRemaining=300;
+
+
+function openBreakModal(){
+
+    const modal = document.getElementById("breakModal");
+
+
+    if(modal.style.display === "block"){
+
+        // hide modal
+        modal.style.display = "none";
+
+        // optionally stop timer
+        clearInterval(breakInterval);
+        breakInterval = null;
+
+        return;
     }
 
-    // Start with a blank viewer
-    leftImage.removeAttribute("src");
-    rightImage.removeAttribute("src");
+
+    // show modal
+    modal.style.display = "block";
+
+    startBreak();
+
+}
+
+function renderBreak(){
+
+    let m=Math.floor(breakRemaining/60);
+
+    let s=String(breakRemaining%60)
+        .padStart(2,"0");
+
+    document.getElementById("breakTimer")
+        .textContent=`${m}:${s}`;
+
+}
+
+function adjustBreakTime(amount){
+
+    /*
+       If timer is finished,
+       start a new countdown.
+    */
+
+    if(breakRemaining <= 0){
+
+        startBreak(amount);
+
+    }
+    else{
+
+        /*
+           Add time to current countdown.
+        */
+
+        breakRemaining += amount;
+
+        renderBreak();
+
+    }
+
+
+    /*
+       Restart audio whenever + button is clicked.
+    */
+
+    if(typeof restartMusicAfterExtension === "function"){
+
+        restartMusicAfterExtension();
+
+    }
+
 }
 
 
+
+function startBreak(duration=300){
+
+    clearInterval(breakInterval);
+
+
+    /*
+       Start new countdown duration.
+       Works after Time's up.
+    */
+
+    breakRemaining = duration;
+
+    renderBreak();
+
+
+    breakInterval = setInterval(()=>{
+
+        breakRemaining--;
+
+        renderBreak();
+
+
+        if(breakRemaining <= 0){
+
+            clearInterval(breakInterval);
+
+            breakInterval = null;
+
+
+            document
+            .getElementById("breakTimer")
+            .textContent = "Time's up!";
+
+
+            /*
+               Keep value at zero so
+               next + click starts a new break.
+            */
+
+            breakRemaining = 0;
+
+        }
+
+    },1000);
+
+}
+
+document
+.getElementById("breakStart")
+.onclick=()=>startBreak();
+
+document
+.getElementById("breakPlus")
+.onclick=()=>adjustBreakTime(60);
+
+
+document
+.getElementById("breakMinus")
+.onclick=()=>adjustBreakTime(-60);
+
+
+
 /* ==========================
-   FEATURE 2: CONTINUOUS RENDERER
+   DRAGGABLE BREAK MODAL
 ========================== */
 
-document.addEventListener("DOMContentLoaded", () => {
-    const container = document.querySelector(".viewer-container");
-    
-    if (container) {
-        spreads.forEach(pair => {
-            const rowDiv = document.createElement("div");
-            rowDiv.className = "row-item";
-            
-            const file0 = getFilename(pair[0]);
-            const file1 = getFilename(pair[1]);
+(function(){
 
-            rowDiv.innerHTML = `
-              <div class="page"><img src="${file0}" alt="Page ${pair[0]}"></div>
-              <div class="page"><img src="${file1}" alt="Page ${pair[1]}"></div>
-            `;
-            
-            container.appendChild(rowDiv);
+let modal=document.getElementById("breakModal");
 
-            const item0HasA = String(pair[0]).toLowerCase().includes("a");
-            const item1HasA = String(pair[1]).toLowerCase().includes("a");
+let dragging=false;
 
-            if (!item0HasA && !item1HasA) {
-              const centerBar = document.createElement("div");
-              centerBar.className = "center-bar"; 
-              rowDiv.appendChild(centerBar);     
-            }
-        });
-    }
+let offsetX=0;
+let offsetY=0;
+
+
+modal.addEventListener("mousedown",e=>{
+
+    dragging=true;
+
+    offsetX=e.clientX-modal.offsetLeft;
+    offsetY=e.clientY-modal.offsetTop;
+
 });
 
 
-/* ==========================
-   FEATURE 3: PNG LOADER
-========================== */
+document.addEventListener("mousemove",e=>{
 
-const pngLoader = document.getElementById("pngLoader");
-let pngData = null;
-let placeMode = "";
+    if(!dragging)return;
 
-if (pngLoader) {
-    pngLoader.addEventListener("change", function(e){
-        const file = e.target.files[0];
-        if(!file) return;
 
-        const reader = new FileReader();
-        reader.onload = function(evt){
-            pngData = evt.target.result;
-            placeMode = "png";
+    modal.style.left=
+        (e.clientX-offsetX)+"px";
+
+
+    modal.style.top=
+        (e.clientY-offsetY)+"px";
+
+
+    modal.style.transform="none";
+
+});
+
+
+document.addEventListener("mouseup",()=>{
+
+    dragging=false;
+
+});
+
+
+})();
+
+</script>
+
+<script>
+/* ==========================================
+   COFFEE BREAK MUSIC PLAYER
+   Standalone
+========================================== */
+
+(function () {
+
+    const breakMusic = new Audio(
+        "musicalmix2020-bossa-nova-summer-instrumental-brazil-7969.mp3"
+    );
+
+    breakMusic.loop = true;
+    breakMusic.preload = "auto";
+    breakMusic.volume = 0.15;
+
+
+    let musicTimer = null;
+
+
+
+    function playMusicFromStart(){
+
+        breakMusic.pause();
+
+        breakMusic.currentTime = 0;
+
+
+        breakMusic.play()
+        .then(()=>{
+
+            console.log(
+                "Coffee music restarted"
+            );
+
+        })
+        .catch(err=>{
+
+            console.log(
+                "Coffee music blocked:",
+                err
+            );
+
+        });
+
+
+        watchBreakTimer();
+
+    }
+
+
+
+    function startBreakMusic(){
+
+        if(!breakMusic.paused){
+            return;
+        }
+
+
+        playMusicFromStart();
+
+    }
+
+
+
+    function restartBreakMusic(){
+
+        /*
+           Restart button
+        */
+
+        playMusicFromStart();
+
+    }
+
+
+
+    function restartMusicAfterExtension(){
+
+        /*
+           Up button:
+           Timer has already been increased elsewhere.
+           We only restart audio.
+        */
+
+        playMusicFromStart();
+
+    }
+
+
+
+    function stopBreakMusic(){
+
+        breakMusic.pause();
+
+        breakMusic.currentTime = 0;
+
+
+        clearInterval(musicTimer);
+
+        musicTimer = null;
+
+    }
+
+
+
+    function watchBreakTimer(){
+
+        clearInterval(musicTimer);
+
+
+        musicTimer = setInterval(()=>{
+
+
+            if(
+                typeof breakRemaining !== "undefined" &&
+                breakRemaining <= 0
+            ){
+
+                stopBreakMusic();
+
+            }
+
+
+        },500);
+
+    }
+
+
+
+    /*
+       Existing Break modal connection
+    */
+
+    const oldOpenBreakModal =
+        window.openBreakModal;
+
+
+    window.openBreakModal = function(){
+
+
+        const modal =
+            document.getElementById("breakModal");
+
+
+        if(
+            modal &&
+            modal.style.display === "block"
+        ){
+
+            stopBreakMusic();
+
+        }
+        else{
+
+            startBreakMusic();
+
+        }
+
+
+        oldOpenBreakModal();
+
+    };
+
+
+
+    /*
+       Global controls
+    */
+
+    window.startBreakMusic =
+        startBreakMusic;
+
+
+    window.stopBreakMusic =
+        stopBreakMusic;
+
+
+    window.restartBreakMusic =
+        restartBreakMusic;
+
+
+    window.restartMusicAfterExtension =
+        restartMusicAfterExtension;
+
+
+
+})();
+</script>
+
+
+<script>
+// Raw text data arrays for each unit containing every file name/extension as presented in directories
+const rawUnitFiles = {
+    "Unit 1": [
+        "Focus (2).jpg",
+"Focus (3).jpg",
+"Focus (4).jpg",
+"Focus (5).jpg",
+"Focus (6).jpg",
+        "Focus (7).jpg",
+"Focus (8).jpg",
+"Focus (9).jpg",
+"Focus (10).jpg",
+"Focus (11).jpg",
+        "Focus (12).jpg",
+"Focus (13).jpg",
+"Focus (14).jpg",
+"Focus (15).jpg",
+"Focus (16).jpg",
+        "Focus (17).jpg",
+"Focus (18).jpg",
+"Focus (19).jpg",
+"Focus (20).jpg",
+"Focus (21).jpg",
+        "Focus (22).jpg",
+"Focus (23).jpg",
+"ACT_1.jpg",
+"IMG_1.jpg",
+"BLACK_BLANK.jpg",
+"WHITE_BLANK.jpg"
+    ],
+    "Unit 2": [
+        "Focus (24).jpg",
+"Focus (25).jpg",
+"Focus (26).jpg",
+"Focus (27).jpg",
+"Focus (28).jpg",
+        "Focus (29).jpg",
+"Focus (30).jpg",
+"Focus (31).jpg",
+"Focus (32).jpg",
+"Focus (33).jpg",
+        "Focus (34).jpg",
+"Focus (35).jpg",
+"ACT_2.jpg",
+"IMG_2.jpg",
+"BLACK_BLANK.jpg",
+"WHITE_BLANK.jpg"
+    ],
+    "Unit 3": [
+        "Focus (36).jpg",
+"Focus (37).jpg",
+"Focus (38).jpg",
+"Focus (39).jpg",
+"Focus (40).jpg",
+        "Focus (41).jpg",
+"Focus (42).jpg",
+"Focus (43).jpg",
+"Focus (44).jpg",
+"Focus (45).jpg",
+        "Focus (46).jpg",
+"Focus (47).jpg",
+"ACT_3.jpg",
+"IMG_3.jpg",
+"BLACK_BLANK.jpg",
+"WHITE_BLANK.jpg"
+    ],
+    "Unit 4": [
+        "Focus (48).jpg",
+"Focus (49).jpg",
+"IMG_(48b)+WHITE.jpg",
+"Focus (50).jpg",
+        "Focus (51).jpg",
+"Focus (52).jpg",
+"Focus (53).jpg",
+"Focus (54).jpg",
+"Focus (55).jpg",
+        "Focus (56).jpg",
+"Focus (57).jpg",
+"IMG_(48b)+BLACK.jpg",
+
+    ],
+    "Unit 5": [
+        "Focus (58).jpg",
+"Focus (59).jpg",
+"Focus (60).jpg",
+"Focus (61).jpg",
+"Focus (62).jpg",
+        "Focus (63).jpg",
+"Focus (64).jpg",
+"Focus (65).jpg",
+"Focus (66).jpg",
+"Focus (67).jpg",
+        "Focus (68).jpg",
+"Focus (69).jpg",
+"ACT_5.jpg",
+"IMG_5.jpg",
+"BLACK_BLANK.jpg",
+"WHITE_BLANK.jpg"
+    ],
+    "Unit 6": [
+        "Focus (70).jpg",
+"Focus (71).jpg",
+"Focus (72).jpg",
+"Focus (73).jpg",
+"Focus (74).jpg",
+        "Focus (75).jpg",
+"Focus (76).jpg",
+"Focus (77).jpg",
+"Focus (78).jpg",
+"Focus (79).jpg",
+        "Focus (80).jpg",
+"Focus (81).jpg",
+"ACT_6.jpg",
+"IMG_6.jpg",
+"BLACK_BLANK.jpg",
+"WHITE_BLANK.jpg"
+    ],
+    "Unit 7": [
+        "Focus (82).jpg",
+"Focus (83).jpg",
+"Focus (84).jpg",
+"Focus (85).jpg",
+"Focus (86).jpg",
+        "Focus (87).jpg",
+"Focus (88).jpg",
+"Focus (89).jpg",
+"Focus (90).jpg",
+"Focus (91).jpg",
+        "Focus (92).jpg",
+"Focus (93).jpg",
+"ACT_7.jpg",
+"IMG_7.jpg",
+"BLACK_BLANK.jpg",
+"WHITE_BLANK.jpg"
+    ],
+    "Unit 8": [
+        "Focus (94).jpg",
+"Focus (95).jpg",
+"Focus (96).jpg",
+"Focus (97).jpg",
+"Focus (98).jpg",
+        "Focus (99).jpg",
+"Focus (100).jpg",
+"Focus (101).jpg",
+"Focus (102).jpg",
+"Focus (103).jpg",
+        "Focus (104).jpg",
+"Focus (105).jpg",
+"Focus (106).jpg",
+"Focus (107).jpg",
+"Focus (108).jpg",
+        "Focus (109).jpg",
+"Focus (110).jpg",
+"Focus (111).jpg",
+"Focus (112).jpg",
+"Focus (113).jpg",
+        "Focus (114).jpg",
+"Focus (115).jpg",
+"Focus (116).jpg",
+"Focus (117).jpg",
+"Focus (118).jpg",
+        "Focus (119).jpg",
+"Focus (120).jpg",
+"Focus (121).jpg",
+"Focus (122).jpg",
+"Focus (123).jpg",
+        "Focus (124).jpg",
+"Focus (125).jpg",
+"Focus (126).jpg",
+"Focus (127).jpg",
+"Focus (128).jpg",
+        "Focus (129).jpg",
+"Focus (130).jpg",
+"Focus (131).jpg",
+"Focus (132).jpg",
+"Focus (133).jpg",
+        "Focus (134).jpg",
+"Focus (135).jpg",
+"Focus (136).jpg",
+"Focus (137).jpg",
+"Focus (138).jpg",
+        "Focus (139).jpg",
+"Focus (140).jpg",
+"Focus (141).jpg",
+"Focus (142).jpg",
+"Focus (143).jpg",
+        "ACT_8.jpg",
+"IMG_8.jpg",
+"BLACK_BLANK.jpg",
+"WHITE_BLANK.jpg"
+    ]
+};
+
+// Automatically generate dynamic page pairs from raw file lists
+function generateSpreads(fileList) {
+    let focusFiles = [];
+    let actImgFiles = [];
+
+    fileList.forEach(file => {
+        const upper = file.toUpperCase();
+        
+        // Filter out standalone placeholder blanks from appearing on their own
+        if (upper === "WHITE_BLANK.JPG" || upper === "BLACK_BLANK.JPG") {
+            return;
+        }
+
+        // Catch ACT or IMG files regardless of parentheses or prefix structure
+        if (upper.startsWith("ACT") || upper.startsWith("IMG")) {
+            actImgFiles.push(file);
+        } else if (upper.startsWith("FOCUS") || upper.includes("(")) {
+            focusFiles.push(file);
+        }
+    });
+
+    let pairs = [];
+
+    // Pair regular sequential files into spreads of 2
+    for (let i = 0; i < focusFiles.length; i += 2) {
+        if (i + 1 < focusFiles.length) {
+            pairs.push([focusFiles[i], focusFiles[i + 1]]);
+        } else {
+            pairs.push([focusFiles[i], "WHITE_BLANK.jpg"]);
+        }
+    }
+
+    // Pair ACT or IMG files automatically according to naming indicator (+BLACK / +WHITE)
+    actImgFiles.forEach(file => {
+        let blankChoice = "WHITE_BLANK.jpg";
+        if (file.toUpperCase().includes("+BLACK") || file.toUpperCase().includes("BLACK")) {
+            blankChoice = "BLACK_BLANK.jpg";
+        }
+        pairs.push([file, blankChoice]);
+    });
+
+    return pairs;
+}
+
+function buildUnitFolders(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = "";
+
+    Object.keys(rawUnitFiles).forEach(unitName => {
+        const folderWrapper = document.createElement("div");
+        folderWrapper.className = "unitFolderContainer";
+
+        const folderBtn = document.createElement("button");
+        folderBtn.className = "unitFolderBtn";
+        folderBtn.textContent = unitName;
+
+        const flyout = document.createElement("div");
+        flyout.className = "spreadFlyout";
+
+        const unitSpreads = generateSpreads(rawUnitFiles[unitName]);
+        unitSpreads.forEach(([leftFile, rightFile]) => {
+            const spreadItem = document.createElement("div");
+            spreadItem.className = "spreadFlyoutItem";
+            
+            const cleanLeft = leftFile.replace(/\.[^/.]+$/, "");
+            const cleanRight = rightFile.replace(/\.[^/.]+$/, "");
+            spreadItem.textContent = `${cleanLeft} - ${cleanRight}`;
+            
+            spreadItem.onclick = (e) => {
+                e.stopPropagation();
+                loadSpread(`${unitName}/${leftFile}`, `${unitName}/${rightFile}`);
+                document.querySelectorAll(".spreadFlyout").forEach(f => f.classList.remove("active"));
+            };
+            flyout.appendChild(spreadItem);
+        });
+
+        folderBtn.onclick = (e) => {
+            e.stopPropagation();
+            const isOpen = flyout.classList.contains("active");
+            document.querySelectorAll(".spreadFlyout").forEach(f => f.classList.remove("active"));
+            if (!isOpen) {
+                flyout.style.top = "0px";
+                flyout.classList.add("active");
+            }
         };
-        reader.readAsDataURL(file);
+
+        folderWrapper.appendChild(folderBtn);
+        folderWrapper.appendChild(flyout);
+        container.appendChild(folderWrapper);
     });
 }
 
+window.onclick = () => {
+    document.querySelectorAll(".spreadFlyout").forEach(f => f.classList.remove("active"));
+};
 
-/* ==========================
-   FEATURE 4: CLEAR BOARD
-========================== */
+document.addEventListener("DOMContentLoaded", () => {
+    buildUnitFolders("unitGridContainerLeft");
+    buildUnitFolders("unitGridContainerRight");
+    // Default load starting spread
+    loadSpread("BLACK_BLANK.jpg", "BLACK_BLANK.jpg");
+});
 
-const clearBoardBtn = document.getElementById("clearBoardBtn");
-if (clearBoardBtn) {
-    clearBoardBtn.onclick = () => {
-        document.querySelectorAll(".draggable").forEach(el => el.remove());
-    };
+const leftImage = document.getElementById("leftImage");
+const rightImage = document.getElementById("rightImage");
+
+function loadSpread(leftPath, rightPath){
+    leftImage.src = leftPath;
+    rightImage.src = rightPath;
 }
-
 
 /* ==========================
    FEATURE 5: ZOOM, PAN & CAMERA CLAMPING
@@ -1610,16 +1875,18 @@ let isPanning = false;
 let lastX = 0;
 let lastY = 0;
 
-const zoomSelect = document.getElementById("zoomSelect");
 window.spread = document.getElementById("spread");
 const viewer = document.getElementById("viewer");
 
-if (zoomSelect) {
-    zoomSelect.addEventListener("change", function(){
+const zoomSelects = document.querySelectorAll("#zoomSelect, #zoomSelectRight, .zoomSelect");
+
+zoomSelects.forEach(select => {
+    select.addEventListener("change", function(){
         viewerScale = Number(this.value);
+        zoomSelects.forEach(s => s.value = this.value);
         updateTransform();
     });
-}
+});
 
 function updateTransform(){
     if (!spread) return;
@@ -1676,15 +1943,43 @@ if (viewer) {
         updateTransform();
     }, true);
 
-    viewer.addEventListener("wheel", function(e){
-        if(panLocked) return;
-        e.preventDefault();
+viewer.addEventListener("wheel", function(e){
+    if(panLocked) return;
+    e.preventDefault();
 
-        panX -= e.deltaX;
-        panY -= e.deltaY;
+    panX -= e.deltaX;
+    panY -= e.deltaY;
 
-        updateTransform();
-    }, { passive: false });
+    if (spread) {
+        const rect = viewer.getBoundingClientRect();
+        const contentW = spread.offsetWidth * viewerScale;
+        const contentH = spread.offsetHeight * viewerScale;
+        const viewW = rect.width;
+        const viewH = rect.height;
+
+        // Horizontal boundaries
+        if (contentW <= viewW) {
+            panX = (viewW - contentW) / 2;
+        } else {
+            panX = Math.max(
+                viewW - contentW,
+                Math.min(0, panX)
+            );
+        }
+
+        // Vertical boundaries
+        if (contentH <= viewH) {
+            panY = (viewH - contentH) / 2;
+        } else {
+            panY = Math.max(
+                viewH - contentH,
+                Math.min(0, panY)
+            );
+        }
+    }
+
+    updateTransform();
+}, { passive: false });;
 
     viewer.addEventListener("pointerup", (e) => {
         isPanning = false;
@@ -1693,6 +1988,38 @@ if (viewer) {
         }
     });
 }
+</script>
+
+<script>
+
+/* ==========================
+   PAGE BUTTON SOUND
+   PLAYS EVERY CLICK
+========================== */
+
+function playLetsGo(){
+
+    const audio =
+    new Audio(
+    ""
+    );
+
+
+    audio.volume = 1.0;
+
+
+    audio.play()
+    .catch(error => {
+
+        console.log(
+            "Sound error:",
+            error
+        );
+
+    });
+
+}
+
 </script>
 
 
@@ -1758,6 +2085,7 @@ function buildAllTiles() {
 
             const tile = document.createElement("div");
             tile.className = "tile mp3Tile";
+            tile.setAttribute("data-prefix", "~SP");
             tile.textContent = label;
             tile.onclick = function() {
                 let audioPath = file;
@@ -1770,8 +2098,11 @@ function buildAllTiles() {
             return;
         }
 
-        // 2. HANDLE INTERNAL TOGGLE-TO-STOP SOUND FILES (~S, ~SA, ~SB, etc.)
+        // 2. HANDLE INTERNAL TOGGLE-TO-STOP SOUND FILES (~S, ~SX, ~SA, ~SB, etc.)
         if (/^~S[A-Za-z0-9]*/i.test(line)) {
+            let prefixMatch = line.match(/^~([A-Za-z0-9]+)/i);
+            let extractedPrefix = prefixMatch ? "~" + prefixMatch[1].toUpperCase() : "~S";
+
             let cleanLine = line.replace(/^~S[A-Za-z0-9]*/i, "").trim();
             cleanLine = cleanLine.replace(/^[-–—]\s*/, "").trim();
             
@@ -1789,6 +2120,7 @@ function buildAllTiles() {
             const tile = document.createElement("button");
             tile.type = "button";
             tile.className = "tile soundTile";
+            tile.setAttribute("data-prefix", extractedPrefix);
             tile.textContent = label;
 
             tile.onclick = function() {
@@ -1835,6 +2167,7 @@ function buildAllTiles() {
 
             const tile = document.createElement("div");
             tile.className = "tile emojiTile";
+            tile.setAttribute("data-prefix", "~E");
             tile.textContent = emojiChar;
 
             tile.onclick = function() {
@@ -1856,7 +2189,7 @@ function buildAllTiles() {
         let prefixTag = "";
         if (line.startsWith("~")) {
             let matchTag = line.match(/^~([A-Za-z0-9]+)/);
-            if (matchTag) prefixTag = matchTag[1];
+            if (matchTag) prefixTag = "~" + matchTag[1].toUpperCase();
             line = line.replace(/^~[A-Za-z0-9]*/i, "").trim();
         }
 
@@ -1868,6 +2201,7 @@ function buildAllTiles() {
 
             const tile = document.createElement("div");
             tile.className = "tile imageTile";
+            tile.setAttribute("data-prefix", prefixTag || "~I");
             tile.textContent = label;
 
             tile.onclick = function() {
@@ -1888,8 +2222,9 @@ function buildAllTiles() {
             let value = dashMatch[2].trim();
 
             const tile = document.createElement("div");
-            let prefixClass = prefixTag ? " tile-" + prefixTag.toLowerCase() : "";
+            let prefixClass = prefixTag ? " tile-" + prefixTag.replace("~", "").toLowerCase() : "";
             tile.className = "tile" + prefixClass;
+            if (prefixTag) tile.setAttribute("data-prefix", prefixTag);
             tile.textContent = label;
 
             tile.onclick = function() {
@@ -2020,33 +2355,558 @@ function enableDragging(el){
         window.addEventListener("pointerup", up);
     });
 }
+</script>
 
 
-/* ==========================
-   DELETE ENGINE
-========================== */
+<script>
 
-function deleteSelectedTile() {
-    if (!window.selectedEl) return;
-    window.selectedEl.remove();
-    window.selectedEl = null;
+(function(){
+
+const bar =
+document.getElementById("tilesResizeBar");
+
+const tiles =
+document.getElementById("tiles");
+
+const script =
+document.getElementById("scriptBar");
+
+let dragging=false;
+
+
+bar.addEventListener("pointerdown",e=>{
+
+    dragging=true;
+
+    bar.setPointerCapture(e.pointerId);
+
+});
+
+
+bar.addEventListener("pointermove",e=>{
+
+    if(!dragging) return;
+
+
+    const y=e.clientY;
+
+    const height =
+        window.innerHeight - y - script.offsetHeight;
+
+
+if(height > 40){
+
+    document.getElementById("tilesBar").style.height =
+        height + "px";
+
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-    const btn = document.getElementById("deleteBtn");
-    if (btn) btn.onclick = deleteSelectedTile;
-    
-    const btnRight = document.getElementById("deleteBtnRight");
-    if (btnRight) btnRight.onclick = deleteSelectedTile;
 });
 
-window.addEventListener("keydown", function (e) {
-    if (e.key === "Delete" || e.key === "Backspace") {
-        if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") return;
-        deleteSelectedTile();
-    }
+
+bar.addEventListener("pointerup",()=>{
+
+    dragging=false;
+
 });
+
+
+})();
+
 </script>
+
+<script>
+
+(function(){
+
+const handle =
+document.getElementById("scriptResizeBar");
+
+const scriptBar =
+document.getElementById("scriptBar");
+
+const textarea =
+document.getElementById("worksheetScript");
+
+const txt =
+document.getElementById("downloadTxtBtn");
+
+let resizing=false;
+
+
+handle.addEventListener("pointerdown", e=>{
+
+    resizing=true;
+
+    handle.setPointerCapture(e.pointerId);
+
+});
+
+
+handle.addEventListener("pointermove", e=>{
+
+    if(!resizing) return;
+
+
+const y = Math.max(40, e.clientY);
+
+let height =
+        window.innerHeight - y;
+
+
+    if(height < 24)
+        height = 24;
+
+
+    scriptBar.style.height =
+        height + "px";
+
+
+    textarea.style.height =
+        height + "px";
+
+
+});
+
+
+handle.addEventListener("pointerup",()=>{
+
+    resizing=false;
+
+});
+
+
+})();
+
+</script>
+
+<script>
+
+(function(){
+
+const bar =
+document.getElementById("tilesResizeBar");
+
+const tilesBar =
+document.getElementById("tilesBar");
+
+const scriptBar =
+document.getElementById("scriptBar");
+
+const leftColumn =
+document.getElementById("leftColumn");
+
+let dragging=false;
+
+let minTop=0;
+
+
+/* SET INITIAL POSITION */
+
+function setTileLimit(){
+
+    if(!leftColumn) return;
+
+    minTop =
+        leftColumn.offsetHeight;
+
+    tilesBar.style.top =
+        minTop + "px";
+
+    tilesBar.style.bottom =
+        scriptBar.offsetHeight + "px";
+
+}
+
+
+window.addEventListener(
+"load",
+setTileLimit
+);
+
+
+window.addEventListener(
+"resize",
+setTileLimit
+);
+
+
+
+/* DRAG */
+
+bar.addEventListener("pointerdown",e=>{
+
+    dragging=true;
+
+    bar.setPointerCapture(e.pointerId);
+
+});
+
+
+bar.addEventListener("pointermove",e=>{
+
+    if(!dragging) return;
+
+
+    let newTop =
+        e.clientY;
+
+
+    // NEVER move below page buttons
+    if(newTop > minTop){
+        newTop = minTop;
+    }
+
+
+    // never off the top
+    if(newTop < 0){
+        newTop = 0;
+    }
+
+
+    tilesBar.style.top =
+        newTop + "px";
+
+
+    tilesBar.style.bottom =
+        scriptBar.offsetHeight + "px";
+
+
+});
+
+
+bar.addEventListener("pointerup",()=>{
+
+    dragging=false;
+
+});
+
+
+})();
+
+</script>
+
+<script>
+
+(function(){
+
+const bar =
+document.getElementById("tilesResizeBar");
+
+const tilesBar =
+document.getElementById("tilesBar");
+
+const scriptBar =
+document.getElementById("scriptBar");
+
+const leftColumn =
+document.getElementById("leftColumn");
+
+let dragging=false;
+
+let maxY=0;
+
+
+function setTileLimit(){
+
+    if(!leftColumn) return;
+
+    maxY =
+        leftColumn.offsetHeight;
+
+    // initial position
+    const startHeight =
+        window.innerHeight -
+        maxY -
+        scriptBar.offsetHeight;
+
+    tilesBar.style.height =
+        startHeight + "px";
+
+}
+
+
+window.addEventListener(
+"load",
+setTileLimit
+);
+
+
+window.addEventListener(
+"resize",
+setTileLimit
+);
+
+
+
+bar.addEventListener("pointerdown",e=>{
+
+    dragging=true;
+
+    bar.setPointerCapture(e.pointerId);
+
+});
+
+
+bar.addEventListener("pointermove",e=>{
+
+    if(!dragging) return;
+
+
+    let y = e.clientY;
+
+
+    // splitter cannot go lower
+    if(y > maxY){
+        y = maxY;
+    }
+
+
+    // splitter cannot go above top
+    if(y < 0){
+        y = 0;
+    }
+
+
+    const newHeight =
+        window.innerHeight -
+        y -
+        scriptBar.offsetHeight;
+
+
+    tilesBar.style.height =
+        newHeight + "px";
+
+
+});
+
+
+bar.addEventListener("pointerup",()=>{
+
+    dragging=false;
+
+});
+
+
+})();
+
+</script>
+
+<script>
+
+(function(){
+
+/* ==========================================
+   TILE PLACEMENT SOUND ENGINE
+========================================== */
+
+
+const PlacementSound = {
+
+    audio:null,
+
+    file:"bubble-pop-406640.mp3",
+
+    volume:0.5
+
+};
+
+
+/* ==========================================
+   CREATE AUDIO
+========================================== */
+
+function initSound(){
+
+    if(PlacementSound.audio)
+        return;
+
+
+    PlacementSound.audio =
+    document.createElement("audio");
+
+
+    PlacementSound.audio.src =
+        PlacementSound.file;
+
+
+    PlacementSound.audio.volume =
+        PlacementSound.volume;
+
+
+    PlacementSound.audio.preload="auto";
+
+
+    document.body.appendChild(
+        PlacementSound.audio
+    );
+
+}
+
+
+
+/* ==========================================
+   PLAY SOUND
+========================================== */
+
+function playPlacementSound(){
+
+    initSound();
+
+
+    PlacementSound.audio.pause();
+
+
+    PlacementSound.audio.currentTime=0;
+
+
+    PlacementSound.audio.play()
+    .catch(err=>{
+
+        console.log(
+            "Placement sound waiting for user interaction"
+        );
+
+    });
+
+}
+
+
+
+/* ==========================================
+   WATCH FOR NEW TILES
+========================================== */
+
+function startWatcher(){
+
+
+    const spread =
+        document.getElementById("spread");
+
+
+    if(!spread)
+        return;
+
+
+
+    const observer =
+    new MutationObserver(function(records){
+
+
+        records.forEach(record=>{
+
+
+            record.addedNodes.forEach(node=>{
+
+
+                if(
+                    node.nodeType === 1 &&
+                    node.classList.contains("draggable")
+                ){
+
+                    playPlacementSound();
+
+                }
+
+
+            });
+
+
+        });
+
+
+    });
+
+
+
+    observer.observe(
+        spread,
+        {
+            childList:true
+        }
+    );
+
+
+}
+
+
+
+/* ==========================================
+   START
+========================================== */
+
+window.addEventListener(
+"DOMContentLoaded",
+startWatcher
+);
+
+
+
+/* expose control */
+
+window.PlacementSound =
+    PlacementSound;
+
+
+})();
+
+</script>
+
+
+
+
+
+<script>
+
+/* =====================================
+   DOWNLOAD SCRIPT TXT
+===================================== */
+
+(function(){
+
+const btn =
+document.getElementById("downloadTxtBtn");
+
+const field =
+document.getElementById("worksheetScript");
+
+
+if(!btn || !field) return;
+
+
+btn.onclick=function(){
+
+    const blob =
+    new Blob(
+        [field.value],
+        {type:"text/plain;charset=utf-8"}
+    );
+
+
+    const a =
+    document.createElement("a");
+
+
+    a.href =
+    URL.createObjectURL(blob);
+
+
+    a.download =
+    "Worksheet.txt";
+
+
+    a.click();
+
+
+    URL.revokeObjectURL(a.href);
+
+};
+
+})();
+
+</script>
+
+
 <script>
 
 /* ==========================================================
@@ -2187,6 +3047,7 @@ function syncPageButtons(){
 
 </script>
 
+
 <script>
 
 /* =====================================
@@ -2258,6 +3119,445 @@ function(){
 
 });
 
+</script>
+
+<script>
+// ==========================================
+// Standalone Transparent & Unified ~P Answer Modal Module (Touch Draggable, Delete Key, Blank on Move)
+// ==========================================
+(function() {
+    // 1. Inject Styles for Fully Unified, Rounded, Transparent-Background Container & Red Font Content
+    const style = document.createElement('style');
+    style.innerHTML = `
+        #pAnswerModal {
+            position: absolute;
+            z-index: 9999;
+            top: 100px;
+            left: 100px;
+            background: transparent;
+            border: none;
+            padding: 0;
+            box-shadow: none;
+            width: auto;
+            font-family: sans-serif;
+            user-select: none;
+            cursor: move;
+            display: inline-flex;
+            align-items: center;
+            touch-action: none;
+        }
+        #pModalContentRow {
+            display: inline-flex;
+            align-items: center;
+            background: #ffffff;
+            border: 1px solid #ccc;
+            padding: 4px 8px;
+            border-radius: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+            gap: 8px;
+        }
+        #pModalBody {
+            min-height: auto;
+            display: inline-flex;
+            align-items: center;
+            justify-content: flex-start;
+            text-align: left;
+            font-size: 13px;
+            font-weight: bold;
+            background: transparent;
+            padding: 0 2px;
+            border: none;
+            white-space: pre-wrap;
+            word-break: break-word;
+            width: 250px; 
+            max-width: 350px;
+            color: red;
+        }
+        .p-modal-btn {
+            background: transparent;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: red;
+        }
+        .p-modal-btn:hover {
+            background: rgba(255, 0, 0, 0.05);
+            border-radius: 50%;
+        }
+        /* Red toggle arrow outside the white area */
+        #pToggleArrow {
+            background: transparent;
+            border: none;
+            color: red;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            padding: 0 4px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        #pToggleArrow:hover {
+            opacity: 0.8;
+        }
+        /* Red grab handle dot */
+#pGrabDot {
+            position: relative;
+            z-index: 10000;
+            width: 28px;
+            height: 28px;
+            background-color: transparent;
+            border-radius: 50%;
+            cursor: grab;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            margin: 0 4px;
+        }
+        #pGrabDot::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background-color: red;
+            border-radius: 50%;
+            display: block;
+        }
+        #pGrabDot:active {
+            cursor: grabbing;
+        }    `;
+    document.head.appendChild(style);
+
+    // 2. Inject HTML Markup for the Unified Modal with the Toggle Arrow initially on the left and the red grab dot on the right
+    const modalHTML = `
+        <div id="pAnswerModal" style="display: none;" tabindex="0">
+            <button id="pToggleArrow" title="Toggle Position">&#9664</button>
+            <div id="pModalContentRow">
+                <button id="pPrevBtn" class="p-modal-btn" title="Back">&#9664;</button>
+                <div id="pModalBody">Loading...</div>
+                <button id="pNextBtn" class="p-modal-btn" title="Next">&#9654;</button>
+            </div>
+            <div id="pGrabDot" title="Grab Handle"></div>
+        </div>
+    `;
+    const div = document.createElement('div');
+    div.innerHTML = modalHTML;
+    
+    // Append the modal directly inside your spread display container so it scrolls naturally with it
+    const spreadContainer = document.querySelector('#displayArea') || document.body;
+    if (spreadContainer !== document.body && getComputedStyle(spreadContainer).position === 'static') {
+        spreadContainer.style.position = 'relative';
+    }
+    spreadContainer.appendChild(div);
+
+    // 3. Attach click handlers to the Answer buttons already present in the HTML structure
+    function setupTriggerButtons() {
+        const btnIds = ['loadAnswerBtn', 'loadAnswerBtnRight'];
+        
+        btnIds.forEach(id => {
+            const triggerBtn = document.getElementById(id);
+            if (triggerBtn && !triggerBtn.hasAttribute('data-modal-bound')) {
+                triggerBtn.setAttribute('data-modal-bound', 'true');
+                triggerBtn.addEventListener('click', () => {
+                    parsePAnswers();
+                    const modal = document.getElementById('pAnswerModal');
+                    modal.style.display = 'inline-flex';
+                    modal.focus();
+                });
+            }
+        });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', setupTriggerButtons);
+    } else {
+        setupTriggerButtons();
+    }
+
+    const observer = new MutationObserver(setupTriggerButtons);
+    observer.observe(document.body, { childList: true, subtree: true });
+
+    // 4. State & Logic Handler
+    let pAnswers = [];
+    let currentIndex = 0; 
+
+    function parsePAnswers() {
+        const scriptArea = document.getElementById('worksheetScript');
+        if (!scriptArea) {
+            pAnswers = [];
+            return;
+        }
+        const lines = scriptArea.value.split('\n');
+        pAnswers = [];
+        
+        lines.forEach(line => {
+            let trimmed = line.trim();
+            if (trimmed.startsWith('~P')) {
+                let content = trimmed.substring(2).trim();
+                if (content.startsWith('.')) {
+                    content = content.substring(1).trim();
+                }
+                let answerContent = "P. " + content;
+                
+                let wrappedContent = answerContent.match(/.{1,50}/g).join('\u200B');
+                pAnswers.push(wrappedContent);
+            }
+        });
+        currentIndex = 0;
+        updatePModalDisplay();
+    }
+
+    function updatePModalDisplay() {
+        const bodyEl = document.getElementById('pModalBody');
+        
+        if (pAnswers.length === 0) {
+            bodyEl.textContent = "None found";
+            return;
+        }
+        
+        bodyEl.textContent = pAnswers[currentIndex];
+    }
+
+    // Navigation triggers
+    document.getElementById('pNextBtn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (pAnswers.length === 0) return;
+        currentIndex = (currentIndex + 1) % pAnswers.length;
+        updatePModalDisplay();
+    });
+
+    document.getElementById('pPrevBtn').addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (pAnswers.length === 0) return;
+        currentIndex = (currentIndex - 1 + pAnswers.length) % pAnswers.length;
+        updatePModalDisplay();
+    });
+
+    // Toggle Arrow functionality (also toggles grab handle opposite to it)
+    const modal = document.getElementById('pAnswerModal');
+    const toggleArrow = document.getElementById('pToggleArrow');
+    const contentRow = document.getElementById('pModalContentRow');
+    const grabDot = document.getElementById('pGrabDot');
+
+toggleArrow.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (toggleArrow.textContent.includes('◄')) {
+            // Move toggle arrow to the right, grab dot to the left
+            toggleArrow.textContent = '►';
+            toggleArrow.style.marginLeft = '4px';
+            toggleArrow.style.marginRight = '0';
+            grabDot.style.marginLeft = '0';
+            grabDot.style.marginRight = '14px';
+            
+            modal.insertBefore(grabDot, toggleArrow);
+            modal.appendChild(toggleArrow);
+        } else {
+            // Move toggle arrow to the left, grab dot to the right
+            toggleArrow.textContent = '◄';
+            toggleArrow.style.marginLeft = '0';
+            toggleArrow.style.marginRight = '4px';
+            grabDot.style.marginLeft = '14px';
+            grabDot.style.marginRight = '0';
+            
+            modal.insertBefore(toggleArrow, contentRow);
+            modal.appendChild(grabDot);
+        }
+    });
+
+    // 5. Clear functionality integration
+    document.addEventListener('click', (e) => {
+        if (e.target.matches('#clearBtn, .clear-btn, [id*="clear"], [class*="clear"]')) {
+            if (modal) modal.style.display = 'none';
+            pAnswers = [];
+            currentIndex = 0;
+        }
+    });
+
+    // 6. Make the Entire Modal Draggable (Mouse + Touch Support & Blank Text on Move) + Red Dot Inert Drag Support
+    let isDragging = false, startX, startY;
+
+    function startDrag(clientX, clientY, target) {
+        if (target.tagName === 'BUTTON') return;
+        isDragging = true;
+        startX = clientX - modal.offsetLeft;
+        startY = clientY - modal.offsetTop;
+        
+        // Blank out text when moving starts, EXCEPT if dragged via the red dot handle
+        if (target !== grabDot) {
+            const bodyEl = document.getElementById('pModalBody');
+            if (bodyEl) bodyEl.textContent = "";
+        }
+    }
+
+    function onDrag(clientX, clientY) {
+        if (!isDragging) return;
+        modal.style.left = `${clientX - startX}px`;
+        modal.style.top = `${clientY - startY}px`;
+    }
+
+    function stopDrag() {
+        isDragging = false;
+    }
+
+    // Mouse Events
+    modal.addEventListener('mousedown', (e) => {
+        startDrag(e.clientX, e.clientY, e.target);
+        e.preventDefault();
+    });
+    document.addEventListener('mousemove', (e) => onDrag(e.clientX, e.clientY));
+    document.addEventListener('mouseup', stopDrag);
+
+    // Touch Events
+    modal.addEventListener('touchstart', (e) => {
+        if (e.target.tagName === 'BUTTON') return;
+        if (e.touches.length === 1) {
+            startDrag(e.touches[0].clientX, e.touches[0].clientY, e.target);
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    document.addEventListener('touchmove', (e) => {
+        if (isDragging && e.touches.length === 1) {
+            onDrag(e.touches[0].clientX, e.touches[0].clientY);
+            e.preventDefault();
+        }
+    }, { passive: false });
+
+    document.addEventListener('touchend', stopDrag);
+
+    // 7. Delete / Backspace Key Removal functionality
+    window.addEventListener('keydown', (e) => {
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
+            if (modal && getComputedStyle(modal).display !== 'none') {
+                modal.style.display = 'none';
+                pAnswers = [];
+                currentIndex = 0;
+            }
+        }
+    });
+})();
+</script>
+
+<script>
+/* ==========================
+   DELETE ENGINE
+========================== */
+
+function deleteSelectedTile() {
+    if (!window.selectedEl) return;
+    window.selectedEl.remove();
+    window.selectedEl = null;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("deleteBtn");
+    if (btn) btn.onclick = deleteSelectedTile;
+    
+    const btnRight = document.getElementById("deleteBtnRight");
+    if (btnRight) btnRight.onclick = deleteSelectedTile;
+});
+
+window.addEventListener("keydown", function (e) {
+    if (e.key === "Delete" || e.key === "Backspace") {
+        if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") return;
+        deleteSelectedTile();
+    }
+});
+</script>
+<script>
+/* ==========================
+   CLEAR BOARD ENGINE
+========================== */
+function clearAllTiles() {
+    const spread = document.getElementById("spread");
+    if (!spread) return;
+    
+    // Select and remove all placed draggable elements / tiles
+    const placedItems = spread.querySelectorAll(".draggable");
+    placedItems.forEach(item => item.remove());
+    
+    // Reset selected element reference
+    window.selectedEl = null;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+    const clearBtn = document.getElementById("clearBoardBtn");
+    if (clearBtn) clearBtn.onclick = clearAllTiles;
+    
+    const clearBtnRight = document.getElementById("clearBoardBtnRight");
+    if (clearBtnRight) clearBtnRight.onclick = clearAllTiles;
+});
+</script>
+
+<script>
+/* ==========================
+   APP CONTROLLER / BRIDGE
+========================== */
+(function() {
+    class AppController {
+        constructor() {
+            this.colorQueue = ["Blue", "Green", "Orange", "Red"];
+            this.currentColorIndex = 0;
+            this.initListeners();
+        }
+
+        isColorOnlyMode() {
+            const classSelect = document.querySelector(".classSelect");
+            return !classSelect || !classSelect.value || (typeof studentData !== "undefined" && !studentData[classSelect.value]);
+        }
+
+        getActiveColor() {
+            return this.colorQueue[this.currentColorIndex];
+        }
+
+        nextColor() {
+            this.currentColorIndex = (this.currentColorIndex + 1) % this.colorQueue.length;
+            this.syncAll();
+        }
+
+        syncAll() {
+            const colorOnly = this.isColorOnlyMode();
+            const tmTile = document.getElementById("tmTile");
+
+            if (tmTile) {
+                if (colorOnly) {
+                    const activeColor = this.getActiveColor();
+                    tmTile.textContent = activeColor;
+                    if (typeof studentColors !== "undefined" && studentColors[activeColor]) {
+                        tmTile.style.background = studentColors[activeColor];
+                        tmTile.style.color = "#111";
+                    }
+                } else {
+                    if (typeof updateTmTileFromApp === "function") {
+                        updateTmTileFromApp();
+                    }
+                }
+            }
+
+            if (colorOnly && typeof Wheel !== "undefined" && Wheel.setActiveColor) {
+                Wheel.setActiveColor(this.getActiveColor());
+            }
+        }
+
+        initListeners() {
+            document.addEventListener("change", (e) => {
+                if (e.target && e.target.classList.contains("classSelect")) {
+                    this.syncAll();
+                }
+            });
+        }
+    }
+
+    window.appController = new AppController();
+})();
 </script>
 
 <script>
@@ -2467,6 +3767,7 @@ document.querySelectorAll(".studentTile");
 
 let colorQueues = {};
 let currentColor = 0;
+let colorOnlyQueue = []; // Added for predetermined color queue
 
 const colorOrder = [
     "Blue",
@@ -2474,7 +3775,6 @@ const colorOrder = [
     "Orange",
     "Red"
 ];
-
 function shuffle(array){
 
     return [...array]
@@ -3419,12 +4719,14 @@ if (className && studentData[className]) {
         Wheel.currentName = tile.textContent.trim();
     }
 } else {
-    // If no class is selected, pick a random color from the color-only wheel options
-    const randomIndex = Math.floor(Math.random() * Wheel.students.length);
-    Wheel.currentName = Wheel.students[randomIndex].name;
+    // If no class is selected, rely on appController state
+    if (window.appController) {
+        window.appController.nextColor();
+        Wheel.currentName = window.appController.getActiveColor();
+    } else {
+        Wheel.currentName = "Blue";
+    }
 }
-
-
 /*
    Aim the CENTER of the student's slice
    at the pointer.
@@ -3734,753 +5036,6 @@ document.addEventListener("click", function(e){
 }, true);
 })();
 
-</script><script>
-
-/* ==========================
-   BREAK TIMER MODAL
-========================== */
-
-
-let breakInterval=null;
-let breakRemaining=300;
-
-
-function openBreakModal(){
-
-    const modal = document.getElementById("breakModal");
-
-
-    if(modal.style.display === "block"){
-
-        // hide modal
-        modal.style.display = "none";
-
-        // optionally stop timer
-        clearInterval(breakInterval);
-        breakInterval = null;
-
-        return;
-    }
-
-
-    // show modal
-    modal.style.display = "block";
-
-    startBreak();
-
-}
-
-function renderBreak(){
-
-    let m=Math.floor(breakRemaining/60);
-
-    let s=String(breakRemaining%60)
-        .padStart(2,"0");
-
-    document.getElementById("breakTimer")
-        .textContent=`${m}:${s}`;
-
-}
-
-function adjustBreakTime(amount){
-
-    /*
-       If timer is finished,
-       start a new countdown.
-    */
-
-    if(breakRemaining <= 0){
-
-        startBreak(amount);
-
-    }
-    else{
-
-        /*
-           Add time to current countdown.
-        */
-
-        breakRemaining += amount;
-
-        renderBreak();
-
-    }
-
-
-    /*
-       Restart audio whenever + button is clicked.
-    */
-
-    if(typeof restartMusicAfterExtension === "function"){
-
-        restartMusicAfterExtension();
-
-    }
-
-}
-
-
-
-function startBreak(duration=300){
-
-    clearInterval(breakInterval);
-
-
-    /*
-       Start new countdown duration.
-       Works after Time's up.
-    */
-
-    breakRemaining = duration;
-
-    renderBreak();
-
-
-    breakInterval = setInterval(()=>{
-
-        breakRemaining--;
-
-        renderBreak();
-
-
-        if(breakRemaining <= 0){
-
-            clearInterval(breakInterval);
-
-            breakInterval = null;
-
-
-            document
-            .getElementById("breakTimer")
-            .textContent = "Time's up!";
-
-
-            /*
-               Keep value at zero so
-               next + click starts a new break.
-            */
-
-            breakRemaining = 0;
-
-        }
-
-    },1000);
-
-}
-
-document
-.getElementById("breakStart")
-.onclick=()=>startBreak();
-
-document
-.getElementById("breakPlus")
-.onclick=()=>adjustBreakTime(60);
-
-
-document
-.getElementById("breakMinus")
-.onclick=()=>adjustBreakTime(-60);
-
-
-
-/* ==========================
-   DRAGGABLE BREAK MODAL
-========================== */
-
-(function(){
-
-let modal=document.getElementById("breakModal");
-
-let dragging=false;
-
-let offsetX=0;
-let offsetY=0;
-
-
-modal.addEventListener("mousedown",e=>{
-
-    dragging=true;
-
-    offsetX=e.clientX-modal.offsetLeft;
-    offsetY=e.clientY-modal.offsetTop;
-
-});
-
-
-document.addEventListener("mousemove",e=>{
-
-    if(!dragging)return;
-
-
-    modal.style.left=
-        (e.clientX-offsetX)+"px";
-
-
-    modal.style.top=
-        (e.clientY-offsetY)+"px";
-
-
-    modal.style.transform="none";
-
-});
-
-
-document.addEventListener("mouseup",()=>{
-
-    dragging=false;
-
-});
-
-
-})();
-
-</script>
-
-
-
-
-<script>
-
-/* =====================================
-   DOWNLOAD SCRIPT TXT
-===================================== */
-
-(function(){
-
-const btn =
-document.getElementById("downloadTxtBtn");
-
-const field =
-document.getElementById("worksheetScript");
-
-
-if(!btn || !field) return;
-
-
-btn.onclick=function(){
-
-    const blob =
-    new Blob(
-        [field.value],
-        {type:"text/plain;charset=utf-8"}
-    );
-
-
-    const a =
-    document.createElement("a");
-
-
-    a.href =
-    URL.createObjectURL(blob);
-
-
-    a.download =
-    "Worksheet.txt";
-
-
-    a.click();
-
-
-    URL.revokeObjectURL(a.href);
-
-};
-
-})();
-
-</script>
-
-<script>
-
-(function(){
-
-const bar =
-document.getElementById("tilesResizeBar");
-
-const tiles =
-document.getElementById("tiles");
-
-const script =
-document.getElementById("scriptBar");
-
-let dragging=false;
-
-
-bar.addEventListener("pointerdown",e=>{
-
-    dragging=true;
-
-    bar.setPointerCapture(e.pointerId);
-
-});
-
-
-bar.addEventListener("pointermove",e=>{
-
-    if(!dragging) return;
-
-
-    const y=e.clientY;
-
-    const height =
-        window.innerHeight - y - script.offsetHeight;
-
-
-if(height > 40){
-
-    document.getElementById("tilesBar").style.height =
-        height + "px";
-
-}
-
-});
-
-
-bar.addEventListener("pointerup",()=>{
-
-    dragging=false;
-
-});
-
-
-})();
-
-</script>
-
-<script>
-
-(function(){
-
-const handle =
-document.getElementById("scriptResizeBar");
-
-const scriptBar =
-document.getElementById("scriptBar");
-
-const textarea =
-document.getElementById("worksheetScript");
-
-const txt =
-document.getElementById("downloadTxtBtn");
-
-let resizing=false;
-
-
-handle.addEventListener("pointerdown", e=>{
-
-    resizing=true;
-
-    handle.setPointerCapture(e.pointerId);
-
-});
-
-
-handle.addEventListener("pointermove", e=>{
-
-    if(!resizing) return;
-
-
-const y = Math.max(40, e.clientY);
-
-let height =
-        window.innerHeight - y;
-
-
-    if(height < 24)
-        height = 24;
-
-
-    scriptBar.style.height =
-        height + "px";
-
-
-    textarea.style.height =
-        height + "px";
-
-
-});
-
-
-handle.addEventListener("pointerup",()=>{
-
-    resizing=false;
-
-});
-
-
-})();
-
-</script>
-
-<script>
-
-(function(){
-
-const bar =
-document.getElementById("tilesResizeBar");
-
-const tilesBar =
-document.getElementById("tilesBar");
-
-const scriptBar =
-document.getElementById("scriptBar");
-
-const leftColumn =
-document.getElementById("leftColumn");
-
-let dragging=false;
-
-let minTop=0;
-
-
-/* SET INITIAL POSITION */
-
-function setTileLimit(){
-
-    if(!leftColumn) return;
-
-    minTop =
-        leftColumn.offsetHeight;
-
-    tilesBar.style.top =
-        minTop + "px";
-
-    tilesBar.style.bottom =
-        scriptBar.offsetHeight + "px";
-
-}
-
-
-window.addEventListener(
-"load",
-setTileLimit
-);
-
-
-window.addEventListener(
-"resize",
-setTileLimit
-);
-
-
-
-/* DRAG */
-
-bar.addEventListener("pointerdown",e=>{
-
-    dragging=true;
-
-    bar.setPointerCapture(e.pointerId);
-
-});
-
-
-bar.addEventListener("pointermove",e=>{
-
-    if(!dragging) return;
-
-
-    let newTop =
-        e.clientY;
-
-
-    // NEVER move below page buttons
-    if(newTop > minTop){
-        newTop = minTop;
-    }
-
-
-    // never off the top
-    if(newTop < 0){
-        newTop = 0;
-    }
-
-
-    tilesBar.style.top =
-        newTop + "px";
-
-
-    tilesBar.style.bottom =
-        scriptBar.offsetHeight + "px";
-
-
-});
-
-
-bar.addEventListener("pointerup",()=>{
-
-    dragging=false;
-
-});
-
-
-})();
-
-</script>
-
-<script>
-
-(function(){
-
-const bar =
-document.getElementById("tilesResizeBar");
-
-const tilesBar =
-document.getElementById("tilesBar");
-
-const scriptBar =
-document.getElementById("scriptBar");
-
-const leftColumn =
-document.getElementById("leftColumn");
-
-let dragging=false;
-
-let maxY=0;
-
-
-function setTileLimit(){
-
-    if(!leftColumn) return;
-
-    maxY =
-        leftColumn.offsetHeight;
-
-    // initial position
-    const startHeight =
-        window.innerHeight -
-        maxY -
-        scriptBar.offsetHeight;
-
-    tilesBar.style.height =
-        startHeight + "px";
-
-}
-
-
-window.addEventListener(
-"load",
-setTileLimit
-);
-
-
-window.addEventListener(
-"resize",
-setTileLimit
-);
-
-
-
-bar.addEventListener("pointerdown",e=>{
-
-    dragging=true;
-
-    bar.setPointerCapture(e.pointerId);
-
-});
-
-
-bar.addEventListener("pointermove",e=>{
-
-    if(!dragging) return;
-
-
-    let y = e.clientY;
-
-
-    // splitter cannot go lower
-    if(y > maxY){
-        y = maxY;
-    }
-
-
-    // splitter cannot go above top
-    if(y < 0){
-        y = 0;
-    }
-
-
-    const newHeight =
-        window.innerHeight -
-        y -
-        scriptBar.offsetHeight;
-
-
-    tilesBar.style.height =
-        newHeight + "px";
-
-
-});
-
-
-bar.addEventListener("pointerup",()=>{
-
-    dragging=false;
-
-});
-
-
-})();
-
-</script>
-
-<script>
-
-(function(){
-
-/* ==========================================
-   TILE PLACEMENT SOUND ENGINE
-========================================== */
-
-
-const PlacementSound = {
-
-    audio:null,
-
-    file:"bubble-pop-406640.mp3",
-
-    volume:0.5
-
-};
-
-
-/* ==========================================
-   CREATE AUDIO
-========================================== */
-
-function initSound(){
-
-    if(PlacementSound.audio)
-        return;
-
-
-    PlacementSound.audio =
-    document.createElement("audio");
-
-
-    PlacementSound.audio.src =
-        PlacementSound.file;
-
-
-    PlacementSound.audio.volume =
-        PlacementSound.volume;
-
-
-    PlacementSound.audio.preload="auto";
-
-
-    document.body.appendChild(
-        PlacementSound.audio
-    );
-
-}
-
-
-
-/* ==========================================
-   PLAY SOUND
-========================================== */
-
-function playPlacementSound(){
-
-    initSound();
-
-
-    PlacementSound.audio.pause();
-
-
-    PlacementSound.audio.currentTime=0;
-
-
-    PlacementSound.audio.play()
-    .catch(err=>{
-
-        console.log(
-            "Placement sound waiting for user interaction"
-        );
-
-    });
-
-}
-
-
-
-/* ==========================================
-   WATCH FOR NEW TILES
-========================================== */
-
-function startWatcher(){
-
-
-    const spread =
-        document.getElementById("spread");
-
-
-    if(!spread)
-        return;
-
-
-
-    const observer =
-    new MutationObserver(function(records){
-
-
-        records.forEach(record=>{
-
-
-            record.addedNodes.forEach(node=>{
-
-
-                if(
-                    node.nodeType === 1 &&
-                    node.classList.contains("draggable")
-                ){
-
-                    playPlacementSound();
-
-                }
-
-
-            });
-
-
-        });
-
-
-    });
-
-
-
-    observer.observe(
-        spread,
-        {
-            childList:true
-        }
-    );
-
-
-}
-
-
-
-/* ==========================================
-   START
-========================================== */
-
-window.addEventListener(
-"DOMContentLoaded",
-startWatcher
-);
-
-
-
-/* expose control */
-
-window.PlacementSound =
-    PlacementSound;
-
-
-})();
-
 </script>
 
 <script>
@@ -4551,195 +5106,6 @@ window.PlacementSound =
 })();
 </script>
 
-<script>
-/* ==========================================
-   COFFEE BREAK MUSIC PLAYER
-   Standalone
-========================================== */
-
-(function () {
-
-    const breakMusic = new Audio(
-        "musicalmix2020-bossa-nova-summer-instrumental-brazil-7969.mp3"
-    );
-
-    breakMusic.loop = true;
-    breakMusic.preload = "auto";
-    breakMusic.volume = 0.15;
-
-
-    let musicTimer = null;
-
-
-
-    function playMusicFromStart(){
-
-        breakMusic.pause();
-
-        breakMusic.currentTime = 0;
-
-
-        breakMusic.play()
-        .then(()=>{
-
-            console.log(
-                "Coffee music restarted"
-            );
-
-        })
-        .catch(err=>{
-
-            console.log(
-                "Coffee music blocked:",
-                err
-            );
-
-        });
-
-
-        watchBreakTimer();
-
-    }
-
-
-
-    function startBreakMusic(){
-
-        if(!breakMusic.paused){
-            return;
-        }
-
-
-        playMusicFromStart();
-
-    }
-
-
-
-    function restartBreakMusic(){
-
-        /*
-           Restart button
-        */
-
-        playMusicFromStart();
-
-    }
-
-
-
-    function restartMusicAfterExtension(){
-
-        /*
-           Up button:
-           Timer has already been increased elsewhere.
-           We only restart audio.
-        */
-
-        playMusicFromStart();
-
-    }
-
-
-
-    function stopBreakMusic(){
-
-        breakMusic.pause();
-
-        breakMusic.currentTime = 0;
-
-
-        clearInterval(musicTimer);
-
-        musicTimer = null;
-
-    }
-
-
-
-    function watchBreakTimer(){
-
-        clearInterval(musicTimer);
-
-
-        musicTimer = setInterval(()=>{
-
-
-            if(
-                typeof breakRemaining !== "undefined" &&
-                breakRemaining <= 0
-            ){
-
-                stopBreakMusic();
-
-            }
-
-
-        },500);
-
-    }
-
-
-
-    /*
-       Existing Break modal connection
-    */
-
-    const oldOpenBreakModal =
-        window.openBreakModal;
-
-
-    window.openBreakModal = function(){
-
-
-        const modal =
-            document.getElementById("breakModal");
-
-
-        if(
-            modal &&
-            modal.style.display === "block"
-        ){
-
-            stopBreakMusic();
-
-        }
-        else{
-
-            startBreakMusic();
-
-        }
-
-
-        oldOpenBreakModal();
-
-    };
-
-
-
-    /*
-       Global controls
-    */
-
-    window.startBreakMusic =
-        startBreakMusic;
-
-
-    window.stopBreakMusic =
-        stopBreakMusic;
-
-
-    window.restartBreakMusic =
-        restartBreakMusic;
-
-
-    window.restartMusicAfterExtension =
-        restartMusicAfterExtension;
-
-
-
-})();
-</script>
 
 <script>
 (function(){
@@ -4747,17 +5113,82 @@ window.PlacementSound =
 "use strict";
 
 /*==================================================
-  TALLYMAN STANDALONE (COLOR SYNC)
-  PART 1: Floating Launcher + Modal Shell
+  TALLYMAN INTEGRATED / STANDALONE
+  VERSION 3.5 (Opaque Windows & Buttons)
 ==================================================*/
 
+
 const TM = {
-  version:"1.3",
-  width:360,
-  height:420
+  version:"3.5",
+  width:250,
+  height:310
 };
 
+
+/*==================================================
+  APP CONTROLLER / BRIDGE (Color Queue State)
+==================================================*/
+
+class AppController {
+    constructor() {
+        this.colorQueue = ["Blue", "Green", "Orange", "Red"];
+        this.currentColorIndex = 0;
+        this.initListeners();
+    }
+
+    isColorOnlyMode() {
+        const classSelect = document.querySelector(".classSelect");
+        return !classSelect || !classSelect.value || (typeof studentData !== "undefined" && !studentData[classSelect.value]);
+    }
+
+    getActiveColor() {
+        return this.colorQueue[this.currentColorIndex];
+    }
+
+    nextColor() {
+        this.currentColorIndex = (this.currentColorIndex + 1) % this.colorQueue.length;
+        this.syncAll();
+    }
+
+    syncAll() {
+        const colorOnly = this.isColorOnlyMode();
+        const tmTile = document.getElementById("tmTile");
+
+        if (tmTile) {
+            if (colorOnly) {
+                const activeColor = this.getActiveColor();
+                tmTile.textContent = activeColor;
+                if (typeof tmDefaultColors !== "undefined" && tmDefaultColors[activeColor]) {
+                    const bg = tmDefaultColors[activeColor];
+                    tmTile.style.background = bg;
+                    tmTile.style.color = (typeof isColorDark === "function" && isColorDark(bg)) ? "#ffffff" : "#111111";
+                }
+            } else {
+                if (typeof updateTmTileFromApp === "function") {
+                    updateTmTileFromApp();
+                }
+            }
+        }
+    }
+
+    initListeners() {
+        document.addEventListener("change", (e) => {
+            if (e.target && e.target.classList.contains("classSelect")) {
+                this.syncAll();
+            }
+        });
+    }
+}
+
+window.appController = new AppController();
+
+
+/*==================================================
+  PART 1: FLOATING LAUNCHER + MODAL SHELL
+==================================================*/
+
 const style=document.createElement("style");
+
 style.textContent=`
 #tmWindow{
   position:fixed;
@@ -4766,184 +5197,377 @@ style.textContent=`
   width:${TM.width}px;
   height:${TM.height}px;
   display:none;
-  background:transparent;
+  background:#ffffff;
   z-index:100000;
   font-family:system-ui,sans-serif;
 }
+
 #tmWindow.tmOpen{
   display:block;
 }
+
 #tmPanel{
   position:absolute;
   inset:0;
   background:#dbeafe;
-  border-radius:12px;
-  box-shadow:0 10px 30px rgba(0,0,0,.30);
+  border-radius:6px;
+  box-shadow:0 5px 15px rgba(0,0,0,.30);
   overflow:hidden;
   display:flex;
   flex-direction:column;
 }
+
 #tmDrag{
-  height:20px;
+  height:12px;
   cursor:move;
   background:#f2f2f2;
   position:relative;
   user-select:none;
 }
+
 #tmContent{
   flex:1;
   overflow:auto;
-  padding:12px;
+  padding:4px;
 }
 `;
+
 document.head.appendChild(style);
 
+
 const win=document.createElement("div");
+
 win.id="tmWindow";
+
 win.innerHTML=`
 <div id="tmPanel">
+
   <div id="tmDrag"></div>
+
   <div id="tmContent">
+
     <h3 style="margin-top:0;"></h3>
+
     <div id="tmApp"></div>
+
   </div>
+
 </div>
 `;
+
 document.body.appendChild(win);
 
-function openTallyman(){
-  win.classList.add("tmOpen");
-}
-
-// Toggle open/close via the control column button
-document.addEventListener("click",function(e){
-    const trigger = e.target.closest("#tallymanLeftBtn, #tallymanRightBtn, [data-open-tallyman]");
-    if(trigger){
-        if(win.classList.contains("tmOpen")){
-            win.classList.remove("tmOpen");
-        } else {
-            openTallyman();
-        }
-    }
-});
-
-function drag(target,handle){
-  let dragging=false;
-  let ox=0;
-  let oy=0;
-  handle.addEventListener("mousedown",function(e){
-    dragging=true;
-    ox=e.clientX-target.offsetLeft;
-    oy=e.clientY-target.offsetTop;
-  });
-  document.addEventListener("mousemove",function(e){
-    if(!dragging)return;
-    target.style.left=(e.clientX-ox)+"px";
-    target.style.top=(e.clientY-oy)+"px";
-    target.style.right="auto";
-    target.style.bottom="auto";
-  });
-  document.addEventListener("mouseup",function(){
-    dragging=false;
-  });
-}
-
-drag(win, document.getElementById("tmDrag"));
 
 /*==================================================
-  PART 2: Interface Setup
+  OPEN / CLOSE TALLYMAN
 ==================================================*/
 
-const app=document.getElementById("tmApp");
+function openTallyman(){
+
+  win.classList.add("tmOpen");
+
+  setTimeout(
+    updateTmTileFromApp,
+    0
+  );
+
+}
+
+
+document.addEventListener(
+  "click",
+  function(e){
+
+    const trigger =
+      e.target.closest(
+        "#tallymanLeftBtn, #tallymanRightBtn, [data-open-tallyman]"
+      );
+
+    if(!trigger)
+      return;
+
+
+    if(win.classList.contains("tmOpen")){
+
+      win.classList.remove("tmOpen");
+
+    }
+    else{
+
+      openTallyman();
+
+    }
+
+  }
+);
+
+
+/*==================================================
+  DRAG
+==================================================*/
+
+function drag(target,handle){
+
+  let dragging=false;
+
+  let ox=0;
+  let oy=0;
+
+
+  handle.addEventListener(
+    "mousedown",
+    function(e){
+
+      dragging=true;
+
+      ox =
+        e.clientX -
+        target.offsetLeft;
+
+      oy =
+        e.clientY -
+        target.offsetTop;
+
+    }
+  );
+
+
+  document.addEventListener(
+    "mousemove",
+    function(e){
+
+      if(!dragging)
+        return;
+
+
+      target.style.left =
+        (e.clientX-ox)+"px";
+
+      target.style.top =
+        (e.clientY-oy)+"px";
+
+      target.style.right="auto";
+
+      target.style.bottom="auto";
+
+    }
+  );
+
+
+  document.addEventListener(
+    "mouseup",
+    function(){
+
+      dragging=false;
+
+    }
+  );
+
+}
+
+
+drag(
+  win,
+  document.getElementById("tmDrag")
+);
+
+
+/*==================================================
+  PART 2: INTERFACE SETUP
+==================================================*/
+
+const app =
+  document.getElementById("tmApp");
+
+
 app.innerHTML=`
 <div id="tmWrapper">
-  <div id="tmTile">Select or generate a student</div>
-  <div id="tmScoreboard">
-    <div class="tmTeam">
-      <div class="tmHeader">Blue</div>
-      <div class="tmTallies" data-team="Blue"></div>
-      <div class="tmScore" id="tmScoreBlue">0</div>
-      <button class="tmDelete" data-team="Blue">Delete</button>
-    </div>
-    <div class="tmTeam">
-      <div class="tmHeader">Green</div>
-      <div class="tmTallies" data-team="Green"></div>
-      <div class="tmScore" id="tmScoreGreen">0</div>
-      <button class="tmDelete" data-team="Green">Delete</button>
-    </div>
-    <div class="tmTeam">
-      <div class="tmHeader">Orange</div>
-      <div class="tmTallies" data-team="Orange"></div>
-      <div class="tmScore" id="tmScoreOrange">0</div>
-      <button class="tmDelete" data-team="Orange">Delete</button>
-    </div>
-    <div class="tmTeam">
-      <div class="tmHeader">Red</div>
-      <div class="tmTallies" data-team="Red"></div>
-      <div class="tmScore" id="tmScoreRed">0</div>
-      <button class="tmDelete" data-team="Red">Delete</button>
-    </div>
+
+  <div id="tmTile">
+    Select or generate a student
   </div>
+
+
+  <div id="tmScoreboard">
+
+    <div class="tmTeam">
+
+      <div class="tmHeader">
+        Blue
+      </div>
+
+      <div
+        class="tmTallies"
+        data-team="Blue">
+      </div>
+
+      <div
+        class="tmScore"
+        id="tmScoreBlue">
+        0
+      </div>
+
+      <button
+        class="tmDelete"
+        data-team="Blue">
+        Delete
+      </button>
+
+    </div>
+
+
+    <div class="tmTeam">
+
+      <div class="tmHeader">
+        Green
+      </div>
+
+      <div
+        class="tmTallies"
+        data-team="Green">
+      </div>
+
+      <div
+        class="tmScore"
+        id="tmScoreGreen">
+        0
+      </div>
+
+      <button
+        class="tmDelete"
+        data-team="Green">
+        Delete
+      </button>
+
+    </div>
+
+
+    <div class="tmTeam">
+
+      <div class="tmHeader">
+        Orange
+      </div>
+
+      <div
+        class="tmTallies"
+        data-team="Orange">
+      </div>
+
+      <div
+        class="tmScore"
+        id="tmScoreOrange">
+        0
+      </div>
+
+      <button
+        class="tmDelete"
+        data-team="Orange">
+        Delete
+      </button>
+
+    </div>
+
+
+    <div class="tmTeam">
+
+      <div class="tmHeader">
+        Red
+      </div>
+
+      <div
+        class="tmTallies"
+        data-team="Red">
+      </div>
+
+      <div
+        class="tmScore"
+        id="tmScoreRed">
+        0
+      </div>
+
+      <button
+        class="tmDelete"
+        data-team="Red">
+        Delete
+      </button>
+
+    </div>
+
+  </div>
+
 </div>
 `;
 
+
 style.textContent+=`
+
 #tmWrapper{
   display:flex;
   flex-direction:column;
-  gap:8px;
+  gap:4px;
 }
+
 #tmTile{
-  height:48px;
+  height:36px;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:0px;
+  font-size:13px;
   font-weight:700;
-  border-radius:8px;
+  border-radius:4px;
   background:#ececec;
   color:#111;
-  transition:background .25s, color .25s;
+  transition:background .25s,color .25s;
   user-select:none;
   cursor:pointer;
-  padding: 0 8px;
-  text-align: center;
+  padding:0 4px;
+  text-align:center;
+  opacity: 1 !important;
 }
+
 #tmScoreboard{
   display:grid;
   grid-template-columns:repeat(4,1fr);
-  gap:6px;
+  gap:4px;
 }
+
 .tmTeam{
   border:1px solid #ccc;
-  border-radius:6px;
+  border-radius:3px;
   background:#fff;
   display:grid;
-  grid-template-rows:auto 1fr auto;
+  grid-template-rows:auto 1fr auto auto;
+  opacity: 1 !important;
 }
+
 .tmHeader{
-  font-size:10px;
+  font-size:12px;
   font-weight:700;
   text-align:center;
-  padding:3px;
+  padding:2px;
+  background:#ffffff;
 }
+
 .tmTallies{
-  min-height:54px;
-  padding:4px;
+  min-height:64px;
+  padding:2px;
   display:flex;
   flex-direction:column;
   align-items:center;
-  gap:4px;
+  gap:2px;
   cursor:pointer;
+  background:#ffffff;
 }
+
 .tmGroup{
   position:relative;
   display:flex;
   justify-content:center;
   align-items:center;
-  gap:3px;
+  gap:2px;
   width:100%;
 }
+
 .tmGroup svg{
   position:absolute;
   inset:0;
@@ -4951,18 +5575,22 @@ style.textContent+=`
   height:100%;
   pointer-events:none;
 }
+
 .tmStick{
   width:2px;
-  height:14px;
+  height:22px;
   background:#111;
 }
+
 .tmScore{
   border-top:1px solid #ddd;
   text-align:center;
-  font-size:10px;
+  font-size:12px;
   font-weight:700;
   padding:2px;
+  background:#ffffff;
 }
+
 .tmDelete{
   width:100%;
   border:none;
@@ -4971,1022 +5599,1266 @@ style.textContent+=`
   font-size:10px;
   padding:3px 0;
   cursor:pointer;
+  opacity: 1 !important;
 }
+
 .tmDelete:hover{
   background:#ffd7d7;
 }
+
+#tallymanLeftBtn, #tallymanRightBtn {
+  background-color: #ffffff !important;
+  opacity: 1 !important;
+}
 `;
 
-/*==================================================
-  PART 3 & 4: Global Logic, Name & Color Sync
-==================================================*/
-
-const tmTile = document.getElementById("tmTile");
-
-function tmTriggerExternalNext() {
-    if (typeof window.nextStudent === "function") {
-        window.nextStudent();
-    } else {
-        const mainGenBtn = document.querySelector("#randomBtn, .random-btn, [data-random-student], #generateBtn");
-        if (mainGenBtn) mainGenBtn.click();
-    }
-}
-
-// Determines if a background color is dark to automatically adjust text color for contrast
-function isColorDark(colorStr) {
-    let rgb = colorStr.match(/\d+/g);
-    if (!rgb || rgb.length < 3) return false;
-    let brightness = (Number(rgb[0]) * 299 + Number(rgb[1]) * 587 + Number(rgb[2]) * 114) / 1000;
-    return brightness < 125;
-}
-
-// Scans the main page control column / UI for the active student element, updating text and styling color
-function updateTmTileFromControlColumn() {
-    try {
-        const controlCol = document.querySelector("#controlColumn, .control-column, aside, .sidebar") || document.body;
-        const candidates = controlCol.querySelectorAll("div, span, h1, h2, h3, h4");
-        
-        for (let el of candidates) {
-            if (el.id === "tmWindow" || el.closest("#tmWindow")) continue;
-            
-            const idClass = (el.id + " " + el.className).toLowerCase();
-            if (idClass.includes("student") || idClass.includes("name") || idClass.includes("display") || idClass.includes("tile")) {
-                const text = el.textContent.trim();
-                if (text && text.length > 0 && text.length < 35 && !text.includes("Tallyman") && !text.includes("Scoreboard")) {
-                    tmTile.textContent = text;
-                    
-                    // Extract background style/color from the matched student element in the main logic
-                    const computed = window.getComputedStyle(el);
-                    const bg = computed.backgroundColor;
-                    
-                    if (bg && bg !== "rgba(0, 0, 0, 0)" && bg !== "transparent") {
-                        tmTile.style.background = bg;
-                        tmTile.style.color = isColorDark(bg) ? "#ffffff" : "#111111";
-                    } else {
-                        // Fallback if background is on an inline style attribute
-                        const inlineBg = el.style.backgroundColor || el.style.background;
-                        if (inlineBg) {
-                            tmTile.style.background = inlineBg;
-                            tmTile.style.color = isColorDark(inlineBg) ? "#ffffff" : "#111111";
-                        }
-                    }
-                    break;
-                }
-            }
-        }
-    } catch(e) {
-        // Fail silently to keep application stable
-    }
-}
-
-// Continuous check to sync name and color instantly
-setInterval(updateTmTileFromControlColumn, 250);
-
-tmTile.addEventListener("click", function() {
-    // Directly target common app methods for spinning/randomizing without breaking animation
-    if (typeof window.startWheel === "function") {
-        window.startWheel();
-    } else if (typeof window.spinWheel === "function") {
-        window.spinWheel();
-    } else if (typeof window.randomize === "function") {
-        window.randomize();
-    } else {
-        tmTriggerExternalNext();
-    }
-
-    setTimeout(updateTmTileFromControlColumn, 150);
-});
-const tmScores = { Blue:0, Green:0, Orange:0, Red:0 };
-
-function tmAddTally(team){
-    tmScores[team]++;
-    const area = document.querySelector('.tmTallies[data-team="'+team+'"]');
-    if(!area) return;
-
-    let groups = area.querySelectorAll(".tmGroup");
-    let group = groups[groups.length-1];
-
-    if(!group || Number(group.dataset.count)>=5){
-        group = document.createElement("div");
-        group.className = "tmGroup";
-        group.dataset.count = 0;
-        area.appendChild(group);
-    }
-
-    let count = Number(group.dataset.count);
-    if(count<4){
-        const stick = document.createElement("div");
-        stick.className = "tmStick";
-        group.appendChild(stick);
-    }
-    count++;
-
-    if(count===5){
-        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttribute("viewBox", "0 0 20 20");
-        svg.innerHTML=`<line x1="2" y1="2" x2="18" y2="18" stroke="#111" stroke-width="2" stroke-linecap="round"/>`;
-        group.appendChild(svg);
-    }
-
-    group.dataset.count = count;
-    document.getElementById("tmScore"+team).textContent = tmScores[team];
-}
-
-function tmDeleteTally(team){
-    if(tmScores[team]===0) return;
-    tmScores[team]--;
-    const area = document.querySelector('.tmTallies[data-team="'+team+'"]');
-    if(!area) return;
-
-    const groups = area.querySelectorAll(".tmGroup");
-    if(!groups.length) return;
-
-    const group = groups[groups.length-1];
-    let count = Number(group.dataset.count);
-
-    if(count===5){
-        const svg = group.querySelector("svg");
-        if(svg) svg.remove();
-    } else {
-        const sticks = group.querySelectorAll(".tmStick");
-        if(sticks.length) sticks[sticks.length-1].remove();
-    }
-
-    count--;
-    group.dataset.count = count;
-    if(count===0){
-        group.remove();
-    }
-    document.getElementById("tmScore"+team).textContent = tmScores[team];
-}
-
-function tmResetScores(){
-    Object.keys(tmScores).forEach(team=>{
-        tmScores[team]=0;
-        document.getElementById("tmScore"+team).textContent = 0;
-        const area = document.querySelector('.tmTallies[data-team="'+team+'"]');
-        if(area) area.innerHTML="";
-    });
-}
-
-document.querySelectorAll(".tmTallies").forEach(panel=>{
-    panel.addEventListener("click", function(){
-        tmAddTally(panel.dataset.team);
-    });
-});
-
-document.querySelectorAll(".tmDelete").forEach(btn=>{
-    btn.addEventListener("click", function(e){
-        e.stopPropagation();
-        tmDeleteTally(btn.dataset.team);
-    });
-});
 
 /*==================================================
-  PART 5: Initialization & Shortcuts
+  PART 3: COLOR / MODE HELPERS
 ==================================================*/
 
-window.tmAddTally = tmAddTally;
-window.Tallyman = {
-    version: "1.3",
-    add: tmAddTally,
-    reset: tmResetScores,
-    scores: tmScores
-};
+const tmTile =
+  document.getElementById("tmTile");
 
-document.addEventListener("keydown", function(e){
-    if(!win.classList.contains("tmOpen")) return;
-    switch(e.key){
-        case " ":
-            e.preventDefault();
-            tmTriggerExternalNext();
-            setTimeout(updateTmTileFromControlColumn, 100);
-            break;
-        case "1": tmAddTally("Blue"); break;
-        case "2": tmAddTally("Green"); break;
-        case "3": tmAddTally("Orange"); break;
-        case "4": tmAddTally("Red"); break;
-    }
-});
 
-const leftBtn = document.getElementById("tallymanLeftBtn");
-if(leftBtn) {
-    leftBtn.addEventListener("dblclick", function(){
-        tmResetScores();
-    });
-}
+const tmDefaultColors = {
 
-win.classList.remove("tmOpen");
-console.log("Tallyman Standalone Loaded (Name & Color Synced)");
+  Blue:"#93c5fd",
 
-})();
-</script>
-<script>
-(function(){
+  Green:"#86efac",
 
-"use strict";
+  Orange:"#fdba74",
 
-/*========================================
- TALLYMAN AUDIO OBSERVER
- No Tallyman edits required
-========================================*/
-
-let count = -1;
-let audio = null;
-
-function initAudio(){
-    if(!audio){
-        audio = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if(audio.state==="suspended"){
-        audio.resume();
-    }
-}
-
-/*========================================
- PENCIL SCRATCH
-========================================*/
-
-function pencilScratch(){
-    initAudio();
-    const ctx=audio;
-    const duration=.18;
-
-    const buffer = ctx.createBuffer(
-        1,
-        ctx.sampleRate*duration,
-        ctx.sampleRate
-    );
-
-    const data = buffer.getChannelData(0);
-
-    for(let i=0;i<data.length;i++){
-        data[i]=
-        (Math.random()*2-1)
-        *
-        (1-i/data.length)
-        *
-        .35;
-    }
-
-    const source = ctx.createBufferSource();
-    const filter = ctx.createBiquadFilter();
-    const gain = ctx.createGain();
-
-    filter.type="bandpass";
-    filter.frequency.value=2800;
-
-    gain.gain.value=.35;
-
-    source.buffer=buffer;
-
-    source
-    .connect(filter)
-    .connect(gain)
-    .connect(ctx.destination);
-
-    source.start();
-}
-
-/*========================================
- WATCH TALLY STROKES
-========================================*/
-
-const observer = new MutationObserver(function(){
-    const groups = document.querySelectorAll(".tmGroup");
-    let total = 0;
-
-    groups.forEach(group=>{
-        total += Number(group.dataset.count || 0);
-    });
-
-    if(total !== count){
-        // Only trigger scratch if the total is increasing (a tally mark was made)
-        if(total > count && count !== -1){
-            pencilScratch();
-        }
-        count = total;
-    }
-});
-
-function start(){
-    const board = document.querySelector("#tmScoreboard");
-
-    if(!board){
-        setTimeout(start,500);
-        return;
-    }
-
-    observer.observe(
-        board,
-        {
-            childList:true,
-            subtree:true
-        }
-    );
-
-    console.log(
-        "Tallyman audio observer loaded"
-    );
-}
-
-start();
-
-})();
-</script>
-
-<script>
-
-(function(){
-
-"use strict";
-
-/*==================================================
- TALLYMAN SOUND FX ADD-ON
- Pencil Scratch + Fairy Dust
-==================================================*/
-
-
-const TMSoundFX = {
-
-
-
-audio:null,
-
-
-init:function(){
-
-    if(!this.audio){
-
-        this.audio =
-        new (window.AudioContext ||
-             window.webkitAudioContext)();
-
-    }
-
-
-    if(this.audio.state==="suspended"){
-
-        this.audio.resume();
-
-    }
-
-},
-
-
-
-/*----------------------------------
- SINGLE PENCIL SCRATCH
-----------------------------------*/
-
-pencil:function(){
-
-    this.init();
-
-    const ctx=this.audio;
-
-
-    const duration=0.22;
-
-
-    const buffer =
-    ctx.createBuffer(
-        1,
-        ctx.sampleRate * duration,
-        ctx.sampleRate
-    );
-
-
-    const data =
-    buffer.getChannelData(0);
-
-
-
-    for(let i=0;i<data.length;i++){
-
-        const fade =
-        1 - (i/data.length);
-
-
-        data[i] =
-        (Math.random()*2-1)
-        *
-        fade
-        *
-        0.35;
-
-    }
-
-
-
-    const source =
-    ctx.createBufferSource();
-
-
-    const filter =
-    ctx.createBiquadFilter();
-
-
-    const gain =
-    ctx.createGain();
-
-
-
-    filter.type="bandpass";
-
-    filter.frequency.value=2800;
-
-    filter.Q.value=2.5;
-
-
-
-    gain.gain.setValueAtTime(
-        0.001,
-        ctx.currentTime
-    );
-
-
-    gain.gain.exponentialRampToValueAtTime(
-        0.35,
-        ctx.currentTime+0.015
-    );
-
-
-    gain.gain.exponentialRampToValueAtTime(
-        0.001,
-        ctx.currentTime+duration
-    );
-
-
-
-    source.buffer=buffer;
-
-
-    source
-    .connect(filter)
-    .connect(gain)
-    .connect(ctx.destination);
-
-
-
-    source.start();
-
-},
-
-
-
-
-/*----------------------------------
- FAIRY DUST BLING
-----------------------------------*/
-
-fairy:function(){
-
-    this.init();
-
-
-    const ctx=this.audio;
-
-
-    const notes=[
-        1200,
-        1600,
-        2200
-    ];
-
-
-    notes.forEach((freq,index)=>{
-
-
-        const osc =
-        ctx.createOscillator();
-
-
-        const gain =
-        ctx.createGain();
-
-
-
-        osc.type="sine";
-
-
-        osc.frequency.value=freq;
-
-
-
-        gain.gain.setValueAtTime(
-            0.001,
-            ctx.currentTime
-        );
-
-
-        gain.gain.exponentialRampToValueAtTime(
-            0.18,
-            ctx.currentTime+0.02+(index*.04)
-        );
-
-
-        gain.gain.exponentialRampToValueAtTime(
-            0.001,
-            ctx.currentTime+0.35+(index*.05)
-        );
-
-
-
-        osc
-        .connect(gain)
-        .connect(ctx.destination);
-
-
-
-        osc.start(
-            ctx.currentTime+(index*.04)
-        );
-
-
-        osc.stop(
-            ctx.currentTime+0.5
-        );
-
-
-    });
-
-}
-
-
+  Red:"#fca5a5"
 
 };
 
 
+function isColorDark(colorStr){
+
+  if(!colorStr)
+    return false;
+
+
+  const rgb =
+    colorStr.match(/\d+/g);
+
+
+  if(
+    !rgb ||
+    rgb.length<3
+  ){
+
+    return false;
+
+  }
+
+
+  const brightness =
+    (
+      Number(rgb[0])*299 +
+      Number(rgb[1])*587 +
+      Number(rgb[2])*114
+    ) / 1000;
+
+
+  return brightness<125;
+
+}
+
 
 /*==================================================
- WAIT FOR TALLYMAN
+  CLASS / COLOR-ONLY DETECTION
 ==================================================*/
 
+function tmGetClass(){
 
-function attachSound(){
-
-
-if(!window.tmAddTally){
-
-    console.warn(
-    "Tallyman add function not found"
+  const select =
+    document.querySelector(
+      ".classSelect"
     );
 
+
+  return select
+    ? select.value.trim()
+    : "";
+
+}
+
+
+function tmIsColorOnly(){
+
+  const className =
+    tmGetClass();
+
+  if(!className)
+    return true;
+
+
+  if(
+    typeof studentData==="undefined"
+  ){
+
+    return true;
+
+  }
+
+
+  return !studentData[className];
+
+}
+
+
+/*==================================================
+  APPLY COLOR TO TALLYMAN TILE
+==================================================*/
+
+function tmApplyColor(
+  colorName,
+  colorValue
+){
+
+  if(!colorName)
     return;
 
-}
+
+  colorName =
+    colorName.charAt(0).toUpperCase() +
+    colorName.slice(1).toLowerCase();
 
 
-
-const originalAdd =
-window.tmAddTally;
-
-
-
-window.tmAddTally =
-function(team){
+  const bg =
+    colorValue ||
+    tmDefaultColors[colorName];
 
 
-    originalAdd(team);
+  tmTile.textContent =
+    colorName;
 
 
+  if(bg){
 
-/* Scratch */
+    tmTile.style.background =
+      bg;
 
-TMSoundFX.pencil();
+    tmTile.style.color =
+      isColorDark(bg)
+      ? "#ffffff"
+      : "#111111";
 
-/* Look at the real score */
-
-const score =
-window.Tallyman.scores[team];
-
-if(score > 0 && score % 5 === 0){
-
-    TMSoundFX.fairy();
+  }
 
 }
 
 
-console.log(
-"Tallyman Sound FX Loaded"
+/*==================================================
+  CONVERT RGB TO HEX
+==================================================*/
+
+function tmRgbToHex(r,g,b){
+
+  return "#" +
+    [r,g,b]
+      .map(
+        n =>
+          Number(n)
+            .toString(16)
+            .padStart(2,"0")
+      )
+      .join("");
+
+}
+
+
+/*==================================================
+  FIND TEAM COLOR FROM PIXEL
+==================================================*/
+
+function tmNearestTeamColor(
+  r,
+  g,
+  b
+){
+
+  let bestName=null;
+
+  let bestDistance=Infinity;
+
+
+  Object.keys(tmDefaultColors)
+  .forEach(
+    name=>{
+
+      const temp =
+        document.createElement(
+          "div"
+        );
+
+
+      temp.style.backgroundColor =
+        tmDefaultColors[name];
+
+
+      document.body.appendChild(
+        temp
+      );
+
+
+      const rgb =
+        getComputedStyle(
+          temp
+        )
+        .backgroundColor
+        .match(/\d+/g);
+
+
+      temp.remove();
+
+
+      if(!rgb)
+        return;
+
+
+      const dr =
+        r-Number(rgb[0]);
+
+      const dg =
+        g-Number(rgb[1]);
+
+      const db =
+        b-Number(rgb[2]);
+
+
+      const distance =
+        dr*dr +
+        dg*dg +
+        db*db;
+
+
+      if(distance<bestDistance){
+
+        bestDistance=distance;
+
+        bestName=name;
+
+      }
+
+    }
+  );
+
+
+  return bestName;
+
+}
+
+
+/*==================================================
+  READ COLOR CURRENTLY UNDER SPINNER POINTER
+==================================================*/
+
+function tmReadSpinnerColor(){
+
+  const canvas =
+    document.getElementById(
+      "studentWheelCanvas"
+    );
+
+
+  if(!canvas)
+    return null;
+
+
+  const ctx =
+    canvas.getContext(
+      "2d",
+      {
+        willReadFrequently:true
+      }
+    );
+
+
+  if(!ctx)
+    return null;
+
+
+  const extraSpace=40;
+
+  const cx =
+    (350/2) +
+    extraSpace/2;
+
+  const cy =
+    (350/2) +
+    extraSpace/2;
+
+
+  const sampleX =
+    Math.round(cx);
+
+  const sampleY =
+    Math.round(cy-70);
+
+
+  try{
+
+    const pixel =
+      ctx.getImageData(
+        sampleX,
+        sampleY,
+        1,
+        1
+      )
+      .data;
+
+
+    if(!pixel || pixel.length<3)
+      return null;
+
+
+    const r=pixel[0];
+    const g=pixel[1];
+    const b=pixel[2];
+
+
+    const max =
+      Math.max(r,g,b);
+
+    const min =
+      Math.min(r,g,b);
+
+
+    if(
+      max<80 ||
+      max-min<15
+    ){
+
+      return null;
+
+    }
+
+
+    return {
+      name:
+        tmNearestTeamColor(
+          r,
+          g,
+          b
+        ),
+
+      color:
+        tmRgbToHex(
+          r,
+          g,
+          b
+        )
+
+    };
+
+  }
+  catch(e){
+
+    return null;
+
+  }
+
+}
+
+
+/*==================================================
+  UPDATE TALLYMAN FROM MAIN APP (LIVE SPINNER SYNC)
+==================================================*/
+
+function updateTmTileFromApp(){
+
+  try{
+
+    const className =
+      tmGetClass();
+
+
+    /*------------------------------------------
+      COLOR-ONLY MODE
+    ------------------------------------------*/
+
+    if(!className || tmIsColorOnly()){
+
+      const overlay =
+        document.getElementById(
+          "studentWheelOverlay"
+        );
+
+
+      if(
+        overlay &&
+        overlay.style.display==="flex"
+      ){
+
+        const spinnerColor =
+          tmReadSpinnerColor();
+
+
+        if(
+          spinnerColor &&
+          spinnerColor.name
+        ){
+
+          tmApplyColor(
+            spinnerColor.name,
+            tmDefaultColors[
+              spinnerColor.name
+            ]
+          );
+
+          return;
+
+        }
+
+      }
+
+      return;
+
+    }
+
+
+    /*------------------------------------------
+      NORMAL CLASS MODE (Live Spinner Student Cycling)
+    ------------------------------------------*/
+
+    const overlay =
+      document.getElementById(
+        "studentWheelOverlay"
+      );
+
+    const spinnerOpen =
+      overlay &&
+      overlay.style.display==="flex";
+
+
+    if(spinnerOpen){
+      /* Target the live elements inside the wheel overlay that update dynamically during a spin */
+      const liveNameElement =
+        overlay.querySelector(
+          ".studentTile, #studentDisplay, [data-active-student], .wheel-current-name, .spinner-name, h2, h3, .selected-student-text"
+        ) || document.querySelector(".studentTile, #studentDisplay, [data-active-student]");
+
+      if(liveNameElement){
+        const text = liveNameElement.textContent.trim();
+        const computed = window.getComputedStyle(liveNameElement);
+        let bg = computed.backgroundColor;
+
+        if(
+          !bg ||
+          bg==="rgba(0, 0, 0, 0)" ||
+          bg==="transparent"
+        ){
+          bg = liveNameElement.style.backgroundColor || liveNameElement.style.background;
+        }
+
+        if(text && text !== "Select or generate a student"){
+          tmTile.textContent = text;
+        }
+
+        if(
+          bg &&
+          bg!=="rgba(0, 0, 0, 0)" &&
+          bg!=="transparent"
+        ){
+          tmTile.style.background = bg;
+          tmTile.style.color = isColorDark(bg) ? "#ffffff" : "#111111";
+        }
+        return;
+      }
+    }
+
+
+    /* Default static fallback when spinner isn't active */
+    const activeSource =
+      document.querySelector(
+        ".studentTile, #studentDisplay, [data-active-student]"
+      );
+
+
+    if(!activeSource)
+      return;
+
+
+    const text =
+      activeSource.textContent.trim();
+
+
+    const computed =
+      window.getComputedStyle(
+        activeSource
+      );
+
+
+    let bg =
+      computed.backgroundColor;
+
+
+    if(
+      !bg ||
+      bg==="rgba(0, 0, 0, 0)" ||
+      bg==="transparent"
+    ){
+
+      bg =
+        activeSource.style.backgroundColor ||
+        activeSource.style.background;
+
+    }
+
+
+    if(text){
+
+      tmTile.textContent =
+        text;
+
+    }
+
+
+    if(
+      bg &&
+      bg!=="rgba(0, 0, 0, 0)" &&
+      bg!=="transparent"
+    ){
+
+      tmTile.style.background =
+        bg;
+
+      tmTile.style.color =
+        isColorDark(bg)
+        ? "#ffffff"
+        : "#111111";
+
+    }
+
+
+  }
+  catch(e){}
+
+}
+
+
+setInterval(
+  updateTmTileFromApp,
+  50
 );
 
 
+/*==================================================
+  PART 4: SPINNER RESULT SYNCHRONIZATION
+==================================================*/
+
+function syncTmFromSpinner(){
+
+  if(tmIsColorOnly()){
+    const result = tmReadSpinnerColor();
+    if(result && result.name){
+      tmApplyColor(
+        result.name,
+        tmDefaultColors[result.name]
+      );
+    }
+  } else {
+    setTimeout(
+      updateTmTileFromApp,
+      50
+    );
+  }
+
 }
 
 
+function scheduleSpinnerSync(){
 
-attachSound();
+  setTimeout(
+    function(){
 
+      syncTmFromSpinner();
 
+    },
+    2150
+  );
 
-})();
-
-</script>
-
-<script>
-
-/* ==========================
-   PAGE BUTTON SOUND
-   PLAYS EVERY CLICK
-========================== */
-
-function playLetsGo(){
-
-    const audio =
-    new Audio(
-    ""
-    );
+}
 
 
-    audio.volume = 1.0;
+/*==================================================
+  WRAP SPINWHEEL
+==================================================*/
+
+function hookSpinner(){
+
+  if(
+    typeof window.spinWheel!=="function"
+  ){
+
+    return false;
+
+  }
 
 
-    audio.play()
-    .catch(error => {
+  if(
+    window.spinWheel.__tallymanWrapped
+  ){
 
-        console.log(
-            "Sound error:",
-            error
+    return true;
+
+  }
+
+
+  const originalSpinWheel =
+    window.spinWheel;
+
+
+  const wrappedSpinWheel =
+    function(){
+
+      const result =
+        originalSpinWheel.apply(
+          this,
+          arguments
         );
 
-    });
 
-}
+      scheduleSpinnerSync();
 
-</script>
 
-<script>
+      return result;
 
-/* ==========================
-   MINI TIMER STANDALONE
-========================== */
+    };
 
-(function(){
 
-const style = document.createElement("style");
+  wrappedSpinWheel.__tallymanWrapped=true;
 
-style.textContent = `
 
-#miniTimer{
+  window.spinWheel =
+    wrappedSpinWheel;
 
-    position:fixed;
 
-    top:2px;
-
-    right:92px;
-
-    width:80px;
-
-    height:20px;
-
-    background:#ff9900;
-
-    border:1px solid #cc6600;
-
-    border-radius:4px;
-
-    display:flex;
-
-    align-items:center;
-
-    justify-content:center;
-
-    font-size:10px;
-
-    font-weight:bold;
-
-    color:black;
-
-    z-index:100000;
-
-    user-select:none;
-
-    font-family:Arial,sans-serif;
+  return true;
 
 }
 
 
-#miniTimer span{
+if(!hookSpinner()){
 
-    cursor:pointer;
+  let attempts=0;
 
-    font-size:12px;
 
-    line-height:20px;
+  const spinnerHookTimer =
+    setInterval(
+      function(){
 
-    padding:0 3px;
+        attempts++;
 
-}
 
+        if(hookSpinner()){
 
-#miniTimerTime{
-
-    min-width:25px;
-
-    text-align:center;
-
-}
-
-`;
-
-document.head.appendChild(style);
-
-
-
-const timer = document.createElement("div");
-
-timer.id="miniTimer";
-
-
-timer.innerHTML=`
-
-<span id="miniDown">▼</span>
-
-<span id="miniTimerTime">00:00</span>
-
-<span id="miniUp">▲</span>
-
-`;
-
-
-document.body.appendChild(timer);
-
-
-
-let seconds = 0;
-
-let interval = null;
-
-
-
-const display =
-document.getElementById("miniTimerTime");
-
-
-
-let audioCtx = null;
-
-
-
-function initAudio(){
-
-    if(!audioCtx){
-
-        audioCtx =
-        new (window.AudioContext || window.webkitAudioContext)();
-
-    }
-
-
-    if(audioCtx.state === "suspended"){
-
-        audioCtx.resume();
-
-    }
-
-}
-
-
-
-/* ==========================
-   UPDATE DISPLAY
-========================== */
-
-function update(){
-
-    let m=Math.floor(seconds/60);
-
-    let s=seconds%60;
-
-
-    display.textContent =
-    String(m).padStart(2,"0")
-    +":"
-    +String(s).padStart(2,"0");
-
-}
-
-
-
-/* ==========================
-   ELECTRONIC BUZZER
-========================== */
-
-function playBuzzer(){
-
-    if(!audioCtx)
-        return;
-
-
-    const osc =
-    audioCtx.createOscillator();
-
-
-    const gain =
-    audioCtx.createGain();
-
-
-    osc.type="square";
-
-    osc.frequency.value=900;
-
-
-    gain.gain.setValueAtTime(
-        0.3,
-        audioCtx.currentTime
-    );
-
-
-    gain.gain.exponentialRampToValueAtTime(
-        0.001,
-        audioCtx.currentTime + 0.8
-    );
-
-
-    osc.connect(gain);
-
-    gain.connect(audioCtx.destination);
-
-
-    osc.start();
-
-    osc.stop(
-        audioCtx.currentTime + 0.8
-    );
-
-}
-
-
-
-/* ==========================
-   START COUNTDOWN
-========================== */
-
-function start(){
-
-    if(interval)
-        clearInterval(interval);
-
-
-    interval=setInterval(()=>{
-
-
-        seconds--;
-
-        update();
-
-
-        if(seconds<=0){
-
-
-            clearInterval(interval);
-
-            interval=null;
-
-
-            seconds=0;
-
-            update();
-
-
-            playBuzzer();
-
+          clearInterval(
+            spinnerHookTimer
+          );
 
         }
 
 
-    },1000);
+        if(attempts>=50){
+
+          clearInterval(
+            spinnerHookTimer
+          );
+
+        }
+
+      },
+      100
+    );
 
 }
 
 
+/*==================================================
+  TALLYMAN TILE CLICK
+==================================================*/
 
-/* ==========================
-   CONTROLS
-========================== */
+tmTile.addEventListener(
+  "click",
+  function(){
+
+    /*------------------------------------------
+      COLOR-ONLY MODE
+    ------------------------------------------*/
+
+    if(tmIsColorOnly()){
+
+      const overlay = document.getElementById("studentWheelOverlay");
+      const wheelOpen = overlay && overlay.style.display === "flex";
+
+      if(wheelOpen && typeof window.spinWheel === "function"){
+        window.spinWheel();
+      } else {
+        if(window.appController){
+          window.appController.nextColor();
+        }
+      }
+
+      return;
+
+    }
 
 
-document.getElementById("miniUp")
-.onclick=function(){
+    /*------------------------------------------
+      CLASS-SELECTED MODE
+    ------------------------------------------*/
 
-    initAudio();
-
-
-    seconds+=60;
-
-
-    update();
+    const overlay =
+      document.getElementById(
+        "studentWheelOverlay"
+      );
 
 
-    start();
+    const spinnerOpen =
+      overlay &&
+      overlay.style.display==="flex";
+
+
+    if(
+      spinnerOpen &&
+      typeof window.spinWheel==="function"
+    ){
+
+      window.spinWheel();
+
+    }
+    else if(
+      typeof window.nextStudent==="function"
+    ){
+
+      window.nextStudent();
+
+    }
+    else{
+
+      const primaryGenBtn =
+        document.querySelector(
+          "#randomBtn, .random-btn, [data-random-student], #generateBtn, button[onclick*='spin'], button[onclick*='random']"
+        );
+
+
+      if(primaryGenBtn)
+        primaryGenBtn.click();
+
+    }
+
+
+    setTimeout(
+      updateTmTileFromApp,
+      100
+    );
+
+  }
+);
+
+
+/*==================================================
+  PART 5: SCOREBOARD
+==================================================*/
+
+const tmScores={
+
+  Blue:0,
+  Green:0,
+  Orange:0,
+  Red:0
 
 };
 
 
+/*==================================================
+  ADD TALLY
+==================================================*/
 
-document.getElementById("miniDown")
-.onclick=function(){
+function tmAddTally(team){
 
-    initAudio();
-
-
-    seconds-=60;
-
-
-    if(seconds<0)
-        seconds=0;
+  tmScores[team]++;
 
 
-    update();
+  const area =
+    document.querySelector(
+      '.tmTallies[data-team="'+team+'"]'
+    );
 
 
-    if(seconds>0)
-        start();
+  if(!area)
+    return;
+
+
+  let groups =
+    area.querySelectorAll(
+      ".tmGroup"
+    );
+
+
+  let group =
+    groups[groups.length-1];
+
+
+  if(
+    !group ||
+    Number(group.dataset.count)>=5
+  ){
+
+    group =
+      document.createElement(
+        "div"
+      );
+
+    group.className=
+      "tmGroup";
+
+    group.dataset.count=0;
+
+    area.appendChild(
+      group
+    );
+
+  }
+
+
+  let count =
+    Number(group.dataset.count);
+
+
+  if(count<4){
+
+    const stick =
+      document.createElement(
+        "div"
+      );
+
+    stick.className=
+      "tmStick";
+
+    group.appendChild(
+      stick
+    );
+
+  }
+
+
+  count++;
+
+
+  if(count===5){
+
+    const svg =
+      document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "svg"
+      );
+
+
+    svg.setAttribute(
+      "viewBox",
+      "0 0 20 20"
+    );
+
+
+    svg.innerHTML=`
+<line
+  x1="1"
+  y1="1"
+  x2="19"
+  y2="19"
+  stroke="#111"
+  stroke-width="2.5"
+  stroke-linecap="round"
+/>
+`;
+
+
+    group.appendChild(
+      svg
+    );
+
+  }
+
+
+  group.dataset.count=
+    count;
+
+
+  document.getElementById(
+    "tmScore"+team
+  ).textContent=
+    tmScores[team];
+
+}
+
+
+/*==================================================
+  DELETE TALLY
+==================================================*/
+
+function tmDeleteTally(team){
+
+  if(
+    tmScores[team]===0
+  ){
+
+    return;
+
+  }
+
+
+  tmScores[team]--;
+
+
+  const area =
+    document.querySelector(
+      '.tmTallies[data-team="'+team+'"]'
+    );
+
+
+  if(!area)
+    return;
+
+
+  const groups =
+    area.querySelectorAll(
+      ".tmGroup"
+    );
+
+
+  if(!groups.length)
+    return;
+
+
+  const group =
+    groups[groups.length-1];
+
+
+  let count =
+    Number(
+      group.dataset.count
+    );
+
+
+  if(count===5){
+
+    const svg =
+      group.querySelector(
+        "svg"
+      );
+
+
+    if(svg)
+      svg.remove();
+
+  }
+  else{
+
+    const sticks =
+      group.querySelectorAll(
+        ".tmStick"
+      );
+
+
+    if(sticks.length){
+
+      sticks[
+        sticks.length-1
+      ].remove();
+
+    }
+
+  }
+
+
+  count--;
+
+
+  group.dataset.count=
+    count;
+
+
+  if(count===0){
+
+    group.remove();
+
+  }
+
+
+  document.getElementById(
+    "tmScore"+team
+  ).textContent=
+    tmScores[team];
+
+}
+
+
+/*==================================================
+  RESET SCORES
+==================================================*/
+
+function tmResetScores(){
+
+  Object.keys(
+    tmScores
+  )
+  .forEach(
+    team=>{
+
+      tmScores[team]=0;
+
+
+      document.getElementById(
+        "tmScore"+team
+      ).textContent=0;
+
+
+      const area =
+        document.querySelector(
+          '.tmTallies[data-team="'+team+'"]'
+        );
+
+
+      if(area)
+        area.innerHTML="";
+
+    }
+  );
+
+}
+
+
+/*==================================================
+  SCOREBOARD EVENTS
+==================================================*/
+
+document
+.querySelectorAll(".tmTallies")
+.forEach(
+  panel=>{
+
+    panel.addEventListener(
+      "click",
+      function(){
+
+        tmAddTally(
+          panel.dataset.team
+        );
+
+      }
+    );
+
+  }
+);
+
+
+document
+.querySelectorAll(".tmDelete")
+.forEach(
+  btn=>{
+
+    btn.addEventListener(
+      "click",
+      function(e){
+
+        e.stopPropagation();
+
+        tmDeleteTally(
+          btn.dataset.team
+        );
+
+      }
+    );
+
+  }
+);
+
+
+/*==================================================
+  PART 6: PUBLIC API
+==================================================*/
+
+window.tmAddTally =
+  tmAddTally;
+
+
+window.Tallyman={
+
+  version:"3.5",
+
+  add:tmAddTally,
+
+  reset:tmResetScores,
+
+  scores:tmScores,
+
+  update:updateTmTileFromApp,
+
+  syncSpinner:syncTmFromSpinner
 
 };
 
 
+/*==================================================
+  KEYBOARD SHORTCUTS
+==================================================*/
 
-update();
+document.addEventListener(
+  "keydown",
+  function(e){
 
+    if(
+      !win.classList.contains(
+        "tmOpen"
+      )
+    ){
+
+      return;
+
+    }
+
+
+    switch(e.key){
+
+      case " ":
+
+        e.preventDefault();
+
+        tmTile.click();
+
+        break;
+
+
+      case "1":
+
+        tmAddTally(
+          "Blue"
+        );
+
+        break;
+
+
+      case "2":
+
+        tmAddTally(
+          "Green"
+        );
+
+        break;
+
+
+      case "3":
+
+        tmAddTally(
+          "Orange"
+        );
+
+        break;
+
+
+      case "4":
+
+        tmAddTally(
+          "Red"
+        );
+
+        break;
+
+    }
+
+  }
+);
+
+
+/*==================================================
+  DOUBLE-CLICK RESET
+==================================================*/
+
+const leftBtn =
+  document.getElementById(
+    "tallymanLeftBtn"
+  );
+
+
+if(leftBtn){
+
+  leftBtn.addEventListener(
+    "dblclick",
+    function(){
+
+      tmResetScores();
+
+    }
+  );
+
+}
+
+
+/*==================================================
+  INITIAL STATE
+==================================================*/
+
+win.classList.remove(
+  "tmOpen"
+);
+
+
+console.log(
+  "Tallyman 3.5 Loaded - Opaque windows and buttons applied"
+);
 
 
 })();
-
 </script>
+
+
+
+
+
 <script>
+/* ==========================================================
+   MP3 BUZZER TOGGLE BUTTON (Standalone Script)
+========================================================== */
 
-/*==========================================
- PERFECTLY PRACTICAL LAUNCHER
- Standalone
-==========================================*/
+document.addEventListener("DOMContentLoaded", () => {
 
-/*==========================================
- PERFECTLY PRACTICAL LAUNCHER
- Standalone
-==========================================*/
+    // 1. Preload the Audio Object
+    const buzzerAudio = new Audio("floraphonic-buzzer-13-187755.mp3");
+    buzzerAudio.preload = "auto";
 
-(function(){
-
-"use strict";
-
-/*------------------------------------------
- Configuration
-------------------------------------------*/
-
-const LOCAL_URL="file:///C:/Users/User/Documents/perfectly-practical-english.github.io/perfectly-practical-english.github.io/index.html";
-
-const ONLINE_URL="https://perfectly-practical-english.github.io/";
-
-
-/*------------------------------------------
- Init
-------------------------------------------*/
-
-initLauncher("ppLauncher");
-initLauncher("ppLauncherRight");
-
-/*------------------------------------------
- Launcher
-------------------------------------------*/
-
-function initLauncher(id){
-
-    const sel=document.getElementById(id);
-
-    if(!sel) return;
-
-    sel.selectedIndex=0;
-
-    sel.addEventListener("change",()=>{
-
-        switch(sel.value){
-
-            case "iframe":
-                window.open(
-                    LOCAL_URL,
-                    "_blank"
-                );
-                break;
-
-            case "online":
-                window.open(
-                    ONLINE_URL,
-                    "_blank"
-                );
-                break;
-
+    // Toggle Function: Plays if paused/ended, stops if currently playing
+    function toggleBuzzer() {
+        if (buzzerAudio.paused) {
+            buzzerAudio.currentTime = 0;
+            buzzerAudio.play().catch(error => {
+                console.log("Audio playback prevented or failed:", error);
+            });
+        } else {
+            buzzerAudio.pause();
+            buzzerAudio.currentTime = 0;
         }
+    }
 
-        sel.selectedIndex=0;
+    // 2. Connect to existing Left Buzzer Button
+    const leftBtn = document.getElementById("buzzerLeftBtn");
+    if (leftBtn) {
+        leftBtn.onclick = toggleBuzzer;
+    }
 
-    });
+    // 3. Connect to existing Right Buzzer Button
+    const rightBtn = document.getElementById("buzzerRightBtn");
+    if (rightBtn) {
+        rightBtn.onclick = toggleBuzzer;
+    }
 
-}
+});
+</script>
 
-})();</script>
 
 <!-- ==========================================================
      JELLY BEAN JAR MODAL SYSTEM (STANDALONE SCRIPT)
@@ -6006,7 +6878,7 @@ function initLauncher(id){
     display: none;
   }
 
-  /* Main Floating Modal Box - Draggable anywhere inside its background area */
+  /* Main Floating Modal Box - Natural 50% dimensions without CSS transforms */
   #jbJarWrapper {
     position: absolute;
     top: 50%;
@@ -6016,13 +6888,13 @@ function initLauncher(id){
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 12px;
-    gap: 8px;
-    background: rgba(255, 255, 255, 0.4); /* Ready for future transparency changes */
+    padding: 6px;
+    gap: 4px;
+    background: rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     border: 2px solid rgba(255, 255, 255, 0.7);
-    border-radius: 16px;
+    border-radius: 12px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
     pointer-events: auto;
     touch-action: none;
@@ -6031,11 +6903,11 @@ function initLauncher(id){
     cursor: move;
   }
 
-  /* Jar Container */
+  /* Jar Container - Naturally shrunk by 50% (width: 160px, height: 234px) */
   #jbJarContainer {
     position: relative;
-    width: 320px;
-    height: 468px;
+    width: 160px;
+    height: 234px;
     aspect-ratio: 520 / 760;
     display: flex;
     justify-content: center;
@@ -6056,28 +6928,28 @@ function initLauncher(id){
   #jbBeanCanvas { z-index: 2; }
   #jbJarGlassOverlay { z-index: 5; }
 
-  /* Lid Image at full original size and position */
+  /* Lid Image */
   #jbJarLid {
     position: absolute;
     width: 98%;
     left: 1%;
     top: 0;
-    margin-top: 55px;
-transform: translateX(3px); /* Shifts it precisely 10px right */
+    margin-top: 27.5px;
+    transform: translateX(1.5px);
     object-fit: contain;
     pointer-events: none;
     z-index: 100;
   }
 
-  /* Lid Hitbox precisely matching the full visible dimensions of the lid asset */
+  /* Lid Hitbox */
   #jbLidHitbox {
     position: absolute;
     width: 98%;
     left: 1%;
     top: 0;
-    height: 22%; /* Covers the full vertical height of the lid asset */
-    margin-top: 55px;
-transform: translateX(3px); /* Keeps hitbox aligned with the image */
+    height: 22%;
+    margin-top: 27.5px;
+    transform: translateX(1.5px);
     cursor: grab;
     z-index: 105;
     pointer-events: auto;
@@ -6107,13 +6979,13 @@ transform: translateX(3px); /* Keeps hitbox aligned with the image */
     transform: translate(-50%, -50%);
     width: 22%;
     height: 12%;
-    border-radius: 10px;
+    border-radius: 6px;
     background: rgba(255, 255, 255, 0.92);
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 22px;
+    font-size: 11px;
     font-weight: bold;
     color: #222;
     cursor: pointer;
@@ -6129,31 +7001,32 @@ transform: translateX(3px); /* Keeps hitbox aligned with the image */
   /* Bottom Controls Bar */
   #jbControls {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
+    white-space: nowrap;
     justify-content: center;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     z-index: 150;
   }
 
   #jbClassSelect {
-    font-size: 12px;
-    padding: 4px 8px;
-    border-radius: 6px;
+    font-size: 10px;
+    padding: 2px 4px;
+    border-radius: 4px;
     border: 1px solid #ccc;
     background: #fff;
   }
 
-.jb-btn {
-    font-family: inherit; /* Ensures it matches the rest of your text/buttons */
-    padding: 4px 10px;
-    font-size: 12px;
+  .jb-btn {
+    font-family: inherit;
+    padding: 2px 6px;
+    font-size: 10px;
     font-weight: bold;
     cursor: pointer;
-    border-radius: 6px;
+    border-radius: 4px;
     border: 1px solid #bbb;
     background-color: #ffffff;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     transition: background-color 0.15s ease;
   }
 
@@ -6161,14 +7034,12 @@ transform: translateX(3px); /* Keeps hitbox aligned with the image */
     background-color: #f0f0f0;
   }
 
-
-.draggable.disappearing,
-.draggable:not(:hover):not(:active) {
-    /* Ensures no interpolation happens on removal */
+  .draggable.disappearing,
+  .draggable:not(:hover):not(:active) {
     transition: none !important;
-}
+  }
 
-.playlistBtn {
+  .playlistBtn {
     width: 100%;
     height: 24px;
     font-size: 10px;
@@ -6179,21 +7050,40 @@ transform: translateX(3px); /* Keeps hitbox aligned with the image */
     cursor: pointer;
     padding: 0;
     text-align: center;
-}
+  }
 
-.playlistBtn:hover {
+  .playlistBtn:hover {
     background: #ddd;
-}
+  }
 
+  .breakBtn,  
+  .classSelect {
+    height: 24px;
+    width: 100%;
+    font-size: 10px;
+    font-family: Arial, sans-serif;
+    border: none;
+    border-bottom: 1px solid #999;
+    background: black;
+    color: white;
+    cursor: pointer;
+    text-align: center;
+    text-align-last: center;
+    padding: 0;
+  }
 
-
+  .breakBtn:hover,  
+  .classSelect:hover {
+    background: #fdfdfd !important;
+    color: #111 !important;
+  }
 </style>
 
 <!-- MODAL HTML STRUCTURE -->
 <div id="jellyBeanModalContainer">
   <div id="jbJarWrapper">
     <div id="jbJarContainer">
-<!-- Background Layer -->
+      <!-- Background Layer -->
       <img id="jbJarBack" src="Jar_Background.png" draggable="false" alt="Jar Back">
 
       <!-- Cosmetic Background Animation Canvas Layer -->
@@ -6256,7 +7146,7 @@ transform: translateX(3px); /* Keeps hitbox aligned with the image */
   const fileInput = document.getElementById("jbFileInput");
   const classSelect = document.getElementById("jbClassSelect");
 
-  const MAX_BEANS = 350;
+  const MAX_BEANS = 50;
   const BEAN_RADIUS = 20.9;
 
   const jarBounds = {
@@ -6376,8 +7266,7 @@ transform: translateX(3px); /* Keeps hitbox aligned with the image */
     }
   }
 
-function updateBeans() {
-    // Instantly remove beans without flying up or moving positions
+  function updateBeans() {
     beans = beans.filter(b => !b.removing);
   }
 
@@ -6418,9 +7307,9 @@ function updateBeans() {
   let lidOffsetX = 0;
   let lidOffsetY = 0;
   let currentLidX = 0;
-  let currentLidY = 55;
+  let currentLidY = 27.5;
   let targetLidX = 0;
-  let targetLidY = 55;
+  let targetLidY = 27.5;
 
   lidHitbox.addEventListener("pointerdown", (event) => {
     event.stopPropagation();
@@ -6525,14 +7414,13 @@ function updateBeans() {
     reader.readAsText(file);
   });
 
-  // Modal Dragging centered on grab point
+  // Standard Natural Modal Dragging (No transforms used)
   function makeModalDraggable(el) {
     el.onpointerdown = (e) => {
       if (e.target.closest('#jbControls') || e.target.closest('#jbLidHitbox') || e.target.closest('#jbJarLid') || e.target.closest('#jbScoreDisplay') || e.target.closest('#jbMouthHotspot')) {
         return;
       }
 
-      // Initialize positioning using pixel offsets if currently using CSS translate center transform
       const rect = el.getBoundingClientRect();
       if (el.style.transform.includes("translate")) {
         el.style.transform = "none";
@@ -6608,168 +7496,6 @@ function updateBeans() {
     animate();
   });
 })();
-</script>
-
-
-<script>
-/* ==========================================================
-   PPE HOTSPOT IMAGE BUTTON (Standalone Script)
-========================================================== */
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    // 1. Create and insert the button in the Left Column
-    const leftColumn = document.getElementById("leftColumn");
-    if (leftColumn) {
-        const leftBtn = document.createElement("button");
-        leftBtn.id = "ppeLeftBtn";
-        leftBtn.textContent = "QR";
-        leftBtn.style.cssText = "height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;";
-        
-        const jellyBeansLeft = document.getElementById("leftBtn");
-        if (jellyBeansLeft) {
-            leftColumn.insertBefore(leftBtn, jellyBeansLeft);
-        } else {
-            leftColumn.appendChild(leftBtn);
-        }
-
-        leftBtn.onclick = togglePpeHotspot;
-    }
-
-    // 2. Create and insert the button in the Right Column
-    const rightColumn = document.getElementById("rightColumn");
-    if (rightColumn) {
-        const rightBtn = document.createElement("button");
-        rightBtn.id = "ppeRightBtn";
-        rightBtn.textContent = "QR";
-        rightBtn.style.cssText = "height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;";
-        
-        const jellyBeansRight = document.getElementById("rightBtn");
-        if (jellyBeansRight) {
-            rightColumn.insertBefore(rightBtn, jellyBeansRight);
-        } else {
-            rightColumn.appendChild(rightBtn);
-        }
-
-        rightBtn.onclick = togglePpeHotspot;
-    }
-
-    // 3. Toggle Function: Spawns if missing, removes if already open
-    function togglePpeHotspot() {
-        const viewer = document.getElementById("viewer");
-        if (!viewer) return;
-
-        const existing = viewer.querySelector(".ppeHotspotImg");
-        if (existing) {
-            if (selectedEl === existing) {
-                selectedEl = null;
-            }
-            existing.remove();
-            return; // Exit so it turns off instead of respawning
-        }
-
-        const img = document.createElement("img");
-        img.src = "PerfectlyPracticalEnglish_with_Hotspot.app.jpg";
-        img.className = "draggable overlayPng ppeHotspotImg";
-        
-        // Fixed dimensions and appearance (keeping your custom tweaks)
-        img.style.position = "absolute";
-        img.style.width = "190px";
-        img.style.zIndex = "1000000";
-        img.style.boxShadow = "3px 15px 30px 10px rgba(0, 0, 0, 0.8)";
-        
-        // Fixed positioning from the top-right of the viewport / control column boundary
-        img.style.right = "20px";
-        img.style.top = "40px";
-
-        viewer.appendChild(img);
-
-        if (typeof enableDragging === "function") {
-            enableDragging(img);
-        }
-
-        selectedEl = img;
-    }
-
-    // 4. Handle clicking off the PPE hotspot image to make it disappear
-    const viewer = document.getElementById("viewer");
-    if (viewer) {
-        viewer.addEventListener("pointerdown", (e) => {
-            if (e.target === viewer || e.target.id === "spread" || e.target.id === "centerBar" || e.target.classList.contains("pageImage")) {
-                if (selectedEl && selectedEl.classList.contains("ppeHotspotImg")) {
-                    selectedEl.remove();
-                    selectedEl = null;
-                }
-            }
-        });
-    }
-
-});
-</script>
-
-
-
-<script>
-/* ==========================================================
-    MP3 BUZZER TOGGLE BUTTON (Standalone Script)
-========================================================== */
-
-document.addEventListener("DOMContentLoaded", () => {
-
-    // 1. Preload the Audio Object
-    const buzzerAudio = new Audio("floraphonic-buzzer-13-187755.mp3");
-    buzzerAudio.preload = "auto";
-
-    // Toggle Function: Plays if paused/ended, stops if currently playing
-    function toggleBuzzer() {
-        if (buzzerAudio.paused) {
-            buzzerAudio.currentTime = 0;
-            buzzerAudio.play().catch(error => {
-                console.log("Audio playback prevented or failed:", error);
-            });
-        } else {
-            buzzerAudio.pause();
-            buzzerAudio.currentTime = 0;
-        }
-    }
-
-    // 2. Create and insert the button in the Left Column
-    const leftColumn = document.getElementById("leftColumn");
-    if (leftColumn) {
-        const leftBtn = document.createElement("button");
-        leftBtn.id = "buzzerLeftBtn";
-        leftBtn.textContent = "Buzzer";
-        leftBtn.style.cssText = "height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;";
-        
-        const jellyBeansLeft = document.getElementById("leftBtn");
-        if (jellyBeansLeft) {
-            leftColumn.insertBefore(leftBtn, jellyBeansLeft);
-        } else {
-            leftColumn.appendChild(leftBtn);
-        }
-
-        leftBtn.onclick = toggleBuzzer;
-    }
-
-    // 3. Create and insert the button in the Right Column
-    const rightColumn = document.getElementById("rightColumn");
-    if (rightColumn) {
-        const rightBtn = document.createElement("button");
-        rightBtn.id = "buzzerRightBtn";
-        rightBtn.textContent = "Buzzer";
-        rightBtn.style.cssText = "height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;";
-        
-        const jellyBeansRight = document.getElementById("rightBtn");
-        if (jellyBeansRight) {
-            rightColumn.insertBefore(rightBtn, jellyBeansRight);
-        } else {
-            rightColumn.appendChild(rightBtn);
-        }
-
-        rightBtn.onclick = toggleBuzzer;
-    }
-
-});
 </script>
 
 <!-- ==========================================================
@@ -6911,467 +7637,265 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 
 <script>
+(function(){
 
-document.addEventListener("DOMContentLoaded", () => {
-    const playlistBtnLeft = document.getElementById("playlistBtnLeft");
-    const playlistBtnRight = document.getElementById("playlistBtnRight");
-    const targetFile = "A_Audio_Links.html";
+"use strict";
 
-    function openPlaylist() {
-        window.open(targetFile, "_blank");
-    }
+/*==================================================
+  TALLYMAN SMOOTH DRAG & OVERLAY FIX
+  VERSION 1.4 (Eliminates Jittering during Drag & Syncs Overlays)
+==================================================*/
 
-    if (playlistBtnLeft) {
-        playlistBtnLeft.addEventListener("click", openPlaylist);
-    }
-
-    if (playlistBtnRight) {
-        playlistBtnRight.addEventListener("click", openPlaylist);
-    }
-});
-
-</script>
-
-/* ======================================================
-   DYNAMIC VIEWER ENGINE: Safe Array & Custom Asset Support
-====================================================== */
-
-document.addEventListener("DOMContentLoaded", () => {
-    setTimeout(() => {
-        const pageList = document.getElementById("pageList");
-        if (!pageList) return;
-
-        pageList.innerHTML = "";
-
-        if (typeof spreads === "undefined" || !Array.isArray(spreads)) return;
-
-        spreads.forEach((item) => {
-            const btn = document.createElement("button");
-            btn.className = "pageBtn";
-
-            // 1. Standard Array Pair [36, 37]
-            if (Array.isArray(item) && item.length === 2) {
-                btn.textContent = `${item[0]}-${item[1]}`;
-            } 
-            // 2. Custom single-item line format (e.g. [clipboard-image...] or [!!GB_Game.jpg])
-            else if (Array.isArray(item) && item.length === 1) {
-                let name = String(item[0]);
-                btn.textContent = name.replace(/\.[^/.]+$/, "");
-            }
-            // 3. Fallback for strings or direct items
-            else {
-                let name = String(item);
-                btn.textContent = name.replace(/\.[^/.]+$/, "");
-            }
-
-            btn.onclick = () => {
-                if (typeof playLetsGo === "function") playLetsGo();
-
-                document.querySelectorAll(".pageBtn")
-                    .forEach(b => b.classList.remove("active"));
-
-                btn.classList.add("active");
-
-                loadSpread(item);
-            };
-
-            pageList.appendChild(btn);
-        });
-    }, 50);
-});
-
-// Dynamic load handler mapping array formats safely
-function loadSpread(item) {
-    const leftImg = document.getElementById("leftImage");
-    const rightImg = document.getElementById("rightImage");
-    const centerBar = document.getElementById("centerBar");
-    
-    if (!leftImg || !rightImg || !centerBar) return;
-
-    const leftPanel = leftImg.closest(".imagePanel");
-    const rightPanel = rightImg.closest(".imagePanel");
-
-    // Reset default two-page spread layout
-    centerBar.style.display = "block";
-    rightPanel.style.display = "block";
-    if (leftPanel) leftPanel.style.width = "";
-    leftImg.className = "pageImage leftPage";
-    rightImg.className = "pageImage rightPage";
-
-    // Scenario A: Standard 2-item Array -> Standard Pair [left, right]
-    if (Array.isArray(item) && item.length === 2) {
-        leftImg.src = `Focus (${item[0]}).jpg`;
-        rightImg.src = `Focus (${item[1]}).jpg`;
-        return;
-    }
-
-    // Scenario B: Single-item array container format -> Single A3 / Image file
-    let targetFile = "";
-    if (Array.isArray(item) && item.length === 1) {
-        targetFile = String(item[0]);
-    } else {
-        targetFile = String(item);
-    }
-
-    if (targetFile) {
-        leftImg.src = targetFile;
-        rightImg.removeAttribute("src");
-        rightPanel.style.display = "none";
-        centerBar.style.display = "none";
-        if (leftPanel) leftPanel.style.width = "100%";
-        leftImg.className = "pageImage";
-    }
+const style = document.createElement("style");
+style.textContent = `
+.standalone-purple-overlay {
+  position: fixed !important;
+  background: #9333ea !important;
+  border: 2px solid #a855f7 !important;
+  border-radius: 4px !important;
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  z-index: 999999 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
+  box-shadow: 0 0 10px #9333ea !important;
+  transition: background 0.2s !important;
 }
 
-</script>
-<script>
-// ==========================================
-// Standalone Transparent & Unified ~P Answer Modal Module (Touch Draggable, Delete Key, Blank on Move)
-// ==========================================
-(function() {
-    // 1. Inject Styles for Fully Unified, Rounded, Transparent-Background Container & Red Font Content
-    const style = document.createElement('style');
-    style.innerHTML = `
-        #pAnswerModal {
-            position: absolute;
-            z-index: 9999;
-            top: 100px;
-            left: 100px;
-            background: transparent;
-            border: none;
-            padding: 0;
-            box-shadow: none;
-            width: auto;
-            font-family: sans-serif;
-            user-select: none;
-            cursor: move;
-            display: inline-flex;
-            align-items: center;
-            touch-action: none;
-        }
-        #pModalContentRow {
-            display: inline-flex;
-            align-items: center;
-            background: #ffffff;
-            border: 1px solid #ccc;
-            padding: 4px 8px;
-            border-radius: 16px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-            gap: 8px;
-        }
-        #pModalBody {
-            min-height: auto;
-            display: inline-flex;
-            align-items: center;
-            justify-content: flex-start;
-            text-align: left;
-            font-size: 13px;
-            font-weight: bold;
-            background: transparent;
-            padding: 0 2px;
-            border: none;
-            white-space: pre-wrap;
-            word-break: break-word;
-            min-width: 140px; 
-            max-width: 350px;
-            color: red;
-        }
-        .p-modal-btn {
-            background: transparent;
-            border: none;
-            padding: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            color: red;
-        }
-        .p-modal-btn:hover {
-            background: rgba(255, 0, 0, 0.05);
-            border-radius: 50%;
-        }
-        /* Red toggle arrow outside the white area */
-        #pToggleArrow {
-            background: transparent;
-            border: none;
-            color: red;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            padding: 0 4px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        #pToggleArrow:hover {
-            opacity: 0.8;
-        }
-    `;
-    document.head.appendChild(style);
+.standalone-purple-overlay:hover {
+  background: #7e22ce !important;
+}
+`;
+document.head.appendChild(style);
 
-    // 2. Inject HTML Markup for the Unified Modal with the Toggle Arrow initially on the left
-    const modalHTML = `
-        <div id="pAnswerModal" style="display: none;" tabindex="0">
-            <button id="pToggleArrow" title="Toggle Position">&#9664</button>
-            <div id="pModalContentRow">
-                <button id="pPrevBtn" class="p-modal-btn" title="Back">&#9664;</button>
-                <div id="pModalBody">Loading...</div>
-                <button id="pNextBtn" class="p-modal-btn" title="Next">&#9654;</button>
-            </div>
-        </div>
-    `;
-    const div = document.createElement('div');
-    div.innerHTML = modalHTML;
-    
-    // Append the modal directly inside your spread display container so it scrolls naturally with it
-    const spreadContainer = document.querySelector('#displayArea') || document.body;
-    if (spreadContainer !== document.body && getComputedStyle(spreadContainer).position === 'static') {
-        spreadContainer.style.position = 'relative';
-    }
-    spreadContainer.appendChild(div);
+function manageStandaloneOverlays() {
+  const overlay = document.getElementById("studentWheelOverlay");
+  const spinnerActive = overlay && overlay.style.display === "flex";
 
-    // 3. Attach click handlers to the Answer buttons already present in the HTML structure
-    function setupTriggerButtons() {
-        const btnIds = ['loadAnswerBtn', 'loadAnswerBtnRight'];
-        
-        btnIds.forEach(id => {
-            const triggerBtn = document.getElementById(id);
-            if (triggerBtn && !triggerBtn.hasAttribute('data-modal-bound')) {
-                triggerBtn.setAttribute('data-modal-bound', 'true');
-                triggerBtn.addEventListener('click', () => {
-                    parsePAnswers();
-                    const modal = document.getElementById('pAnswerModal');
-                    modal.style.display = 'inline-flex';
-                    modal.focus();
-                });
-            }
-        });
-    }
+  const win = document.getElementById("tmWindow");
+  const existingTmOverlay = document.getElementById("standaloneTmStudentOverlay");
+  const existingLeftOverlay = document.getElementById("standaloneLeftColOverlay");
+  const existingRightOverlay = document.getElementById("standaloneRightColOverlay");
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', setupTriggerButtons);
-    } else {
-        setupTriggerButtons();
-    }
+  if (spinnerActive && win && win.classList.contains("tmOpen")) {
+    // 1. Cover over the student button inside the Tallyman modal
+    const tmTile = document.getElementById("tmTile");
+    if (tmTile && !existingTmOverlay) {
+      const tmOv = document.createElement("div");
+      tmOv.id = "standaloneTmStudentOverlay";
+      tmOv.className = "standalone-purple-overlay";
+      tmOv.textContent = "SPIN";
+      
+      const rect = tmTile.getBoundingClientRect();
+      tmOv.style.left = rect.left + "px";
+      tmOv.style.top = rect.top + "px";
+      tmOv.style.width = rect.width + "px";
+      tmOv.style.height = rect.height + "px";
+      document.body.appendChild(tmOv);
 
-    const observer = new MutationObserver(setupTriggerButtons);
-    observer.observe(document.body, { childList: true, subtree: true });
-
-    // 4. State & Logic Handler
-    let pAnswers = [];
-    let currentIndex = 0; 
-
-    function parsePAnswers() {
-        const scriptArea = document.getElementById('worksheetScript');
-        if (!scriptArea) {
-            pAnswers = [];
-            return;
-        }
-        const lines = scriptArea.value.split('\n');
-        pAnswers = [];
-        
-        lines.forEach(line => {
-            let trimmed = line.trim();
-            if (trimmed.startsWith('~P')) {
-                let content = trimmed.substring(2).trim();
-                if (content.startsWith('.')) {
-                    content = content.substring(1).trim();
-                }
-                let answerContent = "P. " + content;
-                
-                let wrappedContent = answerContent.match(/.{1,50}/g).join('\u200B');
-                pAnswers.push(wrappedContent);
-            }
-        });
-        currentIndex = 0;
-        updatePModalDisplay();
-    }
-
-    function updatePModalDisplay() {
-        const bodyEl = document.getElementById('pModalBody');
-        
-        if (pAnswers.length === 0) {
-            bodyEl.textContent = "None found";
-            return;
-        }
-        
-        bodyEl.textContent = pAnswers[currentIndex];
-    }
-
-    // Navigation triggers
-    document.getElementById('pNextBtn').addEventListener('click', (e) => {
+      tmOv.addEventListener("click", (e) => {
         e.stopPropagation();
-        if (pAnswers.length === 0) return;
-        currentIndex = (currentIndex + 1) % pAnswers.length;
-        updatePModalDisplay();
-    });
+        if (window.appController && typeof window.appController.nextColor === "function") {
+          window.appController.nextColor();
+        }
+        if (typeof window.spinWheel === "function") {
+          window.spinWheel();
+        }
+      });
+    } else if (existingTmOverlay && tmTile) {
+      const rect = tmTile.getBoundingClientRect();
+      existingTmOverlay.style.left = rect.left + "px";
+      existingTmOverlay.style.top = rect.top + "px";
+      existingTmOverlay.style.width = rect.width + "px";
+      existingTmOverlay.style.height = rect.height + "px";
+    }
 
-    document.getElementById('pPrevBtn').addEventListener('click', (e) => {
+    // Helper to find student name elements in control columns
+    const findStudentNameElement = (selectorList) => {
+      for (const sel of selectorList) {
+        const el = document.querySelector(sel);
+        if (el) return el;
+      }
+      return null;
+    };
+
+    // 2. Cover over the student name element in the left control column area
+    const leftStudentEl = findStudentNameElement([
+      ".left-control-panel .studentTile", ".leftColumn .studentTile", "#leftColumn .studentTile",
+      ".left-control-panel #studentDisplay", ".leftColumn #studentDisplay", "#leftColumn #studentDisplay",
+      ".left-control-panel [data-active-student]", ".leftColumn [data-active-student]",
+      ".studentTile", "#studentDisplay"
+    ]);
+
+    if (leftStudentEl && !existingLeftOverlay) {
+      const leftOv = document.createElement("div");
+      leftOv.id = "standaloneLeftColOverlay";
+      leftOv.className = "standalone-purple-overlay";
+      leftOv.textContent = "SPIN";
+
+      const rect = leftStudentEl.getBoundingClientRect();
+      leftOv.style.left = rect.left + "px";
+      leftOv.style.top = rect.top + "px";
+      leftOv.style.width = rect.width + "px";
+      leftOv.style.height = rect.height + "px";
+      document.body.appendChild(leftOv);
+
+      leftOv.addEventListener("click", (e) => {
         e.stopPropagation();
-        if (pAnswers.length === 0) return;
-        currentIndex = (currentIndex - 1 + pAnswers.length) % pAnswers.length;
-        updatePModalDisplay();
-    });
+        leftStudentEl.click();
+      });
+    } else if (existingLeftOverlay && leftStudentEl) {
+      const rect = leftStudentEl.getBoundingClientRect();
+      existingLeftOverlay.style.left = rect.left + "px";
+      existingLeftOverlay.style.top = rect.top + "px";
+      existingLeftOverlay.style.width = rect.width + "px";
+      existingLeftOverlay.style.height = rect.height + "px";
+    }
 
-    // Toggle Arrow functionality
-    const modal = document.getElementById('pAnswerModal');
-    const toggleArrow = document.getElementById('pToggleArrow');
-    const contentRow = document.getElementById('pModalContentRow');
+    // 3. Cover over the student name element in the right control column area
+    const rightStudentEl = findStudentNameElement([
+      ".right-control-panel .studentTile", ".rightColumn .studentTile", "#rightColumn .studentTile",
+      ".right-control-panel #studentDisplay", ".rightColumn #studentDisplay", "#rightColumn #studentDisplay",
+      ".right-control-panel [data-active-student]", ".rightColumn [data-active-student]"
+    ]);
 
-    toggleArrow.addEventListener('click', (e) => {
+    if (rightStudentEl && !existingRightOverlay) {
+      const rightOv = document.createElement("div");
+      rightOv.id = "standaloneRightColOverlay";
+      rightOv.className = "standalone-purple-overlay";
+      rightOv.textContent = "SPIN";
+
+      const rect = rightStudentEl.getBoundingClientRect();
+      rightOv.style.left = rect.left + "px";
+      rightOv.style.top = rect.top + "px";
+      rightOv.style.width = rect.width + "px";
+      rightOv.style.height = rect.height + "px";
+      document.body.appendChild(rightOv);
+
+      rightOv.addEventListener("click", (e) => {
         e.stopPropagation();
-        if (toggleArrow.textContent === '◄') {
-            toggleArrow.textContent = '►';
-            toggleArrow.style.marginLeft = '4px';
-            toggleArrow.style.marginRight = '0';
-            modal.appendChild(toggleArrow);
-        } else {
-            toggleArrow.textContent = '◄';
-            toggleArrow.style.marginLeft = '0';
-            toggleArrow.style.marginRight = '4px';
-            modal.insertBefore(toggleArrow, contentRow);
-        }
-    });
-
-    // 5. Clear functionality integration
-    document.addEventListener('click', (e) => {
-        if (e.target.matches('#clearBtn, .clear-btn, [id*="clear"], [class*="clear"]')) {
-            if (modal) modal.style.display = 'none';
-            pAnswers = [];
-            currentIndex = 0;
-        }
-    });
-
-    // 6. Make the Entire Modal Draggable (Mouse + Touch Support & Blank Text on Move)
-    let isDragging = false, startX, startY;
-
-    function startDrag(clientX, clientY, target) {
-        if (target.tagName === 'BUTTON') return;
-        isDragging = true;
-        startX = clientX - modal.offsetLeft;
-        startY = clientY - modal.offsetTop;
-        
-        // Blank out text when moving starts
-        const bodyEl = document.getElementById('pModalBody');
-        if (bodyEl) bodyEl.textContent = "";
+        rightStudentEl.click();
+      });
+    } else if (existingRightOverlay && rightStudentEl) {
+      const rect = rightStudentEl.getBoundingClientRect();
+      existingRightOverlay.style.left = rect.left + "px";
+      existingRightOverlay.style.top = rect.top + "px";
+      existingRightOverlay.style.width = rect.width + "px";
+      existingRightOverlay.style.height = rect.height + "px";
     }
 
-    function onDrag(clientX, clientY) {
-        if (!isDragging) return;
-        modal.style.left = `${clientX - startX}px`;
-        modal.style.top = `${clientY - startY}px`;
-    }
+  } else {
+    if (existingTmOverlay) existingTmOverlay.remove();
+    if (existingLeftOverlay) existingLeftOverlay.remove();
+    if (existingRightOverlay) existingRightOverlay.remove();
+  }
+}
 
-    function stopDrag() {
-        isDragging = false;
-    }
+/* Fix window dragging jitter by using requestAnimationFrame and direct transform/style management */
+function initSmoothDrag() {
+  const win = document.getElementById("tmWindow");
+  const handle = document.getElementById("tmDrag");
 
-    // Mouse Events
-    modal.addEventListener('mousedown', (e) => {
-        startDrag(e.clientX, e.clientY, e.target);
-        e.preventDefault();
+  if (!win || !handle) return;
+
+  let dragging = false;
+  let startX = 0, startY = 0;
+  let initialLeft = 0, initialTop = 0;
+
+  handle.addEventListener("mousedown", (e) => {
+    dragging = true;
+    startX = e.clientX;
+    startY = e.clientY;
+
+    const rect = win.getBoundingClientRect();
+    initialLeft = rect.left;
+    initialTop = rect.top;
+
+    win.style.right = "auto";
+    win.style.bottom = "auto";
+    win.style.left = initialLeft + "px";
+    win.style.top = initialTop + "px";
+
+    e.preventDefault();
+  });
+
+  document.addEventListener("mousemove", (e) => {
+    if (!dragging) return;
+
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    window.requestAnimationFrame(() => {
+      win.style.left = (initialLeft + dx) + "px";
+      win.style.top = (initialTop + dy) + "px";
+      manageStandaloneOverlays();
     });
-    document.addEventListener('mousemove', (e) => onDrag(e.clientX, e.clientY));
-    document.addEventListener('mouseup', stopDrag);
+  });
 
-    // Touch Events
-    modal.addEventListener('touchstart', (e) => {
-        if (e.target.tagName === 'BUTTON') return;
-        if (e.touches.length === 1) {
-            startDrag(e.touches[0].clientX, e.touches[0].clientY, e.target);
-            e.preventDefault();
-        }
-    }, { passive: false });
+  document.addEventListener("mouseup", () => {
+    dragging = false;
+  });
+}
 
-    document.addEventListener('touchmove', (e) => {
-        if (isDragging && e.touches.length === 1) {
-            onDrag(e.touches[0].clientX, e.touches[0].clientY);
-            e.preventDefault();
-        }
-    }, { passive: false });
+// Initialize smooth dragging once DOM is ready
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initSmoothDrag);
+} else {
+  setTimeout(initSmoothDrag, 100);
+}
 
-    document.addEventListener('touchend', stopDrag);
+setInterval(manageStandaloneOverlays, 50);
 
-    // 7. Delete / Backspace Key Removal functionality
-    window.addEventListener('keydown', (e) => {
-        if (e.key === 'Delete' || e.key === 'Backspace') {
-            if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') return;
-            if (modal && getComputedStyle(modal).display !== 'none') {
-                modal.style.display = 'none';
-                pAnswers = [];
-                currentIndex = 0;
-            }
-        }
-    });
+console.log("Standalone Smooth Drag & Overlay Script Loaded");
+
 })();
 </script>
 
 <script>
 /* ==========================================================
-    HS HOTSPOT IMAGE BUTTON (Aligned with QR Position)
+   QR & HS HOTSPOT CONTROLS
+   Consolidated Standalone Script
 ========================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    // 1. Create and insert the HS button in the Left Column
-    const leftColumn = document.getElementById("leftColumn");
-    if (leftColumn) {
-        const hsLeftBtn = document.createElement("button");
-        hsLeftBtn.id = "hsLeftBtn";
-        hsLeftBtn.textContent = "HS";
-        hsLeftBtn.style.cssText = "height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;";
-        
-        const qrLeftBtn = document.getElementById("ppeLeftBtn");
-        if (qrLeftBtn && qrLeftBtn.nextSibling) {
-            leftColumn.insertBefore(hsLeftBtn, qrLeftBtn.nextSibling);
-        } else {
-            leftColumn.appendChild(hsLeftBtn);
-        }
+    const viewer = document.getElementById("viewer");
+    if (!viewer) return;
 
-        hsLeftBtn.onclick = toggleHsHotspot;
+
+    /* ======================================================
+       REMOVE / CLOSE HOTSPOT
+    ====================================================== */
+
+    function closeHotspots() {
+
+        const qrExisting = viewer.querySelector(".qrHotspotImg");
+        const hsExisting = viewer.querySelector(".hsHotspotImg");
+
+        if (qrExisting) qrExisting.remove();
+        if (hsExisting) hsExisting.remove();
+
+        if (typeof selectedEl !== "undefined") {
+            selectedEl = null;
+        }
     }
 
-    // 2. Create and insert the HS button in the Right Column
-    const rightColumn = document.getElementById("rightColumn");
-    if (rightColumn) {
-        const hsRightBtn = document.createElement("button");
-        hsRightBtn.id = "hsRightBtn";
-        hsRightBtn.textContent = "HS";
-        hsRightBtn.style.cssText = "height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;";
-        
-        const qrRightBtn = document.getElementById("ppeRightBtn");
-        if (qrRightBtn && qrRightBtn.nextSibling) {
-            rightColumn.insertBefore(hsRightBtn, qrRightBtn.nextSibling);
-        } else {
-            rightColumn.appendChild(hsRightBtn);
-        }
 
-        hsRightBtn.onclick = toggleHsHotspot;
-    }
+    /* ======================================================
+       CREATE HOTSPOT IMAGE
+    ====================================================== */
 
-    // 3. Toggle Function for HS Hotspot (Matching QR dimensions and placement)
-    function toggleHsHotspot() {
-        const viewer = document.getElementById("viewer");
-        if (!viewer) return;
-
-        const existing = viewer.querySelector(".hsHotspotImg");
-        if (existing) {
-            if (typeof selectedEl !== "undefined" && selectedEl === existing) {
-                selectedEl = null;
-            }
-            existing.remove();
-            return;
-        }
+    function createHotspot(src, className) {
 
         const img = document.createElement("img");
-        img.src = "IEP32_FL3_PALME2746_0!92V2x8.png";
-        img.className = "draggable overlayPng hsHotspotImg";
-        
-        // Exact same dimensions and placement as the QR hotspot image
+
+        img.src = src;
+        img.className = `draggable overlayPng ${className}`;
+
         img.style.position = "absolute";
         img.style.width = "190px";
         img.style.zIndex = "1000000";
@@ -7388,22 +7912,115 @@ document.addEventListener("DOMContentLoaded", () => {
         if (typeof selectedEl !== "undefined") {
             selectedEl = img;
         }
+
+        return img;
     }
 
-    // 4. Handle clicking off the HS hotspot image
-    const viewer = document.getElementById("viewer");
-    if (viewer) {
-        viewer.addEventListener("pointerdown", (e) => {
-            if (e.target === viewer || e.target.id === "spread" || e.target.id === "centerBar" || e.target.classList.contains("pageImage")) {
-                if (typeof selectedEl !== "undefined" && selectedEl && selectedEl.classList.contains("hsHotspotImg")) {
-                    selectedEl.remove();
-                    selectedEl = null;
-                }
+
+    /* ======================================================
+       QR HOTSPOT
+    ====================================================== */
+
+    window.toggleQrHotspot = function() {
+
+        const existing = viewer.querySelector(".qrHotspotImg");
+
+        // If QR is already open, close it.
+        if (existing) {
+
+            if (typeof selectedEl !== "undefined" &&
+                selectedEl === existing) {
+                selectedEl = null;
             }
-        });
+
+            existing.remove();
+            return;
+        }
+
+        // Close HS first.
+        const hsExisting = viewer.querySelector(".hsHotspotImg");
+        if (hsExisting) hsExisting.remove();
+
+        createHotspot(
+            "PerfectlyPracticalEnglish_with_Hotspot.app.jpg",
+            "qrHotspotImg"
+        );
+    };
+
+
+    /* ======================================================
+       HS HOTSPOT
+    ====================================================== */
+
+    window.toggleHsHotspot = function() {
+
+        const existing = viewer.querySelector(".hsHotspotImg");
+
+        // If HS is already open, close it.
+        if (existing) {
+
+            if (typeof selectedEl !== "undefined" &&
+                selectedEl === existing) {
+                selectedEl = null;
+            }
+
+            existing.remove();
+            return;
+        }
+
+        // Close QR first.
+        const qrExisting = viewer.querySelector(".qrHotspotImg");
+        if (qrExisting) qrExisting.remove();
+
+        createHotspot(
+            "IEP32_FL3_PALME2746_0!92V2x8.png",
+            "hsHotspotImg"
+        );
+    };
+
+
+    /* ======================================================
+       EXISTING LEFT / RIGHT BUTTONS
+       
+       The buttons already exist in the HTML:
+         #hsLeftBtn
+         #hsRightBtn
+       
+       We do NOT create new buttons.
+    ====================================================== */
+
+    const hsLeftBtn = document.getElementById("hsLeftBtn");
+    const hsRightBtn = document.getElementById("hsRightBtn");
+
+    if (hsLeftBtn) {
+        hsLeftBtn.onclick = window.toggleHsHotspot;
     }
+
+    if (hsRightBtn) {
+        hsRightBtn.onclick = window.toggleHsHotspot;
+    }
+
+
+    /* ======================================================
+       CLICK OUTSIDE HOTSPOT = CLOSE
+    ====================================================== */
+
+    viewer.addEventListener("pointerdown", (e) => {
+
+        if (
+            e.target === viewer ||
+            e.target.id === "spread" ||
+            e.target.id === "centerBar" ||
+            e.target.classList.contains("pageImage")
+        ) {
+            closeHotspots();
+        }
+
+    });
 
 });
 </script>
+
 </body>
 </html>
+
