@@ -247,7 +247,7 @@ R_Q1_Speaking_Exam_Gamma_Suno.html
   <h3 class="collapsible">Grade 7 Grammar</h3>
   <div class="content" data-grid="true">
 
-
+G_Grammar_at_7-11.html
 G_Game_Ants_Grade_7.html
 G_Game_Asteroids_Grade_7.html
 G_Game_B-52_Stratofortress_Grade_7.html
@@ -291,7 +291,7 @@ V_Vocabulary_Tiles_Grade_7.html
 
 
 
-G_A_Grammar_at_7-11.html
+G_Grammar_at_7-11.html
 GB_Universal_Gameboard.html
 G_Game_Adverbs of Frequency.html
 G_Game_Ants_EFL.html
@@ -339,7 +339,7 @@ V_Word_Search_EFL.html
   <h3 class="collapsible">EFL Grammar Lesson and Quizzes</h3>
   <div class="content" data-grid="true">
 
-G_A_Basic_English_Toolkit.html
+G_Basic_English_Toolkit.html
 G_Grammar_Lesson_Dialogues.html
 G_Grammar_Lesson_Monologues.html
 G_Grammar_Lesson_Tips.html
@@ -614,7 +614,8 @@ document.addEventListener("DOMContentLoaded", function () {
     let name = filename.replace(/\.html$/i, '');
     
     // Handle specific prefixes (Game prefixes, standard G_, V_, GB_, WS_, etc.)
-    name = name.replace(/^(G_Game_|V_Game_|GB_|G_|V_|WS_)/, '');
+name = name.replace(/^(A_|G_Game_|V_Game_|GB_|CDR_|WSR_|WS_|RJ_|A_|G_|P_|R_|S_|T_|V_|W_)/, '');
+
 
     // Strip out trailing level/suffix indicators like _Grade_7, _EFL, etc.
     name = name.replace(/_Grade_\d+$/i, '');
