@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>My Personal Profile Writing Lesson</title>
 
 <style>
@@ -14,6 +15,7 @@
         background: #111;
         font-family: Arial, Helvetica, sans-serif;
         height: 100vh;
+        height: 100dvh;
         overflow: hidden;
         display: flex;
         flex-direction: column;
@@ -22,73 +24,108 @@
     }
 
     #slide-container {
-        width: 95vw;
-        height: 85vh;
+        width: 100vw;
+        height: 100vh;
+        height: 100dvh;
         display: flex;
         justify-content: center;
         align-items: center;
+        padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
 
     img {
         max-width: 100%;
         max-height: 100%;
         object-fit: contain;
-        border-radius: 12px;
-        box-shadow: 0 0 25px rgba(0,0,0,0.6);
+        border-radius: 0;
         transition: opacity 0.4s ease;
     }
 
     #controls {
-        margin-top: 20px;
+        position: fixed;
+        bottom: max(15px, env(safe-area-inset-bottom));
+        left: 50%;
+        transform: translateX(-50%);
         display: flex;
         align-items: center;
-        gap: 20px;
+        gap: 10px;
+        background: rgba(0, 0, 0, 0.6);
+        padding: 8px 15px;
+        border-radius: 30px;
+        backdrop-filter: blur(5px);
+        z-index: 1000;
     }
 
     button {
-        font-size: 22px;
-        padding: 12px 25px;
+        font-size: 16px;
+        padding: 8px 14px;
         border: none;
-        border-radius: 10px;
+        border-radius: 20px;
         cursor: pointer;
-        background: white;
+        background: rgba(255, 255, 255, 0.9);
         color: #333;
+        white-space: nowrap;
     }
 
     button:hover {
-        background: #ddd;
+        background: #fff;
     }
 
     #counter {
         color: white;
-        font-size: 22px;
-        min-width: 100px;
+        font-size: 16px;
+        min-width: 60px;
         text-align: center;
     }
 
     #title {
-        position: absolute;
-        top: 15px;
+        position: fixed;
+        top: max(15px, env(safe-area-inset-top));
+        left: 50%;
+        transform: translateX(-50%);
         color: white;
-        font-size: 28px;
+        font-size: 20px;
         font-weight: bold;
+        z-index: 1000;
+        background: rgba(0, 0, 0, 0.5);
+        padding: 5px 15px;
+        border-radius: 15px;
+        backdrop-filter: blur(5px);
+        pointer-events: none;
     }
 
     .fade {
         opacity: 0;
     }
 
+    /* Mobile landscape adjustments */
+    @media (max-height: 500px) {
+        #controls {
+            padding: 5px 10px;
+            gap: 6px;
+        }
+        button {
+            font-size: 14px;
+            padding: 6px 10px;
+        }
+        #counter {
+            font-size: 14px;
+            min-width: 50px;
+        }
+    }
 </style>
 </head>
 
 <body>
+
+<div id="title">My Personal Profile Writing Lesson</div>
 
 <div id="slide-container">
     <img id="slide" alt="Lesson Slide">
 </div>
 
 <div id="controls">
-    <button onclick="previousSlide()">◀ Previous</button>
+    <button onclick="previousSlide()">◀ Prev</button>
 
     <div id="counter">
         1 / 4
@@ -96,7 +133,7 @@
 
     <button onclick="nextSlide()">Next ▶</button>
 
-    <button onclick="toggleFullScreen()">⛶ Full Screen</button>
+    <button onclick="toggleFullScreen()">⛶ Full</button>
 </div>
 
 
@@ -107,10 +144,8 @@ ChatGPT Image Aug 8, 2026, 09_53_48 PM.jpg
 Gemini_Generated_Image_mf5g36mf5g36mf5g.jfif
 ChatGPT Image Aug 8, 2026, 09_53_48 PM.png
 a394bf4d-dfee-4771-aa9e-1a8d01127de1-0.jpg
-
-
-
-
+Gemini_Generated_Image_mf5g36mf5g36mf5g.jfif
+Gemini_Generated_Image_2o91q52o91q52o91.jfif
 `
 .trim()
 .split("\n")
@@ -226,7 +261,7 @@ function toggleAutoAdvance() {
     } else {
 
         autoRunning = true;
-        autoBtn.textContent = "⏸ Stop Auto";
+        autoBtn.textContent = "⏸ Stop";
 
         autoTimer = setInterval(() => {
             nextSlide();
