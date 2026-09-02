@@ -29,13 +29,14 @@ h1 {
 textarea {
     width: 100%;
     height: 90px;
+    min-height: 90px;
+    resize: vertical;
     font-family: Arial, sans-serif;
     font-size: 14px;
     padding: 10px;
     border: 2px solid #ccc;
     border-radius: 8px;
     outline: none;
-    resize: none;
     margin-bottom: 10px;
 }
 textarea:focus {
@@ -249,7 +250,6 @@ function drawPostIt() {
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
 
-    // Locked directly to the top-left corner with standard padding
     let y = padding;
 
     for (let i = 0; i < wrappedLines.length; i++) {
@@ -260,12 +260,36 @@ function drawPostIt() {
     }
 }
 
+// Generates international date (YYYY-MM-DD), military time (HHMMSS), and uses the first line as filename
+function makeFilename() {
+    const rawText = textContent.replace(/\r/g, "");
+    const firstLine = rawText.split("\n")[0] || "Post-it";
+    
+    // Sanitize unsafe filename characters and limit length
+    let safeName = firstLine.replace(/[<>:"/\\|?*\x00-\x1F]/g, "").trim().substring(0, 30);
+    if (!safeName) safeName = "Post-it";
+
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    
+    const hours = String(d.getHours()).padStart(2, "0");
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    const seconds = String(d.getSeconds()).padStart(2, "0");
+
+    const dateStr = `${year}-${month}-${day}`;
+    const timeStr = `${hours}${minutes}${seconds}`;
+
+    return `${safeName} - ${dateStr} - ${timeStr}.jpg`;
+}
+
 function triggerDownload() {
     drawPostIt();
     canvas.toBlob((blob) => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
-        link.download = "post-it.jpg";
+        link.download = makeFilename();
         link.href = url;
         link.click();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
