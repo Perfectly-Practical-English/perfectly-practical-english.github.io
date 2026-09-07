@@ -336,9 +336,9 @@ button:disabled{ background:#9fbfe4; cursor:not-allowed; }
         </div>
       </div>
 
-      <div class="tele-overlay" id="teleOverlay">
-        0 chars · 0 sent
-      </div>
+<div class="tele-overlay" id="teleOverlay">
+  0 chars · 0%
+</div>
     </div>
   </div>
 
@@ -1190,22 +1190,92 @@ selectBtn.addEventListener("click", () => {
   const section = window.SCRAMBLE_SECTIONS[window.SCRAMBLE_INDEX];
   if (!section) return;
 
-  // 1️⃣ Load section text
-  teleEdit.innerText = section.text.trim();
-  rebuildLinesFromSource(teleEdit.innerText);
-
+// 1️⃣ Load section text & save baseline for change tracking
+  window.originalSectionText = section.text.trim();
+  teleEdit.innerText = window.originalSectionText;
+  if (window.rebuildLinesFromSource) {
+    window.rebuildLinesFromSource(teleEdit.innerText);
+  }
   // 2️⃣ Load matching vocab
   renderVocabForSection(section.name);
 
   // 3️⃣ Reset state
   currentLineIndex = 0;
-  teleScrollWrapper.scrollTop = 0;
+  if (typeof teleScrollWrapper !== 'undefined') {
+    teleScrollWrapper.scrollTop = 0;
+  }
 
   updateOverlay();
-  updatePlaceholder();
+  if (typeof updatePlaceholder === 'function') {
+    updatePlaceholder();
+  }
 });
 
+function updateOverlay() {
+  const teleEdit = document.getElementById('teleEdit');
+  const teleOverlay = document.getElementById('teleOverlay');
+  
+  if (!teleEdit || !teleOverlay) return;
 
+  const currentText = teleEdit.innerText || "";
+  const totalChars = currentText.length;
+  
+  // 1. Calculate sentence count using punctuation
+  const sentenceCount = (currentText.match(/[.!?]+/g) || []).length;
+
+  // 2. Calculate word-level change percentage
+  let changePercent = 0;
+  const originalText = window.originalSectionText || "";
+  
+  const origWords = originalText.trim().split(/\s+/).filter(Boolean);
+  const currWords = currentText.trim().split(/\s+/).filter(Boolean);
+  
+  if (origWords.length > 0) {
+    function getWordEditDistance(a, b) {
+      const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(0));
+      for (let i = 0; i <= b.length; i++) matrix[i][0] = i;
+      for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+      for (let i = 1; i <= b.length; i++) {
+        for (let j = 1; j <= a.length; j++) {
+          const cost = a[j - 1] === b[i - 1] ? 0 : 1;
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j] + 1,     // deletion
+            matrix[i][j - 1] + 1,     // insertion
+            matrix[i - 1][j - 1] + cost // substitution
+          );
+        }
+      }
+      return matrix[b.length][a.length];
+    }
+
+    const edits = getWordEditDistance(origWords, currWords);
+    changePercent = Math.min(100, Math.max(0, Math.round((edits / origWords.length) * 100)));
+  } else if (currWords.length > 0) {
+    changePercent = 100;
+  }
+
+  // 3. Display everything together cleanly
+  teleOverlay.textContent = `${totalChars} chars · ${changePercent}% changed · ${sentenceCount} sent`;
+}
+
+
+// Auto-updates the percentage and character count live in the background
+   setInterval(() => {
+     if (typeof updateOverlay === 'function') {
+       updateOverlay();
+     }
+   }, 250);
+
+   // Instant scroll-triggered update
+   const teleScrollWrapper = document.getElementById('teleScrollWrapper');
+   if (teleScrollWrapper) {
+     teleScrollWrapper.addEventListener('scroll', () => {
+       if (typeof updateOverlay === 'function') {
+         updateOverlay();
+       }
+     });
+   }
 })();
 
 
@@ -3756,8 +3826,8 @@ const style = document.createElement("style");
 style.textContent = `
 #instructionsBtn{
   position:fixed;
-  bottom:20px;
-  right:20px;
+  bottom:35px;
+  left:20px; /* Changed from right:20px to left:20px */
   padding:10px 16px;
   background:#2e8b57;
   color:#fff;
