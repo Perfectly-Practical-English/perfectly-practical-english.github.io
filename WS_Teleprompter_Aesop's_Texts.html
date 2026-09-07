@@ -3147,9 +3147,12 @@ if (typeof window.saveResult === 'function') {
 
 /* Scoreboard button handlers */
 copyScoreBtn.addEventListener('click', async () => {
+    const meta = gsScoreMeta.textContent || '';
     const text = gsScoreText.innerText || '';
+    const fullScoreboardText = meta ? (meta + "\n\n" + text) : text;
+    
     try {
-        await navigator.clipboard.writeText(text);
+        await navigator.clipboard.writeText(fullScoreboardText);
         showToast('Copied scoreboard text');
     } catch(e) {
         alert('Copy failed');
@@ -3700,13 +3703,16 @@ if (!scoreboard) {
         return `${rawFilename}|${sectionName}|${name}|${id}|${dateStr}`;
       };
 
-      // Hijack buttons in this section
+// Hijack buttons in this section (Excluding the copy button so it never downloads)
       const buttons = section.querySelectorAll('button, .scoreboard button, #scoreboardBtns button');
       buttons.forEach(btn => {
         const idLower = btn.id.toLowerCase();
+        if (idLower.includes('copy')) return; // Skip copy button so it only copies to clipboard
+
         const classLower = btn.className?.toLowerCase() || '';
         const isTextButton = /text|txt/.test(idLower) || /text|txt/.test(classLower);
-        hijackDownloadButton(btn, () => {
+      	hijackDownloadButton(btn, () => {
+  const meta = document.getElementById('gsScoreMeta')?.textContent || '';
   const el =
     section.querySelector('pre') ||
     section.querySelector('.scoreboard pre') ||
@@ -3715,10 +3721,10 @@ if (!scoreboard) {
     document.getElementById('vocabScoreOutput') ||
     document.getElementById('gsScoreText');
 
-  return (el?.value ?? el?.textContent ?? el?.innerText ?? '').trim();
+  const text = (el?.value ?? el?.textContent ?? el?.innerText ?? '').trim();
+  return meta ? (meta + "\n\n" + text) : text;
 }, getFilename, isTextButton);
       });
-
     }, true);
   });
 
