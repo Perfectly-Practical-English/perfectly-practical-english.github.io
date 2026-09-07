@@ -1,0 +1,4050 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>Teleprompter</title>
+<script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+:root {
+  --bg: #f7fdfb;
+  --blue: #1976d2;
+  --border-thickness: 10px;
+}
+* { box-sizing: border-box; margin:0; padding:0; }
+html,body{
+  height:100%;
+  background:var(--bg);
+  font-family:Arial,Helvetica,sans-serif;
+  color:#222;
+
+  overflow-y: auto;     /* allow scrolling */
+  overflow-x: hidden;   /* prevent sideways scroll */
+
+  scrollbar-width: none;        /* Firefox */
+}
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;                /* Chrome/Safari */
+}
+/* Desktop (unchanged) */
+body{
+  padding:50px;
+  padding-left:calc(50px + env(safe-area-inset-left));
+  padding-right:calc(50px + env(safe-area-inset-right));
+  padding-bottom:calc(50px + env(safe-area-inset-bottom));
+}
+
+
+/* --- MOBILE FIX HERE --- */
+/* BASE CONTAINER (put this BEFORE media queries) */
+.container {
+  max-width: 900px;
+  margin: 0 auto;
+
+  padding-top: 10px;
+  padding-right: 12px;
+  padding-bottom: 12px;
+  padding-left: 12px;
+}
+
+/* MOBILE */
+@media (max-width: 700px) {
+  body{
+    padding: 8px;
+    padding-left: calc(8px + env(safe-area-inset-left));
+    padding-right: calc(8px + env(safe-area-inset-right));
+    padding-bottom: calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .container{
+    max-width: 100%;
+padding-top: 10px;
+padding-right: 8px;
+padding-bottom: 8px;
+padding-left: 8px;  }
+}
+
+/* DESKTOP */
+@media (min-width: 701px) {
+  body{
+    padding: 50px;
+    padding-left: calc(50px + env(safe-area-inset-left));
+    padding-right: calc(50px + env(safe-area-inset-right));
+    padding-bottom: calc(50px + env(safe-area-inset-bottom));
+  }
+}
+
+.header{
+  text-align: center;
+  font-size: 20px;
+  color: var(--blue);
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+.top-bar {
+  display: flex;
+  gap: 6px;
+  flex-wrap: nowrap;
+  overflow-x: auto;          /* allows scroll instead of wrapping */
+  margin-bottom: 6px;
+  -webkit-overflow-scrolling: touch;
+}
+
+input[type="text"]{ height:36px; padding:0 8px; border:1px solid #cfe2f7; border-radius:6px; font-size:14px; }
+#gsName,#gsId,#nameField,#idField{ flex:0 0 140px; min-width:80px; }
+
+button{ height:36px; padding:0 10px; font-size:14px; background:#1976d2; color:#fff; border:none; border-radius:6px; cursor:pointer; transition:0.12s; }
+button:hover:not(:disabled){ background:#1565c0; }
+button:disabled{ background:#9fbfe4; cursor:not-allowed; }
+
+#gsMain{ display:flex; gap:6px; height:70vh; min-height:360px; }
+#gsWordBank{
+  flex: 0 0 110px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid #9aaed1;
+  border-radius: 8px;
+  background: #eaf6ff;
+
+  /* ENABLE scrolling */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch; /* smooth mobile scroll */
+
+  /* HIDE scrollbar (Chrome/Safari/Edge) */
+}
+#gsWordBank::-webkit-scrollbar{
+  display: none;
+}
+
+/* HIDE scrollbar (Firefox) */
+#gsWordBank{
+  scrollbar-width: none;
+}
+.word-tile{
+  display: block;
+  padding: 6px 8px;          /* slightly tighter */
+  border: 1px solid #1976d2;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #eaf6ff;
+  white-space: normal;
+  word-break: break-word;
+  user-select: none;
+
+  font-size: 12px;           /* 🔥 this is the key line */
+  line-height: 1.25;         /* keeps tiles compact */
+}
+.word-tile:hover{ background:#d0edff; }
+
+.tele-wrapper{ width:100%; height:100%; border:1px solid #ccc; border-radius:6px; overflow:hidden; display:flex; flex-direction:column; background:#fff; position:relative; }
+#teleScrollWrapper {
+  overflow-y: auto;                 /* allow vertical scrolling */
+  overflow-x: hidden;               /* never horizontal */
+  flex-grow: 1;
+  position: relative;
+
+  scrollbar-width: none;            /* Firefox */
+  -ms-overflow-style: none;         /* old Edge */
+}
+
+#teleScrollWrapper::-webkit-scrollbar {
+  display: none;                    /* Chrome / Safari / iOS */
+}
+
+#teleScroll{ position:relative; top:0; transition: top 0.2s linear; }
+.tele-edit{ padding:14px; font-size:18px; line-height:1.6; white-space:pre-wrap; overflow-wrap:break-word; word-break:break-word; min-height:100px; outline:none; }
+.tele-edit.empty::before{ color:#aaa; content:attr(data-placeholder); pointer-events:none; white-space:pre-wrap; }
+.tele-overlay{ position:absolute; bottom:12px; right:12px; background:rgba(255,255,255,0.95); padding:6px 10px; border-radius:6px; font-family:monospace; font-size:12px; pointer-events:none; z-index:10; user-select:none; }
+
+.scoreboard{ display:none; font-family:monospace; font-size:14px; background:#fff; border-radius:6px; padding:12px; margin-top:12px; border:1px solid #ddd; max-width:100%; overflow-y:auto; }
+.scoreboard .text{ white-space:pre-wrap; word-break:break-word; min-height:120px; border:1px solid #ccc; padding:8px; border-radius:6px; resize:vertical; }
+
+.controls{ display:flex; gap:6px; margin-top:8px; margin-bottom:10px; }
+.controls .left{ display:flex; gap:6px; }
+.controls .right{ margin-left:auto; display:flex; gap:6px; }
+
+#speechBtn{ width:60px; height:36px; background:#1976d2; border-radius:6px; border:none; cursor:pointer; color:#fff; }
+#speechBtn.recording{ background:#e53935; }
+#captureAudioBtn{ width:60px; height:36px; background:#39FF14; border-radius:6px; border:none; cursor:pointer; color:#000; }
+#captureAudioBtn.recording{ background:#e53935; }
+
+.speed-buttons{ display:flex; gap:4px; margin-bottom:12px; flex-wrap:wrap; }
+.speed-buttons button{ flex:1 1 auto; background:#bbb; font-weight:700; }
+.speed-buttons button.active{ background:#1976d2; color:#fff; }
+
+#green-border{ position:fixed; inset:0; border:10px solid #39FF14; box-sizing:border-box; z-index:9999; pointer-events:none; background:transparent; }
+
+.toast{ position:fixed; top:20px; left:50%; transform:translateX(-50%); background:var(--blue); color:#fff; padding:10px 14px; border-radius:6px; display:none; z-index:10000; }
+
+#measure{ position:absolute; visibility:hidden; white-space:nowrap; left:-99999px; top:-99999px; padding:14px; font-size:18px; line-height:1.6; font-family:Arial,Helvetica,sans-serif; }
+
+@media(max-width:600px){
+  #gsMain{ height:60vh; min-height:300px; }
+  #gsWordBank{ max-height:100%; }
+  #gsName,#gsId,#nameField,#idField{ flex:1; width:100%; }
+}
+
+#teleScrollWrapper {
+  overflow-y: scroll;                 /* allow vertical scroll */
+  -webkit-overflow-scrolling: touch;  /* smooth scrolling on iOS */
+  flex-grow: 1;
+  position: relative;
+
+  /* Hide scrollbar on all major browsers */
+  scrollbar-width: none;              /* Firefox */
+}
+#copyrightSection {
+  margin-top: 10px;   /* move it up by 20px */
+  text-align: left;    /* flush left text */
+  padding: 0;          /* remove centering padding */
+  font-size: 8px;
+}
+
+.formRow {
+  display: flex;
+  align-items: center;      /* baseline alignment */
+  gap: 6px;
+  flex-wrap: nowrap;
+  overflow-x: auto;         /* horizontal scroll if needed */
+  margin-bottom: 10px;
+}
+
+/* optional but recommended: normalize control height */
+.formRow button {
+  height: 34px;
+  line-height: 34px;
+}
+
+#sectionWheelContainer {
+  height: 34px;                 /* 🔥 match button height */
+  min-width: 130px;
+  max-width: 220px;
+
+  border: 1px solid #bbb;
+  border-radius: 8px;
+  padding: 0 12px;              /* 🔥 no vertical padding */
+  background: #fff;
+
+  display: flex;
+  align-items: center;          /* perfect vertical centering */
+  flex-wrap: nowrap;
+
+}
+
+/* hover + focus like inputs */
+#sectionWheelContainer:hover {
+  border-color: #999;
+}
+
+#sectionWheelContainer:focus-within {
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+/* selector text */
+#sectionWheelContainer .wheel {
+  width: 100%;
+  min-width: 115px;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  line-height: 1;          /* 🔥 prevents baseline drift */
+  display: flex;
+  align-items: center;     /* 🔥 centers text vertically */
+  font-size: 12px;   /* 🔥 change this */
+
+}
+
+
+/* placeholder look (optional but recommended) */
+#sectionWheelContainer .wheel.placeholder {
+  color: #aaa;
+  font-style: italic;
+}
+
+#gsWordBank {
+  flex: 0 0 110px;
+  /* ... existing styles ... */
+  display: none !important; /* Hides the column completely */
+}
+
+</style>
+</head>
+<body>
+<div id="green-border"></div>
+
+<div class="container">
+  <!--<div class="header">Ultimate Teleprompter — Full Merge</div>-->
+
+  <div class="top-bar">
+    <input id="gsName" type="text" placeholder="Name">
+    <input id="gsId" type="text" placeholder="ID">
+    <button id="speechBtn" title="Start/Stop speech">STT</button>
+    <button id="captureAudioBtn" title="Start/Stop audio">🔴</button>
+    <button id="submitBtn" disabled>Submit</button>
+  </div>
+
+  <div class="speed-buttons" role="tablist" aria-label="Speed">
+    <button data-speed="4000">1</button>
+    <button data-speed="3500">2</button>
+    <button data-speed="3000" class="active">3</button>
+    <button data-speed="2500">4</button>
+    <button data-speed="2000">5</button>
+  </div>
+
+  <!-- SECTION SELECTOR ROW -->
+  <div class="formRow">
+    <button type="button" id="sectionUp">▲</button>
+
+    <div id="sectionWheelContainer">
+<div class="wheel placeholder">Select a category.</div>
+    </div>
+
+    <button type="button" id="sectionDown">▼</button>
+
+    <button type="button" id="sectionSelect" disabled>Select</button>
+
+    <button id="startBtn">Start</button>
+    <button id="stopBtn">Stop</button>
+    <button id="repeatBtn">Repeat</button>
+  </div>
+
+  <div id="gsMain">
+    <div id="gsWordBank" aria-label="Word bank"></div>
+
+    <div id="teleWrapper" class="tele-wrapper">
+      <div id="teleScrollWrapper">
+        <div id="teleScroll">
+          <div
+            id="teleEdit"
+            class="tele-edit"
+            contenteditable="true"
+            data-placeholder="Type or paste your text here..."
+          ></div>
+        </div>
+      </div>
+
+      <div class="tele-overlay" id="teleOverlay">
+        0 chars · 0 sent
+      </div>
+    </div>
+  </div>
+
+  <div id="gsScoreboard" class="scoreboard" aria-live="polite">
+    <div id="gsScoreMeta"></div>
+    <div id="gsScoreText" class="text" contenteditable="true"></div>
+
+    <div class="action-buttons" style="margin-top:10px;">
+      <button id="copyScoreBtn">Copy</button>
+      <button id="downloadScoreTxtBtn">TXT</button>
+      <button id="downloadScorePngBtn">PNG</button>
+      <button id="downloadBlobBtn">↓ Audio</button>
+    </div>
+  </div>
+
+  <!-- Copyright Footer Section -->
+  <section id="copyrightSection">
+    <div class="footer-note copyright">
+      © 2026 Perfectly Practical English™. All rights reserved.
+    </div>
+  </section>
+</div>
+
+<div id="toast" class="toast">Copied</div>
+<div id="measure" aria-hidden="true"></div>
+
+
+
+
+
+<script>
+/* =========================================
+   UNIVERSAL RAW TEXT RESOLVER (PER BLOCK)
+   ========================================= */
+document.addEventListener('DOMContentLoaded', async () => {
+  const teleEdit = document.getElementById('teleEdit');
+  const gsWordBank = document.getElementById('gsWordBank');
+
+  // --- LOAD RAW TEXT FOR EDITOR ---
+  const editorScripts = document.querySelectorAll('script[type="text/plain"].rawText');
+  for (const s of editorScripts) {
+    const text = await resolveRaw(s.textContent.trim());
+    teleEdit.innerText += text + "\n\n";
+  }
+
+  // --- LOAD WORDS FOR WORD BANK ---
+  const wordScripts = document.querySelectorAll('script[type="text/plain"].wordBank');
+  for (const s of wordScripts) {
+    const words = (await resolveRaw(s.textContent.trim())).split('\n').filter(Boolean);
+    words.forEach(word => {
+      const sp = document.createElement('span');
+      sp.className = 'word-tile';
+      sp.textContent = word;
+      sp.addEventListener('click', ()=> handleWordInsert(teleEdit, word));
+      gsWordBank.appendChild(sp);
+    });
+  }
+
+  // Initial overlay and placeholder
+  if (window.rebuildLinesFromSource) window.rebuildLinesFromSource(teleEdit.innerText);
+});
+</script>
+
+<!-- Raw text block(s) -->
+<script id="rawText" type="text/plain">
+
+~ 1. The Fox and the Crow
+
+On an early afternoon, during the summer, the crow sat on a branch and frequently looked left and right, cautiously, for she had just stolen a piece of meat.
+
+There is a fox nearby, a clever animal who always wanders through these woods and is often smarter than those birds that ignore danger.
+
+While the crow was sitting quietly on the branch and holding the meat in her beak, the fox, who had already planned to cleverly trick her, began approaching slowly.
+
+He has been watching this crow for days, and he has noticed her vanity, and decided yesterday to use his own charm to steal her food.
+
+He said, “Your feathers are stunning, aren't they? And your beauty is unmatched, isn’t it?” and then he asked, “Can your voice match your looks, my dear crow?”
+
+The fox is now complimenting her endlessly and finally said he would be thrilled to hear her sing if she would be so kind.
+
+He wondered whether she were going to sing now, for the entire forest, saying the animals will surely call her the Queen of Birds.
+
+The crow would indeed love to be so admired, and at the thought she might become famous, felt she ought to prove herself.
+
+The fox exclaimed again, “What a marvelous voice you must have! Oh! I wish I could hear it,” and so then the crow opened her beak, and the meat fell to the hungry fox.
+
+If you listen to flattery, you may lose what you value — so think carefully before you act.
+
+Be cautious of flattery and think before you act!
+
+Do not trust flatterers.~
+
+BLANK
+?BLANK
+
+~ 2. The Hare and the Tortoise
+
+Early one morning, during the spring, in the clearing where the animals often gathered, the Hare mocked the Tortoise’s slow steps.
+
+There is a Hare who always boasts of being faster than that slow creature who moves carefully, and a Tortoise who rarely speaks, but is more patient than most animals.
+
+While the Hare was laughing loudly at her speed, the Tortoise, who had already decided to challenge him, calmly suggested racing to the big tree.
+
+They have been preparing for the race all week, the Fox has marked the course, and they started together yesterday to settle the challenge.
+
+The Tortoise said, “My pace is steady, and I will win,” and asked, “Do you think your speed is enough, Hare?” — It is, isn’t it?
+
+The Hare is now teasing her again, and later said he could beat her easily if she would just agree to start right away.
+
+He said he was going to nap and then sprint, and wondered whether she would even make it halfway before he caught up.
+
+The Tortoise would rather be slow and steady, knowing she might still win; she believes you must finish what you start, and it's necessary to keep moving.
+
+The Hare cried, “What a surprise!” when he saw the Tortoise at the finish line, and said, “I wish I hadn’t slept!” — but she had already won and was resting.
+
+If you underestimate others, you might lose unexpectedly — so never stop trying, and always respect your opponents.
+
+Stay consistent and never underestimate determination!
+
+Slow and steady wins the race.~
+
+BLANK
+?BLANK
+
+
+~ 3. The Lion in Love
+
+Long ago, in the middle of the forest, a Lion often visited a nearby village and once demanded a woodcutter’s daughter in marriage.
+
+There is a woodcutter who usually works near the trees, a Lion that roars loudly, and this daughter is more cautious than other girls.
+
+While the Lion was speaking boldly to the father, the man had already thought of a way to discourage him by removing his threat.
+
+He has been pretending to agree, has explained his condition, and told the Lion to remove his claws and teeth to marry his daughter.
+
+The woodcutter said his daughter’s fear was strong and asked, “Would you really give up your strength for love?” — “This is wise, isn’t it?”
+
+The father is pretending to be kind and later said the Lion could win her heart if he would prove he was gentle.
+
+He said he was going to allow the marriage soon and wondered whether the Lion would return without his claws.
+
+The Lion would rather lose his power than his bride, thinking he might win her, though he knew he must accept the deal because it was necessary.
+
+The Lion cried, “What a trick this was!” and said, “I wish I hadn’t trusted him,” but the woodcutter laughed, and chased him away with a stick.
+
+If you give up your strength for someone unworthy, you may lose more than you gain — Protect your power, and don’t be deceived by flattery.
+
+Never sacrifice your power for those who do not truly accept you!
+
+Love can tame the wildest nature.~
+
+BLANK
+?BLANK
+
+
+~ 4. The Mice in Council
+
+In the past, the Mice frequently held councils at night to discuss important matters, and one day they decided to meet to address the problem of their enemy, the Cat.
+
+There are several Mice, the ones who often gather for these councils, and the Cat, which is always dangerous, is their main enemy. This time, the cleverest Mouse was chosen as the leader.
+
+While the Mice were discussing the best strategy, the Cat had already prowled around their holes many times, and they were wondering how to warn themselves without being caught.
+
+The Mice have been debating for hours about what to do. They have already realized that something must be done, and they decided that to tie a bell to the Cat might be the best idea.
+
+One Mouse said, “We must do this for our safety!” Another asked, “How will we get close enough to the Cat?” The first replied, “It’s not easy, but we must try,” don’t you think?
+
+The leader is suggesting that the Mice should try to bell the Cat, as they are capable of coming together for this risky task.
+
+The Mice are going to discuss the plan more thoroughly, and they will decide who among them is going to bell the Cat. They also wondered whether they could succeed in doing so.
+
+The Mice would rather face a different threat than the Cat, but they know they must find a solution to avoid being eaten. The situation could be dangerous, but they must act quickly.
+
+“I wish we could be braver,” one Mouse said, and added, “What if we fail?” But none of them dared to take the risk, and finally, they gave up.
+
+If you think too much about the risks without acting, you will lose the opportunity — take action rather than waiting forever.
+
+Do not make plans you are not willing to carry out!
+
+It is easy to propose impossible remedies.~
+
+BLANK
+?BLANK
+
+
+~ 5. The Town Mouse and Country Mouse
+
+One day, a Country Mouse invited his friend, the Town Mouse, to visit him and share his humble meal. In the morning, they sat together on the bare plough-lands, eating wheat-stalks and roots pulled up from the hedgerow.
+
+There are two mice: the Country Mouse and the Town Mouse. The Town Mouse is always surrounded by luxury, while the Country Mouse frequently enjoys a simpler life in the country. This contrast made them both unique in their own way.
+
+While they were eating their simple meal, the Town Mouse began to complain about the Country Mouse’s life. When he had tasted the wheat-stalks and roots, he said, “You live like the ants!” The Country Mouse didn’t know how to respond, but he started to think about his friend’s invitation.
+
+The Country Mouse has been living simply for a long time, but now he thought he might like to see how the Town Mouse lived. They have both visited each other’s homes before, but the Country Mouse decided to go with his friend to the town.
+
+The Town Mouse said, “If you come with me, you will have an ample share of my dainties!” The Country Mouse replied, “Will I really?” He was a little hesitant but wanted to try. “Sure,” said the Town Mouse, “it’s my treat!”
+
+The Town Mouse is offering more food and says, “You can enjoy the best of everything here.” He was hoping the Country Mouse would stay longer and enjoy the feast.
+
+The Town Mouse said, “You will come with me to town tomorrow, won’t you?” The Country Mouse wondered whether he should stay or leave immediately, and whether he would be safe in the city.
+
+The Country Mouse would rather stay in his own comfortable, quiet home, where he feels safe. He could not see the appeal of the luxury with so many risks involved.
+
+“I wish I had stayed home!” exclaimed the Country Mouse. “I feel so afraid of all these dangers here!” But, just as they were about to eat, they heard a loud noise and ran away to hide.
+
+If you choose luxury at the cost of safety, you might end up losing your peace of mind. Stick to what makes you happy and don’t try to impress others.
+
+Be content with what you have, and do not envy the lives of others!
+
+Better a simple life in peace than luxury with danger.~
+
+BLANK
+?BLANK
+
+~ 6. The Shepherd's Boy and Wolf
+
+One afternoon, while the sun was shining brightly, a Shepherd-boy was watching his flock of sheep near a small village. At that time, he often cried out, "Wolf! Wolf!" to amuse himself, though he was sometimes bored.
+
+There is a Shepherd-boy who watches his sheep every day. The Wolf, on the other hand, is a dangerous animal who is often seen in nearby forests. This boy, although very mischievous, is used to his quiet life.
+
+While the Shepherd-boy was taking care of the sheep, he was crying out loudly for help. When the villagers rushed to his aid, he laughed at them. He had been doing this trick for some time, and it had been amusing to him.
+
+The Shepherd-boy had been playing with the villagers for several days before he realized the consequences. Now, when he saw the Wolf approaching, he shouted in terror. The villagers have heard his cries before, but they weren’t willing to trust him this time.
+
+The Shepherd-boy shouted, "Please come and help me; the Wolf is killing the sheep!" But when the villagers arrived, they said, “You’ve tricked us too many times, boy.” “Are you sure this time?” they asked. “You always joke around.”
+
+The Shepherd-boy was pleading desperately, “Please, help me! Can you not hear the sheep screaming?” But the villagers, hearing the commotion, could not bring themselves to believe him anymore.
+
+The Shepherd-boy said, “I will never lie again!” The villagers were discussing what they were going to do about the situation. "How will we trust him now?" one of them wondered aloud.
+
+The Shepherd-boy would rather never face the Wolf again, but he realized it was too late. He now understands that honesty is more important than joking, and that he must take responsibility for his actions.
+
+I wish I had never lied! the Shepherd-boy cried as the Wolf began attacking his sheep. "Why did I have to trick them so many times?" he thought, filled with regret.
+
+If you lie too many times, no one will believe you when you really need help. Always tell the truth, and others will trust you when it matters.
+
+Always tell the truth, or no one will believe you in times of need!
+
+Liars are not believed even when they tell the truth.~
+
+BLANK
+?BLANK
+
+
+
+~ 7. The Dancing Monkeys
+
+One day, a prince had some trained monkeys that performed at his court. Every week, they would put on their show for the nobility. In the past, these monkeys had been trained diligently, but today, something unexpected happened.
+
+There are several monkeys, and there is a prince who enjoys showcasing their talent. These monkeys are natural mimics, which makes them very effective in learning human-like movements. The prince often presents them in front of his courtiers. This makes him proud, as he has trained them better than any other.
+
+While the monkeys were dancing on stage, they were moving gracefully in their costumes. When a mischievous courtier had decided to disrupt their performance, he took a handful of nuts from his pocket and threw them onto the stage. The monkeys, naturally, forgot their dancing and became wild, grabbing the nuts instead of performing.
+
+The audience has been enjoying the monkeys’ dancing performances for a long time. They have seen the monkeys put on shows countless times, and each time, they applauded them. However, today, something unexpected happened. The monkeys, who were supposed to dance, began to fight over the nuts instead.
+
+The prince, seeing the monkeys act out of character, asked the courtier, “Why did you do that?” The courtier, with a sly grin, replied, “I wanted to see how they would behave without their training.” “You’ve ruined the show!” the prince exclaimed.
+
+The prince was speaking to the courtier, trying to understand why he had acted that way. “Can you please stop causing trouble?” the prince asked. “It is possible to enjoy the show without disrupting it.”
+
+The prince said that in the future, he will make sure to keep the monkeys away from any distractions. “I wonder if we can prevent something like this from happening again,” he asked. “The show is going to be more controlled from now on,” he added.
+
+The prince would like to keep his shows entertaining without distractions. It is necessary to ensure that the monkeys are not distracted again. They might perform better if they are left to focus on their dancing rather than outside interruptions.
+
+“I wish you hadn’t ruined the show,” the prince exclaimed angrily. “But look what has happened!” The audience laughed loudly as the monkeys continued to fight for the nuts, and the spectacle quickly turned into chaos. “Now we have no performance at all!” he added.
+
+If you act out of mischief, you might spoil something enjoyable for everyone. Always think before you act.
+
+Never expect appearances to change true instincts!
+
+Nature cannot be truly changed.~
+
+BLANK
+?BLANK
+
+
+~ 8. The Lion and the Mouse
+
+One day, a lion was sleeping peacefully in the forest. In the morning, as he rested, a small mouse ran across his face, waking him up. Every time the lion slept, he never expected such an interruption.
+
+A lion and a mouse live in the forest. There are other animals, but these two are special. The lion is strong, while the mouse is small and quick. The lion always roars loudly, whereas the mouse tends to run quietly.
+
+While the lion was sleeping, the mouse ran across his face. When the lion had woken up, he caught the mouse in anger. The mouse, however, began pleading for his life, saying that he might help the lion in the future.
+
+The lion has been sleeping for hours. He has never expected to be interrupted by such a small creature. After the lion let the mouse go, he hoped that the mouse would repay his kindness someday.
+
+The mouse said to the lion, “If you spare my life, I will repay your kindness one day.” The lion laughed and let him go, saying, “Why should I expect anything from you?” But the mouse’s words stayed with him.
+
+The mouse was pleading, saying, “I can help you in the future. Please spare me.” The lion, though surprised, was listening to the mouse’s words, but he didn’t think that such a small creature could make a difference.
+
+After the lion was freed, the mouse said he was going to repay the lion’s kindness someday. He asked if the lion ever thought that the mouse could help him.
+
+The lion would rather not have needed any help, but he realized that even a small mouse might be able to do something big. He had to let the mouse go, as he believed in giving others a chance.
+
+When the lion was trapped by hunters, the mouse heard his roar. The mouse exclaimed, “I wish I could have helped you sooner!” Then, he gnawed the ropes and freed the lion. “See,” said the mouse, “I told you I could help!”
+
+If you help others, they will remember your kindness. Don’t judge others by their size or appearance; even a small creature can make a big difference.
+
+Never underestimate the power of kindness!
+
+Kindness is never wasted.~
+
+BLANK
+?BLANK
+
+
+~ 9. The Fox and the Grapes
+
+One afternoon, a hungry fox saw some ripe grapes hanging from a vine. At that moment, she often looked up, wishing to reach the fruit. Earlier that day, she had not eaten anything, and the grapes seemed like the perfect meal.
+
+The fox is hungry, and there are ripe black grapes hanging on a vine. There is a trellis holding the grapes in place, and the fox always tries to reach the fruit. These grapes look delicious, but the fox cannot reach them.
+
+While the fox was trying different methods to reach the grapes, she became tired. She had attempted several ways, such as jumping and stretching, but none of them worked. In the end, her efforts were in vain.
+
+The fox has been struggling for some time, and she has not reached the grapes yet. Earlier, she tried jumping higher and stretching her paws, but each attempt was unsuccessful. She wanted to give up but kept trying.
+
+The fox said to herself, “I cannot reach them. The grapes are probably sour and not worth the effort.” She asked aloud, “Why should I waste my time on something so difficult, right?”
+
+The fox is walking away, thinking that perhaps she can find other food. She might even stop looking at the grapes. She was considering whether to keep trying or to find something easier.
+
+The fox said that she would not try to reach the grapes again. She asked herself if there were any other options to satisfy her hunger.
+
+The fox would rather find an easier meal than struggle with the grapes. She might decide to look for something else. It is necessary for her to find food, but it’s possible that she’ll leave the grapes behind.
+
+The fox exclaimed, “I wish I could get those grapes, but it’s impossible!” She turned away in frustration. Then, she sighed, realizing that it was better to stop trying.
+
+If you cannot achieve something after trying, don’t waste your time on it. Accept the situation and move on.
+
+Do not despise what you cannot have!
+
+It’s easy to despise what you cannot have.~
+
+BLANK
+?BLANK
+
+
+~ 10. The Ants and the Grasshopper
+
+One cold winter's day, the Ants were working hard to store the grain they had collected during the summer. At that time, the weather was cold, and the ants frequently worked together to ensure they had enough food for the long winter ahead.
+
+There are two main characters: the Ants, who are always busy, and the Grasshopper, who often enjoys singing. The Ants work hard, while the Grasshopper lives in the moment, enjoying the present. These Ants are much more industrious compared to the Grasshopper.
+
+While the Grasshopper was starving, he passed by the Ants. He was begging them for food. At that time, the Ants had already gathered all the food they needed. The Grasshopper, with an air of desperation, was pleading for help when the Ants asked him, "Why didn't you prepare during the summer?"
+
+The Ants had been working all summer, gathering grain for the winter. They have stored enough food to last the season. Earlier, they had planned to be prepared for the cold months ahead. They told the Grasshopper that it was too late to help him now.
+
+The Ants asked the Grasshopper, "Why didn't you gather food while there was plenty?" The Grasshopper replied, "I didn't have the time! I was too busy singing." The Ants shook their heads and said, "You should have been more careful."
+
+The Grasshopper was begging for food, asking the Ants if they could share some. He asked if there was any way they would help him. The Ants replied, “We can’t help you now; you should have planned better.”
+
+The Ants said that they would not give him any food. The Grasshopper asked if they were going to store food again for the next winter. The Ants replied, “We will be prepared again.”
+
+The Grasshopper would rather have sung in the summer, but now he realized that it was necessary to plan for the future. He wished he had stored food earlier and knew it was possible to avoid hunger if he had been wiser.
+
+The Grasshopper exclaimed, "I wish I had listened!" He realized that he had been foolish. The Ants responded, “If you had worked during the summer, you wouldn’t be hungry now.”
+
+If you waste time in the good seasons, you will regret it when hard times come. Prepare today for tomorrow, or you may find yourself in a difficult situation.
+
+Always plan ahead and work hard for the future!
+
+Prepare today for the needs of tomorrow.~
+
+BLANK
+?BLANK
+
+
+~ 11. The Lion and the Shepherd
+
+One bright afternoon, while the sun was setting over the forest, a Lion was wandering through the trees. He often roamed this area, looking for food, when suddenly he trod upon a sharp thorn that pierced his paw.
+
+There is a Lion, a powerful creature, and a Shepherd, who is often seen caring for his flock. This Lion, larger and stronger than most animals in the forest, has a gentle heart when in need of help. The Shepherd, usually calm, is known for his wisdom.
+
+While the Lion was limping through the forest in pain, he came upon the Shepherd’s path. In desperation, he approached the man, wagging his tail as if to ask for help. Having discovered the thorn, the Shepherd gently pulled it out, relieving the Lion’s pain.
+
+The Lion has been feeling much better since the Shepherd’s aid, and has returned to the forest many times. Earlier, the Shepherd had healed the Lion’s wound, and now the Lion is grateful. To repay the kindness, the Lion would remember the Shepherd’s help.
+
+The Shepherd asked, “Why did you come to me for help?” The Lion answered, “I was in pain, and you healed me. I owe you my life.” The Shepherd, in return, said, “I do not seek rewards, but I am glad to help.”
+
+The Lion is now seeking a way to repay the Shepherd’s kindness. He can only show his gratitude by helping the Shepherd in return, and he asked the King to release the Shepherd from prison.
+
+The Lion said that he was going to help the Shepherd when the time came. He wondered if the King would listen to his plea and release the Shepherd. The Lion believed he could save the Shepherd from his punishment.
+
+The Lion would rather see the Shepherd free than imprisoned, as the Shepherd had shown him kindness. The Lion knew that he must act to repay the favor and restore balance.
+
+The Lion exclaimed, “I wish I could do more for you, Shepherd!” Upon hearing the story, the King ordered that the Lion be released and that the Shepherd be pardoned. Because of the Lion’s gratitude, the Shepherd was set free.
+
+If you help others in their time of need, you may find that they return the favor in ways you never expect. Always be kind, as kindness often leads to good things.
+
+Help others when you can, and be generous with your kindness!
+
+Kindness is repaid in kind.~
+
+BLANK
+?BLANK
+
+~ 12. The Wolf in Sheep's Clothing
+
+Once upon a time, on a bright morning, a hungry Wolf decided to disguise himself. Every day, he looked for a way to find food without being noticed, but this time he chose a clever plan. In the evening, the Wolf was ready to act.
+
+There was a Wolf, who was always hungry, and a Shepherd, who frequently cared for his flock. The Wolf, eager for food, is cunning and more clever than most animals. This Shepherd, known for his vigilance, was diligent in guarding his flock.
+
+While the Shepherd was locking up the fold for the night, the Wolf, wearing a sheep's skin, was hiding among the flock. He had planned everything carefully, but his true nature was hidden beneath the disguise.
+
+The Wolf has been waiting for this moment, hoping to deceive the Shepherd. After disguising himself, he had spent hours with the sheep, trying not to be noticed. The Wolf was confident that no one would see through his ruse.
+
+The Shepherd asked, “Why do you look so strange today?” The Wolf, speaking softly, replied, “I am just one of your sheep, please let me stay.” The Shepherd, unaware of the truth, said, “Are you sure you’re not a wolf?” He laughed, thinking it was a silly thought.
+
+The Wolf is pretending to be just another sheep, hoping the Shepherd will believe his act. He can fool the Shepherd for now, but his plan will only succeed if the Shepherd does not notice any difference.
+
+The Wolf said that he was going to eat well tomorrow once the Shepherd closed the gate. The Shepherd, unaware, asked if the Wolf would help guard the flock tonight.
+
+The Wolf would rather stay hidden than be exposed. He knew he must remain disguised for the plan to work. If the Shepherd were to find him out, it would ruin everything.
+
+Later that night, the Shepherd came back into the fold and, in the dark, grabbed the Wolf instead of a sheep. The Wolf exclaimed, “I wish I hadn’t tried to deceive you!” He was caught and, sadly, was killed by the Shepherd's knife.
+
+If you try to deceive others, you might end up being harmed by your own deceit. Always be truthful, as dishonesty leads to downfall.
+
+Be honest, or you may suffer the consequences!
+
+Appearances can be deceiving.~
+
+BLANK
+?BLANK
+
+~ 13. The Lion's Share
+
+One day, in the early morning, the animals of the forest decided to hunt together. Frequently, they hunted as a group, but this time they went out with a specific plan. After the hunt, they caught a large stag, which would feed them for days.
+
+There are several animals in the forest: a Fox, a Wolf, a Jackal, and a Lion. The Fox, who is cunning, always tries to get the best portion. The Lion, the most powerful of all, is the leader of the group, and this time, he wanted everything.
+
+While the animals were dividing the meat, the Lion was sitting quietly, watching. When it had been the Fox’s turn, he chose the hind leg and the loin, while the Wolf took the ribs. The Jackal was wondering if anyone would dare to challenge the Lion.
+
+The Lion has been watching the other animals for a while, wanting to claim the entire stag. He has always known that he deserves more because he is the king. After hearing their protests, he decided to take everything for himself.
+
+The Fox said, "I’ll take the hind leg and the loin." The Wolf replied, "I’ll take the ribs." The Jackal asked, "Why don’t we divide it fairly?" The Lion, growling, said, "Who will challenge my claim? I am the king of the beasts."
+
+The Lion is asserting his power, telling the animals that he can take whatever he wants. The other animals, feeling powerless, cannot argue with him.
+
+The Lion said that he would take the whole stag. The Fox asked if they were going to get anything at all. The Wolf, knowing the Lion’s strength, wondered if there would be any chance for a fair division in the future.
+
+The Lion would like to have all of the stag for himself. He believes that, as the strongest, he deserves it. If the other animals wanted to take more, they would have to fight him.
+
+The Lion exclaimed, "I am the king of the beasts, and I will take the entire stag!" The Fox, feeling defeated, wished they had stood up to him. The Wolf and the Jackal felt helpless, and all the animals walked away empty-handed.
+
+If you are weak, you may lose what is rightfully yours to the stronger. Do not let those more powerful take advantage of you without speaking up.
+
+Stand up for what is right and share fairly, or the strong will take more than their fair share!
+
+Might makes right.~
+
+BLANK
+?BLANK
+
+
+~ 14. The North Wind and the Sun
+
+One day, in the early morning, the North Wind and the Sun met and started a discussion. Often, they debated which of them was the most powerful. This time, they decided to settle it by testing their strength on a wayfaring man.
+
+There are two characters in the story: the North Wind and the Sun. The North Wind is strong and often tries to prove his power, while the Sun is gentle but much warmer than the wind. This time, they decide to test their strength on a traveller.
+
+While the North Wind was blowing with all his might, he was trying to force the traveller to remove his clothes. When the traveller felt the cold wind, he wrapped his cloak around him even more tightly. The North Wind, frustrated, had hoped to succeed, but he realized it wasn't working.
+
+The Sun has been watching the situation for some time. He has decided to try a different approach. While the North Wind was blowing, the Sun began to shine warmly. The traveller, feeling the warmth, started to loosen his clothes and was about to remove them completely.
+
+The North Wind said, “I will blow so hard that the traveller must take off his clothes!” The Sun replied, “Let’s see if warmth can do what force cannot.” The North Wind, feeling embarrassed, asked, “Are you sure your warmth is enough?” The Sun, smiling, answered, “You’ll see.”
+
+The Sun is shining gently now, trying to persuade the traveller. The Sun believes that warmth has the power to make the traveller feel comfortable enough to remove his clothes. He can show that kindness works better than force.
+
+The Sun said that soon the traveller will take off his clothes because of the warmth. The North Wind asked if he really thought the Sun’s plan would work, but the Sun was confident.
+
+The Sun would rather be gentle than forceful, and believes that his method is necessary to succeed. It is possible that kindness will win, and the traveller might take off his clothes when he feels the warmth.
+
+The traveller exclaimed, “I wish I had known that warmth would be so effective!” He then removed his garments and bathed in a nearby stream. The Sun said, “I knew you would listen to me.”
+
+If you use force, you may not succeed, but be kind and gentle instead. Act with patience, and persuasion will work where power fails.
+
+Always be gentle in your approach; force does not always win.
+
+Gentleness and kind persuasion win where force fails.~
+
+BLANK
+?BLANK
+
+
+~ 15. The Birds, the Beasts, and the Bat
+
+In a forest a long time ago, the Birds and Beasts waged war. During the battle, the fight was frequent and intense, with each group taking turns to be the victor. The Birds and Beasts had been fighting for days.
+
+There is a Bat that always changes sides. The Birds and the Beasts are fighting, but the Bat keeps choosing the stronger side. This behavior made the Bat look untrustworthy, even though he usually acts in self-interest.
+
+While the war was raging, the Bat was hiding, secretly observing both sides. He had never committed himself to one group and was only waiting for the right moment. When the fighting ended, his treacherous behavior became obvious.
+
+The Bat has been hiding in dark places ever since the war. He has always been known for his deceitful ways, never choosing a side in conflicts. The Birds and Beasts had discovered his tricks and decided to punish him. The Bat decided it was safer to be alone.
+
+The Birds and Beasts said to the Bat, “Why do you never choose a side?” “You have betrayed us,” they exclaimed. The Bat answered, “I do not need to choose; I simply follow the strongest!” The other animals asked, “Do you think we’ll forgive you now?”
+
+The Bat is trying to convince the Beasts and Birds to accept him, but he can no longer persuade them. One of the Birds requested, “Please, leave us alone!” The Bat cannot understand why they won’t forgive him.
+
+The Bat said to himself, “I will hide from both the Birds and Beasts from now on.” He asked the trees, “Do you think anyone will ever trust me again?” The Bat is going to stay hidden in dark places.
+
+The Bat would rather live alone than risk being caught by the Birds or Beasts. He might try to join other animals, but for now, he must remain in hiding. The Bat knows his betrayal was a mistake.
+
+The Bat exclaimed, “I wish I had chosen a side!” One of the Beasts said, “You were always hiding; now you’ll never see the light of day!” The Bat sighed and realized that he would never be forgiven.
+
+If you are deceitful, you will end up alone, so always choose a side. Don’t be like the Bat, who hid when he should have stood with others.
+
+Don’t be a traitor; choose your side and stick to it.
+
+Those who try to please everyone end up pleasing no one.~
+
+BLANK
+?BLANK
+
+~ 16. The Miser
+
+A long time ago, in a small town, the Miser sold all of his possessions and bought a lump of gold. Every day, he went to the spot where he had buried it, visiting it frequently. He looked at the gold and felt pleased with his secret treasure.
+
+There is a Miser, and he has many possessions, but he is very selfish. There is also a workman who often observes the Miser's behavior. The Miser is always looking for ways to keep his wealth hidden. This gold, however, was not used for anything useful.
+
+While the Miser was visiting the gold every day, the workman was secretly watching him. The Miser had never used the gold for anything useful. The workman had noticed the Miser's routine and began to think about how to steal the treasure.
+
+The workman has been watching the Miser's routine for several weeks. He has learned the secret and decided to steal the gold. One day, he dug into the ground, took the gold, and hid it. The Miser came to visit, but he couldn't find the treasure anymore.
+
+The Miser, desperate, said, “Where has my gold gone?” He asked loudly, “Who would take such a thing from me?” A neighbor, seeing his distress, said, “Don’t worry; just place a stone in the hole and imagine the gold is still there. It will help you feel the same.”
+
+The neighbor is trying to help the Miser, suggesting he can place a stone in the hole and pretend the gold is still there. The Miser could have used the gold, but he never did. The neighbor requested that the Miser not grieve any longer.
+
+The Miser said to himself, “I will follow the neighbor's advice and put a stone in the hole.” He asked himself, “Will I ever truly feel better, even if I do that?” The Miser is going to pretend the gold is still in the ground, but it won’t help him recover what he lost.
+
+The Miser would rather have had his gold back, but he now must accept that it is gone. He might find some comfort in imagining it is still there, but he needs to let go of his obsession with wealth.
+
+The Miser exclaimed, “I wish I had used the gold while I had it!” He said, “I could have been happy, but now it is too late!” He realized that wealth, without use, is meaningless. Though he had the gold, he never enjoyed it.
+
+If you do not use what you have, you might lose it. Don’t hoard things that are not useful—use them for good.
+
+Don’t hoard your wealth; share it with others and enjoy the true value of life.
+
+Wealth unused is useless.~
+
+BLANK
+?BLANK
+
+
+~ 17. The Man and the Satyr
+
+One cold winter day, a Man and a Satyr once met in the forest and shared drinks together, forming a bond of alliance. They sat down by a fire, and frequently enjoyed their talks, which often lasted for hours.
+
+There is a Man and a Satyr in the story. The Man, who is known for his unpredictable behavior, often acts strangely, while the Satyr is more cautious and logical. This particular Man has a habit of doing unusual things.
+
+While the Man and the Satyr were sitting together, the Man suddenly put his fingers to his mouth and blew on them. The Satyr, curiously, asked why he was doing this, and the Man replied that he did it to warm his hands because they were so cold.
+
+The two had been talking for a while, and as the day went on, they sat down to eat. The food was quite scalding, but the Man, as usual, did something strange: he blew in his dish, saying he did it to cool the food, as it was too hot.
+
+The Satyr, confused, asked the Man, “Why are you blowing hot and cold?” The Man replied that it was just to adjust the temperature. “I can no longer consider you a friend,” the Satyr said, “a fellow who does that is not trustworthy.”
+
+The Satyr is considering whether or not he should continue his relationship with the Man. He might have even asked the Man to explain himself, but he didn’t want to waste any more time.
+
+The Satyr decided that he would never trust the Man again. He said to himself, “I wonder what his next move is going to be.” The Satyr also asked the Man, “What do you plan to do next?”
+
+The Satyr would rather not associate with someone who behaves in such an unpredictable manner. He might understand the Man's actions, but it is not necessary to continue their friendship. The Satyr must find someone who is more consistent.
+
+The Satyr exclaimed, “I wish I had never met someone like you!” He said, “You cannot be trusted!” Because of the Man's actions, their alliance was broken, and the Satyr decided to leave.
+
+If you act inconsistently, people may stop trusting you. Don’t behave in contradictory ways if you want to keep good relationships.
+
+Be consistent in your actions, or you will lose the respect of others.
+
+Inconsistency is a sign of deceit.~
+
+BLANK
+?BLANK
+
+~ 18. The Wolf and the House-Dog
+
+One bright morning, as the sun rose over the hills, a Wolf was walking through a quiet forest. He frequently roamed these woods in search of food. While he wandered, he met a well-fed Mastiff who was wearing a wooden collar around his neck.
+
+There is a Wolf, who often roams the forests, and a Mastiff, whose collar looks heavy. This Mastiff is fed well, unlike the Wolf, who is always hungry. The Wolf wonders why the Mastiff seems so content with his life.
+
+The Wolf was walking through the woods when he came upon the Mastiff, who was dragging a heavy log behind him. The Wolf asked the Mastiff, “Why are you dragging such a heavy burden?” The Mastiff replied that it was the price for the good food he received, explaining that he had been bound to this task for a long time.
+
+The Wolf had been wondering about this situation for some time. He has seen many dogs in his travels, but none as well-fed as the Mastiff. He asked the Mastiff why he chose such a life, and the Mastiff explained that he had gotten used to his master’s care.
+
+The Wolf said to the Mastiff, “Who feeds you so well, but forces you to carry this chain?” The Mastiff replied, “It is my master who does it.” The Wolf replied, “May no friend of mine ever be in such a situation. This chain would be too heavy for me!”
+
+The Wolf is considering whether he would ever want to live like the Mastiff, but he feels that he would not have the ability to carry such a burden. He would rather remain free, even if it means going without food sometimes.
+
+The Wolf decided that he would continue to live freely, despite the difficulties. He asked the Mastiff, “What do you plan to do when you get tired of this life?”
+
+The Wolf would rather be free, even if it means struggling for food. He might consider a life like the Mastiff’s, but the idea of being confined does not appeal to him at all. The Wolf feels that his life of independence is essential for his happiness.
+
+The Wolf exclaimed, “I wish I could live without chains like you!” He added, “But I would rather live in the wild than have such a life of confinement!” He told the Mastiff, “Being forced to carry this burden must be awful.”
+
+If you value freedom, you should never trade it for comfort. Don’t let anyone chain you down, no matter how appealing the rewards may seem.
+
+Always value your freedom over temporary comfort.
+
+Better a lean freedom than a fat slavery.~
+
+BLANK
+?BLANK
+
+~ 19. The Blind Man and the Whelp
+
+One afternoon, as the sun was setting, a Blind Man was walking down a narrow country road. He frequently traveled this road, feeling his way with his hands. In the past, he had used his sense of touch to identify various animals he came across.
+
+There is a Blind Man, who is well known in the village for his extraordinary ability to distinguish animals by touch. This man often helps people with his unique skill. There are many who come to him, seeking his knowledge about animals.
+
+One day, while the Blind Man was sitting by the road, a whelp of a Wolf was brought to him. The Blind Man was feeling the whelp carefully, but he was unsure of its identity. He thought it might be a cub of a fox, but he had never felt one like this before.
+
+The Blind Man has been using his sense of touch for many years. He has identified various animals, but this one seems different. He said that it was hard to tell, but he knew that it wouldn’t be wise to allow the whelp near the sheepfold.
+
+The Blind Man said, “I’m not sure if this is a Fox cub or a Wolf whelp, but I would not let it near the sheepfold.” The person who had brought the animal asked, “Are you sure?” The Blind Man replied, “Yes, I am certain of it.”
+
+The Blind Man is feeling the whelp’s fur with care. “You can trust me,” he says. “I can tell what animal this is, even though I cannot see it.”
+
+The Blind Man said that he will tell the villagers to be cautious. He asked the person who had brought the whelp, “What will you do with it now?”
+
+The Blind Man would rather be cautious than regret letting the whelp near the sheep. He believes it might cause harm, and he must protect the sheep from any danger. His actions show a deep sense of responsibility.
+
+The Blind Man exclaimed, “I wish I could see this clearly, but I know my senses will not fail me!” He then warned, “This whelp must not be allowed near the sheep.”
+
+If you see danger early, it is better to act before it becomes a problem. Don’t ignore the signs, even if they seem small.
+
+Trust the wisdom of experience, and act wisely before it’s too late.
+
+Instinct often outsmarts deception.~
+
+BLANK
+?BLANK
+
+~ 20. The Dog and the Shadow
+
+One day, a Dog, while crossing a bridge over a stream, was carrying a piece of meat in his mouth. He often crossed this bridge, but today he was particularly hungry.
+
+There is a Dog who usually enjoys his meals. This particular Dog is very hungry today. There are also many streams in the area where he lives. His hunger made him more eager than usual.
+
+While the Dog was crossing the bridge, he saw his own shadow in the water. He thought it was another Dog with a much larger piece of meat. This made him act quickly and recklessly. He had never encountered such a situation before.
+
+The Dog has been thinking that the other Dog would be an easy target. He has lost his patience because he wants the bigger piece of meat. He decided to let go of his own, thinking it was worth the risk.
+
+The Dog thought to himself, “Why does the other Dog have such a large piece of meat?” He asked himself, “Should I let go of mine to get it?” He was sure the other Dog would give up the larger piece.
+
+The Dog is thinking that the other Dog can easily be defeated. He is planning to attack, believing that the other will let him take the larger piece without resistance.
+
+The Dog said to himself, “I will take that piece and will have a feast.” He also wondered how the other Dog would react. “Will it fight me?” he asked.
+
+The Dog would like to have the bigger piece of meat because it seems more satisfying. He might have been better off keeping what he already had, but he felt it was necessary to try and get more.
+
+The Dog cried out, “I wish I had kept my own!” but it was too late. He realized that he had lost both pieces: his own, which had been swept away, and the shadow, which was never real.
+
+If you are greedy and act hastily, you will lose what you have and gain nothing. Don’t let desire cloud your judgment.
+
+Be content with what you have and don’t be distracted by empty desires.
+
+you may lose everything.~
+
+BLANK
+?BLANK
+
+
+~ 21. The Fox and the Crane
+
+One evening, the Fox invited a Crane to dinner. At that time, the Fox often enjoyed inviting friends over for meals. She had prepared a dish of soup made of pulse, which she poured onto a broad, flat stone dish. The meal was ready, and the guests were about to begin.
+
+There are two main characters in this story: the Fox, who is clever and often finds ways to play tricks, and the Crane, who is more graceful and usually very polite. This Fox seemed to be even craftier than most others.
+
+While the Crane was trying to eat the soup, it fell out of his long bill at every mouthful. The Fox, sitting nearby, was laughing loudly at his struggle. The Crane had never experienced such a situation before. He felt embarrassed and frustrated.
+
+After the meal, the Crane has been thinking about how he could get his own revenge. He has invited the Fox over to his house for dinner. He prepared a meal with a flagon that had a narrow neck, just so the Fox would struggle. To get his revenge, he hoped the Fox would learn a lesson.
+
+The Crane said to the Fox, “Please, come to my house for supper.” The Fox replied, “What will you serve me?” The Crane answered, “I will serve you a delicious dish in a narrow flask, just like the soup you served me.” The Fox’s ears burned as she smiled, but she didn’t question him further.
+
+The Fox is trying to be polite, but she cannot hide her curiosity. The Crane is making sure the meal will be a challenge for the Fox, but he can still invite her with a kind gesture.
+
+The Fox said, “I will come to your house tomorrow for dinner.” The Crane asked, “Will you be able to enjoy the meal as much as I did?” The Fox replied that she was going to try to enjoy it, despite knowing the difficulty ahead.
+
+The Fox would rather avoid another situation where she struggles to eat, but she must face the consequences of her trick. It is necessary for her to learn not to play tricks on others, especially those who can turn the tables on her.
+
+The Fox exclaimed, "I wish I had thought more carefully about my actions!" She realized, "Now I see what it feels like to be tricked!" The Crane smiled, as she had managed to repay the Fox in kind.
+
+If you treat others poorly, you might end up being treated the same way. Learn to be kind, and avoid playing tricks on others for fun.
+
+Be fair and considerate when hosting others.
+
+Treat others as you wish to be treated.~
+
+BLANK
+?BLANK
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+
+<script>
+/* =========================================
+   SECTION PARSER (RAW TEXT → SECTIONS)
+   ========================================= */
+
+function parseSectionsFromRaw(raw) {
+  const sections = [];
+  let current = null;
+
+  raw.split(/\r?\n/).forEach(line => {
+    const t = line.trim();
+    if (!t) return;
+
+    if (t.startsWith("~")) {
+      current = {
+        id: t.slice(1).trim().toLowerCase().replace(/\s+/g, "-"),
+        name: t.slice(1).trim(),
+        text: ""
+      };
+      sections.push(current);
+      return;
+    }
+
+    if (current) {
+      current.text += line + "\n";
+    }
+  });
+
+  return sections;
+}
+function parseVocabSections(raw) {
+  const sections = {};
+  let current = null;
+
+  raw.split(/\r?\n/).forEach(line => {
+    const t = line.trim();
+    if (!t) return;
+
+    if (t.startsWith("~")) {
+      current = t.slice(1).trim();
+      sections[current] = [];
+      return;
+    }
+
+    if (current && t.startsWith("•")) {
+      const m = t.match(/•\s*([^\s–]+)/);
+      if (m) sections[current].push(m[1]);
+    }
+  });
+
+  return sections;
+}
+
+
+</script>
+
+
+<script>
+/* Full merged logic — one DOMContentLoaded scope */
+document.addEventListener('DOMContentLoaded', ()=>{
+
+  // Elements
+  const gsWordBank = document.getElementById('gsWordBank');
+  const teleEdit = document.getElementById('teleEdit');
+// Load the raw text into teleEdit without rebuilding lines yet
+// ---- BUILD SECTIONS FROM RAW TEXT ----
+const rawText = loadRawTextBlocks();
+
+// parse raw text into sections
+window.SCRAMBLE_SECTIONS = parseSectionsFromRaw(rawText);
+window.SCRAMBLE_INDEX = -0;
+
+/* =========================================
+   SECTION SELECTOR CONTROLLER (FIXED)
+   ========================================= */
+(function () {
+  const wheel = document.querySelector("#sectionWheelContainer .wheel");
+  const upBtn = document.getElementById("sectionUp");
+  const downBtn = document.getElementById("sectionDown");
+  const selectBtn = document.getElementById("sectionSelect");
+
+  if (!wheel || !upBtn || !downBtn || !selectBtn) return;
+  if (!window.SCRAMBLE_SECTIONS?.length) return;
+
+  let hasSelected = false;
+
+  function renderWheel() {
+    if (!hasSelected) {
+      wheel.textContent = "Select a category.";
+      wheel.classList.add("placeholder");
+      selectBtn.disabled = true;
+      return;
+    }
+
+    const section = window.SCRAMBLE_SECTIONS[window.SCRAMBLE_INDEX];
+    if (!section) return;
+
+    wheel.textContent = section.name;
+    wheel.classList.remove("placeholder");
+    selectBtn.disabled = false;
+  }
+
+  // Initial placeholder render
+  renderWheel();
+
+  upBtn.addEventListener("click", () => {
+    hasSelected = true;
+    window.SCRAMBLE_INDEX =
+      (window.SCRAMBLE_INDEX - 1 + window.SCRAMBLE_SECTIONS.length) %
+      window.SCRAMBLE_SECTIONS.length;
+    renderWheel();
+  });
+
+  downBtn
+
+
+upBtn.addEventListener("click", () => {
+  window.SCRAMBLE_INDEX =
+    (window.SCRAMBLE_INDEX - 1 + window.SCRAMBLE_SECTIONS.length) %
+    window.SCRAMBLE_SECTIONS.length;
+  renderWheel(); // 👈 REQUIRED
+});
+
+// ⬇️ DOWN BUTTON — first click reveals first section, not skip it
+downBtn.addEventListener("click", () => {
+  // First interaction: show the current section (index 0)
+  if (!hasSelected) {
+    hasSelected = true;
+    renderWheel();   // shows "Speaking"
+    return;
+  }
+
+  // Subsequent clicks: advance normally
+  window.SCRAMBLE_INDEX =
+    (window.SCRAMBLE_INDEX + 1) %
+    window.SCRAMBLE_SECTIONS.length;
+
+  renderWheel();
+});
+
+
+// ✅ LOAD SECTION INTO EDITOR
+selectBtn.addEventListener("click", () => {
+  // Guard: must have a valid selection
+  if (!hasSelected) return;
+
+  const section = window.SCRAMBLE_SECTIONS[window.SCRAMBLE_INDEX];
+  if (!section) return;
+
+  // 1️⃣ Load section text
+  teleEdit.innerText = section.text.trim();
+  rebuildLinesFromSource(teleEdit.innerText);
+
+  // 2️⃣ Load matching vocab
+  renderVocabForSection(section.name);
+
+  // 3️⃣ Reset state
+  currentLineIndex = 0;
+  teleScrollWrapper.scrollTop = 0;
+
+  updateOverlay();
+  updatePlaceholder();
+});
+
+
+})();
+
+
+  const teleScroll = document.getElementById('teleScroll');
+  const teleScrollWrapper = document.getElementById('teleScrollWrapper');
+  const teleOverlay = document.getElementById('teleOverlay');
+
+  const gsName = document.getElementById('gsName');
+  const gsId = document.getElementById('gsId');
+  const submitBtn = document.getElementById('submitBtn');
+
+  const speedButtons = document.querySelectorAll('.speed-buttons button');
+  const startBtn = document.getElementById('startBtn');
+  const stopBtn = document.getElementById('stopBtn');
+  const repeatBtn = document.getElementById('repeatBtn');
+
+  const gsScoreboard = document.getElementById('gsScoreboard');
+  const gsScoreMeta = document.getElementById('gsScoreMeta');
+  const gsScoreText = document.getElementById('gsScoreText');
+  const copyScoreBtn = document.getElementById('copyScoreBtn');
+  const downloadScoreTxtBtn = document.getElementById('downloadScoreTxtBtn');
+  const downloadScorePngBtn = document.getElementById('downloadScorePngBtn');
+
+  const speechBtn = document.getElementById('speechBtn');
+  const captureAudioBtn = document.getElementById('captureAudioBtn');
+  const copyBlobBtn = document.getElementById('copyBlobBtn');
+  const downloadBlobBtn = document.getElementById('downloadBlobBtn');
+
+  const measure = document.getElementById('measure');
+  const toast = document.getElementById('toast');
+
+
+
+  // State
+  let lineDuration = parseInt(document.querySelector('.speed-buttons button.active').dataset.speed,10);
+  let lines = [], currentLineIndex = 0, playing = false, scrollTimer = null;
+  let recognition = null, recognizing = false, startInProgress=false;
+  let mediaRecorder = null, audioChunks = [], audioBlob = null;
+  let activeSpeechTarget = teleEdit;
+
+// PATCH: lock editor after submission
+let inputLocked = false;
+// PATCH: disable capitalization during teleprompter mode
+let autoCapEnabled = true;
+
+  /* -------------------------
+     RAW TEXT LOADING (supports multiple raw blocks)
+     ------------------------- */
+  function loadRawTextBlocks(){
+    const blobs = [];
+    const byId = document.getElementById('rawText');
+    if(byId && byId.textContent) blobs.push(byId.textContent.trim());
+    document.querySelectorAll('script[type="text/plain"].rawText, script[type="text/plain"]').forEach((s) => {
+      if(s.id === 'rawText') return;
+      if(s.textContent && s.textContent.trim()) blobs.push(s.textContent.trim());
+    });
+    return blobs.join("\n\n");
+  }
+
+  /* -------------------------
+     WORD BANK + insertion behavior
+     ------------------------- */
+function parseVocabText(rawText) {
+  return rawText.trim().split('\n')
+    .map(line => {
+      const match = line.match(/•\s*([^\s–<]+)/); // capture word after bullet, before space, dash, or <br>
+      if (match) return match[1]; // only the main word
+      return null;
+    })
+    .filter(Boolean);
+}
+
+const rawWords = `
+
+~All About Me
+
+• appearance 👤 – the way someone looks
+looks, physical features, appearance
+
+• hometown 🏡 – the town or city where you grew up
+birthplace, home city, hometown
+
+• personality 🎭 – the way a person thinks, feels, and behaves
+character, temperament, nature
+
+• family 👨‍👩‍👧‍👦 – the people you are related to
+relatives, household, parents
+
+• friend 🤝 – someone you know and enjoy spending time with
+companion, buddy, pal
+
+• routine ⏰ – the usual things you do every day
+schedule, habit, daily routine
+
+• school 🎓 – a place where students learn
+educational institution, academy, class
+
+• homework 📚 – schoolwork done outside the classroom
+assignment, schoolwork, task
+
+• breakfast 🍳 – the first meal of the day
+morning meal, first meal
+
+• evening 🌆 – the time between afternoon and night
+nightfall, dusk
+
+• subject 📖 – an area of study at school
+course, class, topic
+
+• hobby 🎨 – an activity you enjoy in your free time
+pastime, interest, recreation
+
+• sport ⚽ – a physical activity played for fun or competition
+athletics, game, exercise
+
+• activity 🏃 – something that you do
+task, exercise, event
+
+• achievement 🏆 – something you have successfully done
+accomplishment, success, award
+
+• food 🍽️ – things people eat
+meal, cuisine, dish
+
+• movie 🎬 – a film for entertainment
+film, cinema, motion picture
+
+• music 🎵 – sounds organized into songs or melodies
+songs, melodies, tunes
+
+• game 🎮 – an activity played for fun or competition
+match, play, pastime
+
+• entertainment 🎭 – activities that amuse or interest people
+fun, amusement, recreation
+
+• future 🔮 – the time that is yet to come
+tomorrow, coming years
+
+• goal 🎯 – something you want to achieve
+aim, objective, target
+
+• dream 💭 – a strong hope or wish for the future
+ambition, aspiration, vision
+
+• career 💼 – the job or profession you choose
+occupation, profession, work
+
+• success 🌟 – achieving your goals
+achievement, accomplishment, victory
+
+• be 🌱 – to exist or have a certain quality
+exist, remain, become
+
+• have 🎁 – to own or possess something
+own, possess, hold
+
+• live 🏠 – to stay in a place or enjoy life
+reside, dwell, exist
+
+• describe 📝 – to explain what someone or something is like
+explain, portray, tell
+
+• enjoy 😊 – to like something and get pleasure from it
+like, appreciate, love
+
+• wake up ⏰ – to stop sleeping
+get up, awaken, rise
+
+• study 📚 – to learn by reading or practicing
+learn, review, prepare
+
+• eat 🍴 – to have food
+consume, dine, feed
+
+• go 🚶 – to move from one place to another
+travel, leave, head
+
+• help 🤲 – to make things easier for someone
+assist, support, aid
+
+• learn 📖 – to gain knowledge or skills
+study, understand, discover
+
+• practice 🏋️ – to do something repeatedly to improve
+train, rehearse, exercise
+
+• play ⚽ – to take part in a game or activity
+compete, perform, enjoy
+
+• improve 📈 – to become better
+develop, progress, enhance
+
+• participate 🙋 – to take part in an activity
+join, engage, contribute
+
+• like 👍 – to enjoy or prefer something
+enjoy, prefer, favor
+
+• love ❤️ – to like something very much
+adore, cherish, enjoy
+
+• watch 👀 – to look at something carefully
+observe, view, see
+
+• listen 🎧 – to pay attention to sounds
+hear, pay attention, tune in
+
+• want 🌟 – to wish for something
+desire, hope, need
+
+• hope 🌈 – to wish that something good happens
+expect, wish, trust
+
+• become 🌱 – to grow into something
+turn into, develop, transform
+
+• achieve 🏅 – to successfully reach a goal
+accomplish, attain, complete
+
+• friendly 😊 – kind and pleasant to others
+kind, welcoming, sociable
+
+• kind 💖 – caring and helpful to others
+thoughtful, gentle, caring
+
+• hardworking 💪 – putting a lot of effort into work or study
+diligent, industrious, dedicated
+
+• funny 😂 – making people laugh
+humorous, amusing, entertaining
+
+• confident 😎 – believing in yourself
+self-assured, positive, bold
+
+• busy 📅 – having a lot to do
+occupied, active, engaged
+
+• organized 📋 – keeping things neat and planned
+orderly, prepared, systematic
+
+• relaxing 🌴 – helping you feel calm
+peaceful, calming, restful
+
+• enjoyable 😄 – giving pleasure or happiness
+fun, pleasant, entertaining
+
+• tiring 😴 – making you feel tired
+exhausting, draining, demanding
+
+• interesting 🤔 – making you curious or interested
+engaging, fascinating, appealing
+
+• challenging 🧗 – difficult but rewarding
+demanding, tough, difficult
+
+• exciting 🎉 – making you feel happy and enthusiastic
+thrilling, stimulating, fun
+
+• creative 🎨 – able to produce new ideas
+imaginative, inventive, artistic
+
+• successful 🏆 – having achieved your goals
+accomplished, prosperous, effective
+
+• delicious 😋 – tasting very good
+tasty, flavorful, yummy
+
+• responsible 📌 – dependable and able to handle duties
+reliable, dependable, trustworthy
+
+• ambitious 🚀 – determined to achieve great things
+motivated, driven, aspiring
+
+• always ♾️ – at all times
+constantly, every time
+
+• usually 📆 – most of the time
+normally, generally
+
+• often 🔁 – many times
+frequently, regularly
+
+• sometimes 🌤️ – on some occasions
+occasionally, at times
+
+• never 🚫 – not at any time
+not ever, no time
+
+• rarely 🌙 – not very often
+seldom, infrequently
+
+• regularly 📅 – happening on a routine basis
+consistently, frequently
+
+• really ✨ – very or truly
+truly, genuinely, actually
+
+• someday 🌅 – at an unknown time in the future
+one day, eventually
+
+• hopefully 🤞 – with hope that something good will happen
+optimistically, with luck
+
+
+
+~Speaking
+
+• culture 🏛️ – a shared way of life in a group or society
+customs, way of life, traditions
+
+• values 🧭 – beliefs that guide how people behave
+principles, beliefs, morals
+
+• traditions 📜 – practices passed down over time
+customs, rituals, heritage
+
+• respect 🙏 – showing care and consideration for others
+regard, consideration, esteem
+
+• perspective 🌍 – a way of seeing or understanding the world
+viewpoint, outlook, point of view
+
+• contrast ⚖️ – noticing differences between things
+difference, comparison, distinction
+
+• opportunity 🚪 – a chance for growth or improvement
+chance, possibility, opening
+
+• gratitude ❤️ – appreciation for what one has
+thankfulness, appreciation
+
+• city 🏙️ – a large urban living space
+urban area, town
+
+• modern 🧠 – up-to-date and changing with the times
+current, contemporary
+
+• fast-paced ⚡ – moving or happening quickly
+rapid, high-energy
+
+• independence 🧍 – ability to rely on yourself
+self-reliance, freedom
+
+• environment 🌆 – the surroundings where people live
+setting, surroundings
+
+• lifestyle 🕰️ – the way a person lives
+way of living, daily life
+
+• influence 🧠 – power to affect people or situations
+impact, effect
+
+• exposure 🌐 – contact with new ideas or experiences
+experience, contact
+
+• family 👨‍👩‍👧‍👦 – close personal relationships
+relatives, household
+
+• guidance 🧭 – advice or direction given to help
+direction, support
+
+• responsibility 📌 – duties or tasks you are expected to handle
+duty, obligation
+
+• support 🤍 – care, help, or encouragement
+assistance, help
+
+• school 🎓 – a place for learning and education
+educational institution, class
+
+• challenge 🧗 – something difficult that helps you grow
+difficulty, test
+
+• collaboration 🤝 – working together with others
+teamwork, cooperation
+
+• confidence 💪 – belief in yourself and your abilities
+self-belief, assurance
+
+• friends 🤝 – people you share social connections with
+companions, peers
+
+• trust 🔐 – belief that someone is reliable or honest
+reliance, faith
+
+• belonging 🧩 – feeling accepted and included
+acceptance, connection
+
+• communication 💬 – sharing ideas, thoughts, or feelings
+interaction, expression
+
+• growth 🌱 – development over time
+progress, improvement
+
+• resilience 🛠️ – ability to recover from difficulty
+strength, toughness
+
+• adaptability 🔄 – ability to adjust to change
+flexibility, adjustment
+
+• learning 📖 – gaining knowledge or skills
+education, study
+
+• identity 🧠 – sense of who you are
+self, individuality
+
+• personality 🎭 – individual traits and behavior
+character, temperament
+
+• mindset 🧩 – a way of thinking or viewing situations
+attitude, outlook
+
+• character 🪞 – moral and personal qualities
+integrity, nature
+
+• reflection ✨ – careful thinking about experiences
+thought, consideration
+
+• connect 🔗 – to link ideas or people together
+join, relate
+
+• shape 🛠️ – to form or influence over time
+mold, develop
+
+• understanding 🪞 – awareness and clear knowledge
+comprehension, awareness
+
+
+~Hobbies
+
+• activity 🎯 – something you do for enjoyment or interest
+pastime, action, leisure activity
+
+• achievement 🏆 – something you succeed in doing well
+success, accomplishment, goal
+
+• fun 🎉 – enjoyment or pleasure
+enjoyment, pleasure
+
+• game 🎲 – an activity with rules played for fun
+match, competition
+
+• hobby 🎨 – an activity you do in your free time
+pastime, leisure interest
+
+• interest ❤️ – something you like or care about
+liking, curiosity
+
+• practice 🔁 – time spent learning or improving a skill
+training, repetition
+
+• skill 🛠️ – an ability to do something well
+ability, talent
+
+• sport ⚽ – a physical competitive activity
+athletic activity, competition
+
+• time ⏰ – hours or moments spent doing something
+period, moment
+
+• do ▶️ – to perform an activity
+perform, carry out
+
+• enjoy 😊 – to like something and feel pleasure
+like, take pleasure in
+
+• have 📦 – to take part in or experience something
+experience, take part in
+
+• like 👍 – to feel good about something
+enjoy, appreciate
+
+• learn 📘 – to gain knowledge or a new skill
+study, pick up
+
+• make ✂️ – to create or produce something
+create, build
+
+• play 🎮 – to take part in a game or activity
+participate, take part
+
+• practice 🔄 – to repeat something to improve
+train, rehearse
+
+• try 🔍 – to attempt to do something new
+attempt, test
+
+• watch 👀 – to look at something for enjoyment
+observe, view
+
+• easy 🙂 – not difficult to do
+simple, not hard
+
+• exciting ⚡ – making you feel interested or happy
+thrilling, stimulating
+
+• fun 😄 – enjoyable and pleasant
+enjoyable, pleasant
+
+• interesting 🤔 – holding your attention
+engaging, fascinating
+
+• relaxing 🌿 – helping you feel calm
+calming, restful
+
+• carefully 🧠 – in a slow and thoughtful way
+cautiously, attentively
+
+• easily ✔️ – without difficulty
+simply, effortlessly
+
+• smoothly 🧈 – without problems or stops
+effortlessly, without trouble
+
+• well ⭐ – in a good or correct way
+properly, correctly
+
+• slowly 🐢 – not fast
+gradually, at a low speed
+
+~Helping Others
+
+• action 🤲 – something done to help someone
+step, effort
+
+• family 👨‍👩‍👧‍👦 – people you are related to
+relatives, household
+
+• friend 🧑‍🤝‍🧑 – a person you like and trust
+buddy, companion
+
+• help 🆘 – support or assistance
+aid, assistance
+
+• kindness 💖 – being friendly and caring
+compassion, generosity
+
+• moment ⏳ – a short time
+instant, short time
+
+• need ❗ – something required or wanted
+necessity, requirement
+
+• person 🧍 – a human being
+individual, human
+
+• support 🏗️ – help given to someone
+assistance, backing
+
+• time ⏰ – when something happens
+period, moment
+
+• assist 🤝 – to help someone
+aid, support
+
+• care ❤️ – to feel concern for someone
+look after, care for
+
+• give 🎁 – to provide something
+offer, provide
+
+• help 🛠️ – to make something easier for someone
+assist, support
+
+• listen 👂 – to pay attention to someone speaking
+hear, pay attention
+
+• lend 🤲 – to give something for a short time
+loan, let someone use
+
+• share 🔄 – to give part of something to others
+divide, give
+
+• support 🧱 – to help someone emotionally or physically
+encourage, back
+
+• talk 💬 – to speak with someone
+speak, chat
+
+• teach 📚 – to help someone learn
+instruct, educate
+
+• friendly 🙂 – kind and pleasant
+welcoming, nice
+
+• good 👍 – kind or helpful
+kind, positive
+
+• helpful 🧩 – ready to help
+supportive, useful
+
+• kind 💗 – caring and thoughtful
+caring, gentle
+
+• nice 🌸 – pleasant and friendly
+pleasant, kind
+
+• carefully 🧠 – with attention
+cautiously, attentively
+
+• kindly 🌷 – in a gentle way
+gently, politely
+
+• easily ✔️ – without difficulty
+simply, without trouble
+
+• patiently ⏳ – calmly waiting or helping
+calmly, without rushing
+
+• well ⭐ – in a good way
+properly, correctly
+
+~Heroes
+
+• advice 💬 – helpful ideas or suggestions
+guidance, recommendation
+
+• friend 🧑‍🤝‍🧑 – someone who supports you
+companion, ally
+
+• hero 🦸 – a person who helps or saves others
+role model, protector
+
+• help 🤝 – support given to others
+aid, assistance
+
+• kindness 💛 – caring behavior
+compassion, generosity
+
+• mentor 🎓 – a person who guides others
+guide, coach
+
+• person 🧍 – a human being
+individual, human
+
+• support 🏗️ – help and encouragement
+assistance, encouragement
+
+• teacher 📘 – someone who helps others learn
+educator, instructor
+
+• wisdom 🧠 – knowledge and good judgment
+understanding, insight
+
+• care ❤️ – to look after others
+protect, look after
+
+• give 🎁 – to offer help or support
+provide, offer
+
+• guide 🧭 – to lead or show the way
+lead, direct
+
+• help 🆘 – to assist someone
+aid, assist
+
+• inspire ✨ – to make others feel motivated
+motivate, encourage
+
+• protect 🛡️ – to keep someone safe
+guard, defend
+
+• show 👀 – to demonstrate something
+demonstrate, display
+
+• support 🧱 – to stand by someone
+back, stand by
+
+• teach 📚 – to help someone learn
+educate, instruct
+
+• encourage 🌟 – to give confidence
+motivate, support
+
+• brave 🦁 – not afraid
+fearless, courageous
+
+• good 👍 – kind and helpful
+kind, positive
+
+• kind 💖 – caring and nice
+caring, gentle
+
+• strong 💪 – powerful or brave
+powerful, tough
+
+• wise 🦉 – showing good judgment
+smart, thoughtful
+
+• always 🔁 – at all times
+forever, constantly
+
+• bravely 🛡️ – in a courageous way
+courageously, fearlessly
+
+• helpfully 🤝 – in a useful way
+usefully, supportively
+
+• kindly 🌸 – in a caring way
+gently, politely
+
+• patiently ⏳ – without rushing
+calmly, steadily
+
+~My Best Friend
+
+• bond 🔗 – a close connection
+connection, tie
+
+• friend 🧑‍🤝‍🧑 – someone you like and trust
+buddy, companion
+
+• friendship 💕 – a close relationship
+bond, connection
+
+• memory 🧠 – something you remember
+recollection, experience
+
+• person 🧍 – a human being
+individual, human
+
+• relationship 🤝 – a connection between people
+connection, bond
+
+• support 🧱 – help and care
+help, encouragement
+
+• time ⏰ – moments spent together
+period, moments
+
+• trust 🔐 – belief in someone
+confidence, faith
+
+• laugh 😂 – a sound of happiness
+giggle, chuckle
+
+• care ❤️ – to like and protect someone
+look after, protect
+
+• laugh 😄 – to show happiness
+smile, giggle
+
+• like 👍 – to enjoy someone
+enjoy, appreciate
+
+• love 💖 – strong caring feelings
+affection, care
+
+• meet 🤝 – to see someone
+see, get together
+
+• play 🎮 – to do fun activities
+have fun, spend time
+
+• share 🔄 – to give something to another
+give, exchange
+
+• talk 💬 – to speak with someone
+chat, speak
+
+• trust 🤍 – to believe in someone
+rely on, believe in
+
+• best ⭐ – better than all others
+closest, favorite
+
+• close 🤗 – having a strong connection
+near, connected
+
+• friendly 🙂 – kind and pleasant
+nice, welcoming
+
+• fun 🎉 – enjoyable
+enjoyable, pleasant
+
+• good 👍 – kind or nice
+kind, positive
+
+• really ✔️ – very
+very, truly
+
+• together 🤝 – with each other
+with one another, jointly
+
+• carefully 🧠 – with thought
+gently, attentively
+
+• openly 🔓 – honestly and freely
+honestly, freely
+
+• well ⭐ – in a good way
+properly, nicely
+
+~Dream Job
+
+• career 📈 – a long-term job path
+profession, working life
+
+• dream 💭 – a strong hope for the future
+wish, hope
+
+• future 🔮 – time after now
+later, coming time
+
+• goal 🎯 – something you want to achieve
+aim, target
+
+• job 💼 – paid work
+employment, position
+
+• plan 📝 – an idea for the future
+idea, strategy
+
+• task 📋 – a piece of work
+duty, assignment
+
+• work 🛠️ – effort done for a job
+labor, effort
+
+• company 🏢 – a business organization
+business, firm
+
+• become 🔄 – to change into something
+turn into, grow into
+
+• decide 🧠 – to choose
+choose, make a decision
+
+• dream 💭 – to hope for something
+hope, imagine
+
+• enjoy 😊 – to like doing something
+like, take pleasure in
+
+• help 🤝 – to assist others
+support, aid
+
+• like 👍 – to feel good about something
+enjoy, appreciate
+
+• plan 🗺️ – to prepare for the future
+prepare, organize
+
+• want ❤️ – to wish for something
+wish, hope for
+
+• work 🛠️ – to do your job
+do your job, labor
+
+• exciting ⚡ – making you feel interested
+thrilling, stimulating
+
+• fun 🎉 – enjoyable
+enjoyable, pleasant
+
+• good 👍 – positive or nice
+positive, helpful
+
+• important ❗ – having value
+necessary, valuable
+
+• interesting 🤔 – holding attention
+engaging, fascinating
+
+• efficiently ⚙️ – in a fast and smart way
+effectively, productively
+
+• hard 💪 – with a lot of effort
+intensely, with effort
+
+• really ✔️ – very
+very, truly
+
+• slowly 🐢 – not fast
+gradually, little by little
+
+• well ⭐ – in a good way
+properly, correctly
+
+~Healthy Food
+
+• dish 🍽️ – prepared food
+meal, serving
+
+• food 🍎 – things people eat
+nourishment, meals
+
+• fruit 🍓 – sweet healthy food from plants
+produce, fresh fruit
+
+• health ❤️ – the state of being well
+wellness, fitness
+
+• lunch 🥪 – a midday meal
+midday meal
+
+• meal 🍛 – food eaten at one time
+serving, course
+
+• recipe 📖 – instructions for cooking
+instructions, method
+
+• snack 🍿 – small amount of food
+bite, light meal
+
+• taste 👅 – the flavor of food
+flavor, quality
+
+• vegetable 🥕 – healthy plant food
+greens, produce
+
+• cook 🍳 – to prepare food
+prepare, heat
+
+• eat 🍽️ – to have food
+consume, have
+
+• enjoy 😊 – to like food
+like, appreciate
+
+• make 🥣 – to prepare food
+prepare, create
+
+• prepare 🔪 – to get food ready
+ready, organize
+
+• serve 🍽️ – to give food to others
+offer, present
+
+• taste 👄 – to try food
+sample, try
+
+• try 🔍 – to test food
+sample, taste
+
+• delicious 😋 – very tasty
+tasty, flavorful
+
+• fresh 🌱 – newly made
+new, crisp
+
+• good 👍 – healthy or nice
+healthy, beneficial
+
+• healthy 🥗 – good for the body
+nutritious, good for you
+
+• tasty 😄 – having a good flavor
+flavorful, delicious
+
+• carefully 🧠 – with attention
+gently, attentively
+
+• happily 😊 – with joy
+gladly, cheerfully
+
+• simply ✔️ – in an easy way
+easily, plainly
+
+• slowly 🐢 – not fast
+calmly, gradually
+
+• well ⭐ – in a good way
+properly, nicely
+
+~Famous Places
+
+• city 🏙️ – a large town
+large town, urban area
+
+• country 🌍 – a nation
+nation, state
+
+• dream 💭 – a place you want to visit
+wish, hope
+
+• journey 🚆 – a long trip
+trip, travel
+
+• location 📍 – where something is
+place, position
+
+• place 🗺️ – a specific area
+spot, location
+
+• trip ✈️ – a short journey
+journey, travel
+
+• vacation 🏖️ – time off for travel
+holiday, break
+
+• visit 🧳 – a short stay
+stay, trip
+
+• enjoy 😊 – to like an experience
+like, appreciate
+
+• explore 🧭 – to discover places
+discover, travel around
+
+• feel ❤️ – to have emotions
+experience, sense
+
+• go 🚶 – to move somewhere
+travel, move
+
+• learn 📘 – to gain knowledge
+study, find out
+
+• look 👀 – to see
+watch, view
+
+• see 👁️ – to notice with your eyes
+view, notice
+
+• travel ✈️ – to go to places
+journey, move around
+
+• visit 🏛️ – to go see a place
+see, go to
+
+• want ❤️ – to wish for something
+wish, hope for
+
+• beautiful 🌸 – very nice to look at
+pretty, attractive
+
+• big 🏔️ – large in size
+large, huge
+
+• exciting ⚡ – fun and interesting
+thrilling, stimulating
+
+• famous ⭐ – known by many people
+well-known, popular
+
+• interesting 🤔 – making you curious
+engaging, fascinating
+
+• easily ✔️ – without trouble
+simply, smoothly
+
+• really ✔️ – very
+very, truly
+
+• smoothly 🧈 – without problems
+easily, without trouble
+
+• well ⭐ – in a good way
+properly, nicely
+
+• carefully 🧠 – with attention
+cautiously, attentively
+
+~The Future
+
+• change 🔄 – becoming different
+difference, transformation
+
+• family 👨‍👩‍👧‍👦 – people related to you
+relatives, household
+
+• friends 🧑‍🤝‍🧑 – people you like
+buddies, companions
+
+• future 🔮 – time that has not happened yet
+later, coming time
+
+• house 🏠 – a place to live
+home, building
+
+• life 🌱 – being alive
+living, existence
+
+• technology 💻 – machines and tools
+tech, machines
+
+• work 🛠️ – jobs and effort
+employment, labor
+
+• world 🌍 – the Earth and its people
+Earth, globe
+
+• be 🔄 – to exist or become
+exist, remain
+
+• change 🔁 – to become different
+transform, alter
+
+• decide 🧠 – to choose
+choose, select
+
+• grow 🌱 – to develop
+develop, increase
+
+• help 🤝 – to assist
+support, aid
+
+• live 🏡 – to have a life
+exist, reside
+
+• make ✨ – to create
+create, produce
+
+• see 👀 – to understand or notice
+notice, realize
+
+• start 🚀 – to begin
+begin, launch
+
+• work 🛠️ – to do a job
+labor, work at
+
+• different ⚖️ – not the same
+not the same, changed
+
+• exciting ⚡ – interesting and fun
+thrilling, stimulating
+
+• important ❗ – having value
+necessary, valuable
+
+• new 🆕 – not old
+fresh, recent
+
+• big 📈 – large or important
+large, major
+
+• carefully 🧠 – with thought
+thoughtfully, attentively
+
+• easily ✔️ – without difficulty
+simply, smoothly
+
+• really ✔️ – very
+very, truly
+
+• smoothly 🧈 – without problems
+easily, steadily
+
+• well ⭐ – in a good way
+properly, correctly
+
+~Survival
+
+• danger ⚠️ – risk of harm
+risk, threat
+
+• decision 🧠 – a choice
+choice, decision-making
+
+• help 🆘 – support or aid
+assistance, aid
+
+• life ❤️ – being alive
+living, existence
+
+• moment ⏳ – a short time
+instant, short time
+
+• person 🧍 – a human being
+individual, human
+
+• risk 🎲 – chance of danger
+danger, threat
+
+• situation 🌪️ – what is happening
+condition, circumstance
+
+• time ⏰ – when something happens
+moment, period
+
+• escape 🏃 – to get away
+flee, get away
+
+• face 😠 – to deal with something
+confront, deal with
+
+• fight 🥊 – to struggle
+battle, struggle
+
+• help 🤝 – to assist
+aid, support
+
+• decide 🧠 – to choose
+choose, make a choice
+
+• run 🏃 – to move fast
+hurry, sprint
+
+• save 🛟 – to protect from harm
+rescue, protect
+
+• survive 🏕️ – to stay alive
+stay alive, live
+
+• think 💭 – to use your mind
+consider, reflect
+
+• avoid 🚫 – to stay away from
+prevent, keep away from
+
+• brave 🦁 – not afraid
+fearless, courageous
+
+• dangerous ☠️ – not safe
+risky, unsafe
+
+• hard 💪 – very difficult
+tough, challenging
+
+• important ❗ – very necessary
+necessary, vital
+
+• scary 😨 – causing fear
+frightening, fearful
+
+• bravely 🛡️ – with courage
+courageously, fearlessly
+
+• carefully 🧠 – with caution
+cautiously, attentively
+
+• quickly ⚡ – very fast
+fast, rapidly
+
+• safely 🛟 – without danger
+securely, without harm
+
+• slowly 🐢 – not fast
+gradually, carefully
+
+~Tourists
+
+• activity 🎯 – something done for fun
+event, pastime
+
+• adventure 🧗 – an exciting experience
+journey, experience
+
+• city 🏙️ – a large town
+large town, urban area
+
+• festival 🎉 – a special celebration
+celebration, event
+
+• food 🍽️ – things to eat
+meals, dishes
+
+• location 📍 – where something is
+place, position
+
+• market 🏪 – place to buy things
+shop, marketplace
+
+• place 🗺️ – a location
+spot, area
+
+• temple 🛕 – a religious building
+shrine, place of worship
+
+• trip ✈️ – a journey
+travel, journey
+
+• eat 🍽️ – to have food
+consume, have
+
+• enjoy 😊 – to like something
+like, appreciate
+
+• explore 🧭 – to discover places
+discover, look around
+
+• go 🚶 – to move somewhere
+travel, move
+
+• like 👍 – to enjoy something
+enjoy, appreciate
+
+• see 👀 – to look at
+view, notice
+
+• try 🔍 – to test something new
+attempt, sample
+
+• visit 🧳 – to go to a place
+see, go to
+
+• learn 📘 – to gain knowledge
+study, find out
+
+• beautiful 🌸 – nice to look at
+pretty, attractive
+
+• big 🏔️ – large
+large, huge
+
+• exciting ⚡ – fun and interesting
+thrilling, stimulating
+
+• fun 🎉 – enjoyable
+enjoyable, pleasant
+
+• interesting 🤔 – holding attention
+engaging, fascinating
+
+• carefully 🧠 – with attention
+cautiously, attentively
+
+• eagerly 🔥 – with excitement
+excitedly, enthusiastically
+
+• really ✔️ – very
+very, truly
+
+• smoothly 🧈 – without problems
+easily, steadily
+
+• happily 😊 – with joy
+cheerfully, gladly
+
+~Cryptids
+
+• creature 🐾 – a living being, often unknown or unusual
+cryptid, monster, beast, animal, being, entity
+
+• sightings 👀 – moments when a cryptid is seen or reported
+sighting, encounter, report, observation, witness account
+
+• habitat 🌲 – the place where a cryptid is believed to live
+forest, lake, swamp, mountains, cave, river, wilderness
+
+• behavior 🐾 – the way a cryptid acts
+nocturnal, shy, aggressive, elusive, mysterious, territorial
+
+• evidence 🔬 – proof or signs that suggest existence
+footprint, track, hair, photograph, video, sound
+
+• myth / legend 📜 – traditional stories about cryptids
+legend, myth, folklore, tale, story, lore
+
+• investigation 🕵️ – the study or search for cryptids
+research, expedition, tracking, study, observation
+
+• hoax / skepticism 🤔 – doubt or false information
+hoax, fake, fraud, disbelief, doubt, unverified
+
+• classification 🧬 – ways cryptids are grouped or described
+humanoid, aquatic, reptilian, winged, animal-like, hybrid
+
+• folklore regions 🌎 – places known for cryptid stories
+north america, asia, europe, africa, remote areas, wilderness
+
+
+
+
+`;
+
+window.VOCAB_SECTIONS = parseVocabSections(rawWords);
+
+function renderVocabForSection(sectionName) {
+  const gsWordBank = document.getElementById('gsWordBank');
+  gsWordBank.innerHTML = ''; // clear old vocab
+
+  const words = window.VOCAB_SECTIONS?.[sectionName];
+  if (!words || !words.length) return;
+
+  words.forEach(word => {
+    const sp = document.createElement('span');
+    sp.className = 'word-tile';
+    sp.textContent = word;
+    sp.addEventListener('click', () =>
+      handleWordInsert(activeSpeechTarget, word)
+    );
+    gsWordBank.appendChild(sp);
+  });
+}
+
+
+
+  function handleWordInsert(target, word){
+    if(!target) target = teleEdit;
+
+  // PATCH: prevent editing after submit
+  if(target===teleEdit && inputLocked) return;
+
+    if(target instanceof HTMLTextAreaElement || target instanceof HTMLInputElement){
+      const start = target.selectionStart || 0;
+      const end = target.selectionEnd || 0;
+      let val = target.value || '';
+      let insertWord = word;
+      const charBefore = val[start-1] || '';
+      const atStart = start === 0;
+      const isPunctuation = /[.!?]/.test(insertWord);
+      let shouldCap = atStart || /\n$/.test(val.slice(0,start)) || /[.!?]\s{0,2}$/.test(val.slice(0,start));
+      if(shouldCap && !isPunctuation) insertWord = insertWord.charAt(0).toUpperCase() + insertWord.slice(1);
+      let prefix = '', suffix = ' ';
+      if(!atStart && !isPunctuation) prefix = (charBefore === ' ' || charBefore === '\n') ? '' : ' ';
+      if(isPunctuation){ prefix = charBefore === ' ' ? '' : ''; suffix = ' '; }
+      val = val.slice(0,start) + prefix + insertWord + suffix + val.slice(end);
+      const newPos = start + prefix.length + insertWord.length + suffix.length;
+      target.value = val;
+      target.focus();
+      target.selectionStart = target.selectionEnd = newPos;
+      target.dispatchEvent(new Event('input',{bubbles:true}));
+    } else {
+let insert = word;
+const caretIndex = getCaretCharacterOffsetWithin(target);
+const before = (target.innerText || '').slice(0, caretIndex);
+
+// Only capitalize if NOT in teleprompter mode
+if (autoCapEnabled) {
+    const shouldCap = /(^|\.\s+|!\s+|\?\s+|\n)$/.test(before);
+    if (shouldCap)
+        insert = insert.charAt(0).toUpperCase() + insert.slice(1);
+}
+
+const charBefore = before.slice(-1) || '';
+const prefix = (charBefore === '' || charBefore === ' ' || charBefore === '\n') ? '' : ' ';
+insertTextAtCaretIntoElement(target, prefix + insert + ' ');
+updateOverlay();
+target.focus();
+    }
+  }
+
+  /* -------------------------
+     CARET & INSERT helpers
+     ------------------------- */
+  function insertTextAtCaretIntoElement(el, text){
+    if(!el) return;
+    if(el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement){
+      const start = el.selectionStart || 0;
+      const end = el.selectionEnd || 0;
+      const val = el.value || '';
+      el.value = val.slice(0,start) + text + val.slice(end);
+      const pos = start + text.length;
+      el.setSelectionRange(pos,pos);
+      el.focus();
+      el.dispatchEvent(new Event('input',{bubbles:true}));
+      return;
+    }
+    el.focus();
+    const sel = window.getSelection();
+    if(!sel || !sel.rangeCount){
+      el.appendChild(document.createTextNode(text));
+      placeCaretAtEnd(el);
+      el.dispatchEvent(new Event('input',{bubbles:true}));
+      return;
+    }
+    const range = sel.getRangeAt(0);
+    range.deleteContents();
+    const tn = document.createTextNode(text);
+    range.insertNode(tn);
+    range.setStartAfter(tn);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+    el.dispatchEvent(new Event('input',{bubbles:true}));
+  }
+
+  function placeCaretAtEnd(el){
+    el.focus();
+    if(typeof window.getSelection !== 'undefined' && typeof document.createRange !== 'undefined'){
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      range.collapse(false);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    }
+  }
+
+  function getCaretCharacterOffsetWithin(element) {
+    let caretOffset = 0;
+    const sel = window.getSelection();
+    if(sel.rangeCount > 0) {
+      const range = sel.getRangeAt(0);
+      const preRange = range.cloneRange();
+      preRange.selectNodeContents(element);
+      preRange.setEnd(range.startContainer, range.startOffset);
+      caretOffset = preRange.toString().length;
+    }
+    return caretOffset;
+  }
+
+  /* -------------------------
+     LINE SPLITTING / WRAPPING / WIDOW BALANCING
+     ------------------------- */
+  function willWrap(candidate){
+    if(!candidate) return false;
+    const style = getComputedStyle(teleEdit);
+    measure.style.fontSize = style.fontSize;
+    measure.style.fontFamily = style.fontFamily;
+    measure.style.fontWeight = style.fontWeight;
+    measure.style.letterSpacing = style.letterSpacing;
+    measure.style.padding = style.padding;
+    measure.textContent = candidate;
+    return measure.scrollWidth > teleScrollWrapper.clientWidth - 6;
+  }
+
+  function splitIntoSentences(paragraph){
+    const s = paragraph.trim();
+    if(!s) return [];
+    const re = /[^.!?]+[.!?]+["')\]]*|[^.!?]+$/g;
+    const matches = s.match(re);
+    if(!matches) return [s];
+    return matches.map(sentence=>{
+      sentence = sentence.trim();
+      if(!sentence) return '';
+      return sentence.charAt(0).toUpperCase() + sentence.slice(1);
+    });
+  }
+
+  function balanceWidows(linesArray){
+    if(linesArray.length < 2) return;
+    for(let i=0;i<linesArray.length-1;i++){
+      const words = linesArray[i].trim().split(/\s+/).filter(Boolean);
+      const nextWords = linesArray[i+1].trim().split(/\s+/).filter(Boolean);
+      if(words.length>2 && nextWords.length<=1){
+        const move = words.pop();
+        linesArray[i] = words.join(' ');
+        linesArray[i+1] = move + (linesArray[i+1] ? " " + linesArray[i+1] : "");
+      }
+    }
+    for(let k=linesArray.length-1;k>=0;k--){
+      if(!linesArray[k].trim()) linesArray.splice(k,1);
+    }
+  }
+
+  function breakLongSentence(sentence){
+    if(!willWrap(sentence)) return [sentence];
+    const tokensRaw = sentence.split(/([,;:—–])/g);
+    const clauses = [];
+    for(let i=0;i<tokensRaw.length;i++){
+      const t = tokensRaw[i];
+      if(!t) continue;
+      if(/^[,;:—–]$/.test(t) && clauses.length){
+        clauses[clauses.length-1] += t;
+      } else {
+        clauses.push(t);
+      }
+    }
+    const out = [];
+    let current = "";
+    for(let i=0;i<clauses.length;i++){
+      const c = clauses[i].trim();
+      if(!c) continue;
+      const attempt = current ? current + " " + c : c;
+      if(!willWrap(attempt)) current = attempt;
+      else {
+        if(current) out.push(current);
+        current = c;
+      }
+    }
+    if(current) out.push(current);
+
+    for(let i=0;i<out.length;i++){
+      while(willWrap(out[i])){
+        const words = out[i].split(" ");
+        let line = "";
+        let j=0;
+        for(; j<words.length; j++){
+          const test = line ? line + " " + words[j] : words[j];
+          if(willWrap(test)) break;
+          line = test;
+        }
+        const remainder = words.slice(j).join(" ");
+        out[i] = line;
+        if(remainder) out.splice(i+1,0,remainder);
+      }
+    }
+
+    for(let k=1;k<out.length;k++){
+      const prev = out[k-1].trim();
+      if(prev && !/[.!?]$/.test(prev)) out[k] = out[k].charAt(0).toUpperCase() + out[k].slice(1);
+    }
+
+    balanceWidows(out);
+    return out;
+  }
+
+  function paragraphToLines(p){
+    const sentences = splitIntoSentences(p);
+    const final = [];
+    sentences.forEach(s=>{
+      if(!s.trim()) return;
+      final.push(...breakLongSentence(s));
+    });
+    return final;
+  }
+
+  /* caret save / restore for contenteditable */
+  function saveCaretPosition(container){
+    const sel = window.getSelection();
+    if(!sel.rangeCount) return null;
+    const range = sel.getRangeAt(0);
+    const preSelectionRange = range.cloneRange();
+    preSelectionRange.selectNodeContents(container);
+    preSelectionRange.setEnd(range.startContainer, range.startOffset);
+    return preSelectionRange.toString().length;
+  }
+
+  function restoreCaretPosition(container, chars){
+    container.focus();
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    let nodeStack = [container], node, charIndex = 0, range = document.createRange();
+    while(nodeStack.length){
+      node = nodeStack.pop();
+      if(node.nodeType === 3){
+        const nextCharIndex = charIndex + node.length;
+        if(chars <= nextCharIndex){
+          range.setStart(node, chars - charIndex);
+          range.collapse(true);
+          sel.addRange(range);
+          return true;
+        }
+        charIndex = nextCharIndex;
+      } else {
+        let i = node.childNodes.length - 1;
+        while(i >= 0){ nodeStack.push(node.childNodes[i]); i--; }
+      }
+    }
+    return false;
+  }
+
+ function rebuildLinesFromSource(src){
+const raw = (src || '').replace(/\s*~\s*$/, '');
+
+  // --- Save caret and scroll fraction ---
+  const scrollState = saveScroll();
+
+  // Clear editor and rebuild lines
+  teleEdit.innerHTML = '';
+  lines = [];
+
+  const linesRaw = raw.split(/\n/);
+  linesRaw.forEach((lineText)=>{
+    const text = lineText.replace(/\u200B/g,'');
+    const wrapped = text.trim() ? paragraphToLines(text) : [""];  // keep empty lines
+    wrapped.forEach(txt=>{
+      const d = document.createElement('div');
+      d.className = 'line';
+      d.textContent = txt || "\u200B";
+      teleEdit.appendChild(d);
+      lines.push(d);
+    });
+  });
+
+  // --- Bottom spacer line to allow scroll past last line ---
+  const spacer = document.createElement('div');
+  spacer.className = 'line spacer';
+  spacer.innerHTML = '&nbsp;';
+  spacer.style.height = '20px'; // adjust as needed
+  teleEdit.appendChild(spacer);
+
+
+  // Restore caret and scroll
+  restoreScroll(scrollState);
+
+  // Update overlay
+  updateOverlay();
+
+  // --- Helpers ---
+  function saveScroll(){
+    const sel = window.getSelection();
+    let caretOffset = 0;
+    if(sel.rangeCount){
+      const range = sel.getRangeAt(0);
+      const preRange = range.cloneRange();
+      preRange.selectNodeContents(teleEdit);
+      preRange.setEnd(range.startContainer, range.startOffset);
+      caretOffset = preRange.toString().length;
+    }
+    const scrollFraction = teleScrollWrapper.scrollTop / Math.max(teleEdit.scrollHeight - teleScrollWrapper.clientHeight, 1);
+    return { caretOffset, scrollFraction };
+  }
+
+  function restoreScroll(state){
+    if(!state) return;
+    restoreCaret(state.caretOffset);
+    const scrollTop = state.scrollFraction * (teleEdit.scrollHeight - teleScrollWrapper.clientHeight);
+    teleScrollWrapper.scrollTop = scrollTop;
+  }
+
+  function restoreCaret(chars){
+    teleEdit.focus();
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    let nodeStack = [teleEdit], node, charIndex = 0, range = document.createRange();
+    while(nodeStack.length){
+      node = nodeStack.pop();
+      if(node.nodeType === 3){
+        const nextCharIndex = charIndex + node.length;
+        if(chars <= nextCharIndex){
+          range.setStart(node, chars - charIndex);
+          range.collapse(true);
+          sel.addRange(range);
+          return;
+        }
+        charIndex = nextCharIndex;
+      } else {
+        for(let i=node.childNodes.length-1;i>=0;i--) nodeStack.push(node.childNodes[i]);
+      }
+    }
+  }
+}
+
+  /* -------------------------
+     Overlay update & placeholder
+     ------------------------- */
+  function updateOverlay(){
+    const t = teleEdit.innerText || '';
+    const s = (t.match(/[.!?]+/g)||[]).length;
+    teleOverlay.textContent = `${t.length} chars · ${s} sent`;
+  }
+
+  function updatePlaceholder(){
+    const text = (teleEdit.innerText || '').replace(/\u200B/g,'').trim();
+    if(text.length === 0) teleEdit.classList.add('empty');
+    else teleEdit.classList.remove('empty');
+  }
+
+teleEdit.addEventListener('input', () => {
+    updateOverlay();
+    updatePlaceholder();
+});
+
+// --- Enter key handler (NO rebuild) ---
+teleEdit.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault(); // prevent default <div> creation
+
+    const savedPos = saveCaretPosition(teleEdit);
+    insertTextAtCaretIntoElement(teleEdit, "\n");
+    restoreCaretPosition(teleEdit, savedPos + 1);
+
+    updateOverlay();
+  }
+});
+
+
+  /* -------------------------
+     Scrolling controls (Start/Stop/Repeat buttons)
+     changed to control teleScrollWrapper.scrollTop so users can manually scroll
+     ------------------------- */
+  function scrollStep(){
+    if(!playing || currentLineIndex >= lines.length){
+      playing=false;
+      stopUI();
+      return;
+    }
+    const line = lines[currentLineIndex];
+    const offset = line.offsetTop; // scrollTop target (top of line)
+    // Scroll the wrapper to show the line at top
+    teleScrollWrapper.scrollTop = offset;
+    currentLineIndex++;
+    scrollTimer = setTimeout(scrollStep, lineDuration);
+  }
+
+  function startUI(){
+    if(playing) return;
+    // ensure lines built from current editor (raw input)
+autoCapEnabled = false;   // disable auto-capitalization during teleprompter mode
+
+    rebuildLinesFromSource(teleEdit.innerText || '');
+    if(lines.length === 0) return;
+    playing = true;
+    // lock editing while playing
+    teleEdit.setAttribute('contenteditable','false');
+    startBtn.disabled = true;
+    stopBtn.disabled = false;
+    repeatBtn.disabled = true;
+    // start at currentLineIndex (if 0 will start at top)
+    scrollStep();
+  }
+function stopUI(){
+    autoCapEnabled = true;   // re-enable capitalization after teleprompter stops
+
+    playing = false;
+    if(scrollTimer) clearTimeout(scrollTimer);
+    teleEdit.setAttribute('contenteditable','true');
+    startBtn.disabled = false;
+    stopBtn.disabled = true;
+    repeatBtn.disabled = false;
+}
+  function repeatUI(){
+    // REPEAT SHOULD NOT AUTOSTART: reset to beginning but do not start playback
+    stopUI();
+    currentLineIndex = 0;
+    teleScrollWrapper.scrollTop = 0;
+    // leave teleEdit editable; user must press Start to begin
+  }
+
+  // wire buttons
+  startBtn.addEventListener('click', startUI);
+  stopBtn.addEventListener('click', stopUI);
+  repeatBtn.addEventListener('click', repeatUI);
+
+  // initialize button states
+  stopBtn.disabled = true;
+  startBtn.disabled = false;
+  repeatBtn.disabled = false;
+
+  /* -------------------------
+     Speed buttons handling
+     ------------------------- */
+  speedButtons.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      speedButtons.forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      lineDuration = parseInt(btn.dataset.speed,10);
+    });
+  });
+
+  /* -------------------------
+     Scoreboard behavior (submit shows scoreboard)
+     - Copy/TXT/PNG buttons exist only inside scoreboard
+     ------------------------- */
+  function showScoreboard(){
+    gsScoreboard.style.display = 'block';
+  }
+  function hideScoreboard(){
+    gsScoreboard.style.display = 'none';
+  }
+
+  // initial ensure hidden
+  hideScoreboard();
+
+  [gsName, gsId].forEach(i=> i.addEventListener('input', ()=> submitBtn.disabled = !(gsName.value.trim() && gsId.value.trim())) );
+
+  submitBtn.addEventListener('click', ()=>{
+    // get current raw input from teleEdit
+    const name = gsName.value.trim();
+    const id = gsId.value.trim();
+    const txt = teleEdit.innerText || '';
+
+    // Scoreboard shows EXACTLY what's inside the editor (plain text). Editable there.
+const fileName = window.location.pathname.split('/').pop() || 'index.html';
+
+gsScoreMeta.textContent =
+  `${fileName}|${name}|${id}|${new Date().toLocaleString()}|` +
+  `${txt.length} chars|~${(txt.match(/[.!?]+/g) || []).length} sent`;
+
+gsScoreText.textContent = txt;
+showScoreboard();
+
+// SEND TO SUPABASE (universal hook)
+const resultText =
+  `${fileName}|${name}|${id}|${new Date().toLocaleString()}|` +
+  `${txt.length} chars|~${(txt.match(/[.!?]+/g) || []).length} sent`;
+
+console.log("SUPABASE PAYLOAD:", resultText);
+
+if (typeof window.saveResult === 'function') {
+  window.saveResult(resultText);
+}
+  // PATCH: lock editor after submit
+  inputLocked = true;
+  teleEdit.setAttribute('contenteditable','false');
+
+
+    // disable the submit button after first click per requirement
+    submitBtn.disabled = false;
+    // if audio recording is active, stop it but keep blob
+    if(mediaRecorder && mediaRecorder.state === 'recording'){ try{ mediaRecorder.stop(); }catch(e){} setAudioUI(false); }
+  });
+
+/* Scoreboard button handlers */
+copyScoreBtn.addEventListener('click', async () => {
+    const text = gsScoreText.innerText || '';
+    try {
+        await navigator.clipboard.writeText(text);
+        showToast('Copied scoreboard text');
+    } catch(e) {
+        alert('Copy failed');
+    }
+});
+
+/* TXT Download */
+downloadScoreTxtBtn.addEventListener('click', () => {
+    const txt = gsScoreText.innerText || '';
+    const name = gsName.value.trim() || 'Unknown';
+    const id = gsId.value.trim() || 'Unknown';
+    const dateStr = new Date().toISOString().replace(/[:]/g, '-');
+
+    // Decode URL and replace spaces
+    const rawFileName = decodeURIComponent(window.location.pathname.split('/').pop());
+    const fileName = rawFileName.replace(/\s+/g,'_') || 'file.html';
+
+    const downloadName = `${fileName}|${name}|${id}|${dateStr}.txt`;
+
+    const blob = new Blob([txt], { type:'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = downloadName;
+    a.click();
+    URL.revokeObjectURL(a.href);
+});
+
+/* PNG Download */
+downloadScorePngBtn.addEventListener('click', async () => {
+    const wrapper = document.createElement('div');
+    wrapper.style.background = '#fff';
+    wrapper.style.padding = '10px';
+    wrapper.style.fontFamily = 'monospace';
+    wrapper.style.whiteSpace = 'pre-wrap';
+    wrapper.innerText = gsScoreMeta.textContent + "\n\n" + (gsScoreText.innerText || '');
+    wrapper.style.position = 'fixed';
+    wrapper.style.left = '-9999px';
+    document.body.appendChild(wrapper);
+
+    const name = gsName.value.trim() || 'Unknown';
+    const id = gsId.value.trim() || 'Unknown';
+    const dateStr = new Date().toISOString().replace(/[:]/g, '-');
+
+    // Decode URL and replace spaces
+    const rawFileName = decodeURIComponent(window.location.pathname.split('/').pop());
+    const fileName = rawFileName.replace(/\s+/g,'_') || 'file.html';
+
+    const downloadName = `${fileName}|${name}|${id}|${dateStr}.png`;
+
+    try {
+        const canvas = await html2canvas(wrapper, { backgroundColor:'#fff', scale:2 });
+        const a = document.createElement('a');
+        a.href = canvas.toDataURL('image/png');
+        a.download = downloadName;
+        a.click();
+    } catch(e) {
+        alert('PNG failed');
+    }
+
+    wrapper.remove();
+});
+  /* -------------------------
+     Speech Recognition + Audio recording (mutual interrupt)
+     ------------------------- */
+  function setSpeechUI(on){ if(on) speechBtn.classList.add('recording'); else speechBtn.classList.remove('recording'); }
+  function setAudioUI(on){ if(on) captureAudioBtn.classList.add('recording'); else captureAudioBtn.classList.remove('recording'); }
+
+  // Setup recognition if available
+  if('webkitSpeechRecognition' in window || 'SpeechRecognition' in window){
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    recognition.maxAlternatives = 1;
+
+recognition.onresult = (event) => {
+  // Append final results to the active speech target at caret
+  let finalText = '';
+  for (let i = event.resultIndex; i < event.results.length; i++) {
+    const res = event.results[i];
+    if (res.isFinal) finalText += (res[0].transcript || '');
+  }
+
+if (finalText.trim()) {
+
+  // STEP 5: disable capitalization during teleprompter mode
+  if (!autoCapEnabled) {
+      // Leave speech text exactly as dictated
+      finalText = finalText;
+  } else {
+      // OPTIONAL: Add future speech auto-cap rules here
+      // (currently empty by design)
+  }
+
+  // Insert dictated text at the caret
+  insertTextAtCaretIntoElement(activeSpeechTarget, finalText + ' ');
+
+  // Update the onscreen overlay + placeholder
+  updateOverlay();
+  updatePlaceholder();
+}
+
+};   // ✅ REQUIRED — closes recognition.onresult
+
+
+recognition.onerror = (e) => {
+  console.warn('Speech error', e.error);
+  if (e.error === 'not-allowed' || e.error === 'permission-denied') {
+    recognizing = false;
+    setSpeechUI(false);
+    startInProgress = false;
+  }
+};
+
+recognition.onend = () => {
+  // resilient auto-restart if user intends to keep recognizing
+  if (recognizing) {
+    setTimeout(() => {
+      if (!recognizing) return;
+      try {
+        recognition.start();
+      } catch (err) {
+        recognizing = false;
+        setSpeechUI(false);
+        startInProgress = false;
+      }
+    }, 300);
+  } else {
+    setSpeechUI(false);
+    startInProgress = false;
+  }
+};
+
+  } else {
+    speechBtn.title = 'Speech recognition unsupported';
+    speechBtn.style.opacity = 0.6;
+  }
+
+  speechBtn.addEventListener('click', async ()=>{
+    if(!recognition) return alert('Speech recognition not supported');
+    if(recognizing){
+      try{ recognition.stop(); }catch(e){} recognizing=false; setSpeechUI(false);
+    } else {
+      // if audio recording active, abandon it (stop & discard)
+      if(mediaRecorder && mediaRecorder.state === 'recording'){
+        try{ mediaRecorder.stop(); }catch(e){}
+        audioChunks = []; audioBlob = null; mediaRecorder = null; setAudioUI(false);
+      }
+      try{
+        startInProgress = true;
+        recognition.start();
+        recognizing = true;
+        setSpeechUI(true);
+        if(activeSpeechTarget) activeSpeechTarget.focus();
+        setTimeout(()=>{ startInProgress=false; },600);
+      }catch(err){
+        console.warn('Could not start recognition', err);
+        recognizing=false; setSpeechUI(false); startInProgress=false;
+      }
+    }
+  });
+
+captureAudioBtn.addEventListener('click', async () => {
+    if(mediaRecorder && mediaRecorder.state === 'recording'){
+        mediaRecorder.stop();
+        return;
+    }
+
+    if(recognizing && recognition){
+        recognizing = false;
+        try { recognition.stop(); } catch(e){}
+        setSpeechUI(false);
+    }
+
+    try{
+        const stream = await navigator.mediaDevices.getUserMedia({ audio:true });
+        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+
+        audioChunks = [];
+        audioBlob = null;
+
+        mediaRecorder.ondataavailable = e => {
+            if(e.data && e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = () => {
+            audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            setAudioUI(false);
+            showToast('Audio recording ready');
+        };
+
+        mediaRecorder.start();
+        setAudioUI(true);
+    } catch(err){
+        alert('Microphone access denied');
+        setAudioUI(false);
+    }
+});
+
+/* Audio download */
+downloadBlobBtn.addEventListener('click', () => {
+    if (!audioBlob) {
+        alert("No audio recorded yet.");
+        return;
+    }
+
+    const name = gsName.value.trim() || 'Unknown';
+    const id = gsId.value.trim() || 'Unknown';
+    const dateStr = new Date().toISOString().replace(/[:]/g, '-');
+
+    // Decode URL and replace spaces
+    const rawFileName = decodeURIComponent(window.location.pathname.split('/').pop());
+    const fileName = rawFileName.replace(/\s+/g,'_') || 'file.html';
+
+    const downloadName = `${fileName}|${name}|${id}|${dateStr}.webm`;
+
+    const url = URL.createObjectURL(audioBlob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = downloadName;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+});
+
+/* Audio copy to clipboard */
+copyBlobBtn.addEventListener('click', async () => {
+    if (!audioBlob) {
+        return alert('No audio recorded');
+    }
+
+    try {
+        await navigator.clipboard.write([new ClipboardItem({'audio/webm': audioBlob})]);
+        showToast('Audio blob copied');
+    } catch (e) {
+        alert('Copy blob failed');
+    }
+});
+
+  /* -------------------------
+     Active speech target tracking
+     ------------------------- */
+  [gsName, gsId, teleEdit, gsScoreText].forEach(el=>{
+    if(!el) return;
+    el.addEventListener('focus', ()=> activeSpeechTarget = el);
+    el.addEventListener('click', ()=> activeSpeechTarget = el);
+  });
+
+  /* -------------------------
+     Small utilities
+     ------------------------- */
+  function showToast(msg='Copied'){ toast.textContent = msg; toast.style.display = 'block'; setTimeout(()=> toast.style.display = 'none', 1400); }
+
+  // Expose rebuild function globally for debugging if needed
+  window.rebuildLinesFromSource = (src)=>{
+    teleEdit.innerText = src||teleEdit.innerText;
+    teleEdit.dispatchEvent(new Event('input',{bubbles:true}));
+  };
+
+  /* -------------------------
+     Load initial raw text into editor (raw blocks) — but keep it editable and treat as the main raw input source
+     ------------------------- */
+  const rawBlocks = loadRawTextBlocks();
+  if(rawBlocks && rawBlocks.trim().length){
+rebuildLinesFromSource(teleEdit.innerText);
+    rebuildLinesFromSource(teleEdit.innerText);
+    updateOverlay();
+    updatePlaceholder();
+    // ensure scroll position at top
+    teleScrollWrapper.scrollTop = 0;
+  } else {
+    updatePlaceholder();
+  }
+
+  // On resize re-wrap lines (debounced)
+  let resizeTimer = null;
+  window.addEventListener('resize', ()=>{ if(resizeTimer) clearTimeout(resizeTimer); resizeTimer = setTimeout(()=>{ rebuildLinesFromSource(teleEdit.innerText||''); },200); });
+
+  // ensure initial state
+  updateOverlay();
+  updatePlaceholder();
+
+  /* End DOMContentLoaded */
+});
+
+
+</script>
+
+<script>
+(function() {
+  const teleEdit = document.getElementById('teleEdit');
+  const teleScrollWrapper = document.getElementById('teleScrollWrapper');
+  const teleOverlay = document.getElementById('teleOverlay');
+
+function loadSectionByIndex(index) {
+  const section = window.SCRAMBLE_SECTIONS[index];
+  if (!section) return;
+
+  // Load section text
+  teleEdit.innerText = section.text.trim();
+  rebuildLinesFromSource(teleEdit.innerText);
+
+  // Load vocab
+  renderVocabForSection(section.name);
+
+  // Reset state
+  currentLineIndex = 0;
+  teleScrollWrapper.scrollTop = 0;
+
+  updateOverlay();
+  updatePlaceholder();
+}
+
+
+  // Save scroll relative to caret
+  function saveScroll() {
+    const sel = window.getSelection();
+    if (!sel.rangeCount) return teleScrollWrapper.scrollTop;
+    const range = sel.getRangeAt(0);
+    const preRange = range.cloneRange();
+    preRange.selectNodeContents(teleEdit);
+    preRange.setEnd(range.startContainer, range.startOffset);
+    const caretOffset = preRange.toString().length;
+
+    const totalText = teleEdit.innerText.length;
+    const scrollFraction = teleScrollWrapper.scrollTop / Math.max(teleEdit.scrollHeight - teleScrollWrapper.clientHeight, 1);
+    return { caretOffset, scrollFraction };
+  }
+
+  function restoreScroll(state) {
+    if (!state) return;
+    restoreCaret(state.caretOffset);
+    const scrollTop = state.scrollFraction * (teleEdit.scrollHeight - teleScrollWrapper.clientHeight);
+    teleScrollWrapper.scrollTop = scrollTop;
+  }
+
+  function restoreCaret(chars) {
+    teleEdit.focus();
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    let nodeStack = [teleEdit], node, charIndex = 0, range = document.createRange();
+    while (nodeStack.length) {
+      node = nodeStack.pop();
+      if (node.nodeType === 3) {
+        const nextCharIndex = charIndex + node.length;
+        if (chars <= nextCharIndex) {
+          range.setStart(node, chars - charIndex);
+          range.collapse(true);
+          sel.addRange(range);
+          return;
+        }
+        charIndex = nextCharIndex;
+      } else {
+        for (let i = node.childNodes.length - 1; i >= 0; i--) nodeStack.push(node.childNodes[i]);
+      }
+    }
+  }
+
+  function rebuildLinesPreserveScroll(src) {
+    const state = saveScroll();
+    teleEdit.innerHTML = '';
+
+    const paragraphs = src.split(/\n/);
+    paragraphs.forEach(p => {
+      const div = document.createElement('div');
+      div.className = 'line';
+      div.textContent = p || "\u200B"; // keep empty lines visible
+      teleEdit.appendChild(div);
+    });
+
+    restoreScroll(state);
+  }
+
+  // Patch word insert to use scroll-preserving rebuild
+  document.querySelectorAll('.word-tile').forEach(tile => {
+    tile.addEventListener('click', () => {
+      const word = tile.textContent;
+      const caretOffset = getCaretCharacterOffset(teleEdit);
+      const charBefore = teleEdit.innerText[caretOffset - 1] || '';
+      const prefix = (charBefore === '' || charBefore === ' ' || charBefore === '\n') ? '' : ' ';
+      insertTextAtCaret(teleEdit, prefix + word + ' ');
+      updateOverlay();
+
+      // Rebuild lines after insertion (optional, debounce if many words)
+      rebuildLinesPreserveScroll(teleEdit.innerText);
+    });
+  });
+
+  function insertTextAtCaret(el, text) {
+    el.focus();
+    const sel = window.getSelection();
+    if (!sel || !sel.rangeCount) {
+      el.appendChild(document.createTextNode(text));
+      placeCaretAtEnd(el);
+      return;
+    }
+    const range = sel.getRangeAt(0);
+    range.deleteContents();
+    const tn = document.createTextNode(text);
+    range.insertNode(tn);
+    range.setStartAfter(tn);
+    range.collapse(true);
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  function placeCaretAtEnd(el) {
+    el.focus();
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    range.collapse(false);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+
+  function getCaretCharacterOffset(element) {
+    let caretOffset = 0;
+    const sel = window.getSelection();
+    if (sel.rangeCount > 0) {
+      const range = sel.getRangeAt(0);
+      const preRange = range.cloneRange();
+      preRange.selectNodeContents(element);
+      preRange.setEnd(range.startContainer, range.startOffset);
+      caretOffset = preRange.toString().length;
+    }
+    return caretOffset;
+  }
+
+  function updateOverlay() {
+    const t = teleEdit.innerText || '';
+    const s = (t.match(/[.!?]+/g) || []).length;
+    teleOverlay.textContent = `${t.length} chars · ${s} sent`;
+  }
+})();
+
+safeInsert(activeSpeechTarget, finalText + " ");
+
+</script>
+
+
+<script>
+(async function() {
+  'use strict';
+
+  function sanitizeFilename(name) {
+    return name.trim()
+      .replace(/[\\/:*?"<>|]+/g, '_')
+      .replace(/[\r\n]+/g, '_')
+      .slice(0, 200) || 'score';
+  }
+
+  function downloadBlob(blob, filename) {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      URL.revokeObjectURL(a.href);
+      a.remove();
+    }, 2000);
+  }
+
+  async function downloadScoreAsPNG(text, filename) {
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = text.replace(/\n/g, '<br>');
+    wrapper.style.whiteSpace = 'pre-wrap';
+    wrapper.style.fontFamily = 'monospace';
+    wrapper.style.padding = '10px';
+    wrapper.style.backgroundColor = '#fff';
+    wrapper.style.color = '#000';
+    document.body.appendChild(wrapper);
+
+    try {
+      const canvas = await html2canvas(wrapper, { scale: 2, backgroundColor: '#fff' });
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+      downloadBlob(blob, filename);
+    } catch (err) {
+      console.error(err);
+      alert('PNG download failed');
+    } finally {
+      wrapper.remove();
+    }
+  }
+
+  function hijackDownloadButton(originalBtn, getScoreText, getFilename, isText) {
+    if (!originalBtn) return;
+
+    // Clone button (preserve type)
+    const newBtn = originalBtn.cloneNode(true);
+    originalBtn.parentNode.replaceChild(newBtn, originalBtn);
+
+    newBtn.addEventListener('click', async e => {
+      e.preventDefault();
+      e.stopImmediatePropagation();
+
+      const scoreText = getScoreText();
+      if (!scoreText) {
+        alert('No scoreboard data found. Submit first.');
+        return;
+      }
+
+      const filename = sanitizeFilename(getFilename());
+      if (isText) {
+        downloadBlob(new Blob([scoreText], { type: 'text/plain' }), filename + '.txt');
+      } else {
+        await downloadScoreAsPNG(scoreText, filename + '.png');
+      }
+    }, true);
+  }
+
+  const submitButtons = document.querySelectorAll('button[id$="SubmitBtn"], button[id$="submit"], button[id*="submit"], button[class*="submit"]');
+
+  submitButtons.forEach(submitBtn => {
+    submitBtn.addEventListener('click', () => {
+      const section = submitBtn.closest('section') || document.body;
+
+      // Flexible scoreboard detection
+const scoreboard =
+  section.querySelector('pre') ||
+  section.querySelector('.scoreboard pre') ||
+  section.querySelector('#result') ||
+  section.querySelector('.output') ||
+  section.querySelector('[id*="ScoreOutput"]') ||
+  section.querySelector('[id*="ScoreText"]') ||
+  document.getElementById('vocabScoreOutput') ||
+  document.getElementById('gsScoreText');
+
+if (!scoreboard) {
+  console.warn("⚠️ No scoreboard found for Supabase capture");
+  return;
+}
+
+      // Name/ID inputs
+      const nameInput = section.querySelector('input[id*="Name"], input[name*="name"], #name');
+      const idInput   = section.querySelector('input[id*="Id"], input[name*="id"], #id');
+
+      const getFilename = () => {
+        const rawFilename = window.location.pathname.split('/').pop() || 'score';
+        const sectionName = section.querySelector('h3')?.textContent.trim() || section.id || 'section';
+        const name = nameInput?.value.trim() || 'Student';
+        const id   = idInput?.value.trim() || 'ID';
+        const now = new Date();
+        const dateStr = String(now.getDate()).padStart(2,'0') +
+                        String(now.getMonth()+1).padStart(2,'0') +
+                        String(now.getFullYear());
+        return `${rawFilename}|${sectionName}|${name}|${id}|${dateStr}`;
+      };
+
+      // Hijack buttons in this section
+      const buttons = section.querySelectorAll('button, .scoreboard button, #scoreboardBtns button');
+      buttons.forEach(btn => {
+        const idLower = btn.id.toLowerCase();
+        const classLower = btn.className?.toLowerCase() || '';
+        const isTextButton = /text|txt/.test(idLower) || /text|txt/.test(classLower);
+        hijackDownloadButton(btn, () => {
+  const el =
+    section.querySelector('pre') ||
+    section.querySelector('.scoreboard pre') ||
+    section.querySelector('#result') ||
+    section.querySelector('.output') ||
+    document.getElementById('vocabScoreOutput') ||
+    document.getElementById('gsScoreText');
+
+  return (el?.value ?? el?.textContent ?? el?.innerText ?? '').trim();
+}, getFilename, isTextButton);
+      });
+
+    }, true);
+  });
+
+})();
+</script>
+
+
+
+
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Get filename only
+    let filename = window.location.pathname.split("/").pop();
+
+    // Remove .html
+    filename = filename.replace(/\.html$/i, "");
+
+    // Remove everything up to and including the first underscore
+    // (treats that as the prefix)
+    filename = filename.replace(/^[^_]*_/, "");
+
+    // Convert underscores to spaces
+    const title = filename.replace(/_/g, " ");
+
+    // Replace the first <h1>
+    const h1 = document.querySelector("h1");
+    if (h1) {
+        h1.textContent = title;
+    }
+});
+</script>
+
+<script>
+
+(function(){
+
+/* =========================
+   RAW INSTRUCTIONS TEXT
+========================= */
+
+const RAW_TEXT = `
+
+How to use this page...
+
+1. Enter Name and ID.
+2. Select a category.
+3. Click Start to begin.
+4. Write or edit in the text field.
+5. Select from the suggested word bank.
+6. Click Start to start the Teleprompter Feature.
+7. Adjust the speed with the bars numbered 1-5.
+8. You can Start, Stop and Repeat the teleprompter text.
+9. You can convert your speech to text with STT.
+10. You can record your speech with the red Record button.
+8. Click Submit to find options to save your work.
+9. Copy or download your text.
+10. Download your audio.
+
+
+`;
+
+
+/* =========================
+   RAW TEXT PARSER
+========================= */
+
+function parseRawInstructions(text){
+
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+
+  lines.forEach(line => {
+
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
+
+    html.push(`<p>${line}</p>`);
+  });
+
+  return html.join("");
+}
+
+
+/* =========================
+   CREATE STYLE
+========================= */
+
+const style = document.createElement("style");
+
+style.textContent = `
+#instructionsBtn{
+  position:fixed;
+  bottom:20px;
+  right:20px;
+  padding:10px 16px;
+  background:#2e8b57;
+  color:#fff;
+  border:none;
+  border-radius:6px;
+  font-weight:600;
+  cursor:pointer;
+  box-shadow:0 4px 8px rgba(0,0,0,0.6);
+  z-index:99998;
+}
+
+#instructionsBtn:hover{
+  background:#257047;
+}
+
+#instructionsRoot{
+  position:fixed;
+  inset:0;
+  display:none;
+  z-index:99999;
+}
+
+#instructionsBackdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,.35);
+}
+
+#instructionsModal{
+  position:absolute;
+  top:25px;
+  left:50%;
+  transform:translateX(-50%);
+  width:min(650px,90vw);
+  max-height:90vh;
+  background:#fff;
+  border-radius:10px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+#instructionsHeader{
+  padding:12px 16px;
+  border-bottom:1px solid #ddd;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+#instructionsTitle{
+  color:#1976d2;
+  font-weight:600;
+  font-size:1.1em;
+}
+
+#instructionsBack{
+  border:none;
+  background:none;
+  font-size:20px;
+  cursor:pointer;
+  color:#1976d2;
+  font-weight:600;
+}
+
+#instructionsContent{
+  padding:2px 18px 18px 18px;
+  overflow-y:auto;
+  line-height:1.6;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+}
+
+#instructionsContent::-webkit-scrollbar{
+  display:none;
+}
+
+#instructionsContent h3{
+  color:#1976d2;
+  margin:12px 0 4px 0;
+  font-weight:600;
+}
+
+#instructionsContent p{
+  margin:4px 0;
+}
+
+#instructionsContent hr{
+  margin:12px 0;
+}
+`;
+
+document.head.appendChild(style);
+
+
+/* =========================
+   CREATE BUTTON
+========================= */
+
+const btn = document.createElement("button");
+btn.id = "instructionsBtn";
+btn.textContent = "Instructions";
+
+document.body.appendChild(btn);
+
+
+/* =========================
+   CREATE MODAL
+========================= */
+
+const root = document.createElement("div");
+root.id = "instructionsRoot";
+
+root.innerHTML = `
+<div id="instructionsBackdrop"></div>
+
+<div id="instructionsModal">
+
+  <div id="instructionsHeader">
+    <button id="instructionsBack">←</button>
+    <span id="instructionsTitle">Instructions</span>
+  </div>
+
+  <div id="instructionsContent">
+    ${parseRawInstructions(RAW_TEXT)}
+  </div>
+
+</div>
+`;
+
+document.body.appendChild(root);
+
+
+/* =========================
+   SCROLL LOCK
+========================= */
+
+const modalContent = document.getElementById("instructionsContent");
+
+modalContent.addEventListener("wheel", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+modalContent.addEventListener("touchmove", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+
+/* =========================
+   OPEN / CLOSE
+========================= */
+
+function openModal(){
+  root.style.display="block";
+  document.body.style.overflow="hidden";
+  document.documentElement.style.overflow="hidden";
+}
+
+function closeModal(){
+  root.style.display="none";
+  document.body.style.overflow="";
+  document.documentElement.style.overflow="";
+}
+
+btn.onclick = openModal;
+
+document.getElementById("instructionsBack").onclick = closeModal;
+document.getElementById("instructionsBackdrop").onclick = closeModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape") closeModal();
+});
+/* =========================
+   DYNAMIC BODY PADDING FOR BUTTON
+========================= */
+
+function adjustBodyPadding(){
+  const btnHeight = btn.offsetHeight + -25; // include some gap
+  document.body.style.paddingBottom = `${btnHeight}px`;
+}
+
+// Initial adjustment
+adjustBodyPadding();
+
+// Update if window is resized (responsive)
+window.addEventListener("resize", adjustBodyPadding);
+
+})();
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<!-- SUPABASE LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+window.supabaseClient = window.supabase?.createClient(
+  'https://etwwriloppklhhkmswpr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+);
+
+if (!window.supabaseClient) {
+  console.error("❌ Supabase failed to initialize");
+}
+
+let lastUploadedScore = null;
+
+window.saveResult = async function saveResult(text) {
+
+  if (!window.supabaseClient) {
+    console.error("❌ No Supabase client");
+    return;
+  }
+  // ======================
+  // NORMALIZE INPUT
+  // ======================
+  let cleaned;
+
+  try {
+    cleaned = (typeof text === "string")
+      ? text
+      : JSON.stringify(text);
+
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+
+  } catch (err) {
+    console.error("❌ Normalize error:", err);
+    return;
+  }
+
+  if (!cleaned) {
+    console.error("❌ Empty value blocked");
+    return;
+  }
+
+  if (cleaned === lastUploadedScore) {
+    console.log("⚠️ Duplicate blocked");
+    return;
+  }
+
+  lastUploadedScore = cleaned;
+
+  console.log("📤 INSERTING INTO scoreboard_raw:", cleaned);
+
+  const { data, error } = await supabaseClient
+    .from("scoreboard_raw")
+    .insert([
+      { result_text: cleaned }
+    ])
+    .select();
+
+  if (error) {
+    console.error("❌ INSERT FAILED FULL ERROR:", error);
+    return;
+  }
+
+  console.log("✅ INSERT SUCCESS:", data);
+};
+
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
