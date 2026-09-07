@@ -3831,9 +3831,9 @@ const style = document.createElement("style");
 
 style.textContent = `
 #instructionsBtn{
-  position:fixed;
-  bottom:35px;
-  left:20px; /* Changed from right:20px to left:20px */
+  position:relative; /* No longer floating */
+  display:inline-block;
+  margin: 20px auto 10px auto; /* Centers it and spaces it above copyright */
   padding:10px 16px;
   background:#2e8b57;
   color:#fff;
@@ -3937,7 +3937,10 @@ const btn = document.createElement("button");
 btn.id = "instructionsBtn";
 btn.textContent = "Instructions";
 
-document.body.appendChild(btn);
+// Find your footer or layout container just above the copyright element, 
+// or fallback to appending it right where you want it in the DOM:
+const targetContainer = document.querySelector("footer") || document.body;
+targetContainer.appendChild(btn);
 
 
 /* =========================
