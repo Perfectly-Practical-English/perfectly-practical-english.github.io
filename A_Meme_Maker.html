@@ -776,11 +776,26 @@ function mergeLayerDown(layerKey) {
         redraw();
     }
 
+function initPerimeterCage() {
+        lassoPoints = [];
+        let x1 = 15, y1 = 15, x2 = 345, y2 = 345;
+        let step = 15;
+        
+        for (let x = x1; x <= x2; x += step) lassoPoints.push({ x: x, y: y1 });
+        for (let y = y1 + step; y <= y2; y += step) lassoPoints.push({ x: x2, y: y });
+        for (let x = x2 - step; x >= x1; x -= step) lassoPoints.push({ x: x, y: y2 });
+        for (let y = y2 - step; y > y1; y -= step) lassoPoints.push({ x: x1, y: y });
+        isLassoCompleted = true;
+    }
+
     function setTool(tool) {
         let wasActive = (currentTool === tool);
         deactivateAllTools();
         if (!wasActive) {
             currentTool = tool;
+            if (tool === 'lasso') {
+                initPerimeterCage();
+            }
         }
         closeAllDropdowns();
         updateFlyoutActiveStates();
@@ -1053,31 +1068,12 @@ function mergeLayerDown(layerKey) {
             }
         } else if (currentTool === 'rectangle' || currentTool === 'circle') {
             shapeBox = { x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y };
-        } else if (currentTool === 'lasso') {
+} else if (currentTool === 'lasso') {
             draggedPointIndex = null;
             for (let i = 0; i < lassoPoints.length; i++) {
-                if (Math.hypot(pos.x - lassoPoints[i].x, pos.y - lassoPoints[i].y) < 12) {
+                if (Math.hypot(pos.x - lassoPoints[i].x, pos.y - lassoPoints[i].y) < 16) {
                     draggedPointIndex = i;
                     break;
-                }
-            }
-
-            if (draggedPointIndex === null) {
-                if (lassoPoints.length === 0) {
-                    lassoPoints.push(pos);
-} else {
-                    let startPt = lassoPoints[0];
-                    let dist = Math.hypot(pos.x - startPt.x, pos.y - startPt.y);
-                    if (dist < 15 && lassoPoints.length > 2) {
-                        isLassoCompleted = true;
-                        redraw();
-                    } else {
-                        if (checkLassoIntersection(pos, lassoPoints)) {
-                            alert("The lasso line cannot cross over itself!");
-                            return;
-                        }
-                        lassoPoints.push(pos);
-                    }
                 }
             }
             redraw();
@@ -1457,11 +1453,7 @@ function executeSelection(mode) {
             for (let i = 1; i < lassoPoints.length; i++) {
                 ctx.lineTo(lassoPoints[i].x, lassoPoints[i].y);
             }
-            if (!isLassoCompleted && lassoPoints.length > 0) {
-                ctx.lineTo(currentMousePos.x, currentMousePos.y);
-            } else if (isLassoCompleted) {
-                ctx.closePath();
-            }
+            ctx.closePath();
             ctx.stroke();
 
             ctx.strokeStyle = '#00FFFF';
@@ -1477,7 +1469,7 @@ function executeSelection(mode) {
                 ctx.arc(lassoPoints[i].x, lassoPoints[i].y, 4, 0, Math.PI * 2);
                 ctx.fill();
 
-                ctx.fillStyle = (i === 0 && !isLassoCompleted) ? '#ffcc00' : '#00FFFF';
+                ctx.fillStyle = '#00FFFF';
                 ctx.beginPath();
                 ctx.arc(lassoPoints[i].x, lassoPoints[i].y, 2.5, 0, Math.PI * 2);
                 ctx.fill();
