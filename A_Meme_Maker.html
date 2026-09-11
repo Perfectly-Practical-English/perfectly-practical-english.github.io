@@ -238,11 +238,18 @@
                     <button class="dropdown-btn" type="button" onclick="toggleDropdown('dropSelection')">Select</button>
                     <div class="dropdown-content">
                         <button type="button" id="toolLassoBtn" onclick="setTool('lasso')">Polygonal Lasso</button>
+
+<button type="button" onclick="addCagePoint()">+ Point</button>
+<button type="button" onclick="deleteCagePoint()">- Point</button>
+
+
                         <button type="button" id="toolRectBtn" onclick="setTool('rectangle')">Rectangle Tool</button>
                         <button type="button" id="toolCircleBtn" onclick="setTool('circle')">Circle Tool</button>
                         <button type="button" onclick="executeSelection('interior')">Delete Interior</button>
                         <button type="button" onclick="executeSelection('exterior')">Delete Exterior</button>
                         <button type="button" id="toolRestoreSelectBtn" onclick="setTool('restore')" style="color:#107C10; font-weight:bold;">Restore Brush</button>
+
+
                     </div>
                 </div>
 
@@ -262,7 +269,7 @@
                         <button type="button" id="toolEraserSWBtn" onclick="setTool('eraserSW')">↙</button>
                         <button type="button" id="toolEraserWBtn" onclick="setTool('eraserW')">←</button>
                         <button type="button" id="toolEraserNWBtn" onclick="setTool('eraserNW')">↖</button>
-                        <button type="button" id="toolBgRemovalBtn" onclick="triggerBackgroundRemoval()">BG Removal</button>
+                        
                     </div>
                 </div>
 
@@ -344,6 +351,9 @@ let activeLayerKey = 'bg';
     let currentMousePos = { x: 0, y: 0 };
     let isLassoCompleted = false;
     let draggedPointIndex = null;
+
+let isAddPointActive = false;
+let isDeletePointActive = false;
     let shapeBox = null; 
     let cropBox = null;
     let isDrawing = false;
@@ -776,24 +786,40 @@ function mergeLayerDown(layerKey) {
         redraw();
     }
 
-function initPerimeterCage() {
+let cagePointCount = 16; // Default starting points (great for crude meme cuts)
+
+    function initPerimeterCage() {
         lassoPoints = [];
-        let x1 = 15, y1 = 15, x2 = 345, y2 = 345;
-        let step = 15;
+        let cx = 180, cy = 180; 
+        let radius = 150;       
         
-        for (let x = x1; x <= x2; x += step) lassoPoints.push({ x: x, y: y1 });
-        for (let y = y1 + step; y <= y2; y += step) lassoPoints.push({ x: x2, y: y });
-        for (let x = x2 - step; x >= x1; x -= step) lassoPoints.push({ x: x, y: y2 });
-        for (let y = y2 - step; y > y1; y -= step) lassoPoints.push({ x: x1, y: y });
+        for (let i = 0; i < cagePointCount; i++) {
+            let angle = (i / cagePointCount) * Math.PI * 2;
+            let x = cx + radius * Math.cos(angle);
+            let y = cy + radius * Math.sin(angle);
+            lassoPoints.push({ x: x, y: y });
+        }
+        
         isLassoCompleted = true;
     }
 
-    function setTool(tool) {
+function addCagePoint() {
+    isAddPointActive = true;
+    isDeletePointActive = false;
+    closeAllDropdowns();
+}
+
+function deleteCagePoint() {
+    isDeletePointActive = true;
+    isAddPointActive = false;
+    closeAllDropdowns();
+}
+function setTool(tool) {
         let wasActive = (currentTool === tool);
         deactivateAllTools();
         if (!wasActive) {
             currentTool = tool;
-            if (tool === 'lasso') {
+            if (tool === 'lasso' && lassoPoints.length === 0) {
                 initPerimeterCage();
             }
         }
@@ -802,161 +828,6 @@ function initPerimeterCage() {
         redraw();
     }
 
-    function triggerBackgroundRemoval() {
-        if (activeLayerKey === 'txt' || !layers[activeLayerKey].img) {
-            alert("Please select a valid image layer first.");
-            closeAllDropdowns();
-            return;
-        }
-        
-        saveState(activeLayerKey);
-        let l = layers[activeLayerKey];
-        let lCtx = l.img.getContext('2d');
-        let width = canvas.width;
-        let height = canvas.height;
-        let imgData = lCtx.getImageData(0, 0, width, height);
-        let data = imgData.data;
-
-        let sampleMap = {};
-        let luminanceValues = [];
-        
-        let addSample = (idx) => {
-            let i = idx * 4;
-            if (data[i + 3] === 0) return;
-            let r = Math.round(data[i] / 6) * 6;
-            let g = Math.round(data[i+1] / 6) * 6;
-            let b = Math.round(data[i+2] / 6) * 6;
-            let key = `${r},${g},${b}`;
-            sampleMap[key] = (sampleMap[key] || 0) + 1;
-            
-            let lum = 0.299 * data[i] + 0.587 * data[i+1] + 0.114 * data[i+2];
-            luminanceValues.push(lum);
-        };
-
-        for (let x = 0; x < width; x += Math.max(1, Math.floor(width / 40))) {
-            addSample(x);
-            addSample((height - 1) * width + x);
-        }
-        for (let y = 0; y < height; y += Math.max(1, Math.floor(height / 40))) {
-            addSample(y * width);
-            addSample(y * width + (width - 1));
-        }
-
-        let dominantKey = null;
-        let maxCount = -1;
-        for (let key in sampleMap) {
-            if (sampleMap[key] > maxCount) {
-                maxCount = sampleMap[key];
-                dominantKey = key;
-            }
-        }
-
-        if (!dominantKey) {
-            closeAllDropdowns();
-            return;
-        }
-
-        let rgb = dominantKey.split(',').map(Number);
-        let targetR = rgb[0], targetG = rgb[1], targetB = rgb[2];
-        
-        luminanceValues.sort((a, b) => a - b);
-        let avgLum = luminanceValues[Math.floor(luminanceValues.length / 2)] || 255;
-
-        let edgeMap = new Float32Array(width * height);
-        for (let y = 1; y < height - 1; y++) {
-            for (let x = 1; x < width - 1; x++) {
-                let idx = y * width + x;
-                let i = idx * 4;
-                if (data[i + 3] === 0) continue;
-                
-                let rightI = (y * width + (x + 1)) * 4;
-                let downI = ((y + 1) * width + x) * 4;
-                
-                let diffR = Math.abs(data[rightI] - data[i]) + Math.abs(data[downI] - data[i]);
-                let diffG = Math.abs(data[rightI + 1] - data[i + 1]) + Math.abs(data[downI + 1] - data[i + 1]);
-                let diffB = Math.abs(data[rightI + 2] - data[i + 2]) + Math.abs(data[downI + 2] - data[i + 2]);
-                
-                edgeMap[idx] = (diffR + diffG + diffB) / 3;
-            }
-        }
-
-        let visited = new Uint8Array(width * height);
-        let queue = [];
-
-        for (let x = 0; x < width; x++) {
-            let topIdx = x;
-            let btmIdx = (height - 1) * width + x;
-            if (visited[topIdx] === 0) { visited[topIdx] = 1; queue.push(topIdx); }
-            if (visited[btmIdx] === 0) { visited[btmIdx] = 1; queue.push(btmIdx); }
-        }
-        for (let y = 0; y < height; y++) {
-            let leftIdx = y * width;
-            let rightIdx = y * width + (width - 1);
-            if (visited[leftIdx] === 0) { visited[leftIdx] = 1; queue.push(leftIdx); }
-            if (visited[rightIdx] === 0) { visited[rightIdx] = 1; queue.push(rightIdx); }
-        }
-
-        let baseTolerance = 22;
-        let maxTolerance = 52;
-
-        let head = 0;
-        while (head < queue.length) {
-            let idx = queue[head++];
-            let x = idx % width;
-            let y = Math.floor(idx / width);
-            let i = idx * 4;
-
-            if (data[i + 3] === 0) continue;
-
-            let r = data[i];
-            let g = data[i + 1];
-            let b = data[i + 2];
-            let lum = 0.299 * r + 0.587 * g + 0.114 * b;
-
-            let colorDist = Math.sqrt(
-                Math.pow(r - targetR, 2) + 
-                Math.pow(g - targetG, 2) + 
-                Math.pow(b - targetB, 2)
-            );
-
-            let lumDiff = Math.abs(lum - avgLum);
-            let isShadowMatch = (lum < avgLum && lumDiff < 65 && colorDist < 42);
-
-            let edgeVal = edgeMap[idx];
-
-            if (edgeVal > 14 && colorDist > baseTolerance && !isShadowMatch) {
-                continue;
-            }
-
-            if (colorDist <= maxTolerance || isShadowMatch) {
-                if (colorDist <= baseTolerance || (isShadowMatch && colorDist < 32)) {
-                    data[i + 3] = 0;
-                } else {
-                    let alphaFactor = (colorDist - baseTolerance) / (maxTolerance - baseTolerance);
-                    data[i + 3] = Math.floor(data[i + 3] * Math.max(0, Math.min(1, alphaFactor)));
-                }
-
-                let neighbors = [];
-                if (x > 0) neighbors.push(idx - 1);
-                if (x < width - 1) neighbors.push(idx + 1);
-                if (y > 0) neighbors.push(idx - width);
-                if (y < height - 1) neighbors.push(idx + width);
-
-                for (let n = 0; n < neighbors.length; n++) {
-                    let nIdx = neighbors[n];
-                    if (visited[nIdx] === 0) {
-                        visited[nIdx] = 1;
-                        queue.push(nIdx);
-                    }
-                }
-            }
-        }
-
-        lCtx.putImageData(imgData, 0, 0);
-        closeAllDropdowns();
-        updateUndoRedoButtons();
-        redraw();
-    }
 
 
 // Helper to check counter-clockwise orientation
@@ -985,7 +856,21 @@ function initPerimeterCage() {
     }
 
 
-    function getCanvasCoordinates(e) {
+function isPointNearSegment(point, a, b, tolerance = 16) {
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const len2 = dx * dx + dy * dy;
+
+    let t = ((point.x - a.x) * dx + (point.y - a.y) * dy) / len2;
+    t = Math.max(0, Math.min(1, t));
+
+    const px = a.x + t * dx;
+    const py = a.y + t * dy;
+
+    return Math.hypot(point.x - px, point.y - py) <= tolerance;
+}
+
+function getCanvasCoordinates(e) {
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -1076,6 +961,33 @@ function initPerimeterCage() {
                     break;
                 }
             }
+
+// DELETE MODE
+if (isDeletePointActive) {
+    if (draggedPointIndex !== null && lassoPoints.length > 4) {
+        lassoPoints.splice(draggedPointIndex, 1);
+    }
+draggedPointIndex = null;
+redraw();
+return;
+}
+
+// ADD MODE
+if (isAddPointActive && draggedPointIndex === null && lassoPoints.length > 2) {
+    for (let i = 0; i < lassoPoints.length; i++) {
+        let p1 = lassoPoints[i];
+        let p2 = lassoPoints[(i + 1) % lassoPoints.length];
+
+        if (isPointNearSegment(pos, p1, p2, 16)) {
+            lassoPoints.splice(i + 1, 0, { x: pos.x, y: pos.y });
+            break;
+        }
+    }
+    redraw();
+    return;
+}
+
+
             redraw();
         } else if (isMoveEnabled || isScaleEnabled) {
             saveState(activeLayerKey);
