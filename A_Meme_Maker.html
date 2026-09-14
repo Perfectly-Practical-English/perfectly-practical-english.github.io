@@ -114,6 +114,27 @@
 
         .dropdown.show .dropdown-content { display: block; }
 
+        .color-palette-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 6px;
+            padding: 8px;
+            background: #fff;
+        }
+        .color-swatch {
+            width: 26px;
+            height: 26px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+        .color-swatch.white-swatch { border: 1px solid #ccc; background: white; }
+        .color-swatch.eraser-swatch { background: #e9ecef; border: 1px dashed #6c757d; font-size: 13px; }
+
         .canvas-container {
             position: relative;
             width: 360px;
@@ -234,22 +255,38 @@
             </div>
 
             <div class="toolbar-row">
+                <!-- Pen Tool Dropdown with Balanced 12-Tile Palette & Pen Eraser as Last Tile -->
+                <div class="dropdown" id="dropPen">
+                    <button class="dropdown-btn" type="button" id="toolPenBtn" onclick="toggleDropdown('dropPen')">Pen</button>
+                    <div class="dropdown-content" id="colorPaletteContent" style="padding:0;">
+                        <div class="color-palette-grid">
+                            <div class="color-swatch white-swatch" data-color="#ffffff" title="White"></div>
+                            <div class="color-swatch" style="background:#000000;" data-color="#000000" title="Black"></div>
+                            <div class="color-swatch" style="background:#ff4d4d;" data-color="#ff4d4d" title="Red"></div>
+                            <div class="color-swatch" style="background:#ffa500;" data-color="#ffa500" title="Orange"></div>
+                            <div class="color-swatch" style="background:#ffcc00;" data-color="#ffcc00" title="Yellow"></div>
+                            <div class="color-swatch" style="background:#4CAF50;" data-color="#4CAF50" title="Green"></div>
+                            <div class="color-swatch" style="background:#b1d7ed;" data-color="#b1d7ed" title="Blue"></div>
+                            <div class="color-swatch" style="background:#e1d0f1;" data-color="#e1d0f1" title="Purple"></div>
+                            <div class="color-swatch" style="background:#8B4513;" data-color="#8B4513" title="Brown"></div>
+                            <div class="color-swatch" style="background:#ffc0cb;" data-color="#ffc0cb" title="Pink"></div>
+                            <div class="color-swatch" style="background:#808080;" data-color="#808080" title="Grey"></div>
+                            <div class="color-swatch eraser-swatch" data-action="eraser" title="Pen Eraser">🧽</div>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="dropdown" id="dropSelection">
                     <button class="dropdown-btn" type="button" onclick="toggleDropdown('dropSelection')">Select</button>
                     <div class="dropdown-content">
                         <button type="button" id="toolLassoBtn" onclick="setTool('lasso')">Polygonal Lasso</button>
-
-<button type="button" onclick="addCagePoint()">+ Point</button>
-<button type="button" onclick="deleteCagePoint()">- Point</button>
-
-
+                        <button type="button" onclick="addCagePoint()">+ Point</button>
+                        <button type="button" onclick="deleteCagePoint()">- Point</button>
                         <button type="button" id="toolRectBtn" onclick="setTool('rectangle')">Rectangle Tool</button>
                         <button type="button" id="toolCircleBtn" onclick="setTool('circle')">Circle Tool</button>
                         <button type="button" onclick="executeSelection('interior')">Delete Interior</button>
                         <button type="button" onclick="executeSelection('exterior')">Delete Exterior</button>
                         <button type="button" id="toolRestoreSelectBtn" onclick="setTool('restore')" style="color:#107C10; font-weight:bold;">Restore Brush</button>
-
-
                     </div>
                 </div>
 
@@ -269,15 +306,14 @@
                         <button type="button" id="toolEraserSWBtn" onclick="setTool('eraserSW')">↙</button>
                         <button type="button" id="toolEraserWBtn" onclick="setTool('eraserW')">←</button>
                         <button type="button" id="toolEraserNWBtn" onclick="setTool('eraserNW')">↖</button>
-                        
                     </div>
                 </div>
 
                 <button type="button" id="btnScaleToggle" onclick="toggleScaleMode()">Scale</button>
                 <button type="button" id="btnCropToggle" onclick="toggleCropMode()">Crop</button>
 
-                <button type="button" id="btnUndo" onclick="undoAction()" style="background: #6c757d;" disabled>Undo</button>
-                <button type="button" id="btnRedo" onclick="redoAction()" style="background: #6c757d;" disabled>Redo</button>
+                <button type="button" id="btnUndo" onclick="undoAction()" style="background: #6c757d;" disabled>↺</button>
+                <button type="button" id="btnRedo" onclick="redoAction()" style="background: #6c757d;" disabled>↻</button>
             </div>
 
             <div class="toolbar-row">
@@ -323,15 +359,15 @@
             <textarea id="memeTextInput" class="text-layer-input" placeholder="Type text here..."></textarea>
         </div>
         
-        <div class="instructions" id="instructionText">
-        </div>
+        <div class="instructions" id="instructionText"></div>
     </div>
+
 <script>
     const canvas = document.getElementById('memeCanvas');
     const ctx = canvas.getContext('2d');
     const textInput = document.getElementById('memeTextInput');
 
-let activeLayerKey = 'bg';
+    let activeLayerKey = 'bg';
     let isMoveEnabled = false;
     let isScaleEnabled = false;
     let isCropEnabled = false;
@@ -339,21 +375,34 @@ let activeLayerKey = 'bg';
     let cropActionType = 'create'; 
     let currentFontFamily = "'Aptos', Arial, sans-serif";
 
+    // Dedicated standalone layer to store all freehand pen drawings & pen eraser marks safely
+    let penLayerCanvas = document.createElement('canvas');
+    penLayerCanvas.width = 360;
+    penLayerCanvas.height = 360;
+    let penLayerCtx = penLayerCanvas.getContext('2d');
+
     let layers = {
-        bg: { img: null, orig: null, backupCanvas: null, x: 0, y: 0, scale: 1, visible: true, undo: [], redo: [] },
-        fg1: { img: null, orig: null, backupCanvas: null, x: 0, y: 0, scale: 1, visible: true, undo: [], redo: [] },
-        fg2: { img: null, orig: null, backupCanvas: null, x: 0, y: 0, scale: 1, visible: false, undo: [], redo: [] },
+        bg: { img: null, orig: null, backupCanvas: null, x: 0, y: 0, scale: 1, visible: true },
+        fg1: { img: null, orig: null, backupCanvas: null, x: 0, y: 0, scale: 1, visible: true },
+        fg2: { img: null, orig: null, backupCanvas: null, x: 0, y: 0, scale: 1, visible: false },
         txt: { x: 0, y: 0, visible: false }
     };
 
+    // Global History Stacks for Undo / Redo
+    let globalUndoStack = [];
+    let globalRedoStack = [];
+
     let currentTool = 'none';
+    let stylusColor = '#000000';
+    let stylusSize = 6;
+
     let lassoPoints = [];
     let currentMousePos = { x: 0, y: 0 };
     let isLassoCompleted = false;
     let draggedPointIndex = null;
 
-let isAddPointActive = false;
-let isDeletePointActive = false;
+    let isAddPointActive = false;
+    let isDeletePointActive = false;
     let shapeBox = null; 
     let cropBox = null;
     let isDrawing = false;
@@ -370,6 +419,21 @@ let isDeletePointActive = false;
             redraw();
         }
     }, 50);
+
+    // Color Palette & Pen Eraser Click Listener
+    document.querySelectorAll('.color-swatch').forEach(swatch => {
+        swatch.addEventListener('click', (e) => {
+            if (e.target.dataset.action === 'eraser') {
+                setTool('penEraser');
+                document.getElementById('toolPenBtn').innerText = '🧽';
+            } else if (e.target.dataset.color) {
+                stylusColor = e.target.dataset.color;
+                setTool('pen');
+                document.getElementById('toolPenBtn').innerText = 'Pen';
+            }
+            closeAllDropdowns();
+        });
+    });
 
     textInput.addEventListener('click', () => {
         if (!isMoveEnabled && !isScaleEnabled && !isCropEnabled && activeLayerKey === 'txt') {
@@ -430,7 +494,7 @@ let isDeletePointActive = false;
             if (hideBtn) hideBtn.classList.toggle('flyout-active', !layers[key].visible);
         });
 
-        const tools = ['lasso', 'rectangle', 'circle', 'eraser', 'squareEraser', 'restore', 'eraserN', 'eraserNE', 'eraserE', 'eraserSE', 'eraserS', 'eraserSW', 'eraserW', 'eraserNW', 'bgRemoval'];
+        const tools = ['pen', 'penEraser', 'lasso', 'rectangle', 'circle', 'eraser', 'squareEraser', 'restore', 'eraserN', 'eraserNE', 'eraserE', 'eraserSE', 'eraserS', 'eraserSW', 'eraserW', 'eraserNW'];
         tools.forEach(t => {
             let btnId = 'tool' + t.charAt(0).toUpperCase() + t.slice(1) + 'Btn';
             let btn = document.getElementById(btnId);
@@ -511,6 +575,7 @@ let isDeletePointActive = false;
     }
 
     function setLayerVisibility(key, isVisible) {
+        saveStateSnapshot();
         layers[key].visible = isVisible;
         if (key === 'txt') {
             textInput.style.display = isVisible ? 'block' : 'none';
@@ -525,11 +590,10 @@ let isDeletePointActive = false;
         redraw();
     }
 
-function setFontFamily(fontString, btnId) {
+    function setFontFamily(fontString, btnId) {
         currentFontFamily = fontString;
         textInput.style.fontFamily = fontString;
         
-        // Update active states in text dropdown
         ['fontDefaultBtn', 'fontRobotoBtn', 'fontSFBtn', 'fontImpactBtn', 'fontGeorgiaBtn'].forEach(id => {
             let b = document.getElementById(id);
             if (b) b.classList.toggle('flyout-active', id === btnId);
@@ -540,6 +604,7 @@ function setFontFamily(fontString, btnId) {
     }
 
     function resetTextLayer() {
+        saveStateSnapshot();
         textInput.value = "";
         layers.txt.x = 0;
         layers.txt.y = 0;
@@ -552,7 +617,7 @@ function setFontFamily(fontString, btnId) {
         redraw();
     }
 
-function updateTextStyles() {
+    function updateTextStyles() {
         const fontStyle = document.getElementById('fontStyleSelect').value;
         const fontColor = document.getElementById('fontColorSelect').value;
         const outlineColor = document.getElementById('outlineColorSelect').value;
@@ -570,60 +635,163 @@ function updateTextStyles() {
         redraw();
     }
 
-    function saveState(layerKey) {
+    function ensureLayerCanvas(layerKey) {
         let l = layers[layerKey];
-        if (!l || !l.img) return;
-        let tempCanvas = document.createElement('canvas');
-        tempCanvas.width = canvas.width;
-        tempCanvas.height = canvas.height;
-        let tCtx = tempCanvas.getContext('2d');
-        tCtx.drawImage(l.img, 0, 0);
-        l.undo.push(tCtx.getImageData(0, 0, canvas.width, canvas.height));
-        l.redo = [];
+        if (!l || l.img) return;
+        let layerCanvas = document.createElement('canvas');
+        layerCanvas.width = canvas.width;
+        layerCanvas.height = canvas.height;
+
+        let backupCanvas = document.createElement('canvas');
+        backupCanvas.width = canvas.width;
+        backupCanvas.height = canvas.height;
+
+        l.img = layerCanvas;
+        l.backupCanvas = backupCanvas;
+        l.x = 0;
+        l.y = 0;
+        l.scale = 1;
+        l.visible = true;
+    }
+
+    // --- Global History Management ---
+    function saveStateSnapshot() {
+        let snapshot = {
+            layers: {
+                bg: cloneLayerData(layers.bg),
+                fg1: cloneLayerData(layers.fg1),
+                fg2: cloneLayerData(layers.fg2),
+                txt: { ...layers.txt, value: textInput.value }
+            },
+            penLayer: cloneCanvas(penLayerCanvas),
+            activeLayerKey: activeLayerKey
+        };
+        globalUndoStack.push(snapshot);
+        globalRedoStack = []; // Clear redo stack on new actions
         updateUndoRedoButtons();
+    }
+
+    function cloneLayerData(l) {
+        let clonedImg = null;
+        let clonedBackup = null;
+        if (l.img) {
+            clonedImg = document.createElement('canvas');
+            clonedImg.width = canvas.width; clonedImg.height = canvas.height;
+            clonedImg.getContext('2d').drawImage(l.img, 0, 0);
+        }
+        if (l.backupCanvas) {
+            clonedBackup = document.createElement('canvas');
+            clonedBackup.width = canvas.width; clonedBackup.height = canvas.height;
+            clonedBackup.getContext('2d').drawImage(l.backupCanvas, 0, 0);
+        }
+        let clonedOrig = l.orig ? l.orig : null;
+        return {
+            img: clonedImg,
+            orig: clonedOrig,
+            backupCanvas: clonedBackup,
+            x: l.x,
+            y: l.y,
+            scale: l.scale,
+            visible: l.visible
+        };
+    }
+
+    function cloneCanvas(srcCanvas) {
+        let c = document.createElement('canvas');
+        c.width = canvas.width; c.height = canvas.height;
+        c.getContext('2d').drawImage(srcCanvas, 0, 0);
+        return c;
+    }
+
+    function restoreSnapshot(snapshot) {
+        ['bg', 'fg1', 'fg2'].forEach(key => {
+            let src = snapshot.layers[key];
+            let dest = layers[key];
+            dest.x = src.x;
+            dest.y = src.y;
+            dest.scale = src.scale;
+            dest.visible = src.visible;
+            dest.orig = src.orig;
+
+            if (src.img) {
+                if (!dest.img) {
+                    dest.img = document.createElement('canvas');
+                    dest.img.width = canvas.width; dest.img.height = canvas.height;
+                }
+                dest.img.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                dest.img.getContext('2d').drawImage(src.img, 0, 0);
+            } else {
+                dest.img = null;
+            }
+
+            if (src.backupCanvas) {
+                if (!dest.backupCanvas) {
+                    dest.backupCanvas = document.createElement('canvas');
+                    dest.backupCanvas.width = canvas.width; dest.backupCanvas.height = canvas.height;
+                }
+                dest.backupCanvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height);
+                dest.backupCanvas.getContext('2d').drawImage(src.backupCanvas, 0, 0);
+            } else {
+                dest.backupCanvas = null;
+            }
+        });
+
+        layers.txt = { ...snapshot.layers.txt };
+        textInput.value = snapshot.layers.txt.value || "";
+        textInput.style.transform = `translate(${layers.txt.x}px, ${layers.txt.y}px)`;
+        textInput.style.display = layers.txt.visible ? 'block' : 'none';
+
+        penLayerCtx.clearRect(0, 0, canvas.width, canvas.height);
+        penLayerCtx.drawImage(snapshot.penLayer, 0, 0);
+
+        activeLayerKey = snapshot.activeLayerKey;
+        setActiveLayer(activeLayerKey);
+        redraw();
     }
 
     function updateUndoRedoButtons() {
-        let l = layers[activeLayerKey];
-        let hasUndo = l && l.undo && l.undo.length > 0;
-        let hasRedo = l && l.redo && l.redo.length > 0;
-        document.getElementById('btnUndo').disabled = !hasUndo;
-        document.getElementById('btnRedo').disabled = !hasRedo;
+        document.getElementById('btnUndo').disabled = globalUndoStack.length === 0;
+        document.getElementById('btnRedo').disabled = globalRedoStack.length === 0;
     }
 
     function undoAction() {
-        let l = layers[activeLayerKey];
-        if (!l || !l.undo || l.undo.length === 0) return;
-        let tempCanvas = document.createElement('canvas');
-        tempCanvas.width = canvas.width; tempCanvas.height = canvas.height;
-        let tCtx = tempCanvas.getContext('2d');
-        tCtx.drawImage(l.img, 0, 0);
-        l.redo.push(tCtx.getImageData(0, 0, canvas.width, canvas.height));
+        if (globalUndoStack.length === 0) return;
+        let currentSnapshot = {
+            layers: {
+                bg: cloneLayerData(layers.bg),
+                fg1: cloneLayerData(layers.fg1),
+                fg2: cloneLayerData(layers.fg2),
+                txt: { ...layers.txt, value: textInput.value }
+            },
+            penLayer: cloneCanvas(penLayerCanvas),
+            activeLayerKey: activeLayerKey
+        };
+        globalRedoStack.push(currentSnapshot);
 
-        const prevState = l.undo.pop();
-        let lCtx = l.img.getContext('2d');
-        lCtx.putImageData(prevState, 0, 0);
-
+        let previousSnapshot = globalUndoStack.pop();
+        restoreSnapshot(previousSnapshot);
         updateUndoRedoButtons();
-        redraw();
     }
 
     function redoAction() {
-        let l = layers[activeLayerKey];
-        if (!l || !l.redo || l.redo.length === 0) return;
-        let tempCanvas = document.createElement('canvas');
-        tempCanvas.width = canvas.width; tempCanvas.height = canvas.height;
-        let tCtx = tempCanvas.getContext('2d');
-        tCtx.drawImage(l.img, 0, 0);
-        l.undo.push(tCtx.getImageData(0, 0, canvas.width, canvas.height));
+        if (globalRedoStack.length === 0) return;
+        let currentSnapshot = {
+            layers: {
+                bg: cloneLayerData(layers.bg),
+                fg1: cloneLayerData(layers.fg1),
+                fg2: cloneLayerData(layers.fg2),
+                txt: { ...layers.txt, value: textInput.value }
+            },
+            penLayer: cloneCanvas(penLayerCanvas),
+            activeLayerKey: activeLayerKey
+        };
+        globalUndoStack.push(currentSnapshot);
 
-        const nextState = l.redo.pop();
-        let lCtx = l.img.getContext('2d');
-        lCtx.putImageData(nextState, 0, 0);
-
+        let nextSnapshot = globalRedoStack.pop();
+        restoreSnapshot(nextSnapshot);
         updateUndoRedoButtons();
-        redraw();
     }
+    // ------------------------------------------
 
     function handleImageUpload(e, layerKey) {
         const file = e.target.files[0];
@@ -632,6 +800,7 @@ function updateTextStyles() {
         reader.onload = function(event) {
             const img = new Image();
             img.onload = function() {
+                saveStateSnapshot();
                 let layerCanvas = document.createElement('canvas');
                 layerCanvas.width = canvas.width;
                 layerCanvas.height = canvas.height;
@@ -653,7 +822,6 @@ function updateTextStyles() {
                 let drawY = (canvas.height - baseH) / 2;
                 lCtx.drawImage(img, drawX, drawY, baseW, baseH);
 
-                // Create pristine backup canvas for the restore brush
                 let backupCanvas = document.createElement('canvas');
                 backupCanvas.width = canvas.width;
                 backupCanvas.height = canvas.height;
@@ -667,8 +835,6 @@ function updateTextStyles() {
                 layers[layerKey].y = 0;
                 layers[layerKey].scale = 1;
                 layers[layerKey].visible = true;
-                layers[layerKey].undo = [];
-                layers[layerKey].redo = [];
 
                 setActiveLayer(layerKey);
                 closeAllDropdowns();
@@ -681,8 +847,7 @@ function updateTextStyles() {
         reader.readAsDataURL(file);
     }
 
-
-function mergeLayerDown(layerKey) {
+    function mergeLayerDown(layerKey) {
         let lowerKey = (layerKey === 'fg2') ? 'fg1' : (layerKey === 'fg1' ? 'bg' : null);
         if (!lowerKey) return;
 
@@ -695,60 +860,29 @@ function mergeLayerDown(layerKey) {
             return;
         }
 
-        if (!lower.img) {
-            let layerCanvas = document.createElement('canvas');
-            layerCanvas.width = canvas.width;
-            layerCanvas.height = canvas.height;
-            let lCtx = layerCanvas.getContext('2d');
-            
-            lCtx.save();
-            lCtx.translate(canvas.width / 2, canvas.height / 2);
-            lCtx.scale(upper.scale, upper.scale);
-            lCtx.translate(-canvas.width / 2, -canvas.height / 2);
-            lCtx.drawImage(upper.img, upper.x, upper.y);
-            lCtx.restore();
+        saveStateSnapshot();
+        ensureLayerCanvas(lowerKey);
 
-            let backupCanvas = document.createElement('canvas');
-            backupCanvas.width = canvas.width;
-            backupCanvas.height = canvas.height;
-            let bCtx = backupCanvas.getContext('2d');
-            bCtx.drawImage(layerCanvas, 0, 0);
+        let lCtx = lower.img.getContext('2d');
+        lCtx.save();
+        lCtx.translate(canvas.width / 2, canvas.height / 2);
+        lCtx.scale(upper.scale, upper.scale);
+        lCtx.translate(-canvas.width / 2, -canvas.height / 2);
+        lCtx.drawImage(upper.img, upper.x, upper.y);
+        lCtx.restore();
 
-            lower.orig = upper.orig;
-            lower.img = layerCanvas;
-            lower.backupCanvas = backupCanvas;
-            lower.x = 0;
-            lower.y = 0;
-            lower.scale = 1;
-            lower.visible = true;
-            lower.undo = [];
-            lower.redo = [];
-        } else {
-            saveState(lowerKey);
-            let lCtx = lower.img.getContext('2d');
-            lCtx.save();
-            lCtx.translate(canvas.width / 2, canvas.height / 2);
-            lCtx.scale(upper.scale, upper.scale);
-            lCtx.translate(-canvas.width / 2, -canvas.height / 2);
-            lCtx.drawImage(upper.img, upper.x, upper.y);
-            lCtx.restore();
-
-            if (lower.backupCanvas) {
-                let bCtx = lower.backupCanvas.getContext('2d');
-                bCtx.clearRect(0, 0, canvas.width, canvas.height);
-                bCtx.drawImage(lower.img, 0, 0);
-            }
+        if (lower.backupCanvas) {
+            let bCtx = lower.backupCanvas.getContext('2d');
+            bCtx.clearRect(0, 0, canvas.width, canvas.height);
+            bCtx.drawImage(lower.img, 0, 0);
         }
 
-        saveState(layerKey);
         upper.img = null;
         upper.orig = null;
         upper.backupCanvas = null;
         upper.x = 0;
         upper.y = 0;
         upper.scale = 1;
-        upper.undo = [];
-        upper.redo = [];
 
         setActiveLayer(lowerKey);
         closeAllDropdowns();
@@ -757,11 +891,10 @@ function mergeLayerDown(layerKey) {
         redraw();
     }
 
-
     function resetLayer(layerKey) {
         let l = layers[layerKey];
         if (!l.orig || !l.backupCanvas) return;
-        saveState(layerKey);
+        saveStateSnapshot();
         
         let lCtx = l.img.getContext('2d');
         lCtx.clearRect(0, 0, canvas.width, canvas.height);
@@ -775,7 +908,7 @@ function mergeLayerDown(layerKey) {
     }
 
     function deleteLayer(layerKey) {
-        saveState(layerKey);
+        saveStateSnapshot();
         layers[layerKey].img = null;
         layers[layerKey].orig = null;
         layers[layerKey].backupCanvas = null;
@@ -786,7 +919,7 @@ function mergeLayerDown(layerKey) {
         redraw();
     }
 
-let cagePointCount = 16; // Default starting points (great for crude meme cuts)
+    let cagePointCount = 16;
 
     function initPerimeterCage() {
         lassoPoints = [];
@@ -799,22 +932,22 @@ let cagePointCount = 16; // Default starting points (great for crude meme cuts)
             let y = cy + radius * Math.sin(angle);
             lassoPoints.push({ x: x, y: y });
         }
-        
         isLassoCompleted = true;
     }
 
-function addCagePoint() {
-    isAddPointActive = true;
-    isDeletePointActive = false;
-    closeAllDropdowns();
-}
+    function addCagePoint() {
+        isAddPointActive = true;
+        isDeletePointActive = false;
+        closeAllDropdowns();
+    }
 
-function deleteCagePoint() {
-    isDeletePointActive = true;
-    isAddPointActive = false;
-    closeAllDropdowns();
-}
-function setTool(tool) {
+    function deleteCagePoint() {
+        isDeletePointActive = true;
+        isAddPointActive = false;
+        closeAllDropdowns();
+    }
+
+    function setTool(tool) {
         let wasActive = (currentTool === tool);
         deactivateAllTools();
         if (!wasActive) {
@@ -828,49 +961,22 @@ function setTool(tool) {
         redraw();
     }
 
-
-
-// Helper to check counter-clockwise orientation
     function ccw(A, B, C) {
         return (C.y - A.y) * (B.x - A.x) > (B.y - A.y) * (C.x - A.x);
     }
 
-    // Helper to check if line segment (A,B) intersects segment (C,D)
-    function doSegmentsIntersect(A, B, C, D) {
-        return ccw(A, C, D) !== ccw(B, C, D) && ccw(A, B, C) !== ccw(A, B, D);
+    function isPointNearSegment(point, a, b, tolerance = 16) {
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const len2 = dx * dx + dy * dy;
+        let t = ((point.x - a.x) * dx + (point.y - a.y) * dy) / len2;
+        t = Math.max(0, Math.min(1, t));
+        const px = a.x + t * dx;
+        const py = a.y + t * dy;
+        return Math.hypot(point.x - px, point.y - py) <= tolerance;
     }
 
-    // Checks if a candidate point creates an invalid self-intersecting path
-    function checkLassoIntersection(newPoint, points) {
-        if (points.length < 3) return false;
-        let lastPoint = points[points.length - 1];
-        
-        for (let i = 0; i < points.length - 2; i++) {
-            let segA = points[i];
-            let segB = points[i + 1];
-            if (doSegmentsIntersect(lastPoint, newPoint, segA, segB)) {
-                return true; 
-            }
-        }
-        return false;
-    }
-
-
-function isPointNearSegment(point, a, b, tolerance = 16) {
-    const dx = b.x - a.x;
-    const dy = b.y - a.y;
-    const len2 = dx * dx + dy * dy;
-
-    let t = ((point.x - a.x) * dx + (point.y - a.y) * dy) / len2;
-    t = Math.max(0, Math.min(1, t));
-
-    const px = a.x + t * dx;
-    const py = a.y + t * dy;
-
-    return Math.hypot(point.x - px, point.y - py) <= tolerance;
-}
-
-function getCanvasCoordinates(e) {
+    function getCanvasCoordinates(e) {
         const rect = canvas.getBoundingClientRect();
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -884,8 +990,8 @@ function getCanvasCoordinates(e) {
 
     canvas.addEventListener('wheel', (e) => {
         if (!isScaleEnabled || activeLayerKey === 'txt') return;
+        ensureLayerCanvas(activeLayerKey);
         let l = layers[activeLayerKey];
-        if (!l.orig || !l.img) return;
 
         e.preventDefault();
         let scaleStep = e.deltaY < 0 ? 0.08 : -0.08;
@@ -897,13 +1003,16 @@ function getCanvasCoordinates(e) {
         }
     }, { passive: false });
 
+    let lastDrawPos = null;
+
     canvas.addEventListener('pointerdown', (e) => {
         if (e.pointerType === 'touch') {
             activeTouches.set(e.pointerId, { x: e.clientX, y: e.clientY });
             if (isScaleEnabled && activeTouches.size === 2) {
                 let touches = Array.from(activeTouches.values());
                 initialPinchDistance = Math.hypot(touches[0].x - touches[1].x, touches[0].y - touches[1].y);
-                if (activeLayerKey !== 'txt' && layers[activeLayerKey].orig) {
+                if (activeLayerKey !== 'txt') {
+                    ensureLayerCanvas(activeLayerKey);
                     initialPinchScale = layers[activeLayerKey].scale;
                 }
                 return;
@@ -914,8 +1023,12 @@ function getCanvasCoordinates(e) {
         isDrawing = true;
         dragStartX = pos.x;
         dragStartY = pos.y;
+        lastDrawPos = pos;
 
         if (activeLayerKey === 'txt') return;
+
+        // Capture snapshot before starting any interactive transformation or drawing stroke
+        saveStateSnapshot();
 
         if (isCropEnabled) {
             if (!cropBox) {
@@ -941,11 +1054,9 @@ function getCanvasCoordinates(e) {
             return;
         }
 
-        let l = layers[activeLayerKey];
-        if (!l.img) return;
-
-        if (currentTool === 'eraser' || currentTool === 'squareEraser' || currentTool === 'restore' || currentTool.startsWith('eraser')) {
-            saveState(activeLayerKey);
+        if (currentTool === 'pen' || currentTool === 'penEraser') {
+            drawPenToLayer(pos.x, pos.y, pos.x, pos.y);
+        } else if (currentTool === 'eraser' || currentTool === 'squareEraser' || currentTool === 'restore' || currentTool.startsWith('eraser')) {
             if (currentTool === 'restore') {
                 restoreAt(pos.x, pos.y);
             } else {
@@ -953,7 +1064,7 @@ function getCanvasCoordinates(e) {
             }
         } else if (currentTool === 'rectangle' || currentTool === 'circle') {
             shapeBox = { x1: pos.x, y1: pos.y, x2: pos.x, y2: pos.y };
-} else if (currentTool === 'lasso') {
+        } else if (currentTool === 'lasso') {
             draggedPointIndex = null;
             for (let i = 0; i < lassoPoints.length; i++) {
                 if (Math.hypot(pos.x - lassoPoints[i].x, pos.y - lassoPoints[i].y) < 16) {
@@ -962,35 +1073,28 @@ function getCanvasCoordinates(e) {
                 }
             }
 
-// DELETE MODE
-if (isDeletePointActive) {
-    if (draggedPointIndex !== null && lassoPoints.length > 4) {
-        lassoPoints.splice(draggedPointIndex, 1);
-    }
-draggedPointIndex = null;
-redraw();
-return;
-}
+            if (isDeletePointActive) {
+                if (draggedPointIndex !== null && lassoPoints.length > 4) {
+                    lassoPoints.splice(draggedPointIndex, 1);
+                }
+                draggedPointIndex = null;
+                redraw();
+                return;
+            }
 
-// ADD MODE
-if (isAddPointActive && draggedPointIndex === null && lassoPoints.length > 2) {
-    for (let i = 0; i < lassoPoints.length; i++) {
-        let p1 = lassoPoints[i];
-        let p2 = lassoPoints[(i + 1) % lassoPoints.length];
-
-        if (isPointNearSegment(pos, p1, p2, 16)) {
-            lassoPoints.splice(i + 1, 0, { x: pos.x, y: pos.y });
-            break;
-        }
-    }
-    redraw();
-    return;
-}
-
-
+            if (isAddPointActive && draggedPointIndex === null && lassoPoints.length > 2) {
+                for (let i = 0; i < lassoPoints.length; i++) {
+                    let p1 = lassoPoints[i];
+                    let p2 = lassoPoints[(i + 1) % lassoPoints.length];
+                    if (isPointNearSegment(pos, p1, p2, 16)) {
+                        lassoPoints.splice(i + 1, 0, { x: pos.x, y: pos.y });
+                        break;
+                    }
+                }
+                redraw();
+                return;
+            }
             redraw();
-        } else if (isMoveEnabled || isScaleEnabled) {
-            saveState(activeLayerKey);
         }
     });
 
@@ -1008,13 +1112,12 @@ if (isAddPointActive && draggedPointIndex === null && lassoPoints.length > 2) {
                 let touches = Array.from(activeTouches.values());
                 let currentDistance = Math.hypot(touches[0].x - touches[1].x, touches[0].y - touches[1].y);
                 let factor = currentDistance / initialPinchDistance;
+                ensureLayerCanvas(activeLayerKey);
                 let l = layers[activeLayerKey];
-                if (l.orig) {
-                    let newScale = Math.max(0.1, Math.min(10.0, initialPinchScale * factor));
-                    if (newScale !== l.scale) {
-                        l.scale = newScale;
-                        redraw();
-                    }
+                let newScale = Math.max(0.1, Math.min(10.0, initialPinchScale * factor));
+                if (newScale !== l.scale) {
+                    l.scale = newScale;
+                    redraw();
                 }
                 return;
             }
@@ -1070,10 +1173,13 @@ if (isAddPointActive && draggedPointIndex === null && lassoPoints.length > 2) {
             return;
         }
 
+        ensureLayerCanvas(activeLayerKey);
         let l = layers[activeLayerKey];
-        if (!l.img) return;
 
-        if (currentTool === 'eraser' || currentTool === 'squareEraser' || currentTool === 'restore' || currentTool.startsWith('eraser')) {
+        if (currentTool === 'pen' || currentTool === 'penEraser') {
+            drawPenToLayer(lastDrawPos.x, lastDrawPos.y, pos.x, pos.y);
+            lastDrawPos = pos;
+        } else if (currentTool === 'eraser' || currentTool === 'squareEraser' || currentTool === 'restore' || currentTool.startsWith('eraser')) {
             if (currentTool === 'restore') {
                 restoreAt(pos.x, pos.y);
             } else {
@@ -1089,7 +1195,7 @@ if (isAddPointActive && draggedPointIndex === null && lassoPoints.length > 2) {
             l.y += dy;
             dragStartX = pos.x;
             dragStartY = pos.y;
-        } else if (isScaleEnabled && l.orig) {
+        } else if (isScaleEnabled) {
             let dy = pos.y - dragStartY;
             let scaleStep = -dy * 0.015;
             let newScale = Math.max(0.1, Math.min(10.0, l.scale + scaleStep));
@@ -1121,28 +1227,59 @@ if (isAddPointActive && draggedPointIndex === null && lassoPoints.length > 2) {
         draggedPointIndex = null;
     });
 
+    function drawPenToLayer(x1, y1, x2, y2) {
+        penLayerCtx.save();
+        
+        if (currentTool === 'penEraser') {
+            penLayerCtx.globalCompositeOperation = 'destination-out';
+            penLayerCtx.strokeStyle = 'rgba(0, 0, 0, 1)';
+            penLayerCtx.lineWidth = stylusSize * 2;
+            penLayerCtx.lineCap = 'round';
+            penLayerCtx.lineJoin = 'round';
+            penLayerCtx.beginPath();
+            penLayerCtx.moveTo(x1, y1);
+            penLayerCtx.lineTo(x2, y2);
+            penLayerCtx.stroke();
+        } else {
+            penLayerCtx.globalCompositeOperation = 'source-over';
+            penLayerCtx.strokeStyle = stylusColor;
+            penLayerCtx.lineWidth = stylusSize;
+            penLayerCtx.lineCap = 'round';
+            penLayerCtx.lineJoin = 'round';
+            penLayerCtx.beginPath();
+            penLayerCtx.moveTo(x1, y1);
+            penLayerCtx.lineTo(x2, y2);
+            penLayerCtx.stroke();
+        }
+        penLayerCtx.restore();
+        redraw();
+    }
+
     function eraseAt(x, y) {
+        ensureLayerCanvas(activeLayerKey);
         let l = layers[activeLayerKey];
-        if (!l.img) return;
         let lCtx = l.img.getContext('2d');
         lCtx.save();
         lCtx.globalCompositeOperation = 'destination-out';
         lCtx.beginPath();
 
-if (currentTool === 'eraser') {
-            let grad = lCtx.createRadialGradient(x, y, 3, x, y, 7.5);
+        if (currentTool === 'eraser') {
+            let radius = 12;
+            let grad = lCtx.createRadialGradient(x, y, 0, x, y, radius);
             grad.addColorStop(0, 'rgba(0, 0, 0, 1)');
+            grad.addColorStop(0.5, 'rgba(0, 0, 0, 0.8)');
             grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
             lCtx.fillStyle = grad;
             lCtx.beginPath();
-            lCtx.arc(x, y, 7.5, 0, Math.PI * 2);
+            lCtx.arc(x, y, radius, 0, Math.PI * 2);
             lCtx.fill();
-} else if (currentTool === 'squareEraser') {
-            let grad = lCtx.createRadialGradient(x, y, 2, x, y, 10);
+        } else if (currentTool === 'squareEraser') {
+            let size = 24;
+            let grad = lCtx.createRadialGradient(x, y, 0, x, y, size / 2);
             grad.addColorStop(0, 'rgba(0, 0, 0, 1)');
             grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
             lCtx.fillStyle = grad;
-            lCtx.fillRect(x - 7.5, y - 7.5, 15, 15);
+            lCtx.fillRect(x - size / 2, y - size / 2, size, size);
         } else if (currentTool.startsWith('eraser')) {
             let dir = currentTool.replace('eraser', '');
             let size = 15;
@@ -1185,9 +1322,10 @@ if (currentTool === 'eraser') {
         redraw();
     }
 
-function restoreAt(x, y) {
+    function restoreAt(x, y) {
+        ensureLayerCanvas(activeLayerKey);
         let l = layers[activeLayerKey];
-        if (!l.img || !l.backupCanvas) return;
+        if (!l.backupCanvas) return;
         let lCtx = l.img.getContext('2d');
         lCtx.save();
         lCtx.globalCompositeOperation = 'source-over';
@@ -1206,9 +1344,10 @@ function restoreAt(x, y) {
         lCtx.restore();
         redraw();
     }
-function executeSelection(mode) {
+
+    function executeSelection(mode) {
+        ensureLayerCanvas(activeLayerKey);
         let l = layers[activeLayerKey];
-        if (!l.img) return;
         
         let hasSelection = false;
         if (currentTool === 'rectangle' || currentTool === 'circle') {
@@ -1219,11 +1358,10 @@ function executeSelection(mode) {
 
         if (!hasSelection) return;
 
-        saveState(activeLayerKey);
+        saveStateSnapshot();
         let lCtx = l.img.getContext('2d');
         lCtx.save();
 
-        // Create a mask canvas for feathered selection edges
         let mask = document.createElement('canvas');
         mask.width = canvas.width;
         mask.height = canvas.height;
@@ -1253,7 +1391,6 @@ function executeSelection(mode) {
         }
         mCtx.fill();
 
-        // Apply a 4px standard feather blur to the selection mask
         let blurredMask = document.createElement('canvas');
         blurredMask.width = canvas.width;
         blurredMask.height = canvas.height;
@@ -1277,10 +1414,13 @@ function executeSelection(mode) {
         redraw();
         updateUndoRedoButtons();
     }
+
     function applyCrop() {
+        ensureLayerCanvas(activeLayerKey);
         let l = layers[activeLayerKey];
-        if (!l.img || !cropBox) { deactivateAllTools(); return; }
-        saveState(activeLayerKey);
+        if (!cropBox) { deactivateAllTools(); return; }
+        
+        saveStateSnapshot();
         let rx = Math.min(cropBox.x1, cropBox.x2);
         let ry = Math.min(cropBox.y1, cropBox.y2);
         let rw = Math.abs(cropBox.x2 - cropBox.x1);
@@ -1316,6 +1456,8 @@ function executeSelection(mode) {
             }
         });
 
+        ctx.drawImage(penLayerCanvas, 0, 0);
+
         if (shapeBox) {
             let widthSpan = Math.abs(shapeBox.x2 - shapeBox.x1);
             let heightSpan = Math.abs(shapeBox.y2 - shapeBox.y1);
@@ -1338,18 +1480,6 @@ function executeSelection(mode) {
                     ctx.ellipse(cx, cy, rxRadius, ryRadius, 0, 0, Math.PI * 2);
                     ctx.stroke();
                 }
-
-                if (Math.abs(widthSpan - heightSpan) <= 2) {
-                    let cx = rx + widthSpan / 2;
-                    let cy = ry + heightSpan / 2;
-                    ctx.beginPath();
-                    ctx.moveTo(rx, cy);
-                    ctx.lineTo(rx + widthSpan, cy);
-                    ctx.moveTo(cx, ry);
-                    ctx.lineTo(cx, ry + heightSpan);
-                    ctx.stroke();
-                }
-
                 ctx.setLineDash([]);
             }
         }
@@ -1398,54 +1528,7 @@ function executeSelection(mode) {
             ctx.lineWidth = 2;
             ctx.setLineDash([3, 3]);
             ctx.strokeRect(rx, ry, widthSpan, heightSpan);
-
-            if (Math.abs(widthSpan - heightSpan) <= 2) {
-                let cx = rx + widthSpan / 2;
-                let cy = ry + heightSpan / 2;
-                ctx.beginPath();
-                ctx.moveTo(rx, cy);
-                ctx.lineTo(rx + widthSpan, cy);
-                ctx.moveTo(cx, ry);
-                ctx.lineTo(cx, ry + heightSpan);
-                ctx.stroke();
-            }
-
-ctx.setLineDash([]);
-        }
-
-        // Chisel tool cursor preview (Black fill with White outline)
-// Chisel tool cursor preview (Black fill with White outline) - only shows when clicking/drawing
-        if (isDrawing && currentTool.startsWith('eraser') && currentTool !== 'eraser' && currentTool !== 'squareEraser') {
-            let dir = currentTool.replace('eraser', '');
-            let size = 15;
-            
-            ctx.save();
-            ctx.translate(currentMousePos.x, currentMousePos.y);
-            
-            switch(dir) {
-                case 'N': ctx.rotate(0); break;
-                case 'NE': ctx.rotate(Math.PI / 4); break;
-                case 'E': ctx.rotate(Math.PI / 2); break;
-                case 'SE': ctx.rotate(3 * Math.PI / 4); break;
-                case 'S': ctx.rotate(Math.PI); break;
-                case 'SW': ctx.rotate(5 * Math.PI / 4); break;
-                case 'W': ctx.rotate(3 * Math.PI / 2); break;
-                case 'NW': ctx.rotate(7 * Math.PI / 4); break;
-            }
-            
-            ctx.beginPath();
-            ctx.moveTo(0, -size / 2);
-            ctx.lineTo(size / 4, size / 2);
-            ctx.lineTo(-size / 4, size / 2);
-            ctx.closePath();
-            
-            ctx.fillStyle = '#000000';
-            ctx.fill();
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-            
-            ctx.restore();
+            ctx.setLineDash([]);
         }
     }
 
@@ -1467,6 +1550,8 @@ ctx.setLineDash([]);
             }
         });
 
+        eCtx.drawImage(penLayerCanvas, 0, 0);
+
         if (layers.txt.visible && textInput.value.trim() !== "") {
             eCtx.save();
             let fontWeight = textInput.style.fontWeight || 'bold';
@@ -1479,7 +1564,6 @@ ctx.setLineDash([]);
             const outlineColor = document.getElementById('outlineColorSelect').value;
             if (outlineColor !== 'transparent') {
                 eCtx.lineWidth = 3;
-                eStr = outlineColor;
                 eCtx.strokeStyle = outlineColor;
             }
 
@@ -1520,7 +1604,6 @@ ctx.setLineDash([]);
                     eCtx.fillText(line, startX, currentY);
                 }
             });
-
             eCtx.restore();
         }
 
