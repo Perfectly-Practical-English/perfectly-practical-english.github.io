@@ -218,6 +218,63 @@ button:disabled{ background:#9fbfe4; cursor:not-allowed; }
   line-height: 34px;
 }
 
+
+/* ---------- Section Modal ---------- */
+
+.modal{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.45);
+  z-index:5000;
+  justify-content:center;
+  align-items:center;
+}
+
+.modal.show{
+  display:flex;
+}
+
+.modal-content{
+  width:min(500px,92vw);
+  max-height:80vh;
+  overflow-y:auto;
+  background:#fff;
+  border-radius:12px;
+  padding:18px;
+}
+
+.modal-content h3{
+  margin-bottom:12px;
+  color:#1976d2;
+}
+
+#sectionRadioList{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  margin-bottom:16px;
+}
+
+#sectionRadioList label{
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  padding:8px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+#sectionRadioList label:hover{
+  background:#eef6ff;
+}
+
+.modal-buttons{
+  display:flex;
+  justify-content:flex-end;
+  gap:8px;
+}
+
 #sectionWheelContainer {
   height: 34px;                 /* 🔥 match button height */
   min-width: 130px;
@@ -282,7 +339,7 @@ button:disabled{ background:#9fbfe4; cursor:not-allowed; }
   <!--<div class="header">Ultimate Teleprompter — Full Merge</div>-->
 
   <div class="top-bar">
-    <input id="gsName" type="text" placeholder="Name">
+    <!-- <input id="gsName" type="text" placeholder="Name"> -->
     <input id="gsId" type="text" placeholder="ID">
     <button id="speechBtn" title="Start/Stop speech">STT</button>
     <button id="captureAudioBtn" title="Start/Stop audio">🔴</button>
@@ -298,19 +355,27 @@ button:disabled{ background:#9fbfe4; cursor:not-allowed; }
   </div>
 
   <!-- SECTION SELECTOR ROW -->
-  <div class="formRow">
-    <button type="button" id="sectionUp">▲</button>
+<div class="formRow">
+  <button type="button" id="openSectionModal">
+    Select Section
+  </button>
 
-    <div id="sectionWheelContainer">
-<div class="wheel placeholder">Select a category.</div>
+
+</div>
+
+<!-- Section Modal -->
+<div id="sectionModal" class="modal">
+  <div class="modal-content">
+    <h3>Select a Section</h3>
+
+    <div id="sectionRadioList"></div>
+
+    <div class="modal-buttons">
+      <button id="cancelSectionModal">Cancel</button>
+      <button id="confirmSectionSelection">Load Section</button>
     </div>
-
-    <button type="button" id="sectionDown">▼</button>
-
-    <button type="button" id="sectionSelect" disabled>Select</button>
-
   </div>
-
+</div>
 
   <!-- SECTION SELECTOR ROW -->
   <div class="formRow">
@@ -1114,176 +1179,76 @@ window.SCRAMBLE_SECTIONS = parseSectionsFromRaw(rawText);
 window.SCRAMBLE_INDEX = -0;
 
 /* =========================================
-   SECTION SELECTOR CONTROLLER (FIXED)
+   SECTION MODAL SELECTOR
    ========================================= */
-(function () {
-  const wheel = document.querySelector("#sectionWheelContainer .wheel");
-  const upBtn = document.getElementById("sectionUp");
-  const downBtn = document.getElementById("sectionDown");
-  const selectBtn = document.getElementById("sectionSelect");
 
-  if (!wheel || !upBtn || !downBtn || !selectBtn) return;
-  if (!window.SCRAMBLE_SECTIONS?.length) return;
+const modal = document.getElementById("sectionModal");
+const openBtn = document.getElementById("openSectionModal");
+const cancelBtn = document.getElementById("cancelSectionModal");
+const confirmBtn = document.getElementById("confirmSectionSelection");
+const radioList = document.getElementById("sectionRadioList");
 
-  let hasSelected = false;
+let selectedSectionIndex = -1;
 
-  function renderWheel() {
-    if (!hasSelected) {
-      wheel.textContent = "Select a category.";
-      wheel.classList.add("placeholder");
-      selectBtn.disabled = true;
-      return;
-    }
+/* Build radio list once */
+window.SCRAMBLE_SECTIONS.forEach((section, index) => {
+  const label = document.createElement("label");
 
-    const section = window.SCRAMBLE_SECTIONS[window.SCRAMBLE_INDEX];
-    if (!section) return;
+  label.innerHTML = `
+    <input type="radio" name="sectionChoice" value="${index}">
+    <span>${section.name}</span>
+  `;
 
-    wheel.textContent = section.name;
-    wheel.classList.remove("placeholder");
-    selectBtn.disabled = false;
-  }
-
-  // Initial placeholder render
-  renderWheel();
-
-  upBtn.addEventListener("click", () => {
-    hasSelected = true;
-    window.SCRAMBLE_INDEX =
-      (window.SCRAMBLE_INDEX - 1 + window.SCRAMBLE_SECTIONS.length) %
-      window.SCRAMBLE_SECTIONS.length;
-    renderWheel();
-  });
-
-  downBtn
-
-
-upBtn.addEventListener("click", () => {
-  window.SCRAMBLE_INDEX =
-    (window.SCRAMBLE_INDEX - 1 + window.SCRAMBLE_SECTIONS.length) %
-    window.SCRAMBLE_SECTIONS.length;
-  renderWheel(); // 👈 REQUIRED
+  radioList.appendChild(label);
 });
 
-// ⬇️ DOWN BUTTON — first click reveals first section, not skip it
-downBtn.addEventListener("click", () => {
-  // First interaction: show the current section (index 0)
-  if (!hasSelected) {
-    hasSelected = true;
-    renderWheel();   // shows "Speaking"
-    return;
-  }
+/* Open modal */
+openBtn.addEventListener("click", () => {
+  modal.classList.add("show");
 
-  // Subsequent clicks: advance normally
-  window.SCRAMBLE_INDEX =
-    (window.SCRAMBLE_INDEX + 1) %
-    window.SCRAMBLE_SECTIONS.length;
+  const current = radioList.querySelector(
+    `input[value="${selectedSectionIndex}"]`
+  );
 
-  renderWheel();
+  if (current) current.checked = true;
 });
 
+/* Cancel */
+cancelBtn.addEventListener("click", () => {
+  modal.classList.remove("show");
+});
 
-// ✅ LOAD SECTION INTO EDITOR
-selectBtn.addEventListener("click", () => {
-  // Guard: must have a valid selection
-  if (!hasSelected) return;
+/* Confirm selection */
+confirmBtn.addEventListener("click", () => {
+  const choice = radioList.querySelector(
+    'input[name="sectionChoice"]:checked'
+  );
 
-  const section = window.SCRAMBLE_SECTIONS[window.SCRAMBLE_INDEX];
-  if (!section) return;
+  if (!choice) return;
 
-// 1️⃣ Load section text & save baseline for change tracking
-  window.originalSectionText = section.text.trim();
-  teleEdit.innerText = window.originalSectionText;
-  if (window.rebuildLinesFromSource) {
-    window.rebuildLinesFromSource(teleEdit.innerText);
-  }
-  // 2️⃣ Load matching vocab
-  renderVocabForSection(section.name);
+  selectedSectionIndex = Number(choice.value);
 
-  // 3️⃣ Reset state
-  currentLineIndex = 0;
-  if (typeof teleScrollWrapper !== 'undefined') {
-    teleScrollWrapper.scrollTop = 0;
-  }
+  const section = window.SCRAMBLE_SECTIONS[selectedSectionIndex];
+
+  modal.classList.remove("show");
+
+  // Title in bold inside the teleprompter.
+  teleEdit.innerHTML =
+    `<div style="font-weight:bold;margin-bottom:14px;">${section.name}</div>` +
+    section.text.trim().replace(/\n/g, "<br>");
 
   updateOverlay();
-  if (typeof updatePlaceholder === 'function') {
-    updatePlaceholder();
+});
+/* Close modal if user taps outside the white box */
+modal.addEventListener("click", (e) => {
+  if (e.target === modal) {
+    modal.classList.remove("show");
   }
 });
-
-function updateOverlay() {
-  const teleEdit = document.getElementById('teleEdit');
-  const teleOverlay = document.getElementById('teleOverlay');
-  
-  if (!teleEdit || !teleOverlay) return;
-
-  const currentText = teleEdit.innerText || "";
-  const totalChars = currentText.length;
-  
-  // 1. Calculate sentence count using punctuation
-  const sentenceCount = (currentText.match(/[.!?]+/g) || []).length;
-
-  // 2. Calculate word-level change percentage
-  let changePercent = 0;
-  const originalText = window.originalSectionText || "";
-  
-  const origWords = originalText.trim().split(/\s+/).filter(Boolean);
-  const currWords = currentText.trim().split(/\s+/).filter(Boolean);
-  
-  if (origWords.length > 0) {
-    function getWordEditDistance(a, b) {
-      const matrix = Array(b.length + 1).fill(null).map(() => Array(a.length + 1).fill(0));
-      for (let i = 0; i <= b.length; i++) matrix[i][0] = i;
-      for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-
-      for (let i = 1; i <= b.length; i++) {
-        for (let j = 1; j <= a.length; j++) {
-          const cost = a[j - 1] === b[i - 1] ? 0 : 1;
-          matrix[i][j] = Math.min(
-            matrix[i - 1][j] + 1,     // deletion
-            matrix[i][j - 1] + 1,     // insertion
-            matrix[i - 1][j - 1] + cost // substitution
-          );
-        }
-      }
-      return matrix[b.length][a.length];
-    }
-
-    const edits = getWordEditDistance(origWords, currWords);
-    changePercent = Math.min(100, Math.max(0, Math.round((edits / origWords.length) * 100)));
-  } else if (currWords.length > 0) {
-    changePercent = 100;
-  }
-
-  // 3. Display everything together cleanly
-  teleOverlay.textContent = `${totalChars} chars · ${changePercent}% changed · ${sentenceCount} sent`;
-}
-
-
-// Auto-updates the percentage and character count live in the background
-   setInterval(() => {
-     if (typeof updateOverlay === 'function') {
-       updateOverlay();
-     }
-   }, 250);
-
-   // Instant scroll-triggered update
-   const teleScrollWrapper = document.getElementById('teleScrollWrapper');
-   if (teleScrollWrapper) {
-     teleScrollWrapper.addEventListener('scroll', () => {
-       if (typeof updateOverlay === 'function') {
-         updateOverlay();
-       }
-     });
-   }
-})();
-
-
   const teleScroll = document.getElementById('teleScroll');
   const teleScrollWrapper = document.getElementById('teleScrollWrapper');
   const teleOverlay = document.getElementById('teleOverlay');
 
-  const gsName = document.getElementById('gsName');
   const gsId = document.getElementById('gsId');
   const submitBtn = document.getElementById('submitBtn');
 
@@ -3106,12 +3071,12 @@ function stopUI(){
   // initial ensure hidden
   hideScoreboard();
 
-  [gsName, gsId].forEach(i=> i.addEventListener('input', ()=> submitBtn.disabled = !(gsName.value.trim() && gsId.value.trim())) );
 
   submitBtn.addEventListener('click', ()=>{
     // get current raw input from teleEdit
-    const name = gsName.value.trim();
-    const id = gsId.value.trim();
+const id = gsId.value.trim();
+const name = window.resolveStudentNameFromId(id);
+gsName.value = name;
     const txt = teleEdit.innerText || '';
 
     // Scoreboard shows EXACTLY what's inside the editor (plain text). Editable there.
@@ -3162,8 +3127,8 @@ copyScoreBtn.addEventListener('click', async () => {
 /* TXT Download */
 downloadScoreTxtBtn.addEventListener('click', () => {
     const txt = gsScoreText.innerText || '';
-    const name = gsName.value.trim() || 'Unknown';
-    const id = gsId.value.trim() || 'Unknown';
+const id = gsId.value.trim() || 'Unknown';
+const name = window.resolveStudentNameFromId(id);
     const dateStr = new Date().toISOString().replace(/[:]/g, '-');
 
     // Decode URL and replace spaces
@@ -3192,8 +3157,8 @@ downloadScorePngBtn.addEventListener('click', async () => {
     wrapper.style.left = '-9999px';
     document.body.appendChild(wrapper);
 
-    const name = gsName.value.trim() || 'Unknown';
-    const id = gsId.value.trim() || 'Unknown';
+const id = gsId.value.trim() || 'Unknown';
+const name = window.resolveStudentNameFromId(id);
     const dateStr = new Date().toISOString().replace(/[:]/g, '-');
 
     // Decode URL and replace spaces
@@ -3687,22 +3652,25 @@ if (!scoreboard) {
   return;
 }
 
-      // Name/ID inputs
-      const nameInput = section.querySelector('input[id*="Name"], input[name*="name"], #name');
-      const idInput   = section.querySelector('input[id*="Id"], input[name*="id"], #id');
+const gsIdElem = document.getElementById('gsId');
+      const id = gsIdElem ? gsIdElem.value.trim() : 'ID';
+      const name = window.resolveStudentNameFromId ? window.resolveStudentNameFromId(id) : 'Student';
 
-      const getFilename = () => {
+const getFilename = () => {
         const rawFilename = window.location.pathname.split('/').pop() || 'score';
         const sectionName = section.querySelector('h3')?.textContent.trim() || section.id || 'section';
-        const name = nameInput?.value.trim() || 'Student';
-        const id   = idInput?.value.trim() || 'ID';
+        
+        // Read the live ID and resolve the name dynamically upon click
+        const gsIdElem = document.getElementById('gsId');
+        const id = gsIdElem ? gsIdElem.value.trim() : '';
+        const name = window.resolveStudentNameFromId ? window.resolveStudentNameFromId(id) : 'Student';
+
         const now = new Date();
         const dateStr = String(now.getDate()).padStart(2,'0') +
                         String(now.getMonth()+1).padStart(2,'0') +
                         String(now.getFullYear());
         return `${rawFilename}|${sectionName}|${name}|${id}|${dateStr}`;
       };
-
 // Hijack buttons in this section (Excluding the copy button so it never downloads)
       const buttons = section.querySelectorAll('button, .scoreboard button, #scoreboardBtns button');
       buttons.forEach(btn => {
@@ -4120,11 +4088,257 @@ window.saveResult = async function saveResult(text) {
     return;
   }
 
-  console.log("✅ INSERT SUCCESS:", data);
+console.log("✅ INSERT SUCCESS:", data);
 };
 
 </script>
 
+<script>
+(function() {
+    'use strict';
+    const RAW_STUDENT_DATA = `
+        55555|David
+        55551|Matthew
+        12345|Sarah
+    `;
+    const studentDatabase = new Map();
+    RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+        const [id, name] = line.split('|').map(s => s ? s.trim() : '');
+        if (id && name) studentDatabase.set(id, name);
+    });
+    window.resolveStudentNameFromId = function(idInput) {
+        if (!idInput) return "Student";
+        const trimmed = String(idInput).trim();
+        if (/^(x|g|guest)$/i.test(trimmed)) {
+            return "Guest";
+        }
+        return studentDatabase.get(trimmed) || "Student";
+    };
+})();
+</script>
+
+<script>
+(async function() {
+    'use strict';
+
+    function isValidIdInput(input) {
+        if (!input) return false;
+        const trimmed = String(input).trim();
+        return /^\d+$/.test(trimmed) \vert{}\vert{} /^(x\vert{}g\vert{}guest)$/i.test(trimmed);
+    }
+
+    // 2. FILENAME & DOWNLOAD HELPERS
+    function sanitizeFilename(name) {
+        return name.trim()
+            .replace(/[\\/:*?"<>|]+/g, '_')
+            .replace(/[\r\n]+/g, '_')
+            .slice(0, 200) || 'score';
+    }
+
+    function downloadBlob(blob, filename) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+            URL.revokeObjectURL(a.href);
+            a.remove();
+        }, 2000);
+    }
+
+    async function downloadScoreAsPNG(text, filename) {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = text.replace(/\n/g, '<br>');
+        wrapper.style.whiteSpace = 'pre-wrap';
+        wrapper.style.fontFamily = 'monospace';
+        wrapper.style.padding = '10px';
+        wrapper.style.backgroundColor = '#fff';
+        wrapper.style.color = '#000';
+        document.body.appendChild(wrapper);
+
+        try {
+            const canvas = await html2canvas(wrapper, { scale: 2, backgroundColor: '#fff' });
+            const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+            downloadBlob(blob, filename);
+        } catch (err) {
+            console.error(err);
+            alert('PNG download failed');
+        } finally {
+            wrapper.remove();
+        }
+    }
+
+    function hijackDownloadButton(originalBtn, getScoreText, getFilename, isText) {
+        if (!originalBtn) return;
+
+        const newBtn = originalBtn.cloneNode(true);
+        originalBtn.parentNode.replaceChild(newBtn, originalBtn);
+
+        newBtn.addEventListener('click', async e => {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+
+            const scoreText = getScoreText();
+            if (!scoreText) {
+                alert('No scoreboard data found. Submit first.');
+                return;
+            }
+
+            const filename = sanitizeFilename(getFilename());
+            if (isText) {
+                downloadBlob(new Blob([scoreText], { type: 'text/plain' }), filename + '.txt');
+            } else {
+                await downloadScoreAsPNG(scoreText, filename + '.png');
+            }
+        }, true);
+    }
+
+    // 3. SUBMIT & BUTTON WIRING
+    const submitButtons = document.querySelectorAll('button[id$="SubmitBtn"], button[id$="submit"], button[id*="submit"], button[class*="submit"], #submitBtn');
+
+    submitButtons.forEach(submitBtn => {
+        // Unlock button logic as ID is typed
+        const gsId = document.getElementById('gsId');
+        if (gsId) {
+            const checkId = () => {
+                const isValid = isValidIdInput(gsId.value);
+                submitBtn.disabled = !isValid;
+                if (isValid) submitBtn.removeAttribute('disabled');
+                else submitBtn.setAttribute('disabled', 'true');
+            };
+            gsId.addEventListener('input', checkId);
+            gsId.addEventListener('keyup', checkId);
+            checkId();
+        }
+
+        submitBtn.addEventListener('click', () => {
+            const section = submitBtn.closest('section') || document.body;
+            const gsIdElem = document.getElementById('gsId');
+            const studentId = gsIdElem ? gsIdElem.value.trim() : '';
+            const studentName = window.resolveStudentNameFromId(studentId);
+document.getElementById('gsName').value = studentName;
+
+            // Populate Scoreboard Meta with resolved name
+            const gsScoreMeta = document.getElementById('gsScoreMeta');
+            const teleEdit = document.getElementById('teleEdit');
+            const contentText = teleEdit ? teleEdit.innerText : '';
+            const charCount = contentText.length;
+            const sentenceCount = (contentText.match(/[.!?]+/g) || []).length;
+
+            if (gsScoreMeta) {
+                gsScoreMeta.innerHTML = `<strong>ID:</strong> ${studentId} | <strong>Name:</strong> ${studentName} | <strong>Chars:</strong> ${charCount} | <strong>Sentences:</strong> ${sentenceCount}`;
+            }
+
+            const gsScoreText = document.getElementById('gsScoreText');
+            if (gsScoreText) {
+                gsScoreText.innerText = contentText;
+            }
+
+            const gsScoreboard = document.getElementById('gsScoreboard');
+            if (gsScoreboard) {
+                gsScoreboard.style.display = 'block';
+                gsScoreboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+
+            // Define getFilename using the resolved student name
+            const getFilename = () => {
+                const rawFilename = window.location.pathname.split('/').pop() || 'score';
+                const sectionName = section.querySelector('h3')?.textContent.trim() || section.id || 'section';
+                const name = studentName; // Automatically uses David, Matthew, Sarah, Guest, or Student
+                const id = studentId || 'ID';
+                const now = new Date();
+                const dateStr = String(now.getDate()).padStart(2,'0') +
+                                String(now.getMonth()+1).padStart(2,'0') +
+                                String(now.getFullYear());
+                return `${rawFilename}|${sectionName}|${name}|${id}|${dateStr}`;
+            };
+
+            // Hijack download buttons for TXT and PNG
+            const buttons = section.querySelectorAll('button, .scoreboard button, #scoreboardBtns button');
+            buttons.forEach(btn => {
+                const idLower = btn.id.toLowerCase();
+                if (idLower.includes('copy')) return; // Skip copy button
+
+                const classLower = btn.className?.toLowerCase() || '';
+                const isTextButton = /text|txt/.test(idLower) || /text|txt/.test(classLower);
+                
+                hijackDownloadButton(btn, () => {
+                    const meta = document.getElementById('gsScoreMeta')?.textContent || '';
+                    const el = document.getElementById('gsScoreText') || section.querySelector('pre');
+                    const text = (el?.value ?? el?.textContent ?? el?.innerText ?? '').trim();
+                    return meta ? (meta + "\n\n" + text) : text;
+                }, getFilename, isTextButton);
+            });
+        }, true);
+    });
+
+})();
+</script>
+
+<script>
+
+// Add this inside your document.addEventListener('DOMContentLoaded', () => { ... }) scope:
+const gsId = document.getElementById('gsId');
+const gsName = document.getElementById('gsName');
+const submitBtn = document.getElementById('submitBtn');
+
+if (gsId && gsName) {
+    gsId.addEventListener('input', () => {
+        gsName.value = window.resolveStudentNameFromId(gsId.value.trim());
+    });
+}
+
+if (gsId && submitBtn) {
+    const checkId = () => {
+        const val = gsId.value.trim();
+        // Check if numbers only OR valid guest keyword (X, G, Guest)
+        const isValid = /^\d+$/.test(val) || /^(x|g|guest)$/i.test(val);
+        submitBtn.disabled = !isValid;
+    };
+
+    gsId.addEventListener('input', checkId);
+    gsId.addEventListener('keyup', checkId);
+}
+
+</script>
+
+<script>
+
+// ==========================================
+// SUBMIT BUTTON -> OPEN SCOREBOARD ACTION
+// ==========================================
+if (submitBtn && gsScoreboard) {
+    submitBtn.addEventListener('click', () => {
+        // 1. Get the current student/guest identifier
+        const gsIdElem = document.getElementById('gsId');
+        const studentId = gsIdElem ? gsIdElem.value.trim() : '';
+        const studentName = window.resolveStudentNameFromId ? window.resolveStudentNameFromId(studentId) : "Student";
+
+        // 2. Gather text content and stats
+        const teleEdit = document.getElementById('teleEdit');
+        const contentText = teleEdit ? teleEdit.innerText : '';
+        const charCount = contentText.length;
+        const sentenceCount = (contentText.match(/[.!?]+/g) || []).length;
+
+        // 3. Populate scoreboard metadata and text
+        if (gsScoreMeta) {
+            gsScoreMeta.innerHTML = `<strong>ID:</strong> ${studentId} | <strong>Name:</strong> ${studentName} | <strong>Chars:</strong> ${charCount} | <strong>Sentences:</strong> ${sentenceCount}`;
+        }
+
+        if (gsScoreText) {
+            gsScoreText.innerText = contentText;
+        }
+
+        // 4. Reveal the scoreboard container
+        gsScoreboard.style.display = 'block';
+
+        // 5. Smoothly scroll down so the user immediately sees the scoreboard
+        gsScoreboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+}
+
+</script>
 </body>
 </html>
 
