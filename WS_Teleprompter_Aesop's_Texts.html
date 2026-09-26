@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>Teleprompter</title>
 <script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
 <style>
 :root {
   --bg: #f7fdfb;
@@ -12,10 +13,10 @@
   --border-thickness: 10px;
 }
 
-* { 
-  box-sizing: border-box; 
-  margin: 0; 
-  padding: 0; 
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 html, body {
@@ -43,7 +44,7 @@ body {
 .container {
   max-width: 900px;
   margin: 0 auto;
-  padding: 10px 12px 12px 12px;
+  padding: 10px 12px 12px;
 }
 
 @media (max-width: 700px) {
@@ -53,9 +54,10 @@ body {
     padding-right: calc(8px + env(safe-area-inset-right));
     padding-bottom: calc(8px + env(safe-area-inset-bottom));
   }
+
   .container {
     max-width: 100%;
-    padding: 10px 8px 8px 8px;
+    padding: 10px 8px 8px;
   }
 }
 
@@ -76,47 +78,127 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-input[type="text"] { 
-  height: 36px; 
-  padding: 0 8px; 
-  border: 1px solid #cfe2f7; 
-  border-radius: 6px; 
-  font-size: 14px; 
+input[type="text"] {
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid #cfe2f7;
+  border-radius: 6px;
+  font-size: 14px;
 }
 
-#gsName, #gsId, #nameField, #idField { 
-  flex: 0 0 140px; 
-  min-width: 80px; 
+#gsName,
+#gsId,
+#nameField,
+#idField {
+  flex: 0 0 140px;
+  min-width: 80px;
 }
 
-button { 
-  height: 36px; 
-  padding: 0 10px; 
-  font-size: 14px; 
-  background: #1976d2; 
-  color: #fff; 
-  border: none; 
-  border-radius: 6px; 
-  cursor: pointer; 
-  transition: 0.12s; 
+button {
+  height: 36px;
+  padding: 0 10px;
+  font-size: 14px;
+  background: #1976d2;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.12s;
 }
 
-button:hover:not(:disabled) { background: #1565c0; }
-button:disabled { background: #9fbfe4; cursor: not-allowed; }
+button:hover:not(:disabled) {
+  background: #1565c0;
+}
 
-#gsMain { display: flex; gap: 6px; height: 70vh; min-height: 360px; }
-#gsWordBank { display: none !important; }
+button:disabled {
+  background: #9fbfe4;
+  cursor: not-allowed;
+}
 
-.tele-wrapper { 
-  width: 100%; 
-  height: 100%; 
-  border: 1px solid #ccc; 
-  border-radius: 6px; 
-  overflow: hidden; 
-  display: flex; 
-  flex-direction: column; 
-  background: #fff; 
-  position: relative; 
+/* =========================================================
+   TEXT PANEL + COLLAPSIBLE QUIZ PANEL
+   ========================================================= */
+
+#gsMain {
+  display: flex;
+  gap: 6px;
+  height: 70vh;
+  min-height: 360px;
+}
+
+#gsWordBank {
+  display: none !important;
+}
+
+/* ---------- Quiz Toggle Bar ---------- */
+
+.quiz-toggle-bar {
+  width: 100%;
+  height: 40px;
+  margin-top: 10px;
+  margin-bottom: 0;
+  border: none;
+  border-radius: 6px;
+  background: #1976d2;
+  color: #fff;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.12s;
+}
+
+.quiz-toggle-bar:hover {
+  background: #1565c0;
+}
+
+/* ---------- Hidden Quiz Panel ---------- */
+
+#quizMain {
+  display: none;
+  gap: 6px;
+  height: 70vh;
+  min-height: 360px;
+  margin-top: 10px;
+  flex-direction: column;
+}
+
+#quizWrapper {
+  width: 100%;
+}
+
+/* ---------- Quiz Scroll Area ---------- */
+
+#quizScrollWrapper {
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  flex-grow: 1;
+  position: relative;
+  scrollbar-width: none;
+}
+
+#quizScrollWrapper::-webkit-scrollbar {
+  display: none;
+}
+
+/* ---------- Quiz Content ---------- */
+
+#quizContentContainer {
+  padding: 14px;
+  white-space: normal;
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+.tele-wrapper {
+  width: 100%;
+  height: 100%;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  position: relative;
 }
 
 #teleScrollWrapper {
@@ -126,13 +208,21 @@ button:disabled { background: #9fbfe4; cursor: not-allowed; }
   position: relative;
   scrollbar-width: none;
 }
-#teleScrollWrapper::-webkit-scrollbar { display: none; }
 
-#teleScroll { position: relative; top: 0; transition: top 0.2s linear; }
+#teleScrollWrapper::-webkit-scrollbar {
+  display: none;
+}
+
+#teleScroll {
+  position: relative;
+  top: 0;
+  transition: top 0.2s linear;
+}
 
 /* =========================================================
    STANDARD, CLEAN TELEPROMPTER & TEXT TYPOGRAPHY
    ========================================================= */
+
 .tele-edit,
 .tele-edit .line,
 .line,
@@ -165,83 +255,228 @@ button:disabled { background: #9fbfe4; cursor: not-allowed; }
   word-break: break-word;
 }
 
-.tele-edit.empty::before { 
-  color: #aaa; 
-  content: attr(data-placeholder); 
-  pointer-events: none; 
-  white-space: pre-wrap; 
+.tele-edit.empty::before {
+  color: #aaa;
+  content: attr(data-placeholder);
+  pointer-events: none;
+  white-space: pre-wrap;
 }
 
-.tele-overlay { 
-  position: absolute; 
-  bottom: 12px; 
-  right: 12px; 
-  background: rgba(255,255,255,0.95); 
-  padding: 6px 10px; 
-  border-radius: 6px; 
-  font-family: monospace; 
-  font-size: 12px; 
-  pointer-events: none; 
-  z-index: 10; 
-  user-select: none; 
+.tele-overlay {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.95);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 12px;
+  pointer-events: none;
+  z-index: 10;
+  user-select: none;
 }
 
-.scoreboard { 
-  display: none; 
-  font-family: monospace; 
-  font-size: 14px; 
-  background: #fff; 
-  border-radius: 6px; 
-  padding: 12px; 
-  margin-top: 12px; 
-  border: 1px solid #ddd; 
-  max-width: 100%; 
-  overflow-y: auto; 
+/* =========================================================
+   MAIN TEXT SCOREBOARD
+   ========================================================= */
+
+.scoreboard {
+  display: none;
+  font-family: monospace;
+  font-size: 14px;
+  background: #fff;
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 12px;
+  border: 1px solid #ddd;
+  max-width: 100%;
+  overflow-y: auto;
 }
 
-.scoreboard .text { 
-  white-space: pre-wrap; 
-  word-break: break-word; 
-  min-height: 120px; 
-  border: 1px solid #ccc; 
-  padding: 8px; 
-  border-radius: 6px; 
-  resize: vertical; 
+#gsScoreboard {
+  display: none;
 }
 
-.controls { display: flex; gap: 6px; margin-top: 8px; margin-bottom: 10px; }
-.controls .left { display: flex; gap: 6px; }
-.controls .right { margin-left: auto; display: flex; gap: 6px; }
+#gsScoreboard .text,
+.scoreboard .text {
+  white-space: pre-wrap;
+  word-break: break-word;
+  min-height: 120px;
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 6px;
+  resize: vertical;
+}
 
-#speechBtn { width: 60px; height: 36px; background: #1976d2; border-radius: 6px; border: none; cursor: pointer; color: #fff; }
-#speechBtn.recording { background: #e53935; }
-#captureAudioBtn { width: 60px; height: 36px; background: #39FF14; border-radius: 6px; border: none; cursor: pointer; color: #000; }
-#captureAudioBtn.recording { background: #e53935; }
+.controls {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+  margin-bottom: 10px;
+}
 
-.speed-buttons { display: flex; gap: 4px; margin-bottom: 12px; flex-wrap: wrap; }
-.speed-buttons button { flex: 1 1 auto; background: #bbb; font-weight: 700; }
-.speed-buttons button.active { background: #1976d2; color: #fff; }
+.controls .left {
+  display: flex;
+  gap: 6px;
+}
 
-#green-border { position: fixed; inset: 0; border: 10px solid #39FF14; box-sizing: border-box; z-index: 9999; pointer-events: none; background: transparent; }
-.toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: var(--blue); color: #fff; padding: 10px 14px; border-radius: 6px; display: none; z-index: 10000; }
+.controls .right {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+}
 
-#copyrightSection { margin-top: 10px; text-align: left; padding: 0; font-size: 8px; }
+#speechBtn {
+  width: 60px;
+  height: 36px;
+  background: #1976d2;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+}
 
-.formRow { display: flex; align-items: center; gap: 6px; flex-wrap: nowrap; overflow-x: auto; margin-bottom: 10px; }
-.formRow button { height: 34px; line-height: 34px; }
+#speechBtn.recording {
+  background: #e53935;
+}
+
+#captureAudioBtn {
+  width: 60px;
+  height: 36px;
+  background: #39FF14;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  color: #000;
+}
+
+#captureAudioBtn.recording {
+  background: #e53935;
+}
+
+.speed-buttons {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.speed-buttons button {
+  flex: 1 1 auto;
+  background: #bbb;
+  font-weight: 700;
+}
+
+.speed-buttons button.active {
+  background: #1976d2;
+  color: #fff;
+}
+
+#green-border {
+  position: fixed;
+  inset: 0;
+  border: 10px solid #39FF14;
+  box-sizing: border-box;
+  z-index: 9999;
+  pointer-events: none;
+  background: transparent;
+}
+
+.toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--blue);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 6px;
+  display: none;
+  z-index: 10000;
+}
+
+#copyrightSection {
+  margin-top: 10px;
+  text-align: left;
+  padding: 0;
+  font-size: 8px;
+}
+
+.formRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  margin-bottom: 10px;
+}
+
+.formRow button {
+  height: 34px;
+  line-height: 34px;
+}
 
 /* Modal */
-.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 5000; justify-content: center; align-items: center; }
-.modal.show { display: flex; }
-.modal-content { width: min(500px, 92vw); max-height: 80vh; overflow-y: auto; background: #fff; border-radius: 12px; padding: 18px; box-sizing: border-box; }
-.modal-content h3 { margin-bottom: 12px; color: #1976d2; }
 
-#sectionRadioList { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
-#sectionRadioList label { display: flex; gap: 10px; align-items: flex-start; padding: 8px; border-radius: 6px; cursor: pointer; }
-#sectionRadioList label:hover { background: #eef6ff; }
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 5000;
+  justify-content: center;
+  align-items: center;
+}
 
-.modal-buttons { display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px; }
-.modal-buttons button { flex: 1; }
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  width: min(500px, 92vw);
+  max-height: 80vh;
+  overflow-y: auto;
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+.modal-content h3 {
+  margin-bottom: 12px;
+  color: #1976d2;
+}
+
+#sectionRadioList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+#sectionRadioList label {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+#sectionRadioList label:hover {
+  background: #eef6ff;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.modal-buttons button {
+  flex: 1;
+}
 
 #sectionWheelContainer {
   height: 34px;
@@ -255,8 +490,16 @@ button:disabled { background: #9fbfe4; cursor: not-allowed; }
   align-items: center;
   flex-wrap: nowrap;
 }
-#sectionWheelContainer:hover { border-color: #999; }
-#sectionWheelContainer:focus-within { border-color: #4a90e2; box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2); }
+
+#sectionWheelContainer:hover {
+  border-color: #999;
+}
+
+#sectionWheelContainer:focus-within {
+  border-color: #4a90e2;
+  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
 #sectionWheelContainer .wheel {
   width: 100%;
   min-width: 250px;
@@ -269,22 +512,57 @@ button:disabled { background: #9fbfe4; cursor: not-allowed; }
   align-items: center;
   font-size: 12px;
 }
-#sectionWheelContainer .wheel.placeholder { color: #aaa; font-style: italic; }
+
+#sectionWheelContainer .wheel.placeholder {
+  color: #aaa;
+  font-style: italic;
+}
 
 /* States & Highlights */
-.reading-active { background-color: #ffff00 !important; scroll-margin-top: 120px; transition: background-color 0.4s ease; }
-.highlight { background-color: #ffff00; color: #000000; }
-.word { cursor: pointer; color: inherit; }
-.word:hover { background-color: rgba(26,115,232,0.2); }
-.sentence { font-size: 14px; line-height: 1.4; color: #333; }
 
-body.teleprompter-mode #openSectionModal { display: none !important; }
-.question-text { margin-top: -5px; }
-.question-text:focus { outline: none; box-shadow: none; }
+.reading-active {
+  background-color: #ffff00 !important;
+  scroll-margin-top: 120px;
+  transition: background-color 0.4s ease;
+}
+
+.highlight {
+  background-color: #ffff00;
+  color: #000000;
+}
+
+.word {
+  cursor: pointer;
+  color: inherit;
+}
+
+.word:hover {
+  background-color: rgba(26, 115, 232, 0.2);
+}
+
+.sentence {
+  font-size: 14px;
+  line-height: 1.4;
+  color: #333;
+}
+
+body.teleprompter-mode #openSectionModal {
+  display: none !important;
+}
+
+.question-text {
+  margin-top: -5px;
+}
+
+.question-text:focus {
+  outline: none;
+  box-shadow: none;
+}
 
 /* =========================================================
    NORMALIZED & READABLE QUIZ SECTION STYLING
    ========================================================= */
+
 #quizSections {
   width: 100%;
   margin: 0;
@@ -309,7 +587,7 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
   font-size: 15px;
   font-weight: 400 !important;
   color: #111;
-  margin: 0 0 6px 0;
+  margin: 0 0 6px;
   line-height: 1.5;
   white-space: normal;
 }
@@ -318,17 +596,19 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
   display: flex;
   align-items: center;
   gap: 6px;
-  margin: 0 0 6px 0;
+  margin: 0 0 6px;
   cursor: pointer;
   font-size: 14px;
   line-height: 1.5;
   white-space: normal;
 }
 
+/* ---------- Legacy Quiz Scoreboard ---------- */
+
 .quiz-scoreboard {
   width: 100%;
   box-sizing: border-box;
-  margin-bottom: 12px;
+  margin: 8px 0 12px;
   padding: 6px;
   border: 1px solid #9aaed1;
   border-radius: 6px;
@@ -337,21 +617,34 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
   font-size: 12px;
 }
 
-.scoreboard-data { margin: 0; white-space: pre-wrap; }
-.scoreboard-buttons { margin-top: 6px; display: flex; gap: 6px; }
+.scoreboard-data {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
 
-.quiz, .quiz-container, [class*="quiz"] {
+.scoreboard-buttons {
+  margin-top: 6px;
+  display: flex;
+  gap: 6px;
+}
+
+/*
+   Do NOT use [class*="quiz"] here.
+   It also matches .quiz-mania-scoreboard.
+*/
+
+.quiz,
+.quiz-container {
   margin: 0;
   padding: 0;
 }
-
 
 .section-title {
   font-weight: bold;
   margin-bottom: 2px;
 }
 
-/* Add this to your CSS file to clean up the PNG export wrapper */
 .export-render-canvas {
   background: #fff;
   color: #000;
@@ -367,19 +660,19 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
   box-sizing: border-box;
 }
 
-/* Toast and unsupported styling handled via CSS */
 .toast {
   display: none;
 }
+
 .toast.show {
   display: block;
 }
+
 .speech-unsupported {
   opacity: 0.6;
   pointer-events: none;
 }
 
-/* Move canvas wrapper styles to CSS for better maintenance */
 .quiz-export-wrapper {
   white-space: pre-wrap;
   font-family: monospace;
@@ -393,14 +686,14 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
   box-sizing: border-box;
 }
 
-
 /* =========================================
-   INSTRUCTIONS MODAL & BUTTON STYLES (Move to CSS)
+   INSTRUCTIONS MODAL & BUTTON STYLES
    ========================================= */
+
 #instructionsBtn {
   position: relative;
   display: inline-block;
-  margin: 20px auto 10px auto;
+  margin: 20px auto 10px;
   padding: 10px 16px;
   background: #2e8b57;
   color: #fff;
@@ -408,7 +701,7 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
   border-radius: 6px;
   font-weight: 600;
   cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
   z-index: 99998;
 }
 
@@ -426,7 +719,7 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
 #instructionsBackdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,.35);
+  background: rgba(0, 0, 0, 0.35);
 }
 
 #instructionsModal {
@@ -467,7 +760,7 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
 }
 
 #instructionsContent {
-  padding: 2px 18px 18px 18px;
+  padding: 2px 18px 18px;
   overflow-y: auto;
   line-height: 1.6;
   scrollbar-width: none;
@@ -480,7 +773,7 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
 
 #instructionsContent h3 {
   color: #1976d2;
-  margin: 12px 0 4px 0;
+  margin: 12px 0 4px;
   font-weight: 600;
 }
 
@@ -492,7 +785,6 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
   margin: 12px 0;
 }
 
-/* CSS helper class for PNG export wrapper */
 .png-export-wrapper {
   white-space: pre-wrap;
   font-family: monospace;
@@ -501,10 +793,10 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
   color: #000;
 }
 
-
 /* =========================================
-   QUIZ COMPONENT STYLES (Move to CSS)
+   QUIZ COMPONENT STYLES
    ========================================= */
+
 .editable-text-zone {
   outline: none;
 }
@@ -531,11 +823,11 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
 }
 
 .quiz-content-container {
-  display: none;
-  background: rgba(0,0,0,0.02);
-  padding: 12px;
-  border-radius: 6px;
-  border: 1px solid #e0e0e0;
+  display: block;
+  background: transparent;
+  padding: 0;
+  border: none;
+  border-radius: 0;
   font-family: Arial, Helvetica, sans-serif !important;
   font-size: 16px !important;
   line-height: 1.6 !important;
@@ -556,196 +848,154 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
   word-break: break-word !important;
 }
 
-/* =========================================
-   UI & QUIZ COMPONENT STYLES (Move to CSS)
-   ========================================= */
-.editable-text-zone {
-    outline: none;
-}
-
-.quiz-wrapper {
-    margin-top: 25px;
-    border-top: 2px dashed #ccc;
-    padding-top: 15px;
-}
-
-.quiz-toggle-btn {
-    padding: 6px 14px;
-    cursor: pointer;
-    background: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    font-weight: bold;
-    margin-bottom: 12px;
-}
-
-.quiz-toggle-btn.active {
-    background: #6c757d;
-}
-
 .quiz-sections-container {
-    display: none;
-    background: rgba(0,0,0,0.02);
-    padding: 12px;
-    border-radius: 6px;
-    border: 1px solid #e0e0e0;
+  display: block;
+  background: rgba(0, 0, 0, 0.02);
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #e0e0e0;
 }
 
 .quiz-top-controls {
-    margin-bottom: 10px;
-    display: flex;
-    gap: 6px;
-    flex-wrap: wrap;
+  margin-bottom: 10px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
 }
 
 .quiz-id-input {
-    padding: 4px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+  padding: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
 
 .quiz-submit-btn {
-    padding: 4px 10px;
-    cursor: pointer;
-}
-
-.quiz-scoreboard {
-    display: none;
-    width: 100%;
-    margin-bottom: 12px;
-    padding: 6px;
-    border: 1px solid #9aaed1;
-    border-radius: 6px;
-    background: #f9f9f9;
-    font-family: monospace;
-    font-size: 12px;
-}
-
-.scoreboard-data {
-    margin: 0;
-    white-space: pre-wrap;
-}
-
-.scoreboard-buttons {
-    margin-top: 6px;
-    display: flex;
-    gap: 6px;
+  padding: 4px 10px;
+  cursor: pointer;
 }
 
 .quiz-blank-line {
-    min-height: 1.6em !important;
+  min-height: 1.6em !important;
 }
 
 .quiz-exercise {
-    margin-bottom: 4px !important;
+  margin-bottom: 4px !important;
 }
 
 .quiz-question-title {
-    margin: 0 0 1px 0 !important;
-    line-height: 1.0 !important;
+  margin: 0 0 1px !important;
+  line-height: 1 !important;
 }
 
 .quiz-option-label {
-    margin: 0 0 1px 10px !important;
-    line-height: 1.0 !important;
-    display: block;
+  margin: 0 0 1px 10px !important;
+  line-height: 1 !important;
+  display: block;
 }
 
-
 /* =========================================
-   SPEECH & HIGHLIGHT STYLES (Move to CSS)
+   SPEECH & HIGHLIGHT STYLES
    ========================================= */
+
 .reading-active {
-    background-color: #fff9c4 !important;
-    transition: background-color 0.4s ease;
+  background-color: #fff9c4 !important;
+  transition: background-color 0.4s ease;
 }
 
 .speech-emoji-btn {
-    all: unset;
-    cursor: pointer;
-    font-size: 14px;
-    display: inline;
-    margin: 0;
-    padding: 0;
-    line-height: 1;
-    vertical-align: baseline;
+  all: unset;
+  cursor: pointer;
+  font-size: 14px;
+  display: inline;
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  vertical-align: baseline;
 }
 
-
-/* =========================================
-   QUIZ FEEDBACK & HIGHLIGHT STYLES (Move to CSS)
-   ========================================= */
 .mc-emoji {
-    margin-left: 8px;
+  margin-left: 8px;
 }
-
 
 /* =========================================================
    MC QUIZ MANIA — SEPARATE SCOREBOARD
    ========================================================= */
 
 .quiz-mania-controls {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
 }
 
 .quiz-mania-id {
-    width: 180px;
-    box-sizing: border-box;
-    padding: 6px 8px;
+  width: 180px;
+  box-sizing: border-box;
+  padding: 6px 8px;
 }
 
-/* Match the standard buttons exactly */
 .quiz-mania-controls button,
 .quiz-mania-buttons button {
-    height: 36px !important;
-    padding: 0 10px !important;
-    font-size: 14px !important;
-    font-family: Arial, Helvetica, sans-serif !important;
-    font-weight: normal !important;
-    line-height: normal !important;
-    background: #1976d2 !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 6px !important;
-    cursor: pointer !important;
-    transition: 0.12s !important;
-    box-sizing: border-box !important;
+  height: 36px !important;
+  padding: 0 10px !important;
+  font-size: 14px !important;
+  font-family: Arial, Helvetica, sans-serif !important;
+  font-weight: normal !important;
+  line-height: normal !important;
+  background: #1976d2 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: 0.12s !important;
+  box-sizing: border-box !important;
 }
 
 .quiz-mania-controls button:hover,
 .quiz-mania-buttons button:hover {
-    background: #1565c0 !important;
+  background: #1565c0 !important;
 }
 
+/* ---------- MC Quiz Scoreboard ---------- */
+
 .quiz-mania-scoreboard {
-    display: none;
-    margin: 8px 0;
-    padding: 10px;
-    box-sizing: border-box;
+  display: none;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 8px 0 12px;
+  padding: 10px;
+  border: 1px solid #9aaed1;
+  border-radius: 6px;
+  background: #f9f9f9;
+  font-family: monospace;
+  font-size: 14px;
 }
 
 .quiz-mania-score-text {
-    margin: 0 0 8px 0;
-    padding: 10px;
-    white-space: pre-wrap;
-    word-break: break-word;
-    font-family: monospace;
-    font-size: 14px;
-    line-height: 1.4;
-    background: #fff;
-    color: #000;
+  display: block;
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 10px;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  background: #fff;
+  color: #000;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 }
 
 .quiz-mania-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
 }
 </style>
+
 </head>
 <body>
 
@@ -758,10 +1008,9 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
     <div class="top-bar">
       <input id="gsId" type="text" placeholder="ID">
 
-      <!-- Section / Quiz Button -->
+      <!-- Section Button -->
       <button id="openSectionModal" type="button">Section</button>
     </div>
-
 
     <!-- SECTION SELECTION MODAL -->
     <div id="sectionModal" class="modal">
@@ -772,22 +1021,17 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
         <div id="sectionRadioList"></div>
 
         <div class="modal-buttons">
-          <button
-            id="cancelSectionModal"
-            type="button">
+          <button id="cancelSectionModal" type="button">
             Cancel
           </button>
 
-          <button
-            id="confirmSectionSelection"
-            type="button">
+          <button id="confirmSectionSelection" type="button">
             Load Section
           </button>
         </div>
 
       </div>
     </div>
-
 
     <!-- PLAYBACK CONTROLS & SPEED BUTTONS -->
     <div class="formRow">
@@ -800,7 +1044,7 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
         class="speed-buttons"
         role="tablist"
         aria-label="Speed"
-        style="display: inline-flex; gap: 4px; margin: 0; vertical-align: middle;">
+        style="display:inline-flex; gap:4px; margin:0; vertical-align:middle;">
 
         <button data-speed="4000">Slow</button>
         <button data-speed="3000" class="active">Medium</button>
@@ -810,55 +1054,37 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
 
     </div>
 
-
     <!-- RECORDING & UTILITY CONTROLS -->
     <div class="formRow">
 
-      <button
-        id="highlightBtn"
-        title="Toggle Highlight">
+      <button id="highlightBtn" title="Toggle Highlight">
         Highlight
       </button>
 
-      <button
-        id="copyBtn"
-        title="Copy Selected Text">
-        Copy
-      </button>
+<button id="teleCopyBtn" type="button" title="Copy Selected Text">Copy</button>
 
-      <button
-        id="audioBtn"
-        title="Play Audio">
+      <button id="SpeeaudioBtn" title="Play Audio">
         Audio
       </button>
 
-      <button
-        id="speechBtn"
-        title="Start/Stop speech">
-        STT
-      </button>
+<button id="sttBtn" title="Start/Stop speech">STT</button>
 
-      <button
-        id="captureAudioBtn"
-        title="Start/Stop audio">
+      <button id="captureAudioBtn" title="Start/Stop audio">
         🔴
       </button>
 
-      <button
-        id="submitBtn"
-        disabled>
+      <button id="submitBtn" disabled>
         Submit
       </button>
 
     </div>
 
-
-    <!-- TELEPROMPTER VIEWPORT -->
+    <!-- =====================================================
+         TEXT PANEL
+         ===================================================== -->
     <div id="gsMain">
 
-      <div
-        id="teleWrapper"
-        class="tele-wrapper">
+      <div id="teleWrapper" class="tele-wrapper">
 
         <div id="teleScrollWrapper">
 
@@ -868,8 +1094,7 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
               id="teleEdit"
               class="tele-edit question-text"
               contenteditable="true"
-              data-placeholder="Type or paste your text here..."
-            ></div>
+              data-placeholder="Type or paste your text here..."></div>
 
           </div>
 
@@ -879,16 +1104,38 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
 
     </div>
 
-
-    <!-- METRICS OVERLAY -->
-    <div
-      class="tele-overlay"
-      id="teleOverlay">
+    <!-- TEXT METRICS -->
+    <div class="tele-overlay" id="teleOverlay">
       0 chars · 0 sent · Changed: 0%
     </div>
 
-  </div>
+    <!-- =====================================================
+         QUIZ TOGGLE BAR
+         ===================================================== -->
+    <button id="quizToggleBar" class="quiz-toggle-bar" type="button">
+      ▼ Show Quiz
+    </button>
 
+    <!-- =====================================================
+         QUIZ PANEL (Hidden Until Toggle)
+         ===================================================== -->
+    <div id="quizMain" style="display:none;">
+
+      <div id="quizWrapper" class="tele-wrapper">
+
+        <div id="quizScrollWrapper">
+
+          <div id="quizContentContainer">
+            <!-- Quiz parser inserts quiz here -->
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
 
   <!-- =====================================================
        GLOBAL / TEXT ACTIVITY SCOREBOARD
@@ -930,7 +1177,6 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
 
   </div>
 
-
   <!-- COPYRIGHT FOOTER -->
   <section
     id="copyrightSection"
@@ -944,19 +1190,15 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
 
 </div>
 
-
 <!-- GLOBAL NOTIFICATIONS / MEASURE HELPERS -->
 
-<div
-  id="toast"
-  class="toast">
+<div id="toast" class="toast">
   Copied
 </div>
 
-<div
-  id="measure"
-  aria-hidden="true">
-</div>
+<div id="measure" aria-hidden="true"></div>
+
+
 <script>
   // Modal Cancel Button
   document.getElementById('cancelSectionModal').addEventListener('click', () => {
@@ -975,34 +1217,60 @@ body.teleprompter-mode #openSectionModal { display: none !important; }
     }
   }
 
-  // Copy Selected Text Button
-  document.getElementById('copyBtn').addEventListener('click', () => {
-    const selectedText = window.getSelection().toString();
-    if (!selectedText) {
-      showToast('Please select text first');
-      return;
-    }
-    navigator.clipboard.writeText(selectedText).then(() => {
-      showToast('Copied selection');
-    }).catch(err => {
-      console.error('Failed to copy text: ', err);
-    });
-  });
+// =========================================================
+// TELEPROMPTER COPY — NATIVE SELECTION COPY
+// =========================================================
 
-  // Text-to-Speech Audio Button
-  document.getElementById('audioBtn').addEventListener('click', () => {
-    const text = document.getElementById('teleEdit')?.innerText || '';
-    if (text.trim() && 'speechSynthesis' in window) {
-      if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel();
-        return;
-      }
-      const utterance = new SpeechSynthesisUtterance(text);
-      window.speechSynthesis.speak(utterance);
-    } else {
-      showToast('No text or speech synthesis not supported');
+const teleCopyBtn =
+  document.getElementById('teleCopyBtn');
+
+if (teleCopyBtn) {
+
+  teleCopyBtn.addEventListener(
+    'mousedown',
+    function (e) {
+      e.preventDefault();
     }
-  });
+  );
+
+  teleCopyBtn.addEventListener(
+    'click',
+    function (e) {
+
+      e.preventDefault();
+      e.stopPropagation();
+
+      /*
+       * Ask the browser to copy its current selection.
+       * Do not read the editor contents.
+       * Do not reconstruct the selection.
+       */
+      try {
+
+        const success =
+          document.execCommand('copy');
+
+        if (success) {
+          showToast('Copied selection');
+        } else {
+          showToast('Please select text first');
+        }
+
+      } catch (err) {
+
+        console.error(
+          'Teleprompter copy failed:',
+          err
+        );
+
+        showToast('Copy failed');
+      }
+
+    }
+  );
+
+}
+
 </script>
 
 <script>
@@ -1460,14 +1728,23 @@ if (gsId && mainSubmitBtn) {
             const choice = radioList.querySelector('input[name="sectionChoice"]:checked');
             if (!choice) return;
 
-            selectedSectionIndex = Number(choice.value);
-            const section = window.SCRAMBLE_SECTIONS[selectedSectionIndex];
+selectedSectionIndex = Number(choice.value);
+const section = window.SCRAMBLE_SECTIONS[selectedSectionIndex];
 
-            modal.classList.remove("show");
+modal.classList.remove("show");
 
-            if (section && window.loadSectionWithLockedQuiz) {
-                window.loadSectionWithLockedQuiz(section.text);
-            }
+/* Save the actual selected section */
+if (section) {
+    window.currentQuizSectionText =
+        section.text || '';
+
+    window.currentQuizSectionName =
+        section.name || '';
+}
+
+if (section && window.loadSectionWithLockedQuiz) {
+    window.loadSectionWithLockedQuiz(section.text);
+}
           
             const editableZone = document.getElementById('editableTextZone') || teleEdit;
             if (editableZone && section) {
@@ -1601,28 +1878,83 @@ if (gsId && mainSubmitBtn) {
                 changeRate = Math.min(100, Math.round((diff / initialText.length) * 100));
             }
 
-            const metaString = `ID: ${id} | Name: ${name} | Chars: ${chars} | Sentences: ${sentenceCount} | Changed: ${changeRate}%`;
+const now = new Date();
+const pad = n => String(n).padStart(2, '0');
 
-            if (gsScoreMeta) gsScoreMeta.innerHTML = `<strong>ID:</strong> ${id} | <strong>Name:</strong> ${name} | <strong>Chars:</strong> ${chars} | <strong>Sentences:</strong> ${sentenceCount} | <strong>Changed:</strong> ${changeRate}%`;
-            if (gsScoreText) gsScoreText.textContent = cleanText;
+const dateString =
+    `${pad(now.getDate())}/` +
+    `${pad(now.getMonth() + 1)}/` +
+    `${now.getFullYear()} ` +
+    `${pad(now.getHours())}:` +
+    `${pad(now.getMinutes())}:` +
+    `${pad(now.getSeconds())}`;
 
-            if (gsScoreboard) {
-                gsScoreboard.style.display = 'block';
-                gsScoreboard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }
+const filename =
+    window.location.pathname.split('/').pop() || 'quiz';
 
-            if (teleEdit) {
-                teleEdit.setAttribute('contenteditable', 'false');
-            }
+let sectionName = '';
 
-            const payload = `${metaString}\n\n${cleanText}`;
-            console.log("SUPABASE PAYLOAD:", payload);
-            if (typeof window.saveResult === 'function') {
-                window.saveResult(payload);
-            }
-        });
-    }
+if (
+    window.SCRAMBLE_SECTIONS &&
+    selectedSectionIndex >= 0 &&
+    window.SCRAMBLE_SECTIONS[selectedSectionIndex]
+) {
+    sectionName =
+        window.SCRAMBLE_SECTIONS[selectedSectionIndex].name || '';
+}
 
+if (!sectionName) {
+    sectionName = document.title || 'Text';
+}
+
+const metaString =
+    `${filename}|` +
+    `${sectionName}|` +
+    `${name}|` +
+    `${id}|` +
+    `${dateString}|` +
+    `Chars:${chars}|` +
+    `Sentences:${sentenceCount}|` +
+    `Changed:${changeRate}%`;
+
+if (gsScoreMeta) {
+    gsScoreMeta.textContent = metaString;
+}
+
+if (gsScoreText) {
+    gsScoreText.textContent = cleanText;
+}
+
+if (gsScoreboard) {
+    gsScoreboard.style.display = 'block';
+    gsScoreboard.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+    });
+}
+
+if (teleEdit) {
+    teleEdit.setAttribute(
+        'contenteditable',
+        'false'
+    );
+}
+
+const payload =
+    `${metaString}\n\n${cleanText}`;
+
+console.log(
+    "SUPABASE PAYLOAD:",
+    payload
+);
+
+if (
+    typeof window.saveResult === 'function'
+) {
+    window.saveResult(payload);
+}
+});
+}
     // ==========================================
     // 7. UNIFIED EXPORT HANDLERS (Copy, TXT, PNG)
     // ==========================================
@@ -1781,88 +2113,9 @@ if (copyBlobBtn) {
         });
     }
 
-    // ==========================================
-    // 9. SPEECH-TO-TEXT (STT) DICTATION MODULE
-    // ==========================================
-    const sttBtn = document.getElementById('sttBtn'); 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-
-    if (sttBtn) {
-        if (!SpeechRecognition) {
-            sttBtn.disabled = true;
-            sttBtn.title = "Speech-to-text is not supported in this browser (try Chrome/Edge).";
-        } else {
-            const recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.lang = 'en-US';
-
-            let isListening = false;
-
-            recognition.onresult = (event) => {
-                let interimTranscript = '';
-                let finalTranscript = '';
-
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript;
-                    } else {
-                        interimTranscript += event.results[i][0].transcript;
-                    }
-                }
-
-                const editableZone = document.getElementById('editableTextZone') || teleEdit;
-                if (editableZone) {
-                    const currentText = editableZone.innerText || '';
-                    editableZone.textContent = currentText + " " + (finalTranscript || interimTranscript);
-                    
-                    if (typeof window.updateTextOverlay === 'function') {
-                        window.updateTextOverlay();
-                    }
-                }
-            };
-
-            recognition.onerror = (event) => {
-                console.error("STT Error:", event.error);
-                sttBtn.textContent = 'Start STT';
-                sttBtn.classList.remove('recording');
-                isListening = false;
-            };
-
-            recognition.onend = () => {
-                if (isListening) {
-                    try { recognition.start(); } catch(e) {}
-                } else {
-                    sttBtn.textContent = 'Start STT';
-                    sttBtn.classList.remove('recording');
-                }
-            };
-
-            sttBtn.addEventListener('click', () => {
-                if (!isListening) {
-                    try {
-                        recognition.start();
-                        sttBtn.textContent = 'Stop STT';
-                        sttBtn.classList.add('recording');
-                        isListening = true;
-                    } catch (err) {
-                        console.error("Failed to start speech recognition:", err);
-                        alert("Microphone permission denied or speech recognition failed to start.");
-                    }
-                } else {
-                    isListening = false;
-                    recognition.stop();
-                    sttBtn.textContent = 'Start STT';
-                    sttBtn.classList.remove('recording');
-                }
-            });
-        }
-    }
 
 }); 
 </script>
-
-
 
 
 
@@ -1882,66 +2135,38 @@ if (copyBlobBtn) {
 (function() {
     'use strict';
 
-
     /* =========================================================
-       1. MC QUIZ MANIA
+       1. MAIN TEXT & WORD HELPERS
        ========================================================= */
 
     if (typeof window.getWordSet === 'undefined') {
-
         window.getWordSet = function(str) {
-
             if (!str) return new Set();
-
-            const words =
-                str.toLowerCase()
-                    .match(/[\wÀ-ÿ'-]+/g) || [];
-
+            const words = str.toLowerCase().match(/[\wÀ-ÿ'-]+/g) || [];
             return new Set(words);
         };
     }
 
-
     if (typeof window.cleanSectionText === 'undefined') {
-
         window.cleanSectionText = function(str) {
-
             if (!str) return "";
 
             let working = str;
 
-            const first =
-                working.indexOf('~');
+            const first = working.indexOf('~');
+            const last = working.lastIndexOf('~');
 
-            const last =
-                working.lastIndexOf('~');
-
-            if (
-                first !== -1 &&
-                last !== -1 &&
-                last > first
-            ) {
-                working =
-                    working.slice(
-                        first + 1,
-                        last
-                    );
+            if (first !== -1 && last !== -1 && last > first) {
+                working = working.slice(first + 1, last);
             }
 
-            const lines =
-                working.split(/\r?\n/);
-
+            const lines = working.split(/\r?\n/);
             const validLines = [];
 
             for (let line of lines) {
+                const trimmed = line.trim();
 
-                const trimmed =
-                    line.trim();
-
-                if (
-                    trimmed === 'QUIZ' ||
-                    trimmed === 'Quiz'
-                ) {
+                if (trimmed === 'QUIZ' || trimmed === 'Quiz') {
                     break;
                 }
 
@@ -1952,84 +2177,51 @@ if (copyBlobBtn) {
         };
     }
 
+    if (typeof window.calculateFastChangePercentage === 'undefined') {
+        window.calculateFastChangePercentage = function(original, current) {
 
-    if (
-        typeof window.calculateFastChangePercentage ===
-        'undefined'
-    ) {
+            const cleanOrig = window.cleanSectionText(original);
+            const cleanCurr = window.cleanSectionText(current);
 
-        window.calculateFastChangePercentage =
-            function(original, current) {
+            const origWords =
+                cleanOrig.toLowerCase().match(/[\wÀ-ÿ'-]+/g) || [];
 
-                const cleanOrig =
-                    window.cleanSectionText(
-                        original
-                    );
+            const currWords =
+                cleanCurr.toLowerCase().match(/[\wÀ-ÿ'-]+/g) || [];
 
-                const cleanCurr =
-                    window.cleanSectionText(
-                        current
-                    );
+            if (origWords.length === 0) {
+                return currWords.length > 0 ? 100 : 0;
+            }
 
-                const origWords =
-                    cleanOrig
-                        .toLowerCase()
-                        .match(
-                            /[\wÀ-ÿ'-]+/g
-                        ) || [];
+            const origMap = {};
 
-                const currWords =
-                    cleanCurr
-                        .toLowerCase()
-                        .match(
-                            /[\wÀ-ÿ'-]+/g
-                        ) || [];
+            origWords.forEach(w => {
+                origMap[w] = (origMap[w] || 0) + 1;
+            });
 
-                if (origWords.length === 0) {
-                    return currWords.length > 0
-                        ? 100
-                        : 0;
+            let matches = 0;
+
+            currWords.forEach(w => {
+                if (origMap[w] && origMap[w] > 0) {
+                    matches++;
+                    origMap[w]--;
                 }
+            });
 
-                const origMap = {};
+            const maxLen =
+                Math.max(origWords.length, currWords.length);
 
-                origWords.forEach(w => {
-                    origMap[w] =
-                        (origMap[w] || 0) + 1;
-                });
+            const similarity =
+                matches / maxLen;
 
-                let matches = 0;
-
-                currWords.forEach(w => {
-
-                    if (
-                        origMap[w] &&
-                        origMap[w] > 0
-                    ) {
-                        matches++;
-                        origMap[w]--;
-                    }
-                });
-
-                const maxLen =
-                    Math.max(
-                        origWords.length,
-                        currWords.length
-                    );
-
-                const similarity =
-                    matches / maxLen;
-
-                return Math.max(
-                    0,
-                    Math.min(
-                        100,
-                        Math.round(
-                            (1 - similarity) * 100
-                        )
-                    )
-                );
-            };
+            return Math.max(
+                0,
+                Math.min(
+                    100,
+                    Math.round((1 - similarity) * 100)
+                )
+            );
+        };
     }
 
 
@@ -2040,42 +2232,29 @@ if (copyBlobBtn) {
     window.updateOverlay = function() {
 
         const teleEdit =
-            document.getElementById(
-                'teleEdit'
-            );
+            document.getElementById('teleEdit');
 
         const teleOverlay =
-            document.getElementById(
-                'teleOverlay'
-            );
+            document.getElementById('teleOverlay');
 
         if (!teleEdit) return;
 
-
         const editableZone =
-            document.getElementById(
-                'editableTextZone'
-            );
+            document.getElementById('editableTextZone');
 
         let rawText = "";
-
 
         if (editableZone) {
 
             const lineDivs =
-                editableZone.querySelectorAll(
-                    '.line, p'
-                );
+                editableZone.querySelectorAll('.line, p');
 
             if (lineDivs.length > 0) {
 
                 const lineTexts =
-                    Array.from(
-                        lineDivs
-                    ).map(div => {
+                    Array.from(lineDivs).map(div => {
 
-                        return div.innerHTML ===
-                            '&nbsp;'
+                        return div.innerHTML === '&nbsp;'
                             ? ''
                             : div.textContent;
                     });
@@ -2089,60 +2268,46 @@ if (copyBlobBtn) {
                     editableZone.innerText || '';
             }
 
+        } else {
+
+            rawText =
+                teleEdit.innerText || '';
         }
 
-
         const cleanActiveText =
-            typeof window.cleanSectionText ===
-            'function'
-                ? window.cleanSectionText(
-                    rawText
-                )
+            typeof window.cleanSectionText === 'function'
+                ? window.cleanSectionText(rawText)
                 : rawText;
 
-
         const s =
-            (
-                cleanActiveText.match(
-                    /[.!?]+/g
-                ) || []
-            ).length;
+            (cleanActiveText.match(/[.!?]+/g) || []).length;
 
+        const charCount =
+            cleanActiveText.length;
 
         let originalBaselineText = "";
         let currentChangeRate = 0;
 
-
         if (
             window.SCRAMBLE_SECTIONS &&
-            typeof selectedSectionIndex !==
-                'undefined' &&
-            window.SCRAMBLE_SECTIONS[
-                selectedSectionIndex
-            ]
+            typeof selectedSectionIndex !== 'undefined' &&
+            window.SCRAMBLE_SECTIONS[selectedSectionIndex]
         ) {
-
-            const section =
-                window.SCRAMBLE_SECTIONS[
-                    selectedSectionIndex
-                ];
 
             originalBaselineText =
-                section.text || "";
+                window.SCRAMBLE_SECTIONS[
+                    selectedSectionIndex
+                ].text || "";
 
-        } else if (
-            window._currentOriginalBaseline
-        ) {
+        } else if (window._currentOriginalBaseline) {
 
             originalBaselineText =
                 window._currentOriginalBaseline;
         }
 
-
         if (
             originalBaselineText &&
-            typeof window.calculateFastChangePercentage ===
-                'function'
+            typeof window.calculateFastChangePercentage === 'function'
         ) {
 
             currentChangeRate =
@@ -2150,841 +2315,816 @@ if (copyBlobBtn) {
                     originalBaselineText,
                     cleanActiveText
                 );
-
-        } else {
-
-            currentChangeRate = 0;
         }
-
 
         if (teleOverlay) {
 
             teleOverlay.textContent =
-                `${cleanActiveText.length} chars · ` +
-                `${s} sent · ` +
-                `Changed: ${currentChangeRate}%`;
+                `${charCount} chars · ${s} sent · Changed: ${currentChangeRate}%`;
         }
     };
 
 
-    /* =========================================================
-       3. DOM BUILDER & SECTION LOADER
-       ========================================================= */
+/* =========================================================
+   3. QUIZ BUILDER
+   
+   IMPORTANT:
+   The section is NOT selected here.
 
-    window.loadQuizSection = function(sectionText) {
+   The existing main section selector selects the section.
+   That section's text is passed into this function.
+   This function only extracts the QUIZ portion of that
+   already-selected section and places it into
+   #quizContentContainer.
+   ========================================================= */
 
-        if (!sectionText) return;
+window.loadQuizSection = function(sectionText) {
 
+    if (!sectionText) return;
 
-        const teleEdit =
-            document.getElementById(
-                'teleEdit'
+    const quizMain =
+        document.getElementById('quizMain');
+
+    const quizContentContainer =
+        document.getElementById('quizContentContainer');
+
+    if (
+        !quizMain ||
+        !quizContentContainer
+    ) {
+        return;
+    }
+
+    let fullText =
+        sectionText;
+
+    const first =
+        sectionText.indexOf('~');
+
+    const last =
+        sectionText.lastIndexOf('~');
+
+    if (
+        first !== -1 &&
+        last !== -1 &&
+        last > first
+    ) {
+
+        fullText =
+            sectionText.slice(
+                first + 1,
+                last
             );
+    }
 
-        if (!teleEdit) return;
+    /*
+     * Save the selected section's original text
+     * for the text-change calculation.
+     */
+    window._currentOriginalBaseline =
+        window.cleanSectionText(fullText);
 
 
-        let fullText =
-            sectionText;
+    /* -----------------------------------------------------
+       FIND THE QUIZ PORTION OF THIS SELECTED SECTION
+       ----------------------------------------------------- */
 
+    const lines =
+        fullText.split(/\r?\n/);
 
-        const first =
-            sectionText.indexOf('~');
+    let quizPart = "";
+    let quizStartIndex = -1;
 
-        const last =
-            sectionText.lastIndexOf('~');
+    for (
+        let i = 0;
+        i < lines.length;
+        i++
+    ) {
 
+        const trimmed =
+            lines[i].trim();
 
         if (
-            first !== -1 &&
-            last !== -1 &&
-            last > first
+            trimmed === 'QUIZ' ||
+            trimmed === 'Quiz'
         ) {
 
-            fullText =
-                sectionText.slice(
-                    first + 1,
-                    last
-                );
+            quizStartIndex =
+                i;
+
+            break;
         }
+    }
+
+    if (quizStartIndex !== -1) {
+
+        quizPart =
+            lines
+                .slice(quizStartIndex)
+                .join('\n');
+    }
 
 
-        window._currentOriginalBaseline =
-            window.cleanSectionText(
-                fullText
-            );
+    /* -----------------------------------------------------
+       NO QUIZ IN THIS SELECTED SECTION
+       ----------------------------------------------------- */
+
+    if (!quizPart) {
+
+        quizContentContainer.innerHTML =
+            '<p style="padding: 10px; color: #888;">No quiz available for this section.</p>';
+
+        return;
+    }
 
 
-        const lines =
-            fullText.split(/\r?\n/);
+    /* -----------------------------------------------------
+       CLEAR ONLY THE QUIZ CONTENT
+
+       Do NOT clear #quizMain.
+       Do NOT destroy the quiz wrapper or scroll wrapper.
+       ----------------------------------------------------- */
+
+    quizContentContainer.innerHTML = '';
 
 
-        let quizPart = "";
-        let quizStartIndex = -1;
+    /* -----------------------------------------------------
+       PARSE QUIZ SUBSECTIONS
+       ----------------------------------------------------- */
 
+    const rawQuizLines =
+        quizPart.split(/\r?\n/);
 
-        for (
-            let i = 0;
-            i < lines.length;
-            i++
-        ) {
+    let subSectionsData = [];
+    let currentSub = null;
 
-            const trimmed =
-                lines[i].trim();
+    const SUBSECTION_MARKERS = [
+        "Quiz",
+        "Concept Quiz",
+        "Context Quiz",
+        "Comprehension Quiz",
+        "Grammar Quiz",
+        "Vocabulary Quiz"
+    ];
 
-            if (
-                trimmed === 'QUIZ' ||
-                trimmed === 'Quiz'
-            ) {
+    rawQuizLines.forEach(line => {
 
-                quizStartIndex = i;
-                break;
-            }
-        }
-
-
-        if (quizStartIndex !== -1) {
-
-            quizPart =
-                lines
-                    .slice(quizStartIndex)
-                    .join('\n');
-        }
-
-
-        if (!quizPart) return;
-
-
-        const quizWrapper =
-            document.createElement(
-                'div'
-            );
-
-        quizWrapper.id =
-            'quizWrapper';
-
-        quizWrapper.className =
-            'quiz-wrapper';
-
-
-        const quizBtn =
-            document.createElement(
-                'button'
-            );
-
-        quizBtn.id =
-            'toggleQuizBtn';
-
-        quizBtn.className =
-            'quiz-toggle-btn';
-
-        quizBtn.type =
-            'button';
-
-        quizBtn.textContent =
-            'Toggle Quiz';
-
-
-        const quizContent =
-            document.createElement(
-                'div'
-            );
-
-        quizContent.id =
-            'quizSections';
-
-        quizContent.className =
-            'section quiz-sections-container';
-
-        quizContent.style.display =
-            'none';
-
-
-        const rawQuizLines =
-            quizPart.split(/\r?\n/);
-
-
-        let subSectionsData = [];
-
-        let currentSub = null;
-
-
-        const SUBSECTION_MARKERS = [
-            "Quiz",
-            "Concept Quiz",
-            "Context Quiz",
-            "Comprehension Quiz",
-            "Grammar Quiz",
-            "Vocabulary Quiz"
-        ];
-
-
-        rawQuizLines.forEach(line => {
-
-            const trimmed =
-                line.trim();
-
-
-            if (
-                SUBSECTION_MARKERS.some(
-                    marker =>
-                        trimmed
-                            .toLowerCase()
-                            .startsWith(
-                                marker.toLowerCase()
-                            )
-                )
-            ) {
-
-                currentSub = {
-                    title: trimmed,
-                    questions: []
-                };
-
-                subSectionsData.push(
-                    currentSub
-                );
-
-            } else if (currentSub) {
-
-                currentSub.questions.push(
-                    line
-                );
-            }
-        });
-
+        const trimmed =
+            line.trim();
 
         if (
-            subSectionsData.length === 0 &&
-            rawQuizLines.length > 0
+            SUBSECTION_MARKERS.some(
+                marker =>
+                    trimmed
+                        .toLowerCase()
+                        .startsWith(
+                            marker.toLowerCase()
+                        )
+            )
         ) {
 
             currentSub = {
-                title: 'Comprehension Quiz',
-                questions: rawQuizLines
+                title: trimmed,
+                questions: []
             };
 
             subSectionsData.push(
                 currentSub
             );
+
+        } else if (currentSub) {
+
+            currentSub.questions.push(
+                line
+            );
         }
+    });
 
 
-        subSectionsData.forEach(sub => {
+    /* -----------------------------------------------------
+       FALLBACK IF NO SUBSECTION HEADER WAS FOUND
+       ----------------------------------------------------- */
 
-            const slug =
-                sub.title
-                    .toLowerCase()
-                    .replace(/\s+/g, '-')
-                    .replace(/[^\w-]/g, '');
+    if (
+        subSectionsData.length === 0 &&
+        rawQuizLines.length > 0
+    ) {
 
+        currentSub = {
+            title: 'Comprehension Quiz',
+            questions: rawQuizLines
+        };
 
-            sub.slug =
-                slug;
-
-
-            let subHTML =
-                `<h3 class="parsedSubheader">${sub.title}</h3>`;
-
-
-            subHTML +=
-                `<div class="quiz-subsection" ` +
-                `data-subsection="${sub.title}" ` +
-                `data-sub-slug="${slug}">`;
+        subSectionsData.push(
+            currentSub
+        );
+    }
 
 
-            /* =================================================
-               MC QUIZ MANIA CONTROLS
+    /* -----------------------------------------------------
+       BUILD QUIZ HTML
+       ----------------------------------------------------- */
 
-               IMPORTANT:
-               These classes are intentionally unique.
+    let allSubSectionsHTML = '';
+    let qIndex = 0;
 
-               They do NOT use:
-               .quiz-submit
-               .quiz-submit-btn
-               .quiz-scoreboard
-               .scoreboard-data
-               .score-copy
-               .score-txt
-               .score-png
-               ================================================= */
+    subSectionsData.forEach(sub => {
 
-            subHTML += `
-                <div class="quiz-mania-controls">
+        const slug =
+            sub.title
+                .toLowerCase()
+                .replace(/\s+/g, '-')
+                .replace(/[^\w-]/g, '');
 
-                    <input
-                        type="text"
-                        class="quiz-mania-id"
-                        placeholder="Student ID"
-                        autocomplete="off">
+        sub.slug =
+            slug;
+
+        let subHTML =
+            `<h3 class="parsedSubheader">${sub.title}</h3>`;
+
+        subHTML +=
+            `<div class="quiz-subsection" data-subsection="${sub.title}" data-sub-slug="${slug}">`;
+
+
+        /* -------------------------------------------------
+           QUIZ CONTROLS / SCOREBOARD
+           ------------------------------------------------- */
+
+        subHTML += `
+            <div class="quiz-mania-controls">
+                <input
+                    type="text"
+                    class="quiz-mania-id"
+                    placeholder="Student ID"
+                    autocomplete="off"
+                >
+
+                <button
+                    type="button"
+                    class="quiz-submit"
+                >
+                    Submit
+                </button>
+            </div>
+
+            <div
+                class="quiz-mania-scoreboard"
+                style="display:none;"
+            >
+                <pre class="quiz-mania-score-text"></pre>
+
+                <div class="quiz-mania-buttons">
+                    <button
+                        type="button"
+                        class="quiz-mania-copy"
+                    >
+                        Copy
+                    </button>
 
                     <button
                         type="button"
-                        class="quiz-mania-submit">
-                        Submit
+                        class="quiz-mania-txt"
+                    >
+                        TXT
                     </button>
 
+                    <button
+                        type="button"
+                        class="quiz-mania-png"
+                    >
+                        PNG
+                    </button>
                 </div>
-
-                <div
-                    class="quiz-mania-scoreboard"
-                    style="display:none;">
-
-                    <pre
-                        class="quiz-mania-score-text"></pre>
-
-                    <div class="quiz-mania-buttons">
-
-                        <button
-                            type="button"
-                            class="quiz-mania-copy">
-                            Copy
-                        </button>
-
-                        <button
-                            type="button"
-                            class="quiz-mania-txt">
-                            TXT
-                        </button>
-
-                        <button
-                            type="button"
-                            class="quiz-mania-png">
-                            PNG
-                        </button>
-
-                    </div>
-
-                </div>
-            `;
+            </div>
+        `;
 
 
-            let qIndex = 0;
+        /* -------------------------------------------------
+           QUESTIONS
+           ------------------------------------------------- */
+
+        for (
+            let i = 0;
+            i < sub.questions.length;
+            i++
+        ) {
+
+            let line =
+                sub.questions[i];
 
 
-            for (
-                let i = 0;
-                i < sub.questions.length;
-                i++
+            /* Blank line */
+
+            if (
+                line.trim() === ''
             ) {
 
-                let line =
-                    sub.questions[i];
+                subHTML +=
+                    `<div class="line quiz-blank-line">&nbsp;</div>`;
+
+                continue;
+            }
 
 
-                if (line.trim() === '') {
+            /* Only lines beginning with ? are questions */
 
-                    subHTML +=
-                        `<div class="line quiz-blank-line">&nbsp;</div>`;
-
-                    continue;
-                }
-
-
-                if (
-                    !line.trim().startsWith('?')
-                ) {
-                    continue;
-                }
+            if (
+                !line.trim().startsWith('?')
+            ) {
+                continue;
+            }
 
 
-                let question =
-                    line
+            /* Question text */
+
+            let question =
+                line
+                    .trim()
+                    .replace(
+                        /^\?\s*/,
+                        ''
+                    );
+
+
+            /* Optional continuation line beginning with - */
+
+            if (
+                i + 1 < sub.questions.length &&
+                sub.questions[
+                    i + 1
+                ]
+                    .trim()
+                    .startsWith('-')
+            ) {
+
+                question +=
+                    ' ' +
+                    sub.questions[
+                        i + 1
+                    ]
                         .trim()
                         .replace(
-                            /^\?\s*/,
+                            /^-+\s*/,
                             ''
                         );
 
-
-                if (
-                    i + 1 <
-                        sub.questions.length &&
-                    sub.questions[i + 1]
-                        .trim()
-                        .startsWith('-')
-                ) {
-
-                    question +=
-                        ' ' +
-                        sub.questions[i + 1]
-                            .trim()
-                            .replace(
-                                /^-+\s*/,
-                                ''
-                            );
-
-                    i++;
-                }
+                i++;
+            }
 
 
-                const options = [];
+            /* Answer options */
 
-                let j =
-                    i + 1;
+            const options = [];
 
+            let j =
+                i + 1;
 
-                while (
-                    j <
-                        sub.questions.length &&
+            while (
+                j < sub.questions.length &&
+                sub.questions[j].trim() !== '' &&
+                !sub.questions[j].trim().startsWith('?')
+            ) {
+
+                options.push(
                     sub.questions[j]
-                        .trim() !== '' &&
-                    !sub.questions[j]
-                        .trim()
-                        .startsWith('?')
-                ) {
+                );
 
-                    options.push(
-                        sub.questions[j]
-                    );
-
-                    j++;
-                }
+                j++;
+            }
 
 
-                const correctPipe =
-                    options
-                        .filter(
-                            o =>
-                                /\|.*?\|/.test(o)
-                        )
-                        .map(
-                            o =>
-                                o
-                                    .replace(
-                                        /\|/g,
-                                        ''
-                                    )
-                                    .trim()
-                        )
-                        .join('|');
+            /* Correct answer */
+
+            const correctPipe =
+                options
+                    .filter(
+                        o =>
+                            /\|.*?\|/.test(o)
+                    )
+                    .map(
+                        o =>
+                            o
+                                .replace(/\|/g, '')
+                                .trim()
+                    )
+                    .join('|');
 
 
-                subHTML +=
-                    `<div class="exercise quiz-exercise" ` +
-                    `data-correct="${correctPipe}">`;
+            /* Question container */
+
+            subHTML +=
+                `<div class="exercise quiz-exercise" data-correct="${correctPipe}">`;
 
 
-                subHTML +=
-                    `<p class="quiz-question-title">` +
-                    `<strong>${qIndex + 1}. ${question}</strong>` +
-                    `</p>`;
+            subHTML +=
+                `<p class="quiz-question-title"><strong>${qIndex + 1}. ${question}</strong></p>`;
 
 
-                subHTML +=
-                    `<div class="quiz-options-group">`;
+            subHTML +=
+                `<div class="quiz-options-group">`;
 
 
-                options.forEach((opt, oi) => {
+            /* Options */
+
+            options.forEach(
+                (opt, oi) => {
 
                     const clean =
                         opt
-                            .replace(
-                                /\|/g,
-                                ''
-                            )
+                            .replace(/\|/g, '')
                             .trim();
-
 
                     const isCorrectOption =
                         /\|.*?\|/.test(opt);
 
-
                     subHTML += `
                         <label
                             class="quiz-option-label"
-                            data-is-correct="${isCorrectOption}">
-
+                            data-is-correct="${isCorrectOption}"
+                        >
                             <input
                                 type="radio"
                                 name="q_${slug}_${qIndex}"
                                 value="${clean.replace(/"/g, '&quot;')}"
-                                data-correct="${correctPipe}">
+                                data-correct="${correctPipe}"
+                            >
 
                             <span class="option-text">
                                 ${String.fromCharCode(65 + oi)}) ${clean}
                             </span>
-
                         </label>
                     `;
-                });
-
-
-                subHTML +=
-                    `</div>`;
-
-
-                subHTML +=
-                    `<div
-                        class="quiz-feedback-box"
-                        style="display:none; font-size:0.9em; margin-top:5px;">
-                    </div>`;
-
-
-                subHTML +=
-                    `</div>`;
-
-
-                qIndex++;
-
-                i =
-                    j - 1;
-            }
+                }
+            );
 
 
             subHTML +=
                 `</div>`;
 
 
-            quizContent.insertAdjacentHTML(
-                'beforeend',
-                subHTML
-            );
-        });
+            subHTML +=
+                `<div class="quiz-feedback-box" style="display:none; font-size:0.9em; margin-top:5px;"></div>`;
 
 
-        quizBtn.onclick =
-            function() {
+            subHTML +=
+                `</div>`;
 
-                if (
-                    quizContent.style.display ===
-                        'none' ||
-                    !quizContent.style.display
-                ) {
 
-                    quizContent.style.display =
-                        'block';
+            qIndex++;
 
-                    quizBtn.textContent =
-                        'Hide Quiz';
+            i =
+                j - 1;
+        }
 
-                    quizBtn.classList.add(
+
+        subHTML +=
+            `</div>`;
+
+        allSubSectionsHTML +=
+            subHTML;
+    });
+
+
+    /* -----------------------------------------------------
+       PUT QUIZ INTO THE EXISTING QUIZ CONTENT CONTAINER
+       ----------------------------------------------------- */
+
+    quizContentContainer.innerHTML =
+        allSubSectionsHTML;
+};
+    /* =========================================================
+       4. INITIALIZATION & UI LISTENERS
+       ========================================================= */
+
+    function initApp() {
+
+        /* -----------------------------------------------------
+           QUIZ TOGGLE BAR
+
+           This ONLY shows/hides the quiz belonging to the
+           section that was already selected elsewhere.
+           
+           It does NOT select sections.
+           ----------------------------------------------------- */
+
+        document.addEventListener(
+            'click',
+            (e) => {
+
+                const quizToggleBar =
+                    e.target.closest(
+                        '#quizToggleBar'
+                    );
+
+                if (!quizToggleBar) {
+                    return;
+                }
+
+                const quizMain =
+                    document.getElementById(
+                        'quizMain'
+                    );
+
+                if (!quizMain) {
+                    return;
+                }
+
+                const computedStyle =
+                    window.getComputedStyle(
+                        quizMain
+                    );
+
+                const isVisible =
+                    computedStyle.display !== 'none';
+
+
+                if (isVisible) {
+
+                    quizMain.style.setProperty(
+                        'display',
+                        'none',
+                        'important'
+                    );
+
+                    quizToggleBar.classList.remove(
                         'active'
                     );
+
+                    quizToggleBar.textContent =
+                        '▼ Show Quiz';
 
                 } else {
 
-                    quizContent.style.display =
-                        'none';
+                    /*
+                     * #quizMain is a flex container in the
+                     * existing CSS, so restore it as flex.
+                     */
+                    quizMain.style.setProperty(
+                        'display',
+                        'flex',
+                        'important'
+                    );
 
-                    quizBtn.textContent =
-                        'Toggle Quiz';
-
-                    quizBtn.classList.remove(
+                    quizToggleBar.classList.add(
                         'active'
                     );
-                }
-            };
 
-
-        quizWrapper.appendChild(
-            quizBtn
-        );
-
-        quizWrapper.appendChild(
-            quizContent
-        );
-
-
-        teleEdit.appendChild(
-            quizWrapper
-        );
-    };
-
-
-    window.loadSectionWithLockedQuiz =
-        function(sectionText) {
-
-            const teleEdit =
-                document.getElementById(
-                    'teleEdit'
-                );
-
-
-            if (
-                !sectionText ||
-                !teleEdit
-            ) {
-                return;
-            }
-
-
-            let fullText =
-                sectionText;
-
-
-            const first =
-                sectionText.indexOf('~');
-
-            const last =
-                sectionText.lastIndexOf('~');
-
-
-            if (
-                first !== -1 &&
-                last !== -1 &&
-                last > first
-            ) {
-
-                fullText =
-                    sectionText.slice(
-                        first + 1,
-                        last
-                    );
-            }
-
-
-            window._currentOriginalBaseline =
-                window.cleanSectionText(
-                    fullText
-                );
-
-
-            let activePart =
-                fullText;
-
-
-            const lines =
-                fullText.split(/\r?\n/);
-
-
-            let quizStartIndex = -1;
-
-
-            for (
-                let i = 0;
-                i < lines.length;
-                i++
-            ) {
-
-                const trimmed =
-                    lines[i].trim();
-
-
-                if (
-                    trimmed === 'QUIZ' ||
-                    trimmed === 'Quiz'
-                ) {
-
-                    quizStartIndex = i;
-                    break;
+                    quizToggleBar.textContent =
+                        '▲ Hide Quiz';
                 }
             }
+        );
 
 
-            if (quizStartIndex !== -1) {
-
-                activePart =
-                    lines
-                        .slice(
-                            0,
-                            quizStartIndex
-                        )
-                        .join('\n');
-            }
-
-
-            teleEdit.innerHTML =
-                '';
-
-            teleEdit.setAttribute(
-                'contenteditable',
-                'false'
-            );
-
-
-            /* Main Editable Reading/Writing Zone */
-
-            const editableContainer =
-                document.createElement(
-                    'div'
-                );
-
-            editableContainer.id =
-                'editableTextZone';
-
-            editableContainer.className =
-                'question-text editable-text-zone';
-
-            editableContainer.setAttribute(
-                'contenteditable',
-                'true'
-            );
-
-
-            activePart
-                .split(/\r?\n/)
-                .forEach(line => {
-
-                    const p =
-                        document.createElement(
-                            'p'
-                        );
-
-                    p.className =
-                        'line';
-
-
-                    if (
-                        line.trim() === ''
-                    ) {
-
-                        p.innerHTML =
-                            '&nbsp;';
-
-                    } else {
-
-                        p.textContent =
-                            line;
-                    }
-
-
-                    editableContainer.appendChild(
-                        p
-                    );
-                });
-
-
-            teleEdit.appendChild(
-                editableContainer
-            );
-
-
-            /* Build & attach interactive quiz section */
-
-            window.loadQuizSection(
-                sectionText
-            );
-
-
-            window.updateOverlay();
-        };
-
-
-    /* =========================================================
-       4. EVENT LISTENERS & HOOK INTEGRATION
-       ========================================================= */
-
-    function initListeners() {
+        /* -----------------------------------------------------
+           TELEEDIT & METRICS LISTENERS
+           ----------------------------------------------------- */
 
         const teleEditEl =
             document.getElementById(
                 'teleEdit'
             );
 
+        if (teleEditEl) {
 
-        if (!teleEditEl) return;
-
-
-        teleEditEl.addEventListener(
-            'input',
-            () => {
-                window.updateOverlay();
-            }
-        );
+            teleEditEl.addEventListener(
+                'input',
+                () => {
+                    window.updateOverlay();
+                }
+            );
 
 
-        teleEditEl.addEventListener(
-            'keydown',
-            (e) => {
+            teleEditEl.addEventListener(
+                'keydown',
+                (e) => {
 
-                if (e.key === 'Enter') {
+                    if (e.key !== 'Enter') {
+                        return;
+                    }
 
                     const sel =
                         window.getSelection();
 
-
                     if (
-                        sel &&
-                        sel.rangeCount > 0
+                        !sel ||
+                        sel.rangeCount === 0
+                    ) {
+                        return;
+                    }
+
+                    let node =
+                        sel.anchorNode;
+
+                    let inEditable =
+                        false;
+
+                    while (
+                        node &&
+                        node !== teleEditEl
                     ) {
 
-                        let node =
-                            sel.anchorNode;
-
-                        let inEditable =
-                            false;
-
-
-                        while (
+                        if (
                             node &&
-                            node !== teleEditEl
+                            (
+                                node.id ===
+                                'editableTextZone' ||
+
+                                node.classList?.contains(
+                                    'editable'
+                                )
+                            )
                         ) {
 
-                            if (
-                                node &&
-                                node.id ===
-                                    'editableTextZone'
-                            ) {
+                            inEditable =
+                                true;
 
-                                inEditable =
-                                    true;
-
-                                break;
-                            }
-
-
-                            node =
-                                node
-                                    ? node.parentNode
-                                    : null;
+                            break;
                         }
 
-
-                        if (inEditable) {
-
-                            e.preventDefault();
-
-
-                            const range =
-                                sel.getRangeAt(0);
+                        node =
+                            node
+                                ? node.parentNode
+                                : null;
+                    }
 
 
-                            range.deleteContents();
+                    if (
+                        inEditable ||
+                        teleEditEl.id === 'teleEdit'
+                    ) {
+
+                        e.preventDefault();
+
+                        const range =
+                            sel.getRangeAt(0);
+
+                        range.deleteContents();
 
 
-                            const newP =
-                                document.createElement(
-                                    'p'
-                                );
-
-                            newP.className =
-                                'line';
-
-
-                            range.insertNode(
-                                newP
+                        const newP =
+                            document.createElement(
+                                'p'
                             );
 
+                        newP.className =
+                            'line';
 
-                            range.setStartAfter(
-                                newP
-                            );
-
-                            range.collapse(
-                                true
-                            );
+                        newP.innerHTML =
+                            '&nbsp;';
 
 
-                            sel.removeAllRanges();
+                        range.insertNode(
+                            newP
+                        );
 
-                            sel.addRange(
-                                range
-                            );
+                        range.setStartAfter(
+                            newP
+                        );
 
+                        range.collapse(
+                            true
+                        );
 
-                            window.updateOverlay();
+                        sel.removeAllRanges();
 
-                        } else {
+                        sel.addRange(
+                            range
+                        );
 
-                            e.preventDefault();
-                        }
+                        window.updateOverlay();
                     }
                 }
+            );
+        }
+
+
+        /* -----------------------------------------------------
+           IMPORTANT:
+           Section selection is handled elsewhere.
+
+           There is NO hard-coded section list here.
+           There is NO sampleSections array here.
+           There is NO second section selector here.
+           ----------------------------------------------------- */
+
+
+        /* -----------------------------------------------------
+           SPEED BUTTONS
+           ----------------------------------------------------- */
+
+        const speedButtons =
+            document.querySelectorAll(
+                '.speed-buttons button'
+            );
+
+        if (speedButtons) {
+
+            speedButtons.forEach(
+                btn => {
+
+                    btn.addEventListener(
+                        'click',
+                        () => {
+
+                            speedButtons.forEach(
+                                b =>
+                                    b.classList.remove(
+                                        'active'
+                                    )
+                            );
+
+                            btn.classList.add(
+                                'active'
+                            );
+                        }
+                    );
+                }
+            );
+        }
+
+
+        /* -----------------------------------------------------
+           COPY BUTTON TOAST
+           ----------------------------------------------------- */
+
+        function showToast(
+            message = 'Copied'
+        ) {
+
+            const toast =
+                document.getElementById(
+                    'toast'
+                );
+
+            if (!toast) {
+                return;
             }
-        );
+
+            toast.textContent =
+                message;
+
+            toast.classList.add(
+                'show'
+            );
+
+            setTimeout(
+                () => {
+                    toast.classList.remove(
+                        'show'
+                    );
+                },
+                2000
+            );
+        }
+
+
+        const copyBtn =
+            document.getElementById(
+                'copyBtn'
+            );
+
+        const teleEdit =
+            document.getElementById(
+                'teleEdit'
+            );
+
+        if (
+            copyBtn &&
+            teleEdit
+        ) {
+
+            copyBtn.addEventListener(
+                'click',
+                () => {
+
+                    navigator.clipboard
+                        .writeText(
+                            teleEdit.innerText
+                        )
+                        .then(
+                            () => {
+                                showToast(
+                                    'Text Copied!'
+                                );
+                            }
+                        );
+                }
+            );
+        }
+
+
+        /* -----------------------------------------------------
+           INITIAL OVERLAY
+           ----------------------------------------------------- */
+
+        window.updateOverlay();
     }
 
+
+    /* =========================================================
+       START APP
+       ========================================================= */
 
     if (
         document.readyState ===
@@ -2993,80 +3133,107 @@ if (copyBlobBtn) {
 
         document.addEventListener(
             'DOMContentLoaded',
-            initListeners
+            initApp
         );
 
     } else {
 
-        initListeners();
+        initApp();
     }
 
 
     /* =========================================================
-       GLOBAL CUSTOM EVENT HOOK RECEIVER
+       GLOBAL CUSTOM EVENT HOOK
+
+       The EXISTING section loader sends the selected section's
+       text here.
+
+       This quiz module then extracts the QUIZ from that same
+       section.
+
+       It does NOT select a section.
        ========================================================= */
 
-    window.addEventListener(
-        'textSectionLoaded',
-        function(e) {
+window.addEventListener(
+    'textSectionLoaded',
+    function(e) {
 
-            if (
-                e &&
-                e.detail &&
+        if (
+            e &&
+            e.detail &&
+            e.detail.sectionText
+        ) {
+
+            // Keep the exact raw section text
+            // available to the quiz scoreboard.
+            window.currentRawSectionText =
+                e.detail.sectionText;
+
+            window.loadQuizSection(
                 e.detail.sectionText
-            ) {
-
-                window.loadQuizSection(
-                    e.detail.sectionText
-                );
-            }
+            );
         }
-    );
+    }
+);
+
+})();
+
+
+
+</script>
+
+
+
+
+
+
+
+
+
+
+
+<script>
+(function() {
+    'use strict';
 
 
     /* =========================================================
-       5. MC QUIZ MANIA — SUBMISSION & SCOREBOARD
-
-       COMPLETELY SEPARATE FROM GLOBAL SCOREBOARD
-
-       FIRST SUBMISSION ONLY
-
-       The quiz remains playable after submission.
-       Only the first recorded result is preserved.
+       MC QUIZ MANIA SUBMIT + SCOREBOARD
        ========================================================= */
 
     document.addEventListener(
         'click',
         function(e) {
 
-            /* -------------------------------------------------
-               ONLY MC QUIZ MANIA SUBMIT BUTTONS
-               ------------------------------------------------- */
+            const submit =
+                e.target.closest('.quiz-submit');
 
-            const quizSubmitBtn =
-                e.target.closest(
-                    '.quiz-mania-submit'
-                );
+            if (!submit) return;
 
 
-            if (!quizSubmitBtn) {
-                return;
-            }
-
-
-            const subsection =
-                quizSubmitBtn.closest(
-                    '.quiz-subsection'
-                );
-
-
-            if (!subsection) {
-                return;
-            }
-
-
+            /*
+             * Prevent a form submit from interrupting the
+             * scoreboard display.
+             */
             e.preventDefault();
             e.stopPropagation();
+
+
+            /* -------------------------------------------------
+               FIND QUIZ SUBSECTION
+               ------------------------------------------------- */
+
+            const subsection =
+                submit.closest('.quiz-subsection');
+
+            if (!subsection) {
+
+                console.error(
+                    'MC Quiz Mania: .quiz-subsection not found.'
+                );
+
+                return;
+            }
 
 
             /* -------------------------------------------------
@@ -3078,48 +3245,21 @@ if (copyBlobBtn) {
                 'true'
             ) {
 
-                return;
-            }
-
-
-            /* -------------------------------------------------
-               STUDENT ID
-               ------------------------------------------------- */
-
-            const studentIdInput =
-                subsection.querySelector(
-                    '.quiz-mania-id'
-                );
-
-
-            const studentId =
-                studentIdInput &&
-                studentIdInput.value.trim()
-                    ? studentIdInput.value.trim()
-                    : '';
-
-
-            /* -------------------------------------------------
-               RESOLVE STUDENT NAME
-
-               Uses the separate Student Data Registry:
-
-               window.resolveStudentNameFromId(id)
-               ------------------------------------------------- */
-
-            let studentName =
-                'Student';
-
-
-            if (
-                typeof window.resolveStudentNameFromId ===
-                'function'
-            ) {
-
-                studentName =
-                    window.resolveStudentNameFromId(
-                        studentId
+                const existingScoreboard =
+                    subsection.querySelector(
+                        '.quiz-mania-scoreboard'
                     );
+
+                if (existingScoreboard) {
+
+                    existingScoreboard.style.setProperty(
+                        'display',
+                        'block',
+                        'important'
+                    );
+                }
+
+                return;
             }
 
 
@@ -3129,52 +3269,80 @@ if (copyBlobBtn) {
 
             const exercises =
                 subsection.querySelectorAll(
-                    '.quiz-exercise'
+                    '.exercise'
                 );
 
 
-            let score = 0;
+            let correctCount = 0;
 
-            const total =
+
+            exercises.forEach(
+                function(exercise) {
+
+                    correctCount +=
+                        Number(
+                            exercise.dataset.score || 0
+                        );
+                }
+            );
+
+
+            const totalExercises =
                 exercises.length;
 
 
-            exercises.forEach(ex => {
-
-                const correctVal =
-                    ex.getAttribute(
-                        'data-correct'
-                    ) || '';
-
-
-                const selectedRadio =
-                    ex.querySelector(
-                        'input[type="radio"]:checked'
-                    );
-
-
-                const selectedVal =
-                    selectedRadio
-                        ? selectedRadio.value
-                        : '';
-
-
-                if (
-                    selectedVal ===
-                    correctVal
-                ) {
-
-                    score++;
-                }
-            });
-
-
             const percentage =
-                total > 0
+                totalExercises > 0
+
                     ? Math.round(
-                        (score / total) * 100
+                        (
+                            correctCount /
+                            totalExercises
+                        ) * 100
                     )
+
                     : 0;
+
+
+            /* -------------------------------------------------
+               STUDENT ID
+               ------------------------------------------------- */
+
+            const studentIdInput =
+                document.getElementById('gsId');
+
+
+            const studentId =
+                studentIdInput
+                    ? studentIdInput.value.trim()
+                    : '';
+
+
+            const studentName =
+                window.resolveStudentNameFromId
+                    ? window.resolveStudentNameFromId(
+                        studentId
+                    )
+                    : 'Student';
+
+
+/* -------------------------------------------------
+   SECTION NAME
+   ------------------------------------------------- */
+
+let sectionName =
+    window.currentQuizSectionName || '';
+
+if (!sectionName) {
+    sectionName = 'Quiz';
+}           /* -------------------------------------------------
+               QUIZ NAME
+               ------------------------------------------------- */
+
+            const quizName =
+                subsection.getAttribute(
+                    'data-subsection'
+                ) || 'Quiz';
 
 
             /* -------------------------------------------------
@@ -3186,12 +3354,12 @@ if (copyBlobBtn) {
 
 
             const pad =
-                n =>
-                    String(n)
-                        .padStart(
-                            2,
-                            '0'
-                        );
+                function(n) {
+
+                    return n
+                        .toString()
+                        .padStart(2, '0');
+                };
 
 
             const dateString =
@@ -3204,166 +3372,62 @@ if (copyBlobBtn) {
 
 
             /* -------------------------------------------------
-               FILE NAME
+               FILENAME
                ------------------------------------------------- */
 
-            let filename =
+            const filename =
                 window.location.pathname
                     .split('/')
-                    .pop();
-
-
-            if (!filename) {
-                filename =
-                    'Quiz.html';
-            }
+                    .pop() || 'quiz';
 
 
             /* -------------------------------------------------
-               CURRENT SECTION NAME
-               ------------------------------------------------- */
-
-            let sectionName =
-                '';
-
-
-            if (
-                window.SCRAMBLE_SECTIONS &&
-                typeof selectedSectionIndex !==
-                    'undefined' &&
-                window.SCRAMBLE_SECTIONS[
-                    selectedSectionIndex
-                ]
-            ) {
-
-                const currentSection =
-                    window.SCRAMBLE_SECTIONS[
-                        selectedSectionIndex
-                    ];
-
-
-                sectionName =
-                    currentSection.name ||
-                    '';
-            }
-
-
-            /* -------------------------------------------------
-               FALLBACK: SECTION H2
-               ------------------------------------------------- */
-
-            if (!sectionName) {
-
-                const sectionHeading =
-                    subsection
-                        .closest('.section')
-                        ?.querySelector('h2');
-
-
-                if (sectionHeading) {
-
-                    sectionName =
-                        sectionHeading
-                            .textContent
-                            .trim();
-                }
-            }
-
-
-            /* -------------------------------------------------
-               FALLBACK: PAGE H1
-               ------------------------------------------------- */
-
-            if (!sectionName) {
-
-                const pageHeading =
-                    document.querySelector(
-                        'h1'
-                    );
-
-
-                if (pageHeading) {
-
-                    sectionName =
-                        pageHeading
-                            .textContent
-                            .trim();
-                }
-            }
-
-
-            /* -------------------------------------------------
-               FALLBACK: DOCUMENT TITLE
-               ------------------------------------------------- */
-
-            if (!sectionName) {
-
-                sectionName =
-                    document.title
-                        .replace(
-                            /\.(html?|php)$/i,
-                            ''
-                        )
-                        .trim();
-            }
-
-
-            if (!sectionName) {
-
-                sectionName =
-                    'Quiz';
-            }
-
-
-            /* -------------------------------------------------
-               QUIZ NAME
-               ------------------------------------------------- */
-
-            const quizName =
-                subsection.getAttribute(
-                    'data-subsection'
-                ) || 'Quiz';
-
-
-            /* -------------------------------------------------
-               CLEAN PIPE-DELIMITED FIELDS
+               CLEAN FIELD
                ------------------------------------------------- */
 
             const cleanField =
-                value =>
-                    String(value || '')
-                        .replace(
-                            /\|/g,
-                            '/'
-                        )
-                        .replace(
-                            /\r?\n/g,
-                            ' '
-                        )
+                function(value) {
+
+                    return String(value || '')
+                        .replace(/\|/g, '/')
+                        .replace(/\r?\n/g, ' ')
                         .trim();
+                };
 
 
             /* -------------------------------------------------
-               FINAL COMPACT RESULT
-
-               Example:
-
-               Rabbit_Hole.html|The Rabbit Hole: Quiz 1|David|55555|26/09/2026 15:32:11|18/20|90%
+               CREATE RESULT
                ------------------------------------------------- */
 
             const resultText =
                 `${cleanField(filename)}|` +
-                `${cleanField(sectionName)}: ${cleanField(quizName)}|` +
+                `${cleanField(sectionName)}: ` +
+                `${cleanField(quizName)}|` +
                 `${cleanField(studentName)}|` +
                 `${cleanField(studentId)}|` +
                 `${dateString}|` +
-                `${score}/${total}|` +
+                `${correctCount}/${totalExercises}|` +
                 `${percentage}%`;
 
 
             /* -------------------------------------------------
-               MC QUIZ MANIA SCOREBOARD
+               SAVE RESULT
                ------------------------------------------------- */
+
+            if (
+                typeof window.saveResult ===
+                'function'
+            ) {
+
+                window.saveResult(
+                    resultText
+                );
+            }
+
+
+            /* =================================================
+               FIND MC QUIZ MANIA SCOREBOARD
+               ================================================= */
 
             const quizScoreboard =
                 subsection.querySelector(
@@ -3377,25 +3441,57 @@ if (copyBlobBtn) {
                 );
 
 
-            if (
-                !quizScoreboard ||
-                !scoreText
-            ) {
+            /* -------------------------------------------------
+               DEBUG CHECKS
+               ------------------------------------------------- */
+
+            if (!quizScoreboard) {
+
+                console.error(
+                    'MC Quiz Mania: .quiz-mania-scoreboard was not found inside the quiz subsection.'
+                );
+
+                console.log(
+                    'Quiz subsection:',
+                    subsection
+                );
 
                 return;
             }
 
 
-            /* -------------------------------------------------
-               DISPLAY FIRST RESULT
-               ------------------------------------------------- */
+            if (!scoreText) {
+
+                console.error(
+                    'MC Quiz Mania: .quiz-mania-score-text was not found inside the quiz subsection.'
+                );
+
+                console.log(
+                    'Quiz subsection:',
+                    subsection
+                );
+
+                return;
+            }
+
+
+            /* =================================================
+               DISPLAY SCOREBOARD
+               ================================================= */
 
             scoreText.textContent =
                 resultText;
 
 
-            quizScoreboard.style.display =
-                'block';
+            /*
+             * Use !important in case the CSS hides the
+             * scoreboard with display:none !important.
+             */
+            quizScoreboard.style.setProperty(
+                'display',
+                'block',
+                'important'
+            );
 
 
             /* -------------------------------------------------
@@ -3418,15 +3514,18 @@ if (copyBlobBtn) {
 
 
                         const savedResult =
-                            subsection.dataset.firstResult ||
+                            subsection.dataset
+                                .firstResult ||
                             resultText;
 
 
                         try {
 
-                            await navigator.clipboard.writeText(
-                                savedResult
-                            );
+                            await navigator
+                                .clipboard
+                                .writeText(
+                                    savedResult
+                                );
 
 
                             alert(
@@ -3463,7 +3562,8 @@ if (copyBlobBtn) {
 
 
                         const savedResult =
-                            subsection.dataset.firstResult ||
+                            subsection.dataset
+                                .firstResult ||
                             resultText;
 
 
@@ -3521,11 +3621,6 @@ if (copyBlobBtn) {
 
             /* -------------------------------------------------
                DOWNLOAD PNG
-
-               The visible scoreboard is NOT captured.
-
-               A temporary element containing ONLY the
-               recorded result is created instead.
                ------------------------------------------------- */
 
             const pngBtn =
@@ -3548,13 +3643,10 @@ if (copyBlobBtn) {
 
 
                         const savedResult =
-                            subsection.dataset.firstResult ||
+                            subsection.dataset
+                                .firstResult ||
                             resultText;
 
-
-                        /* -------------------------------------
-                           CREATE TEMPORARY CAPTURE ELEMENT
-                           ------------------------------------- */
 
                         const capture =
                             document.createElement(
@@ -3569,9 +3661,14 @@ if (copyBlobBtn) {
                         Object.assign(
                             capture.style,
                             {
-                                position: 'fixed',
-                                left: '-10000px',
-                                top: '0',
+                                position:
+                                    'fixed',
+
+                                left:
+                                    '-10000px',
+
+                                top:
+                                    '0',
 
                                 display:
                                     'inline-block',
@@ -3579,8 +3676,11 @@ if (copyBlobBtn) {
                                 boxSizing:
                                     'border-box',
 
-                                padding: '10px',
-                                margin: '0',
+                                padding:
+                                    '10px',
+
+                                margin:
+                                    '0',
 
                                 background:
                                     '#ffffff',
@@ -3617,10 +3717,6 @@ if (copyBlobBtn) {
                         );
 
 
-                        /* -------------------------------------
-                           CAPTURE ONLY RESULT ELEMENT
-                           ------------------------------------- */
-
                         html2canvas(
                             capture,
                             {
@@ -3632,7 +3728,7 @@ if (copyBlobBtn) {
                             }
                         )
                         .then(
-                            canvas => {
+                            function(canvas) {
 
                                 const link =
                                     document.createElement(
@@ -3669,10 +3765,9 @@ if (copyBlobBtn) {
                             }
                         )
                         .catch(
-                            err => {
+                            function(err) {
 
                                 capture.remove();
-
 
                                 console.error(
                                     'MC Quiz PNG export failed:',
@@ -3686,11 +3781,6 @@ if (copyBlobBtn) {
 
             /* -------------------------------------------------
                SAVE FIRST RESULT
-
-               This is the permanent recorded result for
-               this quiz subsection.
-
-               The quiz itself remains completely playable.
                ------------------------------------------------- */
 
             subsection.dataset.firstSubmitted =
@@ -3725,30 +3815,63 @@ if (copyBlobBtn) {
             }
 
 
-            const section =
-                window.SCRAMBLE_SECTIONS
-                    ? window.SCRAMBLE_SECTIONS[
-                        index
-                    ]
-                    : null;
+const section =
+    window.SCRAMBLE_SECTIONS
+        ? window.SCRAMBLE_SECTIONS[index]
+        : null;
 
 
-            if (!section) {
-
-                if (
-                    typeof originalLoad ===
-                    'function'
-                ) {
-
-                    originalLoad(
-                        index
-                    );
-                }
-
-                return;
-            }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+if (!section) {
+
+    if (
+        typeof originalLoad ===
+        'function'
+    ) {
+
+        originalLoad(index);
+    }
+
+    return;
+}
+
+/* Save the actual selected section text */
+window.currentQuizSectionText =
+    section && section.text
+        ? section.text
+        : '';
             window.loadSectionWithLockedQuiz(
                 section.text
             );
@@ -3790,35 +3913,6 @@ if (copyBlobBtn) {
 
 })();
 </script>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -3886,18 +3980,6 @@ if (copyBlobBtn) {
     }
 })();
 </script>
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -4603,7 +4685,1155 @@ window.saveResult = async function saveResult(text) {
 };
 </script>
 
+<script>
+
+// ==========================================
+// 9. SPEECH-TO-TEXT (STT) DICTATION MODULE
+// ==========================================
+const sttBtn = document.getElementById('sttBtn');
+
+const SpeechRecognition =
+    window.SpeechRecognition ||
+    window.webkitSpeechRecognition;
+
+if (sttBtn && SpeechRecognition) {
+
+    const recognition =
+        new SpeechRecognition();
+
+    recognition.continuous = true;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+    recognition.maxAlternatives = 1;
+
+    let isListening = false;
+
+    /*
+     * Store the editor selection before the
+     * STT button takes focus.
+     */
+    let savedRange = null;
 
 
+    // ------------------------------------------
+    // SAVE THE EDITOR CARET
+    // ------------------------------------------
+
+    function saveEditorCaret() {
+
+        const editableZone =
+            document.getElementById('editableTextZone');
+
+        if (!editableZone) return;
+
+        const selection =
+            window.getSelection();
+
+        if (
+            !selection ||
+            selection.rangeCount === 0
+        ) {
+            return;
+        }
+
+        const range =
+            selection.getRangeAt(0);
+
+        if (
+            editableZone.contains(
+                range.commonAncestorContainer
+            )
+        ) {
+
+            savedRange =
+                range.cloneRange();
+        }
+    }
+
+
+    // ------------------------------------------
+    // KEEP THE EDITOR CARET WHEN BUTTON
+    // IS CLICKED
+    // ------------------------------------------
+
+    sttBtn.addEventListener(
+        'mousedown',
+        function(e) {
+
+            /*
+             * Save the current caret before the
+             * button can take focus.
+             */
+            saveEditorCaret();
+
+            /*
+             * Prevent the button from taking
+             * focus away from the editor.
+             */
+            e.preventDefault();
+        }
+    );
+
+
+    // ------------------------------------------
+    // INSERT SPEECH INTO EXISTING EDITOR
+    // ------------------------------------------
+
+    function insertSpeech(text) {
+
+        const editableZone =
+            document.getElementById('editableTextZone');
+
+        if (!editableZone) return;
+
+        if (!text || !text.trim()) return;
+
+
+        /*
+         * Restore the caret that existed when
+         * the STT button was pressed.
+         */
+        if (!savedRange) {
+
+            /*
+             * Do not append to the editor if
+             * there is no known caret.
+             *
+             * This prevents STT from creating
+             * unexpected DOM structure or
+             * changing line spacing.
+             */
+            return;
+        }
+
+
+        const selection =
+            window.getSelection();
+
+        if (!selection) return;
+
+
+        const range =
+            savedRange.cloneRange();
+
+
+        /*
+         * Make absolutely sure the saved
+         * range still belongs to the editor.
+         */
+        if (
+            !editableZone.contains(
+                range.commonAncestorContainer
+            )
+        ) {
+            return;
+        }
+
+
+        /*
+         * Replace selected text, if any,
+         * exactly as normal typing would.
+         */
+        range.deleteContents();
+
+
+        /*
+         * Insert ONLY a text node.
+         *
+         * No <div>
+         * No <p>
+         * No <br>
+         * No new .line
+         *
+         * Therefore the existing line structure
+         * and CSS remain untouched.
+         */
+        const textNode =
+            document.createTextNode(
+                text.trim() + ' '
+            );
+
+
+        range.insertNode(textNode);
+
+
+        /*
+         * Put the caret immediately after
+         * the newly inserted speech.
+         */
+        range.setStartAfter(textNode);
+
+        range.collapse(true);
+
+
+        selection.removeAllRanges();
+
+        selection.addRange(range);
+
+
+        /*
+         * Save the new caret so the next
+         * speech result continues from here.
+         */
+        savedRange =
+            range.cloneRange();
+
+
+        /*
+         * Update the application's existing
+         * text counter / overlay.
+         */
+        if (
+            typeof window.updateTextOverlay ===
+            'function'
+        ) {
+
+            window.updateTextOverlay();
+        }
+    }
+
+
+    // ------------------------------------------
+    // SPEECH RESULT
+    // ------------------------------------------
+
+    recognition.onresult =
+        function(event) {
+
+            let finalTranscript = '';
+
+
+            for (
+                let i = event.resultIndex;
+                i < event.results.length;
+                i++
+            ) {
+
+                if (
+                    event.results[i].isFinal
+                ) {
+
+                    finalTranscript +=
+                        event.results[i][0]
+                            .transcript;
+                }
+            }
+
+
+            finalTranscript =
+                finalTranscript.trim();
+
+
+            if (!finalTranscript) return;
+
+
+            insertSpeech(
+                finalTranscript
+            );
+        };
+
+
+    // ------------------------------------------
+    // ERROR
+    // ------------------------------------------
+
+    recognition.onerror =
+        function(event) {
+
+            console.error(
+                'STT Error:',
+                event.error
+            );
+
+
+            /*
+             * Chrome can report no-speech
+             * during normal continuous use.
+             */
+            if (
+                event.error === 'no-speech'
+            ) {
+                return;
+            }
+
+
+            isListening = false;
+
+            sttBtn.textContent =
+                'Start STT';
+
+            sttBtn.classList.remove(
+                'recording'
+            );
+        };
+
+
+    // ------------------------------------------
+    // RECOGNITION ENDED
+    // ------------------------------------------
+
+    recognition.onend =
+        function() {
+
+            if (isListening) {
+
+                /*
+                 * Chrome may stop recognition
+                 * after a period of silence.
+                 */
+                try {
+
+                    recognition.start();
+
+                } catch (e) {
+
+                    /*
+                     * Ignore the normal restart
+                     * race condition.
+                     */
+                }
+
+            } else {
+
+                sttBtn.textContent =
+                    'STT';
+
+                sttBtn.classList.remove(
+                    'recording'
+                );
+            }
+        };
+
+
+    // ------------------------------------------
+    // EXISTING STT BUTTON
+    // ------------------------------------------
+
+    sttBtn.addEventListener(
+        'click',
+        function() {
+
+            if (!isListening) {
+
+                /*
+                 * Save the caret one more time
+                 * immediately before starting.
+                 */
+                saveEditorCaret();
+
+
+                try {
+
+                    recognition.start();
+
+                    isListening =
+                        true;
+
+                    sttBtn.textContent =
+                        'Off';
+
+                    sttBtn.classList.add(
+                        'recording'
+                    );
+
+                } catch (err) {
+
+                    console.error(
+                        'Failed to start speech recognition:',
+                        err
+                    );
+                }
+
+            } else {
+
+                isListening =
+                    false;
+
+
+                try {
+
+                    recognition.stop();
+
+                } catch (e) {
+
+                    /*
+                     * Recognition may already
+                     * have stopped.
+                     */
+                }
+
+
+                sttBtn.textContent =
+                    'Start STT';
+
+                sttBtn.classList.remove(
+                    'recording'
+                );
+            }
+        }
+    );
+
+} else if (sttBtn) {
+
+    sttBtn.disabled = true;
+
+    sttBtn.title =
+        'Speech-to-text is not supported in this browser (try Chrome/Edge).';
+}
+
+</script>
+
+
+<script>
+
+/* =========================================================
+   STANDALONE DOWNLOAD FILENAME INTERCEPTOR
+   ---------------------------------------------------------
+   Automatically renames outgoing:
+
+   - TXT
+   - PNG
+   - Audio files
+
+   Filename format:
+
+   Filename_Section_Name_ID_Date_Time_Score_Percent.ext
+
+   Example:
+
+   Teleprompter_Food_and_Cooking_Somchai_Jaidee_12345_
+   26-09-2026_14-53-27_8-10_80%.txt
+
+   If no quiz score is available:
+
+   Teleprompter_Food_and_Cooking_Somchai_Jaidee_12345_
+   26-09-2026_14-53-27_NA_NA.webm
+
+   Windows-safe:
+   - Spaces become underscores
+   - Illegal filename characters become underscores
+   - Date uses -
+   - Time uses -
+   - Score uses -
+   ========================================================= */
+
+
+/* =========================================================
+   1. CLEAN FILENAME PART
+   ========================================================= */
+
+function cleanScoreboardFilenamePart(value) {
+
+    return String(value || '')
+        .trim()
+        .replace(/\s+/g, '_')
+        .replace(/[<>:"/\\|?*]/g, '_')
+        .replace(/_+/g, '_')
+        .replace(/^_+|_+$/g, '');
+}
+
+
+/* =========================================================
+   2. MAKE COMPLETE FILENAME
+   ========================================================= */
+
+function makeScoreboardFilename(
+    filename,
+    sectionName,
+    studentName,
+    studentId,
+    date,
+    time,
+    score,
+    percent,
+    extension
+) {
+
+    const parts = [
+        filename,
+        sectionName,
+        studentName,
+        studentId,
+        date,
+        time,
+        score,
+        percent
+    ];
+
+    const safeName =
+        parts
+            .map(cleanScoreboardFilenamePart)
+            .filter(Boolean)
+            .join('_');
+
+    const safeExtension =
+        String(extension || 'txt')
+            .replace(/^\./, '')
+            .replace(/[<>:"/\\|?*]/g, '');
+
+    return (
+        safeName +
+        '.' +
+        safeExtension
+    );
+}
+
+
+/* =========================================================
+   3. DATE / TIME
+   ========================================================= */
+
+function getScoreboardDateTime() {
+
+    const now = new Date();
+
+    function pad(number) {
+        return String(number).padStart(2, '0');
+    }
+
+    return {
+
+        date:
+            `${pad(now.getDate())}-` +
+            `${pad(now.getMonth() + 1)}-` +
+            `${now.getFullYear()}`,
+
+        time:
+            `${pad(now.getHours())}-` +
+            `${pad(now.getMinutes())}-` +
+            `${pad(now.getSeconds())}`
+    };
+}
+
+
+/* =========================================================
+   4. GET CURRENT PAGE FILENAME
+   ========================================================= */
+
+function getCurrentDownloadBaseName() {
+
+    let filename =
+        window.location.pathname
+            .split('/')
+            .pop() || 'Teleprompter';
+
+    /*
+       Remove the existing extension.
+
+       Example:
+
+       Teleprompter.html
+       becomes:
+
+       Teleprompter
+    */
+
+    filename =
+        filename.replace(
+            /\.[^.]+$/,
+            ''
+        );
+
+    return filename || 'Teleprompter';
+}
+
+
+/* =========================================================
+   5. GET CURRENT SECTION NAME
+   ========================================================= */
+
+function getCurrentDownloadSectionName() {
+
+    /*
+       This is set by the main section selector.
+    */
+
+    if (
+        window.currentQuizSectionName &&
+        String(
+            window.currentQuizSectionName
+        ).trim()
+    ) {
+
+        return String(
+            window.currentQuizSectionName
+        ).trim();
+    }
+
+
+    /*
+       Fallback: try the currently selected
+       section from SCRAMBLE_SECTIONS.
+    */
+
+    if (
+        window.SCRAMBLE_SECTIONS &&
+        typeof window.SCRAMBLE_INDEX ===
+            'number' &&
+        window.SCRAMBLE_SECTIONS[
+            window.SCRAMBLE_INDEX
+        ]
+    ) {
+
+        return (
+            window.SCRAMBLE_SECTIONS[
+                window.SCRAMBLE_INDEX
+            ].name || ''
+        );
+    }
+
+
+    return 'Section';
+}
+
+
+/* =========================================================
+   6. GET STUDENT ID
+   ========================================================= */
+
+function getCurrentStudentId() {
+
+    const input =
+        document.getElementById('gsId');
+
+    if (!input) {
+        return '';
+    }
+
+    return (
+        input.value ||
+        ''
+    ).trim();
+}
+
+
+/* =========================================================
+   7. GET STUDENT NAME
+   ========================================================= */
+
+function getCurrentStudentName() {
+
+    const studentId =
+        getCurrentStudentId();
+
+
+    /*
+       Use the existing ID → student-name
+       resolver if available.
+    */
+
+    if (
+        studentId &&
+        typeof window.resolveStudentNameFromId ===
+            'function'
+    ) {
+
+        const resolved =
+            window.resolveStudentNameFromId(
+                studentId
+            );
+
+        if (
+            resolved &&
+            String(resolved).trim()
+        ) {
+
+            return String(
+                resolved
+            ).trim();
+        }
+    }
+
+
+    /*
+       Fallbacks if a name field exists.
+    */
+
+    const possibleNameIds = [
+        'gsName',
+        'studentName',
+        'student-name'
+    ];
+
+    for (
+        const id of possibleNameIds
+    ) {
+
+        const element =
+            document.getElementById(id);
+
+        if (
+            element &&
+            String(
+                element.value ||
+                element.textContent ||
+                ''
+            ).trim()
+        ) {
+
+            return String(
+                element.value ||
+                element.textContent ||
+                ''
+            ).trim();
+        }
+    }
+
+
+    return 'Student';
+}
+
+
+/* =========================================================
+   8. GET CURRENT QUIZ SCORE
+   ---------------------------------------------------------
+   Looks for the existing MC Quiz Mania scoreboard.
+
+   Existing format:
+
+   filename|section: quiz|name|id|date/time|8/10|80%
+
+   Therefore:
+
+   parts[6] = 8/10
+   parts[7] = 80%
+   ========================================================= */
+
+function getCurrentQuizScoreData() {
+
+    const scoreElements =
+        document.querySelectorAll(
+            '.quiz-mania-score-text'
+        );
+
+    /*
+       Work backwards so the most recently
+       displayed scoreboard is used.
+    */
+
+    for (
+        let i = scoreElements.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const text =
+            scoreElements[i]
+                .textContent
+                .trim();
+
+        if (!text) {
+            continue;
+        }
+
+        const parts =
+            text.split('|');
+
+        if (
+            parts.length >= 8
+        ) {
+
+            const score =
+                parts[6].trim();
+
+            const percent =
+                parts[7].trim();
+
+            if (
+                score &&
+                percent
+            ) {
+
+                return {
+                    score: score,
+                    percent: percent
+                };
+            }
+        }
+    }
+
+
+    /*
+       No MC quiz score available.
+
+       This is normal for audio recordings
+       or other non-quiz downloads.
+    */
+
+    return {
+        score: 'NA',
+        percent: 'NA'
+    };
+}
+
+
+/* =========================================================
+   9. DETERMINE FILE EXTENSION
+   ========================================================= */
+
+function getDownloadExtension(link) {
+
+    const originalName =
+        link.getAttribute('download') ||
+        '';
+
+
+    /*
+       1. If the download filename already
+          contains an extension, use it.
+    */
+
+    const match =
+        originalName.match(
+            /\.([a-zA-Z0-9]+)$/
+        );
+
+    if (match) {
+
+        return match[1]
+            .toLowerCase();
+    }
+
+
+    /*
+       2. Inspect the href when possible.
+    */
+
+    const href =
+        link.getAttribute('href') ||
+        '';
+
+
+    if (
+        href.includes('image/png')
+    ) {
+        return 'png';
+    }
+
+    if (
+        href.includes('audio/webm')
+    ) {
+        return 'webm';
+    }
+
+    if (
+        href.includes('audio/wav')
+    ) {
+        return 'wav';
+    }
+
+    if (
+        href.includes('audio/mpeg')
+    ) {
+        return 'mp3';
+    }
+
+    if (
+        href.includes('audio/ogg')
+    ) {
+        return 'ogg';
+    }
+
+    if (
+        href.includes('audio/mp4')
+    ) {
+        return 'm4a';
+    }
+
+
+    /*
+       3. If there is no extension at all,
+          this app's MediaRecorder uses WebM/Opus
+          for recorded audio.
+
+          Therefore use WEBM as the fallback.
+    */
+
+    return 'webm';
+}
+/* =========================================================
+   10. SHOULD THIS DOWNLOAD BE INTERCEPTED?
+   ========================================================= */
+
+function isRenameableDownload(link) {
+
+    if (!link) {
+        return false;
+    }
+
+    if (
+        !link.hasAttribute('download')
+    ) {
+        return false;
+    }
+
+    const extension =
+        getDownloadExtension(link);
+
+const allowedExtensions = [
+    'txt',
+    'png',
+'webm'
+];
+
+    return allowedExtensions.includes(
+        extension
+    );
+}
+
+
+/* =========================================================
+   11. BUILD NEW DOWNLOAD FILENAME
+   ========================================================= */
+
+function buildInterceptedDownloadFilename(
+    link
+) {
+
+    const extension =
+        getDownloadExtension(link);
+
+    const filename =
+        getCurrentDownloadBaseName();
+
+    const sectionName =
+        getCurrentDownloadSectionName();
+
+    const studentName =
+        getCurrentStudentName();
+
+    const studentId =
+        getCurrentStudentId();
+
+    const dateTime =
+        getScoreboardDateTime();
+
+    const scoreData =
+        getCurrentQuizScoreData();
+
+
+    const newFilename =
+        makeScoreboardFilename(
+
+            filename,
+
+            sectionName,
+
+            studentName,
+
+            studentId,
+
+            dateTime.date,
+
+            dateTime.time,
+
+            scoreData.score,
+
+            scoreData.percent,
+
+            extension
+        );
+
+
+    return newFilename;
+}
+
+
+/* =========================================================
+   12. DOWNLOAD INTERCEPTOR
+   ---------------------------------------------------------
+   Intercepts programmatic and normal clicks on
+   TXT, PNG, and WEBM download links.
+
+   This runs immediately before the browser
+   performs the actual anchor download.
+   ========================================================= */
+
+(function() {
+
+    const originalAnchorClick =
+        HTMLAnchorElement.prototype.click;
+
+
+    HTMLAnchorElement.prototype.click =
+        function() {
+
+            const link = this;
+
+
+            /*
+               Only process actual download links.
+            */
+
+            if (
+                link.hasAttribute('download')
+            ) {
+
+                const originalName =
+                    link.getAttribute(
+                        'download'
+                    ) || '';
+
+
+                const extensionMatch =
+                    originalName.match(
+                        /\.([a-zA-Z0-9]+)$/
+                    );
+
+
+                if (extensionMatch) {
+
+                    const extension =
+                        extensionMatch[1]
+                            .toLowerCase();
+
+
+                    /*
+                       Only rename the file types
+                       we want to intercept.
+                    */
+
+                    const allowedExtensions = [
+                        'txt',
+                        'png',
+                        'webm'
+                    ];
+
+
+                    if (
+                        allowedExtensions.includes(
+                            extension
+                        )
+                    ) {
+
+                        const newFilename =
+                            buildInterceptedDownloadFilename(
+                                link
+                            );
+
+
+                        link.download =
+                            newFilename;
+
+
+                        console.log(
+                            'Download renamed:',
+                            newFilename
+                        );
+                    }
+                }
+            }
+
+
+            /*
+               Now perform the ORIGINAL click.
+            */
+
+            return originalAnchorClick.call(
+                link
+            );
+        };
+
+
+    /*
+       Also handle ordinary user clicks
+       that do not go through .click().
+    */
+
+    document.addEventListener(
+        'click',
+        function(event) {
+
+            const link =
+                event.target.closest(
+                    'a[download]'
+                );
+
+            if (!link) {
+                return;
+            }
+
+
+            const originalName =
+                link.getAttribute(
+                    'download'
+                ) || '';
+
+
+            const extensionMatch =
+                originalName.match(
+                    /\.([a-zA-Z0-9]+)$/
+                );
+
+
+            if (!extensionMatch) {
+                return;
+            }
+
+
+            const extension =
+                extensionMatch[1]
+                    .toLowerCase();
+
+
+            const allowedExtensions = [
+                'txt',
+                'png',
+                'webm'
+            ];
+
+
+            if (
+                !allowedExtensions.includes(
+                    extension
+                )
+            ) {
+                return;
+            }
+
+
+            const newFilename =
+                buildInterceptedDownloadFilename(
+                    link
+                );
+
+
+            link.download =
+                newFilename;
+
+
+            console.log(
+                'Download renamed:',
+                newFilename
+            );
+
+        },
+        true
+    );
+
+})();
+/* =========================================================
+   13. OPTIONAL GLOBAL HELPER
+   ---------------------------------------------------------
+   Makes the builder available elsewhere if
+   you ever need it.
+   ========================================================= */
+
+window.makeScoreboardFilename =
+    makeScoreboardFilename;
+
+window.getScoreboardDateTime =
+    getScoreboardDateTime;
+
+
+/* =========================================================
+   14. READY MESSAGE
+   ========================================================= */
+
+console.log(
+    'Standalone download filename interceptor loaded.'
+);
+
+</script>
 </body>
 </html>
