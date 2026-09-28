@@ -261,7 +261,6 @@ button:disabled {
 #teleScroll {
   position: relative;
   top: 0;
-  transition: top 0.2s linear;
 }
 
 /* =========================================================
@@ -280,6 +279,25 @@ button:disabled {
   font-weight: normal !important;
   color: #333 !important;
 }
+
+#gsScoreMeta {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0 0 8px;
+  padding: 10px;
+  white-space: pre-wrap;
+overflow-wrap: anywhere;
+word-break: normal;
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 1.4;
+  background: #fff;
+  color: #000;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
 
 .tele-edit {
   width: 100%;
@@ -353,9 +371,12 @@ button:disabled {
   overflow-x: hidden;
 }
 
+
+
 #gsScoreboard .text,
 .scoreboard .text {
   width: 100%;
+  height: 180px;
   box-sizing: border-box;
   white-space: pre-wrap;
   overflow-wrap: break-word;
@@ -364,8 +385,16 @@ button:disabled {
   border: 1px solid #ccc;
   padding: 8px;
   border-radius: 6px;
-  resize: vertical;
+  resize: none;
+  overflow-y: auto;
   overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#gsScoreboard .text::-webkit-scrollbar,
+.scoreboard .text::-webkit-scrollbar {
+  display: none;
 }
 
 @media (max-width: 700px) {
@@ -1173,7 +1202,7 @@ table {
 
     <!-- TOP BAR -->
     <div class="top-bar">
-      <input id="gsId" type="text" placeholder="ID">
+      <input id="gsId" type="text" placeholder="Student ID">
 
       <!-- Section Button -->
       <button id="openSectionModal" type="button">Section</button>
@@ -1203,8 +1232,7 @@ table {
     <!-- PLAYBACK CONTROLS & SPEED BUTTONS -->
     <div class="formRow">
 
-      <button id="startBtn">Start</button>
-      <button id="stopBtn">Stop</button>
+      <button id="startBtn">Scroll</button>
       <button id="repeatBtn">Repeat</button>
 
       <div
@@ -1218,23 +1246,23 @@ table {
         <button data-speed="2000">Fast</button>
 
       </div>
-
+<button id="audioBtn" title="Play Audio">
+    Audio
+</button>
     </div>
 
     <!-- RECORDING & UTILITY CONTROLS -->
     <div class="formRow">
 
       <button id="highlightBtn" title="Toggle Highlight">
-        Marker
+        Mark
       </button>
 
       <button id="teleCopyBtn" type="button" title="Copy Selected Text">
         Copy
       </button>
 
-<button id="audioBtn" title="Play Audio">
-    Audio
-</button>
+
 
       <button id="sttBtn" title="Start/Stop speech">
         STT
@@ -1243,6 +1271,13 @@ table {
       <button id="captureAudioBtn" title="Start/Stop audio">
         🔴
       </button>
+
+<div class="audio-download-control">
+    <button id="topAudioDownloadBtn" type="button">
+        ↓ 🔴
+    </button>
+</div>
+
 
       <button id="submitBtn" disabled>
         Submit
@@ -2346,13 +2381,12 @@ const gsName = document.getElementById('gsName');
 
 // Enable Submit only when Student ID is entered
 if (gsId && mainSubmitBtn) {
-    mainSubmitBtn.disabled = !gsId.value.trim();
+    mainSubmitBtn.disabled = false;   // <-- enable on load
 
     gsId.addEventListener('input', () => {
         mainSubmitBtn.disabled = !gsId.value.trim();
     });
 }
-
     // Audio Elements
     const captureAudioBtn = document.getElementById('captureAudioBtn');
     const copyBlobBtn = document.getElementById('copyBlobBtn');
@@ -2655,10 +2689,10 @@ if (section && window.loadSectionWithLockedQuiz) {
             e.preventDefault();
             e.stopPropagation();
 
-            const id = gsId ? gsId.value.trim() || 'Unknown' : 'Unknown';
-            const name = (window.resolveStudentNameFromId && id !== 'Unknown') 
+            const id = gsId ? gsId.value.trim() || 'Student' : 'Student';
+            const name = (window.resolveStudentNameFromId && id !== 'Student') 
                 ? window.resolveStudentNameFromId(id) 
-                : (gsName ? gsName.value.trim() || 'Unknown' : 'Unknown');
+                : (gsName ? gsName.value.trim() || 'Guest' : 'Guest');
             
             if (gsName) gsName.value = name;
 
@@ -2707,7 +2741,7 @@ if (!sectionName) {
 
 const metaString =
     `${filename}|` +
-    `${sectionName}|` +
+    `${sectionName}: Edits|` +
     `${name}|` +
     `${id}|` +
     `${dateString}|` +
@@ -2775,23 +2809,47 @@ if (
         }, 2000);
     }
 
-    async function downloadScoreAsPNG(text, filename) {
-        const wrapper = document.createElement('div');
-        wrapper.className = 'png-export-wrapper';
-        wrapper.innerHTML = text.replace(/\n/g, '<br>');
-        document.body.appendChild(wrapper);
+async function downloadScoreAsPNG(text, filename) {
+    const wrapper = document.createElement('div');
 
-        try {
-            const canvas = await html2canvas(wrapper, { scale: 2, backgroundColor: '#fff' });
-            const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
-            downloadBlob(blob, filename);
-        } catch (err) {
-            console.error(err);
-            alert('PNG download failed');
-        } finally {
-            wrapper.remove();
-        }
+    wrapper.className = 'png-export-wrapper';
+
+    wrapper.style.width = '794px';
+    wrapper.style.boxSizing = 'border-box';
+    wrapper.style.padding = '40px';
+    wrapper.style.background = '#fff';
+    wrapper.style.fontFamily = 'Arial, sans-serif';
+    wrapper.style.fontSize = '14px';
+    wrapper.style.lineHeight = '1.5';
+    wrapper.style.whiteSpace = 'normal';
+    wrapper.style.overflowWrap = 'break-word';
+    wrapper.style.wordBreak = 'break-word';
+
+    wrapper.innerHTML = text.replace(/\n/g, '<br>');
+
+    document.body.appendChild(wrapper);
+
+    try {
+        const canvas = await html2canvas(wrapper, {
+            scale: 2,
+            backgroundColor: '#fff',
+            width: 794
+        });
+
+        const blob = await new Promise(res =>
+            canvas.toBlob(res, 'image/png')
+        );
+
+        downloadBlob(blob, filename);
+
+    } catch (err) {
+        console.error(err);
+        alert('PNG download failed');
+
+    } finally {
+        wrapper.remove();
     }
+}
 
     function hijackDownloadButton(originalBtn, getScoreText, getFilename, isText) {
         if (!originalBtn) return;
@@ -4100,28 +4158,53 @@ window.addEventListener(
                     : 0;
 
 
-            /* -------------------------------------------------
-               STUDENT ID
-               ------------------------------------------------- */
+/* -------------------------------------------------
+   STUDENT ID + NAME
+   ------------------------------------------------- */
 
-            const studentIdInput =
-                document.getElementById('gsId');
-
-
-            const studentId =
-                studentIdInput
-                    ? studentIdInput.value.trim()
-                    : '';
+const studentIdInput =
+    document.getElementById('gsId');
 
 
-            const studentName =
-                window.resolveStudentNameFromId
-                    ? window.resolveStudentNameFromId(
-                        studentId
-                    )
-                    : 'Student';
+const enteredStudentId =
+    studentIdInput
+        ? studentIdInput.value.trim()
+        : '';
 
 
+let studentId = 'Student';
+let studentName = 'Guest';
+
+
+/*
+ * If a student ID was entered, use it to
+ * resolve the student's name.
+ */
+if (enteredStudentId) {
+
+    studentId = enteredStudentId;
+
+    if (
+        typeof window.resolveStudentNameFromId ===
+        'function'
+    ) {
+
+        const resolvedName =
+            window.resolveStudentNameFromId(
+                enteredStudentId
+            );
+
+        if (
+            resolvedName &&
+            String(resolvedName).trim() &&
+            String(resolvedName).trim() !== 'Guest'
+        ) {
+
+            studentName =
+                String(resolvedName).trim();
+        }
+    }
+}
 /* -------------------------------------------------
    SECTION NAME
    ------------------------------------------------- */
@@ -4712,6 +4795,358 @@ window.currentQuizSectionText =
 
 
 
+<script>
+(function() {
+    'use strict';
+
+
+    const wrapper =
+        document.getElementById('teleScrollWrapper');
+
+    const stage =
+        document.getElementById('teleScroll');
+
+    const startBtn =
+        document.getElementById('startBtn');
+
+    const repeatBtn =
+        document.getElementById('repeatBtn');
+
+    const speedButtons =
+        document.querySelectorAll('.speed-buttons button');
+
+
+    if (!wrapper || !stage) return;
+
+
+    /* =========================================================
+       SCROLLER STATE
+       ========================================================= */
+
+    let playing = false;
+    let frame = null;
+
+    /*
+     * Position of the stage in pixels.
+     *
+     * This is the ONLY position used by the scroller.
+     */
+    let position = 0;
+
+    /*
+     * Pixels per second.
+     */
+    let pixelsPerSecond = 8;
+
+    let lastTime = 0;
+
+
+    /* =========================================================
+       GET MAXIMUM POSITION
+       ========================================================= */
+
+    function maximumPosition() {
+
+        return Math.max(
+            0,
+            stage.scrollHeight -
+            wrapper.clientHeight
+        );
+    }
+
+
+    /* =========================================================
+       DRAW
+       ========================================================= */
+
+    function draw() {
+
+        stage.style.transform =
+            'translate3d(0, -' +
+            position +
+            'px, 0)';
+    }
+
+
+    /* =========================================================
+       ANIMATION
+       ========================================================= */
+
+    function animate(timestamp) {
+
+        if (!playing) {
+            frame = null;
+            return;
+        }
+
+
+        if (!lastTime) {
+            lastTime = timestamp;
+        }
+
+
+        const elapsed =
+            Math.min(
+                timestamp - lastTime,
+                50
+            ) / 1000;
+
+
+        lastTime = timestamp;
+
+
+        /*
+         * Continuous movement.
+         */
+        position +=
+            pixelsPerSecond * elapsed;
+
+
+        const max =
+            maximumPosition();
+
+
+        if (position >= max) {
+
+            position = max;
+
+            draw();
+
+            pause();
+
+            return;
+        }
+
+
+        draw();
+
+
+        frame =
+            requestAnimationFrame(
+                animate
+            );
+    }
+
+
+    /* =========================================================
+       START / PAUSE TOGGLE
+       ========================================================= */
+
+    function toggleStart() {
+
+        /*
+         * -----------------------------------------------
+         * PAUSE
+         * -----------------------------------------------
+         */
+
+        if (playing) {
+
+            playing = false;
+
+
+            if (frame !== null) {
+
+                cancelAnimationFrame(frame);
+
+                frame = null;
+            }
+
+
+            lastTime = 0;
+
+
+            /*
+             * IMPORTANT:
+             *
+             * Leave the transform exactly where it is.
+             *
+             * Do NOT touch scrollTop.
+             * Do NOT remove the transform.
+             */
+            stage.style.willChange =
+                'auto';
+
+
+            startBtn.textContent =
+                'Start';
+
+
+            return;
+        }
+
+
+        /*
+         * -----------------------------------------------
+         * START / RESUME
+         * -----------------------------------------------
+         */
+
+        /*
+         * The transform position is authoritative.
+         *
+         * Do NOT read scrollTop here.
+         */
+        wrapper.scrollTop = 0;
+
+
+        stage.style.transition =
+            'none';
+
+        stage.style.willChange =
+            'transform';
+
+
+        playing = true;
+        lastTime = 0;
+
+
+        startBtn.textContent =
+            'Pause';
+
+
+        frame =
+            requestAnimationFrame(
+                animate
+            );
+    }
+
+
+    /* =========================================================
+       REPEAT
+       ========================================================= */
+
+    function repeat() {
+
+        playing = false;
+
+
+        if (frame !== null) {
+
+            cancelAnimationFrame(frame);
+
+            frame = null;
+        }
+
+
+        lastTime = 0;
+
+        position = 0;
+
+
+        wrapper.scrollTop = 0;
+
+
+        stage.style.transform =
+            'translate3d(0, 0, 0)';
+
+        stage.style.willChange =
+            'auto';
+
+
+        startBtn.textContent =
+            'Start';
+    }
+
+
+    /* =========================================================
+       SPEED
+       ========================================================= */
+
+    speedButtons.forEach(
+        function(button) {
+
+            button.addEventListener(
+                'click',
+                function() {
+
+                    const text =
+                        button.textContent
+                            .trim()
+                            .toLowerCase();
+
+
+                    if (
+                        text.includes('slow')
+                    ) {
+
+                        pixelsPerSecond = 5;
+
+                    } else if (
+                        text.includes('medium') ||
+                        text.includes('normal')
+                    ) {
+
+                        pixelsPerSecond = 8;
+
+                    } else if (
+                        text.includes('fast')
+                    ) {
+
+                        pixelsPerSecond = 14;
+                    }
+
+
+                    speedButtons.forEach(
+                        function(other) {
+
+                            other.classList.remove(
+                                'active'
+                            );
+                        }
+                    );
+
+
+                    button.classList.add(
+                        'active'
+                    );
+                }
+            );
+        }
+    );
+
+
+    /* =========================================================
+       BUTTONS
+       ========================================================= */
+
+    startBtn?.addEventListener(
+        'click',
+        function(event) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            toggleStart();
+        }
+    );
+
+
+    repeatBtn?.addEventListener(
+        'click',
+        function(event) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            repeat();
+        }
+    );
+
+
+    /* =========================================================
+       INITIAL STATE
+       ========================================================= */
+
+    stage.style.transform =
+        'translate3d(0, 0, 0)';
+
+    stage.style.willChange =
+        'auto';
+
+})();
+</script>
+
 
 
 
@@ -4737,7 +5172,7 @@ window.currentQuizSectionText =
         if (/^(x|g|guest)$/i.test(trimmed)) {
             return "Guest";
         }
-        return studentDatabase.get(trimmed) || "Student";
+        return studentDatabase.get(trimmed) || "Guest";
     };
 })();
 </script>
@@ -5230,8 +5665,8 @@ window.currentQuizSectionText =
             const dataEl = board.querySelector('.scoreboard-data');
             const name = sub.querySelector('.quiz-name')?.value || 'Anonymous';
             const id = sub.querySelector('.quiz-id')?.value || 'N/A';
-            const section = sub.closest('.section')?.querySelector('h2')?.textContent || 'Unknown Section';
-            const subsection = sub.dataset.subsection || 'Unknown Subsection';
+            const section = sub.closest('.section')?.querySelector('h2')?.textContent || 'Guest Section';
+            const subsection = sub.dataset.subsection || 'Guest Subsection';
             const now = new Date();
             const pad = n => n.toString().padStart(2,'0');
             const dateString = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
@@ -5249,6 +5684,8 @@ window.currentQuizSectionText =
     });
 })();
 </script>
+
+
 
 <!-- =========================================================
      [2] HIGHLIGHT TOGGLE UTILITY
@@ -5284,123 +5721,25 @@ document.getElementById('highlightBtn')?.addEventListener('click', () => {
 });
 </script>
 
-
 <script>
-(function() {
-    'use strict';
 
-    let scrollInterval = null;
-    let isPlaying = false;
-    let currentLineIndex = 0;
-    let lineIntervalMs = 2500; // Time spent on each line (milliseconds)
+function engageScrollerMode() {
+    wrapper.style.overflowY = 'hidden';          // Disable native scrolling
+    wrapper.style.touchAction = 'none';          // Disable touch scrolling
+    wrapper.style.pointerEvents = 'none';        // Ignore wheel/drag inside viewport
 
-    const wrapper = document.getElementById('teleScrollWrapper');
-    const editArea = document.getElementById('teleEdit');
-    const startBtn = document.getElementById('startBtn') || document.getElementById('telePlayBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const repeatBtn = document.getElementById('repeatBtn');
-    const speedButtons = document.querySelectorAll('.speed-buttons button');
+    scrollStage.style.pointerEvents = 'none';
 
-    function scrollToLine(index) {
-        if (!wrapper || !editArea) return;
-        const lines = editArea.querySelectorAll('.line');
-        if (lines.length === 0) return;
-
-        if (index >= lines.length) {
-            stopPrompter();
-            return;
-        }
-
-        const targetLine = lines[index];
-        wrapper.scrollTo({
-            top: targetLine.offsetTop - wrapper.offsetTop - 20,
-            behavior: 'smooth'
-        });
+    if (editArea) {
+        editArea.setAttribute('contenteditable', 'false');
+        editArea.style.userSelect = 'none';
     }
 
-    function startPrompter() {
-        if (!wrapper || isPlaying) return;
-        const lines = editArea.querySelectorAll('.line');
-        if (lines.length === 0) return;
+    document.body.classList.add('teleprompter-mode');
+}
 
-        isPlaying = true;
-        if (startBtn) startBtn.textContent = 'Pause';
-
-        scrollToLine(currentLineIndex);
-
-        scrollInterval = setInterval(() => {
-            currentLineIndex++;
-            scrollToLine(currentLineIndex);
-        }, lineIntervalMs);
-    }
-
-    function stopPrompter() {
-        if (scrollInterval) {
-            clearInterval(scrollInterval);
-            scrollInterval = null;
-        }
-        isPlaying = false;
-        if (startBtn) startBtn.textContent = 'Play';
-    }
-
-    // 1. Speed Button Integration
-    speedButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            speedButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            const val = parseInt(btn.dataset.speed || btn.textContent, 10);
-            if (!isNaN(val)) {
-                lineIntervalMs = val > 20 ? val : 3500 / val;
-            }
-
-            if (isPlaying) {
-                stopPrompter();
-                startPrompter();
-            }
-        });
-    });
-
-    // 2. Play / Pause Control
-    startBtn?.addEventListener('click', () => {
-        if (isPlaying) {
-            stopPrompter();
-        } else {
-            startPrompter();
-        }
-    });
-
-    // 3. Stop Control
-    stopBtn?.addEventListener('click', stopPrompter);
-
-    // 4. Repeat / Reset to Top Control
-    repeatBtn?.addEventListener('click', () => {
-        stopPrompter();
-        currentLineIndex = 0;
-        if (wrapper) {
-            wrapper.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
-    });
-
-    // 5. Reset line index when typing or loading new sections
-    editArea?.addEventListener('input', () => {
-        if (isPlaying) stopPrompter();
-        currentLineIndex = 0;
-    });
-
-    const originalLoadByIndex = window.loadSectionByIndex;
-    if (typeof originalLoadByIndex === 'function') {
-        window.loadSectionByIndex = function(index) {
-            stopPrompter();
-            currentLineIndex = 0;
-            originalLoadByIndex(index);
-        };
-    }
-})();
 </script>
+
 
 <script>
 (function(){
@@ -6864,8 +7203,8 @@ console.log(
             const dataEl = board.querySelector('.scoreboard-data');
             const name = sub.querySelector('.quiz-name')?.value || 'Anonymous';
             const id = sub.querySelector('.quiz-id')?.value || 'N/A';
-            const section = sub.closest('.section')?.querySelector('h2')?.textContent || 'Unknown Section';
-            const subsection = sub.dataset.subsection || 'Unknown Subsection';
+            const section = sub.closest('.section')?.querySelector('h2')?.textContent || 'Guest Section';
+            const subsection = sub.dataset.subsection || 'Guest Subsection';
             const now = new Date();
             const pad = n => n.toString().padStart(2,'0');
             const dateString = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
@@ -6919,122 +7258,6 @@ document.getElementById('highlightBtn')?.addEventListener('click', () => {
 </script>
 
 
-<script>
-(function() {
-    'use strict';
-
-    let scrollInterval = null;
-    let isPlaying = false;
-    let currentLineIndex = 0;
-    let lineIntervalMs = 2500; // Time spent on each line (milliseconds)
-
-    const wrapper = document.getElementById('teleScrollWrapper');
-    const editArea = document.getElementById('teleEdit');
-    const startBtn = document.getElementById('startBtn') || document.getElementById('telePlayBtn');
-    const stopBtn = document.getElementById('stopBtn');
-    const repeatBtn = document.getElementById('repeatBtn');
-    const speedButtons = document.querySelectorAll('.speed-buttons button');
-
-    function scrollToLine(index) {
-        if (!wrapper || !editArea) return;
-        const lines = editArea.querySelectorAll('.line');
-        if (lines.length === 0) return;
-
-        if (index >= lines.length) {
-            stopPrompter();
-            return;
-        }
-
-        const targetLine = lines[index];
-        wrapper.scrollTo({
-            top: targetLine.offsetTop - wrapper.offsetTop - 20,
-            behavior: 'smooth'
-        });
-    }
-
-    function startPrompter() {
-        if (!wrapper || isPlaying) return;
-        const lines = editArea.querySelectorAll('.line');
-        if (lines.length === 0) return;
-
-        isPlaying = true;
-        if (startBtn) startBtn.textContent = 'Pause';
-
-        scrollToLine(currentLineIndex);
-
-        scrollInterval = setInterval(() => {
-            currentLineIndex++;
-            scrollToLine(currentLineIndex);
-        }, lineIntervalMs);
-    }
-
-    function stopPrompter() {
-        if (scrollInterval) {
-            clearInterval(scrollInterval);
-            scrollInterval = null;
-        }
-        isPlaying = false;
-        if (startBtn) startBtn.textContent = 'Play';
-    }
-
-    // 1. Speed Button Integration
-    speedButtons.forEach(btn => {
-        btn.addEventListener('click', () => {
-            speedButtons.forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-
-            const val = parseInt(btn.dataset.speed || btn.textContent, 10);
-            if (!isNaN(val)) {
-                lineIntervalMs = val > 20 ? val : 3500 / val;
-            }
-
-            if (isPlaying) {
-                stopPrompter();
-                startPrompter();
-            }
-        });
-    });
-
-    // 2. Play / Pause Control
-    startBtn?.addEventListener('click', () => {
-        if (isPlaying) {
-            stopPrompter();
-        } else {
-            startPrompter();
-        }
-    });
-
-    // 3. Stop Control
-    stopBtn?.addEventListener('click', stopPrompter);
-
-    // 4. Repeat / Reset to Top Control
-    repeatBtn?.addEventListener('click', () => {
-        stopPrompter();
-        currentLineIndex = 0;
-        if (wrapper) {
-            wrapper.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-        }
-    });
-
-    // 5. Reset line index when typing or loading new sections
-    editArea?.addEventListener('input', () => {
-        if (isPlaying) stopPrompter();
-        currentLineIndex = 0;
-    });
-
-    const originalLoadByIndex = window.loadSectionByIndex;
-    if (typeof originalLoadByIndex === 'function') {
-        window.loadSectionByIndex = function(index) {
-            stopPrompter();
-            currentLineIndex = 0;
-            originalLoadByIndex(index);
-        };
-    }
-})();
-</script>
 
 
 <!-- 1. MOBILE TOUCH & GESTURE GUARD -->
@@ -7516,34 +7739,32 @@ if (sttBtn && SpeechRecognition) {
 <script>
 
 /* =========================================================
-   STANDALONE DOWNLOAD FILENAME INTERCEPTOR
+   SCOREBOARD-BASED DOWNLOAD FILENAME INTERCEPTOR
    ---------------------------------------------------------
-   Automatically renames outgoing:
+   Reads the ACTUAL scoreboard string and converts it
+   directly into a Windows-safe download filename.
 
-   - TXT
-   - PNG
-   - Audio files
+   QUIZ:
 
-   Filename format:
+   filename|section: Quiz|name|id|date/time|8/20|40%
 
-   Filename_Section_Name_ID_Date_Time_Score_Percent.ext
+   becomes:
 
-   Example:
+   filename_section_name_id_date_time_8_20_40%.txt
 
-   Teleprompter_Food_and_Cooking_Somchai_Jaidee_12345_
-   26-09-2026_14-53-27_8-10_80%.txt
 
-   If no quiz score is available:
+   EDITS:
 
-   Teleprompter_Food_and_Cooking_Somchai_Jaidee_12345_
-   26-09-2026_14-53-27_NA_NA.webm
+   filename|section: Edits|name|id|date/time|
+   Chars:2493|Sentences:54|Changed:0%
 
-   Windows-safe:
-   - Spaces become underscores
-   - Illegal filename characters become underscores
-   - Date uses -
-   - Time uses -
-   - Score uses -
+   becomes:
+
+   filename_section_name_id_date_time_
+   Chars_2493_Sentences_54_Changed_0%.txt
+
+
+   The scoreboard is the source of truth.
    ========================================================= */
 
 
@@ -7563,353 +7784,17 @@ function cleanScoreboardFilenamePart(value) {
 
 
 /* =========================================================
-   2. MAKE COMPLETE FILENAME
-   ========================================================= */
-
-function makeScoreboardFilename(
-    filename,
-    sectionName,
-    studentName,
-    studentId,
-    date,
-    time,
-    score,
-    percent,
-    extension
-) {
-
-    const parts = [
-        filename,
-        sectionName,
-        studentName,
-        studentId,
-        date,
-        time,
-        score,
-        percent
-    ];
-
-    const safeName =
-        parts
-            .map(cleanScoreboardFilenamePart)
-            .filter(Boolean)
-            .join('_');
-
-    const safeExtension =
-        String(extension || 'txt')
-            .replace(/^\./, '')
-            .replace(/[<>:"/\\|?*]/g, '');
-
-    return (
-        safeName +
-        '.' +
-        safeExtension
-    );
-}
-
-
-/* =========================================================
-   3. DATE / TIME
-   ========================================================= */
-
-function getScoreboardDateTime() {
-
-    const now = new Date();
-
-    function pad(number) {
-        return String(number).padStart(2, '0');
-    }
-
-    return {
-
-        date:
-            `${pad(now.getDate())}-` +
-            `${pad(now.getMonth() + 1)}-` +
-            `${now.getFullYear()}`,
-
-        time:
-            `${pad(now.getHours())}-` +
-            `${pad(now.getMinutes())}-` +
-            `${pad(now.getSeconds())}`
-    };
-}
-
-
-/* =========================================================
-   4. GET CURRENT PAGE FILENAME
-   ========================================================= */
-
-function getCurrentDownloadBaseName() {
-
-    let filename =
-        window.location.pathname
-            .split('/')
-            .pop() || 'Teleprompter';
-
-    /*
-       Remove the existing extension.
-
-       Example:
-
-       Teleprompter.html
-       becomes:
-
-       Teleprompter
-    */
-
-    filename =
-        filename.replace(
-            /\.[^.]+$/,
-            ''
-        );
-
-    return filename || 'Teleprompter';
-}
-
-
-/* =========================================================
-   5. GET CURRENT SECTION NAME
-   ========================================================= */
-
-function getCurrentDownloadSectionName() {
-
-    /*
-       This is set by the main section selector.
-    */
-
-    if (
-        window.currentQuizSectionName &&
-        String(
-            window.currentQuizSectionName
-        ).trim()
-    ) {
-
-        return String(
-            window.currentQuizSectionName
-        ).trim();
-    }
-
-
-    /*
-       Fallback: try the currently selected
-       section from SCRAMBLE_SECTIONS.
-    */
-
-    if (
-        window.SCRAMBLE_SECTIONS &&
-        typeof window.SCRAMBLE_INDEX ===
-            'number' &&
-        window.SCRAMBLE_SECTIONS[
-            window.SCRAMBLE_INDEX
-        ]
-    ) {
-
-        return (
-            window.SCRAMBLE_SECTIONS[
-                window.SCRAMBLE_INDEX
-            ].name || ''
-        );
-    }
-
-
-    return 'Section';
-}
-
-
-/* =========================================================
-   6. GET STUDENT ID
-   ========================================================= */
-
-function getCurrentStudentId() {
-
-    const input =
-        document.getElementById('gsId');
-
-    if (!input) {
-        return '';
-    }
-
-    return (
-        input.value ||
-        ''
-    ).trim();
-}
-
-
-/* =========================================================
-   7. GET STUDENT NAME
-   ========================================================= */
-
-function getCurrentStudentName() {
-
-    const studentId =
-        getCurrentStudentId();
-
-
-    /*
-       Use the existing ID → student-name
-       resolver if available.
-    */
-
-    if (
-        studentId &&
-        typeof window.resolveStudentNameFromId ===
-            'function'
-    ) {
-
-        const resolved =
-            window.resolveStudentNameFromId(
-                studentId
-            );
-
-        if (
-            resolved &&
-            String(resolved).trim()
-        ) {
-
-            return String(
-                resolved
-            ).trim();
-        }
-    }
-
-
-    /*
-       Fallbacks if a name field exists.
-    */
-
-    const possibleNameIds = [
-        'gsName',
-        'studentName',
-        'student-name'
-    ];
-
-    for (
-        const id of possibleNameIds
-    ) {
-
-        const element =
-            document.getElementById(id);
-
-        if (
-            element &&
-            String(
-                element.value ||
-                element.textContent ||
-                ''
-            ).trim()
-        ) {
-
-            return String(
-                element.value ||
-                element.textContent ||
-                ''
-            ).trim();
-        }
-    }
-
-
-    return 'Student';
-}
-
-
-/* =========================================================
-   8. GET CURRENT QUIZ SCORE
-   ---------------------------------------------------------
-   Looks for the existing MC Quiz Mania scoreboard.
-
-   Existing format:
-
-   filename|section: quiz|name|id|date/time|8/10|80%
-
-   Therefore:
-
-   parts[6] = 8/10
-   parts[7] = 80%
-   ========================================================= */
-
-function getCurrentQuizScoreData() {
-
-    const scoreElements =
-        document.querySelectorAll(
-            '.quiz-mania-score-text'
-        );
-
-    /*
-       Work backwards so the most recently
-       displayed scoreboard is used.
-    */
-
-    for (
-        let i = scoreElements.length - 1;
-        i >= 0;
-        i--
-    ) {
-
-        const text =
-            scoreElements[i]
-                .textContent
-                .trim();
-
-        if (!text) {
-            continue;
-        }
-
-        const parts =
-            text.split('|');
-
-        if (
-            parts.length >= 8
-        ) {
-
-            const score =
-                parts[6].trim();
-
-            const percent =
-                parts[7].trim();
-
-            if (
-                score &&
-                percent
-            ) {
-
-                return {
-                    score: score,
-                    percent: percent
-                };
-            }
-        }
-    }
-
-
-    /*
-       No MC quiz score available.
-
-       This is normal for audio recordings
-       or other non-quiz downloads.
-    */
-
-    return {
-        score: 'NA',
-        percent: 'NA'
-    };
-}
-
-
-/* =========================================================
-   9. DETERMINE FILE EXTENSION
+   2. GET DOWNLOAD EXTENSION
    ========================================================= */
 
 function getDownloadExtension(link) {
 
     const originalName =
-        link.getAttribute('download') ||
-        '';
+        link.getAttribute('download') || '';
 
 
     /*
-       1. If the download filename already
-          contains an extension, use it.
+       First check the existing download filename.
     */
 
     const match =
@@ -7925,12 +7810,11 @@ function getDownloadExtension(link) {
 
 
     /*
-       2. Inspect the href when possible.
+       Otherwise inspect the href.
     */
 
     const href =
-        link.getAttribute('href') ||
-        '';
+        link.getAttribute('href') || '';
 
 
     if (
@@ -7939,11 +7823,13 @@ function getDownloadExtension(link) {
         return 'png';
     }
 
+
     if (
         href.includes('audio/webm')
     ) {
         return 'webm';
     }
+
 
     if (
         href.includes('audio/wav')
@@ -7951,17 +7837,20 @@ function getDownloadExtension(link) {
         return 'wav';
     }
 
+
     if (
         href.includes('audio/mpeg')
     ) {
         return 'mp3';
     }
 
+
     if (
         href.includes('audio/ogg')
     ) {
         return 'ogg';
     }
+
 
     if (
         href.includes('audio/mp4')
@@ -7971,17 +7860,15 @@ function getDownloadExtension(link) {
 
 
     /*
-       3. If there is no extension at all,
-          this app's MediaRecorder uses WebM/Opus
-          for recorded audio.
-
-          Therefore use WEBM as the fallback.
+       Default for MediaRecorder audio.
     */
 
     return 'webm';
 }
+
+
 /* =========================================================
-   10. SHOULD THIS DOWNLOAD BE INTERCEPTED?
+   3. SHOULD THIS DOWNLOAD BE INTERCEPTED?
    ========================================================= */
 
 function isRenameableDownload(link) {
@@ -7990,20 +7877,24 @@ function isRenameableDownload(link) {
         return false;
     }
 
+
     if (
         !link.hasAttribute('download')
     ) {
         return false;
     }
 
+
     const extension =
         getDownloadExtension(link);
 
-const allowedExtensions = [
-    'txt',
-    'png',
-'webm'
-];
+
+    const allowedExtensions = [
+        'txt',
+        'png',
+        'webm'
+    ];
+
 
     return allowedExtensions.includes(
         extension
@@ -8012,7 +7903,137 @@ const allowedExtensions = [
 
 
 /* =========================================================
-   11. BUILD NEW DOWNLOAD FILENAME
+   4. GET THE ACTUAL SCOREBOARD STRING
+   ---------------------------------------------------------
+   Priority:
+
+   1. Quiz scoreboard
+   2. Edits scoreboard
+
+   IMPORTANT:
+
+   We do NOT reconstruct the scoreboard.
+
+   We read the exact string already displayed.
+   ========================================================= */
+
+function getCurrentScoreboardString() {
+
+
+    /* -----------------------------------------
+       QUIZ SCOREBOARD
+       ----------------------------------------- */
+
+    const quizElements =
+        document.querySelectorAll(
+            '.quiz-mania-score-text'
+        );
+
+
+    for (
+        let i = quizElements.length - 1;
+        i >= 0;
+        i--
+    ) {
+
+        const text =
+            quizElements[i]
+                .textContent
+                .trim();
+
+
+        if (text) {
+
+            return text;
+        }
+    }
+
+
+    /* -----------------------------------------
+       EDITS SCOREBOARD
+       ----------------------------------------- */
+
+    const editMeta =
+        document.getElementById(
+            'gsScoreMeta'
+        );
+
+
+    if (
+        editMeta &&
+        editMeta.textContent.trim()
+    ) {
+
+        return editMeta
+            .textContent
+            .trim();
+    }
+
+
+    return '';
+}
+
+
+/* =========================================================
+   5. PARSE SCOREBOARD DATE / TIME
+   ---------------------------------------------------------
+   Input:
+
+   28/09/2026 11:12:47
+
+   Output:
+
+   date = 28-09-2026
+   time = 11-12-47
+   ========================================================= */
+
+function parseScoreboardDateTime(
+    dateTime
+) {
+
+    const result = {
+        date: '',
+        time: ''
+    };
+
+
+    const match =
+        String(dateTime || '')
+            .trim()
+            .match(
+                /^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2}):(\d{2})$/
+            );
+
+
+    if (!match) {
+
+        result.date =
+            cleanScoreboardFilenamePart(
+                dateTime
+            );
+
+        return result;
+    }
+
+
+    result.date =
+        `${match[1].padStart(2, '0')}-` +
+        `${match[2].padStart(2, '0')}-` +
+        `${match[3]}`;
+
+
+    result.time =
+        `${match[4].padStart(2, '0')}-` +
+        `${match[5]}-` +
+        `${match[6]}`;
+
+
+    return result;
+}
+
+
+/* =========================================================
+   6. BUILD FILENAME DIRECTLY FROM SCOREBOARD
    ========================================================= */
 
 function buildInterceptedDownloadFilename(
@@ -8022,60 +8043,307 @@ function buildInterceptedDownloadFilename(
     const extension =
         getDownloadExtension(link);
 
-    const filename =
-        getCurrentDownloadBaseName();
 
-    const sectionName =
-        getCurrentDownloadSectionName();
+    /*
+       Get the actual scoreboard text.
+    */
+
+    const scoreboard =
+        getCurrentScoreboardString();
+
+
+    /*
+       If no scoreboard exists,
+       keep the original filename.
+    */
+
+    if (!scoreboard) {
+
+        return (
+            link.getAttribute('download') ||
+            'download'
+        );
+    }
+
+
+    /*
+       Split the scoreboard at pipes.
+
+       Common structure:
+
+       [0] filename
+       [1] section
+       [2] student name
+       [3] student ID
+       [4] date/time
+    */
+
+    const parts =
+        scoreboard
+            .split('|')
+            .map(
+                part => part.trim()
+            );
+
+
+    /*
+       -----------------------------------------
+       BASIC FIELDS
+       -----------------------------------------
+    */
+
+    let filename =
+        parts[0] ||
+        'Teleprompter';
+
+
+    let section =
+        parts[1] ||
+        'Section';
+
 
     const studentName =
-        getCurrentStudentName();
+        parts[2] ||
+        'Guest';
+
 
     const studentId =
-        getCurrentStudentId();
+        parts[3] ||
+        'Guest';
+
 
     const dateTime =
-        getScoreboardDateTime();
-
-    const scoreData =
-        getCurrentQuizScoreData();
+        parts[4] ||
+        '';
 
 
-    const newFilename =
-        makeScoreboardFilename(
+    /*
+       Remove original file extension.
+    */
 
-            filename,
-
-            sectionName,
-
-            studentName,
-
-            studentId,
-
-            dateTime.date,
-
-            dateTime.time,
-
-            scoreData.score,
-
-            scoreData.percent,
-
-            extension
+    filename =
+        filename.replace(
+            /\.[^.]+$/,
+            ''
         );
 
 
-    return newFilename;
+    /*
+       -----------------------------------------
+       DETERMINE SCOREBOARD TYPE
+       -----------------------------------------
+    */
+
+    const isQuiz =
+        /:\s*Quiz\s*$/i.test(
+            section
+        );
+
+
+    const isEdits =
+        /:\s*Edits\s*$/i.test(
+            section
+        );
+
+
+    /*
+       Remove:
+
+       : Quiz
+
+       or:
+
+       : Edits
+
+       from the section name.
+    */
+
+    section =
+        section.replace(
+            /\s*:\s*(Quiz|Edits)\s*$/i,
+            ''
+        );
+
+
+    /*
+       -----------------------------------------
+       DATE / TIME
+       -----------------------------------------
+    */
+
+    const dateTimeParts =
+        parseScoreboardDateTime(
+            dateTime
+        );
+
+
+    /*
+       -----------------------------------------
+       START BUILDING FILENAME
+       -----------------------------------------
+    */
+
+    const filenameParts = [
+
+        filename,
+
+        section,
+
+        studentName,
+
+        studentId,
+
+        dateTimeParts.date,
+
+        dateTimeParts.time
+
+    ];
+
+
+    /*
+       -----------------------------------------
+       QUIZ
+       -----------------------------------------
+
+       Quiz:
+
+       parts[5] = 8/20
+       parts[6] = 40%
+    */
+
+    if (isQuiz) {
+
+        const score =
+            parts[5] ||
+            'NA';
+
+
+        const percent =
+            parts[6] ||
+            'NA';
+
+
+        filenameParts.push(
+            score,
+            percent
+        );
+    }
+
+
+    /*
+       -----------------------------------------
+       EDITS
+       -----------------------------------------
+
+       Everything after the date/time is retained.
+
+       Example:
+
+       parts[5] = Chars:2493
+       parts[6] = Sentences:54
+       parts[7] = Changed:0%
+
+       These become:
+
+       Chars_2493
+       Sentences_54
+       Changed_0%
+    */
+
+    if (isEdits) {
+
+        const editFields =
+            parts.slice(5);
+
+
+        editFields.forEach(
+            field => {
+
+                if (
+                    field
+                ) {
+
+                    filenameParts.push(
+                        field
+                    );
+                }
+            }
+        );
+    }
+
+
+    /*
+       -----------------------------------------
+       Guest / OTHER SCOREBOARD
+       -----------------------------------------
+
+       If this is neither Quiz nor Edits,
+       retain everything after the date/time
+       rather than throwing it away.
+    */
+
+    if (
+        !isQuiz &&
+        !isEdits
+    ) {
+
+        const remainingFields =
+            parts.slice(5);
+
+
+        remainingFields.forEach(
+            field => {
+
+                if (
+                    field
+                ) {
+
+                    filenameParts.push(
+                        field
+                    );
+                }
+            }
+        );
+    }
+
+
+    /*
+       -----------------------------------------
+       MAKE WINDOWS-SAFE FILENAME
+       -----------------------------------------
+    */
+
+    const safeName =
+        filenameParts
+            .map(
+                cleanScoreboardFilenamePart
+            )
+            .filter(Boolean)
+            .join('_');
+
+
+    const safeExtension =
+        String(extension || 'txt')
+            .replace(
+                /^\./,
+                ''
+            )
+            .replace(
+                /[<>:"/\\|?*]/g,
+                ''
+            );
+
+
+    return (
+        safeName +
+        '.' +
+        safeExtension
+    );
 }
 
 
 /* =========================================================
-   12. DOWNLOAD INTERCEPTOR
-   ---------------------------------------------------------
-   Intercepts programmatic and normal clicks on
-   TXT, PNG, and WEBM download links.
-
-   This runs immediately before the browser
-   performs the actual anchor download.
+   7. INTERCEPT PROGRAMMATIC DOWNLOADS
    ========================================================= */
 
 (function() {
@@ -8090,73 +8358,26 @@ function buildInterceptedDownloadFilename(
             const link = this;
 
 
-            /*
-               Only process actual download links.
-            */
-
             if (
-                link.hasAttribute('download')
+                isRenameableDownload(link)
             ) {
 
-                const originalName =
-                    link.getAttribute(
-                        'download'
-                    ) || '';
-
-
-                const extensionMatch =
-                    originalName.match(
-                        /\.([a-zA-Z0-9]+)$/
+                const newFilename =
+                    buildInterceptedDownloadFilename(
+                        link
                     );
 
 
-                if (extensionMatch) {
-
-                    const extension =
-                        extensionMatch[1]
-                            .toLowerCase();
+                link.download =
+                    newFilename;
 
 
-                    /*
-                       Only rename the file types
-                       we want to intercept.
-                    */
-
-                    const allowedExtensions = [
-                        'txt',
-                        'png',
-                        'webm'
-                    ];
-
-
-                    if (
-                        allowedExtensions.includes(
-                            extension
-                        )
-                    ) {
-
-                        const newFilename =
-                            buildInterceptedDownloadFilename(
-                                link
-                            );
-
-
-                        link.download =
-                            newFilename;
-
-
-                        console.log(
-                            'Download renamed:',
-                            newFilename
-                        );
-                    }
-                }
+                console.log(
+                    'Download renamed:',
+                    newFilename
+                );
             }
 
-
-            /*
-               Now perform the ORIGINAL click.
-            */
 
             return originalAnchorClick.call(
                 link
@@ -8164,10 +8385,10 @@ function buildInterceptedDownloadFilename(
         };
 
 
-    /*
-       Also handle ordinary user clicks
-       that do not go through .click().
-    */
+
+    /* =====================================================
+       8. INTERCEPT NORMAL USER DOWNLOAD CLICKS
+       ===================================================== */
 
     document.addEventListener(
         'click',
@@ -8178,45 +8399,11 @@ function buildInterceptedDownloadFilename(
                     'a[download]'
                 );
 
-            if (!link) {
-                return;
-            }
-
-
-            const originalName =
-                link.getAttribute(
-                    'download'
-                ) || '';
-
-
-            const extensionMatch =
-                originalName.match(
-                    /\.([a-zA-Z0-9]+)$/
-                );
-
-
-            if (!extensionMatch) {
-                return;
-            }
-
-
-            const extension =
-                extensionMatch[1]
-                    .toLowerCase();
-
-
-            const allowedExtensions = [
-                'txt',
-                'png',
-                'webm'
-            ];
-
 
             if (
-                !allowedExtensions.includes(
-                    extension
-                )
+                !isRenameableDownload(link)
             ) {
+
                 return;
             }
 
@@ -8241,30 +8428,268 @@ function buildInterceptedDownloadFilename(
     );
 
 })();
+
+
 /* =========================================================
-   13. OPTIONAL GLOBAL HELPER
-   ---------------------------------------------------------
-   Makes the builder available elsewhere if
-   you ever need it.
+   9. OPTIONAL GLOBAL HELPERS
    ========================================================= */
 
-window.makeScoreboardFilename =
-    makeScoreboardFilename;
+window.getCurrentScoreboardString =
+    getCurrentScoreboardString;
 
-window.getScoreboardDateTime =
-    getScoreboardDateTime;
+
+window.buildInterceptedDownloadFilename =
+    buildInterceptedDownloadFilename;
 
 
 /* =========================================================
-   14. READY MESSAGE
+   10. READY MESSAGE
    ========================================================= */
 
 console.log(
-    'Standalone download filename interceptor loaded.'
+    'Scoreboard-based download filename interceptor loaded.'
 );
 
 </script>
 
+
+
+<script>
+/* =========================================================
+   NO-QUIZ MARKER HANDLER
+   ========================================================= */
+
+(function () {
+    'use strict';
+
+    function isNoQuizText(text) {
+
+        if (!text) return false;
+
+        const lines = String(text)
+            .replace(/\r\n/g, '\n')
+            .replace(/\r/g, '\n')
+            .split('\n');
+
+        for (let i = 0; i < lines.length - 1; i++) {
+
+            if (
+                lines[i].trim() === 'BLANK' &&
+                lines[i + 1].trim() === '?BLANK'
+            ) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    function removeNoQuizLines() {
+
+        const zone =
+            document.getElementById('editableTextZone');
+
+        if (!zone) return;
+
+        const lines =
+            Array.from(
+                zone.querySelectorAll('.line')
+            );
+
+        for (let i = 0; i < lines.length - 1; i++) {
+
+            if (
+                lines[i].textContent.trim() === 'BLANK' &&
+                lines[i + 1].textContent.trim() === '?BLANK'
+            ) {
+
+                lines[i].remove();
+                lines[i + 1].remove();
+
+                break;
+            }
+        }
+    }
+
+
+    function updateQuizBar(noQuiz) {
+
+        const bar =
+            document.getElementById('quizToggleBar');
+
+        if (!bar) return;
+
+        /*
+           Only hide/show the existing bar.
+           Do not change its text.
+           Do not disable it.
+           Do not modify its event handlers.
+        */
+
+        bar.style.display =
+            noQuiz ? 'none' : '';
+    }
+
+
+    /*
+       Your existing section loader already fires this
+       event after a section has been selected and loaded.
+    */
+
+    window.addEventListener(
+        'textSectionLoaded',
+        function (event) {
+
+            const text =
+                event &&
+                event.detail &&
+                typeof event.detail.sectionText === 'string'
+                    ? event.detail.sectionText
+                    : '';
+
+            const noQuiz =
+                isNoQuizText(text);
+
+            if (noQuiz) {
+                removeNoQuizLines();
+            }
+
+            updateQuizBar(noQuiz);
+        }
+    );
+
+})();
+</script>
+
+<script>
+(function() {
+    'use strict';
+
+    const button =
+        document.getElementById(
+            'standaloneDownloadAudioBtn'
+        );
+
+    if (!button) return;
+
+
+    button.addEventListener(
+        'click',
+        function() {
+
+            /*
+             * Use the existing recording.
+             */
+            if (
+                typeof audioBlob === 'undefined' ||
+                !audioBlob
+            ) {
+                alert('No audio recording available.');
+                return;
+            }
+
+
+            /*
+             * Create temporary download URL.
+             */
+            const url =
+                URL.createObjectURL(
+                    audioBlob
+                );
+
+
+            /*
+             * Create download link.
+             */
+            const link =
+                document.createElement('a');
+
+            link.href = url;
+
+            link.download =
+                'recorded-audio.webm';
+
+
+            /*
+             * Trigger download.
+             */
+            link.click();
+
+
+            /*
+             * Clean up.
+             */
+            setTimeout(
+                function() {
+                    URL.revokeObjectURL(url);
+                },
+                100
+            );
+
+        }
+    );
+
+})();
+</script>
+
+<script>
+(function() {
+    'use strict';
+
+    const button =
+        document.getElementById(
+            'topAudioDownloadBtn'
+        );
+
+    if (!button) return;
+
+
+    button.addEventListener(
+        'click',
+        function() {
+
+            /*
+             * Find the existing scoreboard
+             * audio download button.
+             */
+            const existingButton =
+                document.getElementById(
+                    'downloadBlobBtn'
+                );
+
+
+            /*
+             * If the existing audio system has
+             * a recording, trigger its download.
+             */
+            if (existingButton) {
+
+                if (existingButton.disabled) {
+
+                    alert(
+                        'No audio recording available.'
+                    );
+
+                    return;
+                }
+
+
+                existingButton.click();
+
+                return;
+            }
+
+
+            alert(
+                'Audio download system not found.'
+            );
+
+        }
+    );
+
+})();
+</script>
 
 </body>
 </html>
