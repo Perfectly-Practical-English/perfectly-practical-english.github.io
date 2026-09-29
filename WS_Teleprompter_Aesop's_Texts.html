@@ -11,6 +11,16 @@
   --bg: #f7fdfb;
   --blue: #1976d2;
   --border-thickness: 10px;
+
+  /* STANDARD TYPOGRAPHY */
+  --font-main: Arial, Helvetica, sans-serif;
+  --font-mono: monospace;
+
+  --size-main: 16px;
+  --size-control: 12px;
+  --size-small: 11px;
+  --size-label: 14px;
+  --size-title: 18px;
 }
 
 * {
@@ -19,10 +29,11 @@
   padding: 0;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   background: var(--bg);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-main);
   color: #222;
   overflow-y: auto;
   overflow-x: hidden;
@@ -73,55 +84,113 @@ body {
   margin-bottom: 3px;
 }
 
-.top-bar {
-  display: grid;
-  grid-template-columns: 178.5px 178.5px;
+/* =========================================================
+   TOP NAVIGATION BAR
+   ========================================================= */
+
+.top-bar-container {
   width: 360px;
   max-width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
   gap: 3px;
-  margin-bottom: 6px;
-  overflow: hidden;
+  margin-bottom: 3px;
 }
 
-#gsId,
-#openSectionModal {
-  width: 178.5px;
+.top-bar-row-1 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 3px;
+  box-sizing: border-box;
+  margin-bottom: 0;
+}
+
+#gsId {
+  grid-column: span 1;
+  width: 100%;
+  height: 28px;
   min-width: 0;
-  max-width: 178.5px;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#openSectionModal {
+  grid-column: span 1;
+  width: 100%;
+  height: 28px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0 6px;
+  text-align: left;
+  box-sizing: border-box;
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--size-small);
+  font-weight: 400;
+}
+
+.top-bar-row-2,
+.top-bar-row-3 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 3px;
+  box-sizing: border-box;
+}
+
+.top-bar-row-2 select,
+.top-bar-row-3 select,
+.top-bar-row-2 button,
+.top-bar-row-3 button {
+  height: 28px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.top-bar-row-2 select,
+.top-bar-row-3 select {
+  padding: 0 4px;
+  font-size: var(--size-small);
+  font-weight: 400;
+  text-align: center;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  color: #333;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+#goBtn,
+#instructionsBtn {
+  font-size: var(--size-control);
+  font-weight: 400;
+  cursor: pointer;
+  white-space: nowrap;
+  padding: 0;
 }
 
 input[type="text"] {
-  height: 36px;
+  height: 28px;
   padding: 0 8px;
   border: 1px solid #cfe2f7;
   border-radius: 6px;
-  font-size: 14px;
-}
-
-#gsName,
-#gsId,
-#nameField,
-#idField {
-  flex: 0 0 140px;
-  min-width: 80px;
-}
-
-@media (max-width: 700px) {
-  #gsName,
-  #gsId,
-  #nameField,
-  #idField {
-    flex: 1 1 120px;
-    min-width: 80px;
-    max-width: 180px;
-  }
+  font-family: var(--font-main);
+  font-size: var(--size-control);
+  font-weight: 400;
 }
 
 button {
-  height: 36px;
-  padding: 0 10px;
-  font-family: Arial, sans-serif;
-  font-size: 14px;
+  height: 28px;
+  padding: 0 8px;
+  font-family: var(--font-main);
+  font-size: var(--size-control);
   font-weight: 400;
   background: #1976d2;
   color: #fff;
@@ -156,8 +225,6 @@ button:disabled {
   display: none !important;
 }
 
-/* ---------- Quiz Toggle Bar ---------- */
-
 .quiz-toggle-bar {
   width: 100%;
   height: 40px;
@@ -167,6 +234,7 @@ button:disabled {
   border-radius: 6px;
   background: #1976d2;
   color: #fff;
+  font-family: var(--font-main);
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
@@ -176,8 +244,6 @@ button:disabled {
 .quiz-toggle-bar:hover {
   background: #1565c0;
 }
-
-/* ---------- Hidden Quiz Panel ---------- */
 
 #quizMain {
   display: none;
@@ -195,8 +261,6 @@ button:disabled {
   min-height: 0;
 }
 
-/* ---------- Quiz Scroll Area ---------- */
-
 #quizScrollWrapper {
   overflow-y: scroll;
   overflow-x: hidden;
@@ -212,13 +276,40 @@ button:disabled {
   display: none;
 }
 
-/* ---------- Quiz Content ---------- */
-
 #quizContentContainer {
   padding: 14px;
+  font-family: var(--font-main) !important;
+  font-size: var(--size-main) !important;
+  line-height: 1.6 !important;
+  font-weight: 400 !important;
+  color: #333 !important;
   white-space: normal;
   overflow-wrap: break-word;
   word-break: break-word;
+  background: #ffffff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+#quizContentContainer p,
+#quizContentContainer .exercise,
+#quizContentContainer .quiz-exercise {
+  margin-bottom: 12px !important;
+  line-height: 1.5 !important;
+  font-weight: 400 !important;
+}
+
+#quizContentContainer label,
+#quizContentContainer .quiz-option-label {
+  display: flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  margin: 6px 0 !important;
+  cursor: pointer !important;
+  font-family: var(--font-main) !important;
+  font-size: var(--size-label) !important;
+  line-height: 1.4 !important;
+  font-weight: 400 !important;
 }
 
 @media (max-width: 700px) {
@@ -264,40 +355,20 @@ button:disabled {
 }
 
 /* =========================================================
-   STANDARD, CLEAN TELEPROMPTER & TEXT TYPOGRAPHY
+   STANDARD TELEPROMPTER TEXT TYPOGRAPHY
    ========================================================= */
 
 .tele-edit,
 .tele-edit .line,
 .line,
 #gsScoreText,
-.quiz-container,
-#quizContentContainer {
-  font-family: Arial, Helvetica, sans-serif !important;
-  font-size: 16px !important;
+.quiz-container {
+  font-family: var(--font-main) !important;
+  font-size: var(--size-main) !important;
   line-height: 1.6 !important;
-  font-weight: normal !important;
+  font-weight: 400 !important;
   color: #333 !important;
 }
-
-#gsScoreMeta {
-  display: block;
-  width: 100%;
-  box-sizing: border-box;
-  margin: 0 0 8px;
-  padding: 10px;
-  white-space: pre-wrap;
-overflow-wrap: anywhere;
-word-break: normal;
-  font-family: monospace;
-  font-size: 14px;
-  line-height: 1.4;
-  background: #fff;
-  color: #000;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
 
 .tele-edit {
   width: 100%;
@@ -318,6 +389,7 @@ word-break: normal;
   min-height: 1.6em !important;
   white-space: pre-wrap !important;
   word-break: break-word;
+  font-weight: 400 !important;
 }
 
 .tele-edit.empty::before {
@@ -325,6 +397,7 @@ word-break: normal;
   content: attr(data-placeholder);
   pointer-events: none;
   white-space: pre-wrap;
+  font-weight: 400;
 }
 
 .tele-overlay {
@@ -335,9 +408,10 @@ word-break: normal;
   padding: 0;
   background: transparent;
   border-radius: 0;
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   line-height: 1.2;
+  font-weight: 400;
   text-align: left;
   pointer-events: none;
   z-index: auto;
@@ -351,8 +425,10 @@ word-break: normal;
 
 .scoreboard {
   display: none;
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 14px;
+  font-weight: 400;
+  line-height: 1.4;
   background: #fff;
   border-radius: 6px;
   padding: 12px;
@@ -361,6 +437,7 @@ word-break: normal;
   max-width: 100%;
   overflow-y: auto;
 }
+
 #gsScoreboard {
   display: none;
   width: 360px;
@@ -370,8 +447,6 @@ word-break: normal;
   box-sizing: border-box;
   overflow-x: hidden;
 }
-
-
 
 #gsScoreboard .text,
 .scoreboard .text {
@@ -390,6 +465,10 @@ word-break: normal;
   overflow-x: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 400;
 }
 
 #gsScoreboard .text::-webkit-scrollbar,
@@ -397,86 +476,188 @@ word-break: normal;
   display: none;
 }
 
-@media (max-width: 700px) {
-  #gsMain {
-    height: 60dvh;
-    min-height: 280px;
-  }
-}
-
-.controls {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  width: 360px;
-  max-width: 100%;
-  gap: 3px;
-  margin-top: 8px;
-  margin-bottom: 10px;
-}
-
-.controls .left {
-  display: flex;
+#gsScoreMeta {
+  display: block;
   width: 100%;
-  gap: 3px;
-  min-width: 0;
-}
-
-.controls .left button {
-  flex: 1 1 0;
-  min-width: 0;
-}
-
-.controls .right {
-  display: flex;
-  gap: 3px;
-  min-width: 0;
-}
-
-#speechBtn {
-  width: 60px;
-  height: 36px;
-  background: #1976d2;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  color: #fff;
-}
-
-#speechBtn.recording {
-  background: #e53935;
-}
-
-#captureAudioBtn {
-  width: 60px;
-  height: 36px;
-  background: #39FF14;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
+  box-sizing: border-box;
+  margin: 0 0 8px;
+  padding: 10px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 400;
+  background: #fff;
   color: #000;
+  border: 1px solid #ccc;
+  border-radius: 6px;
 }
 
-#captureAudioBtn.recording {
-  background: #e53935;
-}
+/* =========================================================
+   QUIZ SCOREBOARDS
+   ========================================================= */
 
-.speed-buttons {
-  display: contents !important;
-}
+/* Legacy / Standard Quiz Scoreboard */
 
-.speed-buttons button {
+.quiz-scoreboard {
   width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  padding: 0;
-  background: #bbb;
+  box-sizing: border-box;
+  margin: 8px 0 12px;
+  padding: 6px;
+  border: 1px solid #9aaed1;
+  border-radius: 6px;
+  background: #f9f9f9;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.4;
   font-weight: 400;
 }
 
-.speed-buttons button.active {
-  background: #1976d2;
-  color: #fff;
+.scoreboard-data {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-weight: 400;
 }
+
+.scoreboard-buttons {
+  margin-top: 6px;
+  display: flex;
+  gap: 6px;
+}
+
+/* MC Quiz Mania Scoreboard */
+
+.quiz-mania-scoreboard {
+  display: none;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 8px 0 12px;
+  padding: 10px;
+  border: 1px solid #9aaed1;
+  border-radius: 6px;
+  background: #f9f9f9;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+.quiz-mania-score-text {
+  display: block;
+  width: 100%;
+  margin: 0 0 8px;
+  padding: 10px;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.4;
+  font-weight: 400;
+  background: #fff;
+  color: #000;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+}
+
+.quiz-mania-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.quiz-mania-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.quiz-mania-id {
+  width: 180px;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  font-family: var(--font-main);
+  font-size: var(--size-control);
+  font-weight: 400;
+}
+
+.quiz-mania-controls button,
+.quiz-mania-buttons button {
+  height: 28px !important;
+  padding: 0 4px !important;
+  font-size: var(--size-small) !important;
+  font-family: var(--font-main) !important;
+  font-weight: 400 !important;
+  line-height: normal !important;
+  background: #1976d2 !important;
+  color: #fff !important;
+  border: none !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  transition: 0.12s !important;
+  box-sizing: border-box !important;
+}
+
+.quiz-mania-controls button:hover,
+.quiz-mania-buttons button:hover {
+  background: #1565c0 !important;
+}
+
+/* =========================================================
+   EXPORT RELATED CSS
+   ========================================================= */
+
+.export-render-canvas {
+  background: #fff;
+  color: #000;
+  padding: 20px;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 400;
+  white-space: pre-wrap;
+  position: absolute;
+  left: -99999px;
+  top: 0;
+  width: 900px;
+  box-sizing: border-box;
+}
+
+.quiz-export-wrapper {
+  white-space: pre-wrap;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 400;
+  padding: 15px;
+  background-color: #fff;
+  color: #000;
+  position: fixed;
+  left: -9999px;
+  top: 0;
+  width: 900px;
+  box-sizing: border-box;
+}
+
+.png-export-wrapper {
+  white-space: pre-wrap;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 1.4;
+  font-weight: 400;
+  padding: 10px;
+  background-color: #fff;
+  color: #000;
+}
+
+/* =========================================================
+   GREEN BORDER + TOAST
+   ========================================================= */
 
 #green-border {
   position: fixed;
@@ -499,19 +680,13 @@ word-break: normal;
   border-radius: 6px;
   display: none;
   z-index: 10000;
+  font-family: var(--font-main);
+  font-size: var(--size-control);
+  font-weight: 400;
 }
 
-#copyrightSection {
-  width: 360px;
-  max-width: 100%;
-  margin: 10px 0 0 !important;
-  padding: 0;
-  text-align: left !important;
-  justify-self: start !important;
-  align-self: start !important;
-  margin-left: 0 !important;
-  margin-right: auto !important;
-  font-size: 8px;
+.toast.show {
+  display: block;
 }
 
 /* =========================================================
@@ -527,9 +702,10 @@ word-break: normal;
   flex-direction: column;
   align-items: flex-start;
   gap: 3px;
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   line-height: 1.2;
+  font-weight: 400;
 }
 
 .under-text-copyright {
@@ -537,23 +713,29 @@ word-break: normal;
   min-width: 0;
   margin: 0;
   padding: 0;
-  font-family: monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
   line-height: 1.2;
-  font-weight: normal;
+  font-weight: 400;
   text-align: left;
   white-space: normal;
   overflow-wrap: break-word;
   word-break: break-word;
   flex: 0 0 auto;
-}.formRow {
+}
+
+/* =========================================================
+   6-COLUMN GRID FOR CONTROL ROWS
+   ========================================================= */
+
+.formRow {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
   width: 360px;
   max-width: 100%;
   align-items: center;
   gap: 3px;
-  margin-bottom: 10px;
+  margin-bottom: 3px;
   min-width: 0;
 }
 
@@ -561,11 +743,35 @@ word-break: normal;
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  height: 34px;
-  line-height: 34px;
+  height: 28px;
+  line-height: 28px;
   padding: 0;
+  font-family: var(--font-main);
+  font-size: var(--size-small);
+  font-weight: 400;
 }
-/* Modal */
+
+.speed-buttons {
+  display: contents !important;
+}
+
+.speed-buttons button {
+  background: #bbb;
+  font-weight: 400;
+}
+
+.speed-buttons button.active {
+  background: #1976d2;
+  color: #fff;
+}
+
+.audio-download-control {
+  display: contents !important;
+}
+
+/* =========================================================
+   MODAL & SECTION STYLING
+   ========================================================= */
 
 .modal {
   display: none;
@@ -596,6 +802,10 @@ word-break: normal;
 .modal-content h3 {
   margin-bottom: 12px;
   color: #1976d2;
+  font-family: var(--font-main);
+  font-size: var(--size-title);
+  line-height: 1.3;
+  font-weight: 700;
 }
 
 #sectionRadioList {
@@ -622,6 +832,10 @@ word-break: normal;
   padding: 8px;
   border-radius: 6px;
   cursor: pointer;
+  font-family: var(--font-main);
+  font-size: var(--size-label);
+  line-height: 1.4;
+  font-weight: 400;
 }
 
 #sectionRadioList label:hover {
@@ -640,45 +854,94 @@ word-break: normal;
   flex: 1;
 }
 
-#sectionWheelContainer {
-  height: 34px;
-  min-width: 130px;
-  max-width: 220px;
-  border: 1px solid #bbb;
-  border-radius: 8px;
-  padding: 0 12px;
+/* =========================================================
+   DYNAMICALLY INJECTED INSTRUCTIONS MODAL
+   ========================================================= */
+
+#instructionsRoot {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 6000;
+}
+
+#instructionsBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#instructionsModal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
   background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+#instructionsHeader {
   display: flex;
   align-items: center;
-  flex-wrap: nowrap;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex: 0 0 auto;
 }
 
-#sectionWheelContainer:hover {
-  border-color: #999;
+#instructionsTitle {
+  font-family: var(--font-main);
+  font-size: var(--size-title);
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
 }
 
-#sectionWheelContainer:focus-within {
-  border-color: #4a90e2;
-  box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+#instructionsContent {
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  flex: 1 1 auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  font-family: var(--font-main);
+  font-size: var(--size-label);
+  line-height: 1.5;
+  font-weight: 400;
+  color: #333;
 }
 
-#sectionWheelContainer .wheel {
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+#instructionsContent::-webkit-scrollbar {
+  display: none;
 }
 
-#sectionWheelContainer .wheel.placeholder {
-  color: #aaa;
-  font-style: italic;
+#instructionsContent h3 {
+  margin-top: 10px;
+  margin-bottom: 4px;
+  font-family: var(--font-main);
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
 }
-/* States & Highlights */
+
+#instructionsContent p {
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+/* =========================================================
+   STATES & HIGHLIGHTS
+   ========================================================= */
 
 .reading-active {
-  background-color: #ffff00 !important;
+  background-color: #fff9c4 !important;
   scroll-margin-top: 120px;
   transition: background-color 0.4s ease;
 }
@@ -691,6 +954,7 @@ word-break: normal;
 .word {
   cursor: pointer;
   color: inherit;
+  font-weight: inherit;
 }
 
 .word:hover {
@@ -698,8 +962,10 @@ word-break: normal;
 }
 
 .sentence {
+  font-family: var(--font-main);
   font-size: 14px;
   line-height: 1.4;
+  font-weight: 400;
   color: #333;
 }
 
@@ -716,483 +982,56 @@ body.teleprompter-mode #openSectionModal {
   box-shadow: none;
 }
 
+.selected-verse {
+  background-color: rgba(255, 235, 59, 0.4);
+  transition: background-color 0.5s ease;
+  padding: 2px 4px;
+  border-radius: 3px;
+}
+
 /* =========================================================
-   NORMALIZED & READABLE QUIZ SECTION STYLING
+   DYNAMIC MODAL BOX
    ========================================================= */
 
-#quizSections {
-  width: 100%;
-  margin: 0;
-  padding: 12px;
-  box-sizing: border-box;
-  background: #ffffff !important;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-family: Arial, Helvetica, sans-serif;
-  color: #333;
-  white-space: normal;
-}
-
-#quizSections .exercise {
-  margin-bottom: 12px;
-  padding: 0;
-  background: none;
-  border: none;
-}
-
-#quizSections .exercise p {
-  font-size: 15px;
-  font-weight: 400 !important;
-  color: #111;
-  margin: 0 0 6px;
-  line-height: 1.5;
-  white-space: normal;
-}
-
-#quizSections label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  margin: 0 0 6px;
-  cursor: pointer;
-  font-size: 14px;
-  line-height: 1.5;
-  white-space: normal;
-}
-
-/* ---------- Legacy Quiz Scoreboard ---------- */
-
-.quiz-scoreboard {
-  width: 100%;
-  box-sizing: border-box;
-  margin: 8px 0 12px;
-  padding: 6px;
-  border: 1px solid #9aaed1;
-  border-radius: 6px;
-  background: #f9f9f9;
-  font-family: monospace;
-  font-size: 12px;
-}
-
-.scoreboard-data {
-  margin: 0;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.scoreboard-buttons {
-  margin-top: 6px;
-  display: flex;
-  gap: 6px;
-}
-
-/*
-   Do NOT use [class*="quiz"] here.
-   It also matches .quiz-mania-scoreboard.
-*/
-
-.quiz,
-.quiz-container {
-  margin: 0;
-  padding: 0;
-}
-
-.section-title {
-  font-weight: bold;
-  margin-bottom: 2px;
-}
-
-.export-render-canvas {
-  background: #fff;
-  color: #000;
-  padding: 20px;
-  font-family: monospace;
-  font-size: 16px;
-  line-height: 1.4;
-  white-space: pre-wrap;
+.dynamic-modal-box {
   position: absolute;
-  left: -99999px;
-  top: 0;
-  width: 900px;
-  box-sizing: border-box;
-}
-
-.toast {
-  display: none;
-}
-
-.toast.show {
-  display: block;
-}
-
-.speech-unsupported {
-  opacity: 0.6;
-  pointer-events: none;
-}
-
-.quiz-export-wrapper {
-  white-space: pre-wrap;
-  font-family: monospace;
-  padding: 15px;
-  background-color: #fff;
-  color: #000;
-  position: fixed;
-  left: -9999px;
-  top: 0;
-  width: 900px;
-  box-sizing: border-box;
-}
-
-/* =========================================
-   INSTRUCTIONS MODAL & BUTTON STYLES
-   ========================================= */
-
-#instructionsBtn {
-  position: fixed;
+  top: 50%;
   left: 50%;
-  transform: translateX(-180px);
-  bottom: 8px;
-
-  display: inline-block;
-  margin: 0;
-  padding: 10px 16px;
-
-  background: #2e8b57;
-  color: #fff;
-  border: none;
-  border-radius: 6px;
-
-  font-family: Arial, sans-serif;
-  font-size: 14px;
-  font-weight: 400;
-
-  cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0,0,0,.6);
-  z-index: 99998;
-}
-
-#instructionsBtn:hover {
-  background: #257047;
-}
-
-#instructionsRoot {
-  position: fixed;
-  inset: 0;
-  display: none;
-  z-index: 99999;
-}
-
-#instructionsBackdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.35);
-}
-
-#instructionsModal {
-  position: absolute;
-  top: 25px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(650px, 90vw);
-  max-height: 90vh;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
   background: #fff;
-  border-radius: 10px;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
 
-#instructionsHeader {
-  padding: 12px 16px;
-  border-bottom: 1px solid #ddd;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-#instructionsTitle {
-  color: #1976d2;
-  font-weight: 600;
-  font-size: 1.1em;
-}
-
-#instructionsBack {
-  border: none;
+.dynamic-back-btn {
   background: none;
-  font-size: 20px;
-  cursor: pointer;
-  color: #1976d2;
-  font-weight: 600;
-}
-
-#instructionsContent {
-  padding: 2px 18px 18px;
-  overflow-y: auto;
-  line-height: 1.6;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-}
-
-#instructionsContent::-webkit-scrollbar {
-  display: none;
-}
-
-#instructionsContent h3 {
-  color: #1976d2;
-  margin: 12px 0 4px;
-  font-weight: 600;
-}
-
-#instructionsContent p {
-  margin: 4px 0;
-}
-
-#instructionsContent hr {
-  margin: 12px 0;
-}
-
-.png-export-wrapper {
-  white-space: pre-wrap;
-  font-family: monospace;
-  padding: 10px;
-  background-color: #fff;
-  color: #000;
-}
-
-/* =========================================
-   QUIZ COMPONENT STYLES
-   ========================================= */
-
-.editable-text-zone {
-  outline: none;
-}
-
-.quiz-wrapper {
-  margin-top: 25px;
-  border-top: 2px dashed #ccc;
-  padding-top: 15px;
-}
-
-.quiz-toggle-btn {
-  padding: 6px 14px;
-  cursor: pointer;
-  background: #007bff;
-  color: white;
   border: none;
-  border-radius: 4px;
-  font-weight: bold;
-  margin-bottom: 12px;
-}
-
-.quiz-toggle-btn.active {
-  background: #6c757d;
-}
-
-.quiz-content-container {
-  display: block;
-  background: transparent;
-  padding: 0;
-  border: none;
-  border-radius: 0;
-  font-family: Arial, Helvetica, sans-serif !important;
-  font-size: 16px !important;
-  line-height: 1.6 !important;
-  white-space: pre-wrap !important;
-}
-
-.quiz-line-item {
-  display: block !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  font-family: Arial, Helvetica, sans-serif !important;
-  font-size: 16px !important;
-  line-height: 1.6 !important;
-  font-weight: normal !important;
-  color: #333 !important;
-  min-height: 1.6em !important;
-  white-space: pre-wrap !important;
-  word-break: break-word !important;
-}
-
-.quiz-sections-container {
-  display: block;
-  background: rgba(0, 0, 0, 0.02);
-  padding: 12px;
-  border-radius: 6px;
-  border: 1px solid #e0e0e0;
-}
-
-.quiz-top-controls {
-  margin-bottom: 10px;
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-
-.quiz-id-input {
-  padding: 4px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
-.quiz-submit-btn {
-  padding: 4px 10px;
+  color: #1976d2;
+  font-family: var(--font-main);
+  font-size: 22px;
+  font-weight: 700;
   cursor: pointer;
-}
-
-.quiz-blank-line {
-  min-height: 1.6em !important;
-}
-
-.quiz-exercise {
-  margin-bottom: 4px !important;
-}
-
-.quiz-question-title {
-  margin: 0 0 1px !important;
-  line-height: 1 !important;
-}
-
-.quiz-option-label {
-  margin: 0 0 1px 10px !important;
-  line-height: 1 !important;
-  display: block;
-}
-
-/* =========================================
-   SPEECH & HIGHLIGHT STYLES
-   ========================================= */
-
-.reading-active {
-  background-color: #fff9c4 !important;
-  transition: background-color 0.4s ease;
-}
-
-.speech-emoji-btn {
-  all: unset !important;
-  display: inline-block !important;
-  width: auto !important;
-  height: auto !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  border-radius: 0 !important;
-  box-shadow: none !important;
-  color: inherit !important;
-  font-family: inherit !important;
-  font-size: 14px !important;
-  font-weight: normal !important;
-  line-height: 1 !important;
-  cursor: pointer !important;
-  vertical-align: middle !important;
-  transition: none !important;
-}
-
-.speech-emoji-btn:hover,
-.speech-emoji-btn:focus,
-.speech-emoji-btn:active {
-  background: transparent !important;
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
-  color: inherit !important;
-  outline: none !important;
-}
-.mc-emoji {
-  margin-left: 8px;
-}
-
-/* =========================================================
-   MC QUIZ MANIA — SEPARATE SCOREBOARD
-   ========================================================= */
-
-.quiz-mania-controls {
-  display: flex;
+  padding: 4px 8px;
+  line-height: 1;
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-  margin: 8px 0;
+  justify-content: center;
+  border-radius: 4px;
 }
 
-.quiz-mania-id {
-  width: 180px;
-  box-sizing: border-box;
-  padding: 6px 8px;
+.dynamic-back-btn:hover {
+  background-color: #eef6ff;
 }
-
-.quiz-mania-controls button,
-.quiz-mania-buttons button {
-  height: 36px !important;
-  padding: 0 10px !important;
-  font-size: 14px !important;
-  font-family: Arial, Helvetica, sans-serif !important;
-  font-weight: normal !important;
-  line-height: normal !important;
-  background: #1976d2 !important;
-  color: #fff !important;
-  border: none !important;
-  border-radius: 6px !important;
-  cursor: pointer !important;
-  transition: 0.12s !important;
-  box-sizing: border-box !important;
-}
-
-.quiz-mania-controls button:hover,
-.quiz-mania-buttons button:hover {
-  background: #1565c0 !important;
-}
-
-/* ---------- MC Quiz Scoreboard ---------- */
-
-.quiz-mania-scoreboard {
-  display: none;
-  width: 100%;
-  box-sizing: border-box;
-  margin: 8px 0 12px;
-  padding: 10px;
-  border: 1px solid #9aaed1;
-  border-radius: 6px;
-  background: #f9f9f9;
-  font-family: monospace;
-  font-size: 14px;
-}
-
-.quiz-mania-score-text {
-  display: block;
-  width: 100%;
-  margin: 0 0 8px;
-  padding: 10px;
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
-  word-break: break-word;
-  font-family: monospace;
-  font-size: 14px;
-  line-height: 1.4;
-  background: #fff;
-  color: #000;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-}
-
-.quiz-mania-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 6px;
-}
-
-img,
-video,
-canvas,
-iframe,
-table {
-  max-width: 100%;
-}
-
 </style>
 
 </head>
+
 <body>
 
 <div id="green-border"></div>
@@ -1200,210 +1039,540 @@ table {
 <div id="layout">
   <div class="container">
 
-    <!-- TOP BAR -->
-    <div class="top-bar">
-      <input id="gsId" type="text" placeholder="Student ID">
+    <!-- TOP BAR CONTAINER (360px layout boundary) -->
+    <div class="top-bar-container">
+      
+      <!-- ROW 1: ID Input & Section Button -->
+      <div class="top-bar-row-1">
+        <input id="gsId" type="text" placeholder="Student ID">
+        <button id="openSectionModal" type="button">Section</button>
+      </div>
 
-      <!-- Section Button -->
-      <button id="openSectionModal" type="button">Section</button>
+      <!-- ROW 2: Navigation & Strategy Buttons (Grid adapted to fit them cleanly) -->
+      <div class="top-bar-row-2 multi-strategy-row">
+        <button id="instructionsBtn" type="button">Instructions</button>
+        <button id="readingStrategiesBtn" type="button">Reading</button>
+        <button id="listeningStrategiesBtn" type="button">Listening</button>
+        <button id="signalWordsBtn" type="button">Signal Words</button>
+        <!--<button id="originalTextBtn" type="button">Original</button>-->
+      </div>
+
+      <!-- ROW 3: Chapter, Verse, Go, and Instructions -->
+      <div class="top-bar-row-3">
+         <select id="chapterSelect"></select>
+         <select id="verseSelect"></select>
+         <button id="goBtn" type="button">Go</button>
+ <button id="row3InstructionsBtn">Instructions</button>  
+	</div>
+
     </div>
 
     <!-- SECTION SELECTION MODAL -->
     <div id="sectionModal" class="modal">
-      <div class="modal-content" style="position: relative;">
-
+      <div class="modal-content section-modal-custom">
         <h3>Select a Section</h3>
-
         <div id="sectionRadioList"></div>
-
         <div class="modal-buttons">
-          <button id="cancelSectionModal" type="button">
-            Cancel
-          </button>
+          <button id="confirmSectionSelection" type="button">Load Section</button>
+          <button id="cancelSectionModal" type="button">Cancel</button>
 
-          <button id="confirmSectionSelection" type="button">
-            Load Section
-          </button>
         </div>
-
       </div>
     </div>
 
-    <!-- PLAYBACK CONTROLS & SPEED BUTTONS -->
+    <!-- PLAYBACK CONTROLS & SPEED BUTTONS (Strict 6-Column Grid) -->
     <div class="formRow">
-
       <button id="startBtn">Scroll</button>
       <button id="repeatBtn">Repeat</button>
 
-      <div
-        class="speed-buttons"
-        role="tablist"
-        aria-label="Speed"
-        style="display:inline-flex; gap:4px; margin:0; vertical-align:middle;">
-
+      <div class="speed-buttons">
         <button data-speed="4000">Slow</button>
         <button data-speed="3000" class="active">Medium</button>
         <button data-speed="2000">Fast</button>
-
       </div>
-<button id="audioBtn" title="Play Audio">
-    Audio
-</button>
+
+      <button id="audioBtn" title="Play Audio">Audio</button>
     </div>
 
     <!-- RECORDING & UTILITY CONTROLS -->
     <div class="formRow">
+      <button id="highlightBtn" title="Toggle Highlight">Mark</button>
+      <button id="teleCopyBtn" type="button" title="Copy Selected Text">Copy</button>
+      <button id="sttBtn" title="Start/Stop speech">STT</button>
+      <button id="captureAudioBtn" title="Start/Stop audio">🔴</button>
 
-      <button id="highlightBtn" title="Toggle Highlight">
-        Mark
-      </button>
-
-      <button id="teleCopyBtn" type="button" title="Copy Selected Text">
-        Copy
-      </button>
-
-
-
-      <button id="sttBtn" title="Start/Stop speech">
-        STT
-      </button>
-
-      <button id="captureAudioBtn" title="Start/Stop audio">
-        🔴
-      </button>
-
-<div class="audio-download-control">
-    <button id="topAudioDownloadBtn" type="button">
-        ↓ 🔴
-    </button>
-</div>
-
-
-      <button id="submitBtn" disabled>
-        Submit
-      </button>
-
-    </div>
-
-    <!-- =====================================================
-         TEXT PANEL
-         ===================================================== -->
-    <div id="gsMain">
-
-      <div id="teleWrapper" class="tele-wrapper">
-
-        <div id="teleScrollWrapper">
-
-          <div id="teleScroll">
-
-            <div
-              id="teleEdit"
-              class="tele-edit question-text"
-              contenteditable="true"
-              data-placeholder="Type or paste your text here..."></div>
-
-          </div>
-
-        </div>
-
+      <div class="audio-download-control">
+        <button id="topAudioDownloadBtn" type="button">↓ 🔴</button>
       </div>
 
+      <button id="submitBtn" disabled>Submit</button>
     </div>
 
-    <!-- =====================================================
-         TEXT METRICS + COPYRIGHT
-         ===================================================== -->
-    <div class="under-text-row">
+    <!-- TEXT PANEL -->
+    <div id="gsMain">
+      <div id="teleWrapper" class="tele-wrapper">
+        <div id="teleScrollWrapper">
+          <div id="teleScroll">
+            <div id="teleEdit" class="tele-edit question-text" contenteditable="true" data-placeholder="Type or paste your text here..."></div>
+          </div>
+        </div>
+      </div>
+    </div>
 
+    <!-- TEXT METRICS + COPYRIGHT -->
+    <div class="under-text-row">
       <div class="tele-overlay" id="teleOverlay">
         0 chars · 0 sent · Changed: 0%
       </div>
-
-<div class="under-text-copyright">
-  © <span id="copyrightYear"></span> Perfectly Practical English
-</div>
-
+      <div class="under-text-copyright">
+        © <span id="copyrightYear"></span> Perfectly Practical English
+      </div>
     </div>
 
-    <!-- =====================================================
-         QUIZ TOGGLE BAR
-         ===================================================== -->
+    <!-- QUIZ TOGGLE BAR -->
     <button id="quizToggleBar" class="quiz-toggle-bar" type="button">
       ▼ Show Quiz
     </button>
 
-    <!-- =====================================================
-         QUIZ PANEL (Hidden Until Toggle)
-         ===================================================== -->
-    <div id="quizMain" style="display:none;">
-
+    <!-- QUIZ PANEL (Hidden Until Toggle) -->
+    <div id="quizMain" class="quiz-main-hidden">
       <div id="quizWrapper" class="tele-wrapper">
-
         <div id="quizScrollWrapper">
-
           <div id="quizContentContainer">
             <!-- Quiz parser inserts quiz here -->
           </div>
-
         </div>
-
       </div>
-
     </div>
 
   </div>
 
-  <!-- =====================================================
-       GLOBAL / TEXT ACTIVITY SCOREBOARD
-       ===================================================== -->
-  <div
-    id="gsScoreboard"
-    class="scoreboard"
-    aria-live="polite">
-
+  <!-- GLOBAL / TEXT ACTIVITY SCOREBOARD -->
+  <div id="gsScoreboard" class="scoreboard" aria-live="polite">
     <div id="gsScoreMeta"></div>
-
-    <div
-      id="gsScoreText"
-      class="text"
-      contenteditable="true">
+    <div id="gsScoreText" class="text" contenteditable="true"></div>
+    <div class="global-scoreboard-buttons">
+      <button id="copyScoreBtn">Copy</button>
+      <button id="downloadScoreTxtBtn">TXT</button>
+      <button id="downloadScorePngBtn">PNG</button>
+      <button id="downloadBlobBtn">↓ 🔴</button>
     </div>
-
-    <div
-      class="global-scoreboard-buttons"
-      style="margin-top:10px;">
-
-      <button id="copyScoreBtn">
-        Copy
-      </button>
-
-      <button id="downloadScoreTxtBtn">
-        TXT
-      </button>
-
-      <button id="downloadScorePngBtn">
-        PNG
-      </button>
-
-      <button id="downloadBlobBtn">
-        ↓ 🔴
-      </button>
-
-    </div>
-
   </div>
 
 </div>
 
 <!-- GLOBAL NOTIFICATIONS / MEASURE HELPERS -->
-
-<div id="toast" class="toast">
-  Copied
-</div>
-
+<div id="toast" class="toast">Copied</div>
 <div id="measure" aria-hidden="true"></div>
 
+
+<!-- MULTI-MODAL SYSTEM SCRIPT (ALL 5 MODALS + DUAL INSTRUCTIONS BUTTONS) -->
 <script>
+(function(){
+  'use strict';
+
+  /* =========================
+     1. CONTEXT CONFIGURATIONS
+     ========================= */
+  const modalConfigs = [
+    {
+      id: "instructions",
+      btnIds: ["instructionsBtn", "row3InstructionsBtn"],
+      title: "Instructions",
+      rawText: `
+How to use this page...
+
+1. Enter Name and ID.
+2. Select a category.
+3. Click Start to begin.
+4. Write or edit in the text field.
+5. Select from the suggested word bank.
+6. Click Start to start the Teleprompter Feature.
+7. Adjust the speed with the bars numbered 1-5.
+8. You can Start, Stop and Repeat the teleprompter text.
+9. You can convert your speech to text with STT.
+10. You can record your speech with the red Record button.
+11. Click Submit to find options to save your work.
+12. Copy or download your text.
+13. Download your audio.
+      `
+    },
+    {
+      id: "readingStrategies",
+      btnIds: ["readingStrategiesBtn"],
+      title: "Reading Strategies",
+      rawText: `
+Reading Strategies...
+
+Traditional Strategies:
+1. Preview the text headings and structure before starting.
+2. Identify the main thesis or core objective.
+3. Pause at paragraph breaks to synthesize key points.
+4. Utilize the prompter pacing to match natural reading speeds.
+
+Comprehensive reading strategy checklist
+
+1. Cut texts into small pieces.
+2. Collect context clues.
+3. Reread when lost.
+4. Scan titles and images.
+5. Identify known/unknown words.
+6. Use background knowledge.
+7. Break down word parts.
+8. Look up vocabulary.
+9. Identify signal words.
+      `
+    },
+    {
+      id: "listeningStrategies",
+      btnIds: ["listeningStrategiesBtn"],
+      title: "Listening Strategies",
+      rawText: `
+Listening Strategies
+
+Traditional Strategies:
+
+1. Preview the topic, headings, images, and questions before listening.
+2. Identify the main idea or purpose of the listening.
+3. Pause between sections to recall and summarize key points.
+4. Use the recording's pacing to follow natural speech.
+
+Comprehensive listening strategy checklist
+
+1. Break the recording into small pieces.
+2. Collect context clues.
+3. Replay when lost.
+4. Preview titles, images, and questions.
+5. Identify known and unknown words.
+6. Use background knowledge to predict.
+7. Listen for familiar word parts and sounds.
+8. Check vocabulary after listening.
+9. Listen for signal words and stressed words.
+10. Listen for the main idea and key details.
+      `
+    },
+    {
+      id: "signalWords",
+      btnIds: ["signalWordsBtn"],
+      title: "Signal Words",
+      rawText: `
+Common Signal Word Categories and Examples
+
+• Time ⏰: words that tell when something happens
+
+on, at, in, before, after, since, until, during, for, now, yesterday, today, tomorrow, later, then, when, while, once
+
+• Addition ➕: words that add ideas together
+
+and, also, too, with, plus, as well as, not only...but also, both...and
+
+• Cause / Effect 🔗: words that show a reason or result
+
+because, so, since, because of, due to, as a result, therefore, that’s why
+
+• Comparison / Similarity / Difference ⚖️: words that compare things
+
+like, as, as...as, than, similar to, different from, more than, less than, the most, just as...so, whereas, in contrast to
+
+• Contrast / Opposition 🎭: words that show differences
+
+but, although, though, even though, however, yet, still, despite, instead, whereas, while, on the other hand
+
+• Frequency 〰️: words that tell how often something happens
+
+always, usually, often, sometimes, occasionally, rarely, never, every day, once a week, hardly ever, from time to time
+
+• Possibility / Certainty 🎲: words that show how possible or sure something is
+
+maybe, probably, possibly, must, might, may, could, can, definitely, certainly
+
+• Advice / Obligation / Permission ☝️: words that tell rules or give guidance
+
+must, must not, have to, don’t have to, should, ought to, had better, can, cannot, may, could
+
+• Manner 🎭: words that tell how something is done
+
+quickly, slowly, carefully, easily, well, badly, with, by, in a...way, as
+
+• Place / Location 📍: words that tell where something is
+
+in, on, at, under, above, between, near, next to, here, there, everywhere, anywhere
+
+• Condition 🌧️: words that show something depends on something else
+
+if, unless, in case, on condition that
+
+• Emphasis / Focus 🎯: words that make something stronger or more important
+
+only, just, even, especially, mainly, particularly
+
+• Questions (Interrogatives) ❓: words used to ask questions
+
+how, when, where, why
+
+• Relative Words 👨‍👩‍👧‍👦: words that connect ideas about time, place, reason, or manner
+
+when, where, why, how
+
+• Direction / Movement 🧭: words that show movement or direction
+
+to, from, toward, away from, up, down, forward, back
+
+• Affirmative and Negative ✔️❌: words that show yes or no
+
+yes, no
+      `
+    },
+    {
+      id: "originalText",
+      btnIds: ["originalTextBtn"],
+      title: "Original Text",
+      rawText: `
+Original Source Reference...
+
+[Insert your original unedited text source here for quick structural comparison or copy verification.]
+      `
+    }
+  ];
+
+  /* =========================
+     2. SHARED RAW TEXT PARSER
+     ========================= */
+  function parseRawText(text){
+    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+    const html = [];
+
+    lines.forEach(line => {
+      if(line === "---"){
+        html.push(`<hr>`);
+        return;
+      }
+
+      if(/^\d+\./.test(line)){
+        html.push(`<p>${line}</p>`);
+        return;
+      }
+
+      if(!/[.!?:]$/.test(line)){
+        html.push(`<h3>${line}</h3>`);
+        return;
+      }
+
+      html.push(`<p>${line}</p>`);
+    });
+
+    return html.join("");
+  }
+
+  /* =========================
+     3. INITIALIZE MODALS DYNAMICALLY
+     ========================= */
+  modalConfigs.forEach(config => {
+
+    // Create root container for each modal
+    const root = document.createElement("div");
+    root.id = `${config.id}Root`;
+    root.style.display = "none";
+    root.style.position = "fixed";
+    root.style.inset = "0";
+    root.style.zIndex = "6000";
+
+    root.innerHTML = `
+      <div
+        id="${config.id}Backdrop"
+        style="position:absolute; inset:0; background:rgba(0,0,0,0.45);">
+      </div>
+
+      <div id="${config.id}Modal" class="dynamic-modal-box">
+
+        <div
+          id="${config.id}Header"
+          style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:12px; flex:0 0 auto;">
+
+          <span
+            id="${config.id}Title"
+            style="font-size:18px; font-weight:700; color:#1976d2;">
+            ${config.title}
+          </span>
+
+          <button
+            id="${config.id}Back"
+            type="button"
+            class="dynamic-exit-btn"
+            aria-label="Exit">
+            X
+          </button>
+
+        </div>
+
+        <div
+          id="${config.id}Content"
+          style="overflow-y:auto; overflow-x:hidden; min-height:0; flex:1 1 auto; scrollbar-width:none; font-size:14px; line-height:1.5; color:#333;">
+          ${parseRawText(config.rawText)}
+        </div>
+
+      </div>
+    `;
+
+    document.body.appendChild(root);
+
+    // Modal elements reference
+    const modalContent = document.getElementById(`${config.id}Content`);
+    const backBtn = document.getElementById(`${config.id}Back`);
+    const backdrop = document.getElementById(`${config.id}Backdrop`);
+
+    // Scroll Lock logic
+    if(modalContent) {
+      modalContent.addEventListener(
+        "wheel",
+        e => { e.stopPropagation(); },
+        { passive: false }
+      );
+
+      modalContent.addEventListener(
+        "touchmove",
+        e => { e.stopPropagation(); },
+        { passive: false }
+      );
+    }
+
+    // Open / Close functions
+    function openModal(){
+      root.style.display = "block";
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+    }
+
+    function closeModal(){
+      root.style.display = "none";
+
+      // Only restore main document overflow if NO other modal is currently open
+      const anyOpen = modalConfigs.some(
+        c => document.getElementById(`${c.id}Root`)?.style.display === "block"
+      );
+
+      if(!anyOpen) {
+        document.body.style.overflow = "";
+        document.documentElement.style.overflow = "";
+      }
+    }
+
+    // Event Bindings for all designated trigger button IDs
+    if(config.btnIds) {
+      config.btnIds.forEach(btnId => {
+        const triggerBtn = document.getElementById(btnId);
+
+        if(triggerBtn) {
+          triggerBtn.addEventListener("click", openModal);
+        }
+      });
+    }
+
+    // Exit button
+    if(backBtn) {
+      backBtn.addEventListener("click", function(e) {
+        e.preventDefault();
+        closeModal();
+      });
+    }
+
+    // Backdrop closes modal
+    if(backdrop) {
+      backdrop.addEventListener("click", closeModal);
+    }
+  });
+
+  /* =========================
+     4. GLOBAL ESCAPE KEY
+     ========================= */
+  document.addEventListener("keydown", e => {
+    if(e.key === "Escape") {
+
+      modalConfigs.forEach(config => {
+        const rootElem = document.getElementById(`${config.id}Root`);
+
+        if(rootElem && rootElem.style.display === "block") {
+          rootElem.style.display = "none";
+        }
+      });
+
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    }
+  });
+
+})();
+</script>
+
+
+<!-- 1. MOBILE TOUCH & GESTURE GUARD -->
+<script>
+(function() {
+  'use strict';
+  function preventPinch(e) { if (e.touches.length > 1) e.preventDefault(); }
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) e.preventDefault();
+    lastTouchTime = now;
+  }
+  function preventGesture(e) { e.preventDefault(); }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<script>
+(function () {
+  'use strict';
+
+  function smoothSignalWordsText() {
+    const content = document.getElementById('signalWordsContent');
+    if (!content) return;
+
+    const headings = content.querySelectorAll('h3');
+
+    headings.forEach(function (heading, index) {
+      const text = heading.textContent.trim();
+
+      /*
+       * Keep:
+       * 1. The main Signal Words heading.
+       * 2. Category headings beginning with a bullet.
+       */
+      if (
+        index === 0 ||
+        text.startsWith('•')
+      ) {
+        return;
+      }
+
+      /*
+       * Everything else that the generic parser
+       * incorrectly made into an h3 becomes
+       * normal body text.
+       */
+      const paragraph = document.createElement('p');
+      paragraph.textContent = text;
+      heading.replaceWith(paragraph);
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener(
+      'DOMContentLoaded',
+      smoothSignalWordsText
+    );
+  } else {
+    smoothSignalWordsText();
+  }
+
+})();
+</script>
+<script>
+
 document.getElementById('copyrightYear').textContent = new Date().getFullYear();
 </script>
 
@@ -2340,8 +2509,6 @@ Treat others as you wish to be treated.~
 
 BLANK
 ?BLANK
-
-
 
 </script>
 
@@ -5563,6 +5730,144 @@ window.currentQuizSectionText =
 })();
 </script>
 
+<script>
+(function() {
+    // Wait a brief moment to ensure the original script has initialized
+    setTimeout(() => {
+        const highlightBtn = document.getElementById("highlightBtn") || document.getElementById("highlightSelected");
+        const editor = document.getElementById("teleEdit");
+        if (!highlightBtn || !editor) return;
+
+        // Clone the button to strip away the old broken click listener safely
+        const newBtn = highlightBtn.cloneNode(true);
+        highlightBtn.parentNode.replaceChild(newBtn, highlightBtn);
+
+        newBtn.addEventListener("mousedown", (e) => e.preventDefault());
+
+        newBtn.addEventListener("click", () => {
+            const sel = window.getSelection();
+            if (!sel.rangeCount || sel.isCollapsed) return;
+
+            const range = sel.getRangeAt(0);
+            if (!editor.contains(range.commonAncestorContainer)) return;
+
+            let container = range.commonAncestorContainer;
+            if (container.nodeType === 3) container = container.parentNode;
+            
+            const enclosingHighlight = container.closest(".highlight");
+
+            // 1. UN-HIGHLIGHT LOGIC (Toggle off if inside an existing highlight)
+            if (enclosingHighlight) {
+                const parent = enclosingHighlight.parentNode;
+                while (enclosingHighlight.firstChild) {
+                    parent.insertBefore(enclosingHighlight.firstChild, enclosingHighlight);
+                }
+                enclosingHighlight.remove();
+                editor.normalize();
+                sel.removeAllRanges();
+                return;
+            }
+
+            // 2. CHECK INTERSECTING HIGHLIGHTS
+            const allHighlights = Array.from(editor.querySelectorAll(".highlight"));
+            const intersecting = allHighlights.filter(h => {
+                try {
+                    return range.intersectsNode(h) || h.contains(range.startContainer) || h.contains(range.endContainer);
+                } catch (e) {
+                    return false;
+                }
+            });
+
+            if (intersecting.length > 0) {
+                intersecting.forEach(h => {
+                    const parent = h.parentNode;
+                    if (parent) {
+                        while (h.firstChild) {
+                            parent.insertBefore(h.firstChild, h);
+                        }
+                        h.remove();
+                    }
+                });
+                editor.normalize();
+                sel.removeAllRanges();
+                return;
+            }
+
+            // 3. SAFE MULTI-NODE HIGHLIGHT LOGIC (Prevents text deletion across paragraphs)
+            try {
+                // Try standard surround first if it's within a single text node
+                const span = document.createElement("span");
+                span.className = "highlight";
+                range.surroundContents(span);
+            } catch (err) {
+                // Multi-node/multi-paragraph safe wrapping algorithm
+                const startContainer = range.startContainer;
+                const endContainer = range.endContainer;
+                const startOffset = range.startOffset;
+                const endOffset = range.endOffset;
+
+                // Collect all text nodes contained within the range
+                const walker = document.createTreeWalker(
+                    range.commonAncestorContainer,
+                    NodeFilter.SHOW_TEXT,
+                    {
+                        acceptNode: function(node) {
+                            try {
+                                return range.intersectsNode(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+                            } catch(e) {
+                                return NodeFilter.FILTER_REJECT;
+                            }
+                        }
+                    }
+                );
+
+                const textNodesToWrap = [];
+                let currentNode;
+                while (currentNode = walker.nextNode()) {
+                    textNodesToWrap.push(currentNode);
+                }
+
+                if (textNodesToWrap.length === 0) {
+                    // Fallback extract if tree walker misses
+                    const span = document.createElement("span");
+                    span.className = "highlight";
+                    span.appendChild(range.extractContents());
+                    range.insertNode(span);
+                } else {
+                    // Process nodes safely from last to first to avoid index shifting mutations
+                    textNodesToWrap.reverse().forEach(node => {
+                        let targetNode = node;
+                        let startIdx = 0;
+                        let endIdx = node.nodeValue.length;
+
+                        if (node === startContainer) {
+                            startIdx = startOffset;
+                        }
+                        if (node === endContainer) {
+                            endIdx = endOffset;
+                        }
+
+                        if (startIdx < endIdx) {
+                            if (startIdx > 0 || endIdx < node.nodeValue.length) {
+                                targetNode = node.splitText(startIdx);
+                                targetNode.splitText(endIdx - startIdx);
+                            }
+
+                            const span = document.createElement("span");
+                            span.className = "highlight";
+                            targetNode.parentNode.insertBefore(span, targetNode);
+                            span.appendChild(targetNode);
+                        }
+                    });
+                }
+            }
+
+            editor.normalize();
+            sel.removeAllRanges();
+        });
+    }, 100);
+})();
+</script>
 
 
 <!-- =========================================================
@@ -5741,137 +6046,6 @@ function engageScrollerMode() {
 </script>
 
 
-<script>
-(function(){
-  'use strict';
-
-  /* =========================
-     RAW INSTRUCTIONS TEXT
-  ========================= */
-  const RAW_TEXT = `
-How to use this page...
-
-1. Enter Name and ID.
-2. Select a category.
-3. Click Start to begin.
-4. Write or edit in the text field.
-5. Select from the suggested word bank.
-6. Click Start to start the Teleprompter Feature.
-7. Adjust the speed with the bars numbered 1-5.
-8. You can Start, Stop and Repeat the teleprompter text.
-9. You can convert your speech to text with STT.
-10. You can record your speech with the red Record button.
-8. Click Submit to find options to save your work.
-9. Copy or download your text.
-10. Download your audio.
-  `;
-
-  /* =========================
-     RAW TEXT PARSER
-  ========================= */
-  function parseRawInstructions(text){
-    const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-    const html = [];
-
-    lines.forEach(line => {
-      if(line === "---"){
-        html.push(`<hr>`);
-        return;
-      }
-      if(/^\d+\./.test(line)){
-        html.push(`<p>${line}</p>`);
-        return;
-      }
-      if(!/[.!?:]$/.test(line)){
-        html.push(`<h3>${line}</h3>`);
-        return;
-      }
-      html.push(`<p>${line}</p>`);
-    });
-
-    return html.join("");
-  }
-
-  /* =========================
-     CREATE BUTTON
-  ========================= */
-  const btn = document.createElement("button");
-  btn.id = "instructionsBtn";
-  btn.textContent = "Instructions";
-
-  const targetContainer = document.querySelector("footer") || document.body;
-  targetContainer.appendChild(btn);
-
-  /* =========================
-     CREATE MODAL
-  ========================= */
-  const root = document.createElement("div");
-  root.id = "instructionsRoot";
-
-  root.innerHTML = `
-    <div id="instructionsBackdrop"></div>
-    <div id="instructionsModal">
-      <div id="instructionsHeader">
-        <button id="instructionsBack">←</button>
-        <span id="instructionsTitle">Instructions</span>
-      </div>
-      <div id="instructionsContent">
-        ${parseRawInstructions(RAW_TEXT)}
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(root);
-
-  /* =========================
-     SCROLL LOCK
-  ========================= */
-  const modalContent = document.getElementById("instructionsContent");
-
-  modalContent.addEventListener("wheel", e => {
-    e.stopPropagation();
-  }, { passive: false });
-
-  modalContent.addEventListener("touchmove", e => {
-    e.stopPropagation();
-  }, { passive: false });
-
-  /* =========================
-     OPEN / CLOSE
-  ========================= */
-  function openModal(){
-    root.style.display = "block";
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
-  }
-
-  function closeModal(){
-    root.style.display = "none";
-    document.body.style.overflow = "";
-    document.documentElement.style.overflow = "";
-  }
-
-  btn.onclick = openModal;
-  document.getElementById("instructionsBack").onclick = closeModal;
-  document.getElementById("instructionsBackdrop").onclick = closeModal;
-
-  document.addEventListener("keydown", e => {
-    if(e.key === "Escape") closeModal();
-  });
-
-  /* =========================
-     DYNAMIC BODY PADDING FOR BUTTON
-  ========================= */
-  function adjustBodyPadding(){
-    const btnHeight = btn.offsetHeight - 25; 
-    document.body.style.paddingBottom = `${btnHeight}px`;
-  }
-
-  adjustBodyPadding();
-  window.addEventListener("resize", adjustBodyPadding);
-
-})();
-</script>
 
 <!-- 1. MOBILE TOUCH & GESTURE GUARD -->
 <script>
@@ -5891,7 +6065,6 @@ How to use this page...
   document.addEventListener('gesturestart', preventGesture, { passive: false });
 })();
 </script>
-
 <!-- SUPABASE LIBRARY -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -8690,6 +8863,639 @@ console.log(
 
 })();
 </script>
+
+<script>
+/* ==========================================================================
+   CASCADING CHAPTER & VERSE NAVIGATION & TOP-ALIGNMENT MODULE
+   ========================================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+    'use strict';
+
+    const chapterSelect = document.getElementById('chapterSelect');
+    const verseSelect = document.getElementById('verseSelect');
+    const goBtn = document.getElementById('goBtn');
+    const teleEdit = document.getElementById('teleEdit');
+
+    let currentSectionVerseMap = {};
+
+    // 1. PARSE CHAPTERS & VERSES FROM THE ACTIVE TEXT SECTION
+    function parseChaptersAndVerses() {
+        currentSectionVerseMap = {};
+        const editableZone = document.getElementById('editableTextZone') || teleEdit;
+        if (!editableZone) return;
+
+        const nodes = Array.from(editableZone.querySelectorAll('.line, p, h3, h4'));
+        
+        let currentChap = "1";
+        currentSectionVerseMap[currentChap] = {};
+
+        nodes.forEach((node) => {
+            const text = node.textContent ? node.textContent.trim() : "";
+            if (!text) return;
+
+            const chapMatch = text.match(/^chapter\s*[:]?\s*(\d+)/i) || text.match(/^ch\.?\s*(\d+)/i);
+            const verseMatch = text.match(/^verse\s*[:]?\s*(\d+)/i) || text.match(/^v\.?\s*(\d+)/i);
+
+            if (chapMatch && chapMatch[1]) {
+                currentChap = chapMatch[1];
+                if (!currentSectionVerseMap[currentChap]) {
+                    currentSectionVerseMap[currentChap] = {};
+                }
+            }
+
+            if (verseMatch && verseMatch[1]) {
+                const verseNum = verseMatch[1];
+                currentSectionVerseMap[currentChap][verseNum] = node;
+                node.dataset.verseNum = verseNum;
+                node.dataset.chapterNum = currentChap;
+            }
+        });
+
+        if (Object.keys(currentSectionVerseMap["1"]).length === 0) {
+            nodes.forEach((node, idx) => {
+                currentSectionVerseMap["1"][idx + 1] = node;
+            });
+        }
+
+        populateChapterDropdown();
+    }
+
+    // 2. POPULATE CHAPTER DROPDOWN
+    function populateChapterDropdown() {
+        if (!chapterSelect) return;
+        chapterSelect.innerHTML = '';
+
+        const chapters = Object.keys(currentSectionVerseMap);
+        if (chapters.length === 0) {
+            chapters.push("1");
+            currentSectionVerseMap["1"] = { "1": teleEdit };
+        }
+
+        chapters.forEach(chap => {
+            const opt = document.createElement('option');
+            opt.value = chap;
+            opt.textContent = `Chapter ${chap}`;
+            chapterSelect.appendChild(opt);
+        });
+
+        populateVerseDropdown();
+    }
+
+    // 3. POPULATE VERSE DROPDOWN BASED ON SELECTED CHAPTER
+    function populateVerseDropdown() {
+        if (!verseSelect || !chapterSelect) return;
+        verseSelect.innerHTML = '';
+
+        const activeChap = chapterSelect.value;
+        const versesObj = currentSectionVerseMap[activeChap] || {};
+        const verses = Object.keys(versesObj);
+
+        if (verses.length === 0) {
+            verses.push("1");
+        }
+
+        verses.forEach(verse => {
+            const opt = document.createElement('option');
+            opt.value = verse;
+            opt.textContent = `Verse ${verse}`;
+            verseSelect.appendChild(opt);
+        });
+    }
+
+    if (chapterSelect) {
+        chapterSelect.addEventListener('change', populateVerseDropdown);
+    }
+
+    window.addEventListener('textSectionLoaded', () => {
+        setTimeout(parseChaptersAndVerses, 100);
+    });
+
+    setTimeout(parseChaptersAndVerses, 300);
+
+    // 4. "GO" BUTTON NAVIGATION (Brings target verse precisely to the top)
+    if (goBtn) {
+        goBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const chap = chapterSelect ? chapterSelect.value : "1";
+            const verse = verseSelect ? verseSelect.value : "1";
+
+            const targetNode = currentSectionVerseMap[chap]?.[verse];
+            const scrollWrapper = document.getElementById('teleScrollWrapper') || document.getElementById('teleWrapper');
+
+            if (targetNode && scrollWrapper) {
+                // Sum up offset tops recursively up to the scroll wrapper for absolute precision
+                let topPos = 0;
+                let el = targetNode;
+                while (el && el !== scrollWrapper && el !== document.body) {
+                    topPos += el.offsetTop;
+                    el = el.offsetParent;
+                }
+
+                // Scroll container so the selected verse sits right at the top (with a 10px safety buffer)
+                scrollWrapper.scrollTo({
+                    top: Math.max(0, topPos - 10),
+                    behavior: 'smooth'
+                });
+
+                // Soft highlight effect to make it pop out
+                targetNode.style.transition = 'background-color 0.3s ease';
+                targetNode.style.backgroundColor = '#dbeafe';
+                setTimeout(() => {
+                    targetNode.style.backgroundColor = '';
+                }, 1800);
+            } else {
+                console.warn(`Target Chapter ${chap}, Verse ${verse} element could not be located.`);
+            }
+        });
+    }
+});
+</script>
+
+<script>
+/* ==========================================================================
+   CASCADING CHAPTER & VERSE NAVIGATION & TOP-ALIGNMENT MODULE
+   ========================================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+    'use strict';
+
+    const chapterSelect = document.getElementById('chapterSelect');
+    const verseSelect = document.getElementById('verseSelect');
+    const goBtn = document.getElementById('goBtn');
+    const teleEdit = document.getElementById('teleEdit');
+
+    let currentSectionVerseMap = {};
+
+    // 1. PARSE CHAPTERS & VERSES FROM THE ACTIVE TEXT SECTION (Enhanced flexibility)
+    function parseChaptersAndVerses() {
+        currentSectionVerseMap = {};
+        const editableZone = document.getElementById('editableTextZone') || teleEdit;
+        if (!editableZone) return;
+
+        const nodes = Array.from(editableZone.querySelectorAll('.line, p, h3, h4, span'));
+        
+        let currentChap = "1";
+        currentSectionVerseMap[currentChap] = {};
+
+        nodes.forEach((node) => {
+            const text = node.textContent ? node.textContent.trim() : "";
+            if (!text) return;
+
+            // Check if node already has explicit dataset attributes
+            if (node.dataset.verseNum) {
+                const c = node.dataset.chapterNum || currentChap;
+                const v = node.dataset.verseNum;
+                if (!currentSectionVerseMap[c]) currentSectionVerseMap[c] = {};
+                currentSectionVerseMap[c][v] = node;
+                return;
+            }
+
+            // Flexible regex match for chapters and verses
+            const chapMatch = text.match(/^(?:chapter|ch\.?)\s*(\d+)/i);
+            const verseMatch = text.match(/^(?:verse|v\.?)\s*(\d+)/i) || text.match(/^(\d+[\.:])\s+/); // matches "1." or "1:" at start
+
+            if (chapMatch && chapMatch[1]) {
+                currentChap = chapMatch[1];
+                if (!currentSectionVerseMap[currentChap]) {
+                    currentSectionVerseMap[currentChap] = {};
+                }
+            }
+
+            if (verseMatch && verseMatch[1]) {
+                const verseNum = verseMatch[1].replace(/[\.:]/g, ''); // clean up punctuation if matched via "1."
+                currentSectionVerseMap[currentChap][verseNum] = node;
+                node.dataset.verseNum = verseNum;
+                node.dataset.chapterNum = currentChap;
+            }
+        });
+
+        // Fallback: If no explicit chapter/verse markers were found in the text, map sequential nodes as verses for Chapter 1
+        let totalVersesFound = Object.values(currentSectionVerseMap).reduce((acc, chapObj) => acc + Object.keys(chapObj).length, 0);
+        if (totalVersesFound === 0) {
+            currentSectionVerseMap["1"] = {};
+            nodes.forEach((node, idx) => {
+                const vNum = String(idx + 1);
+                currentSectionVerseMap["1"][vNum] = node;
+                node.dataset.verseNum = vNum;
+                node.dataset.chapterNum = "1";
+            });
+        }
+
+        populateChapterDropdown();
+    }
+
+    // 2. POPULATE CHAPTER DROPDOWN (Defaults to "CH", options are pure numbers)
+    function populateChapterDropdown() {
+        if (!chapterSelect) return;
+        chapterSelect.innerHTML = '';
+
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = "0";
+        defaultOpt.textContent = "CH";
+        chapterSelect.appendChild(defaultOpt);
+
+        const chapters = Object.keys(currentSectionVerseMap);
+        chapters.forEach(chap => {
+            const opt = document.createElement('option');
+            opt.value = chap;
+            opt.textContent = chap; // Pure number
+            chapterSelect.appendChild(opt);
+        });
+
+        populateVerseDropdown();
+    }
+
+    // 3. POPULATE VERSE DROPDOWN BASED ON SELECTED CHAPTER (Defaults to "V", populates all verses correctly)
+    function populateVerseDropdown() {
+        if (!verseSelect || !chapterSelect) return;
+        verseSelect.innerHTML = '';
+
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = "0";
+        defaultOpt.textContent = "V";
+        verseSelect.appendChild(defaultOpt);
+
+        const allChapters = Object.keys(currentSectionVerseMap);
+        let activeChap = chapterSelect.value;
+        if (!activeChap || activeChap === "0") {
+            activeChap = allChapters[0] || "1";
+        }
+
+        const versesObj = currentSectionVerseMap[activeChap] || {};
+        const verses = Object.keys(versesObj);
+
+        // If no explicit verses mapped for this chapter, create indices based on node count/fallback
+        if (verses.length === 0 && teleEdit) {
+            const fallbackNodes = Array.from(teleEdit.querySelectorAll('.line, p, h3, h4'));
+            fallbackNodes.forEach((node, idx) => {
+                const vNum = String(idx + 1);
+                versesObj[vNum] = node;
+                verses.push(vNum);
+            });
+            currentSectionVerseMap[activeChap] = versesObj;
+        }
+
+        verses.forEach(verse => {
+            const opt = document.createElement('option');
+            opt.value = verse;
+            opt.textContent = verse; // Pure number
+            verseSelect.appendChild(opt);
+        });
+    }
+
+    if (chapterSelect) {
+        chapterSelect.addEventListener('change', populateVerseDropdown);
+    }
+
+    window.addEventListener('textSectionLoaded', () => {
+        setTimeout(parseChaptersAndVerses, 100);
+    });
+
+    setTimeout(parseChaptersAndVerses, 300);
+
+    // 4. "GO" BUTTON NAVIGATION
+    if (goBtn) {
+        goBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            let chap = chapterSelect ? chapterSelect.value : "1";
+            let verse = verseSelect ? verseSelect.value : "1";
+
+            if (chap === "0") chap = Object.keys(currentSectionVerseMap)[0] || "1";
+            if (verse === "0") verse = "1";
+
+            const targetNode = currentSectionVerseMap[chap]?.[verse];
+            const scrollWrapper = document.getElementById('teleScrollWrapper') || document.getElementById('teleWrapper');
+
+            if (targetNode && scrollWrapper) {
+                let topPos = 0;
+                let el = targetNode;
+                while (el && el !== scrollWrapper && el !== document.body) {
+                    topPos += el.offsetTop;
+                    el = el.offsetParent;
+                }
+
+                scrollWrapper.scrollTo({
+                    top: Math.max(0, topPos - 10),
+                    behavior: 'smooth'
+                });
+
+                targetNode.style.transition = 'background-color 0.3s ease';
+                targetNode.style.backgroundColor = '#dbeafe';
+                setTimeout(() => {
+                    targetNode.style.backgroundColor = '';
+                }, 1800);
+            } else {
+                console.warn(`Target Chapter ${chap}, Verse ${verse} element could not be located.`);
+            }
+        });
+    }
+});
+</script>
+
+<script>
+/* ==========================================================================
+   STANDALONE DYNAMIC SECTION, CHAPTER & VERSE LABEL UPDATER
+   ========================================================================== */
+document.addEventListener('DOMContentLoaded', () => {
+    'use strict';
+
+    const openSectionModalBtn = document.getElementById('openSectionModal');
+    const chapterSelect = document.getElementById('chapterSelect');
+    const verseSelect = document.getElementById('verseSelect');
+
+    function updateSectionButtonLabel(name) {
+        if (!openSectionModalBtn || !name) return;
+        const displayName = name.length > 20 
+            ? name.substring(0, 17) + '...' 
+            : name;
+
+        openSectionModalBtn.textContent = displayName;
+        openSectionModalBtn.title = name;
+    }
+
+    function resetChapterAndVerse() {
+        if (chapterSelect && chapterSelect.options.length > 0) {
+            chapterSelect.selectedIndex = 0;
+            chapterSelect.dispatchEvent(new Event('change'));
+        }
+        if (verseSelect && verseSelect.options.length > 0) {
+            verseSelect.selectedIndex = 0;
+        }
+    }
+
+    window.addEventListener('textSectionLoaded', () => {
+        if (window.currentQuizSectionName) {
+            updateSectionButtonLabel(window.currentQuizSectionName);
+        }
+        setTimeout(resetChapterAndVerse, 150);
+    });
+
+    const confirmSectionBtn = document.getElementById('confirmSectionSelection');
+    const radioList = document.getElementById('sectionRadioList');
+
+    if (confirmSectionBtn && radioList) {
+        confirmSectionBtn.addEventListener('click', () => {
+            setTimeout(() => {
+                const checkedRadio = radioList.querySelector('input[name="sectionChoice"]:checked');
+                if (checkedRadio && window.SCRAMBLE_SECTIONS) {
+                    const index = Number(checkedRadio.value);
+                    if (window.SCRAMBLE_SECTIONS[index]) {
+                        updateSectionButtonLabel(window.SCRAMBLE_SECTIONS[index].name);
+                    }
+                }
+                resetChapterAndVerse();
+            }, 50);
+        });
+    }
+});
+</script>
+
+<script>
+
+(function () {
+    'use strict';
+
+    // 1. Inject Styles for Modal, Buttons, and New Row Layout
+    const styleEl = document.createElement('style');
+    styleEl.innerHTML = `
+        .standalone-ai-row {
+            display: block !important;
+            width: 100% !important;
+            text-align: left !important;
+            margin-top: 8px !important;
+            margin-left: 0 !important;
+            clear: both !important;
+        }
+        .standalone-ai-btn, .standalone-music-btn {
+            background-color: #4f46e5 !important;
+            color: #ffffff !important;
+            border: none !important;
+            padding: 8px 14px !important;
+            border-radius: 6px !important;
+            cursor: pointer !important;
+            font-weight: 600 !important;
+            font-size: 14px !important;
+            margin: 4px 4px 4px 0 !important;
+            transition: background-color 0.2s !important;
+        }
+        .standalone-ai-btn:hover { background-color: #4338ca !important; }
+        .standalone-music-btn { background-color: #0d9488 !important; }
+        .standalone-music-btn:hover { background-color: #0f766e !important; }
+        
+        #standalone-music-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            font-family: inherit;
+        }
+        #standalone-music-content {
+            background: #ffffff;
+            padding: 24px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+        }
+        #standalone-music-content h3 { margin-top: 0; color: #1f2937; font-size: 18px; }
+        .sam-group { margin-bottom: 15px; }
+        .sam-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #374151; font-size: 13px; }
+        .sam-options { display: flex; flex-wrap: wrap; gap: 10px; }
+        .sam-options label { font-weight: normal; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 4px; }
+        .sam-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .sam-btn-cancel, .sam-btn-send { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; }
+        .sam-btn-cancel { background: #e5e7eb; color: #374151; }
+        .sam-btn-send { background: #0d9488; color: white; }
+    `;
+    document.head.appendChild(styleEl);
+
+    // 2. Create Modal HTML Structure
+    const modalHTML = `
+        <div id="standalone-music-modal">
+            <div id="standalone-music-content">
+                <h3>Configure Music AI Prompt</h3>
+                
+                <div class="sam-group">
+                    <label>Genre:</label>
+                    <div class="sam-options">
+                        <label><input type="radio" name="sam_genre" value="Rock" checked> Rock</label>
+                        <label><input type="radio" name="sam_genre" value="Pop"> Pop</label>
+                        <label><input type="radio" name="sam_genre" value="Rap"> Rap</label>
+                        <label><input type="radio" name="sam_genre" value="Jazz"> Jazz</label>
+                        <label><input type="radio" name="sam_genre" value="Blues"> Blues</label>
+                        <label><input type="radio" name="sam_genre" value="Country / Folk"> Country / Folk</label>
+                        <label><input type="radio" name="sam_genre" value="Classical"> Classical</label>
+                        <label><input type="radio" name="sam_genre" value="Reggae"> Reggae</label>
+                    </div>
+                </div>
+
+                <div class="sam-group">
+                    <label>Vocals:</label>
+                    <div class="sam-options">
+                        <label><input type="radio" name="sam_vocal" value="Male" checked> Male</label>
+                        <label><input type="radio" name="sam_vocal" value="Female"> Female</label>
+                    </div>
+                </div>
+
+                <div class="sam-group" id="sam-tone-group">
+                    <label>Tone:</label>
+                    <div class="sam-options">
+                        <label><input type="radio" name="sam_tone" value="Funny" checked> Funny</label>
+                        <label><input type="radio" name="sam_tone" value="Serious"> Serious</label>
+                    </div>
+                </div>
+
+                <div class="sam-actions">
+                    <button class="sam-btn-cancel" id="sam-cancel-btn">Cancel</button>
+                    <button class="sam-btn-send" id="sam-send-btn">Generate & Copy</button>
+                </div>
+            </div>
+        </div>
+    `;
+    const modalContainer = document.createElement('div');
+    modalContainer.innerHTML = modalHTML;
+    document.body.appendChild(modalContainer);
+
+    // Toggle Tone options dynamically based on Genre
+    document.querySelectorAll('input[name="sam_genre"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const toneGroup = document.getElementById('sam-tone-group');
+            if (['Classical', 'Reggae'].includes(e.target.value)) {
+                toneGroup.style.display = 'none';
+            } else {
+                toneGroup.style.display = 'block';
+            }
+        });
+    });
+
+    // Helper: Trigger system copy message/toast if available, plus button feedback
+    function triggerSystemCopyFeedback(buttonElement) {
+        if (typeof window.showToast === 'function') {
+            window.showToast('Copied scoreboard text');
+        }
+        
+        const oldText = buttonElement.innerText;
+        buttonElement.innerText = 'Copied!';
+        setTimeout(() => { buttonElement.innerText = oldText; }, 2000);
+    }
+
+    // Helper to copy text and trigger feedback
+    function executeCopy(text, buttonElement) {
+        navigator.clipboard.writeText(text).then(() => {
+            triggerSystemCopyFeedback(buttonElement);
+        }).catch(err => {
+            console.error('Clipboard error: ', err);
+            alert('Failed to copy to clipboard.');
+        });
+    }
+
+    // Helper to grab text scoreboard data safely
+    function getScoreboardText() {
+        const activeScoreTextEl = document.querySelector('.quiz-mania-scoreboard[style*="block"] .quiz-mania-score-text, #gsScoreText, pre');
+        if (activeScoreTextEl && activeScoreTextEl.innerText.trim()) {
+            return activeScoreTextEl.innerText;
+        }
+        
+        const possibleElements = document.querySelectorAll('pre, code, .score-output, .quiz-score-box');
+        let text = '';
+        possibleElements.forEach(el => {
+            if (el.innerText && el.innerText.length > text.length) {
+                text = el.innerText;
+            }
+        });
+        return text || document.body.innerText;
+    }
+
+    // Button Actions
+    function handleGeneralAIClick(e) {
+        const scoreText = getScoreboardText();
+        const instructions = "Please use the following scoreboard data to create a 6-panel cartoon narrative structured on an A4 landscape layout:\n\n" + scoreText;
+        executeCopy(instructions, e.target);
+    }
+
+    let activeScoreText = '';
+    function handleMusicAIClick(e) {
+        activeScoreText = getScoreboardText();
+        document.getElementById('standalone-music-modal').style.display = 'flex';
+    }
+
+    document.getElementById('sam-cancel-btn').addEventListener('click', () => {
+        document.getElementById('standalone-music-modal').style.display = 'none';
+    });
+
+    document.getElementById('sam-send-btn').addEventListener('click', () => {
+        const genre = document.querySelector('input[name="sam_genre"]:checked').value;
+        const vocal = document.querySelector('input[name="sam_vocal"]:checked').value;
+        
+        let tonePart = '';
+        if (!['Classical', 'Reggae'].includes(genre)) {
+            const toneInput = document.querySelector('input[name="sam_tone"]:checked');
+            if (toneInput) {
+                tonePart = `, Tone: ${toneInput.value}`;
+            }
+        }
+
+        // Appended at the end of the text
+        const musicPrompt = activeScoreText + `\n\n[Music Style Request: Genre: ${genre}, Vocals: ${vocal}${tonePart}]`;
+        
+        document.getElementById('standalone-music-modal').style.display = 'none';
+        const musicBtn = document.querySelector('.standalone-music-btn');
+        if (musicBtn) {
+            executeCopy(musicPrompt, musicBtn);
+        }
+    });
+
+    // 3. Observer targeting text scoreboard containers while skipping quiz scoreboards
+    const observer = new MutationObserver(() => {
+        const potentialContainers = document.querySelectorAll('.scoreboard, #scoreDisplay, .score-container, div[id*="score"]');
+        
+        potentialContainers.forEach(container => {
+            if (container.closest('.quiz-scoreboard, .quiz-visual, .quiz-graphic, .quiz-mania-card')) {
+                return;
+            }
+
+            const buttonsInContainer = container.querySelectorAll('button');
+            let hasExportGroup = false;
+            
+            buttonsInContainer.forEach(btn => {
+                const t = btn.innerText.toLowerCase();
+                if (t.includes('copy') || t.includes('txt') || t.includes('png') || t.includes('audio') || t.includes('download')) {
+                    hasExportGroup = true;
+                }
+            });
+
+            if (hasExportGroup && !container.querySelector('.standalone-ai-row')) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'standalone-ai-row';
+
+                const aiBtn = document.createElement('button');
+                aiBtn.className = 'standalone-ai-btn';
+                aiBtn.innerText = 'AI Visuals';
+                aiBtn.addEventListener('click', handleGeneralAIClick);
+
+                const musicBtn = document.createElement('button');
+                musicBtn.className = 'standalone-music-btn';
+                musicBtn.innerText = 'AI Music';
+                musicBtn.addEventListener('click', handleMusicAIClick);
+
+                rowDiv.appendChild(aiBtn);
+                rowDiv.appendChild(musicBtn);
+
+                container.appendChild(rowDiv);
+            }
+        });
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true,
+        attributes: true,
+        attributeFilter: ['style', 'class']
+    });
+
+})();</script>
 
 </body>
 </html>
