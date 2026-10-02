@@ -16,7 +16,7 @@ body {
   font-family: Arial, sans-serif;
   background: linear-gradient(to bottom, #a0e0ff 0%, #ffffff 95%);
   user-select: none;
-  padding: 30px; /* breathing room for bubble effect */
+  padding: 30px;
 }
 
 /* ===== OVERLAY ===== */
@@ -30,113 +30,156 @@ body {
   z-index: 9998;
 }
 
-/* ===== TOP + MID BARS ===== */
-#topBar, #midBar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px;
-  margin: 0 auto 16px auto;      /* center the bars */
-  background: #f0f8ff;
-  border-radius: 6px;
-  width: 100%;
+/* ===== TOP BAR & ID FIELD STYLES ===== */
+.top-bar {  
+  display: flex;  
+  gap: 8px;  
+  margin: 0 auto 16px auto;  
   max-width: 600px;
-  flex-wrap: nowrap;
-  box-sizing: border-box;
+  flex-wrap: nowrap;  
+  align-items: center;  
 }
 
-#topBar input[type="text"] {
-  flex: 1 1 0;                    /* inputs shrink first */
-  min-width: 70px;
-  max-width: 140px;
-  padding: 6px 10px;
-  font-size: 16px;
-  border: 1px solid #999;
-  border-radius: 4px;
-}
-
-#topBar button, #midBar button {
-  flex: 0 0 auto;
-  white-space: nowrap;
-}
-
-#countdownOverlay {
-  flex: 0 0 auto;
-  min-width: 32px;
-  text-align: center;
-}
-
-/* ===== WHEEL SELECT ===== */
-#sectionWheelContainer {
-  height: 34px;
-  flex: 1 1 0;
-  min-width: 0;
-  overflow: hidden;
-  border: 1px solid #999;
-  border-radius: 4px;
+.top-bar input[type="text"],
+.top-bar #sectionSelectorBtn {  
+  flex: 1 1 50%;  
+  padding: 6px 12px;  
+  font-size: 14px;  
+  border: 1px solid #9fc8e8;  
+  border-radius: 6px;  
+  box-sizing: border-box;  
+  min-width: 0;  
   background: #fff;
-  position: relative;
 }
 
-#wheel, .wheel {
-  position: absolute;
-  top: 0;
-  width: 100%;
-  transition: transform 0.25s ease;
-}
-
-.wheelItem {
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.top-bar #sectionSelectorBtn {
+  background: #1976d2;
+  color: #fff;
+  cursor: pointer;
+  text-align: center;
+  border: none;
   font-weight: bold;
-  font-size: 15px;
-  line-height: 1;
-  user-select: none;
 }
 
-.wheelItem.placeholder {
-  color: #888;
-  font-style: bold;
+.top-bar #sectionSelectorBtn:hover {
+  background: #1565c0;
 }
 
-/* ===== BUTTONS ===== */
-button {
+.top-bar button {
   padding: 6px 12px;
   font-size: 16px;
-  border-radius: 4px;
+  border-radius: 6px;
   border: 1px solid #777;
   background: #eef6fb;
   cursor: pointer;
   user-select: none;
+  white-space: nowrap;
 }
 
-button:disabled {
+.top-bar button:not(#sectionSelectorBtn) {
+  font-size: 14px;
+}
+
+.top-bar button:disabled {
   opacity: 0.5;
   cursor: default;
 }
 
-/* ===== SCOREBOARD ===== */
+/* ===== SECTION SELECTION MODAL STYLING ===== */
+#sectionModalRoot {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 99999;
+}
+
+#sectionModalBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+}
+
+#sectionModalContent {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(400px, 90vw);
+  max-height: 80vh;
+  background: #fff;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+#sectionModalHeader {
+  padding: 12px 16px;
+  background: #1976d2;
+  color: white;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#sectionModalClose {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+#sectionListContainer {
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.section-item {
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  background: #eaf6ff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #1976d2;
+  font-weight: 600;
+}
+
+.section-item:hover {
+  background: #d0e8ff;
+}
+
+/* ===== SCOREBOARD & BUTTONS ===== */
 #scoreboardContainer {
-  margin: 12px 0 0 0;
+  margin: 12px auto 0 auto;
   font-family: monospace;
   font-weight: bold;
   font-size: 18px;
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: anywhere;
-  max-width: 100%;
+  max-width: 600px;
 }
 
 #scoreButtons {
-  margin: 12px 0 24px 0;
+  margin: 12px auto 24px auto;
   display: none;
   gap: 10px;
+  max-width: 600px;
+  flex-wrap: wrap;
 }
 
 #scoreButtons button {
   font-family: Arial, sans-serif;
+  padding: 6px 12px;
+  font-size: 16px;
+  border-radius: 4px;
+  border: 1px solid #777;
+  background: #eef6fb;
+  cursor: pointer;
 }
 
 /* ===== GAME AREA ===== */
@@ -146,13 +189,12 @@ button:disabled {
   height: 240px;
   width: 100%;
   max-width: 600px;
-  padding: 10px;
   border-radius: 6px;
-  background: #9fd0ff;
   overflow: hidden;
-  box-shadow: inset 0 0 12px #5f9eff;
+  display: block;
 }
 
+/* ===== WORD STYLES (Style 1) ===== */
 .word {
   position: absolute;
   font-size: 24px;
@@ -182,7 +224,34 @@ button:disabled {
   100% { transform: scale(3) rotate(720deg); opacity: 0; }
 }
 
-/* ===== TYPING INPUT ===== */
+/* ===== BUBBLE STYLES (Style 2) ===== */
+.bubble {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.bubble-ambient {
+  opacity: 0.5;
+}
+
+.bubble-exploding {
+  animation: popScale 0.4s forwards;
+}
+
+@keyframes popScale {
+  0%   { transform: scale(1) rotate(0deg); opacity: 1; }
+  50%  { transform: scale(1.5) rotate(180deg); opacity: 1; }
+  100% { transform: scale(2.5) rotate(720deg); opacity: 0; }
+}
+
+/* ===== INVISIBLE TYPING INPUT ===== */
 #typingInput {
   position: fixed;
   left: 5px;
@@ -199,61 +268,47 @@ button:disabled {
   caret-color: transparent;
 }
 
-/* ===== GAME OVER ===== */
-.game-over {
-  position: fixed;
-  top: -50px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 36px;
-  font-weight: bold;
-  color: red;
-  opacity: 0;
-  transition: top 1s, opacity 1s;
-}
-
 /* ===== FOOTER ===== */
 footer {
   margin-top: 16px;
   padding: 10px 12px;
   text-align: left;
-  font-size: 14px;
+  font-size: 12px; /* Balanced between 10px and 14px */
   color: #666;
   background: #f0f8ff;
   border-radius: 6px;
 }
 
-/* ===== FORM ROWS ===== */
-.formRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
+/* ===== RESPONSIVE & TOUCH ADJUSTMENTS ===== */
+@media (max-width: 480px) {
+  body { padding: 16px; }
+  .top-bar input[type="text"], .top-bar #sectionSelectorBtn { font-size: 13px; padding: 5px; }
+  #gameArea { height: 180px; }
 }
-
-/* ===== EXTRA TEMPLATE-SPECIFIC ADDITIONS ===== */
-/* Place for future enhancements: animations, responsive tweaks, utility classes, color variables */
 </style>
 </head>
 <body>
 
   <div id="overlay"></div>
 
-<!-- TOP BAR -->
-<div id="topBar">
-  <input type="text" id="nameInput" placeholder="Name" autocomplete="off" />
-  <input type="text" id="idInput" placeholder="ID Number" autocomplete="off" />
+<!-- TOP BAR (Contains ID Field, Section Button, and Controls) -->
+<div class="top-bar">
+  <input id="studentId" type="text" placeholder="ID" autocomplete="off" />
+  <button id="sectionSelectorBtn" type="button">Select a section.</button>
   <button id="startBtn">Start</button>
-<button id="stopBtn" disabled style="display:none;">Stop</button>  <button id="submitBtn" disabled>Submit</button>
-  <!--<div id="countdownOverlay">120</div>-->
-</div>
+  <button id="stopBtn" disabled style="display:none;">Stop</button>  
+<button id="submitBtn">Submit</button></div>
 
-<!-- MIDDLE BAR / SECTION WHEEL -->
-<div id="midBar" class="formRow">
-  <button type="button" id="sectionUp">▲</button>
-  <div id="sectionWheelContainer">
-    <div class="wheel"></div>
+<!-- SECTION SELECTION MODAL -->
+<div id="sectionModalRoot">
+  <div id="sectionModalBackdrop"></div>
+  <div id="sectionModalContent">
+    <div id="sectionModalHeader">
+      <span>Select a Category</span>
+      <button id="sectionModalClose">✕</button>
+    </div>
+    <div id="sectionListContainer"></div>
   </div>
-  <button type="button" id="sectionDown">▼</button>
 </div>
 
   <div id="scoreboardContainer"></div>
@@ -268,8 +323,38 @@ footer {
   <audio id="popSound" src="pop-331049.mp3" preload="auto"></audio>
   <input id="typingInput" type="text" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="1" autocomplete="off" />
 
+<footer>
+<p>© <span id="currentYear"></span> Perfectly Practical English</p>
+</footer>
+
+<script>
+  document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
   <script>
-    /* ALL GAME LOGIC PRESERVED AS-IS */
+    /* --- 1. Student Name & ID Matching Module --- */
+    (function() {
+        'use strict';
+        const RAW_STUDENT_DATA = `
+            55555|David
+            55551|Matthew
+            12345|Sarah
+        `;
+        const studentDatabase = new Map();
+        RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+            const [id, name] = line.split('|').map(s => s ? s.trim() : '');
+            if (id && name) studentDatabase.set(id, name);
+        });
+
+        window.resolveStudentNameFromId = function(idInput) {
+            if (!idInput) return "Guest";
+            const trimmed = String(idInput).trim();
+            if (/^(x|g|guest)$/i.test(trimmed)) {
+                return "Guest";
+            }
+            return studentDatabase.get(trimmed) || "Guest";
+        };
+    })();
+
     (() => {
       const wordListText = ` 
 
@@ -419,7 +504,7 @@ loan, let someone use
 divide, give
 
 • support 🧱 – to help someone emotionally or physically
-encourage, back
+encouraging, back
 
 • talk 💬 – to speak with someone
 speak, chat
@@ -735,7 +820,7 @@ nourishment, meals
 • fruit 🍓 – sweet healthy food from plants
 produce, fresh fruit
 
-• health ❤️ – the state of being well
+• health ❤ – the state of being well
 wellness, fitness
 
 • lunch 🥪 – a midday meal
@@ -759,7 +844,7 @@ greens, produce
 • cook 🍳 – to prepare food
 prepare, heat
 
-• eat 🍽️ – to have food
+• eat 🍽️️ – to have food
 consume, have
 
 • enjoy 😊 – to like food
@@ -771,7 +856,7 @@ prepare, create
 • prepare 🔪 – to get food ready
 ready, organize
 
-• serve 🍽️ – to give food to others
+• serve 🍽️️ – to give food to others
 offer, present
 
 • taste 👄 – to try food
@@ -830,7 +915,7 @@ place, position
 • place 🗺️ – a specific area
 spot, location
 
-• trip ✈️ – a short journey
+• trip ✈ – a short journey
 journey, travel
 
 • vacation 🏖️ – time off for travel
@@ -976,7 +1061,7 @@ large, major
 • carefully 🧠 – with thought
 thoughtfully, attentively
 
-• easily ✔️ – without difficulty
+• easily ✔️️ – without difficulty
 simply, smoothly
 
 • really ✔️ – very
@@ -1229,7 +1314,7 @@ quickly, slowly, carefully, easily, well, badly, with, by, in a...way, as
 • Place / Location 📍 – words that tell where something is<br>
 in, on, at, under, above, between, near, next to, here, there, everywhere, anywhere
 
-• Condition 🌧️ – words that show something depends on something else<br>
+• Condition 🌧️️ – words that show something depends on something else<br>
 if, unless, in case, on condition that
 
 • Emphasis / Focus 🎯 – words that make something stronger or more important<br>
@@ -1249,114 +1334,106 @@ yes, no
 
 `;
 
-function parseSections(raw) {
-  const sections = [];
+      function parseSections(raw) {
+        const sections = [];
+        const blocks = raw
+          .split(/^\s*~\s*/m)
+          .map(b => b.trim())
+          .filter(Boolean);
 
-  // Split on any line that STARTS with ~
-  const blocks = raw
-    .split(/^\s*~\s*/m)
-    .map(b => b.trim())
-    .filter(Boolean);
+        blocks.forEach(block => {
+          const lines = block
+            .split(/\r?\n/)
+            .map(l => l.replace(/<br\s*\/?>/gi, '').trim())
+            .filter(Boolean);
 
-  blocks.forEach(block => {
-    const lines = block
-      .split(/\r?\n/)
-      .map(l => l.replace(/<br\s*\/?>/gi, '').trim())
-      .filter(Boolean);
+          if (!lines.length) return;
 
-    if (!lines.length) return;
+          const sectionName = lines[0];
+          const entries = [];
 
-    const sectionName = lines[0];
-    const entries = [];
+          lines.forEach(line => {
+            if (!line.startsWith('•')) return;
 
-    lines.forEach(line => {
-      if (!line.startsWith('•')) return;
+            const entry = line
+              .replace(/^•\s*/, '')
+              .split(/[–—-]/)[0]
+              .replace(/[^\p{L}\s]/gu, '')
+              .trim()
+              .toLowerCase()
+              .split(/\s+/)[0];
 
-      const entry = line
-        .replace(/^•\s*/, '')
-        .split(/[–—-]/)[0]
-        .replace(/[^\p{L}\s]/gu, '')
-        .trim()
-        .toLowerCase()
-        .split(/\s+/)[0];
+            if (entry) entries.push(entry);
+          });
 
-      if (entry) entries.push(entry);
-    });
+          if (entries.length) {
+            sections.push({
+              name: sectionName,
+              entries
+            });
+          }
+        });
 
-    if (entries.length) {
-      sections.push({
-        name: sectionName,
-        entries
-      });
-    }
-  });
+        return sections;
+      }
 
-  return sections;
-}
+      const sections = parseSections(wordListText);
 
-const sections = parseSections(wordListText);
+      // ===== CORE GAME STATE =====
+      let activeWords = [];
+      let dropInterval = null;
+      let dropSpeed = 0.5;
+      let dropTickTime = 20;
 
-// ===== CORE GAME STATE (REQUIRED — FROM SAMPLE) =====
-let activeWords = [];
-let dropInterval = null;
-let dropSpeed = 0.5;
-let dropTickTime = 20;
+      let gameStarted = false;
+      let gameStopped = false;
+      let currentTypedWord = null;
 
-let gameStarted = false;
-let gameStopped = false;
-let currentTypedWord = null;
+      let totalWords = 0;
+      let correctWords = 0;
 
-let totalWords = 0;
-let correctWords = 0;
+      let currentSectionIndex = -1;
+      let currentSectionName = "No Section";
+      let wordList = [];
 
+      // ===== SECTION SELECTION MODAL LOGIC =====
+      const sectionSelectorBtn = document.getElementById('sectionSelectorBtn');
+      const sectionModalRoot = document.getElementById('sectionModalRoot');
+      const sectionModalBackdrop = document.getElementById('sectionModalBackdrop');
+      const sectionModalClose = document.getElementById('sectionModalClose');
+      const sectionListContainer = document.getElementById('sectionListContainer');
 
+      function openModal() {
+        if (gameStarted) return;
+        sectionListContainer.innerHTML = "";
+        if (sections.length === 0) {
+          sectionListContainer.innerHTML = "<div style='padding:10px; text-align:center; color:#666;'>No categories found.</div>";
+        } else {
+          sections.forEach((sec, idx) => {
+            const item = document.createElement("div");
+            item.className = "section-item";
+            item.textContent = sec.name;
+            item.addEventListener("click", () => {
+              currentSectionName = sec.name;
+              currentSectionIndex = idx;
+              wordList = sec.entries.slice();
+              nextWordIndex = 0;
+              if (sectionSelectorBtn) sectionSelectorBtn.textContent = sec.name;
+              closeModal();
+            });
+            sectionListContainer.appendChild(item);
+          });
+        }
+        sectionModalRoot.style.display = "block";
+      }
 
-// Start with a placeholder, nothing selected yet
-let currentSectionIndex = -1; // -1 means placeholder
-let wordList = [];
-// ===== SECTION WHEEL LOGIC (REQUIRED) =====
-const sectionUp = document.getElementById('sectionUp');
-const sectionDown = document.getElementById('sectionDown');
-const wheel = document.querySelector('#sectionWheelContainer .wheel');
+      function closeModal() {
+        sectionModalRoot.style.display = "none";
+      }
 
-function renderSectionWheel() {
-  wheel.innerHTML = '';
-
-  // 🔹 Placeholder at top
-  const placeholder = document.createElement('div');
-  placeholder.className = 'wheelItem placeholder';
-  placeholder.textContent = 'Select a category';
-  wheel.appendChild(placeholder);
-
-  // 🔹 Real sections
-  sections.forEach(section => {
-    const div = document.createElement('div');
-    div.className = 'wheelItem';
-    div.textContent = section.name;
-    wheel.appendChild(div);
-  });
-
-  updateWheelPosition();
-}
-
-function updateWheelPosition() {
-  // Add +1 to currentSectionIndex because placeholder is at index 0
-  const index = currentSectionIndex === -1 ? 0 : currentSectionIndex + 1;
-  wheel.style.transform = `translateY(${-index * 34}px)`;
-}
-
-function changeSection(dir) {
-  if (gameStarted) return; // lock during play (sample behavior)
-
-  currentSectionIndex =
-    (currentSectionIndex + dir + sections.length) % sections.length;
-
-  wordList = sections[currentSectionIndex].entries.slice();
-  nextWordIndex = 0; // 🔑 reset pointer
-  updateWheelPosition();
-}
-
-
+      if (sectionSelectorBtn) sectionSelectorBtn.addEventListener("click", openModal);
+      if (sectionModalClose) sectionModalClose.addEventListener("click", closeModal);
+      if (sectionModalBackdrop) sectionModalBackdrop.addEventListener("click", closeModal);
 
       function createWordElement(word){const span=document.createElement('span');span.className='word';span.textContent='';for(let ch of word){const letterSpan=document.createElement('span');letterSpan.textContent=ch;letterSpan.className='letter';span.appendChild(letterSpan);}gameArea.appendChild(span);return span;}
       function spawnWord(text){const element=createWordElement(text);const wordWidth=element.offsetWidth;const x=Math.random()*(gameArea.clientWidth-wordWidth-20)+10;const y=-30;element.style.left=`${x}px`;element.style.top=`${y}px`;return{text,text,y,speed:dropSpeed+Math.random()*0.25,element,typedIndex:0,exploded:false,isGameOver:false};}
@@ -1367,93 +1444,90 @@ function changeSection(dir) {
       function dropWords(){for(let w of activeWords){if(w.exploded)continue;w.y+=w.speed;if(w.y+w.element.offsetHeight>=gameArea.clientHeight){explodeWord(w,false);}else{w.element.style.top=w.y+'px';}}activeWords=activeWords.filter(w=>!w.exploded);if(!gameStopped&&activeWords.length===0){spawnNextWord();}}
       let nextWordIndex=0;
       function spawnNextWord(){
-  if(nextWordIndex < wordList.length){
-    const wordText = wordList[nextWordIndex];
-    const w = spawnWord(wordText);
-    activeWords.push(w);
-    nextWordIndex++;
-  }
-}
+        if(nextWordIndex < wordList.length){
+          const wordText = wordList[nextWordIndex];
+          const w = spawnWord(wordText);
+          activeWords.push(w);
+          nextWordIndex++;
+        }
+      }
 
-function startGame(){
-  if(gameStarted)return;
+      function startGame(){
+        if(gameStarted)return;
 
-  if(!nameInput.value.trim() || !idInput.value.trim()){
-    alert('Please enter your Name and ID Number before starting.');
-    return;
-  }
+        if (currentSectionIndex === -1) {
+          alert('Please select a category first.');
+          return;
+        }
 
-  // SAMPLE-COMPATIBLE RESET
-  resetGameState();
-  clearWords();
+        resetGameState();
+        clearWords();
 
-  gameStarted = true;
-  gameStopped = false;
+        gameStarted = true;
+        gameStopped = false;
 
-  startBtn.disabled = true;
-  stopBtn.disabled = false;
-  submitBtn.disabled = true;
+startBtn.disabled = true;
+stopBtn.disabled = false;
+// submitBtn remains enabled
 
-  scoreboardContainer.textContent = '';
-  scoreButtons.style.display = 'none';
+        scoreboardContainer.textContent = '';
+        scoreButtons.style.display = 'none';
 
-  // 🔑 CRITICAL FIXES
-  nextWordIndex = 0;
-  wordList = sections[currentSectionIndex].entries.slice();
+        nextWordIndex = 0;
+        wordList = sections[currentSectionIndex].entries.slice();
 
-// SAMPLE-COMPATIBLE SCORING
-correctWords = 0;
-totalWords = sections[currentSectionIndex].entries.length;
+        correctWords = 0;
+        totalWords = sections[currentSectionIndex].entries.length;
 
+        spawnNextWord();
+        dropInterval = setInterval(dropWords, dropTickTime);
+        typingInput.focus();
+      }
 
-  spawnNextWord();
-  dropInterval = setInterval(dropWords, dropTickTime);
-  typingInput.focus();
-}
       function stopGame(forceSubmit=false){if(!gameStarted||gameStopped)return;gameStopped=true;clearInterval(dropInterval);startBtn.disabled=false;stopBtn.disabled=true;submitBtn.disabled=false;}
-function submitResults(){
-  if(!gameStarted) return;
-  stopGame();
+      
+      function submitResults(){
+        if(!gameStarted) return;
+        stopGame();
 
-  const now = new Date();
+        const now = new Date();
+        const dateStr =
+          `${String(now.getDate()).padStart(2,'0')}/` +
+          `${String(now.getMonth()+1).padStart(2,'0')}/` +
+          `${now.getFullYear()} ` +
+          `${String(now.getHours()).padStart(2,'0')}:` +
+          `${String(now.getMinutes()).padStart(2,'0')}`;
 
-  // dd/mm/yyyy military time
-  const dateStr =
-    `${String(now.getDate()).padStart(2,'0')}/` +
-    `${String(now.getMonth()+1).padStart(2,'0')}/` +
-    `${now.getFullYear()} ` +
-    `${String(now.getHours()).padStart(2,'0')}:` +
-    `${String(now.getMinutes()).padStart(2,'0')}`;
+        const pct = totalWords
+          ? Math.round((correctWords / totalWords) * 100)
+          : 0;
 
-  const pct = totalWords
-    ? Math.round((correctWords / totalWords) * 100)
-    : 0;
+        const fileName =
+          window.location.pathname.split('/').pop() || 'index.html';
 
-  const fileName =
-    window.location.pathname.split('/').pop() || 'index.html';
+        const sectionName = currentSectionName;
+        const idVal = document.getElementById('studentId')?.value.trim() || '';
+        const resolvedName = window.resolveStudentNameFromId ? window.resolveStudentNameFromId(idVal) : (idVal ? "Guest" : "Guest");
 
-  const sectionName =
-    sections[currentSectionIndex]?.name || '';
+        const scoreLine =
+          `${fileName}|${sectionName}|` +
+          `${resolvedName}|${idVal}|` +
+          `${dateStr}|${correctWords}/${totalWords}|${pct}%`;
 
-  const scoreLine =
-    `${fileName}|${sectionName}|` +
-    `${nameInput.value.trim()}|${idInput.value.trim()}|` +
-    `${dateStr}|${correctWords}/${totalWords}|${pct}%`;
+        scoreboardContainer.textContent = scoreLine;
+        scoreButtons.style.display = 'flex';
 
-scoreboardContainer.textContent = scoreLine;
-scoreButtons.style.display = 'flex';
-
-// SUPABASE SAVE (ADDED)
-if (window.saveResult) {
-  window.saveResult(scoreLine);
-}
-}
+        if (window.saveResult) {
+          window.saveResult(scoreLine);
+        }
+      }
 
       function resetGameState(){activeWords=[];currentTypedWord=null;nextWordIndex=0;totalWords=0;correctWords=0;}
       function copyScoreboard(){if(!scoreboardContainer.textContent)return;navigator.clipboard.writeText(scoreboardContainer.textContent).then(()=>{alert("Scoreboard copied to clipboard.");});}
-      function downloadScoreText(){if(!scoreboardContainer.textContent)return;const blob=new Blob([scoreboardContainer.textContent],{type:"text/plain"});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`score_${nameInput.value.trim()||"player"}.txt`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},100);}
-      async function downloadScorePng(){if(!scoreboardContainer.textContent)return;try{if(!window.html2canvas)await loadHtml2Canvas();const canvas=await window.html2canvas(scoreboardContainer,{backgroundColor:null});canvas.toBlob(blob=>{const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`score_${nameInput.value.trim()||"player"}.png`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},100);});}catch(e){alert('Error generating image: '+e.message);}}
+      function downloadScoreText(){if(!scoreboardContainer.textContent)return;const blob=new Blob([scoreboardContainer.textContent],{type:"text/plain"});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;const idVal = document.getElementById('studentId')?.value.trim() || 'player';a.download=`score_${idVal}.txt`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},100);}
+      async function downloadScorePng(){if(!scoreboardContainer.textContent)return;try{if(!window.html2canvas)await loadHtml2Canvas();const canvas=await window.html2canvas(scoreboardContainer,{backgroundColor:null});canvas.toBlob(blob=>{const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;const idVal = document.getElementById('studentId')?.value.trim() || 'player';a.download=`score_${idVal}.png`;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(url);a.remove();},100);});}catch(e){alert('Error generating image: '+e.message);}}
       function loadHtml2Canvas(){return new Promise((res,rej)=>{const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';script.onload=res;script.onerror=()=>rej(new Error('Failed to load html2canvas'));document.head.appendChild(script);});}
+      
       startBtn.addEventListener('click',startGame);
       stopBtn.addEventListener('click',stopGame);
       submitBtn.addEventListener('click',submitResults);
@@ -1462,15 +1536,8 @@ if (window.saveResult) {
       downloadPngBtn.addEventListener('click',downloadScorePng);
       typingInput.addEventListener('input',handleTypingInput);
       gameArea.addEventListener('click',()=>{if(gameStarted&&!gameStopped){typingInput.focus();}});
-
-sectionUp.addEventListener('click', () => changeSection(-1));
-sectionDown.addEventListener('click', () => changeSection(1));
-renderSectionWheel();
-
     })();
-
   </script>
-
 
   <script>
     // Green border
@@ -1489,7 +1556,6 @@ renderSectionWheel();
 (async function() {
   'use strict';
 
-  // Sanitize filenames to remove illegal characters
   function sanitizeFilename(name) {
     return name.trim()
       .replace(/[\\/:*?"<>|]+/g, '_')
@@ -1497,7 +1563,6 @@ renderSectionWheel();
       .slice(0, 200) || 'score';
   }
 
-  // Generic download function
   function downloadBlob(blob, filename) {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -1510,51 +1575,47 @@ renderSectionWheel();
     }, 2000);
   }
 
-  // Convert scoreboard to PNG using html2canvas
   async function downloadScoreAsPNG(text, filename) {
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = text.replace(/\n/g, '<br>');
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = text.replace(/\n/g, '<br>');
 
-  /* MATCH SCOREBOARD APPEARANCE */
-  wrapper.style.display = 'inline-block';
-  wrapper.style.whiteSpace = 'pre-wrap';
-  wrapper.style.fontFamily = 'monospace';
-  wrapper.style.fontWeight = 'bold';
-  wrapper.style.fontSize = '18px';
-  wrapper.style.lineHeight = '1.2';
-  wrapper.style.padding = '6px 8px';
-  wrapper.style.backgroundColor = '#fff';
-  wrapper.style.color = '#000';
+    wrapper.style.display = 'inline-block';
+    wrapper.style.whiteSpace = 'pre-wrap';
+    wrapper.style.fontFamily = 'monospace';
+    wrapper.style.fontWeight = 'bold';
+    wrapper.style.fontSize = '18px';
+    wrapper.style.lineHeight = '1.2';
+    wrapper.style.padding = '6px 8px';
+    wrapper.style.backgroundColor = '#fff';
+    wrapper.style.color = '#000';
 
-  document.body.appendChild(wrapper);
+    document.body.appendChild(wrapper);
 
-  try {
-    if (!window.html2canvas) {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
-      document.head.appendChild(script);
-      await new Promise(res => script.onload = res);
+    try {
+      if (!window.html2canvas) {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+        document.head.appendChild(script);
+        await new Promise(res => script.onload = res);
+      }
+
+      const canvas = await html2canvas(wrapper, {
+        scale: 2,
+        backgroundColor: '#fff',
+        width: wrapper.offsetWidth,
+        height: wrapper.offsetHeight
+      });
+
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+      downloadBlob(blob, filename);
+    } catch (err) {
+      console.error(err);
+      alert('PNG download failed');
+    } finally {
+      wrapper.remove();
     }
-
-    const canvas = await html2canvas(wrapper, {
-      scale: 2,
-      backgroundColor: '#fff',
-      width: wrapper.offsetWidth,
-      height: wrapper.offsetHeight
-    });
-
-    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
-    downloadBlob(blob, filename);
-  } catch (err) {
-    console.error(err);
-    alert('PNG download failed');
-  } finally {
-    wrapper.remove();
   }
-}
 
-
-  // Hijack a download button
   function hijackDownloadButton(button, getScoreText, getFilename, isText) {
     if (!button) return;
 
@@ -1580,18 +1641,16 @@ renderSectionWheel();
     }, true);
   }
 
-  // Grab scoreboard and buttons
   const scoreboard = document.getElementById('scoreboardContainer');
   const downloadTxtBtn = document.getElementById('downloadTxtBtn');
   const downloadPngBtn = document.getElementById('downloadPngBtn');
-  const nameInput = document.getElementById('nameInput');
-  const idInput = document.getElementById('idInput');
+  const studentIdInput = document.getElementById('studentId');
 
   if (scoreboard) {
     const getFilename = () => {
       const htmlFile = window.location.pathname.split('/').pop() || 'index.html';
-      const name = nameInput?.value.trim() || 'Student';
-      const id = idInput?.value.trim() || 'ID';
+      const id = studentIdInput?.value.trim() || 'ID';
+      const name = window.resolveStudentNameFromId ? window.resolveStudentNameFromId(id) : 'Student';
       const now = new Date();
       const dateStr = `${String(now.getDate()).padStart(2,'0')}${String(now.getMonth()+1).padStart(2,'0')}${now.getFullYear()}`;
       return `${htmlFile}|${name}|${id}|${dateStr}`;
@@ -1606,21 +1665,10 @@ renderSectionWheel();
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-
-    // Get filename only
     let filename = window.location.pathname.split("/").pop();
-
-    // Remove .html
     filename = filename.replace(/\.html$/i, "");
-
-    // Remove everything up to and including the first underscore
-    // (treats that as the prefix)
     filename = filename.replace(/^[^_]*_/, "");
-
-    // Convert underscores to spaces
     const title = filename.replace(/_/g, " ");
-
-    // Replace the first <h1>
     const h1 = document.querySelector("h1");
     if (h1) {
         h1.textContent = title;
@@ -1629,66 +1677,40 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script>
-
 (function(){
-
-/* =========================
-   RAW INSTRUCTIONS TEXT
-========================= */
-
 const RAW_TEXT = `
-
 How to play...
 
-1. Enter Name and ID.
+1. Enter ID Number.
 2. Select a category.
 3. Click Start to begin.
 4. Type the words correctly.
 5. Click Submit to see your score.
 6. Copy or download your score.
-
 `;
 
-
-/* =========================
-   RAW TEXT PARSER
-========================= */
-
 function parseRawInstructions(text){
-
   const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
   const html = [];
-
   lines.forEach(line => {
-
     if(line === "---"){
       html.push(`<hr>`);
       return;
     }
-
     if(/^\d+\./.test(line)){
       html.push(`<p>${line}</p>`);
       return;
     }
-
     if(!/[.!?:]$/.test(line)){
       html.push(`<h3>${line}</h3>`);
       return;
     }
-
     html.push(`<p>${line}</p>`);
   });
-
   return html.join("");
 }
 
-
-/* =========================
-   CREATE STYLE
-========================= */
-
 const style = document.createElement("style");
-
 style.textContent = `
 #instructionsBtn{
   position:fixed;
@@ -1704,24 +1726,20 @@ style.textContent = `
   box-shadow:0 4px 8px rgba(0,0,0,0.6);
   z-index:99998;
 }
-
 #instructionsBtn:hover{
   background:#257047;
 }
-
 #instructionsRoot{
   position:fixed;
   inset:0;
   display:none;
   z-index:99999;
 }
-
 #instructionsBackdrop{
   position:absolute;
   inset:0;
   background:rgba(0,0,0,.35);
 }
-
 #instructionsModal{
   position:absolute;
   top:25px;
@@ -1735,7 +1753,6 @@ style.textContent = `
   flex-direction:column;
   overflow:hidden;
 }
-
 #instructionsHeader{
   padding:12px 16px;
   border-bottom:1px solid #ddd;
@@ -1743,13 +1760,11 @@ style.textContent = `
   align-items:center;
   gap:10px;
 }
-
 #instructionsTitle{
   color:#1976d2;
   font-weight:600;
   font-size:1.1em;
 }
-
 #instructionsBack{
   border:none;
   background:none;
@@ -1758,7 +1773,6 @@ style.textContent = `
   color:#1976d2;
   font-weight:600;
 }
-
 #instructionsContent{
   padding:2px 18px 18px 18px;
   overflow-y:auto;
@@ -1766,85 +1780,47 @@ style.textContent = `
   scrollbar-width:none;
   -ms-overflow-style:none;
 }
-
 #instructionsContent::-webkit-scrollbar{
   display:none;
 }
-
 #instructionsContent h3{
   color:#1976d2;
   margin:12px 0 4px 0;
   font-weight:600;
 }
-
 #instructionsContent p{
   margin:4px 0;
 }
-
 #instructionsContent hr{
   margin:12px 0;
 }
 `;
-
 document.head.appendChild(style);
-
-
-/* =========================
-   CREATE BUTTON
-========================= */
 
 const btn = document.createElement("button");
 btn.id = "instructionsBtn";
 btn.textContent = "Instructions";
-
 document.body.appendChild(btn);
-
-
-/* =========================
-   CREATE MODAL
-========================= */
 
 const root = document.createElement("div");
 root.id = "instructionsRoot";
-
 root.innerHTML = `
 <div id="instructionsBackdrop"></div>
-
 <div id="instructionsModal">
-
   <div id="instructionsHeader">
     <button id="instructionsBack">←</button>
     <span id="instructionsTitle">Instructions</span>
   </div>
-
   <div id="instructionsContent">
     ${parseRawInstructions(RAW_TEXT)}
   </div>
-
 </div>
 `;
-
 document.body.appendChild(root);
 
-
-/* =========================
-   SCROLL LOCK
-========================= */
-
 const modalContent = document.getElementById("instructionsContent");
-
-modalContent.addEventListener("wheel", e=>{
-  e.stopPropagation();
-},{passive:false});
-
-modalContent.addEventListener("touchmove", e=>{
-  e.stopPropagation();
-},{passive:false});
-
-
-/* =========================
-   OPEN / CLOSE
-========================= */
+modalContent.addEventListener("wheel", e=>{e.stopPropagation();},{passive:false});
+modalContent.addEventListener("touchmove", e=>{e.stopPropagation();},{passive:false});
 
 function openModal(){
   root.style.display="block";
@@ -1859,40 +1835,24 @@ function closeModal(){
 }
 
 btn.onclick = openModal;
-
 document.getElementById("instructionsBack").onclick = closeModal;
 document.getElementById("instructionsBackdrop").onclick = closeModal;
-
-document.addEventListener("keydown", e=>{
-  if(e.key==="Escape") closeModal();
-});
-
-/* =========================
-   DYNAMIC BODY PADDING FOR BUTTON
-========================= */
+document.addEventListener("keydown", e=>{if(e.key==="Escape") closeModal();});
 
 function adjustBodyPadding(){
-  const btnHeight = btn.offsetHeight + -25; // include some gap
+  const btnHeight = btn.offsetHeight + -25;
   document.body.style.paddingBottom = `${btnHeight}px`;
 }
-
-// Initial adjustment
 adjustBodyPadding();
-
-// Update if window is resized (responsive)
 window.addEventListener("resize", adjustBodyPadding);
-
 })();
 </script>
 
 <script>
 (function() {
-  // Prevent pinch-to-zoom
   function preventPinch(e) {
     if (e.touches.length > 1) e.preventDefault();
   }
-
-  // Prevent double-tap zoom
   let lastTouchTime = 0;
   function preventDoubleTap(e) {
     const now = Date.now();
@@ -1901,12 +1861,9 @@ window.addEventListener("resize", adjustBodyPadding);
     }
     lastTouchTime = now;
   }
-
-  // Block gesture events on iOS
   function preventGesture(e) {
     e.preventDefault();
   }
-
   document.addEventListener('touchstart', preventPinch, { passive: false });
   document.addEventListener('touchend', preventDoubleTap, { passive: false });
   document.addEventListener('gesturestart', preventGesture, { passive: false });
@@ -1917,7 +1874,6 @@ window.addEventListener("resize", adjustBodyPadding);
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-
 const supabaseClient = window.supabase?.createClient(
   'https://etwwriloppklhhkmswpr.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
@@ -1930,65 +1886,40 @@ if (!supabaseClient) {
 let lastUploadedScore = null;
 
 window.saveResult = async function saveResult(text) {
-
   if (!supabaseClient) {
     console.error("❌ No Supabase client");
     return;
   }
-
-  // ======================
-  // NORMALIZE INPUT
-  // ======================
   let cleaned;
-
   try {
-    cleaned = (typeof text === "string")
-      ? text
-      : JSON.stringify(text);
-
+    cleaned = (typeof text === "string") ? text : JSON.stringify(text);
     cleaned = cleaned.replace(/\s+/g, " ").trim();
-
   } catch (err) {
     console.error("❌ Normalize error:", err);
     return;
   }
-
   if (!cleaned) {
     console.error("❌ Empty value blocked");
     return;
   }
-
   if (cleaned === lastUploadedScore) {
-    console.log("⚠️ Duplicate blocked");
+    console.log("⚠ Duplicate blocked");
     return;
   }
-
   lastUploadedScore = cleaned;
-
-  console.log("📤 INSERTING INTO scoreboard_raw:", cleaned);
 
   const { data, error } = await supabaseClient
     .from("scoreboard_raw")
-    .insert([
-      { result_text: cleaned }
-    ])
+    .insert([{ result_text: cleaned }])
     .select();
 
   if (error) {
     console.error("❌ INSERT FAILED FULL ERROR:", error);
     return;
   }
-
   console.log("✅ INSERT SUCCESS:", data);
 };
-
 </script>
 
 </body>
 </html>
-
-
-
-
-
-

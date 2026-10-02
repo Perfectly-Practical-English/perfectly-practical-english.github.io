@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Word Bubbles</title>
 <style>
-/* ==============================
-   GLOBAL RESET & BASE STYLES
-   ============================== */
+/* ===== GLOBAL RESET ===== */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -15,179 +13,218 @@
 }
 
 body {
-  padding: 30px;
   font-family: Arial, sans-serif;
   background: linear-gradient(to bottom, #a0e0ff 0%, #ffffff 95%);
   user-select: none;
+  padding: 30px;
 }
 
-/* ==============================
-   TOP + MID BARS
-   ============================== */
-#topBar,
-#midBar {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px;
-  margin: 0 auto 16px auto;
-  background: #f0f8ff;
-  border-radius: 6px;
-  flex-wrap: nowrap;
+/* ===== OVERLAY ===== */
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  max-width: 100%;
+  height: 4px;
+  background-color: #d0e7f9;
+  z-index: 9998;
 }
 
-#topBar input[type="text"] {
-  flex: 1 1 0;
-  min-width: 70px;
-  max-width: 140px;
+/* ===== TOP BAR & ID FIELD STYLES ===== */
+.top-bar {  
+  display: flex;  
+  gap: 8px;  
+  margin: 0 auto 16px auto;  
+  max-width: 600px;
+  flex-wrap: nowrap;  
+  align-items: center;  
 }
 
-#topBar button,
-#midBar button {
-  flex: 0 0 auto;
+.top-bar input[type="text"],
+.top-bar #sectionSelectorBtn {  
+  flex: 1 1 50%;  
+  padding: 6px 12px;  
+  font-size: 14px;  
+  border: 1px solid #9fc8e8;  
+  border-radius: 6px;  
+  box-sizing: border-box;  
+  min-width: 0;  
+  background: #fff;
+}
+
+.top-bar #sectionSelectorBtn {
+  background: #1976d2;
+  color: #fff;
+  cursor: pointer;
+  text-align: center;
+  border: none;
+  font-weight: bold;
+}
+
+.top-bar #sectionSelectorBtn:hover {
+  background: #1565c0;
+}
+
+.top-bar button {
+  padding: 6px 12px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: 1px solid #777;
+  background: #eef6fb;
+  cursor: pointer;
+  user-select: none;
   white-space: nowrap;
 }
 
-#countdownOverlay {
-  flex: 0 0 auto;
-  min-width: 32px;
-  text-align: center;
+.top-bar button:not(#sectionSelectorBtn) {
+  font-size: 14px;
 }
 
-/* ==============================
-   INPUTS & BUTTONS
-   ============================== */
-input[type="text"] {
-  padding: 6px 10px;
-  font-size: 16px;
-  width: 140px;
-  border: 1px solid #999;
-  border-radius: 4px;
+.top-bar button:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
-button {
+/* ===== SECTION SELECTION MODAL STYLING ===== */
+#sectionModalRoot {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 99999;
+}
+
+#sectionModalBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.35);
+}
+
+#sectionModalContent {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(400px, 90vw);
+  max-height: 80vh;
+  background: #fff;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+#sectionModalHeader {
+  padding: 12px 16px;
+  background: #1976d2;
+  color: white;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#sectionModalClose {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+#sectionListContainer {
+  padding: 10px;
+  overflow-y: auto;
+}
+
+.section-item {
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  background: #eaf6ff;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #1976d2;
+  font-weight: 600;
+}
+
+.section-item:hover {
+  background: #d0e8ff;
+}
+
+/* ===== SCOREBOARD & BUTTONS ===== */
+#scoreboardContainer {
+  margin: 12px auto 0 auto;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 18px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  max-width: 600px;
+}
+
+#scoreButtons {
+  margin: 12px auto 24px auto;
+  display: none;
+  gap: 10px;
+  max-width: 600px;
+  flex-wrap: wrap;
+}
+
+#scoreButtons button {
+  font-family: Arial, sans-serif;
   padding: 6px 12px;
   font-size: 16px;
   border-radius: 4px;
   border: 1px solid #777;
   background: #eef6fb;
   cursor: pointer;
-  user-select: none;
 }
 
-button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-
-/* ==============================
-   SCOREBOARD & BUTTONS
-   ============================== */
-#scoreboardContainer {
-  margin: 12px 0 0 0;
-  font-family: monospace;
-  font-weight: bold;
-  font-size: 18px;
-  white-space: normal;
-}
-
-#scoreButtons {
-  margin: 12px 0 24px 0;
-  display: none;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-/* ==============================
-   GAME AREA / CANVAS
-   ============================== */
+/* ===== GAME AREA ===== */
 #gameArea {
   position: relative;
   margin: 0 auto 16px auto;
   height: 240px;
   width: 100%;
-  max-width: 100%;
+  max-width: 600px;
   border-radius: 6px;
   overflow: hidden;
   display: block;
 }
 
-/* ==============================
-   INVISIBLE TYPING INPUT
-   ============================== */
-#typingInput {
-  position: fixed;
-  left: 5px;
-  top: 5px;
-  width: 24px;
-  height: 24px;
-  opacity: 0;
-  pointer-events: none;
-  background: transparent;
-  border: none;
-  z-index: 9999;
-  font-size: 18px;
-  color: black;
-  caret-color: transparent;
-}
-
-/* ==============================
-   FOOTER
-   ============================== */
-footer {
-  margin-top: 16px;
-  padding: 10px 12px;
-  text-align: left;
-  font-size: 10px;
-  color: #666;
-  background: #f0f8ff;
-  border-radius: 6px;
-}
-
-/* ==============================
-   FORM ROWS & WHEEL
-   ============================== */
-.formRow {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-#sectionWheelContainer {
-  height: 34px;
-  flex: 1 1 0;
-  min-width: 0;
-  overflow: hidden;
-  border: 1px solid #999;
-  border-radius: 4px;
-  background: #fff;
-  position: relative;
-}
-
-#wheel,
-.wheel {
+/* ===== WORD STYLES (Style 1) ===== */
+.word {
   position: absolute;
-  top: 0;
-  width: 100%;
-  transition: transform 0.25s ease;
-}
-
-.wheelItem {
-  height: 34px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
+  font-size: 24px;
+  font-weight: 600;
+  white-space: nowrap;
   user-select: none;
-  font-size: 15px;
-  line-height: 1;
+  pointer-events: none;
+  transition: transform 0.1s linear;
+  text-shadow: 0 0 3px rgba(0,0,0,0.3);
 }
 
-/* ==============================
-   BUBBLE STYLING (EXTRA TEMPLATE)
-   ============================== */
+.letter {
+  display: inline-block;
+  transition: color 0.2s ease;
+}
+
+.typed {
+  color: red !important;
+}
+
+.exploding {
+  animation: explodeAnim 0.4s ease forwards;
+}
+
+@keyframes explodeAnim {
+  0% { transform: scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: scale(3) rotate(720deg); opacity: 0; }
+}
+
+/* ===== BUBBLE STYLES (Style 2) ===== */
 .bubble {
   border-radius: 50%;
   display: flex;
@@ -214,39 +251,63 @@ footer {
   100% { transform: scale(2.5) rotate(720deg); opacity: 0; }
 }
 
-/* ==============================
-   RESPONSIVE & TOUCH ADJUSTMENTS
-   ============================== */
-@media (max-width: 480px) {
-  body { padding: 16px; }
-  input[type="text"] { width: 100px; }
-  button { padding: 4px 8px; font-size: 14px; }
-  #gameArea { height: 180px; }
-  .wheelItem { font-size: 13px; }
+/* ===== INVISIBLE TYPING INPUT ===== */
+#typingInput {
+  position: fixed;
+  left: 5px;
+  top: 5px;
+  width: 24px;
+  height: 24px;
+  opacity: 0;
+  pointer-events: none;
+  background: transparent;
+  border: none;
+  z-index: 9999;
+  font-size: 18px;
+  color: black;
+  caret-color: transparent;
 }
 
+/* ===== FOOTER ===== */
+footer {
+  margin-top: 16px;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 12px; /* Balanced between 10px and 14px */
+  color: #666;
+  background: #f0f8ff;
+  border-radius: 6px;
+}
+
+/* ===== RESPONSIVE & TOUCH ADJUSTMENTS ===== */
+@media (max-width: 480px) {
+  body { padding: 16px; }
+  .top-bar input[type="text"], .top-bar #sectionSelectorBtn { font-size: 13px; padding: 5px; }
+  #gameArea { height: 180px; }
+}
 </style>
 </head>
 <body>
 
-<div id="topBar">
-  <input type="text" id="nameField" placeholder="Name">
-  <input type="text" id="idField" placeholder="ID">
-  <button id="startButton" disabled>Start</button>
-  <button id="submitButton" disabled>Submit</button>
-  <!-- <div id="countdownOverlay">120</div> -->
+<!-- TOP BAR (Contains ID Field, Section Button, Start, and Submit) -->
+<div class="top-bar">
+  <input id="studentId" type="text" placeholder="ID" autocomplete="off" />
+  <button id="sectionSelectorBtn" type="button">Select a section.</button>
+  <button id="startButton">Start</button>
+  <button id="submitButton">Submit</button>
 </div>
 
-<div id="midBar" class="formRow">
-  <button type="button" id="sectionUp">▲</button>
-
-  <div id="sectionWheelContainer">
-    <div class="wheel"></div>
+<!-- SECTION SELECTION MODAL -->
+<div id="sectionModalRoot">
+  <div id="sectionModalBackdrop"></div>
+  <div id="sectionModalContent">
+    <div id="sectionModalHeader">
+      <span>Select a Category</span>
+      <button id="sectionModalClose">✕</button>
+    </div>
+    <div id="sectionListContainer"></div>
   </div>
-
-  <button type="button" id="sectionDown">▼</button>
 </div>
-
 
 <div id="scoreboardContainer"></div>
 <div id="scoreButtons">
@@ -260,10 +321,37 @@ footer {
 <audio id="popSound" src="bubble-pop-406640.mp3" preload="auto"></audio>
 <input id="typingInput" type="text" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="20" autocomplete="off" />
 <footer>
-  <p>© 2026 Perfectly Practical English™. All rights reserved.</p>
-</footer>
+<p>© <span id="currentYear"></span> Perfectly Practical English</p>
 
 <script>
+  document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+
+<script>
+// --- 1. Student Name & ID Matching Module ---
+(function() {
+    'use strict';
+    const RAW_STUDENT_DATA = `
+        55555|David
+        55551|Matthew
+        12345|Sarah
+    `;
+    const studentDatabase = new Map();
+    RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+        const [id, name] = line.split('|').map(s => s ? s.trim() : '');
+        if (id && name) studentDatabase.set(id, name);
+    });
+
+    window.resolveStudentNameFromId = function(idInput) {
+        if (!idInput) return "Guest";
+        const trimmed = String(idInput).trim();
+        if (/^(x|g|guest)$/i.test(trimmed)) {
+            return "Guest";
+        }
+        return studentDatabase.get(trimmed) || "Guest";
+    };
+})();
+
 (() => {
   const canvas = document.getElementById('gameArea');
   const ctx = canvas.getContext('2d');
@@ -377,7 +465,7 @@ step, effort
 • family 👨‍👩‍👧‍👦 – people you are related to
 relatives, household
 
-• friend 🧑‍🤝‍🧑 – a person you like and trust
+• friend 🧑‍‍🤝‍🧑 – a person you like and trust
 buddy, companion
 
 • help 🆘 – support or assistance
@@ -541,7 +629,7 @@ smart, thoughtful
 • always 🔁 – at all times
 forever, constantly
 
-• bravely 🛡️ – in a courageous way
+• bravely 🛡 – in a courageous way
 courageously, fearlessly
 
 • helpfully 🤝 – in a useful way
@@ -558,7 +646,7 @@ calmly, steadily
 • bond 🔗 – a close connection
 connection, tie
 
-• friend 🧑‍🤝‍🧑 – someone you like and trust
+• friend 🧑‍‍🤝‍🧑 – someone you like and trust
 buddy, companion
 
 • friendship 💕 – a close relationship
@@ -876,7 +964,7 @@ wish, hope for
 • beautiful 🌸 – very nice to look at
 pretty, attractive
 
-• big 🏔️ – large in size
+• big 🏔️️ – large in size
 large, huge
 
 • exciting ⚡ – fun and interesting
@@ -898,7 +986,7 @@ very, truly
 easily, without trouble
 
 • well ⭐ – in a good way
-properly, nicely
+properly, correctly
 
 • carefully 🧠 – with attention
 cautiously, attentively
@@ -980,7 +1068,7 @@ large, major
 • carefully 🧠 – with thought
 thoughtfully, attentively
 
-• easily ✔️ – without difficulty
+• easily ✔ – without difficulty
 simply, smoothly
 
 • really ✔️ – very
@@ -1042,7 +1130,7 @@ hurry, sprint
 • save 🛟 – to protect from harm
 rescue, protect
 
-• survive 🏕️ – to stay alive
+• survive 🏕️️ – to stay alive
 stay alive, live
 
 • think 💭 – to use your mind
@@ -1089,7 +1177,7 @@ event, pastime
 • adventure 🧗 – an exciting experience
 journey, experience
 
-• city 🏙️ – a large town
+• city 🏙 – a large town
 large town, urban area
 
 • festival 🎉 – a special celebration
@@ -1110,7 +1198,7 @@ spot, area
 • temple 🛕 – a religious building
 shrine, place of worship
 
-• trip ✈️ – a journey
+• trip ✈ – a journey
 travel, journey
 
 • eat 🍽️ – to have food
@@ -1190,7 +1278,7 @@ footprint, track, hair, photograph, video, sound
 • myth / legend 📜 – traditional stories about cryptids
 legend, myth, folklore, tale, story, lore
 
-• investigation 🕵️ – the study or search for cryptids
+• investigation 🕵️️ – the study or search for cryptids
 research, expedition, tracking, study, observation
 
 • hoax / skepticism 🤔 – doubt or false information
@@ -1207,7 +1295,7 @@ north america, asia, europe, africa, remote areas, wilderness
 on, at, in, before, after, since, until, during, for, now, yesterday, today, tomorrow, later, then, when, while, once
 
 • Addition ➕ – words that add ideas together<br>
-and, also, too, with, plus, as well as, not only...but also, both...and
+and, also, too, plus, as well as, not only...but also, both...and
 
 • Cause / Effect 🔗 – words that show a reason or result<br>
 because, so, since, because of, due to, as a result, therefore, that’s why
@@ -1252,157 +1340,100 @@ to, from, toward, away from, up, down, forward, back
 yes, no
 
  `;
-async function loadVocab(source) {
-  let text = "";
-  // If it looks like a filename (ends with .txt), fetch it
-  if (source.trim().endsWith(".txt")) {
-    try {
-      const res = await fetch(source.trim());
-      if (!res.ok) throw new Error("Failed to load file");
-      text = await res.text();
-    } catch (err) {
-      console.error("Error loading vocab file:", err);
-      return [];
-    }
-  } else {
-    // Otherwise treat as raw text
-    text = source;
+
+  function parseSections(raw) {
+    const chunks = raw.split(/\n(?=~+)/);
+    return chunks
+      .map(chunk => chunk.trim())
+      .filter(chunk => chunk.startsWith("~"))
+      .map(chunk => {
+        const lines = chunk.split("\n");
+        const name = lines.shift().replace(/^~+/, "").trim();
+        const text = lines.join("\n").trim();
+        return { name, text };
+      });
   }
-  return parseVocabInput(text);
-}
 
-// Example usage:
-const rawVocabTextOrFilename = `vocab.txt`; // can also be pasted text
-loadVocab(rawVocabTextOrFilename).then(pairs => {
-  console.log("Loaded vocab pairs:", pairs);
-  // initialize flashcards here
-});
+  function extractWords(sectionText) {
+    return sectionText
+      .split("\n")
+      .map(line => {
+        const match = line.match(/•\s*([^\s–]+)/);
+        return match ? match[1] : null;
+      })
+      .filter(Boolean);
+  }
 
+  const sections = parseSections(wordListText);
 
-function parseSections(raw) {
-  const chunks = raw.split(/\n(?=~+)/);
-
-  return chunks
-    .map(chunk => chunk.trim())
-    .filter(chunk => chunk.startsWith("~"))
-    .map(chunk => {
-      const lines = chunk.split("\n");
-      const name = lines.shift().replace(/^~+/, "").trim();
-      const text = lines.join("\n").trim();
-      return { name, text };
-    });
-}
-
-function extractWords(sectionText) {
-  return sectionText
-    .split("\n")
-    .map(line => {
-      const match = line.match(/•\s*([^\s–]+)/);
-      return match ? match[1] : null;
-    })
-    .filter(Boolean);
-}
-
-const sections = parseSections(wordListText);
-
-const sectionData = [
-  { name: "Select a category.", words: [] }, // ✅ placeholder
-  ...sections.map(sec => ({
+  const sectionData = sections.map(sec => ({
     name: sec.name,
     words: extractWords(sec.text)
-  }))
-];
+  }));
 
+  let currentSectionName = 'No Section';
+  let wordList = [];
 
+  // Dropdown Modal Setup
+  const btn = document.getElementById("sectionSelectorBtn");
+  const modalRoot = document.getElementById("sectionModalRoot");
+  const modalBackdrop = document.getElementById("sectionModalBackdrop");
+  const modalClose = document.getElementById("sectionModalClose");
+  const listContainer = document.getElementById("sectionListContainer");
 
-const sectionUp = document.getElementById("sectionUp");
-const sectionDown = document.getElementById("sectionDown");
-const wheel = document.querySelector("#sectionWheelContainer .wheel");
+  function openModal() {
+    listContainer.innerHTML = "";
+    if (sectionData.length === 0) {
+      listContainer.innerHTML = "<div style='padding:10px; text-align:center; color:#666;'>No categories found.</div>";
+    } else {
+      sectionData.forEach(sec => {
+        const item = document.createElement("div");
+        item.className = "section-item";
+        item.textContent = sec.name;
+        item.addEventListener("click", () => {
+          currentSectionName = sec.name;
+          wordList = sec.words;
+          btn.textContent = sec.name;
+          closeModal();
+        });
+        listContainer.appendChild(item);
+      });
+    }
+    modalRoot.style.display = "block";
+  }
 
+  function closeModal() {
+    modalRoot.style.display = "none";
+  }
 
-let currentSectionIndex = 0;
-let wordList = [];
+  if (btn) btn.addEventListener("click", openModal);
+  if (modalClose) modalClose.addEventListener("click", closeModal);
+  if (modalBackdrop) modalBackdrop.addEventListener("click", closeModal);
 
-
-renderWheel();
-
-
-function renderWheel() {
-  wheel.innerHTML = '';
-
-  sectionData.forEach((sec) => {
-    const div = document.createElement('div');
-    div.className = 'wheelItem';
-    div.textContent = sec.name;
-    wheel.appendChild(div);
+  window.addEventListener("DOMContentLoaded", () => {
+    currentSectionName = "No Section";
+    btn.textContent = "Select a section.";
   });
-
-  updateWheel();
-}
-
-function updateWheel() {
-  const offset = -currentSectionIndex * 34;
-  wheel.style.transform = `translateY(${offset}px)`;
-
-  wordList = sectionData[currentSectionIndex]?.words || [];
-}
-
-sectionUp.addEventListener('click', () => {
-  if (currentSectionIndex > 0) {
-    currentSectionIndex--;
-    updateWheel();
-  }
-});
-
-sectionDown.addEventListener('click', () => {
-  if (currentSectionIndex < sectionData.length - 1) {
-    currentSectionIndex++;
-    updateWheel();
-  }
-});
-
-
-
-let activeSectionName = '';
-
 
   let activeBubbles = [];
   let ambientBubbles = [];
-  let explodingBubbles = []; // store bubbles in spinning pop animation
+  let explodingBubbles = [];
   let gameStarted = false, gameStopped = false;
   let currentTypedWord = null;
-nextWordIndex = 0;
-correctWords = 0;
-totalWords = wordList.length;
+  let nextWordIndex = 0;
+  let correctWords = 0;
+  let totalWords = 0;
 
-const popSound   = document.getElementById('popSound');
-const typingInput = document.getElementById('typingInput');
-
-const startBtn   = document.getElementById('startButton');
-const submitBtn  = document.getElementById('submitButton');
-
-const nameInput  = document.getElementById('nameField');
-const idInput    = document.getElementById('idField');
-
+  const popSound = document.getElementById('popSound');
+  const typingInput = document.getElementById('typingInput');
+  const startBtn = document.getElementById('startButton');
+  const submitBtn = document.getElementById('submitButton');
+  const idInput = document.getElementById('studentId');
   const scoreboardContainer = document.getElementById('scoreboardContainer');
   const scoreButtons = document.getElementById('scoreButtons');
   const copyBtn = document.getElementById('copyBtn');
   const downloadTxtBtn = document.getElementById('downloadTxtBtn');
   const downloadPngBtn = document.getElementById('downloadPngBtn');
-
-
-// Enable Start button when Name + ID are filled
-function updateStartButtonState() {
-  startBtn.disabled = !(
-    nameInput.value.trim() &&
-    idInput.value.trim()
-  );
-}
-
-nameInput.addEventListener('input', updateStartButtonState);
-idInput.addEventListener('input', updateStartButtonState);
-updateStartButtonState(); // <-- REQUIRED
-
 
   function brightColor(alpha=0.35) {
     const hue = Math.random()*360;
@@ -1410,7 +1441,7 @@ updateStartButtonState(); // <-- REQUIRED
   }
 
   function darkVariant(color) {
-    const match = color.match(/hsla\((\d+),\s*(\d+)%,\s*(\d+)%,\s*([\d.]+)\)/);
+    const match = color.match(/hsla\((\d+),\s*(\d+)\%,\s*(\d+)\%,\s*([\d.]+)\)/);
     if(!match) return 'rgba(0,0,0,0.5)';
     const h = match[1], s = match[2], l = Math.max(0, match[3]-35), a = match[4];
     return `hsla(${h},${s}%,${l}%,${a})`;
@@ -1464,33 +1495,27 @@ updateStartButtonState(); // <-- REQUIRED
         ctx.font = `bold ${Math.floor(this.radius/2.5)}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-ctx.shadowColor = this.shadowColor;
-ctx.shadowBlur = 20;
+        ctx.shadowColor = this.shadowColor;
+        ctx.shadowBlur = 20;
 
-let startX = this.x + offsetX;
+        let startX = this.x + offsetX;
+        ctx.textAlign = 'left';
 
-ctx.font = `bold ${Math.floor(this.radius/2.5)}px Arial`;
-ctx.textAlign = 'left';
-ctx.textBaseline = 'middle';
+        for (let i = 0; i < this.word.length; i++) {
+          if (i < this.typedIndex) {
+            ctx.fillStyle = 'red';
+          } else {
+            ctx.fillStyle = 'white';
+          }
 
-for (let i = 0; i < this.word.length; i++) {
+          ctx.fillText(
+            this.word[i],
+            startX - ctx.measureText(this.word).width / 2,
+            this.y
+          );
 
-  if (i < this.typedIndex) {
-    ctx.fillStyle = 'red'; // typed letters green
-  } else {
-    ctx.fillStyle = 'white';   // remaining letters
-  }
-
-  ctx.fillText(
-    this.word[i],
-    startX - ctx.measureText(this.word).width / 2,
-    this.y
-  );
-
-  startX += ctx.measureText(this.word[i]).width;
-}
-
-ctx.shadowBlur = 0;
+          startX += ctx.measureText(this.word[i]).width;
+        }
         ctx.shadowBlur = 0;
       }
     }
@@ -1510,15 +1535,15 @@ ctx.shadowBlur = 0;
       this.shadowColor = bubble.shadowColor;
       this.word = bubble.word;
       this.startTime = performance.now();
-      this.duration = 400; // ms
+      this.duration = 400;
     }
 
     draw(time) {
       const elapsed = time - this.startTime;
       const t = Math.min(elapsed / this.duration, 1);
 
-      const scale = 1 + 1.5 * t; // scale up
-      const rotation = 2 * Math.PI * 2 * t; // 720 deg
+      const scale = 1 + 1.5 * t;
+      const rotation = 2 * Math.PI * 2 * t;
       const alpha = 1 - t;
 
       ctx.save();
@@ -1559,12 +1584,12 @@ ctx.shadowBlur = 0;
     }
   }
 
-function spawnNextWord() {
-  if (nextWordIndex >= wordList.length) return;
-  const bubble = new Bubble(wordList[nextWordIndex]);
-  activeBubbles.push(bubble);
-  nextWordIndex++;
-}
+  function spawnNextWord() {
+    if (nextWordIndex >= wordList.length) return;
+    const bubble = new Bubble(wordList[nextWordIndex]);
+    activeBubbles.push(bubble);
+    nextWordIndex++;
+  }
 
   function spawnAmbientBurst() {
     const count = 5 + Math.floor(Math.random()*6);
@@ -1592,69 +1617,53 @@ function spawnNextWord() {
   }
 
   function handleTypingInput(e) {
-  if(!gameStarted || gameStopped) return;
-  if(activeBubbles.length === 0) return;
+    if(!gameStarted || gameStopped) return;
+    if(activeBubbles.length === 0) return;
 
-  let wordToType = currentTypedWord;
+    let wordToType = currentTypedWord;
 
-  if(!wordToType){
-    wordToType = activeBubbles.find(b => !b.exploded);
-    if(!wordToType) return;
-    currentTypedWord = wordToType;
-  }
+    if(!wordToType){
+      wordToType = activeBubbles.find(b => !b.exploded);
+      if(!wordToType) return;
+      currentTypedWord = wordToType;
+    }
 
+    if(e.inputType === "deleteContentBackward") {
+      if(wordToType.typedIndex > 0) {
+        wordToType.typedIndex--;
+      }
+      typingInput.value = "";
+      return;
+    }
 
-  // BACKSPACE CORRECTION
-  if(e.inputType === "deleteContentBackward") {
+    const key = e.data || e.key;
+    if(!key) {
+      typingInput.value = "";
+      return;
+    }
 
-    if(wordToType.typedIndex > 0) {
-      wordToType.typedIndex--;
+    const lowerKey = key.toLowerCase();
+    if(!/^[a-z]$/.test(lowerKey)) {
+      typingInput.value = "";
+      return;
+    }
+
+    const expected = wordToType.word[wordToType.typedIndex]?.toLowerCase();
+
+    if(lowerKey !== expected) {
+      typingInput.value = "";
+      return;
+    }
+
+    wordToType.typedIndex++;
+
+    if(wordToType.typedIndex === wordToType.word.length) {
+      explodeWord(wordToType, true);
+      currentTypedWord = null;
     }
 
     typingInput.value = "";
-    return;
   }
-
-
-  const key = e.data || e.key;
-
-  if(!key) {
-    typingInput.value = "";
-    return;
-  }
-
-
-  const lowerKey = key.toLowerCase();
-
-  if(!/^[a-z]$/.test(lowerKey)) {
-    typingInput.value = "";
-    return;
-  }
-
-
-  const expected =
-    wordToType.word[wordToType.typedIndex]?.toLowerCase();
-
-
-  // WRONG LETTER
-  if(lowerKey !== expected) {
-    typingInput.value = "";
-    return;
-  }
-
-
-  // CORRECT LETTER
-  wordToType.typedIndex++;
-
-
-  if(wordToType.typedIndex === wordToType.word.length) {
-    explodeWord(wordToType,true);
-    currentTypedWord = null;
-  }
-
-
-  typingInput.value = "";
-}
 
   function explodeWord(bubble, success){
     if(bubble.exploded) return;
@@ -1664,66 +1673,47 @@ function spawnNextWord() {
     explodingBubbles.push(new ExplodingBubble(bubble));
   }
 
-function startGame(){
-  if(gameStarted) return;
+  function startGame(){
+    if(gameStarted) return;
 
-  if(!nameInput.value.trim() || !idInput.value.trim()){
-    alert('Please enter your Name and ID Number before starting.');
-    return;
+    if(wordList.length === 0){
+      alert('Please select a category first.');
+      return;
+    }
+
+    gameStarted = true;
+    gameStopped = false;
+
+    startBtn.disabled = true;
+
+    scoreboardContainer.textContent = '';
+    scoreButtons.style.display = 'none';
+
+    activeBubbles = [];
+    ambientBubbles = [];
+    explodingBubbles = [];
+
+    currentTypedWord = null;
+    nextWordIndex = 0;
+    correctWords = 0;
+    totalWords = wordList.length;
+
+    spawnNextWord();
+    floatBubbles();
+    typingInput.focus();
   }
 
-// ===== STEP 8: LOCK SECTION INTO THIS RUN =====
-wordList = [...sectionData[currentSectionIndex].words];
-activeSectionName = sectionData[currentSectionIndex].name;
+  function stopGame(){ 
+    if(!gameStarted || gameStopped) return;
+    gameStopped = true;
+    startBtn.disabled = false;
+  }
 
-sectionUp.disabled = true;
-sectionDown.disabled = true;
-// =============================================
+  async function submitResults(){ 
+    const studentIdVal = idInput.value.trim();
+    const resolvedName = window.resolveStudentNameFromId(studentIdVal);
 
-gameStarted = true;
-gameStopped = false;
-
-startBtn.disabled = true;
-submitBtn.disabled = false;
-
-
-scoreboardContainer.textContent = '';
-scoreButtons.style.display = 'none';
-
-activeBubbles = [];
-ambientBubbles = [];
-explodingBubbles = [];
-
-currentTypedWord = null;
-nextWordIndex = 0;
-correctWords = 0;
-
-// 🔒 lock total count once (number of bullet entries)
-totalWords = wordList.length;
-
-spawnNextWord();
-floatBubbles();
-typingInput.focus();
-}
-
-
-function stopGame(){ 
-  if(!gameStarted || gameStopped) return;
-  gameStopped = true;
-  startBtn.disabled = false;
-  submitBtn.disabled = false;
-}
-
-async function submitResults(){ 
-    if(!gameStarted) return;
-
-    stopGame();
-
-    const pct =
-      totalWords
-        ? Math.round((correctWords / totalWords) * 100)
-        : 0;
-
+    const pct = totalWords ? Math.round((correctWords / totalWords) * 100) : 0;
     const now = new Date();
 
     const dateStr =
@@ -1733,63 +1723,51 @@ async function submitResults(){
       String(now.getHours()).padStart(2, '0') + ':' +
       String(now.getMinutes()).padStart(2, '0');
 
-    // SAFER filename extraction
     let currentFile = window.location.pathname.split('/').pop() || 'unknown.html';
-
-    // remove query strings/fragments if present
     currentFile = currentFile.split('?')[0].split('#')[0];
 
-    // Build ONE complete line
     const scoreLine =
       currentFile + "|" +
-      activeSectionName + "|" +
-      nameInput.value.trim() + "|" +
-      idInput.value.trim() + "|" +
+      currentSectionName + "|" +
+      resolvedName + "|" +
+      (studentIdVal || "N/A") + "|" +
       dateStr + "|" +
       correctWords + "/" + totalWords + "|" +
       pct + "%";
 
-    // Display scoreboard
     scoreboardContainer.textContent = scoreLine;
     scoreButtons.style.display = 'flex';
 
-    // Upload EXACT same text to Supabase
     try {
-
       await saveResult(scoreLine);
-
       console.log("✅ Score uploaded to Supabase");
-
     } catch(err) {
-
       console.error("❌ Upload failed:", err);
-
     }
-}
+  }
 
-startBtn.addEventListener('click', startGame);  submitBtn.addEventListener('click', submitResults);
+  startBtn.addEventListener('click', startGame);
+  submitBtn.addEventListener('click', submitResults);
   typingInput.addEventListener('input', handleTypingInput);
 
-typingInput.addEventListener('keydown', function(e) {
-  if(e.key === "Backspace") {
-    handleTypingInput({
-      inputType: "deleteContentBackward"
-    });
-  }
-});
+  typingInput.addEventListener('keydown', function(e) {
+    if(e.key === "Backspace") {
+      handleTypingInput({
+        inputType: "deleteContentBackward"
+      });
+    }
+  });
+
   canvas.addEventListener('click', ()=>{if(gameStarted && !gameStopped) typingInput.focus();});
 
   copyBtn.addEventListener('click', ()=>{if(!scoreboardContainer.textContent) return; navigator.clipboard.writeText(scoreboardContainer.textContent).then(()=>alert('Scoreboard copied.'));});
-  downloadTxtBtn.addEventListener('click', ()=>{if(!scoreboardContainer.textContent) return; const blob=new Blob([scoreboardContainer.textContent],{type:'text/plain'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`score_${nameInput.value.trim()||'player'}.txt`; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},100);});
-  downloadPngBtn.addEventListener('click', async ()=>{if(!scoreboardContainer.textContent) return; if(!window.html2canvas) await loadHtml2Canvas(); const canvasScore = await window.html2canvas(scoreboardContainer,{backgroundColor:null}); canvasScore.toBlob(blob=>{const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`score_${nameInput.value.trim()||'player'}.png`; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},100);});});
+  downloadTxtBtn.addEventListener('click', ()=>{if(!scoreboardContainer.textContent) return; const blob=new Blob([scoreboardContainer.textContent],{type:'text/plain'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`score_student.txt`; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},100);});
+  downloadPngBtn.addEventListener('click', async ()=>{if(!scoreboardContainer.textContent) return; if(!window.html2canvas) await loadHtml2Canvas(); const canvasScore = await window.html2canvas(scoreboardContainer,{backgroundColor:null}); canvasScore.toBlob(blob=>{const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`score_student.png`; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},100);});});
   function loadHtml2Canvas(){return new Promise((res,rej)=>{const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';script.onload=res;script.onerror=()=>rej(new Error('Failed to load html2canvas'));document.head.appendChild(script);});}
 })();
 </script>
 
-
-
-  <script>
-    // Green border
+<script>
     const borderDiv = document.createElement('div');
     borderDiv.style.position = 'fixed';
     borderDiv.style.inset = '0';
@@ -1799,13 +1777,12 @@ typingInput.addEventListener('keydown', function(e) {
     borderDiv.style.pointerEvents = 'none';
     borderDiv.style.backgroundColor = 'transparent';
     document.body.appendChild(borderDiv);
-  </script>
+</script>
 
 <script>
 (async function() {
   'use strict';
 
-  // Sanitize filenames to remove illegal characters
   function sanitizeFilename(name) {
     return name.trim()
       .replace(/[\\/:*?"<>|]+/g, '_')
@@ -1813,7 +1790,6 @@ typingInput.addEventListener('keydown', function(e) {
       .slice(0, 200) || 'score';
   }
 
-  // Generic download function
   function downloadBlob(blob, filename) {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
@@ -1826,51 +1802,47 @@ typingInput.addEventListener('keydown', function(e) {
     }, 2000);
   }
 
-  // Convert scoreboard to PNG using html2canvas
   async function downloadScoreAsPNG(text, filename) {
-  const wrapper = document.createElement('div');
-  wrapper.innerHTML = text.replace(/\n/g, '<br>');
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = text.replace(/\n/g, '<br>');
 
-  /* MATCH SCOREBOARD APPEARANCE */
-  wrapper.style.display = 'inline-block';
-  wrapper.style.whiteSpace = 'pre-wrap';
-  wrapper.style.fontFamily = 'monospace';
-  wrapper.style.fontWeight = 'bold';
-  wrapper.style.fontSize = '18px';
-  wrapper.style.lineHeight = '1.2';
-  wrapper.style.padding = '6px 8px';
-  wrapper.style.backgroundColor = '#fff';
-  wrapper.style.color = '#000';
+    wrapper.style.display = 'inline-block';
+    wrapper.style.whiteSpace = 'pre-wrap';
+    wrapper.style.fontFamily = 'monospace';
+    wrapper.style.fontWeight = 'bold';
+    wrapper.style.fontSize = '18px';
+    wrapper.style.lineHeight = '1.2';
+    wrapper.style.padding = '6px 8px';
+    wrapper.style.backgroundColor = '#fff';
+    wrapper.style.color = '#000';
 
-  document.body.appendChild(wrapper);
+    document.body.appendChild(wrapper);
 
-  try {
-    if (!window.html2canvas) {
-      const script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
-      document.head.appendChild(script);
-      await new Promise(res => script.onload = res);
+    try {
+      if (!window.html2canvas) {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+        document.head.appendChild(script);
+        await new Promise(res => script.onload = res);
+      }
+
+      const canvas = await html2canvas(wrapper, {
+        scale: 2,
+        backgroundColor: '#fff',
+        width: wrapper.offsetWidth,
+        height: wrapper.offsetHeight
+      });
+
+      const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
+      downloadBlob(blob, filename);
+    } catch (err) {
+      console.error(err);
+      alert('PNG download failed');
+    } finally {
+      wrapper.remove();
     }
-
-    const canvas = await html2canvas(wrapper, {
-      scale: 2,
-      backgroundColor: '#fff',
-      width: wrapper.offsetWidth,
-      height: wrapper.offsetHeight
-    });
-
-    const blob = await new Promise(res => canvas.toBlob(res, 'image/png'));
-    downloadBlob(blob, filename);
-  } catch (err) {
-    console.error(err);
-    alert('PNG download failed');
-  } finally {
-    wrapper.remove();
   }
-}
 
-
-  // Hijack a download button
   function hijackDownloadButton(button, getScoreText, getFilename, isText) {
     if (!button) return;
 
@@ -1896,47 +1868,32 @@ typingInput.addEventListener('keydown', function(e) {
     }, true);
   }
 
-  // Grab scoreboard and buttons
   const scoreboard = document.getElementById('scoreboardContainer');
   const downloadTxtBtn = document.getElementById('downloadTxtBtn');
   const downloadPngBtn = document.getElementById('downloadPngBtn');
-const nameInput = document.getElementById('nameField');
-const idInput = document.getElementById('idField');
+  const idInput = document.getElementById('studentId');
 
   if (scoreboard) {
     const getFilename = () => {
       const htmlFile = window.location.pathname.split('/').pop() || 'index.html';
-      const name = nameInput?.value.trim() || 'Student';
       const id = idInput?.value.trim() || 'ID';
       const now = new Date();
       const dateStr = `${String(now.getDate()).padStart(2,'0')}${String(now.getMonth()+1).padStart(2,'0')}${now.getFullYear()}`;
-      return `${htmlFile}|${name}|${id}|${dateStr}`;
+      return `${htmlFile}|${id}|${dateStr}`;
     };
 
     hijackDownloadButton(downloadTxtBtn, () => scoreboard.textContent.trim(), getFilename, true);
     hijackDownloadButton(downloadPngBtn, () => scoreboard.textContent.trim(), getFilename, false);
   }
-
 })();
 </script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
-
-    // Get filename only
     let filename = window.location.pathname.split("/").pop();
-
-    // Remove .html
     filename = filename.replace(/\.html$/i, "");
-
-    // Remove everything up to and including the first underscore
-    // (treats that as the prefix)
     filename = filename.replace(/^[^_]*_/, "");
-
-    // Convert underscores to spaces
     const title = filename.replace(/_/g, " ");
-
-    // Replace the first <h1>
     const h1 = document.querySelector("h1");
     if (h1) {
         h1.textContent = title;
@@ -1945,66 +1902,40 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script>
-
 (function(){
-
-/* =========================
-   RAW INSTRUCTIONS TEXT
-========================= */
-
 const RAW_TEXT = `
-
 How to play...
 
-1. Enter Name and ID.
+1. Enter Student ID.
 2. Select a category.
 3. Click Start to begin.
 4. Type the words correctly.
 5. Click Submit to see your score.
 6. Copy or download your score.
-
 `;
 
-
-/* =========================
-   RAW TEXT PARSER
-========================= */
-
 function parseRawInstructions(text){
-
   const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
   const html = [];
-
   lines.forEach(line => {
-
     if(line === "---"){
       html.push(`<hr>`);
       return;
     }
-
     if(/^\d+\./.test(line)){
       html.push(`<p>${line}</p>`);
       return;
     }
-
     if(!/[.!?:]$/.test(line)){
       html.push(`<h3>${line}</h3>`);
       return;
     }
-
     html.push(`<p>${line}</p>`);
   });
-
   return html.join("");
 }
 
-
-/* =========================
-   CREATE STYLE
-========================= */
-
 const style = document.createElement("style");
-
 style.textContent = `
 #instructionsBtn{
   position:fixed;
@@ -2020,24 +1951,20 @@ style.textContent = `
   box-shadow:0 4px 8px rgba(0,0,0,0.6);
   z-index:99998;
 }
-
 #instructionsBtn:hover{
   background:#257047;
 }
-
 #instructionsRoot{
   position:fixed;
   inset:0;
   display:none;
   z-index:99999;
 }
-
 #instructionsBackdrop{
   position:absolute;
   inset:0;
   background:rgba(0,0,0,.35);
 }
-
 #instructionsModal{
   position:absolute;
   top:25px;
@@ -2051,7 +1978,6 @@ style.textContent = `
   flex-direction:column;
   overflow:hidden;
 }
-
 #instructionsHeader{
   padding:12px 16px;
   border-bottom:1px solid #ddd;
@@ -2059,13 +1985,11 @@ style.textContent = `
   align-items:center;
   gap:10px;
 }
-
 #instructionsTitle{
   color:#1976d2;
   font-weight:600;
   font-size:1.1em;
 }
-
 #instructionsBack{
   border:none;
   background:none;
@@ -2074,7 +1998,6 @@ style.textContent = `
   color:#1976d2;
   font-weight:600;
 }
-
 #instructionsContent{
   padding:2px 18px 18px 18px;
   overflow-y:auto;
@@ -2082,85 +2005,47 @@ style.textContent = `
   scrollbar-width:none;
   -ms-overflow-style:none;
 }
-
 #instructionsContent::-webkit-scrollbar{
   display:none;
 }
-
 #instructionsContent h3{
   color:#1976d2;
   margin:12px 0 4px 0;
   font-weight:600;
 }
-
 #instructionsContent p{
   margin:4px 0;
 }
-
 #instructionsContent hr{
   margin:12px 0;
 }
 `;
-
 document.head.appendChild(style);
-
-
-/* =========================
-   CREATE BUTTON
-========================= */
 
 const btn = document.createElement("button");
 btn.id = "instructionsBtn";
 btn.textContent = "Instructions";
-
 document.body.appendChild(btn);
-
-
-/* =========================
-   CREATE MODAL
-========================= */
 
 const root = document.createElement("div");
 root.id = "instructionsRoot";
-
 root.innerHTML = `
 <div id="instructionsBackdrop"></div>
-
 <div id="instructionsModal">
-
   <div id="instructionsHeader">
     <button id="instructionsBack">←</button>
     <span id="instructionsTitle">Instructions</span>
   </div>
-
   <div id="instructionsContent">
     ${parseRawInstructions(RAW_TEXT)}
   </div>
-
 </div>
 `;
-
 document.body.appendChild(root);
 
-
-/* =========================
-   SCROLL LOCK
-========================= */
-
 const modalContent = document.getElementById("instructionsContent");
-
-modalContent.addEventListener("wheel", e=>{
-  e.stopPropagation();
-},{passive:false});
-
-modalContent.addEventListener("touchmove", e=>{
-  e.stopPropagation();
-},{passive:false});
-
-
-/* =========================
-   OPEN / CLOSE
-========================= */
+modalContent.addEventListener("wheel", e=>{ e.stopPropagation(); },{passive:false});
+modalContent.addEventListener("touchmove", e=>{ e.stopPropagation(); },{passive:false});
 
 function openModal(){
   root.style.display="block";
@@ -2175,40 +2060,24 @@ function closeModal(){
 }
 
 btn.onclick = openModal;
-
 document.getElementById("instructionsBack").onclick = closeModal;
 document.getElementById("instructionsBackdrop").onclick = closeModal;
-
-document.addEventListener("keydown", e=>{
-  if(e.key==="Escape") closeModal();
-});
-
-/* =========================
-   DYNAMIC BODY PADDING FOR BUTTON
-========================= */
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
 
 function adjustBodyPadding(){
-  const btnHeight = btn.offsetHeight + -25; // include some gap
+  const btnHeight = btn.offsetHeight + -25;
   document.body.style.paddingBottom = `${btnHeight}px`;
 }
-
-// Initial adjustment
 adjustBodyPadding();
-
-// Update if window is resized (responsive)
 window.addEventListener("resize", adjustBodyPadding);
-
 })();
 </script>
 
 <script>
 (function() {
-  // Prevent pinch-to-zoom
   function preventPinch(e) {
     if (e.touches.length > 1) e.preventDefault();
   }
-
-  // Prevent double-tap zoom
   let lastTouchTime = 0;
   function preventDoubleTap(e) {
     const now = Date.now();
@@ -2217,12 +2086,9 @@ window.addEventListener("resize", adjustBodyPadding);
     }
     lastTouchTime = now;
   }
-
-  // Block gesture events on iOS
   function preventGesture(e) {
     e.preventDefault();
   }
-
   document.addEventListener('touchstart', preventPinch, { passive: false });
   document.addEventListener('touchend', preventDoubleTap, { passive: false });
   document.addEventListener('gesturestart', preventGesture, { passive: false });
@@ -2233,7 +2099,6 @@ window.addEventListener("resize", adjustBodyPadding);
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script>
-
 const supabaseClient = window.supabase?.createClient(
   'https://etwwriloppklhhkmswpr.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
@@ -2246,22 +2111,15 @@ if (!supabaseClient) {
 window.lastUploadedScore = null;
 
 window.saveResult = async function saveResult(text) {
-
   if (!supabaseClient) {
     console.error("❌ No Supabase client");
     return;
   }
 
   let cleaned;
-
   try {
-
-    cleaned = String(text)
-      .replace(/\s+/g, " ")
-      .trim();
-
+    cleaned = String(text).replace(/\s+/g, " ").trim();
   } catch (err) {
-
     console.error("❌ Normalize error:", err);
     return;
   }
@@ -2277,42 +2135,6 @@ window.saveResult = async function saveResult(text) {
   }
 
   lastUploadedScore = cleaned;
-
-  console.log("📤 INSERTING:", cleaned);
-
-  // Parse existing score line
-  const parts = cleaned.split("|");
-
-  const file_name      = parts[0] || "";
-  const category       = parts[1] || "";
-  const student_name   = parts[2] || "";
-  const student_id     = parts[3] || "";
-  const datetime       = parts[4] || "";
-
-  let score_correct = null;
-  let score_total   = null;
-  let score_percent = null;
-
-  // Parse 12/30
-  if (parts[5]) {
-
-    const scoreMatch = parts[5].match(/^(\d+)\/(\d+)$/);
-
-    if (scoreMatch) {
-      score_correct = Number(scoreMatch[1]);
-      score_total   = Number(scoreMatch[2]);
-    }
-  }
-
-  // Parse 40%
-  if (parts[6]) {
-
-    const pctMatch = parts[6].match(/^(\d+)%$/);
-
-    if (pctMatch) {
-      score_percent = Number(pctMatch[1]);
-    }
-  }
 
   const { data, error } = await supabaseClient
   .from("scoreboard_raw")
@@ -2334,9 +2156,3 @@ window.saveResult = async function saveResult(text) {
 
 </body>
 </html>
-
-
-
-
-
-
