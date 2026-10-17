@@ -1,0 +1,2102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Word Bubbles</title>
+<style>
+/* ==============================
+   GLOBAL RESET & BASE STYLES
+   ============================== */
+:root {
+  --bg: #f7fdfb;
+  --blue: #1976d2;
+  --blue-hover: #1565c0;
+  --input-border-blue: #cfe2f7;
+  --section-item-default: #eaf6ff;
+  --section-item-hover: #d0e8ff;
+  --border-thickness: 10px;
+  --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: monospace;
+  --size-main: 16px;
+  --size-control: 12px;
+  --size-small: 11px;
+  --size-label: 14px;
+  --size-title: 18px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  padding: 30px;
+  font-family: var(--font-main);
+  background: black;
+  user-select: none;
+}
+
+/* ==============================
+   TOP BAR & CONTROLS (EQUAL WIDTHS)
+   ============================== */
+#topBar {
+  position: relative;
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 6px;
+  padding: 8px;
+  margin: 0 auto 16px auto;
+  background: rgba(0, 0, 0, 0.75);
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#topBar > * {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  width: 100% !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+#topBar input[type="text"] {
+  text-align: left !important;
+  justify-content: flex-start !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+#topBar button,
+#instructionsBtn,
+#submitButton {
+  justify-content: center !important;
+  text-align: center !important;
+  overflow: visible !important;
+}
+
+#sectionSelectorBtn {
+  text-align: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+#topBar input[type="text"],
+#topBar button,
+#sectionSelectorBtn,
+#instructionsBtn,
+#submitButton {
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px !important;
+  box-sizing: border-box !important;
+  padding: 0 8px !important;
+  margin: 0 !important;
+  font-size: 11px !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+  font-weight: 400 !important;
+  line-height: normal !important;
+  border: 1px solid #cfe2f7 !important;
+  border-radius: 6px !important;
+  background: linear-gradient(145deg, #ffffff, #eaf6ff) !important;
+  color: #1976d2 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  vertical-align: middle !important;
+  cursor: pointer;
+}
+
+#topBar input[type="text"] {
+  color: #000 !important;
+  text-align: left !important;
+  cursor: text !important;
+  justify-content: flex-start !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+#topBar input[type="text"]::placeholder {
+  color: #1976d2 !important;
+  opacity: 1 !important;
+}
+
+#topBar input[type="text"]:hover,
+#topBar button:hover:not(:disabled),
+#sectionSelectorBtn:hover,
+#instructionsBtn:hover,
+#submitButton:hover {
+  background: linear-gradient(145deg, #ffffff, #d0e8ff) !important;
+  border-color: #1976d2 !important;
+}
+
+button:disabled {
+  background: #f1f5f9 !important;
+  color: #94a3b8 !important;
+  border-color: var(--input-border-blue) !important;
+  cursor: not-allowed !important;
+  opacity: 1 !important;
+}
+
+/* ===== UNIFIED MODAL STYLING (Selection & Instructions) ===== */
+#sectionModalRoot,
+#instructionsRoot {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 99999;
+}
+
+#sectionModalBackdrop,
+#instructionsBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#sectionModalContent,
+#instructionsModal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--input-border-blue);
+  font-family: var(--font-main);
+}
+
+#sectionModalHeader,
+#instructionsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex: 0 0 auto;
+  font-size: var(--size-title);
+  font-weight: 700;
+  color: var(--blue);
+}
+
+#instructionsTitle {
+  color: var(--blue);
+  font-weight: 700;
+  font-size: var(--size-title);
+}
+
+#sectionModalClose,
+#instructionsBack {
+  background: none;
+  border: none;
+  color: var(--blue);
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  width: auto;
+  height: auto;
+}
+
+#sectionModalClose:hover,
+#instructionsBack:hover {
+  background-color: #eef6ff;
+}
+
+#sectionListContainer,
+#instructionsContent {
+  padding: 0;
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  font-size: var(--size-label);
+  line-height: 1.5;
+  color: #333;
+}
+
+#sectionListContainer::-webkit-scrollbar,
+#instructionsContent::-webkit-scrollbar {
+  display: none;
+}
+
+.section-item {
+  height: 28px;
+  padding: 0 6px;
+  margin-bottom: 6px;
+  background: var(--section-item-default);
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-main);
+  font-size: var(--size-small);
+  color: var(--blue);
+  font-weight: 400;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  transition: 0.12s;
+  width: 100%;
+}
+
+.section-item:hover {
+  background: var(--section-item-hover);
+  border-color: var(--blue);
+}
+
+.section-item.selected {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+#instructionsContent h3 {
+  margin-top: 10px;
+  margin-bottom: 4px;
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+#instructionsContent p {
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+#instructionsContent hr {
+  margin: 12px 0;
+  border: none;
+  border-top: 1px solid var(--input-border-blue);
+}
+
+/* ==============================
+   SCOREBOARD & BUTTONS
+   ============================== */
+#scoreboardContainer {
+  position: relative;
+  z-index: 1000;
+  transform: translateY(-260px);
+  margin: 30px 0 0 0;
+  font-family: var(--font-mono);
+  font-weight: 400;
+  font-size: 14px;
+  color: #fff !important;
+  white-space: normal;
+  word-break: break-all;
+  overflow-wrap: break-word;
+}
+
+#scoreButtons {
+  position: relative;
+  z-index: 1001;
+  transform: translateY(-250px);
+  margin: 12px 0 24px 0;
+  display: none;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+#scoreButtons button {
+  height: 28px !important;
+  padding: 0 6px !important;
+  font-size: var(--size-small) !important;
+  font-family: var(--font-main) !important;
+  font-weight: 400 !important;
+  background: linear-gradient(145deg, #ffffff, var(--section-item-default)) !important;
+  color: var(--blue) !important;
+  border: 1px solid var(--input-border-blue) !important;
+  border-radius: 6px !important;
+  cursor: pointer !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+  box-sizing: border-box !important;
+}
+
+#scoreButtons button:hover {
+  background: linear-gradient(145deg, #ffffff, var(--section-item-hover)) !important;
+  border-color: var(--blue) !important;
+}
+
+/* ==============================
+   INVISIBLE TYPING INPUT
+   ============================== */
+#typingInput {
+  position: fixed;
+  left: 5px;
+  top: 5px;
+  width: 24px;
+  height: 24px;
+  opacity: 0;
+  pointer-events: none;
+  background: transparent;
+  border: none;
+  z-index: 9999;
+  font-size: 18px;
+  color: black;
+  caret-color: transparent;
+}
+
+/* ==============================
+   FOOTER
+   ============================== */
+footer {
+  transform: translateY(-250px);
+  margin-top: 0px;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 10px;
+  color: #666;
+  background: #f0f8ff;
+  border-radius: 6px;
+  z-index: 1000;
+  font-family: var(--font-main);
+}
+
+/* ==============================
+   RESPONSIVE & TOUCH ADJUSTMENTS
+   ============================== */
+@media (max-width: 480px) {
+  body { padding: 16px; }
+}
+
+/* Sky field canvas */
+#starCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 300px;
+    pointer-events: none;
+    z-index: 2;
+    background: black;
+    -webkit-mask-image: linear-gradient(
+        to bottom,
+        black 0%,
+        black calc(100% - 20px),
+        transparent 100%
+    );
+    mask-image: linear-gradient(
+        to bottom,
+        black 0%,
+        black calc(100% - 40px),
+        transparent 100%
+    );
+}
+
+#gameArea {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -50px;
+  width: calc(100% + 100px);
+  height: 100%;
+  display: block;
+}
+
+/* UFO / Tornado container */
+#ufoContainer {
+  position: absolute;
+  top: -90px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: -131;
+}
+
+#ufo {
+  font-size: 200px;
+  filter: brightness(0.65) contrast(1.15);
+  z-index: 131;
+  -webkit-mask-image:
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,1) 0%,
+      rgba(0,0,0,1) 75%,
+      rgba(0,0,0,0) 100%
+    );
+  mask-image:
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,1) 0%,
+      rgba(0,0,0,1) 75%,
+      rgba(0,0,0,0) 100%
+    );
+}
+
+.cow {
+  position: absolute;
+  display: block;
+  font-size: 80px;
+  z-index: 5000;
+  opacity: 0;
+  visibility: visible;
+  pointer-events: none;
+  transition: opacity 3s ease-in-out;
+}
+
+.cowIcon {
+  transform:scaleX(-1);
+  display:inline-block;
+  line-height:1;
+}
+
+#gameWrapper {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  overflow: visible;
+  background: transparent;
+  z-index:10;
+}
+
+#animalLayer {
+  position:absolute;
+  left:0;
+  width:100vw;
+  height:330px;
+  pointer-events:none;
+  overflow:visible;
+  z-index:1000;
+}
+
+#groundCanvas {
+    position: fixed;
+    inset: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: -2;
+}
+
+/* Hide scrollbars but keep scrolling */
+html,
+body {
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+    display: none;
+}
+</style>
+</head>
+<body>
+
+
+<div id="loadingCover"></div>
+
+<canvas id="groundCanvas"></canvas>
+<canvas id="starCanvas"></canvas>
+
+<script>
+(function () {
+const canvas = document.getElementById("starCanvas");
+const ctx = canvas.getContext("2d");
+
+let stars = [];
+let t = 0;
+const STAR_COUNT = 2000;
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = canvas.offsetHeight;
+  createStars();
+}
+
+function createStars() {
+  stars = [];
+  const w = canvas.width;
+  const h = canvas.height;
+  for (let i = 0; i < STAR_COUNT; i++) {
+    stars.push({
+      x: (Math.random() * 2 - 0.5) * w,
+      y: (Math.random() * 2 - 0.5) * h,
+      r: Math.random() * 1.6 + 0.3,
+      a: Math.random() * 0.5 + 0.5,
+      s: Math.random() * 0.01 + 0.005
+    });
+  }
+}
+
+window.addEventListener("resize", resize);
+resize();
+
+function draw() {
+  const w = canvas.width;
+  const h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  const cx = w / 2;
+  const cy = h * 0.42;
+  const angle = t * 0.0009;
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+
+  ctx.fillStyle = "white";
+
+  for (let i = 0; i < stars.length; i++) {
+    const s = stars[i];
+    let dx = s.x - cx;
+    let dy = s.y - cy;
+    const rx = dx * cos - dy * sin;
+    const ry = dx * sin + dy * cos;
+    const x = cx + rx;
+    const y = cy + ry;
+
+    if (x >= -10 && x <= w + 10 && y >= -10 && y <= h + 10) {
+      ctx.globalAlpha = s.a;
+      ctx.beginPath();
+      ctx.arc(x, y, s.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  ctx.globalAlpha = 1;
+  t += 1;
+  requestAnimationFrame(draw);
+}
+
+draw();
+})();
+</script>
+
+<div id="topBar">
+  <input type="text" id="idField" placeholder="ID">
+  <button id="sectionSelectorBtn" type="button">Select a section.</button>
+  <button id="instructionsBtn" type="button">Instructions</button>
+  <button id="submitButton">Submit</button>
+</div>
+
+<!-- Section Selection Modal -->
+<div id="sectionModalRoot">
+  <div id="sectionModalBackdrop"></div>
+  <div id="sectionModalContent">
+    <div id="sectionModalHeader">
+      <span>Select a Category</span>
+      <button id="sectionModalClose" type="button">✕</button>
+    </div>
+    <div id="sectionListContainer"></div>
+  </div>
+</div>
+
+<!-- Instructions Modal -->
+<div id="instructionsRoot">
+  <div id="instructionsBackdrop"></div>
+  <div id="instructionsModal">
+    <div id="instructionsHeader">
+      <span id="instructionsTitle">Instructions</span>
+      <button id="instructionsBack" type="button">✕</button>
+    </div>
+    <div id="instructionsContent"></div>
+  </div>
+</div>
+
+<div id="gameWrapper">
+  <div id="animalLayer"></div>
+
+  <canvas id="gameArea"
+    tabindex="0"
+    aria-label="Typing game area">
+  </canvas>
+
+  <div id="ufoContainer">
+    <div id="ufo">🛸</div>
+    <div id="beam"></div>
+  </div>
+</div>
+
+<audio
+  id="popSound"
+  src="bubble-pop-406640.mp3"
+  preload="auto">
+</audio>
+
+<input
+  id="typingInput"
+  type="text"
+  inputmode="text"
+  autocapitalize="off"
+  autocorrect="off"
+  spellcheck="false"
+  maxlength="20"
+  autocomplete="off"
+/>
+<footer>
+  <p>© <span id="currentYear"></span> Perfectly Practical English</p>
+</footer>
+
+<script>
+  document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+
+<div id="scoreboardContainer"></div>
+
+<div id="scoreButtons">
+  <button id="copyBtn">Copy</button>
+  <button id="downloadTxtBtn">↓Text</button>
+  <button id="downloadPngBtn">↓PNG</button>
+</div>
+
+<script>
+(() => {
+  const canvas = document.getElementById('gameArea');
+  const ctx = canvas.getContext('2d');
+
+  function resizeCanvas() {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  const wordListText = `
+~Hobbies
+• activity 🎯 – something you do for enjoyment or interest
+pastime, action, leisure activity
+• achievement 🏆 – something you succeed in doing well
+success, accomplishment, goal
+• fun 🎉 – enjoyment or pleasure
+enjoyment, pleasure
+• game 🎲 – an activity with rules played for fun
+match, competition
+• hobby 🎨 – an activity you do in your free time
+pastime, leisure interest
+• interest ❤️ – something you like or care about
+liking, curiosity
+• practice 🔁 – time spent learning or improving a skill
+training, repetition
+• skill 🛠 – an ability to do something well
+ability, talent
+• sport ⚽ – a physical competitive activity
+athletic activity, competition
+• time ⏰ – hours or moments spent doing something
+period, moment
+• do ▶️ – to perform an activity
+perform, carry out
+• enjoy 😊 – to like something and feel pleasure
+like, take pleasure in
+• have 📦 – to take part in or experience something
+experience, take part in
+• like 👍 – to feel good about something
+enjoy, appreciate
+• learn 📘 – to gain knowledge or a new skill
+study, pick up
+• make ✂ – to create or produce something
+create, build
+• play 🎮 – to take part in a game or activity
+participate, take part
+• practice 🔄 – to repeat something to improve
+train, rehearse
+• try 🔍 – to attempt to do something new
+attempt, test
+• watch 👀 – to look at something for enjoyment
+observe, view
+• easy 🙂 – not difficult to do
+simple, not hard
+• exciting ⚡ – making you feel interested or happy
+thrilling, stimulating
+• fun 😄 – enjoyable and pleasant
+enjoyable, pleasant
+• interesting 🤔 – holding your attention
+engaging, fascinating
+• relaxing 🌿 – helping you feel calm
+calming, restful
+• carefully 🧠 – in a slow and thoughtful way
+cautiously, attentively
+• easily ✔️ – without difficulty
+simply, effortlessly
+• smoothly 🧈 – without problems or stops
+effortlessly, without trouble
+• well ⭐ – in a good or correct way
+properly, correctly
+• slowly 🐢 – not fast
+gradually, at a low speed
+
+~Helping Others
+• action 🤲 – something done to help someone
+step, effort
+• family 👨‍👩‍👧‍👦 – people you are related to
+relatives, household
+• friend 🧑‍🤝‍🧑 – a person you like and trust
+buddy, companion
+• help 🆘 – support or assistance
+aid, assistance
+• kindness 💖 – being friendly and caring
+compassion, generosity
+• moment ⏳ – a short time
+instant, short time
+• need ❗ – something required or wanted
+necessity, requirement
+• person 🧍 – a human being
+individual, human
+• support 🏗️ – help given to someone
+assistance, backing
+• time ⏰ – when something happens
+period, moment
+• assist 🤝 – to help someone
+aid, support
+• care ❤️ – to feel concern for someone
+look after, care for
+• give 🎁 – to provide something
+offer, provide
+• help 🛠️ – to make something easier for someone
+assist, support
+• listen 👂 – to pay attention to someone speaking
+hear, pay attention
+• lend 🤲 – to give something for a short time
+loan, let someone use
+• share 🔄 – to give part of something to others
+divide, give
+• support 🧱 – to help someone emotionally or physically
+encouragement, back
+• talk 💬 – to speak with someone
+speak, chat
+• teach 📚 – to help someone learn
+instruct, educate
+• friendly 🙂 – kind and pleasant
+welcoming, nice
+• good 👍 – kind or helpful
+kind, positive
+• helpful 🧩 – ready to help
+supportive, useful
+• kind 💗 – caring and thoughtful
+caring, gentle
+• nice 🌸 – pleasant and friendly
+pleasant, kind
+• carefully 🧠 – with attention
+cautiously, attentively
+• kindly 🌷 – in a gentle way
+gently, politely
+• easily ✔️ – without difficulty
+simply, without trouble
+• patiently ⏳ – calmly waiting or helping
+calmly, without rushing
+• well ⭐ – in a good way
+properly, correctly
+
+~Heroes
+• advice 💬 – helpful ideas or suggestions
+guidance, recommendation
+• friend 🧑‍🤝‍🧑 – someone who supports you
+companion, ally
+• hero 🦸 – a person who helps or saves others
+role model, protector
+• help 🤝 – support given to others
+aid, assistance
+• kindness 💛 – caring behavior
+compassion, generosity
+• mentor 🎓 – a person who guides others
+guide, coach
+• person 🧍 – a human being
+individual, human
+• support 🏗️ – help and encouragement
+assistance, encouragement
+• teacher 📘 – someone who helps others learn
+educator, instructor
+• wisdom 🧠 – knowledge and good judgment
+understanding, insight
+• care ❤️ – to look after others
+protect, look after
+• give 🎁 – to offer help or support
+provide, offer
+• guide 🧭 – to lead or show the way
+lead, direct
+• help 🆘 – to assist someone
+aid, assist
+• inspire ✨ – to make others feel motivated
+motivate, encourage
+• protect 🛡️ – to keep someone safe
+guard, defend
+• show 👀 – to demonstrate something
+demonstrate, display
+• support 🧱 – to stand by someone
+back, stand by
+• teach 📚 – to help someone learn
+educate, instruct
+• encourage 🌟 – to give confidence
+motivate, support
+• brave 🦁 – not afraid
+fearless, courageous
+• good 👍 – kind and helpful
+kind, positive
+• kind 💖 – caring and nice
+caring, gentle
+• strong 💪 – powerful or brave
+powerful, tough
+• wise 🦉 – showing good judgment
+smart, thoughtful
+• always 🔁 – at all times
+forever, constantly
+• bravely 🛡️ – in a courageous way
+courageously, fearlessly
+• helpfully 🤝 – in a useful way
+usefully, supportively
+• kindly 🌸 – in a caring way
+gently, politely
+• patiently ⏳ – without rushing
+calmly, steadily
+
+~My Best Friend
+• bond 🔗 – a close connection
+connection, tie
+• friend 🧑‍🤝‍🧑 – someone you like and trust
+buddy, companion
+• friendship 💕 – a close relationship
+bond, connection
+• memory 🧠 – something you remember
+recollection, experience
+• person 🧍 – a human being
+individual, human
+• relationship 🤝 – a connection between people
+connection, bond
+• support 🧱 – help and care
+help, encouragement
+• time ⏰ – moments spent together
+period, moments
+• trust 🔐 – belief in someone
+confidence, faith
+• laugh 😂 – a sound of happiness
+giggle, chuckle
+• care ❤️ – to like and protect someone
+look after, protect
+• laugh 😄 – to show happiness
+smile, giggle
+• like 👍 – to enjoy someone
+enjoy, appreciate
+• love 💖 – strong caring feelings
+affection, care
+• meet 🤝 – to see someone
+see, get together
+• play 🎮 – to do fun activities
+have fun, spend time
+• share 🔄 – to give something to another
+give, exchange
+• talk 💬 – to speak with someone
+chat, speak
+• trust 🤍 – to believe in someone
+rely on, believe in
+• best ⭐ – better than all others
+closest, favorite
+• close 🤗 – having a strong connection
+near, connected
+• friendly 🙂 – kind and pleasant
+nice, welcoming
+• fun 🎉 – enjoyable
+enjoyable, pleasant
+• good 👍 – kind or nice
+kind, positive
+• really ✔️ – very
+very, truly
+• together 🤝 – with each other
+with one another, jointly
+• carefully 🧠 – with thought
+gently, attentively
+• openly 🔓 – honestly and freely
+honestly, freely
+• well ⭐ – in a good way
+properly, nicely
+
+~Dream Job
+• career 📈 – a long-term job path
+profession, working life
+• dream 💭 – a strong hope for the future
+wish, hope
+• future 🔮 – time after now
+later, coming time
+• goal 🎯 – something you want to achieve
+aim, target
+• job 💼 – paid work
+employment, position
+• plan 📝 – an idea for the future
+idea, strategy
+• task 📋 – a piece of work
+duty, assignment
+• work 🛠️ – effort done for a job
+labor, effort
+• company 🏢 – a business organization
+business, firm
+• become 🔄 – to change into something
+turn into, grow into
+• decide 🧠 – to choose
+choose, make a decision
+• dream 💭 – to hope for something
+hope, imagine
+• enjoy 😊 – to like doing something
+like, take pleasure in
+• help 🤝 – to assist others
+support, aid
+• like 👍 – to feel good about something
+enjoy, appreciate
+• plan 🗺️ – to prepare for the future
+prepare, organize
+• want ❤️ – to wish for something
+wish, hope for
+• work 🛠️ – to do your job
+do your job, labor
+• exciting ⚡ – making you feel interested
+thrilling, stimulating
+• fun 🎉 – enjoyable
+enjoyable, pleasant
+• good 👍 – positive or nice
+positive, helpful
+• important ❗ – having value
+necessary, valuable
+• interesting 🤔 – holding attention
+engaging, fascinating
+• efficiently ⚙️ – in a fast and smart way
+effectively, productively
+• hard 💪 – with a lot of effort
+intensely, with effort
+• really ✔️ – very
+very, truly
+• slowly 🐢 – not fast
+gradually, little by little
+• well ⭐ – in a good way
+properly, correctly
+
+~Healthy Food
+• dish 🍽️ – prepared food
+meal, serving
+• food 🍎 – things people eat
+nourishment, meals
+• fruit 🍓 – sweet healthy food from plants
+produce, fresh food
+• health ❤️ – the state of being well
+wellness, fitness
+• lunch 🥪 – a midday meal
+midday meal
+• meal 🍛 – food eaten at one time
+serving, course
+• recipe 📖 – instructions for cooking
+instructions, method
+• snack 🍿 – small amount of food
+bite, light meal
+• taste 👅 – the flavor of food
+flavor, quality
+• vegetable 🥕 – healthy plant food
+greens, produce
+• cook 🍳 – to prepare food
+prepare, heat
+• eat 🍽️ – to have food
+consume, have
+• enjoy 😊 – to like food
+like, appreciate
+• make 🥣 – to prepare food
+prepare, create
+• prepare 🔪 – to get food ready
+ready, organize
+• serve 🍽️ – to give food to others
+offer, present
+• taste 👄 – to try food
+sample, try
+• try 🔍 – to test food
+sample, taste
+• delicious 😋 – very tasty
+tasty, flavorful
+• fresh 🌱 – newly made
+new, crisp
+• good 👍 – healthy or nice
+healthy, beneficial
+• healthy 🥗 – good for the body
+nutritious, good for you
+• tasty 😄 – having a good flavor
+flavorful, delicious
+• carefully 🧠 – with attention
+gently, attentively
+• happily 😊 – with joy
+gladly, cheerfully
+• simply ✔️ – in an easy way
+easily, plainly
+• slowly 🐢 – not fast
+calmly, gradually
+• well ⭐ – in a good way
+properly, correctly
+
+~Famous Places
+• city 🏙️ – a large town
+large town, urban area
+• country 🌍 – a nation
+nation, state
+• dream 💭 – a place you want to visit
+wish, hope
+• journey 🚆 – a long trip
+trip, travel
+• location 📍 – where something is
+place, position
+• place 🗺️ – a specific area
+spot, location
+• trip ✈️ – a short journey
+journey, travel
+• vacation 🏖️ – time off for travel
+holiday, break
+• visit 🧳 – a short stay
+stay, trip
+• enjoy 😊 – to like an experience
+like, appreciate
+• explore 🧭 – to discover places
+discover, travel around
+• feel ❤️ – to have emotions
+experience, sense
+• go 🚶 – to move somewhere
+travel, move
+• learn 📘 – to gain knowledge
+study, find out
+• look 👀 – to see
+watch, view
+• see 👁️ – to notice with your eyes
+view, notice
+• travel ✈️ – to go to places
+journey, move around
+• visit 🏛️ – to go see a place
+see, go to
+• want ❤️ – to wish for something
+wish, hope for
+• beautiful 🌸 – very nice to look at
+pretty, attractive
+• big 🏔️ – large in size
+large, huge
+• exciting ⚡ – fun and interesting
+thrilling, stimulating
+• famous ⭐ – known by many people
+well-known, popular
+• interesting 🤔 – making you curious
+engaging, fascinating
+• easily ✔️ – without trouble
+simply, smoothly
+• really ✔️ – very
+very, truly
+• smoothly 🧈 – without problems
+easily, without trouble
+• well ⭐ – in a good way
+properly, correctly
+• carefully 🧠 – with attention
+cautiously, attentively
+
+~The Future
+• change 🔄 – becoming different
+difference, transformation
+• family 👨‍👩‍👧‍👦 – people related to you
+relatives, household
+• friends 🧑‍🤝‍🧑 – people you like
+buddies, companions
+• future 🔮 – time that has not happened yet
+later, coming time
+• house 🏠 – a place to live
+home, building
+• life 🌱 – being alive
+living, existence
+• technology 💻 – machines and tools
+tech, machines
+• work 🛠️ – jobs and effort
+employment, labor
+• world 🌍 – the Earth and its people
+Earth, globe
+• be 🔄 – to exist or become
+exist, remain
+• change 🔁 – to become different
+transform, alter
+• decide 🧠 – to choose
+choose, select
+• grow 🌱 – to develop
+develop, increase
+• help 🤝 – to assist
+support, aid
+• live 🏡 – to have a life
+exist, reside
+• make ✨ – to create
+create, produce
+• see 👀 – to understand or notice
+notice, realize
+• start 🚀 – to begin
+begin, launch
+• work 🛠️ – to do a job
+labor, work at
+• different ⚖️ – not the same
+not the same, changed
+• exciting ⚡ – interesting and fun
+thrilling, stimulating
+• important ❗ – having value
+necessary, valuable
+• new 🆕 – not old
+fresh, recent
+• big 📈 – large or important
+large, major
+• carefully 🧠 – with thought
+thoughtfully, attentively
+• easily ✔️ – without difficulty
+simply, smoothly
+• really ✔️ – very
+very, truly
+• smoothly 🧈 – without problems
+easily, steadily
+• well ⭐ – in a good way
+properly, correctly
+
+~Survival
+• danger ⚠️ – risk of harm
+risk, threat
+• decision 🧠 – a choice
+choice, decision-making
+• help 🆘 – support or aid
+assistance, aid
+• life ❤️ – being alive
+living, existence
+• moment ⏳ – a short time
+instant, short time
+• person 🧍 – a human being
+individual, human
+• risk 🎲 – chance of danger
+danger, threat
+• situation 🌪️ – what is happening
+condition, circumstance
+• time ⏰ – when something happens
+moment, period
+• escape 🏃 – to get away
+flee, get away
+• face 😠 – to deal with something
+confront, deal with
+• fight 🥊 – to struggle
+battle, struggle
+• help 🤝 – to assist
+aid, support
+• decide 🧠 – to choose
+choose, make a choice
+• run 🏃 – to move fast
+hurry, sprint
+• save 🛟 – to protect from harm
+rescue, protect
+• survive 🏕️ – to stay alive
+stay alive, live
+• think 💭 – to use your mind
+consider, reflect
+• avoid 🚫 – to stay away from
+prevent, keep away from
+• brave 🦁 – not afraid
+fearless, courageous
+• dangerous ☠️ – not safe
+risky, unsafe
+• hard 💪 – very difficult
+tough, challenging
+• important ❗ – very necessary
+necessary, vital
+• scary 😨 – causing fear
+frightening, fearful
+• bravely 🛡️ – with courage
+courageously, fearlessly
+• carefully 🧠 – with caution
+cautiously, attentively
+• quickly ⚡ – very fast
+fast, rapidly
+• safely 🛟 – without danger
+securely, without harm
+• slowly 🐢 – not fast
+gradually, carefully
+
+~Tourists
+• activity 🎯 – something done for fun
+event, pastime
+• adventure 🧗 – an exciting experience
+journey, experience
+• city 🏙️ – a large town
+large town, urban area
+• festival 🎉 – a special celebration
+celebration, event
+• food 🍽️ – things to eat
+meals, dishes
+• location 📍 – where something is
+place, position
+• market 🏪 – place to buy things
+shop, marketplace
+• place 🗺️ – a location
+spot, area
+• temple 🛕 – a religious building
+shrine, place of worship
+• trip ✈️ – a journey
+travel, journey
+• eat 🍽️ – to have food
+consume, have
+• enjoy 😊 – to like something
+like, appreciate
+• explore 🧭 – to discover places
+discover, look around
+• go 🚶 – to move somewhere
+travel, move
+• like 👍 – to enjoy something
+enjoy, appreciate
+• see 👀 – to look at
+view, notice
+• try 🔍 – to test something new
+attempt, sample
+• visit 🧳 – to go to a place
+see, go to
+• learn 📘 – to gain knowledge
+study, find out
+• beautiful 🌸 – nice to look at
+pretty, attractive
+• big 🏔️ – large
+large, huge
+• exciting ⚡ – fun and interesting
+thrilling, stimulating
+• fun 🎉 – enjoyable
+enjoyable, pleasant
+• interesting 🤔 – holding attention
+engaging, fascinating
+• carefully 🧠 – with attention
+cautiously, attentively
+• eagerly 🔥 – with excitement
+excitedly, enthusiastically
+• really ✔️ – very
+very, truly
+• smoothly 🧈 – without problems
+easily, steadily
+• happily 😊 – with joy
+cheerfully, gladly
+
+~Cryptids
+• creature 🐾 – a living being, often unknown or unusual
+cryptid, monster, beast, animal, being, entity
+• sightings 👀 – moments when a cryptid is seen or reported
+sighting, encounter, report, observation, witness account
+• habitat 🌲 – the place where a cryptid is believed to live
+forest, lake, swamp, mountains, cave, river, wilderness
+• behavior 🐾 – the way a cryptid acts
+nocturnal, shy, aggressive, elusive, mysterious, territorial
+• evidence 🔬 – proof or signs that suggest existence
+footprint, track, hair, photograph, video, sound
+• myth / legend 📜 – traditional stories about cryptids
+legend, myth, folklore, tale, story, lore
+• investigation 🕵️ – the study or search for cryptids
+research, expedition, tracking, study, observation
+• hoax / skepticism 🤔 – doubt or false information
+hoax, fake, fraud, disbelief, doubt, unverified
+• classification 🧬 – ways cryptids are grouped or described
+humanoid, aquatic, reptilian, winged, animal-like, hybrid
+• folklore regions 🌎 – places known for cryptid stories
+north america, asia, europe, africa, remote areas, wilderness
+
+~Signal Words
+• Time ⏰ – words that tell when something happens<br>
+on, at, in, before, after, since, until, during, for, now, yesterday, today, tomorrow, later, then, when, while, once
+• Addition ➕ – words that add ideas together<br>
+and, also, too, plus, as well as, not only...but also, both...and
+• Cause / Effect 🔗 – words that show a reason or result<br>
+because, so, since, because of, due to, as a result, therefore, that’s why
+• Comparison / Similarity / Difference ⚖️ – words that compare things<br>
+like, as, as...as, than, similar to, different from, more than, less than, the most, just as...so, whereas, in contrast to
+• Contrast / Opposition 🎭 – words that show differences<br>
+but, although, though, even though, however, yet, still, despite, instead, whereas, while, on the other hand
+• Frequency 〰️ – words that tell how often something happens<br>
+always, usually, often, sometimes, occasionally, rarely, never, every day, once a week, hardly ever, from time to time
+• Possibility / Certainty 🎲 – words that show how possible or sure something is<br>
+maybe, probably, possibly, must, might, may, could, can, definitely, certainly
+• Advice / Obligation / Permission ☝️ – words that tell rules or give guidance<br>
+must, must not, have to, don’t have to, should, ought to, had better, can, cannot, may, could
+• Manner 🎭 – words that tell how something is done<br>
+quickly, slowly, carefully, easily, well, badly, with, by, in a...way, as
+• Place / Location 📍 – words that tell where something is<br>
+in, on, at, under, above, between, near, next to, here, there, everywhere, anywhere
+• Condition 🌧️ – words that show something depends on something else<br>
+if, unless, in case, on condition that
+• Emphasis / Focus 🎯 – words that make something stronger or more important<br>
+only, just, even, especially, mainly, particularly
+• Questions (Interrogatives) ❓ – words used to ask questions<br>
+how, when, where, why
+• Relative Words 👨‍👩‍👧‍👦 – words that connect ideas about time, place, reason, or manner<br>
+when, where, why, how
+• Direction / Movement 🧭 – words that show movement or direction<br>
+to, from, toward, away from, up, down, forward, back
+• Affirmative and Negative ✔️❌ – words that show yes or no<br>
+yes, no
+`;
+
+  function parseSections(raw) {
+    const chunks = raw.split(/\n(?=~+)/);
+    return chunks
+      .map(chunk => chunk.trim())
+      .filter(chunk => chunk.startsWith("~"))
+      .map(chunk => {
+        const lines = chunk.split("\n");
+        const name = lines.shift().replace(/^~+/, "").trim();
+        const text = lines.join("\n").trim();
+        return { name, text };
+      });
+  }
+
+  function extractWords(sectionText) {
+    return sectionText
+      .split("\n")
+      .map(line => {
+        const match = line.match(/•\s*([^\s–]+)/);
+        return match ? match[1] : null;
+      })
+      .filter(Boolean);
+  }
+
+  const sections = parseSections(wordListText);
+
+  const sectionData = sections.map(sec => ({
+    name: sec.name,
+    words: extractWords(sec.text)
+  }));
+
+  let currentSectionName = 'No Section';
+  window.wordList = [];
+
+  const btn = document.getElementById("sectionSelectorBtn");
+  const modalRoot = document.getElementById("sectionModalRoot");
+  const modalBackdrop = document.getElementById("sectionModalBackdrop");
+  const modalClose = document.getElementById("sectionModalClose");
+  const listContainer = document.getElementById("sectionListContainer");
+
+  let selectedModalIndex = -1;
+
+  function openModal() {
+    listContainer.innerHTML = "";
+    if (sectionData.length === 0) {
+      const emptyDiv = document.createElement("div");
+      emptyDiv.style.padding = '10px';
+      emptyDiv.style.textAlign = 'center';
+      emptyDiv.style.color = '#666';
+      emptyDiv.textContent = "No categories found.";
+      listContainer.appendChild(emptyDiv);
+    } else {
+      sectionData.forEach((sec, index) => {
+        const item = document.createElement("div");
+        item.className = "section-item" + (selectedModalIndex === index ? " selected" : "");
+        item.textContent = sec.name;
+        item.addEventListener("click", () => {
+          document.querySelectorAll('.section-item').forEach(i => i.classList.remove('selected'));
+          item.classList.add("selected");
+          selectedModalIndex = index;
+
+          if (!idInput.value.trim()) {
+            idInput.value = "Guest";
+          }
+
+          currentSectionName = sec.name;
+          wordList = sec.words;
+          btn.textContent = sec.name;
+          closeModal();
+
+          if (window.gameStarted && !gameStopped) {
+            activeSectionName = sec.name;
+            nextWordIndex = 0;
+            activeBubbles = [];
+            currentTypedWord = null;
+          } else {
+            startGame();
+          }
+
+          typingInput.focus();
+        });
+        listContainer.appendChild(item);
+      });
+    }
+    modalRoot.style.display = "block";
+  }
+
+  function closeModal() {
+    modalRoot.style.display = "none";
+  }
+
+  if (btn) btn.addEventListener("click", openModal);
+  if (modalClose) modalClose.addEventListener("click", closeModal);
+  if (modalBackdrop) modalBackdrop.addEventListener("click", closeModal);
+
+  window.addEventListener("DOMContentLoaded", () => {
+    currentSectionName = "No Section";
+    btn.textContent = "Select a section.";
+  });
+
+  let activeSectionName = '';
+  let activeBubbles = [];
+  let ambientBubbles = [];
+  let explodingBubbles = [];
+  window.gameStarted = false;
+  let gameStopped = false;
+  let currentTypedWord = null;
+  let nextWordIndex = 0;
+  let correctWords = 0;
+  let totalWords = 0;
+
+  const popSound = document.getElementById('popSound');
+  const typingInput = document.getElementById('typingInput');
+  const submitBtn = document.getElementById('submitButton');
+  const idInput = document.getElementById('idField');
+
+  const scoreboardContainer = document.getElementById('scoreboardContainer');
+  const scoreButtons = document.getElementById('scoreButtons');
+
+  // Helper to generate filename based strictly on scoreboard contents matching format requirements
+  function getScoreboardFilename(extension) {
+    const text = scoreboardContainer.textContent.trim();
+    if (!text) return 'score.' + extension;
+    return text.replace(/\|/g, '_').replace(/[:\/]/g, '-') + '.' + extension;
+  }
+
+  document.getElementById('copyBtn').addEventListener('click', () => {
+    const text = scoreboardContainer.textContent;
+    if (!text) return;
+    navigator.clipboard.writeText(text).then(() => {
+      alert('Score copied to clipboard!');
+    });
+  });
+
+  document.getElementById('downloadTxtBtn').addEventListener('click', () => {
+    const text = scoreboardContainer.textContent;
+    if (!text) return;
+    const blob = new Blob([text], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = getScoreboardFilename('txt');
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById('downloadPngBtn').addEventListener('click', () => {
+    if (!scoreboardContainer.textContent) return;
+    if (typeof html2canvas !== 'undefined') {
+      html2canvas(scoreboardContainer).then(canvas => {
+        const link = document.createElement('a');
+        link.download = getScoreboardFilename('png');
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    } else {
+      alert('html2canvas not loaded.');
+    }
+  });
+
+  function getStudentName(id) {
+    return window.resolveStudentNameFromId ? window.resolveStudentNameFromId(id) : ("Guest");
+  }
+
+  function brightColor(alpha=0.35) {
+    const hue = Math.random()*360;
+    return `hsla(${hue},90%,65%,${alpha})`;
+  }
+
+  function darkVariant(color) {
+    const match = color.match(/hsla\((\d+),\s*(\d+)\%,\s*(\d+)\%,\s*([\d.]+)\)/);
+    if(!match) return 'rgba(0,0,0,0.5)';
+    const h = match[1], s = match[2], l = Math.max(0, match[3]-35), a = match[4];
+    return `hsla(${h},${s}%,${l}%,${a})`;
+  }
+
+  class Bubble {
+    constructor(word=null) {
+      this.word = word;
+      this.typedIndex = 0;
+      this.exploded = false;
+      if(word){
+        this.radius = 50 + Math.random()*40;
+        this.color = brightColor(0.35);
+      } else {
+        this.radius = 10 + Math.random()*30;
+        this.color = brightColor(0.2);
+      }
+      this.shadowColor = darkVariant(this.color);
+      this.x = canvas.width / 2;
+      this.y = canvas.height / 2;
+      this.speed = (word ? 0.6 : 0.2) + Math.random()*0.6;
+      this.swayAmplitude = (word ? 20 : 10) + Math.random()*20;
+      this.swaySpeed = Math.random()*0.02 + 0.01;
+      this.swayPhase = Math.random()*Math.PI*2;
+    }
+
+    draw() {
+      const offsetX = this.word ? 0 : Math.sin(this.swayPhase + this.y*this.swaySpeed) * this.swayAmplitude;
+
+      if(this.word){
+        ctx.font = `bold 32px system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+
+        let typed = this.typedIndex || 0;
+        let totalWidth = ctx.measureText(this.word).width;
+        let startX = this.x + offsetX - totalWidth / 2;
+
+        for(let i = 0; i < this.word.length; i++){
+          ctx.fillStyle = i < typed ? 'red' : 'white';
+          let char = this.word[i];
+          ctx.fillText(char, startX, this.y);
+          startX += ctx.measureText(char).width;
+        }
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    update() {
+      if (!this.word) {
+        this.y -= this.speed;
+      }
+      if(this.y + this.radius < 0) this.exploded = true;
+    }
+  }
+
+  function spawnNextWord() {
+    if (nextWordIndex >= wordList.length) return;
+    const bubble = new Bubble(wordList[nextWordIndex]);
+    activeBubbles.push(bubble);
+    nextWordIndex++;
+  }
+
+  function floatBubbles(time) {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    ambientBubbles.forEach(b=>{b.update(); b.draw();});
+    ambientBubbles = ambientBubbles.filter(b=>!b.exploded);
+
+    activeBubbles.forEach(bubble=>{bubble.update(); bubble.draw();});
+    activeBubbles = activeBubbles.filter(b=>!b.exploded);
+
+    if(!gameStopped && activeBubbles.length === 0) spawnNextWord();
+
+    requestAnimationFrame(floatBubbles);
+  }
+
+  function handleTypingInput(e) {
+    if(!window.gameStarted || gameStopped) return;
+    if(activeBubbles.length === 0) return;
+
+    let wordToType = currentTypedWord;
+
+    if(!wordToType){
+      wordToType = activeBubbles.find(b => !b.exploded);
+      if(!wordToType) return;
+      currentTypedWord = wordToType;
+    }
+
+    if(e.inputType === "deleteContentBackward") {
+      if(wordToType.typedIndex > 0) {
+        wordToType.typedIndex--;
+      }
+      typingInput.value = "";
+      return;
+    }
+
+    const key = e.data || e.key;
+    if(!key) {
+      typingInput.value = "";
+      return;
+    }
+
+    const lowerKey = key.toLowerCase();
+    if(!/^[a-z]$/.test(lowerKey)) {
+      typingInput.value = "";
+      return;
+    }
+
+    const expected = wordToType.word[wordToType.typedIndex]?.toLowerCase();
+
+    if(lowerKey !== expected) {
+      typingInput.value = "";
+      return;
+    }
+
+    wordToType.typedIndex++;
+
+    if(wordToType.typedIndex === wordToType.word.length) {
+      explodeWord(wordToType, true);
+      abductClosestRandomAnimal();
+      currentTypedWord = null;
+    }
+
+    typingInput.value = "";
+  }
+
+  function explodeWord(bubble, success){
+    if(bubble.exploded) return;
+    bubble.exploded = true;
+    if(success) correctWords++;
+  }
+
+  function startGame(){
+    if(window.gameStarted) return;
+
+    if (!idInput.value.trim()) {
+      idInput.value = "Guest";
+    }
+
+    wordList = [...(sectionData.find(s => s.name === currentSectionName)?.words || wordList)];
+    activeSectionName = currentSectionName;
+
+    window.gameStarted = true;
+    gameStopped = false;
+
+    submitBtn.disabled = false;
+
+    scoreboardContainer.textContent = '';
+    scoreButtons.style.display = 'none';
+
+    activeBubbles = [];
+    ambientBubbles = [];
+    explodingBubbles = [];
+
+    currentTypedWord = null;
+    nextWordIndex = 0;
+    correctWords = 0;
+    totalWords = wordList.length;
+
+    spawnNextWord();
+    floatBubbles();
+    typingInput.focus();
+  }
+
+  function stopGame(){ 
+    if(!window.gameStarted || gameStopped) return;
+    gameStopped = true;
+    window.gameStarted = false;
+    submitBtn.disabled = false;
+  }
+
+  async function submitResults(){ 
+    if(!window.gameStarted && !correctWords && !totalWords) return;
+    stopGame();
+
+    const pct = totalWords ? Math.round((correctWords / totalWords) * 100) : 0;
+    const pctStr = pct + '%';
+    const now = new Date();
+
+    const pad = n => n.toString().padStart(2,'0');
+    const dateStr = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+    const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+    let currentFile = window.location.pathname.split('/').pop() || 'unknown.html';
+    currentFile = currentFile.split('?')[0].split('#')[0];
+    const filenameWithoutExt = currentFile.replace(/\.[^/.]+$/, "");
+
+    const studentId = idInput.value.trim() || 'Guest';
+    const studentName = getStudentName(studentId);
+
+    const scoreLine =
+      filenameWithoutExt + "|" +
+      activeSectionName + "|" +
+      studentName + "|" +
+      studentId + "|" +
+      dateStr + "|" +
+      timeStr + "|" +
+      correctWords + "/" + totalWords + "|" +
+      pctStr;
+
+    scoreboardContainer.textContent = scoreLine;
+    scoreButtons.style.display = 'flex';
+
+    try {
+      await saveResult(scoreLine);
+      console.log("✅ Score uploaded to Supabase");
+    } catch(err) {
+      console.error("❌ Upload failed:", err);
+    }
+  }
+
+  submitBtn.addEventListener('click', submitResults);
+  typingInput.addEventListener('input', handleTypingInput);
+
+  typingInput.addEventListener('keydown', function(e) {
+    if(e.key === "Backspace") {
+      e.preventDefault();
+      handleTypingInput({ inputType: "deleteContentBackward" });
+    }
+  });
+
+  canvas.addEventListener('click', ()=>{
+    if(window.gameStarted && !gameStopped) typingInput.focus();
+  });
+})();
+</script>
+
+<script>
+  const borderDiv = document.createElement('div');
+  borderDiv.style.position = 'fixed';
+  borderDiv.style.inset = '0';
+  borderDiv.style.border = '10px solid #39FF14';
+  borderDiv.style.boxSizing = 'border-box';
+  borderDiv.style.zIndex = '9999';
+  borderDiv.style.pointerEvents = 'none';
+  borderDiv.style.backgroundColor = 'transparent';
+  document.body.appendChild(borderDiv);
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let filename = window.location.pathname.split("/").pop();
+    filename = filename.replace(/\.html$/i, "");
+    filename = filename.replace(/^[^_]*_/, "");
+    const title = filename.replace(/_/g, " ");
+    const h1 = document.querySelector("h1");
+    if (h1) {
+        h1.textContent = title;
+    }
+});
+</script>
+
+<script>
+(function(){
+const RAW_TEXT = `
+How to play...
+• Enter your ID number into the ID field — Auto: Your name will automatically populate if registered, and entering your ID unlocks score tracking.
+• Click the Select a section. button to choose a vocabulary category from the pop-up menu.
+• Click the Instructions button anytime to view the gameplay guide.
+• Type the vocabulary words correctly into the input bar as they appear in the rising word bubbles to pop them and abduct the animals.
+• Click Submit to view your final score and percentage — Auto: Your results are compiled into a scoreboard record and logged automatically to the database.
+• Use the Copy, Text, or PNG buttons to download or copy your score record.
+`;
+
+function parseRawInstructions(text){
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+  lines.forEach(line => {
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
+    html.push(`<p>${line}</p>`);
+  });
+  return html.join("");
+}
+
+const instructionsBtn = document.getElementById("instructionsBtn");
+const instructionsRoot = document.getElementById("instructionsRoot");
+const instructionsBackdrop = document.getElementById("instructionsBackdrop");
+const instructionsBack = document.getElementById("instructionsBack");
+const instructionsContent = document.getElementById("instructionsContent");
+
+if(instructionsContent) {
+  instructionsContent.innerHTML = parseRawInstructions(RAW_TEXT);
+  instructionsContent.addEventListener("wheel", e=>{ e.stopPropagation(); },{passive:false});
+  instructionsContent.addEventListener("touchmove", e=>{ e.stopPropagation(); },{passive:false});
+}
+
+function openInstructionsModal(){
+  if(instructionsRoot) instructionsRoot.style.display="block";
+  document.body.style.overflow="hidden";
+  document.documentElement.style.overflow="hidden";
+}
+
+function closeInstructionsModal(){
+  if(instructionsRoot) instructionsRoot.style.display="none";
+  document.body.style.overflow="";
+  document.documentElement.style.overflow="";
+}
+
+if(instructionsBtn) instructionsBtn.onclick = openInstructionsModal;
+if(instructionsBack) instructionsBack.onclick = closeInstructionsModal;
+if(instructionsBackdrop) instructionsBackdrop.onclick = closeInstructionsModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape") {
+    closeModal();
+    closeInstructionsModal();
+  }
+});
+})();
+</script>
+
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseClient = window.supabase?.createClient(
+  'https://etwwriloppklhhkmswpr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+);
+
+window.lastUploadedScore = null;
+window.saveResult = async function saveResult(text) {
+  if (!supabaseClient) return;
+  let cleaned = String(text).replace(/\s+/g, " ").trim();
+  if (!cleaned || cleaned === lastUploadedScore) return;
+  lastUploadedScore = cleaned;
+
+  await supabaseClient.from("scoreboard_raw").insert([{ result_text: cleaned }]);
+};
+</script>
+
+<script>
+const ufoContainer = document.getElementById("ufoContainer");
+const beam = document.getElementById("beam");
+const animalLayer = document.getElementById("animalLayer");
+
+let swayAmplitude = 50;
+let swaySpeed = 0.01;
+let swayTime = 0;
+
+function animateUFO(){
+  if(!ufoContainer) return;
+  swayTime++;
+  const offsetX = Math.sin(swayTime * swaySpeed) * swayAmplitude;
+  ufoContainer.style.left = `calc(50% + ${offsetX}px)`;
+  requestAnimationFrame(animateUFO);
+}
+animateUFO();
+
+let cows = [];
+let pendingAbduction = false;
+
+function abductClosestRandomAnimal(){
+  if(cows.length === 0) return;
+  pendingAbduction = true;
+}
+
+const animalPattern = [
+  "🐄","🐖","🐓","🐖",
+  "🐓","🐄","🐄","🐖",
+  "🐓","🐖","🐓","🐄",
+  "🐄","🐖","🐓","🐖",
+  "🐓","🐄"
+];
+
+const spacingPattern = [90,120,140,90];
+const cowSpeed = 3;
+let trainInProgress = false;
+
+function spawnCowTrain(){
+  if(!animalLayer) return;
+  trainInProgress = true;
+  let trainCows = [];
+  let currentX = (window.innerWidth / 2) - 100;
+
+  animalPattern.forEach((emoji,i)=>{
+    const cow = document.createElement("div");
+    cow.className = "cow";
+    cow.style.position = "absolute";
+    cow.style.left = `${currentX}px`;
+    cow.style.top = `${animalLayer.clientHeight - 200}px`;
+    cow.innerHTML = `<span class="cowIcon">${emoji}</span>`;
+    animalLayer.appendChild(cow);
+    cows.push(cow);
+    trainCows.push(cow);
+
+    requestAnimationFrame(() => {
+      setTimeout(() => { cow.style.opacity = "1"; }, 50);
+    });
+
+    currentX -= spacingPattern[i % spacingPattern.length];
+  });
+
+  const moveTrain = setInterval(()=>{
+    trainCows.forEach(cow=>{
+      if(!animalLayer.contains(cow)) return;
+      if(cow.dataset.abducting === "true") return;
+
+      let x = parseFloat(cow.style.left);
+      x += cowSpeed;
+      cow.style.left = x + "px";
+
+      if(pendingAbduction){
+        const ufoRect = ufoContainer.getBoundingClientRect();
+        const cowRect = cow.getBoundingClientRect();
+        const cowCenter = cowRect.left + cowRect.width / 2;
+        const ufoCenter = ufoRect.left + ufoRect.width / 2;
+
+        if(Math.abs(cowCenter - ufoCenter) < 35){
+          pendingAbduction = false;
+          if(beam) beam.classList.add("beamOn");
+          suckCowToUFO(cow);
+          setTimeout(()=>{
+            if(beam) beam.classList.remove("beamOn");
+          },1000);
+        }
+      }
+
+      if(x > window.innerWidth + 150){
+        cow.remove();
+        cows = cows.filter(c=>c!==cow);
+      }
+    });
+
+    if(!trainCows.some(c => animalLayer.contains(c))){
+      clearInterval(moveTrain);
+      trainInProgress = false;
+    }
+  },2);
+}
+
+function suckCowToUFO(cow){
+  cow.dataset.abducting = "true";
+  const ufoRect = ufoContainer.getBoundingClientRect();
+  const cowRect = cow.getBoundingClientRect();
+  const targetX = ufoRect.left + ufoRect.width / 2;
+  const targetY = ufoRect.top + ufoRect.height * 0.70;
+  const distX = targetX - (cowRect.left + cowRect.width / 2);
+  const distY = targetY - (cowRect.top + cowRect.height / 2);
+
+  cow.style.transition = "transform 1.5s linear, opacity 1.2s linear";
+
+  requestAnimationFrame(()=>{
+    cow.style.transform = `translateX(-50%) translate(${distX}px, ${distY - 80}px)`;
+    cow.style.opacity = "0";
+  });
+
+  setTimeout(()=>{
+    cow.remove();
+    cows = cows.filter(c=>c!==cow);
+  },1500);
+}
+
+function scheduleNextCow(){
+  const delay = 1200 + Math.random()*4000;
+  setTimeout(()=>{
+    if (window.gameStarted && typeof wordList !== "undefined" && wordList.length > 0){
+      if(!trainInProgress){
+        spawnCowTrain();
+      }
+    }
+    scheduleNextCow();
+  },delay);
+}
+
+window.addEventListener("load", scheduleNextCow);
+</script>
+
+<script>
+(function () {
+  const canvas = document.getElementById("groundCanvas");
+  const ctx = canvas.getContext("2d");
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  let t = 0;
+
+  function noise(x, y, t) {
+    return (
+      Math.sin(x * 0.008 + t) +
+      Math.sin(y * 0.012 + t * 1.2) +
+      Math.sin((x + y) * 0.006 - t * 0.7)
+    ) / 3;
+  }
+
+  function draw() {
+    const w = canvas.width;
+    const h = canvas.height;
+    const img = ctx.createImageData(w, h);
+    const d = img.data;
+    const groundStart = h * 0.42;
+    const featherHeight = h * 0.08;
+
+    for (let y = 0; y < h; y++) {
+      for (let x = 0; x < w; x++) {
+        let blend;
+        if (y < groundStart) blend = 0;
+        else if (y > groundStart + featherHeight) blend = 1;
+        else blend = (y - groundStart) / featherHeight;
+
+        const n = noise(x, y, t) + noise(x * 0.5, y * 0.5, t * 0.9);
+        const swirl = Math.sin(n * 4 + y * 0.015);
+
+        const wr = 170, wg = 160, wb = 105;
+        const gr = 65, gg = 100, gb = 60;
+        const mix = swirl * 0.5 + 0.5;
+
+        const groundR = gr * mix + wr * (1 - mix);
+        const groundG = gg * mix + wg * (1 - mix);
+        const groundB = gb * mix + wb * (1 - mix);
+
+        const i = (y * w + x) * 4;
+        d[i] = groundR;
+        d[i + 1] = groundG;
+        d[i + 2] = groundB;
+        d[i + 3] = 255;
+      }
+    }
+
+    ctx.putImageData(img, 0, 0);
+    t += 0.02;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+
+<script>
+(function(){
+  const wobbleSettings = {
+    maxAngle: 2,
+    speed: 0.08,
+    randomOffset: true
+  };
+
+  function animateAnimalWobble(){
+    const animals = document.querySelectorAll(".cow");
+    const time = performance.now() * wobbleSettings.speed;
+
+    animals.forEach((animal,index)=>{
+      if(animal.dataset.abducting === "true") return;
+      const offset = wobbleSettings.randomOffset ? index * 1.7 : 0;
+      const angle = Math.sin(time + offset) * wobbleSettings.maxAngle;
+      animal.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+    });
+    requestAnimationFrame(animateAnimalWobble);
+  }
+  animateAnimalWobble();
+})();
+</script>
+
+<!-- 3. STUDENT DATA REGISTRY MODULE -->
+<script>
+(function() {
+    'use strict';
+    const RAW_STUDENT_DATA = `
+        55555|David
+        55551|Matthew
+        12345|Sarah
+    `;
+    const studentDatabase = new Map();
+    RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+        const [id, name] = line.split('|').map(s => s ? s.trim() : '');
+        if (id && name) studentDatabase.set(id, name);
+    });
+
+    window.resolveStudentNameFromId = function(idInput) {
+        if (!idInput) return "Guest";
+        const trimmed = String(idInput).trim();
+        if (/^(x|g|guest)$/i.test(trimmed)) {
+            return "Guest";
+        }
+        return studentDatabase.get(trimmed) || "Guest";
+    };
+})();
+</script>
+
+</body>
+</html>

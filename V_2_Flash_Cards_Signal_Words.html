@@ -1,0 +1,971 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
+<title>English-Thai Basic Flash Cards</title>
+<script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+  :root { --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+
+  /* Base */
+  body { font-family: var(--font-main); margin:0; padding:0; background:#f7fdfb; }
+  #layout { max-width: 480px; margin:0 auto; padding:20px; box-sizing: border-box; }
+  h2 { text-align:left; margin-bottom:12px; font-size:20px; }
+
+  .top-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: nowrap; align-items: center; }
+  
+  /* Unified styling for top bar elements to match other buttons */
+  .top-bar input[type="text"],
+  .top-bar #sectionSelectorBtn,
+  .top-bar #instructionsBtn { 
+    flex: 1 1 50%; 
+    height: 28px;
+    padding: 0 12px; 
+    font-size: 14px; 
+    border: 1px solid #cfe2f7; 
+    border-radius: 6px; 
+    box-sizing: border-box; 
+    min-width: 0; 
+    background: linear-gradient(145deg, #ffffff, #eaf6ff);
+    color: #1976d2;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    font-weight: 400;
+    transition: 0.12s;
+    text-align: left;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .top-bar input[type="text"] {
+    cursor: text;
+    text-align: left;
+  }
+
+  .top-bar input[type="text"]::placeholder {
+    color: #1976d2;
+    opacity: 0.8;
+  }
+  
+  /* Top bar elements hover styling */
+  .top-bar #sectionSelectorBtn:hover,
+  .top-bar input[type="text"]:hover,
+  .top-bar input[type="text"]:focus,
+  .top-bar #instructionsBtn:hover {
+    background: linear-gradient(145deg, #ffffff, #d0e8ff);
+    border-color: #1976d2;
+    outline: none;
+  }
+
+  .top-bar button.audio-btn { 
+    height: 28px;
+    padding: 0 12px; 
+    font-size: 14px; 
+    border: 1px solid #cfe2f7; 
+    border-radius: 6px; 
+    background: linear-gradient(145deg, #ffffff, #eaf6ff); 
+    color: #1976d2; 
+    cursor: pointer; 
+    flex: 0 0 auto;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    font-weight: 400;
+    transition: 0.12s;
+  }
+  .top-bar button.audio-btn:hover {
+    background: linear-gradient(145deg, #ffffff, #d0e8ff);
+    border-color: #1976d2;
+  }
+
+  .flashcard-container { perspective: 1000px; margin-bottom: 12px; }
+  .flashcard { width: 100%; min-height: 100px; background: #eaf6ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; transform-style: preserve-3d; transition: transform 0.6s; position: relative; border: 1px solid #9aaed1; box-sizing: border-box; }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .flashcard .front, .flashcard .back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; border-radius: 12px; padding: 12px; text-align: center; box-sizing: border-box; }
+
+  .flashcard .back {
+    transform: rotateY(180deg);
+    background: #ffeacf;
+    font-size: 14px;
+    text-align: left;
+    align-items: center;         
+    justify-content: center;    
+    display: flex;
+    flex-direction: column;
+    padding: 12px 16px;
+    overflow-wrap: break-word;
+  }
+
+  #vocabHeader { 
+    font-size: 16px; 
+    font-weight: 400; 
+    color: #1976d2; 
+    background: linear-gradient(145deg, #ffffff, #eaf6ff); 
+    border: 1px solid #cfe2f7; 
+    padding: 8px 16px; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    margin-bottom: 12px; 
+    text-align: center; 
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: 0.12s; 
+  }
+  #vocabHeader:hover { 
+    background: linear-gradient(145deg, #ffffff, #d0e8ff);
+    border-color: #1976d2; 
+  }
+
+  #vocabList { list-style-type: disc; list-style-position: outside; padding-left: 20px; margin:0; }
+  #vocabList li { margin-bottom: 6px; font-size: 14px; text-align: left; }
+
+  #exampleInput { width: 100%; height: 28px; padding: 0 8px; font-size: 14px; border: 1px solid #9aaed1; border-radius: 6px; margin-bottom: 12px; box-sizing: border-box; background: #fff; }
+
+  #navButtons { display: flex; gap: 12px; justify-content: space-between; margin-bottom: 12px; }
+
+  #navButtons button {
+    background: linear-gradient(145deg, #ffffff, #eaf6ff);
+    color: #1976d2;
+    border: 1px solid #cfe2f7;
+    border-radius: 6px;
+    padding: 0 12px;
+    height: 28px;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    font-weight: 400;
+    transition: 0.12s;
+  }
+  #navButtons button:hover {
+    background: linear-gradient(145deg, #ffffff, #d0e8ff);
+    border-color: #1976d2;
+  }
+
+  #scoreboard { display: none; border: 2px solid #39FF14; padding: 20px; border-radius: 10px; background: #fff; font-family: monospace; font-size: 14px; max-height: 50vh; overflow-y: auto; box-sizing: border-box; }
+  #scoreboard pre { margin: 0; }
+  
+  #scoreboard .btn-group { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  #scoreboard .btn-group button {
+    background: linear-gradient(145deg, #ffffff, #eaf6ff);
+    color: #1976d2;
+    border: 1px solid #cfe2f7;
+    border-radius: 6px;
+    padding: 0 12px;
+    height: 28px;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    font-weight: 400;
+    transition: 0.12s;
+  }
+  #scoreboard .btn-group button:hover {
+    background: linear-gradient(145deg, #ffffff, #d0e8ff);
+    border-color: #1976d2;
+  }
+
+  @media (max-width: 480px) {
+    h2 { font-size: 18px; }
+    .flashcard { font-size: 16px; min-height: 90px; }
+    #exampleInput { font-size: 13px; height: 28px; padding: 0 6px; }
+    #navButtons button, #scoreboard button { font-size: 13px; height: 28px; padding: 0 10px; }
+    .top-bar input[type="text"], .top-bar #sectionSelectorBtn, .top-bar #instructionsBtn { font-size: 13px; height: 28px; padding: 0 5px; }
+  }
+
+  #copyrightSection {
+    margin-top: 0px;   
+    text-align: left;    
+    padding: 0;          
+    font-size: 8px;
+  }
+
+  .reading-highlight {
+    background: #cce5ff;
+    transition: background 0.2s ease;
+  }
+
+  .read-line {
+    display: block;
+  }
+
+  #scoreOutput {
+    white-space: pre-wrap;     
+    word-break: break-word;     
+    overflow-wrap: anywhere;    
+  }
+
+  /* ===== UNIFIED MODAL STYLING (Selection & Instructions) ===== */
+  #sectionModalRoot,
+  #instructionsRoot {
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 99999;
+  }
+  #sectionModalBackdrop,
+  #instructionsBackdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+  }
+  #sectionModalContent,
+  #instructionsModal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(500px, 92vw);
+    max-height: min(80vh, calc(100dvh - 16px));
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border: 1px solid #cfe2f7;
+    font-family: var(--font-main);
+  }
+  #sectionModalHeader,
+  #instructionsHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex: 0 0 auto;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1976d2;
+  }
+  #instructionsTitle {
+    color: #1976d2;
+    font-weight: 700;
+    font-size: 18px;
+  }
+  #sectionModalClose,
+  #instructionsBack {
+    background: none;
+    border: none;
+    color: #1976d2;
+    font-size: 22px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    width: auto;
+    height: auto;
+  }
+  #sectionModalClose:hover,
+  #instructionsBack:hover {
+    background-color: #eef6ff;
+  }
+  #sectionListContainer,
+  #instructionsContent {
+    padding: 0;
+    overflow-y: auto;
+    min-height: 0;
+    flex: 1 1 auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+  }
+  #sectionListContainer::-webkit-scrollbar,
+  #instructionsContent::-webkit-scrollbar {
+    display: none;
+  }
+  .section-item {
+    height: 28px;
+    padding: 0 6px;
+    margin-bottom: 6px;
+    background: #eaf6ff;
+    border: 1px solid #cfe2f7;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-size: 11px;
+    color: #1976d2;
+    font-weight: 400;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    transition: 0.12s;
+    width: 100%;
+  }
+  .section-item:hover {
+    background: #d0e8ff;
+    border-color: #1976d2;
+  }
+  .section-item.selected {
+    background: #1976d2;
+    border-color: #1976d2;
+    color: #fff;
+  }
+  #instructionsContent h3 {
+    margin-top: 10px;
+    margin-bottom: 4px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1976d2;
+  }
+  #instructionsContent p {
+    margin-bottom: 8px;
+    font-weight: 400;
+  }
+  #instructionsContent hr {
+    margin: 12px 0;
+    border: none;
+    border-top: 1px solid #cfe2f7;
+  }
+</style>
+</head>
+<body>
+
+
+<div id="layout">
+  <h2></h2>
+
+  <!-- TOP BAR -->
+  <div class="top-bar" id="topFields">
+    <input id="studentId" type="text" placeholder="ID" autocomplete="off" />
+    <button id="sectionSelectorBtn" type="button">Section</button>
+    <button id="instructionsBtn" type="button">Instructions</button>
+  </div>
+
+  <!-- HEADER -->
+  <div id="vocabHeader" style="margin: 6px 0 10px 0;">
+    Click to view / hide the complete list.
+  </div>
+
+  <!-- READING AREA -->
+  <div id="readingArea">
+
+    <!-- VOCAB LIST -->
+    <ul id="vocabList"></ul>
+
+    <!-- FLASHCARD -->
+    <div class="flashcard-container" id="flashcardContainer">
+      <div class="flashcard" id="flashcard">
+        <div class="front read-line"></div>
+        <div class="back read-line"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <input type="text" id="exampleInput" class="visible" placeholder="Type your example sentence..." />
+
+  <div id="navButtons" class="visible">
+    <button id="prevBtn">Previous</button>
+    <button id="nextBtn">Next</button>
+  </div>
+
+  <div id="scoreboard">
+    <pre id="scoreOutput"></pre>
+    <div class="btn-group" id="scoreBtns">
+      <button id="copyBtn">Copy</button>
+      <button id="downloadTextBtn">↓TXT</button>
+      <button id="downloadPngBtn">↓PNG</button>
+    </div>
+  </div>
+
+<section id="copyrightSection">
+  <div class="footer-note copyright">© <span id="currentYear"></span> Perfectly Practical English™. All rights reserved.</div>
+</section>
+
+</div>
+
+<!-- SECTION SELECTION MODAL -->
+<div id="sectionModalRoot">
+  <div id="sectionModalBackdrop"></div>
+  <div id="sectionModalContent">
+    <div id="sectionModalHeader">
+      <span>Select a Category</span>
+      <button id="sectionModalClose" type="button">✕</button>
+    </div>
+    <div id="sectionListContainer"></div>
+  </div>
+</div>
+
+<!-- INSTRUCTIONS MODAL -->
+<div id="instructionsRoot">
+  <div id="instructionsBackdrop"></div>
+  <div id="instructionsModal">
+    <div id="instructionsHeader">
+      <span id="instructionsTitle">Instructions</span>
+      <button id="instructionsBack" type="button">✕</button>
+    </div>
+    <div id="instructionsContent"></div>
+  </div>
+</div>
+
+
+<script>
+document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+
+<!-- 3. STUDENT DATA REGISTRY MODULE -->
+<script>
+(function() {
+    'use strict';
+    const RAW_STUDENT_DATA = `
+        55555|David
+        55551|Matthew
+        12345|Sarah
+    `;
+    const studentDatabase = new Map();
+    RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+        const [id, name] = line.split('|').map(s => s ? s.trim() : '');
+        if (id && name) studentDatabase.set(id, name);
+    });
+
+    window.resolveStudentNameFromId = function(idInput) {
+        if (!idInput) return "Guest";
+        const trimmed = String(idInput).trim();
+        if (/^(x|g|guest)$/i.test(trimmed)) {
+            return "Guest";
+        }
+        return studentDatabase.get(trimmed) || "Guest";
+    };
+})();
+</script>
+
+<script>
+function parseVocabInput(input) {
+  const lines = input.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+  const result = [];
+  let currentWord = null;
+  let currentDef = "";
+
+  lines.forEach(line => {
+    if (/^[•*-]/.test(line)) {
+      if (currentWord) result.push({ word: currentWord, definition: currentDef.trim() });
+      const match = line.match(/^[•*-]\s*(.+?)\s*(?:–|—|-)\s*(.+)/);
+      if (match) { currentWord = match[1].trim(); currentDef = match[2].trim(); }
+      else { currentWord = line.replace(/^[•*-]\s*/, ""); currentDef = ""; }
+    } 
+    else if (/\s[-–—]\s/.test(line)) {
+      if (currentWord) {
+        result.push({
+          word: currentWord,
+          definition: currentDef.trim()
+        });
+      }
+
+      const match = line.match(/^(.+?)\s[-–—]\s(.+)$/);
+      if (match) {
+        currentWord = match[1].trim();
+        currentDef = match[2].trim();
+      }
+    }
+    else { 
+      currentDef = currentDef ? currentDef + "<br/>" + line : line;
+    }
+  });
+  if (currentWord) result.push({ word: currentWord, definition: currentDef.trim() });
+  return result;
+}
+
+const rawVocabText = `
+~Signal Words
+• Time ⏰ – words that tell when something happens<br>
+on, at, in, before, after, since, until, during, for, now, yesterday, today, tomorrow, later, then, when, while, once
+
+• Addition ➕ – words that add ideas together<br>
+and, also, too, with, plus, as well as, not only...but also, both...and
+
+• Cause / Effect 🔗 – words that show a reason or result<br>
+because, so, since, because of, due to, as a result, therefore, that’s why
+
+• Comparison / Similarity / Difference ⚖️ – words that compare things<br>
+like, as, as...as, than, similar to, different from, more than, less than, the most, just as...so, whereas, in contrast to
+
+• Contrast / Opposition 🎭 – words that show differences<br>
+but, although, though, even though, however, yet, still, despite, instead, whereas, while, on the other hand
+
+• Frequency 〰️ – words that tell how often something happens<br>
+always, usually, often, sometimes, occasionally, rarely, never, every day, once a week, hardly ever, from time to time
+
+• Possibility / Certainty 🎲 – words that show how possible or sure something is<br>
+maybe, probably, possibly, must, might, may, could, can, definitely, certainly
+
+• Advice / Obligation / Permission ☝️ – words that tell rules or give guidance<br>
+must, must not, have to, don’t have to, should, ought to, had better, can, cannot, may, could
+
+• Manner 🎭 – words that tell how something is done<br>
+quickly, slowly, carefully, easily, well, badly, with, by, in a...way, as
+
+• Place / Location 📍 – words that tell where something is<br>
+in, on, at, under, above, between, near, next to, here, there, everywhere, anywhere
+
+• Condition 🌧️ – words that show something depends on something else<br>
+if, unless, in case, on condition that
+
+• Emphasis / Focus 🎯 – words that make something stronger or more important<br>
+only, just, even, especially, mainly, particularly
+
+• Questions (Interrogatives) ❓ – words used to ask questions<br>
+how, when, where, why
+
+• Relative Words 👨‍👩‍👧‍👦 – words that connect ideas about time, place, reason, or manner<br>
+when, where, why, how
+
+• Direction / Movement 🧭 – words that show movement or direction<br>
+to, from, toward, away from, up, down, forward, back
+
+• Affirmative and Negative ✔️❌ – words that show yes or no<br>
+yes, no
+`;
+</script>
+
+<script>
+(function () {
+  window.__RAW_SECTION_TEXT__ = rawVocabText;
+})();
+</script>
+
+<script>
+let vocabPairs = [];
+let currentSectionName = "No Section";
+
+(function () {
+  function parseSections(raw) {
+    const chunks = raw.split(/\n(?=~+)/);
+    return chunks
+      .map(chunk => chunk.trim())
+      .filter(chunk => chunk.startsWith("~"))
+      .map(chunk => {
+        const lines = chunk.split("\n");
+        const name = lines.shift().replace(/^~+/, "").trim();
+        const text = lines.join("\n").trim();
+        return { name, text };
+      });
+  }
+
+  const sections = parseSections(window.__RAW_SECTION_TEXT__);
+  
+  window.getSelectedSectionName = () => currentSectionName;
+  window.getSelectedSectionText = () => {
+    const found = sections.find(s => s.name === currentSectionName);
+    return found ? found.text : "";
+  };
+
+  const btn = document.getElementById("sectionSelectorBtn");
+  const modalRoot = document.getElementById("sectionModalRoot");
+  const modalBackdrop = document.getElementById("sectionModalBackdrop");
+  const modalClose = document.getElementById("sectionModalClose");
+  const listContainer = document.getElementById("sectionListContainer");
+
+  let selectedModalIndex = -1;
+
+  function openModal() {
+    listContainer.innerHTML = "";
+    if (sections.length === 0) {
+      listContainer.innerHTML = "<div style='padding:10px; text-align:center; color:#666;'>No categories found.</div>";
+    } else {
+      sections.forEach((sec, index) => {
+        const item = document.createElement("div");
+        item.className = "section-item" + (selectedModalIndex === index ? " selected" : "");
+        item.textContent = sec.name;
+        item.addEventListener("click", () => {
+          document.querySelectorAll('.section-item').forEach(i => i.classList.remove('selected'));
+          item.classList.add("selected");
+          selectedModalIndex = index;
+
+          currentSectionName = sec.name;
+          btn.textContent = sec.name;
+          closeModal();
+          
+          vocabPairs = parseVocabInput(sec.text);
+          if (typeof studentSentences !== "undefined") {
+            studentSentences = Array(vocabPairs.length).fill("");
+          }
+          if (typeof flashcardIndex !== "undefined") {
+            flashcardIndex = 0;
+          }
+          if (typeof renderVocabList === "function") renderVocabList();
+          if (typeof updateFlashcard === "function") updateFlashcard();
+        });
+        listContainer.appendChild(item);
+      });
+    }
+    modalRoot.style.display = "block";
+  }
+
+  function closeModal() {
+    modalRoot.style.display = "none";
+  }
+
+  if (btn) btn.addEventListener("click", openModal);
+  if (modalClose) modalClose.addEventListener("click", closeModal);
+  if (modalBackdrop) modalBackdrop.addEventListener("click", closeModal);
+
+  window.addEventListener("DOMContentLoaded", () => {
+    currentSectionName = "No Section";
+    btn.textContent = "Select a section.";
+    vocabPairs = [];
+    if (typeof renderVocabList === "function") renderVocabList();
+    if (typeof updateFlashcard === "function") updateFlashcard();
+  });
+})();
+</script>
+
+<script>
+let studentSentences = [];
+let flashcardIndex = 0;
+
+const flashcard = document.getElementById('flashcard');
+const front = flashcard.querySelector('.front');
+const back = flashcard.querySelector('.back');
+const exampleInput = document.getElementById('exampleInput');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const finishBtn = document.getElementById('finishBtn');
+const idEl = document.getElementById('studentId');
+const scoreboard = document.getElementById('scoreboard');
+const scoreOutput = document.getElementById('scoreOutput');
+const vocabList = document.getElementById('vocabList');
+const vocabHeader = document.getElementById('vocabHeader');
+
+function renderVocabList() {
+  vocabList.innerHTML = vocabPairs.map(p =>
+    `<li class="read-line">${p.word}: ${p.definition}</li>`
+  ).join('');
+}
+
+vocabHeader.addEventListener('click', () => {
+  vocabList.style.display = vocabList.style.display === 'none' ? 'block' : 'none';
+});
+
+function updateFlashcard() {
+  if (!vocabPairs.length) {
+    front.textContent = "Select a section to begin.";
+    back.innerHTML = "Click 'Section' above";
+    return;
+  }
+
+  front.textContent = vocabPairs[flashcardIndex].word;
+  back.innerHTML = vocabPairs[flashcardIndex].definition;
+  exampleInput.value = studentSentences[flashcardIndex] || '';
+
+  prevBtn.style.display = flashcardIndex === 0 ? "none" : "inline-block";
+  nextBtn.textContent =
+    flashcardIndex === vocabPairs.length - 1 ? "Finish" : "Next";
+
+  flashcard.classList.remove('flipped');
+}
+
+function checkInputs() {
+  if (finishBtn) finishBtn.style.display = 'inline-block';
+}
+
+flashcard.addEventListener('click', () => flashcard.classList.toggle('flipped'));
+exampleInput.addEventListener('input', () =>
+  studentSentences[flashcardIndex] = exampleInput.value.trim()
+);
+
+idEl.addEventListener('input', checkInputs);
+
+prevBtn.addEventListener('click', () => {
+  if (flashcardIndex > 0) {
+    flashcardIndex--;
+    updateFlashcard();
+  }
+});
+
+nextBtn.addEventListener('click', () => {
+  if (!vocabPairs.length) return;
+  studentSentences[flashcardIndex] = exampleInput.value.trim();
+
+  if (flashcardIndex < vocabPairs.length - 1) {
+    flashcardIndex++;
+    updateFlashcard();
+  } else {
+    showScoreboard();
+  }
+});
+
+function showScoreboard() {
+  const rawId = idEl.value.trim();
+  const sid = rawId || 'N/A';
+  const resolvedName = window.resolveStudentNameFromId ? window.resolveStudentNameFromId(rawId) : "Guest";
+  
+  const now = new Date();
+  const formattedDate =
+    `${String(now.getDate()).padStart(2,'0')}/` +
+    `${String(now.getMonth()+1).padStart(2,'0')}/` +
+    `${now.getFullYear()} ` +
+    `${String(now.getHours()).padStart(2,'0')}:` +
+    `${String(now.getMinutes()).padStart(2,'0')}`;
+
+  const fileName = window.location.pathname.split('/').pop() || 'unknown.html';
+  const sectionName = window.getSelectedSectionName ? window.getSelectedSectionName() : "No Section";
+
+  let output = `${fileName}|${sectionName}|${resolvedName}|${sid}|${formattedDate}|0/10|100%`;
+
+  const sentenceLines = [];
+  vocabPairs.forEach((p, i) => {
+    const sentence = (studentSentences[i] || "").trim();
+    if (sentence) {
+      sentenceLines.push(`${i+1}. ${sentence}`);
+    }
+  });
+
+  if (sentenceLines.length > 0) {
+    output += "\n\n" + sentenceLines.join("\n");
+  }
+
+  scoreOutput.textContent = output;
+  scoreboard.style.display = 'block';
+
+  window.saveResult?.(output);
+}
+
+document.getElementById('copyBtn').addEventListener('click', () => 
+  navigator.clipboard.writeText(scoreOutput.textContent).then(() => alert('Copied!'))
+); 
+
+document.getElementById('downloadTextBtn').addEventListener('click', () => {
+  const rawId = idEl.value.trim() || 'N/A';
+  const resolvedName = window.resolveStudentNameFromId ? window.resolveStudentNameFromId(rawId) : "Guest";
+  const sectionName = window.getSelectedSectionName ? window.getSelectedSectionName() : "NoSection";
+  const downloadFileName = getScoreboardFilename('txt');
+
+  const blob = new Blob([scoreOutput.textContent], {type: 'text/plain'}); 
+  const a = document.createElement('a'); 
+  a.href = URL.createObjectURL(blob); 
+  a.download = downloadFileName; 
+  a.click();
+});
+
+document.getElementById('downloadPngBtn').addEventListener('click', () => {
+  const rawId = idEl.value.trim() || 'N/A';
+  const resolvedName = window.resolveStudentNameFromId ? window.resolveStudentNameFromId(rawId) : "Guest";
+  const sectionName = window.getSelectedSectionName ? window.getSelectedSectionName() : "NoSection";
+  const downloadFileName = getScoreboardFilename('png');
+
+  const btnGroup = document.getElementById('scoreBtns'); 
+  btnGroup.style.display = 'none';
+  html2canvas(scoreboard).then(canvas => { 
+    btnGroup.style.display = 'flex'; 
+    const link = document.createElement('a'); 
+    link.download = downloadFileName; 
+    link.href = canvas.toDataURL('image/png'); 
+    link.click(); 
+  });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabaseClient = window.supabase?.createClient(
+  'https://etwwriloppklhhkmswpr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+);
+
+let lastUploadedScore = null;
+
+window.saveResult = async function saveResult(text) {
+  if (!supabaseClient) return;
+  let cleaned;
+  try {
+    cleaned = (typeof text === "string") ? text : JSON.stringify(text);
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+  } catch (err) {
+    return;
+  }
+  if (!cleaned || cleaned === lastUploadedScore) return;
+  lastUploadedScore = cleaned;
+
+  await supabaseClient.from("scoreboard_raw").insert([{ result_text: cleaned }]);
+};
+</script>
+
+<script>
+(function() {
+  function getScoreboardFilename(extension) {
+    const scoreOutput = document.getElementById('scoreOutput');
+    if (scoreOutput && scoreOutput.textContent.trim()) {
+      let firstLine = scoreOutput.textContent.split('\n')[0];
+      let baseName = firstLine
+        .replace(/\|/g, '_')
+        .replace(/\s+/g, '_')
+        .replace(/[:\/]/g, '-');
+      return baseName + '.' + extension;
+    }
+    return 'scoreboard.' + extension;
+  }
+
+  window.getScoreboardFilename = getScoreboardFilename;
+
+  window.showScoreboard = function() {
+    const idEl = document.getElementById('studentId');
+    const scoreboard = document.getElementById('scoreboard');
+    const scoreOutput = document.getElementById('scoreOutput');
+
+    const rawId = idEl.value.trim();
+    const sid = rawId || 'N/A';
+    const resolvedName = window.resolveStudentNameFromId ? window.resolveStudentNameFromId(rawId) : "Guest";
+    
+    const now = new Date();
+    const formattedDate =
+      `${String(now.getDate()).padStart(2,'0')}/` +
+      `${String(now.getMonth()+1).padStart(2,'0')}/` +
+      `${now.getFullYear()} ` +
+      `${String(now.getHours()).padStart(2,'0')}:` +
+      `${String(now.getMinutes()).padStart(2,'0')}`;
+
+    const fileName = window.location.pathname.split('/').pop() || 'unknown.html';
+    const sectionName = window.getSelectedSectionName ? window.getSelectedSectionName() : "No Section";
+
+    let output = `${fileName}|${sectionName}|${resolvedName}|${sid}|${formattedDate}|0/10|100%`;
+
+    const sentenceLines = [];
+    if (typeof vocabPairs !== 'undefined' && typeof studentSentences !== 'undefined') {
+      vocabPairs.forEach((p, i) => {
+        const sentence = (studentSentences[i] || "").trim();
+        if (sentence) {
+          sentenceLines.push(`${i+1}. ${sentence}`);
+        }
+      });
+    }
+
+    if (sentenceLines.length > 0) {
+      output += "\n\n" + sentenceLines.join("\n");
+    }
+
+    scoreOutput.textContent = output;
+    scoreboard.style.display = 'block';
+
+    if (typeof window.saveResult === 'function') {
+      window.saveResult(output);
+    }
+  };
+
+  const copyBtn = document.getElementById('copyBtn');
+  if (copyBtn) {
+    copyBtn.replaceWith(copyBtn.cloneNode(true));
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const scoreOutput = document.getElementById('scoreOutput');
+      navigator.clipboard.writeText(scoreOutput.textContent).then(() => alert('Copied!'));
+    });
+  }
+
+  const downloadTextBtn = document.getElementById('downloadTextBtn');
+  if (downloadTextBtn) {
+    downloadTextBtn.replaceWith(downloadTextBtn.cloneNode(true));
+    document.getElementById('downloadTextBtn').addEventListener('click', () => {
+      const scoreOutput = document.getElementById('scoreOutput');
+      const downloadFileName = getScoreboardFilename('txt');
+
+      const blob = new Blob([scoreOutput.textContent], {type: 'text/plain'}); 
+      const a = document.createElement('a'); 
+      a.href = URL.createObjectURL(blob); 
+      a.download = downloadFileName; 
+      a.click();
+    });
+  }
+
+  const downloadPngBtn = document.getElementById('downloadPngBtn');
+  if (downloadPngBtn) {
+    downloadPngBtn.replaceWith(downloadPngBtn.cloneNode(true));
+    document.getElementById('downloadPngBtn').addEventListener('click', () => {
+      const scoreboard = document.getElementById('scoreboard');
+      const downloadFileName = getScoreboardFilename('png');
+
+      const btnGroup = document.getElementById('scoreBtns'); 
+      if (btnGroup) btnGroup.style.display = 'none';
+      
+      html2canvas(scoreboard).then(canvas => { 
+        if (btnGroup) btnGroup.style.display = 'flex'; 
+        const link = document.createElement('a'); 
+        link.download = downloadFileName; 
+        link.href = canvas.toDataURL('image/png'); 
+        link.click(); 
+      });
+    });
+  }
+})();
+</script>
+
+<script>
+(function(){
+const RAW_TEXT = `
+How to use this page…
+
+Overview: The English-Thai Basic Flash Cards tool enables students to study bilingual English-Thai vocabulary flashcards, write custom example sentences, and export or submit formatted completion scoreboards.
+
+Student Identification: Type your student ID number into the ID input field located at the top-left corner. [Automatic] The application instantly resolves and matches your ID to your student name from the internal registry.
+
+Category Selection: Click the Section button in the top bar to open the category selection modal, and choose a vocabulary module (such as Top 100 Verbs, Adjectives, Nouns, or Numbers). [Automatic] Selecting a section loads the respective vocabulary deck and resets card progress.
+
+Instructions Modal: Click the Instructions button in the top bar to open a popup guide explaining the step-by-step student workflow.
+
+Vocabulary List Toggle: Click the Click to view / hide the complete list. header bar to expand or collapse the full scrollable text list of vocabulary words and definitions.
+
+Flashcard Interaction: View the English term on the front of the card, then click anywhere on the flashcard container to flip it over and inspect the Thai translation, definition, and pronunciation notes on the back.
+
+Example Sentence Input: Type your practice sentence into the Type your example sentence... text field below the flashcard area. [Automatic] Your sentence is saved in real-time to the active card index as you type.
+
+Card Navigation: Click the Previous or Next buttons to navigate through the deck. [Automatic] The Next button automatically converts into a Finish button upon reaching the final card.
+
+Scoreboard & Cloud Submission: Advancing past the final card reveals the formatted scoreboard containing your user details, timestamp, and sentence history. [Automatic] Completion data is automatically transmitted and saved to the backend database registry.
+
+Export Options: Use the action buttons at the bottom of the scoreboard to copy data via Copy, save a text file via ↓TXT, or download an image snapshot via ↓PNG.`;
+
+function parseRawInstructions(text){
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+  lines.forEach(line => {
+    if(line === "---"){ html.push(`<hr>`); return; }
+    if(/^\d+\./.test(line)){ html.push(`<p>${line}</p>`); return; }
+    if(!/[.!?:]$/.test(line)){ html.push(`<h3>${line}</h3>`); return; }
+    html.push(`<p>${line}</p>`);
+  });
+  return html.join("");
+}
+
+const instructionsBtn = document.getElementById("instructionsBtn");
+const instructionsRoot = document.getElementById("instructionsRoot");
+const instructionsBackdrop = document.getElementById("instructionsBackdrop");
+const instructionsBack = document.getElementById("instructionsBack");
+const instructionsContent = document.getElementById("instructionsContent");
+
+if(instructionsContent) {
+  instructionsContent.innerHTML = parseRawInstructions(RAW_TEXT);
+  instructionsContent.addEventListener("wheel", e=>{ e.stopPropagation(); },{passive:false});
+  instructionsContent.addEventListener("touchmove", e=>{ e.stopPropagation(); },{passive:false});
+}
+
+function openInstructionsModal(){
+  if(instructionsRoot) instructionsRoot.style.display="block";
+  document.body.style.overflow="hidden";
+  document.documentElement.style.overflow="hidden";
+}
+
+function closeInstructionsModal(){
+  if(instructionsRoot) instructionsRoot.style.display="none";
+  document.body.style.overflow="";
+  document.documentElement.style.overflow="";
+}
+
+if(instructionsBtn) instructionsBtn.onclick = openInstructionsModal;
+if(instructionsBack) instructionsBack.onclick = closeInstructionsModal;
+if(instructionsBackdrop) instructionsBackdrop.onclick = closeInstructionsModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape") {
+    closeInstructionsModal();
+  }
+});
+})();
+</script>
+
+</body>
+</html>

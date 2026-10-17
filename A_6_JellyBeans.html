@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Jelly Beans Jar</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+  }
+
+  #jellyBeanModalContainer {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    background: #000000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  #jbJarWrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+    gap: 8px;
+    background: rgba(30, 30, 30, 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.8);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  #jbJarContainer {
+    position: relative;
+    width: 230px;
+    height: 322px;
+    aspect-ratio: 520 / 760;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: visible;
+  }
+
+  #jbJarBack, #jbBeanCanvas, #jbJarGlassOverlay, #jbBlurCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+  }
+
+  #jbJarBack { z-index: 1; }
+  #jbBeanCanvas { z-index: 2; }
+  #jbBlurCanvas { z-index: 4; }
+  #jbJarGlassOverlay { z-index: 5; }
+
+  #jbJarLid {
+    position: absolute;
+    width: 94%;
+    left: 3%;
+    top: 0;
+    margin-top: 36.5px;
+    object-fit: contain;
+    pointer-events: none;
+    z-index: 100;
+  }
+
+  #jbLidHitbox {
+    position: absolute;
+    width: 94%;
+    left: 3%;
+    top: 0;
+    height: 22%;
+    margin-top: 36.5px;
+    cursor: grab;
+    z-index: 105;
+    pointer-events: auto;
+    touch-action: none;
+    background: rgba(0, 0, 0, 0);
+  }
+
+  #jbLidHitbox:active {
+    cursor: grabbing;
+  }
+
+  #jbMouthHotspot {
+    position: absolute;
+    width: 80%;
+    height: 22%;
+    left: 10%;
+    top: 2%;
+    z-index: 30;
+    cursor: pointer;
+    background: rgba(0, 0, 0, 0);
+    pointer-events: auto;
+  }
+
+  #jbScoreDisplay {
+    position: absolute;
+    left: 50%;
+    top: 52%;
+    transform: translate(-50%, -50%);
+    width: 26%;
+    height: 14%;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    font-weight: bold;
+    color: #111;
+    cursor: pointer;
+    z-index: 40;
+    pointer-events: auto;
+    transition: transform 0.1s ease, background 0.1s ease;
+  }
+
+  #jbScoreDisplay:active {
+    transform: translate(-50%, -50%) scale(0.9);
+    background: rgba(255, 240, 180, 0.95);
+  }
+
+  #jbControls {
+    display: flex;
+    flex-wrap: nowrap;
+    white-space: nowrap;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    z-index: 150;
+    width: 100%;
+  }
+
+  #jbClassSelect {
+    font-size: 11px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    border: 1px solid #444;
+    background: #222;
+    color: #fff;
+  }
+
+  .jb-btn {
+    font-family: inherit;
+    padding: 4px 8px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+    border: 1px solid #444;
+    background-color: #222;
+    color: #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    transition: background-color 0.15s ease;
+  }
+
+  .jb-btn:hover {
+    background-color: #444;
+  }
+</style>
+</head>
+<body>
+
+<div id="jellyBeanModalContainer">
+  <div id="jbJarWrapper">
+    <div id="jbJarContainer">
+      <img id="jbJarBack" src="Jar_Background.png" draggable="false" alt="Jar Back">
+      <canvas id="jbBeanCanvas" width="520" height="760"></canvas>
+      <svg id="jbJarGlassOverlay" viewBox="0 0 520 760">
+        <path d="M150,180 Q130,220 130,620 Q130,660 170,660 L350,660 Q390,660 390,620 Q390,220 370,180 Z" 
+              fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="8"/>
+        <path d="M155,200 Q142,250 142,600" 
+              fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="6" stroke-linecap="round"/>
+      </svg>
+      <img id="jbJarLid" src="Jar_Lid.png" draggable="false" alt="Jar Lid">
+      <div id="jbLidHitbox" title="Drag Lid"></div>
+      <div id="jbMouthHotspot" title="Click to Add Bean"></div>
+      <div id="jbScoreDisplay" title="Click to Remove Bean">0</div>
+    </div>
+
+    <div id="jbControls">
+      <select id="jbClassSelect">
+        <option value="" disabled selected>Class</option>
+        <option>11.1</option>
+        <option>13.2</option>
+        <option>14.1</option>
+        <option>15.3</option>
+        <option>16.2</option>
+        <option>00.0</option>
+      </select>
+      <button id="jbSaveButton" class="jb-btn">Save</button>
+      <input type="file" id="jbFileInput" accept=".txt" hidden>
+      <button id="jbBrowseButton" class="jb-btn">Update</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const jarContainer = document.getElementById("jbJarContainer");
+  const beanCanvas = document.getElementById("jbBeanCanvas");
+  const ctx = beanCanvas.getContext("2d");
+
+  const scoreDisplay = document.getElementById("jbScoreDisplay");
+  const mouthHotspot = document.getElementById("jbMouthHotspot");
+  const jarLid = document.getElementById("jbJarLid");
+  const lidHitbox = document.getElementById("jbLidHitbox");
+
+  const saveButton = document.getElementById("jbSaveButton");
+  const browseButton = document.getElementById("jbBrowseButton");
+  const fileInput = document.getElementById("jbFileInput");
+  const classSelect = document.getElementById("jbClassSelect");
+
+  const MAX_BEANS = 50;
+  const BEAN_RADIUS = 20.9;
+  const jarBounds = { left: 135, right: 385, top: 175, bottom: 645 };
+
+  beanCanvas.width = 520;
+  beanCanvas.height = 760;
+
+  let beans = [];
+  let score = 0;
+
+  const BEAN_COLORS = [
+    { fill: "#E74C3C" }, { fill: "#F1C40F" }, { fill: "#E84393" },
+    { fill: "#2ECC71" }, { fill: "#9B59B6" }, { fill: "#E67E22" }, { fill: "#3498DB" }
+  ];
+
+  function randomBeanColor() {
+    return BEAN_COLORS[Math.floor(Math.random() * BEAN_COLORS.length)];
+  }
+
+  function updateScore() {
+    scoreDisplay.textContent = score;
+  }
+
+  function getTargetPosition(index) {
+    const maxCols = 6;
+    const col = index % maxCols;
+    const row = Math.floor(index / maxCols);
+
+    const availableWidth = (jarBounds.right - 10) - (jarBounds.left + 10) - (BEAN_RADIUS * 2);
+    const colSpacing = availableWidth / (maxCols - 1);
+
+    const baseTargetX = (jarBounds.left + 10) + BEAN_RADIUS + (col * colSpacing);
+    const baseFloor = (jarBounds.bottom - 5) + 15;
+    const baseTargetY = baseFloor - BEAN_RADIUS - (row * (BEAN_RADIUS * 1.3));
+
+    const jarCenterX = (jarBounds.left + jarBounds.right) / 2;
+    const distanceFromCenter = Math.abs(baseTargetX - jarCenterX);
+    const maxDistanceFromCenter = (jarBounds.right - jarBounds.left) / 2;
+    const edgeCurveFactor = Math.min(1, distanceFromCenter / maxDistanceFromCenter);
+    const edgeLift = (row === 0) ? (edgeCurveFactor * 8) : 0;
+
+    const jitterX = Math.sin(index * 12.9898) * 12;
+    const jitterY = Math.cos(index * 78.233) * 6;
+
+    return { 
+      targetX: baseTargetX + jitterX, 
+      targetY: (baseTargetY - edgeLift) + jitterY 
+    };
+  }
+
+  function createBean() {
+    if (score >= MAX_BEANS) return;
+    const { targetX, targetY } = getTargetPosition(beans.length);
+    const angleJitter = (Math.sin(beans.length * 43.11) * 0.6) + ((Math.random() - 0.5) * 0.4);
+
+    beans.push({
+      x: targetX, y: targetY,
+      targetX: targetX, targetY: targetY,
+      angle: angleJitter,
+      color: randomBeanColor(),
+      alpha: 1,
+      removing: false
+    });
+    score++;
+    updateScore();
+  }
+
+  function removeBean() {
+    if (score <= 0) return;
+    let selectedBean = null;
+    for (let i = beans.length - 1; i >= 0; i--) {
+      if (!beans[i].removing) {
+        selectedBean = beans[i];
+        break;
+      }
+    }
+    if (!selectedBean) return;
+
+    selectedBean.removing = true;
+    score--;
+    updateScore();
+
+    let activeIdx = 0;
+    for (const bean of beans) {
+      if (!bean.removing) {
+        const { targetX, targetY } = getTargetPosition(activeIdx);
+        bean.targetX = targetX;
+        bean.targetY = targetY;
+        bean.x = targetX;
+        bean.y = targetY;
+        activeIdx++;
+      }
+    }
+  }
+
+  function updateBeans() {
+    beans = beans.filter(b => !b.removing);
+  }
+
+  function drawBeans() {
+    ctx.clearRect(0, 0, beanCanvas.width, beanCanvas.height);
+    for (const bean of beans) {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0, bean.alpha);
+      ctx.translate(bean.x, bean.y);
+      ctx.rotate(bean.angle);
+
+      ctx.beginPath();
+      ctx.moveTo(-19, -6);
+      ctx.bezierCurveTo(-24, -22, 19, -25, 24, -6);
+      ctx.bezierCurveTo(28, 11, -4, 25, -19, 15);
+      ctx.bezierCurveTo(-26, 9, -24, 0, -19, -6);
+      ctx.closePath();
+
+      ctx.fillStyle = bean.color.fill;
+      ctx.fill();
+      ctx.strokeStyle = "rgba(0, 0, 0, 0.12)";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.ellipse(-5, -9, 9, 3.5, Math.PI / 4, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(255, 255, 255, 0.65)";
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  // Lid Dragging with initial layout matching
+  const initialLidRect = jarLid.getBoundingClientRect();
+  const initialContainerRect = jarContainer.getBoundingClientRect();
+  let lidDragging = false, lidOffsetX = 0, lidOffsetY = 0;
+  let currentLidX = initialLidRect.left - initialContainerRect.left;
+  let currentLidY = initialLidRect.top - initialContainerRect.top;
+  let targetLidX = currentLidX;
+  let targetLidY = currentLidY;
+
+  lidHitbox.addEventListener("pointerdown", (event) => {
+    event.stopPropagation();
+    lidDragging = true;
+    lidHitbox.setPointerCapture(event.pointerId);
+    const containerRect = jarContainer.getBoundingClientRect();
+    const lidRect = jarLid.getBoundingClientRect();
+    lidOffsetX = event.clientX - lidRect.left;
+    lidOffsetY = event.clientY - lidRect.top;
+    targetLidX = lidRect.left - containerRect.left;
+    targetLidY = lidRect.top - containerRect.top;
+  });
+
+  lidHitbox.addEventListener("pointermove", (event) => {
+    if (!lidDragging) return;
+    event.stopPropagation();
+    const containerRect = jarContainer.getBoundingClientRect();
+    targetLidX = event.clientX - containerRect.left - lidOffsetX;
+    targetLidY = event.clientY - containerRect.top - lidOffsetY;
+  });
+
+  const stopLidDrag = (event) => {
+    if (lidDragging) {
+      lidDragging = false;
+      try { lidHitbox.releasePointerCapture(event.pointerId); } catch (e) {}
+    }
+  };
+  lidHitbox.addEventListener("pointerup", stopLidDrag);
+  lidHitbox.addEventListener("pointercancel", stopLidDrag);
+
+  function animate() {
+    currentLidX += (targetLidX - currentLidX) * 0.25;
+    currentLidY += (targetLidY - currentLidY) * 0.25;
+
+    jarLid.style.left = currentLidX + "px";
+    jarLid.style.top = currentLidY + "px";
+    jarLid.style.margin = "0";
+
+    lidHitbox.style.left = currentLidX + "px";
+    lidHitbox.style.top = currentLidY + "px";
+    lidHitbox.style.margin = "0";
+
+    updateBeans();
+    drawBeans();
+    requestAnimationFrame(animate);
+  }
+
+  // File IO
+  function getDateString() {
+    const today = new Date();
+    return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+  }
+
+  saveButton.addEventListener("pointerdown", async (e) => {
+    e.stopPropagation();
+    if (!classSelect.value) {
+      alert("Please select a class first.");
+      return;
+    }
+    const filename = `${classSelect.value}_${getDateString()}.txt`;
+    try {
+      const folderHandle = await window.showDirectoryPicker({ mode: "readwrite" });
+      const fileHandle = await folderHandle.getFileHandle(filename, { create: true });
+      const writable = await fileHandle.createWritable();
+      await writable.write(score.toString());
+      await writable.close();
+      alert(`Saved: ${filename}`);
+    } catch (error) {
+      if (error.name !== "AbortError") alert("Could not save the file.");
+    }
+  });
+
+  browseButton.addEventListener("pointerdown", (e) => {
+    e.stopPropagation();
+    if (!classSelect.value) {
+      alert("Please select a class first before updating.");
+      return;
+    }
+    fileInput.click();
+  });
+
+  fileInput.addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const selectedClass = classSelect.value;
+    const expectedPrefix = selectedClass + "_";
+
+    // Validate filename prefix (first 4 characters must match selected class prefix)
+    if (!file.name.startsWith(expectedPrefix)) {
+      alert(`Invalid file! Please select a file starting with "${expectedPrefix}" for class ${selectedClass}.`);
+      fileInput.value = ""; // Reset input
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const loadedScore = parseInt(e.target.result.trim());
+      if (!isNaN(loadedScore) && loadedScore >= 0) {
+        beans = []; score = 0; updateScore();
+        for (let i = 0; i < Math.min(loadedScore, MAX_BEANS); i++) createBean();
+      } else {
+        alert("Invalid file contents. Expected a numerical score.");
+      }
+      fileInput.value = ""; // Reset input
+    };
+    reader.readAsText(file);
+  });
+
+  mouthHotspot.addEventListener("pointerdown", (e) => { e.stopPropagation(); createBean(); });
+  scoreDisplay.addEventListener("pointerdown", (e) => { e.stopPropagation(); removeBean(); });
+
+  updateScore();
+  animate();
+})();
+</script>
+
+<!-- Neutral Grey Falling Bean Trails System -->
+<script>
+(function() {
+  window.addEventListener("DOMContentLoaded", () => {
+    const jarContainer = document.getElementById("jbJarContainer");
+    const scoreDisplay = document.getElementById("jbScoreDisplay");
+    if (!jarContainer || !scoreDisplay) return;
+
+    const blurCanvas = document.createElement("canvas");
+    blurCanvas.id = "jbBlurCanvas";
+    blurCanvas.width = 520;
+    blurCanvas.height = 760;
+    jarContainer.appendChild(blurCanvas);
+    const blurCtx = blurCanvas.getContext("2d");
+
+    let impressionisticTrails = [];
+    let lastKnownScore = parseInt(scoreDisplay.textContent) || 0;
+    const jarBounds = { left: 135, right: 385, top: 175, bottom: 645 };
+    const BEAN_RADIUS = 20.9;
+    const maxCols = 6;
+
+    function getBeanCoordinates(scoreIndex) {
+      const col = scoreIndex % maxCols;
+      const row = Math.floor(scoreIndex / maxCols);
+      const availableWidth = (jarBounds.right - 10) - (jarBounds.left + 10) - (BEAN_RADIUS * 2);
+      const baseTargetX = (jarBounds.left + 10) + BEAN_RADIUS + (col * (availableWidth / (maxCols - 1)));
+      const baseTargetY = (jarBounds.bottom - 5) + 15 - BEAN_RADIUS - (row * (BEAN_RADIUS * 1.3));
+      return { x: baseTargetX + (Math.sin(scoreIndex * 12.9898) * 12), y: baseTargetY };
+    }
+
+    const observer = new MutationObserver(() => {
+      const currentScore = parseInt(scoreDisplay.textContent) || 0;
+      if (currentScore === lastKnownScore) return;
+
+      const centerX = (jarBounds.left + jarBounds.right) / 2;
+      const startY = jarBounds.top - 15;
+      const targetCoord = getBeanCoordinates(currentScore > lastKnownScore ? currentScore - 1 : currentScore);
+
+      impressionisticTrails.push({
+        x: centerX,
+        y: currentScore > lastKnownScore ? startY : targetCoord.y,
+        targetY: currentScore > lastKnownScore ? targetCoord.y : startY,
+        color: "#95A5A6",
+        alpha: 0.35,
+        life: 1.0,
+        decay: 0.015
+      });
+      lastKnownScore = currentScore;
+    });
+
+    observer.observe(scoreDisplay, { childList: true, characterData: true, subtree: true });
+
+    function renderBlurTrails() {
+      blurCtx.clearRect(0, 0, blurCanvas.width, blurCanvas.height);
+      for (let i = impressionisticTrails.length - 1; i >= 0; i--) {
+        let trail = impressionisticTrails[i];
+        trail.y += (trail.targetY - trail.y) * 0.12;
+        trail.life -= trail.decay;
+
+        if (trail.life <= 0 || Math.abs(trail.targetY - trail.y) < 1) {
+          impressionisticTrails.splice(i, 1);
+          continue;
+        }
+
+        blurCtx.save();
+        blurCtx.globalAlpha = trail.alpha * trail.life;
+        blurCtx.shadowColor = trail.color;
+        blurCtx.shadowBlur = 35;
+        blurCtx.translate(trail.x, trail.y);
+        blurCtx.beginPath();
+        blurCtx.moveTo(-19, -6);
+        blurCtx.bezierCurveTo(-24, -22, 19, -25, 24, -6);
+        blurCtx.bezierCurveTo(28, 11, -4, 25, -19, 15);
+        blurCtx.bezierCurveTo(-26, 9, -24, 0, -19, -6);
+        blurCtx.closePath();
+        blurCtx.fillStyle = trail.color;
+        blurCtx.fill();
+        blurCtx.restore();
+      }
+      requestAnimationFrame(renderBlurTrails);
+    }
+    renderBlurTrails();
+  });
+})();
+</script>
+
+</body>
+</html>

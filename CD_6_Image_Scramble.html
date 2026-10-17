@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Chess</title>
+  <style>
+    :root {
+      --bg: #b3d9ff;
+      --blue: #1976d2;
+      --blue-hover: #1565c0;
+      --input-border-blue: #cfe2f7;
+      --section-item-default: #eaf6ff;
+      --section-item-hover: #d0e8ff;
+      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --size-small: 11px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: var(--font-main);
+      background: var(--bg);
+      display: flex;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      max-width: 450px;
+      max-height: 100vh;        
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 10px;
+      scroll-behavior: smooth;
+
+      scrollbar-width: none;        /* Firefox */
+      -ms-overflow-style: none;     /* IE / old Edge */
+    }
+
+    .container::-webkit-scrollbar {
+      display: none;                /* Chrome / Safari */
+    }
+
+    /* ===============================
+       TOP FIELDS / ROW STYLING
+       =============================== */
+    #topFields {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+      margin-bottom: 5px;
+      width: 100%;
+      white-space: nowrap;
+    }
+
+    #topFields input,
+    #topFields button,
+    #sectionSelectorBtn,
+    #instructionsBtn {
+      flex: 1;
+      min-width: 0;
+      width: 0;
+      height: 36px;
+      padding: 0 8px;
+      border: 1px solid var(--input-border-blue);
+      border-radius: 6px;
+      font-family: var(--font-main);
+      font-size: var(--size-small);
+      font-weight: 400;
+      background: linear-gradient(145deg, #ffffff, var(--section-item-default));
+      color: var(--blue);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      box-sizing: border-box;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0;
+      transition: background 0.15s ease, transform 0.1s ease, border-color 0.15s ease;
+    }
+
+    #topFields input {
+      color: #000000 !important;
+      background-color: #fff !important;
+      text-align: left !important;
+      padding: 0 12px !important;
+    }
+
+    #topFields input::placeholder {
+      color: var(--blue) !important;
+      opacity: 1 !important;
+    }
+
+    #topFields button:hover:not(:disabled),
+    #sectionSelectorBtn:hover:not(:disabled),
+    #instructionsBtn:hover:not(:disabled) {
+      background: linear-gradient(145deg, #ffffff, var(--section-item-hover));
+      border-color: var(--blue);
+    }
+
+    #topFields button:active:not(:disabled),
+    .controls button:active:not(:disabled) {
+      transform: scale(0.97);
+    }
+
+    #topFields button:disabled,
+    .controls button:disabled {
+      background: #f1f5f9 !important;
+      color: #94a3b8 !important;
+      border-color: var(--input-border-blue) !important;
+      cursor: not-allowed;
+      box-shadow: none !important;
+    }
+
+    .mainContainer {
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      max-height: 50vh;         
+      border-radius: 10px;
+      background: #000;
+      border: 2px solid #39ff14;
+      display: block;
+    }
+
+    .responseField {
+      flex: none;                
+      width: 100%;
+      padding: 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      display: none;
+      resize: none;
+      overflow: hidden;
+      min-height: 20px;
+      line-height: 1.4;
+      font-family: inherit;
+      font-size: 14px;
+    }
+
+    /* ===============================
+       CONTROLS (BACK, NEXT, SUBMIT)
+       =============================== */
+    .controls {
+      display: flex;
+      gap: 6px;
+      margin-top: 15px;
+      justify-content: center;
+      width: 100%;
+      max-width: 450px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .controls button {
+      flex: 1;
+      min-width: 0;
+      width: 0;
+      height: 36px;
+      padding: 0 8px;
+      font-family: var(--font-main);
+      font-size: var(--size-small);
+      font-weight: 400;
+      background: linear-gradient(145deg, #ffffff, var(--section-item-default));
+      color: var(--blue);
+      border: 1px solid var(--input-border-blue);
+      border-radius: 6px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+      box-sizing: border-box;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+    }
+
+    .controls button:hover:not(:disabled) {
+      background: linear-gradient(145deg, #ffffff, var(--section-item-hover));
+      border-color: var(--blue);
+    }
+
+    /* ===============================
+       MC SCOREBOARD (SINGLE SOURCE)
+       =============================== */
+    #mcScoreboard {
+      margin-top: 10px;
+      padding: 10px;
+      background: #fff;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      width: 100%;
+      display: none;
+      text-align: left;
+    }
+
+    #mcScoreboard pre {
+      min-height: 100px;
+      max-height: 50vh;          
+      white-space: pre-wrap;
+      word-wrap: break-word;
+      font-size: 14px;
+      font-family: monospace;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: none;     
+      -ms-overflow-style: none;  
+    }
+
+    #mcScoreboard pre::-webkit-scrollbar {
+      display: none;             
+    }
+
+    #mcScoreboard .action-buttons {
+      margin-top: 12px;
+      display: flex;
+      gap: 6px;
+    }
+
+    #mcScoreboard .action-buttons button {
+      height: 36px;
+      font-size: var(--size-small);
+    }
+
+    /* ===============================
+       FORM ROW & DROPDOWN STYLING
+       =============================== */
+    .formRow {
+      display: flex;
+      flex-shrink: 0;
+      flex-direction: row;
+      flex-wrap: nowrap;
+      gap: 3px;
+      width: 100%;
+      height: 28px;               
+      margin-bottom: 3px;
+      align-items: stretch;      
+    }
+
+    .formRow > * {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      box-sizing: border-box;
+    }
+
+    /* ===============================
+       MODAL STYLING (Selection & Instructions Match)
+       =============================== */
+    #sectionModalRoot,
+    #instructionsRoot {
+      position: fixed;
+      inset: 0;
+      display: none; 
+      z-index: 99999;
+    }
+
+    #sectionModalBackdrop,
+    #instructionsBackdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+    }
+
+    #sectionModalContent,
+    #instructionsModal {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: min(500px, 92vw);
+      max-height: min(80vh, calc(100dvh - 16px));
+      background: #fff;
+      border-radius: 12px;
+      padding: 18px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      border: 1px solid var(--input-border-blue);
+      font-family: var(--font-main);
+    }
+
+    #sectionModalHeader,
+    #instructionsHeader {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      flex: 0 0 auto;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    #instructionsTitle {
+      color: var(--blue);
+      font-weight: 700;
+      font-size: 18px;
+    }
+
+    #sectionModalClose,
+    #instructionsBack {
+      background: linear-gradient(145deg, #ffffff, var(--section-item-default));
+      border: 1px solid var(--input-border-blue);
+      color: var(--blue);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 0 8px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      width: auto;
+      height: 28px;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    }
+
+    #sectionModalClose:hover,
+    #instructionsBack:hover {
+      background: linear-gradient(145deg, #ffffff, var(--section-item-hover));
+      border-color: var(--blue);
+    }
+
+    #sectionListContainer,
+    #instructionsContent {
+      padding: 0;
+      overflow-y: auto;
+      min-height: 0;
+      flex: 1 1 auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #333;
+    }
+
+    #sectionListContainer::-webkit-scrollbar,
+    #instructionsContent::-webkit-scrollbar {
+      display: none;
+    }
+
+    .section-item {
+      height: 28px;
+      padding: 0 6px;
+      margin-bottom: 6px;
+      background: var(--section-item-default);
+      border: 1px solid var(--input-border-blue);
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: var(--font-main);
+      font-size: var(--size-small);
+      color: var(--blue);
+      font-weight: 400;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      text-align: left;
+      transition: 0.12s;
+      width: 100%;
+    }
+
+    .section-item:hover {
+      background: var(--section-item-hover);
+      border-color: var(--blue);
+    }
+
+    .section-item.selected {
+      background: var(--blue);
+      border-color: var(--blue);
+      color: #fff;
+    }
+
+    #instructionsContent h3 {
+      margin-top: 10px;
+      margin-bottom: 4px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--blue);
+    }
+
+    #instructionsContent p {
+      margin-bottom: 8px;
+      font-weight: 400;
+    }
+
+    #instructionsContent hr {
+      margin: 12px 0;
+      border: none;
+      border-top: 1px solid var(--input-border-blue);
+    }
+
+    .word {
+      display: inline-block;                
+      padding: 0 2px;                       
+      border-radius: 4px;
+      box-shadow: 0 0 0 2px transparent;    
+      transition: background-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .word.selected-word {
+      background-color: rgba(25, 118, 210, 0.25); 
+      box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.35);
+    }
+
+    .word.selected-word.correct,
+    .word.selected-word.incorrect {
+      background-color: rgba(25, 118, 210, 0.25);
+      box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.35);
+    }
+
+    .word.correct {
+      outline: 1px solid rgba(46, 125, 50, 0.6);
+    }
+
+    .word.incorrect {
+      outline: 1px solid rgba(198, 40, 40, 0.6);
+    }
+
+    #mcImageArea {
+      width: 100%;
+      margin-top: 3px;
+      font-size: 14px;
+    }
+
+    .mcQuestion {
+      margin-bottom: 3px;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Nicely styled Multiple Choice questions layout */
+    .exercise {
+      display: none;          
+      white-space: pre-line;
+      margin-bottom: 3px;
+      padding: 10px;
+      background: #ffffff;
+      border: 1px solid var(--input-border-blue);
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-left: 0;
+      text-indent: 0;
+      align-self: stretch;
+      text-align: left;
+    }
+
+    .exercise > strong {
+      color: var(--blue);
+      font-size: 13px;
+    }
+
+    .mcOption {
+      display: flex;
+      align-items: center;
+      padding: 6px 8px;
+      margin: 3px 0;
+      background: #f8fbff;
+      border: 1px solid #e1effe;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      color: #333;
+      transition: background 0.1s ease, border-color 0.1s ease;
+    }
+
+    .mcOption:hover {
+      background: #edf5ff;
+      border-color: var(--blue);
+    }
+
+    .mcOption input {
+      margin-right: 8px;
+      accent-color: var(--blue);
+    }
+
+    #mcContainer {
+      align-self: stretch;
+    }
+
+    #copyrightSection {
+      width: 100%;
+      align-self: stretch;     
+      text-align: left;
+      padding: 3px 10px;
+      font-size: 10px;
+      line-height: 1.1;
+      font-weight: normal;
+      opacity: 0.7;
+    }
+
+    footer {
+      width: 100%;
+      align-self: stretch;     
+      font-size: 10px;
+      line-height: 1.1;
+      opacity: 0.7;
+      text-align: left;
+      margin-top: 3px;
+    }
+
+    footer p {
+      margin: 0;
+      padding: 0;
+    }
+
+    #gameArea {
+      width: 100%;
+      display: flex;
+      justify-content: center;    
+      align-items: center;        
+      margin: 3px 0;
+      flex-shrink: 0;
+    }
+
+    #gameArea iframe {
+      display: block;            
+      width: 336px;
+      height: 336px;
+      border: 2px solid #39ff14;
+      border-radius: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- TOP BAR CONTROLS ON ONE LINE -->
+  <div id="topFields">
+    <input type="text" id="mcId" placeholder="ID" />
+    <button id="sectionSelectorBtn" type="button">Select a section.</button>
+    <button id="instructionsBtn" type="button">Instructions</button>
+  </div>
+
+  <!-- Section Selection Modal -->
+  <div id="sectionModalRoot">
+    <div id="sectionModalBackdrop"></div>
+    <div id="sectionModalContent">
+      <div id="sectionModalHeader">
+        <span>Select a Category</span>
+        <button id="sectionModalClose" type="button">✕</button>
+      </div>
+      <div id="sectionListContainer"></div>
+    </div>
+  </div>
+
+  <!-- Instructions Modal -->
+  <div id="instructionsRoot">
+    <div id="instructionsBackdrop"></div>
+    <div id="instructionsModal">
+      <div id="instructionsHeader">
+        <span id="instructionsTitle">Instructions</span>
+        <button id="instructionsBack" type="button">✕</button>
+      </div>
+      <div id="instructionsContent"></div>
+    </div>
+  </div>
+
+  <div id="gameArea">
+    <iframe
+      src="G_Game_Chess_336x336.html"
+      width="336"
+      height="336"
+      frameborder="0"
+      scrolling="no"
+      loading="lazy"
+      title="Chess Game">
+    </iframe>
+  </div>
+
+  <div id="mcImageArea"></div>
+
+  <!-- MULTIPLE CHOICE QUESTIONS -->
+  <div id="mcContainer" class="hidden"></div>
+
+  <div class="scoreboard" id="mcScoreboard">
+    <pre id="mcScoreOutput"></pre>
+    <div class="action-buttons">
+      <button id="mcCopyBtn">Copy</button>
+      <button id="mcDownloadTextBtn">↓TXT</button>
+      <button id="mcDownloadPngBtn">↓PNG</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="backButton">Back</button>
+    <button id="nextButton">Next</button>
+    <button id="mcSubmitBtn" type="button">Submit</button>
+  </div>
+
+  <footer>
+    <p>&copy; <span id="copyrightYear"></span> Perfectly Practical English</p>
+  </footer>
+
+</div>
+
+<script>
+document.getElementById('copyrightYear').textContent = new Date().getFullYear();
+</script>
+
+<script>
+    let showOverlayNumber = false;
+
+// ===== STUDENT NAME MATCHING FUNCTION =====
+function getStudentName(id) {
+  if (typeof window.resolveStudentNameFromId === 'function') {
+    return window.resolveStudentNameFromId(id);
+  }
+  const cleanId = (id || "").trim();
+  if (!cleanId) return "Student";
+  return cleanId;
+}
+
+/* ===============================
+   MULTIPLE CHOICE GAME CORE
+   =============================== */
+const mcRawSource = ` 
+~Chess Basics
+
+?What is the primary objective of a game of chess?
+Capture all enemy pieces
+|Checkmate the opponent's king|
+Control the center squares
+Promote a pawn to a queen
+
+?How many squares are on a standard chess board?
+32
+48
+|64|
+80
+`;
+
+const mcContainer = document.getElementById('mcContainer');
+
+(async () => {
+  const mcRaw = mcRawSource;
+
+  const blocks = mcRaw
+    .trim()
+    .split(/\n\s*\n/)
+    .filter(b => !b.trim().startsWith('~'));
+
+  blocks.forEach((block, index) => {
+    const lines = block.trim().split('\n');
+    const qText = lines.shift().trim().replace(/^\?+/, '');
+
+    const opts = lines.map(l => l.trim());
+    const correctAnswer = opts.find(o => o.includes('|'))
+      ?.replace(/\|/g, '')
+      .trim();
+
+    const cleanOpts = opts.map(o => o.replace(/\|/g, '').trim());
+
+    const div = document.createElement('div');
+    div.className = 'exercise';
+    div.dataset.index = index;
+    div.dataset.correct = correctAnswer;
+
+    div.innerHTML = `<strong>${index + 1}.</strong> ${qText}`;
+
+    cleanOpts.forEach((opt, optIndex) => {
+      const label = document.createElement('label');
+      label.className = 'mcOption';
+
+      const input = document.createElement('input');
+      input.type = 'radio';
+      input.name = `mc-q${index}`;
+      input.value = opt;
+
+      input.addEventListener('click', () => {
+        if (div.dataset.locked) return;
+        div.dataset.locked = 'true';
+        div.dataset.firstSelected = opt;
+      });
+
+      const letter = String.fromCharCode(65 + optIndex);
+
+      label.appendChild(input);
+      label.append(` ${letter}) ${opt}`);
+
+      div.appendChild(label);
+    });
+
+    mcContainer.appendChild(div);
+  });
+})();
+
+function renderMCForImage(index) {
+  const questions = mcContainer.querySelectorAll('.exercise');
+
+  questions.forEach(q => {
+    q.style.display = 'none';
+  });
+
+  const active = mcContainer.querySelector(
+    `.exercise[data-index="${index}"]`
+  );
+
+  if (active) active.style.display = 'block';
+}
+
+function getScoreboardFilename(extension) {
+  const out = document.getElementById('mcScoreOutput');
+  if (out && out.textContent.trim()) {
+    let firstLine = out.textContent.split('\n')[0];
+    let baseName = firstLine
+      .replace(/\|/g, '_')
+      .replace(/\s+/g, '_')
+      .replace(/[:\/]/g, '-');
+    return baseName + '.' + extension;
+  }
+  return 'scoreboard.' + extension;
+}
+
+// ---------------------- SUBMIT HANDLER ----------------------
+document.getElementById('mcSubmitBtn').addEventListener('click', () => {
+  let currentFile = window.location.pathname.split('/').pop() || 'unknown.html';
+  currentFile = currentFile.split('?')[0].split('#')[0];
+  const filenameWithoutExt = currentFile.replace(/\.[^/.]+$/, "");
+
+  const id = document.getElementById('mcId').value.trim() || 'Guest';
+  const nm = getStudentName(id);
+  const sectionName = (activeSection && activeSection.title) ? activeSection.title : "Chess Basics";
+
+  const now = new Date();
+  const pad = n => n.toString().padStart(2,'0');
+
+  const dateStr = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+  const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+  const exercises = mcContainer.querySelectorAll('.exercise');
+  let score = 0;
+
+  exercises.forEach(ex => {
+    if (ex.dataset.firstSelected === ex.dataset.correct) score++;
+  });
+
+  const percent = exercises.length
+    ? Math.round((score / exercises.length) * 100)
+    : 0;
+  const percentStr = percent + '%';
+
+  const scoreText =
+    `${filenameWithoutExt}|${sectionName}|${nm}|${id}|${dateStr}|${timeStr}|${score}/${exercises.length}|${percentStr}`;
+
+  const out = document.getElementById('mcScoreOutput');
+  out.textContent = scoreText;
+
+  document.getElementById('mcScoreboard').style.display = 'block';
+
+  if (window.saveResult) {
+    window.saveResult(scoreText);
+  }
+});
+
+const rawImageList = `
+~Chess Basics
+
+Standard Board
+Strategy Rules
+`;
+
+function parseImageSections(raw) {
+  const lines = raw.split('\n').map(l => l.trim());
+  const sections = [];
+  let current = null;
+
+  lines.forEach(line => {
+    if (!line) return;
+
+    if (line.startsWith("~")) {
+      current = {
+        title: line.replace(/~/g, "").trim(),
+        images: []
+      };
+      sections.push(current);
+    } else if (current) {
+      current.images.push(line);
+    }
+  });
+
+  return sections;
+}
+
+const imageSections = parseImageSections(rawImageList);
+
+let sectionIndex = null;
+let activeSection = null;
+let images = [];
+
+// ===== DROPDOWN MODAL SCRIPT LOGIC =====
+const sectionSelectorBtn = document.getElementById("sectionSelectorBtn");
+const modalRoot = document.getElementById("sectionModalRoot");
+const modalBackdrop = document.getElementById("sectionModalBackdrop");
+const modalClose = document.getElementById("sectionModalClose");
+const listContainer = document.getElementById("sectionListContainer");
+
+const sectionData = imageSections.map((sec, idx) => ({
+  index: idx,
+  name: `${sec.title} (${sec.images.length} items)`,
+  words: sec.images
+}));
+
+let selectedModalIndex = -1;
+
+function openModal() {
+  listContainer.innerHTML = "";
+  
+  if (sectionData.length === 0) {
+    const emptyDiv = document.createElement("div");
+    emptyDiv.style.cssText = 'padding:10px; text-align:center; color:#666;';
+    emptyDiv.textContent = "No categories found.";
+    listContainer.appendChild(emptyDiv);
+  } else {
+    sectionData.forEach((sec, index) => {
+      const item = document.createElement("div");
+      item.className = "section-item" + (selectedModalIndex === index ? " selected" : "");
+      item.textContent = sec.name;
+      
+      item.addEventListener("click", () => {
+        document.querySelectorAll('.section-item').forEach(i => i.classList.remove('selected'));
+        item.classList.add("selected");
+        selectedModalIndex = index;
+        
+        sectionIndex = sec.index;
+        sectionSelectorBtn.textContent = sec.name;
+
+        activeSection = imageSections[sectionIndex];
+        images = activeSection.images;
+        currentImageIndex = 0;
+
+        mcContainer.classList.remove('hidden');   
+        renderMCForImage(0);                      
+
+        document.getElementById('nextButton').disabled = false;
+        document.getElementById('backButton').disabled = false;
+        document.getElementById('mcSubmitBtn').disabled = false;
+        closeModal();
+      });
+      listContainer.appendChild(item);
+    });
+  }
+  modalRoot.style.display = "block";
+}
+
+function closeModal() {
+  modalRoot.style.display = "none";
+}
+
+if (sectionSelectorBtn) sectionSelectorBtn.addEventListener("click", openModal);
+if (modalClose) modalClose.addEventListener("click", closeModal);
+if (modalBackdrop) modalBackdrop.addEventListener("click", closeModal);
+
+let currentImageIndex = 0;
+
+function goToImage(index) {
+  currentImageIndex = index;
+  renderMCForImage(currentImageIndex);
+}
+
+document.getElementById('nextButton').addEventListener('click', () => {
+  if (images.length > 0) goToImage((currentImageIndex + 1) % images.length);
+});
+
+document.getElementById('backButton').addEventListener('click', () => {
+  if (images.length > 0) goToImage((currentImageIndex - 1 + images.length) % images.length);
+});
+
+const copyBtn = document.getElementById('mcCopyBtn');
+if (copyBtn) {
+  copyBtn.addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText(
+        document.getElementById('mcScoreOutput').innerText
+      );
+    } catch {
+      alert("Failed to copy. Please copy manually.");
+    }
+  });
+}
+
+const downloadTextBtn = document.getElementById('mcDownloadTextBtn');
+if (downloadTextBtn) {
+  downloadTextBtn.addEventListener('click', () => {
+    const text = document.getElementById('mcScoreOutput').textContent;
+    if (!text) return;
+    const downloadFileName = getScoreboardFilename('txt');
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = downloadFileName;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+}
+
+const downloadPngBtn = document.getElementById('mcDownloadPngBtn');
+if (downloadPngBtn) {
+  downloadPngBtn.addEventListener('click', async () => {
+    const scoreboard = document.getElementById('mcScoreboard');
+    if (!window.html2canvas) {
+      alert("html2canvas library not loaded yet.");
+      return;
+    }
+    try {
+      const downloadFileName = getScoreboardFilename('png');
+      const canvas = await html2canvas(scoreboard);
+      const url = canvas.toDataURL('image/png');
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = downloadFileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    } catch {
+      alert("Failed to generate PNG image.");
+    }
+  });
+}
+
+const script = document.createElement('script');
+script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+document.head.appendChild(script);
+</script>
+
+<!-- SUPABASE LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabaseClient = window.supabase?.createClient(
+  'https://etwwriloppklhhkmswpr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+);
+
+let lastUploadedScore = null;
+
+window.saveResult = async function saveResult(text) {
+  if (!supabaseClient) return;
+  let cleaned;
+  try {
+    cleaned = (typeof text === "string") ? text : JSON.stringify(text);
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+  } catch (err) {
+    return;
+  }
+  if (!cleaned || cleaned === lastUploadedScore) return;
+  lastUploadedScore = cleaned;
+
+  await supabaseClient
+    .from("scoreboard_raw")
+    .insert([{ result_text: cleaned }]);
+};
+</script>
+
+<!-- STUDENT DATA REGISTRY MODULE -->
+<script>
+(function() {
+    'use strict';
+    const RAW_STUDENT_DATA = `
+        55555|David
+        55551|Matthew
+        12345|Sarah
+    `;
+    const studentDatabase = new Map();
+    RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+        const [id, name] = line.split('|').map(s => s ? s.trim() : '');
+        if (id && name) studentDatabase.set(id, name);
+    });
+
+    window.resolveStudentNameFromId = function(idInput) {
+        if (!idInput) return "Guest";
+        const trimmed = String(idInput).trim();
+        if (/^(x|g|guest)$/i.test(trimmed)) {
+            return "Guest";
+        }
+        return studentDatabase.get(trimmed) || "Guest";
+    };
+})();
+</script>
+
+<script>
+(function(){
+const RAW_TEXT = `
+How to use this page...
+• Enter your ID number into the ID field — Auto: Your name will automatically populate if registered, and entering your ID unlocks score tracking.
+• Click the Select a section button to choose a category from the pop-up menu.
+• Click the Instructions button anytime to view the gameplay guide.
+• View the chess game and answer the multiple-choice questions below.
+• Click the Back or Next buttons to navigate between different questions.
+• Click Submit to view your final score and percentage — Auto: Your results are compiled into a scoreboard record and logged automatically to the database.
+• Use the Copy, TXT, or PNG buttons to download or copy your score record.
+`;
+
+function parseRawInstructions(text){
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+  lines.forEach(line => {
+    if(line === "---"){ html.push(`<hr>`); return; }
+    if(/^\d+\./.test(line)){ html.push(`<p>${line}</p>`); return; }
+    if(!/[.!?:]$/.test(line)){ html.push(`<h3>${line}</h3>`); return; }
+    html.push(`<p>${line}</p>`);
+  });
+  return html.join("");
+}
+
+const RAW_INSTRUCTIONS_TEXT = RAW_TEXT;
+const instructionsBtn = document.getElementById("instructionsBtn");
+const instructionsRoot = document.getElementById("instructionsRoot");
+const instructionsBackdrop = document.getElementById("instructionsBackdrop");
+const instructionsBack = document.getElementById("instructionsBack");
+const instructionsContent = document.getElementById("instructionsContent");
+
+if(instructionsContent) {
+  instructionsContent.innerHTML = parseRawInstructions(RAW_INSTRUCTIONS_TEXT);
+  instructionsContent.addEventListener("wheel", e=>{ e.stopPropagation(); },{passive:false});
+  instructionsContent.addEventListener("touchmove", e=>{ e.stopPropagation(); },{passive:false});
+}
+
+function openInstructionsModal(){
+  if(instructionsRoot) instructionsRoot.style.display="block";
+  document.body.style.overflow="hidden";
+  document.documentElement.style.overflow="hidden";
+}
+
+function closeInstructionsModal(){
+  if(instructionsRoot) instructionsRoot.style.display="none";
+  document.body.style.overflow="";
+  document.documentElement.style.overflow="";
+}
+
+if(instructionsBtn) instructionsBtn.onclick = openInstructionsModal;
+if(instructionsBack) instructionsBack.onclick = closeInstructionsModal;
+if(instructionsBackdrop) instructionsBackdrop.onclick = closeInstructionsModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape") {
+    closeInstructionsModal();
+  }
+});
+
+})();
+</script>
+
+</body>
+</html>

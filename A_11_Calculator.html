@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Scientific Calculator</title>
+
+<style>
+:root {
+  --bg: #000;
+  --panel: #1c1c1e;
+  --display-bg: #111;
+  --btn-dark: #2c2c2e;
+  --btn-light: #3a3a3c;
+  --btn-orange: #ff9500;
+  --text: #fff;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #111;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.calculator {
+  width: 100%;
+  max-width: 420px;
+  background: var(--panel);
+  padding: 15px;
+  border-radius: 25px;
+  box-shadow: 0 0 40px rgba(0,0,0,0.8);
+}
+
+.display {
+  background: var(--display-bg);
+  color: var(--text);
+  font-size: 2.2rem;
+  padding: 20px;
+  border-radius: 15px;
+  text-align: right;
+  word-wrap: break-word;
+  min-height: 60px;
+  margin-bottom: 15px;
+}
+
+.mode {
+  text-align: right;
+  font-size: 0.8rem;
+  opacity: 0.6;
+  margin-bottom: 5px;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+button {
+  padding: 18px 0;
+  font-size: 1rem;
+  border-radius: 12px;
+  border: none;
+  background: var(--btn-dark);
+  color: var(--text);
+  cursor: pointer;
+  transition: 0.15s;
+}
+
+button:active {
+  transform: scale(0.95);
+}
+
+.operator { background: var(--btn-orange); }
+.function { background: var(--btn-light); }
+.wide { grid-column: span 2; }
+
+@media (max-height: 700px){
+  button { padding: 12px 0; }
+}
+
+footer {
+  text-align: center;
+  font-size: 10px;
+  color: #888;
+  margin-top: 15px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="calculator">
+  <div class="mode" id="mode">DEG</div>
+  <div class="display" id="display">0</div>
+
+  <div class="buttons">
+    <button class="function" onclick="toggleMode()">DEG/RAD</button>
+    <button class="function" onclick="clearDisplay()">AC</button>
+    <button class="function" onclick="backspace()">⌫</button>
+    <button class="function" onclick="append('%')">%</button>
+    <button class="operator" onclick="append('/')">÷</button>
+
+    <button class="function" onclick="append('Math.sin(')">sin</button>
+    <button class="function" onclick="append('Math.cos(')">cos</button>
+    <button class="function" onclick="append('Math.tan(')">tan</button>
+    <button class="function" onclick="append('Math.log10(')">log</button>
+    <button class="operator" onclick="append('*')">×</button>
+
+    <button class="function" onclick="append('Math.asin(')">sin⁻¹</button>
+    <button class="function" onclick="append('Math.acos(')">cos⁻¹</button>
+    <button class="function" onclick="append('Math.atan(')">tan⁻¹</button>
+    <button class="function" onclick="append('Math.log(')">ln</button>
+    <button class="operator" onclick="append('-')">−</button>
+
+    <button onclick="append('Math.PI')">π</button>
+    <button onclick="append('Math.E')">e</button>
+    <button onclick="append('(')">(</button>
+    <button onclick="append(')')">)</button>
+    <button class="operator" onclick="append('+')">+</button>
+
+    <button onclick="append('7')">7</button>
+    <button onclick="append('8')">8</button>
+    <button onclick="append('9')">9</button>
+    <button onclick="append('**')">xʸ</button>
+    <button onclick="factorial()">x!</button>
+
+    <button onclick="append('4')">4</button>
+    <button onclick="append('5')">5</button>
+    <button onclick="append('6')">6</button>
+    <button onclick="append('Math.sqrt(')">√</button>
+    <button onclick="append('Math.random()')">rand</button>
+
+    <button onclick="append('1')">1</button>
+    <button onclick="append('2')">2</button>
+    <button onclick="append('3')">3</button>
+    <button onclick="append('.')">.</button>
+    <button class="operator" onclick="calculate()">=</button>
+
+    <button class="wide" onclick="append('0')">0</button>
+    <button onclick="memoryAdd()">M+</button>
+    <button onclick="memoryRecall()">MR</button>
+    <button onclick="memoryClear()">MC</button>
+  </div>
+
+  <footer>
+    © <span id="currentYear"></span> Perfectly Practical English
+  </footer>
+</div>
+
+<script>
+  document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+
+<script>
+let display = document.getElementById("display");
+let modeDisplay = document.getElementById("mode");
+let expression = "";
+let memory = 0;
+let isDegree = true;
+
+function append(value){
+  expression += value;
+  display.textContent = expression;
+}
+
+function clearDisplay(){
+  expression = "";
+  display.textContent = "0";
+}
+
+function backspace(){
+  expression = expression.slice(0,-1);
+  display.textContent = expression || "0";
+}
+
+function toggleMode(){
+  isDegree = !isDegree;
+  modeDisplay.textContent = isDegree ? "DEG" : "RAD";
+}
+
+function calculate(){
+  try{
+    let exp = expression;
+    if(isDegree){
+      exp = exp.replace(/Math\.(sin|cos|tan)\(/g,
+        (match,fn)=>`Math.${fn}((Math.PI/180)*`);
+    }
+    let result = eval(exp);
+    display.textContent = result;
+    expression = result.toString();
+  } catch{
+    display.textContent = "Error";
+    expression = "";
+  }
+}
+
+function factorial(){
+  let num = parseFloat(expression);
+  if(num < 0) return display.textContent="Error";
+  let result = 1;
+  for(let i=1;i<=num;i++) result*=i;
+  display.textContent = result;
+  expression = result.toString();
+}
+
+function memoryAdd(){
+  memory += parseFloat(display.textContent)||0;
+}
+
+function memoryRecall(){
+  expression += memory;
+  display.textContent = expression;
+}
+
+function memoryClear(){
+  memory = 0;
+}
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+
+<script>
+
+(function(){
+
+/* =========================
+   RAW INSTRUCTIONS TEXT
+========================= */
+
+const RAW_TEXT = `
+How to use this page…
+
+• Overview: Perform standard and scientific mathematical calculations using an interactive on-screen keypad and display screen.
+• Mode Toggle: Click the DEG/RAD button to toggle angle measurements between degrees and radians, indicated by the mode display in the top right.
+• Entering Values and Operations: Click number buttons (0 through 9), decimal points (.), and operator buttons (+, −, ×, ÷, %) to build mathematical expressions.
+• Scientific Functions: Click advanced function buttons such as sin, cos, tan, log, ln, inverse trig functions, square roots (√), constants (π, e), factorials (x!), powers (xʸ), or random numbers (rand).
+• Calculation Execution: Click the = operator button to compute and display the final result.
+• Clearing and Editing: Click AC to clear the entire display or ⌫ (backspace) to delete the last entered character.
+• Memory Operations: Use M+ to add current values to memory, MR to recall stored memory into the expression, and MC to clear memory.
+
+`;
+
+
+/* =========================
+   RAW TEXT PARSER
+========================= */
+
+function parseRawInstructions(text){
+
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+
+  lines.forEach(line => {
+
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
+
+    html.push(`<p>${line}</p>`);
+  });
+
+  return html.join("");
+}
+
+
+/* =========================
+   CREATE STYLE
+========================= */
+
+const style = document.createElement("style");
+
+style.textContent = `
+#instructionsBtn{
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  background: #2e8b57;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+#instructionsBtn:hover{
+  background: #257047;
+  transform: scale(1.05);
+}
+
+#instructionsRoot{
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+}
+
+#instructionsBackdrop{
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#instructionsModal{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid #cfe2f7;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+#instructionsHeader{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex: 0 0 auto;
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+#instructionsBack{
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  height: auto;
+  width: auto;
+}
+
+#instructionsBack:hover{
+  background-color: #eef6ff;
+}
+
+#instructionsContent{
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  flex: 1 1 auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #333;
+}
+
+#instructionsContent::-webkit-scrollbar{
+  display: none;
+}
+
+#instructionsContent h3{
+  margin-top: 10px;
+  margin-bottom: 4px;
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+#instructionsContent p{
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+#instructionsContent hr{
+  margin: 12px 0;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+`;
+
+document.head.appendChild(style);
+
+
+/* =========================
+   CREATE BUTTON
+========================= */
+
+const btn = document.createElement("button");
+btn.id = "instructionsBtn";
+btn.innerHTML = "?";
+btn.setAttribute("aria-label", "Instructions");
+
+document.body.appendChild(btn);
+
+
+/* =========================
+   CREATE MODAL
+========================= */
+
+const root = document.createElement("div");
+root.id = "instructionsRoot";
+
+root.innerHTML = `
+<div id="instructionsBackdrop"></div>
+
+<div id="instructionsModal">
+
+  <div id="instructionsHeader">
+    <span>Instructions</span>
+    <button id="instructionsBack" type="button">✕</button>
+  </div>
+
+  <div id="instructionsContent">
+    ${parseRawInstructions(RAW_TEXT)}
+  </div>
+
+</div>
+`;
+
+document.body.appendChild(root);
+
+
+/* =========================
+   SCROLL LOCK
+========================= */
+
+const modalContent = document.getElementById("instructionsContent");
+
+modalContent.addEventListener("wheel", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+modalContent.addEventListener("touchmove", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+
+/* =========================
+   OPEN / CLOSE
+========================= */
+
+function openModal(){
+  root.style.display = "block";
+  document.body.style.overflow = "hidden";
+  document.documentElement.style.overflow = "hidden";
+}
+
+function closeModal(){
+  root.style.display = "none";
+  document.body.style.overflow = "";
+  document.documentElement.style.overflow = "";
+}
+
+btn.onclick = openModal;
+
+document.getElementById("instructionsBack").onclick = closeModal;
+document.getElementById("instructionsBackdrop").onclick = closeModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key === "Escape") closeModal();
+});
+
+})();
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+</body>
+</html>

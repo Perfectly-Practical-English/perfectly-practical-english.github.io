@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Parts of Speech</title>
+<script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<!-- SUPABASE LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg: #f7fdfb;
+  --blue: #1976d2;
+  --blue-hover: #1565c0;
+  --input-border-blue: #cfe2f7;
+  --section-item-default: #eaf6ff;
+  --section-item-hover: #d0e8ff;
+  --border-thickness: 10px;
+
+  /* STANDARD TYPOGRAPHY */
+  --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: monospace;
+
+  --size-main: 16px;
+  --size-control: 12px;
+  --size-small: 11px;
+  --size-label: 14px;
+  --size-title: 18px;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  height: 100%;
+  background: var(--bg);
+  font-family: var(--font-main);
+  color: #222;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  padding: 50px;
+  padding-left: calc(50px + env(safe-area-inset-left));
+  padding-right: calc(50px + env(safe-area-inset-right));
+  padding-bottom: calc(50px + env(safe-area-inset-bottom));
+}
+
+.container {
+  width: 360px;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 10px 0 12px;
+}
+
+@media (max-width: 700px) {
+  body {
+    padding: 8px;
+    padding-left: max(8px, env(safe-area-inset-left));
+    padding-right: max(8px, env(safe-area-inset-right));
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+
+  .container {
+    width: 360px;
+    max-width: 100%;
+    min-width: 0;
+    margin: 0 auto;
+    padding: 10px 0 8px;
+  }
+}
+
+.header {
+  text-align: center;
+  font-size: 20px;
+  color: var(--blue);
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+
+/* =========================================================
+   TOP NAVIGATION BAR
+   ========================================================= */
+
+.top-bar-container {
+  width: 360px;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 3px;
+}
+
+.top-bar-row-1 {
+  display: flex;
+  flex-direction: row;
+  gap: 3px;
+  box-sizing: border-box;
+  margin-bottom: 0;
+  width: 100%;
+}
+
+#id {
+  flex: 1;
+  width: 100%;
+  height: 28px;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
+  color: #000 !important;
+}
+
+#id::placeholder {
+  color: var(--blue) !important;
+  opacity: 1 !important;
+}
+
+/* ===== TOP BAR BUTTONS (FLUSH LEFT) ===== */
+
+.top-bar-container button,
+.action-buttons button {
+  flex: 1;
+  width: 100%;
+  height: 28px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0 6px;
+  text-align: center;
+  justify-content: center;
+  box-sizing: border-box;
+  white-space: normal;
+  line-height: 1.1;
+  overflow: visible;
+  text-overflow: clip;
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 400;
+  background: linear-gradient(145deg, #ffffff, var(--section-item-default));
+  color: var(--blue);
+  cursor: pointer;
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+.top-bar-container button:hover:not(:disabled),
+.action-buttons button:hover {
+  background: linear-gradient(145deg, #ffffff, var(--section-item-hover));
+  border-color: var(--blue);
+}
+
+input[type="text"] {
+  height: 28px;
+  padding: 0 8px;
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  font-family: var(--font-main);
+  font-size: var(--size-control);
+  font-weight: 400;
+  background: linear-gradient(145deg, #ffffff, var(--section-item-default));
+  color: var(--blue);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+input[type="text"]:hover {
+  background: linear-gradient(145deg, #ffffff, var(--section-item-hover));
+  border-color: var(--blue);
+}
+
+button:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  border-color: var(--input-border-blue);
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   TEXT PANEL + QUIZ AREA
+   ========================================================= */
+
+.quiz-container {
+  display: none;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  padding: 14px;
+  background: #fff;
+  margin-top: 6px;
+}
+
+.exercise-container {
+  font-family: var(--font-main);
+  font-size: var(--size-main);
+  line-height: 1.6;
+  color: #333;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+  margin-bottom: 12px;
+}
+
+.sentence {
+  display: inline-block;
+  margin: 0;
+  font-weight: 400;
+}
+
+/* =========================================================
+   STREAMLINED SCOREBOARD
+   ========================================================= */
+
+.scoreboard {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  background: #fff;
+  border-radius: 6px;
+  padding: 8px;
+  margin-top: 8px;
+  border: 1px solid var(--input-border-blue);
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#result {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  margin: 0;
+  padding: 0;
+}
+
+.action-buttons {
+  margin-top: 6px;
+  display: flex;
+  gap: 6px;
+}
+
+.action-buttons button {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* =========================================================
+   GREEN BORDER
+   ========================================================= */
+
+#green-border {
+  position: fixed;
+  inset: 0;
+  border: 10px solid #39FF14;
+  box-sizing: border-box;
+  z-index: 9999;
+  pointer-events: none;
+  background: transparent;
+}
+
+/* =========================================================
+   SECTION SELECTION MODAL
+   ========================================================= */
+
+#sectionModalRoot {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 99999;
+}
+
+#sectionModalBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#sectionModalContent {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--input-border-blue);
+  font-family: var(--font-main);
+}
+
+#sectionModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex: 0 0 auto;
+  font-family: var(--font-main);
+  font-size: var(--size-title);
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+#sectionModalClose {
+  background: none;
+  border: none;
+  color: var(--blue);
+  font-family: var(--font-main);
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  width: auto;
+  height: auto;
+}
+
+#sectionModalClose:hover {
+  background-color: #eef6ff;
+}
+
+#sectionListContainer {
+  padding: 0;
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#sectionListContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.section-item {
+  height: 28px;
+  padding: 0 6px;
+  margin-bottom: 6px;
+  background: var(--section-item-default);
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-main);
+  font-size: var(--size-small);
+  color: var(--blue);
+  font-weight: 400;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  text-align: left;
+  transition: 0.12s;
+}
+
+.section-item:hover {
+  background: var(--section-item-hover);
+  border-color: var(--blue);
+}
+
+.section-item.selected {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+/* =========================================================
+   INSTRUCTIONS MODAL
+   ========================================================= */
+
+#instructionsRoot {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 6000;
+}
+
+#instructionsBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#instructionsModal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--input-border-blue);
+  font-family: var(--font-main);
+}
+
+#instructionsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex: 0 0 auto;
+  font-family: var(--font-main);
+  font-size: var(--size-title);
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+#instructionsTitle {
+  color: var(--blue);
+  font-weight: 700;
+  font-size: var(--size-title);
+}
+
+#instructionsBack {
+  background: none;
+  border: none;
+  color: var(--blue);
+  font-family: var(--font-main);
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  width: auto;
+  height: auto;
+}
+
+#instructionsBack:hover {
+  background-color: #eef6ff;
+}
+
+#instructionsContent {
+  padding: 0;
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  font-family: var(--font-main);
+  font-size: var(--size-label);
+  line-height: 1.5;
+  font-weight: 400;
+  color: #333;
+}
+
+#instructionsContent::-webkit-scrollbar {
+  display: none;
+}
+
+#instructionsContent h3 {
+  margin-top: 10px;
+  margin-bottom: 4px;
+  font-family: var(--font-main);
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+#instructionsContent p {
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+#instructionsContent hr {
+  margin: 12px 0;
+}
+
+/* =========================================================
+   STATES & HIGHLIGHTS
+   ========================================================= */
+
+.word {
+  cursor: pointer;
+  color: inherit;
+  font-weight: inherit;
+  display: inline-block;
+  padding: 0 2px;
+  border-radius: 4px;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.word:hover {
+  background-color: rgba(26, 115, 232, 0.2);
+}
+
+.word.selected-word {
+  background-color: rgba(25, 118, 210, 0.25);
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.35);
+}
+
+/* =========================================================
+   COPYRIGHT FOOTER
+   ========================================================= */
+
+#copyrightSection {
+  width: 100%;
+  min-width: 0;
+  margin: 4px 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 10px;
+  line-height: 1.4;
+  font-weight: 400;
+  text-align: left;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">Signal Words</div>
+
+  <div class="top-bar-container">
+    <div class="top-bar-row-1">
+      <input type="text" id="id" placeholder="ID">
+      <button id="sectionSelectorBtn" type="button">Select a section.</button>
+      <button id="instructionsBtn" type="button">Instructions</button>
+      <button id="grammarsubmit" type="button">Submit</button>
+    </div>
+  </div>
+
+  <!-- GAME / EXERCISE AREA -->
+  <div class="quiz-container">
+    <div id="exercises"></div>
+
+    <!-- STREAMLINED SCOREBOARD -->
+    <div class="scoreboard" id="scoreboardContainer">
+      <div id="result"></div>
+
+      <div class="action-buttons" id="scoreboardBtns" style="display: none;">
+        <button id="grammarCopyBtn" type="button">Copy</button>
+        <button id="grammarDownloadTxtBtn" type="button">↓TXT</button>
+        <button id="grammarDownloadPngBtn" type="button">↓PNG</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Copyright Footer Section -->
+  <div id="copyrightSection">
+    <div class="footer-note copyright">
+      &copy; <span id="copyrightYear"></span> Perfectly Practical English
+    </div>
+  </div>
+</div>
+
+<script>
+document.getElementById('copyrightYear').textContent = new Date().getFullYear();
+</script>
+
+<!-- Section Selection Modal -->
+<div id="sectionModalRoot">
+  <div id="sectionModalBackdrop"></div>
+  <div id="sectionModalContent">
+    <div id="sectionModalHeader">
+      <span>Select a Category</span>
+      <button id="sectionModalClose" type="button">✕</button>
+    </div>
+    <div id="sectionListContainer"></div>
+  </div>
+</div>
+
+<!-- Instructions Modal -->
+<div id="instructionsRoot">
+  <div id="instructionsBackdrop"></div>
+  <div id="instructionsModal">
+    <div id="instructionsHeader">
+      <span id="instructionsTitle">Instructions</span>
+      <button id="instructionsBack" type="button">✕</button>
+    </div>
+    <div id="instructionsContent"></div>
+  </div>
+</div>
+
+<script>
+async function resolveRaw(source) {
+  if (typeof source === "string" && !source.includes("\n")) {
+    try {
+      const res = await fetch(source, { cache: "no-store" });
+      if (res.ok) return await res.text();
+    } catch {}
+  }
+  return source;
+}
+</script>
+
+<script>
+// ---------------------- Signal Words ----------------------
+const rawExercisesSource = `
+~Time ⏰
+I arrived |on| Monday.
+The meeting starts |at| 9 AM.
+She was born |in| 2005.
+Finish your homework |before| dinner.
+We can eat |after| the movie.
+He has lived here |since| 2010.
+Stay here |until| I return.
+Don’t talk |during| the lecture.
+I have waited |for| an hour.
+I am leaving |now|.
+I saw him |yesterday|.
+I will call you |today|.
+We will meet |tomorrow|.
+Let’s meet |later|.
+He left, and |then| she came.
+Remember |when| we visited the park?
+She read a book |while| waiting.
+I met him only |once|.
+
+~Addition ➕
+I like apples |and| oranges.
+She sings |also| dances.
+I want juice |too|.
+I came |with| my brother.
+He bought pizza |plus| salad.
+He is smart |as well as| kind.
+They are |not only| talented |but also| hardworking.
+We need |both| sugar |and| flour.
+
+~Cause / Effect 🔗
+I stayed home |because| it was raining.
+She forgot her keys, |so| she was locked out.
+I was late |since| the train was delayed.
+He missed school |because of| illness.
+The streets flooded |due to| heavy rain.
+She studied hard; |as a result|, she passed.
+He didn’t apologize; |therefore|, we are upset.
+That’s why| he was absent.
+
+~Comparison / Similarity / Difference ⚖️
+She runs |like| a professional.
+He is |as| tall |as| his brother.
+This bag is |as...as| that one.
+He is taller |than| I am.
+This result is |similar to| the previous one.
+Your answer is |different from| mine.
+She has |more than| enough money.
+He has |less than| five books.
+This is |the most| exciting part.
+|Just as...so| he finished on time.
+He loves tea, |whereas| she prefers coffee.
+This is true |in contrast to| the last result.
+
+~Contrast / Opposition 🎭
+I like coffee, |but| he prefers tea.
+|Although| it was raining, we went outside.
+|Though| tired, she finished her homework.
+|Even though| it’s late, he continues working.
+He tried hard; |however|, he failed.
+She is young, |yet| very responsible.
+He |still| wants to play.
+|Despite| the warnings, they went out.
+Go home |instead| of staying.
+I like pizza, |whereas| he likes pasta.
+She works quietly, |while| he talks loudly.
+|On the other hand|, I can help you tomorrow.
+
+~Frequency 〰️
+I |always| eat breakfast.
+She |usually| wakes up early.
+I |often| go to the gym.
+He |sometimes| forgets his keys.
+They |occasionally| visit us.
+I |rarely| watch TV.
+She |never| drinks coffee.
+I jog |every day|.
+We meet |once a week|.
+He |hardly ever| comes late.
+I clean my room |from time to time|.
+
+~Possibility / Certainty 🎲
+It |maybe| rains today.
+She |probably| forgot.
+He |possibly| knows the answer.
+You |must| finish your work.
+He |might| arrive soon.
+You |may| leave early.
+She |could| win the prize.
+I |can| help you.
+This will |definitely| succeed.
+He is |certainly| the best choice.
+
+~Advice / Obligation / Permission ☝️
+You |must| complete your homework.
+You |must not| lie.
+I |have to| go to the meeting.
+You |don’t have to| come if tired.
+You |should| eat vegetables.
+You |ought to| respect your elders.
+You |had better| study now.
+I |can| borrow your book?
+You |cannot| enter here.
+He |may| join us.
+She |could| try again.
+
+~Manner 🎭
+She runs |quickly|.
+He works |slowly|.
+They painted |carefully|.
+He solved it |easily|.
+She sings |well|.
+He performed |badly|.
+He built it |with| care.
+She traveled |by| train.
+He acted |in a...way| polite.
+She did it |as| instructed.
+
+~Place / Location 📍
+The cat is hiding |in| the box.
+Put it |on| the table.
+Meet me |at| the park.
+The ball rolled |under| the chair.
+Look |above| the window.
+The restaurant is |between| the bank and the school.
+The shop is |near| my house.
+Stand |next to| me.
+Come |here|.
+He went |there|.
+They went |everywhere|.
+You can sit |anywhere|.
+
+~Condition 🌧️
+I’ll go |if| it doesn’t rain.
+You can’t leave |unless| you finish.
+Take an umbrella |in case| it rains.
+You can join |on condition that| you behave.
+
+~Emphasis / Focus 🎯
+I want |only| one.
+I |just| finished.
+He is |even| smarter than me.
+She is |especially| talented.
+I like this |mainly| for its color.
+This is |particularly| important.
+
+~Questions ❓
+|How| did you do that?
+|When| is the meeting?
+|Where| is the library?
+|Why| are you late?
+
+~Relative Words 👨‍👩‍👧‍👦
+I remember the day |when| we met.
+The place |where| I was born is beautiful.
+Do you know the reason |why| he left?
+Show me |how| you did it.
+
+~Direction / Movement 🧭
+Walk |to| the store.
+He came |from| the city.
+Move |toward| the light.
+Keep away |from| danger.
+Climb |up| the hill.
+Slide |down| the slope.
+Step |forward|.
+Step |back|.
+
+~Affirmative / Negative ✔️❌
+|Yes|, I agree.
+|No|, I don’t want that.
+`;
+
+(async function initQuiz() {
+  const rawExercises = await resolveRaw(rawExercisesSource);
+
+  function parseRawExerciseSections(raw) {
+    const sections = [];
+    let current = null;
+    raw.split(/\r?\n/).forEach(line => {
+      const text = line.trim();
+      if (!text) return;
+      if (text[0] === "~") {
+        current = { name: text.slice(1).trim(), exercises: [] };
+        sections.push(current);
+        return;
+      }
+      if (current) current.exercises.push(text);
+    });
+    return sections;
+  }
+
+  window.RAW_SECTIONS = parseRawExerciseSections(rawExercises);
+
+  const btn = document.getElementById("sectionSelectorBtn");
+  const modalRoot = document.getElementById("sectionModalRoot");
+  const modalBackdrop = document.getElementById("sectionModalBackdrop");
+  const modalClose = document.getElementById("sectionModalClose");
+  const listContainer = document.getElementById("sectionListContainer");
+
+  function openModal() {
+    listContainer.innerHTML = "";
+    if (window.RAW_SECTIONS.length === 0) {
+      listContainer.innerHTML = "<div style='padding:10px; text-align:center; color:#666;'>No categories found.</div>";
+    } else {
+      window.RAW_SECTIONS.forEach((sec, idx) => {
+        const item = document.createElement("div");
+        item.className = "section-item" + (idx === window.SCRAMBLE_INDEX ? " selected" : "");
+        item.textContent = sec.name;
+        item.addEventListener("click", () => {
+          window.SCRAMBLE_INDEX = idx;
+          btn.textContent = sec.name;
+          closeModal();
+          window.startPOSSection();
+        });
+        listContainer.appendChild(item);
+      });
+    }
+    modalRoot.style.display = "block";
+  }
+
+  function closeModal() {
+    modalRoot.style.display = "none";
+  }
+
+  if (btn) btn.addEventListener("click", openModal);
+  if (modalClose) modalClose.addEventListener("click", closeModal);
+  if (modalBackdrop) modalBackdrop.addEventListener("click", closeModal);
+
+  window.addEventListener("DOMContentLoaded", () => {
+    btn.textContent = "Select a section.";
+  });
+
+  function parseExercise(exerciseText, index) {
+    let prompt = `${index}.`;
+    let sentence = exerciseText;
+
+    if (exerciseText.includes(' - ')) {
+      const parts = exerciseText.split(' - ');
+      prompt = `${index}. ${parts[0]}`;
+      sentence = parts.slice(1).join(' - ');
+    }
+
+    if (!sentence) sentence = exerciseText;
+
+    const tokens = sentence.match(/\|\s*[^|]+\s*\||\s+|[A-Za-z0-9']+|[.,!?;]/g) || [];
+
+    const parsedSentence = tokens.map(token => {
+      if (token.startsWith('|') && token.endsWith('|')) {
+        const clean = token.slice(1, -1);
+        return `<span class="word" data-correct="true">${clean}</span>`;
+      }
+      return token.trim() ? `<span>${token}</span>` : token;
+    }).join('');
+
+    return `${prompt} ${parsedSentence}`;
+  }
+
+  function renderExercises() {
+    const exercisesContainer = document.getElementById('exercises');
+    if (!window.quizExercises || window.quizExercises.length === 0) {
+      exercisesContainer.innerHTML = "";
+      return;
+    }
+
+    exercisesContainer.innerHTML = "";
+    const section = window.RAW_SECTIONS[window.SCRAMBLE_INDEX];
+    if (!section) return;
+
+    const header = document.createElement('div');
+    header.className = 'section-header';
+    header.textContent = section.name;
+    header.style.fontWeight = 'bold';
+    header.style.marginBottom = '8px';
+    header.style.color = '#1976d2';
+    exercisesContainer.appendChild(header);
+
+    window.quizExercises.forEach((exercise, index) => {
+      const parsedExercise = parseExercise(exercise, index + 1);
+      const exerciseContainer = document.createElement('div');
+      exerciseContainer.classList.add('exercise-container');
+
+      const sentence = document.createElement('div');
+      sentence.classList.add('sentence');
+      sentence.innerHTML = parsedExercise;
+
+      exerciseContainer.appendChild(sentence);
+      exercisesContainer.appendChild(exerciseContainer);
+    });
+
+    document.querySelectorAll('.word').forEach(word => {
+      word.addEventListener('click', handleWordClick);
+    });
+  }
+
+  window.startPOSSection = function () {
+    const section = window.RAW_SECTIONS?.[window.SCRAMBLE_INDEX];
+    if (!section) return;
+
+    document.querySelector('.quiz-container').style.display = 'block';
+
+    window.quizExercises = section.exercises;
+    window.currentExerciseIndex = 0;
+    window.score = 0;
+
+    renderExercises();
+
+    window.correctAnswers = 0;
+    window.scoreSubmitted = false;
+    window.pipedWordsCount = document.querySelectorAll('#exercises .word[data-correct="true"]').length;
+  };
+
+  function handleWordClick(event) {
+    const word = event.target;
+    if (window.scoreSubmitted) return;
+    if (!word.classList.contains('word')) return;
+    word.classList.toggle('selected-word');
+  }
+
+  function getScoreboardFilename(extension) {
+    const resultEl = document.getElementById('result');
+    if (resultEl && resultEl.textContent.trim()) {
+      let firstLine = resultEl.textContent.split('\n')[0];
+      let baseName = firstLine
+        .replace(/\|/g, '_')
+        .replace(/\s+/g, '_')
+        .replace(/[:\/]/g, '-');
+      return baseName + '.' + extension;
+    }
+    return 'scoreboard.' + extension;
+  }
+
+  // Submission & Student Matching
+  const idInput = document.getElementById('id');
+  const submitBtn = document.getElementById('grammarsubmit');
+
+  submitBtn.addEventListener('click', function () {
+    if (window.SCRAMBLE_INDEX === undefined || window.RAW_SECTIONS[window.SCRAMBLE_INDEX] == null) {
+      alert('Please select a section first.');
+      return;
+    }
+
+    const id = idInput.value.trim() || 'Guest';
+    const studentName = window.resolveStudentNameFromId ? window.resolveStudentNameFromId(id) : (id ? "Guest" : "Guest");
+
+    const totalPiped = document.querySelectorAll('#exercises .word[data-correct="true"]').length;
+    const selectedCorrect = document.querySelectorAll('#exercises .word[data-correct="true"].selected-word').length;
+
+    window.correctAnswers = selectedCorrect;
+    window.pipedWordsCount = totalPiped;
+    window.scoreSubmitted = true;
+
+    const percentage = totalPiped > 0 ? Math.round((selectedCorrect / totalPiped) * 100) : 0;
+    const percentageStr = percentage + '%';
+
+    const now = new Date();
+    const pad = n => n.toString().padStart(2,'0');
+
+    const dateStr = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+    const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+    let currentFile = window.location.pathname.split('/').pop() || 'unknown.html';
+    currentFile = currentFile.split('?')[0].split('#')[0];
+    const filenameWithoutExt = currentFile.replace(/\.[^/.]+$/, "");
+
+    const sectionName = window.RAW_SECTIONS[window.SCRAMBLE_INDEX]?.name || 'Signal Words';
+
+    const resultText = `${filenameWithoutExt}|${sectionName}|${studentName}|${id}|${dateStr}|${timeStr}|${selectedCorrect}/${totalPiped}|${percentageStr}`;
+
+    document.getElementById('result').textContent = resultText;
+    document.getElementById('scoreboardContainer').style.display = 'block';
+    document.getElementById('scoreboardBtns').style.display = 'flex';
+
+    if (window.saveResult) {
+      window.saveResult(resultText);
+    }
+  });
+
+  document.getElementById('grammarCopyBtn').addEventListener('click', () => {
+    navigator.clipboard.writeText(document.getElementById('result').textContent).then(() => alert('Score copied to clipboard!'));
+  });
+
+  document.getElementById('grammarDownloadTxtBtn').addEventListener('click', () => {
+    const textContent = document.getElementById('result').textContent;
+    const downloadFileName = getScoreboardFilename('txt');
+    const blob = new Blob([textContent], { type: 'text/plain' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = downloadFileName;
+    link.click();
+  });
+
+  document.getElementById('grammarDownloadPngBtn').addEventListener('click', () => {
+    const resultEl = document.getElementById('result');
+    const downloadFileName = getScoreboardFilename('png');
+
+    const wrapper = document.createElement('div');
+    wrapper.style.background = '#ffffff';
+    wrapper.style.padding = '10px';
+    wrapper.style.display = 'inline-block';
+    wrapper.style.fontFamily = getComputedStyle(resultEl).fontFamily;
+    wrapper.style.fontSize = getComputedStyle(resultEl).fontSize;
+    wrapper.style.color = getComputedStyle(resultEl).color;
+
+    const clone = resultEl.cloneNode(true);
+    wrapper.appendChild(clone);
+    document.body.appendChild(wrapper);
+
+    html2canvas(wrapper, { backgroundColor: '#ffffff' }).then(canvas => {
+      const link = document.createElement('a');
+      link.href = canvas.toDataURL('image/png');
+      link.download = downloadFileName;
+      link.click();
+      document.body.removeChild(wrapper);
+    });
+  });
+})();
+</script>
+
+<!-- Instructions Modal Script -->
+<script>
+(function(){
+const RAW_TEXT = `
+How to use this page...
+• Enter your ID number into the ID field — Auto: Your name will automatically populate if registered, and entering your ID unlocks score tracking.
+• Click the Select a section button to choose a signal word category from the pop-up menu.
+• Click the Instructions button anytime to view the gameplay guide.
+• Click on the target signal words within the sentences to select or deselect them.
+• Click Submit to view your final score and percentage — Auto: Your results are compiled into a scoreboard record and logged automatically to the database.
+• Use the Copy, TXT, or PNG buttons to download or copy your score record.
+`;
+
+function parseRawInstructions(text){
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+  lines.forEach(line => {
+    if(line === "---"){ html.push(`<hr>`); return; }
+    if(/^\d+\./.test(line)){ html.push(`<p>${line}</p>`); return; }
+    if(!/[.!?:]$/.test(line)){ html.push(`<h3>${line}</h3>`); return; }
+    html.push(`<p>${line}</p>`);
+  });
+  return html.join("");
+}
+
+const instructionsContent = document.getElementById("instructionsContent");
+if(instructionsContent) {
+  instructionsContent.innerHTML = parseRawInstructions(RAW_TEXT);
+  instructionsContent.addEventListener("wheel", e=>{ e.stopPropagation(); },{passive:false});
+  instructionsContent.addEventListener("touchmove", e=>{ e.stopPropagation(); },{passive:false});
+}
+
+const root = document.getElementById("instructionsRoot");
+const btn = document.getElementById("instructionsBtn");
+
+function openModal(){
+  if(root) root.style.display="block";
+  document.body.style.overflow="hidden";
+  document.documentElement.style.overflow="hidden";
+}
+
+function closeModal(){
+  if(root) root.style.display="none";
+  document.body.style.overflow="";
+  document.documentElement.style.overflow="";
+}
+
+if(btn) btn.onclick = openModal;
+const backBtn = document.getElementById("instructionsBack");
+if(backBtn) backBtn.onclick = closeModal;
+const backdrop = document.getElementById("instructionsBackdrop");
+if(backdrop) backdrop.onclick = closeModal;
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
+})();
+</script>
+
+<!-- STUDENT DATA REGISTRY MODULE -->
+<script>
+(function() {
+    'use strict';
+    const RAW_STUDENT_DATA = `
+        55555|David
+        55551|Matthew
+        12345|Sarah
+    `;
+    const studentDatabase = new Map();
+    RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+        const [id, name] = line.split('|').map(s => s ? s.trim() : '');
+        if (id && name) studentDatabase.set(id, name);
+    });
+
+    window.resolveStudentNameFromId = function(idInput) {
+        if (!idInput) return "Guest";
+        const trimmed = String(idInput).trim();
+        if (/^(x|g|guest)$/i.test(trimmed)) {
+            return "Guest";
+        }
+        return studentDatabase.get(trimmed) || "Guest";
+    };
+})();
+</script>
+
+<!-- SUPABASE CLIENT & RESULT SAVER -->
+<script>
+    const supabaseClient = window.supabase?.createClient(
+      'https://etwwriloppklhhkmswpr.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+    );
+    
+    let lastUploadedScore = null;
+    
+    window.saveResult = async function saveResult(text) {
+      if (!supabaseClient) return;
+      let cleaned;
+      try {
+        cleaned = (typeof text === "string") ? text : JSON.stringify(text);
+        cleaned = cleaned.replace(/\s+/g, " ").trim();
+      } catch (err) {
+        return;
+      }
+    
+      if (!cleaned || cleaned === lastUploadedScore) return;
+      lastUploadedScore = cleaned;
+    
+      await supabaseClient
+        .from("scoreboard_raw")
+        .insert([{ result_text: cleaned }]);
+    };
+    </script>
+
+<!-- Neon Green Border -->
+<script>
+const borderDiv = document.createElement("div");
+borderDiv.id = "green-border";
+document.body.appendChild(borderDiv);
+</script>
+
+</body>
+</html>

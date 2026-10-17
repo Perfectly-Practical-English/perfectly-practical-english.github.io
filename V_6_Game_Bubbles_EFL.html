@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Word Bubbles</title>
+<style>
+:root {
+  --bg: #f7fdfb;
+  --blue: #1976d2;
+  --blue-hover: #1565c0;
+  --input-border-blue: #cfe2f7;
+  --section-item-default: #eaf6ff;
+  --section-item-hover: #d0e8ff;
+  --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --size-control: 12px;
+  --size-small: 11px;
+}
+
+/* ===== GLOBAL RESET ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-main);
+  background: linear-gradient(to bottom, #a0e0ff 0%, #ffffff 95%);
+  user-select: none;
+  padding: 30px;
+}
+
+/* ===== OVERLAY ===== */
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background-color: #d0e7f9;
+  z-index: 9998;
+}
+
+/* ===== UNIFIED CONTROL STYLES (Top Bar & Score Buttons) ===== */
+.top-bar {  
+  display: flex;  
+  gap: 3px;  
+  margin: 0 auto 3px auto;  
+  max-width: 600px;
+  flex-wrap: nowrap;  
+  align-items: center;  
+}
+
+.top-bar input[type="text"],
+.top-bar button,
+#sectionSelectorBtn,
+#scoreButtons button {
+  height: 28px;
+  padding: 0 8px;
+  font-family: var(--font-main);
+  font-size: var(--size-control);
+  font-weight: 400;
+  background: linear-gradient(145deg, #ffffff, var(--section-item-default));
+  color: var(--blue);
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: 0.12s;
+  white-space: nowrap;
+}
+
+.top-bar input[type="text"] {
+  background: #fff;
+  color: #000;
+  flex: 1 1 25%;
+  cursor: text;
+  text-align: left !important;
+  justify-content: flex-start !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.top-bar input[type="text"]::placeholder {
+  color: var(--blue);
+  opacity: 1;
+  text-align: left;
+}
+
+.top-bar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center !important;
+  text-align: center !important;
+  overflow: visible !important;
+  flex: 1 1 25%;
+}
+
+.top-bar #sectionSelectorBtn {  
+  flex: 1 1 25%;  
+  min-width: 0;  
+  text-align: center !important;
+  justify-content: center !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+  display: inline-flex;
+  align-items: center;
+}
+
+.top-bar button:hover:not(:disabled),
+#sectionSelectorBtn:hover,
+#scoreButtons button:hover {
+  background: linear-gradient(145deg, #ffffff, var(--section-item-hover));
+  border-color: var(--blue);
+}
+
+.top-bar button:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  border-color: var(--input-border-blue);
+  cursor: not-allowed;
+}
+
+/* ===== MODALS (SECTION & INSTRUCTIONS) ===== */
+#sectionModalRoot,
+#instructionsRoot {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 99999;
+}
+
+#sectionModalBackdrop,
+#instructionsBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#sectionModalContent,
+#instructionsModal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--input-border-blue);
+  font-family: var(--font-main);
+}
+
+#sectionModalHeader,
+#instructionsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex: 0 0 auto;
+  font-family: var(--font-main);
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+#instructionsTitle {
+  color: var(--blue);
+  font-weight: 700;
+  font-size: 18px;
+}
+
+#sectionModalClose,
+#instructionsBack {
+  background: none;
+  border: none;
+  color: var(--blue);
+  font-family: var(--font-main);
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  width: auto;
+  height: auto;
+}
+
+#sectionModalClose:hover,
+#instructionsBack:hover {
+  background-color: #eef6ff;
+}
+
+#sectionListContainer,
+#instructionsContent {
+  padding: 0;
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  font-family: var(--font-main);
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #333;
+}
+
+#sectionListContainer::-webkit-scrollbar,
+#instructionsContent::-webkit-scrollbar {
+  display: none;
+}
+
+.section-item {
+  height: 28px;
+  padding: 0 6px;
+  margin-bottom: 6px;
+  background: var(--section-item-default);
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-main);
+  font-size: 11px;
+  color: var(--blue);
+  font-weight: 400;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  transition: 0.12s;
+}
+
+.section-item:hover {
+  background: var(--section-item-hover);
+  border-color: var(--blue);
+}
+
+.section-item.selected {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+#instructionsContent h3 {
+  margin-top: 10px;
+  margin-bottom: 4px;
+  font-family: var(--font-main);
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+#instructionsContent p {
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+#instructionsContent hr {
+  margin: 12px 0;
+  border: none;
+  border-top: 1px solid var(--input-border-blue);
+}
+
+/* ===== GAME AREA ===== */
+#gameArea {
+  position: relative;
+  margin: 0 auto 3px auto;
+  height: 240px;
+  width: 100%;
+  max-width: 600px;
+  border-radius: 6px;
+  overflow: hidden;
+  display: block;
+}
+
+/* ===== SCOREBOARD & BUTTONS ===== */
+#scoreboardContainer {
+  display: none;
+  margin: 12px auto 0 auto;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 14px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  max-width: 600px;
+  text-align: center;
+  background: #fff;
+  padding: 12px;
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+}
+
+#scoreButtons {
+  margin: 6px auto 0 auto;
+  display: none;
+  gap: 6px;
+  max-width: 600px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+#scoreButtons button {
+  height: 28px;
+  padding: 0 8px;
+  font-size: var(--size-small);
+}
+
+/* ===== BUBBLE STYLES ===== */
+.bubble {
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: white;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.bubble-ambient {
+  opacity: 0.5;
+}
+
+.bubble-exploding {
+  animation: popScale 0.4s forwards;
+}
+
+@keyframes popScale {
+  0%   { transform: scale(1) rotate(0deg); opacity: 1; }
+  50%  { transform: scale(1.5) rotate(180deg); opacity: 1; }
+  100% { transform: scale(2.5) rotate(720deg); opacity: 0; }
+}
+
+/* ===== INVISIBLE TYPING INPUT ===== */
+#typingInput {
+  position: fixed;
+  left: 5px;
+  top: 5px;
+  width: 24px;
+  height: 24px;
+  opacity: 0;
+  pointer-events: none;
+  background: transparent;
+  border: none;
+  z-index: 9999;
+  font-size: 18px;
+  color: black;
+  caret-color: transparent;
+}
+
+/* ===== FOOTER ===== */
+footer {
+  margin-top: 16px;
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 10px;
+  color: #666;
+  background: #f0f8ff;
+  border-radius: 6px;
+}
+
+/* ===== RESPONSIVE & TOUCH ADJUSTMENTS ===== */
+@media (max-width: 480px) {
+  body { padding: 16px; }
+  #gameArea { height: 180px; }
+}
+</style>
+</head>
+<body>
+
+<div id="overlay"></div>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <input id="studentId" type="text" placeholder="ID" autocomplete="off" />
+  <button id="sectionSelectorBtn" type="button">Select a section.</button>
+  <button id="instructionsBtn" type="button">Instructions</button>
+  <button id="submitButton">Submit</button>
+</div>
+
+<!-- SECTION SELECTION MODAL -->
+<div id="sectionModalRoot">
+  <div id="sectionModalBackdrop"></div>
+  <div id="sectionModalContent">
+    <div id="sectionModalHeader">
+      <span>Select a Category</span>
+      <button id="sectionModalClose" type="button">✕</button>
+    </div>
+    <div id="sectionListContainer"></div>
+  </div>
+</div>
+
+<!-- INSTRUCTIONS MODAL -->
+<div id="instructionsRoot">
+  <div id="instructionsBackdrop"></div>
+  <div id="instructionsModal">
+    <div id="instructionsHeader">
+      <span id="instructionsTitle">Instructions</span>
+      <button id="instructionsBack" type="button">✕</button>
+    </div>
+    <div id="instructionsContent"></div>
+  </div>
+</div>
+
+<canvas id="gameArea" tabindex="0" aria-label="Typing game area"></canvas>
+
+<!-- SCOREBOARD & BUTTONS -->
+<div id="scoreboardContainer"></div>
+<div id="scoreButtons">
+  <button id="copyBtn">Copy</button>
+  <button id="downloadTxtBtn">↓Text</button>
+  <button id="downloadPngBtn">↓PNG</button>
+</div>
+
+<audio id="popSound" src="bubble-pop-406640.mp3" preload="auto"></audio>
+<input id="typingInput" type="text" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="20" autocomplete="off" />
+
+<footer>
+<p>© <span id="currentYear"></span> Perfectly Practical English</p>
+</footer>
+
+<script>
+  document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+
+<script>
+// --- 1. Student Name & ID Matching Module ---
+(function() {
+    'use strict';
+    const RAW_STUDENT_DATA = `
+        55555|David
+        55551|Matthew
+        12345|Sarah
+    `;
+    const studentDatabase = new Map();
+    RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+        const [id, name] = line.split('|').map(s => s ? s.trim() : '');
+        if (id && name) studentDatabase.set(id, name);
+    });
+
+    window.resolveStudentNameFromId = function(idInput) {
+        if (!idInput) return "Guest";
+        const trimmed = String(idInput).trim();
+        if (/^(x|g|guest)$/i.test(trimmed)) {
+            return "Guest";
+        }
+        return studentDatabase.get(trimmed) || "Guest";
+    };
+})();
+
+(() => {
+  const canvas = document.getElementById('gameArea');
+  const ctx = canvas.getContext('2d');
+
+  function resizeCanvas() {
+    canvas.width = canvas.clientWidth;
+    canvas.height = canvas.clientHeight;
+  }
+  window.addEventListener('resize', resizeCanvas);
+  resizeCanvas();
+
+  const wordListText = `
+~Hobbies
+
+• activity 🎯 – something you do for enjoyment or interest
+pastime, action, leisure activity
+
+• achievement 🏆 – something you succeed in doing well
+success, accomplishment, goal
+
+• fun 🎉 – enjoyment or pleasure
+enjoyment, pleasure
+
+• game 🎲 – an activity with rules played for fun
+match, competition
+
+• hobby 🎨 – an activity you do in your free time
+pastime, leisure interest
+
+• interest ❤️ – something you like or care about
+liking, curiosity
+
+• practice 🔁 – time spent learning or improving a skill
+training, repetition
+
+• skill 🛠️ – an ability to do something well
+ability, talent
+
+• sport ⚽ – a physical competitive activity
+athletic activity, competition
+
+• time ⏰ – hours or moments spent doing something
+period, moment
+
+• do ▶️ – to perform an activity
+perform, carry out
+
+• enjoy 😊 – to like something and feel pleasure
+like, take pleasure in
+
+• have 📦 – to take part in or experience something
+experience, take part in
+
+• like 👍 – to feel good about something
+enjoy, appreciate
+
+• learn 📘 – to gain knowledge or a new skill
+study, pick up
+
+• make ✂️ – to create or produce something
+create, build
+
+• play 🎮 – to take part in a game or activity
+participate, take part
+
+• practice 🔄 – to repeat something to improve
+train, rehearse
+
+• try 🔍 – to attempt to do something new
+attempt, test
+
+• watch 👀 – to look at something for enjoyment
+observe, view
+
+• easy 🙂 – not difficult to do
+simple, not hard
+
+• exciting ⚡ – making you feel interested or happy
+thrilling, stimulating
+
+• fun 😄 – enjoyable and pleasant
+enjoyable, pleasant
+
+• interesting 🤔 – holding your attention
+engaging, fascinating
+
+• relaxing 🌿 – helping you feel calm
+calming, restful
+
+• carefully 🧠 – in a slow and thoughtful way
+cautiously, attentively
+
+• easily ✔️ – without difficulty
+simply, effortlessly
+
+• smoothly 🧈 – without problems or stops
+effortlessly, without trouble
+
+• well ⭐ – in a good or correct way
+properly, correctly
+
+~Helping Others
+
+• action 🤲 – something done to help someone
+step, effort
+
+• family 👨‍👩‍👧‍👦 – people you are related to
+relatives, household
+
+• friend 🧑‍🤝‍🧑 – a person you like and trust
+buddy, companion
+
+• help 🆘 – support or assistance
+aid, assistance
+
+• kindness 💖 – being friendly and caring
+compassion, generosity
+
+• moment ⏳ – a short time
+instant, short time
+
+• need ❗ – something required or wanted
+necessity, requirement
+
+• person 🧍 – a human being
+individual, human
+
+• support 🏗️ – help given to someone
+assistance, backing
+
+• time ⏰ – when something happens
+period, moment
+
+• assist 🤝 – to help someone
+aid, support
+
+• care ❤️ – to feel concern for someone
+look after, care for
+
+• give 🎁 – to provide something
+offer, provide
+
+• help 🛠️ – to make something easier for someone
+assist, support
+
+• listen 👂 – to pay attention to someone speaking
+hear, pay attention
+
+• lend 🤲 – to give something for a short time
+loan, let someone use
+
+• share 🔄 – to give part of something to others
+divide, give
+
+• support 🧱 – to help someone emotionally or physically
+back, encourage
+
+• talk 💬 – to speak with someone
+speak, chat
+
+• teach 📚 – to help someone learn
+instruct, educate
+
+~Signal Words
+• Time ⏰ – words that tell when something happens<br>
+on, at, in, before, after, since, until, during, for, now, yesterday, today, tomorrow, later, then, when, while, once
+`;
+
+  function parseSections(raw) {
+    const chunks = raw.split(/\n(?=~+)/);
+    return chunks
+      .map(chunk => chunk.trim())
+      .filter(chunk => chunk.startsWith("~"))
+      .map(chunk => {
+        const lines = chunk.split("\n");
+        const name = lines.shift().replace(/^~+/, "").trim();
+        const text = lines.join("\n").trim();
+        return { name, text };
+      });
+  }
+
+  function extractWords(sectionText) {
+    return sectionText
+      .split("\n")
+      .map(line => {
+        const match = line.match(/•\s*([^\s–]+)/);
+        return match ? match[1] : null;
+      })
+      .filter(Boolean);
+  }
+
+  const sections = parseSections(wordListText);
+  const sectionData = sections.map(sec => ({
+    name: sec.name,
+    words: extractWords(sec.text)
+  }));
+
+  let currentSectionName = 'No Section';
+  let wordList = [];
+
+  const btn = document.getElementById("sectionSelectorBtn");
+  const modalRoot = document.getElementById("sectionModalRoot");
+  const modalBackdrop = document.getElementById("sectionModalBackdrop");
+  const modalClose = document.getElementById("sectionModalClose");
+  const listContainer = document.getElementById("sectionListContainer");
+
+  function openModal() {
+    listContainer.innerHTML = "";
+    if (sectionData.length === 0) {
+      listContainer.innerHTML = "<div style='padding:10px; text-align:center; color:#666;'>No categories found.</div>";
+    } else {
+      sectionData.forEach((sec) => {
+        const item = document.createElement("div");
+        item.className = "section-item";
+        item.textContent = sec.name;
+        item.addEventListener("click", () => {
+          currentSectionName = sec.name;
+          wordList = sec.words;
+          btn.textContent = sec.name;
+          closeModal();
+          startGame();
+        });
+        listContainer.appendChild(item);
+      });
+    }
+    modalRoot.style.display = "block";
+  }
+
+  function closeModal() {
+    modalRoot.style.display = "none";
+  }
+
+  if (btn) btn.addEventListener("click", openModal);
+  if (modalClose) modalClose.addEventListener("click", closeModal);
+  if (modalBackdrop) modalBackdrop.addEventListener("click", closeModal);
+
+  window.addEventListener("DOMContentLoaded", () => {
+    currentSectionName = "No Section";
+    btn.textContent = "Select a section.";
+  });
+
+  let activeBubbles = [];
+  let ambientBubbles = [];
+  let explodingBubbles = [];
+  let gameStarted = false, gameStopped = false;
+  let currentTypedWord = null;
+  let nextWordIndex = 0;
+  let correctWords = 0;
+  let totalWords = 0;
+
+  const popSound = document.getElementById('popSound');
+  const typingInput = document.getElementById('typingInput');
+  const submitBtn = document.getElementById('submitButton');
+  const idInput = document.getElementById('studentId');
+  const scoreboardContainer = document.getElementById('scoreboardContainer');
+  const scoreButtons = document.getElementById('scoreButtons');
+  const copyBtn = document.getElementById('copyBtn');
+  const downloadTxtBtn = document.getElementById('downloadTxtBtn');
+  const downloadPngBtn = document.getElementById('downloadPngBtn');
+
+  function brightColor(alpha=0.35) {
+    const hue = Math.random()*360;
+    return `hsla(${hue},90%,65%,${alpha})`;
+  }
+
+  function darkVariant(color) {
+    const match = color.match(/hsla\((\d+),\s*(\d+)\%,\s*(\d+)\%,\s*([\d.]+)\)/);
+    if(!match) return 'rgba(0,0,0,0.5)';
+    const h = match[1], s = match[2], l = Math.max(0, match[3]-35), a = match[4];
+    return `hsla(${h},${s}%,${l}%,${a})`;
+  }
+
+  class Bubble {
+    constructor(word=null) {
+      this.word = word;
+      this.typedIndex = 0;
+      this.exploded = false;
+      if(word){
+        // Use a uniform font size for all words, then measure width to size the bubble correctly
+        this.fontSize = 24;
+        ctx.font = `bold ${this.fontSize}px system-ui, -apple-system, sans-serif`;
+        const textWidth = ctx.measureText(word).width;
+        const minRadius = Math.max(45, (textWidth / 2) + 20);
+        this.radius = minRadius + Math.random() * 15;
+        this.color = brightColor(0.35);
+      } else {
+        this.fontSize = 0;
+        this.radius = 10 + Math.random()*30;
+        this.color = brightColor(0.2);
+      }
+      this.shadowColor = darkVariant(this.color);
+      this.x = Math.random() * (canvas.width - this.radius*2) + this.radius;
+      this.y = canvas.height + this.radius;
+      this.speed = (word ? 0.6 : 0.2) + Math.random()*0.6;
+      this.swayAmplitude = (word ? 20 : 10) + Math.random()*20;
+      this.swaySpeed = Math.random()*0.02 + 0.01;
+      this.swayPhase = Math.random()*Math.PI*2;
+    }
+
+    draw() {
+      const offsetX = Math.sin(this.swayPhase + this.y*this.swaySpeed) * this.swayAmplitude;
+
+      const gradient = ctx.createRadialGradient(
+        this.x - this.radius*0.2 + offsetX,
+        this.y - this.radius*0.2,
+        this.radius*0.05,
+        this.x + offsetX,
+        this.y,
+        this.radius*1.8
+      );
+      gradient.addColorStop(0, 'rgba(255,255,255,0.2)');
+      gradient.addColorStop(0.3, this.color);
+      gradient.addColorStop(1, this.color);
+
+      ctx.beginPath();
+      ctx.arc(this.x + offsetX, this.y, this.radius, 0, Math.PI*2);
+      ctx.fillStyle = gradient;
+      ctx.fill();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.stroke();
+
+      if(this.word){
+        ctx.font = `bold ${this.fontSize}px system-ui, -apple-system, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = this.shadowColor;
+        ctx.shadowBlur = 20;
+
+        let startX = this.x + offsetX;
+        ctx.textAlign = 'left';
+
+        for (let i = 0; i < this.word.length; i++) {
+          if (i < this.typedIndex) {
+            ctx.fillStyle = 'red';
+          } else {
+            ctx.fillStyle = 'white';
+          }
+
+          ctx.fillText(
+            this.word[i],
+            startX - ctx.measureText(this.word).width / 2,
+            this.y
+          );
+
+          startX += ctx.measureText(this.word[i]).width;
+        }
+        ctx.shadowBlur = 0;
+      }
+    }
+
+    update() {
+      this.y -= this.speed;
+      if(this.y + this.radius < 0) this.exploded = true;
+    }
+  }
+
+  class ExplodingBubble {
+    constructor(bubble) {
+      this.x = bubble.x;
+      this.y = bubble.y;
+      this.radius = bubble.radius;
+      this.color = bubble.color;
+      this.shadowColor = bubble.shadowColor;
+      this.word = bubble.word;
+      this.fontSize = bubble.fontSize || 24;
+      this.startTime = performance.now();
+      this.duration = 400;
+    }
+
+    draw(time) {
+      const elapsed = time - this.startTime;
+      const t = Math.min(elapsed / this.duration, 1);
+
+      const scale = 1 + 1.5 * t;
+      const rotation = 2 * Math.PI * 2 * t;
+      const alpha = 1 - t;
+
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(rotation);
+      ctx.scale(scale, scale);
+
+      const gradient = ctx.createRadialGradient(0,0,this.radius*0.05,0,0,this.radius*1.8);
+      gradient.addColorStop(0, 'rgba(255,255,255,0.2)');
+      gradient.addColorStop(0.3, this.color);
+      gradient.addColorStop(1, this.color);
+
+      ctx.beginPath();
+      ctx.arc(0,0,this.radius,0,Math.PI*2);
+      ctx.fillStyle = gradient;
+      ctx.globalAlpha = alpha;
+      ctx.fill();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+      ctx.stroke();
+
+      if(this.word){
+        ctx.font = `bold ${this.fontSize}px system-ui, -apple-system, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'white';
+        ctx.shadowColor = this.shadowColor;
+        ctx.shadowBlur = 30;
+        ctx.fillText(this.word,0,0);
+        ctx.shadowBlur = 0;
+      }
+
+      ctx.restore();
+    }
+
+    isDone(time) {
+      return time - this.startTime >= this.duration;
+    }
+  }
+
+  function spawnNextWord() {
+    if (nextWordIndex >= wordList.length) return;
+    const bubble = new Bubble(wordList[nextWordIndex]);
+    activeBubbles.push(bubble);
+    nextWordIndex++;
+  }
+
+  function spawnAmbientBurst() {
+    const count = 5 + Math.floor(Math.random()*6);
+    for(let i=0;i<count;i++){
+      ambientBubbles.push(new Bubble());
+    }
+  }
+
+  function floatBubbles(time) {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+
+    ambientBubbles.forEach(b=>{b.update(); b.draw();});
+    ambientBubbles = ambientBubbles.filter(b=>!b.exploded);
+
+    activeBubbles.forEach(bubble=>{bubble.update(); bubble.draw();});
+    activeBubbles = activeBubbles.filter(b=>!b.exploded);
+
+    explodingBubbles.forEach(b=>b.draw(time));
+    explodingBubbles = explodingBubbles.filter(b=>!b.isDone(time));
+
+    if(Math.random() < 0.01) spawnAmbientBurst();
+    if(!gameStopped && activeBubbles.length === 0) spawnNextWord();
+
+    requestAnimationFrame(floatBubbles);
+  }
+
+  function handleTypingInput(e) {
+    if(!gameStarted || gameStopped) return;
+    if(activeBubbles.length === 0) return;
+
+    let wordToType = currentTypedWord;
+
+    if(!wordToType){
+      wordToType = activeBubbles.find(b => !b.exploded);
+      if(!wordToType) return;
+      currentTypedWord = wordToType;
+    }
+
+    if(e.inputType === "deleteContentBackward") {
+      if(wordToType.typedIndex > 0) {
+        wordToType.typedIndex--;
+      }
+      typingInput.value = "";
+      return;
+    }
+
+    const key = e.data || e.key;
+    if(!key) {
+      typingInput.value = "";
+      return;
+    }
+
+    const lowerKey = key.toLowerCase();
+    if(!/^[a-z]$/.test(lowerKey)) {
+      typingInput.value = "";
+      return;
+    }
+
+    const expected = wordToType.word[wordToType.typedIndex]?.toLowerCase();
+
+    if(lowerKey !== expected) {
+      typingInput.value = "";
+      return;
+    }
+
+    wordToType.typedIndex++;
+
+    if(wordToType.typedIndex === wordToType.word.length) {
+      explodeWord(wordToType, true);
+      currentTypedWord = null;
+    }
+
+    typingInput.value = "";
+  }
+
+  function explodeWord(bubble, success){
+    if(bubble.exploded) return;
+    bubble.exploded = true;
+    popSound.currentTime=0; popSound.play().catch(()=>{});
+    if(success) correctWords++;
+    explodingBubbles.push(new ExplodingBubble(bubble));
+  }
+
+  function startGame(){
+    if(wordList.length === 0){
+      alert('Please select a category first.');
+      return;
+    }
+
+    gameStarted = true;
+    gameStopped = false;
+
+    scoreboardContainer.style.display = 'none';
+    scoreboardContainer.textContent = '';
+    scoreButtons.style.display = 'none';
+
+    activeBubbles = [];
+    ambientBubbles = [];
+    explodingBubbles = [];
+
+    currentTypedWord = null;
+    nextWordIndex = 0;
+    correctWords = 0;
+    totalWords = wordList.length;
+
+    spawnNextWord();
+    floatBubbles();
+    typingInput.focus();
+  }
+
+  async function submitResults(){ 
+    const studentIdVal = idInput.value.trim();
+    const resolvedName = window.resolveStudentNameFromId(studentIdVal);
+
+    const pct = totalWords ? Math.round((correctWords / totalWords) * 100) : 0;
+    const now = new Date();
+
+    const dateStr =
+      String(now.getDate()).padStart(2, '0') + '/' +
+      String(now.getMonth() + 1).padStart(2, '0') + '/' +
+      now.getFullYear() + ' ' +
+      String(now.getHours()).padStart(2, '0') + ':' +
+      String(now.getMinutes()).padStart(2, '0');
+
+    let currentFile = window.location.pathname.split('/').pop() || 'unknown.html';
+    currentFile = currentFile.split('?')[0].split('#')[0];
+
+    const scoreLine =
+      currentFile + "|" +
+      currentSectionName + "|" +
+      resolvedName + "|" +
+      (studentIdVal || "N/A") + "|" +
+      dateStr + "|" +
+      correctWords + "/" + totalWords + "|" +
+      pct + "%";
+
+    scoreboardContainer.textContent = scoreLine;
+    scoreboardContainer.style.display = 'block';
+    scoreButtons.style.display = 'flex';
+
+    try {
+      await saveResult(scoreLine);
+      console.log("✅ Score uploaded to Supabase");
+    } catch(err) {
+      console.error("❌ Upload failed:", err);
+    }
+  }
+
+  submitBtn.addEventListener('click', submitResults);
+  typingInput.addEventListener('input', handleTypingInput);
+
+  typingInput.addEventListener('keydown', function(e) {
+    if(e.key === "Backspace") {
+      handleTypingInput({
+        inputType: "deleteContentBackward"
+      });
+    }
+  });
+
+  canvas.addEventListener('click', ()=>{if(gameStarted && !gameStopped) typingInput.focus();});
+
+  copyBtn.addEventListener('click', ()=>{if(!scoreboardContainer.textContent) return; navigator.clipboard.writeText(scoreboardContainer.textContent).then(()=>alert('Scoreboard copied.'));});
+  downloadTxtBtn.addEventListener('click', ()=>{if(!scoreboardContainer.textContent) return; const blob=new Blob([scoreboardContainer.textContent],{type:'text/plain'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`score_student.txt`; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},100);});
+  downloadPngBtn.addEventListener('click', async ()=>{if(!scoreboardContainer.textContent) return; if(!window.html2canvas) await loadHtml2Canvas(); const canvasScore = await window.html2canvas(scoreboardContainer,{backgroundColor:null}); canvasScore.toBlob(blob=>{const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`score_student.png`; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(url); a.remove();},100);});});
+  function loadHtml2Canvas(){return new Promise((res,rej)=>{const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';script.onload=res;script.onerror=()=>rej(new Error('Failed to load html2canvas'));document.head.appendChild(script);});}
+})();
+</script>
+
+<script>
+    const borderDiv = document.createElement('div');
+    borderDiv.style.position = 'fixed';
+    borderDiv.style.inset = '0';
+    borderDiv.style.border = '10px solid #39FF14';
+    borderDiv.style.boxSizing = 'border-box';
+    borderDiv.style.zIndex = '9999';
+    borderDiv.style.pointerEvents = 'none';
+    borderDiv.style.backgroundColor = 'transparent';
+    document.body.appendChild(borderDiv);
+</script>
+
+<script>
+(function(){
+const RAW_TEXT = `
+How to use this page...
+
+• Enter your ID number into the ID field — Auto: Your name will automatically populate if registered, and entering your ID unlocks score tracking.
+• Click the Select a section button to choose a category from the pop-up menu.
+• Click the Instructions button anytime to view the gameplay guide.
+• Type the vocabulary words correctly into the input bar as they appear in the rising word bubbles to pop them.
+• Click Submit to view your final score and percentage — Auto: Your results are compiled into a scoreboard record and logged automatically to the database.
+• Use the Copy, ↓Text, or ↓PNG buttons to copy or download your score record.
+`;
+
+function parseRawInstructions(text){
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+  lines.forEach(line => {
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
+    html.push(`<p>${line}</p>`);
+  });
+  return html.join("");
+}
+
+const style = document.createElement("style");
+style.textContent = `
+#instructionsRoot{
+  position:fixed;
+  inset:0;
+  display:none;
+  z-index:99999;
+}
+#instructionsBackdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.45);
+}
+#instructionsModal{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  width:min(500px, 92vw);
+  max-height:min(80vh, calc(100dvh - 16px));
+  background:#fff;
+  border-radius:12px;
+  padding:18px;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--input-border-blue);
+  font-family: var(--font-main);
+}
+#instructionsHeader{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex: 0 0 auto;
+  font-family: var(--font-main);
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--blue);
+}
+#instructionsTitle{
+  color: var(--blue);
+  font-weight: 700;
+  font-size: 18px;
+}
+#instructionsBack{
+  background: none;
+  border: none;
+  color: var(--blue);
+  font-family: var(--font-main);
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  height: auto;
+  width: auto;
+}
+#instructionsBack:hover{
+  background-color: #eef6ff;
+}
+#instructionsContent{
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  flex: 1 1 auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  font-family: var(--font-main);
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #333;
+}
+#instructionsContent::-webkit-scrollbar {
+  display: none;
+}
+#instructionsContent h3 {
+  margin-top: 10px;
+  margin-bottom: 4px;
+  font-family: var(--font-main);
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--blue);
+}
+#instructionsContent p {
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+`;
+document.head.appendChild(style);
+
+// Check if static HTML already includes instructionsRoot, otherwise create it
+let root = document.getElementById("instructionsRoot");
+if (!root) {
+  root = document.createElement("div");
+  root.id = "instructionsRoot";
+  root.innerHTML = `
+  <div id="instructionsBackdrop"></div>
+  <div id="instructionsModal">
+    <div id="instructionsHeader">
+      <span id="instructionsTitle">Instructions</span>
+      <button id="instructionsBack" type="button">✕</button>
+    </div>
+    <div id="instructionsContent">
+      ${parseRawInstructions(RAW_TEXT)}
+    </div>
+  </div>
+  `;
+  document.body.appendChild(root);
+} else {
+  const contentEl = root.querySelector("#instructionsContent");
+  if (contentEl && !contentEl.innerHTML.trim()) {
+    contentEl.innerHTML = parseRawInstructions(RAW_TEXT);
+  }
+}
+
+const btn = document.getElementById("instructionsBtn");
+const modalContent = root.querySelector("#instructionsContent");
+if (modalContent) {
+  modalContent.addEventListener("wheel", e=>{e.stopPropagation();},{passive:false});
+  modalContent.addEventListener("touchmove", e=>{e.stopPropagation();},{passive:false});
+}
+
+function openModal(){
+  root.style.display = "block";
+  document.body.style.overflow = "hidden";
+  document.documentElement.style.overflow = "hidden";
+}
+
+function closeModal(){
+  root.style.display = "none";
+  document.body.style.overflow = "";
+  document.documentElement.style.overflow = "";
+}
+
+if (btn) btn.onclick = openModal;
+
+const backBtn = root.querySelector("#instructionsBack");
+if (backBtn) backBtn.onclick = closeModal;
+
+const backdrop = root.querySelector("#instructionsBackdrop");
+if (backdrop) backdrop.onclick = closeModal;
+
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape") closeModal();
+});
+})();
+</script>
+<script>
+(function() {
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+
+</body>
+</html>

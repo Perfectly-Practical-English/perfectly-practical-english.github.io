@@ -1,0 +1,1321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile Board Game Shell</title>
+    <style>
+        :root {
+            --blue: #2196F3;
+            --green: #4CAF50;
+            --orange: #FF9800;
+            --red: #F44336;
+        }
+
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background: #121212;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 4px;
+            box-sizing: border-box;
+            gap: 4px;
+        }
+
+        h2 {
+            margin: 0;
+            display: none;
+        }
+
+        .game-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 430px;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .controls-panel {
+            background: #1e1e1e;
+            padding: 3px 0px;
+            border-radius: 6px;
+            width: 100%;
+            display: flex;
+            flex-wrap: nowrap;
+            gap: 3px;
+            align-items: center;
+            justify-content: space-between;
+            box-sizing: border-box;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 20;
+        }
+
+        select, button.action-btn {
+            padding: 4px 6px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            background: #2d2d2d;
+            color: #fff;
+            font-size: 0.75rem;
+            cursor: pointer;
+            box-sizing: border-box;
+            text-align: center;
+            white-space: nowrap;
+            height: 28px;
+        }
+
+        #dice-count-select {
+            flex: 0 0 auto;
+            width: 58px;
+        }
+
+        .dropdown-select {
+            flex: 0 0 auto;
+            width: 74px;
+            font-size: 0.7rem;
+            text-overflow: ellipsis;
+        }
+
+        .tray-pieces {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            justify-content: flex-start;
+            background: #2d2d2d;
+            padding: 1px 3px;
+            border-radius: 4px;
+            border: 1px solid #444;
+            height: 28px;
+            width: 32px;
+            box-sizing: border-box;
+            flex: 0 0 auto;
+            overflow: hidden;
+        }
+
+        .tray-piece {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        #dice-slot-container {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            position: relative;
+            height: 28px;
+            flex: 1;
+        }
+
+        #dice-corner {
+            background: #2d2d2d;
+            padding: 2px 4px;
+            border-radius: 4px;
+            display: flex;
+            gap: 3px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 1px solid #444;
+            height: 28px;
+            box-sizing: border-box;
+        }
+
+        .dice {
+            width: 20px;
+            height: 20px;
+            background: #fdfdfd;
+            color: #111;
+            border-radius: 3px;
+            display: grid;
+            grid-template: repeat(3, 1fr) / repeat(3, 1fr);
+            padding: 1px;
+            box-sizing: border-box;
+            box-shadow: inset 0 0 1px rgba(0,0,0,0.3), 0 1px 2px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease;
+        }
+
+        .dice.rolling {
+            animation: shake 0.4s ease infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(-10deg) scale(1.1); }
+            50% { transform: rotate(10deg) scale(0.9); }
+            75% { transform: rotate(-5deg) scale(1.05); }
+            100% { transform: rotate(0deg) scale(1); }
+        }
+
+        .dot {
+            background: #111;
+            border-radius: 50%;
+            align-self: center;
+            justify-self: center;
+            width: 3.5px;
+            height: 3.5px;
+            display: none;
+        }
+
+        .dice[data-value="1"] .dot.center { display: block; }
+        .dice[data-value="2"] .dot.top-right, .dice[data-value="2"] .dot.bottom-left { display: block; }
+        .dice[data-value="3"] .dot.top-right, .dice[data-value="3"] .dot.center, .dice[data-value="3"] .dot.bottom-left { display: block; }
+        .dice[data-value="4"] .dot.top-left, .dice[data-value="4"] .dot.top-right, .dice[data-value="4"] .dot.bottom-left, .dice[data-value="4"] .dot.bottom-right { display: block; }
+        .dice[data-value="5"] .dot.top-left, .dice[data-value="5"] .dot.top-right, .dice[data-value="5"] .dot.center, .dice[data-value="5"] .dot.bottom-left, .dice[data-value="5"] .dot.bottom-right { display: block; }
+        .dice[data-value="6"] .dot.top-left, .dice[data-value="6"] .dot.top-right, .dice[data-value="6"] .dot.middle-left, .dice[data-value="6"] .dot.middle-right, .dice[data-value="6"] .dot.bottom-left, .dice[data-value="6"] .dot.bottom-right { display: block; }
+
+        .top-left { grid-row: 1; grid-column: 1; }
+        .top-right { grid-row: 1; grid-column: 3; }
+        .middle-left { grid-row: 2; grid-column: 1; }
+        .center { grid-row: 2; grid-column: 2; }
+        .middle-right { grid-row: 2; grid-column: 3; }
+        .bottom-left { grid-row: 3; grid-column: 1; }
+        .bottom-right { grid-row: 3; grid-column: 3; }
+
+        #floating-spinner-wrapper {
+            position: absolute;
+            bottom: -39px;
+            right: 27px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--blue) 0deg 90deg, 
+                var(--green) 90deg 180deg, 
+                var(--orange) 180deg 270deg, 
+                var(--red) 270deg 360deg
+            );
+            border: 2.5px solid #fff;
+            box-sizing: border-box;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.7);
+            cursor: pointer;
+            z-index: 50;
+            display: none;
+        }
+
+        #spinner-diagonal-arrow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 3.5px;
+            height: 40px;
+            transform: translate(-50%, -50%) rotate(45deg);
+            transform-origin: center center;
+            transition: transform 1.2s cubic-bezier(0.15, 0.9, 0.2, 1);
+            pointer-events: none;
+            background: #fff;
+            border: 0.5px solid rgba(0,0,0,0.4);
+        }
+
+        #spinner-diagonal-arrow::before {
+            content: '';
+            position: absolute;
+            top: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-bottom: 10px solid #fff;
+            filter: drop-shadow(0 -1px 1px rgba(0,0,0,0.3));
+        }
+
+        #spinner-diagonal-arrow::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 5px;
+            height: 3px;
+            background: #fff;
+        }
+
+        .spinner-center-cap {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 9px;
+            height: 9px;
+            background: #111;
+            border: 1.5px solid #fff;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 52;
+            pointer-events: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 45px);
+            max-height: 750px;
+            background: #2d2d2d;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            box-sizing: border-box;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            padding: 0;
+        }
+
+        .board-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0px;
+            background: transparent;
+            width: 82%;
+            max-width: 330px;
+            height: auto;
+            box-sizing: border-box;
+            margin: 0;
+        }
+
+        .path-tile {
+            background: #ffffff;
+            box-sizing: border-box;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            aspect-ratio: 1 / 1;
+        }
+
+        .path-tile img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        #board-image {
+            max-width: calc(100% - 30px);
+            max-height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+
+        .placeholder-text {
+            color: #777;
+            text-align: center;
+            padding: 20px;
+            z-index: 1;
+            font-size: 0.9rem;
+        }
+
+        #board-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .game-piece {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            transform: translate(-50%, -50%);
+            pointer-events: auto;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        .game-piece.selected {
+            transform: translate(-50%, -50%) scale(1.25);
+            box-shadow: 0 0 10px #ffeb3b;
+            border-color: #ffeb3b;
+            z-index: 10;
+        }
+
+        #card-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 112px;
+            background: #fff;
+            color: #111;
+            border-radius: 6px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            z-index: 100;
+            user-select: none;
+            padding: 6px;
+            box-sizing: border-box;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border: 1px solid rgba(0,0,0,0.2);
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        #card-content {
+            font-size: 0.62rem;
+            font-weight: 700;
+            line-height: 1.15;
+            margin: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 6;
+            -webkit-box-orient: vertical;
+        }
+
+        #card-move-handle {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 33%;
+            cursor: grab;
+            background: transparent;
+            opacity: 0;
+            transition: opacity 0.2s ease, background-color 0.2s ease;
+            border-top: 1px dashed rgba(0,0,0,0.2);
+        }
+
+        #card-modal:hover #card-move-handle {
+            opacity: 1;
+            background: rgba(0, 0, 0, 0.08);
+        }
+
+        #card-modal.following {
+            outline: 2px solid #2196F3;
+            box-shadow: 0 8px 20px rgba(33,150,243,0.4);
+        }
+
+        #card-modal.following #card-move-handle {
+            opacity: 1;
+            cursor: grabbing;
+            background: rgba(33, 150, 243, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+    <h2></h2>
+
+    <div class="game-wrapper">
+        <div class="controls-panel">
+            <select id="online-board-select" class="dropdown-select">
+                <option value="">Boards</option>
+                <option value="LOCAL_FILE_TRIGGER" style="color: #4CAF50; font-weight: bold;">📁 Load Local...</option>
+                <option disabled>----------------</option>
+            </select>
+            <input type="file" id="hidden-local-board-input" accept="image/*" style="display: none;">
+
+            <select id="online-cards-select" class="dropdown-select">
+                <option value="">Cards</option>
+                <option value="LOCAL_FILE_TRIGGER" style="color: #4CAF50; font-weight: bold;">📁 Load Local...</option>
+                <option disabled>----------------</option>
+            </select>
+            <input type="file" id="hidden-local-cards-input" accept=".txt, text/plain" style="display: none;">
+
+            <select id="dice-count-select">
+                <option value="" disabled selected>Dice</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="spinner">Spin</option>
+            </select>
+
+            <div class="tray-pieces" id="tray-container" title="Piece Tray"></div>
+
+            <div id="dice-slot-container">
+                <div id="dice-corner" title="Tap to Roll Dice">
+                    <div id="dice-box" style="display: flex; gap: 2px;"></div>
+                </div>
+                <div id="floating-spinner-wrapper" title="Tap to Spin">
+                    <div id="spinner-diagonal-arrow"></div>
+                    <div class="spinner-center-cap"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-container">
+            <div class="placeholder-text" id="placeholder">Select a board or load locally</div>
+            <img id="board-image" alt="">
+            <div id="board-layer"></div>
+        </div>
+    </div>
+
+    <div id="card-modal" title="Tap card for next prompt">
+        <div id="card-content">No prompts loaded</div>
+        <div id="card-move-handle" title="Click bottom handle to move card"></div>
+    </div>
+
+    <!-- 3. STUDENT DATA REGISTRY MODULE -->
+    <script>
+    (function() {
+        'use strict';
+        const RAW_STUDENT_DATA = `
+            55555|David
+            55551|Matthew
+            12345|Sarah
+        `;
+        const studentDatabase = new Map();
+        RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+            const [id, name] = line.split('|').map(s => s ? s.trim() : '');
+            if (id && name) studentDatabase.set(id, name);
+        });
+
+        window.resolveStudentNameFromId = function(idInput) {
+            if (!idInput) return "Student";
+            const trimmed = String(idInput).trim();
+            if (/^(x|g|guest)$/i.test(trimmed)) {
+                return "Guest";
+            }
+            return studentDatabase.get(trimmed) || "Guest";
+        };
+    })();
+    </script>
+
+    <script>
+        const gameBoardTemplates = {
+            "template_1": {
+                name: "Hero",
+                backgroundImage: "Hero_City.png",
+                layout: [{"r":1,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":2,"c":1,"radius":"0 0 0 15px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":2,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":2,"c":3,"radius":"0 15px 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":3,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":4,"c":0,"radius":"15px 0 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":4,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":4,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":4,"c":3,"radius":"0 0 15px 0","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":5,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":6,"c":0,"radius":"0 0 0 15px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":6,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":6,"c":2,"radius":"0 15px 0 0","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":7,"c":2,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}}],
+                squaresRawText: [
+"Hero_1.png",
+"Hero_2.png",
+"Hero_3.png",
+"Hero_4.png",
+"Hero_5.png",
+"Hero_6.png",
+"Hero_7.png",
+"Hero_8.png",
+"Hero_9.png",
+"Hero_10.png",
+"Hero_11.png",
+"Hero_12.png",
+"Hero_13.png",
+"Hero_14.png",
+                ],
+cardsRawText: `1. A Call for Help! Someone needs help! What has happened?
+2. A New Superhero! Who will save the city?
+3. How They Became a Superhero? How did they get their powers?
+4. Superpowers! What can this superhero do?
+5. Weakness! What is this superhero's weakness or limitation?
+6. Costume! What does this superhero wear?
+7. Logo / Symbol! What is this superhero's special logo or symbol?
+8. Personality! What kind of person is your superhero?
+9. Headquarters! Where does your superhero live?
+10. Vehicle! What vehicle does this superhero use?
+11. Special Equipment! What special equipment or gadgets does this superhero use?
+12. Challenge / Problem! What problem must your superhero deal with?
+13. Enemy! Who is your superhero's enemy?
+14. Superhero Mission! What is your superhero's main mission?`
+            },
+            "template_2": {
+                name: "Board 2",
+                backgroundImage: "https://picsum.photos/id/1025/800/1200",
+                layout: [{"r":1,"c":0,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":1,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":1,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":1,"c":3,"radius":"0 15px 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":2,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":3,"c":0,"radius":"15px 0 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":3,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":3,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":3,"c":3,"radius":"0 0 15px 0","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":4,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":5,"c":0,"radius":"0 0 0 15px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":5,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":5,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":5,"c":3,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":6,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":7,"c":3,"radius":"0 0 15px 0","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}}],
+                squaresRawText: [
+                    "https://picsum.photos/id/101/100/100", "https://picsum.photos/id/102/100/100", "https://picsum.photos/id/103/100/100", "https://picsum.photos/id/104/100/100", "https://picsum.photos/id/105/100/100", "https://picsum.photos/id/106/100/100",
+                    "https://picsum.photos/id/107/100/100", "https://picsum.photos/id/108/100/100", "https://picsum.photos/id/109/100/100", "https://picsum.photos/id/110/100/100", "https://picsum.photos/id/111/100/100", "https://picsum.photos/id/112/100/100",
+                    "https://picsum.photos/id/113/100/100", "https://picsum.photos/id/114/100/100", "https://picsum.photos/id/115/100/100", "https://picsum.photos/id/116/100/100"
+                ],
+                cardsRawText: "Template 2: Special Event!\nSwap places with any player.\nTake another turn."
+            },
+            "template_3": {
+                name: "Board 3",
+                backgroundImage: "https://picsum.photos/id/1035/800/1200",
+                layout: [
+                    {"r":2,"c":0,"radius":"15px 0 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},
+                    {"r":2,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},
+                    {"r":2,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},
+                    {"r":2,"c":3,"radius":"0 15px 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},
+                    {"r":3,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},
+                    {"r":3,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},
+                    {"r":4,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},
+                    {"r":4,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},
+                    {"r":5,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},
+                    {"r":5,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},
+                    {"r":6,"c":0,"radius":"0 0 0 15px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},
+                    {"r":6,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},
+                    {"r":6,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},
+                    {"r":6,"c":3,"radius":"0 0 15px 0","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}}
+                ],
+                squaresRawText: [
+                    "https://picsum.photos/id/130/100/100", "https://picsum.photos/id/131/100/100", 
+                    "https://picsum.photos/id/132/100/100", "https://picsum.photos/id/133/100/100", 
+                    "https://picsum.photos/id/134/100/100", "https://picsum.photos/id/135/100/100",
+                    "https://picsum.photos/id/136/100/100", "https://picsum.photos/id/137/100/100", 
+                    "https://picsum.photos/id/138/100/100", "https://picsum.photos/id/139/100/100", 
+                    "https://picsum.photos/id/140/100/100", "https://picsum.photos/id/141/100/100"
+                ],
+                cardsRawText: "Template 3: Circle Loop\nMove forward 2 spaces.\nSkip your next roll.\nDraw a bonus card."
+            },
+            "template_4": {
+                name: "Board 4",
+                backgroundImage: "https://picsum.photos/id/1043/800/1200",
+                layout: [{"r":2,"c":0,"radius":"15px 0 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":2,"c":1,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":2,"c":2,"radius":"0px","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"1px solid #000000"}},{"r":2,"c":3,"radius":"0 15px 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":3,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":3,"c":3,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":4,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":4,"c":2,"radius":"15px 0 0 0","borders":{"top":"2px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":4,"c":3,"radius":"0 0 15px 0","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}},{"r":5,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":5,"c":2,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"1px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":6,"c":0,"radius":"0px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"2px solid #000000"}},{"r":6,"c":2,"radius":"0 0 0 15px","borders":{"top":"1px solid #000000","bottom":"2px solid #000000","left":"2px solid #000000","right":"1px solid #000000"}},{"r":6,"c":3,"radius":"0 0 15px 0","borders":{"top":"2px solid #000000","bottom":"2px solid #000000","left":"1px solid #000000","right":"2px solid #000000"}}],
+                squaresRawText: [
+                    "https://picsum.photos/id/150/100/100", "https://picsum.photos/id/151/100/100", "https://picsum.photos/id/152/100/100", "https://picsum.photos/id/153/100/100", "https://picsum.photos/id/154/100/100", "https://picsum.photos/id/155/100/100",
+                    "https://picsum.photos/id/156/100/100", "https://picsum.photos/id/157/100/100", "https://picsum.photos/id/158/100/100", "https://picsum.photos/id/159/100/100", "https://picsum.photos/id/160/100/100", "https://picsum.photos/id/161/100/100",
+                    "https://picsum.photos/id/162/100/100", "https://picsum.photos/id/163/100/100", "https://picsum.photos/id/164/100/100", "https://picsum.photos/id/165/100/100", "https://picsum.photos/id/166/100/100"
+                ],
+                cardsRawText: "Template 4: Snake Bridge\nTake a shortcut ahead.\nMove back 1 space.\nRoll again immediately."
+            }
+        };
+
+        const colors = ['var(--blue)', 'var(--green)', 'var(--orange)', 'var(--red)'];
+        let pieces = [];
+        let selectedPieceId = null;
+        let currentNeedleAngle = 45;
+        let lastColorIndex = null;
+
+        const pastelColors = [
+            '#FFB3BA', '#FFDFBA', '#FFFFBA', '#BAFFC9', '#BAE1FF', '#E8C5FF',
+            '#FFC5EC', '#C5FFEC', '#F4FFC5', '#FFCBC1', '#D4C5FF', '#C5F6FF'
+        ];
+
+        let cardPrompts = [];
+        let cardQueue = [];
+
+        const onlineBoardSelect = document.getElementById('online-board-select');
+        const hiddenLocalBoardInput = document.getElementById('hidden-local-board-input');
+        
+        const onlineCardsSelect = document.getElementById('online-cards-select');
+        const hiddenLocalCardsInput = document.getElementById('hidden-local-cards-input');
+
+        const boardImage = document.getElementById('board-image');
+        const placeholder = document.getElementById('placeholder');
+        const gameContainer = document.getElementById('game-container');
+        const boardLayer = document.getElementById('board-layer');
+        const trayContainer = document.getElementById('tray-container');
+        const diceCountSelect = document.getElementById('dice-count-select');
+        const diceBox = document.getElementById('dice-box');
+        const diceCorner = document.getElementById('dice-corner');
+        const floatingSpinner = document.getElementById('floating-spinner-wrapper');
+        const spinnerArrow = document.getElementById('spinner-diagonal-arrow');
+
+        const cardModal = document.getElementById('card-modal');
+        const cardContent = document.getElementById('card-content');
+
+        function initDropdowns() {
+            Object.keys(gameBoardTemplates).forEach(key => {
+                const board = gameBoardTemplates[key];
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = board.name;
+                onlineBoardSelect.appendChild(option);
+            });
+
+            Object.keys(gameBoardTemplates).forEach(key => {
+                const board = gameBoardTemplates[key];
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = board.name + " Cards";
+                onlineCardsSelect.appendChild(option);
+            });
+        }
+
+        function renderBoardTemplate(templateKey) {
+            const template = gameBoardTemplates[templateKey];
+            if (!template) return;
+
+            const existingGrid = gameContainer.querySelector('.board-grid');
+            if (existingGrid) existingGrid.remove();
+
+            boardImage.style.display = 'none';
+            placeholder.style.display = 'none';
+
+            gameContainer.style.backgroundImage = `url('${template.backgroundImage}')`;
+
+            const maxRow = 9;
+
+            const boardGrid = document.createElement('div');
+            boardGrid.className = 'board-grid';
+            boardGrid.style.gridTemplateRows = `repeat(${maxRow}, 1fr)`;
+
+            let layoutTiles = [...template.layout];
+            let visited = new Set();
+            let orderedPath = [];
+
+            const getKey = (r, c) => `${r},${c}`;
+            
+            let tileMap = new Map();
+            layoutTiles.forEach(tile => tileMap.set(getKey(tile.r, tile.c), tile));
+
+            layoutTiles.sort((a, b) => a.r === b.r ? a.c - b.c : a.r - b.r);
+            let current = layoutTiles[0];
+
+            while (current && !visited.has(getKey(current.r, current.c))) {
+                let currentKey = getKey(current.r, current.c);
+                visited.add(currentKey);
+                orderedPath.push(current);
+
+                let neighbors = [
+                    { r: current.r - 1, c: current.c },
+                    { r: current.r + 1, c: current.c },
+                    { r: current.r, c: current.c - 1 },
+                    { r: current.r, c: current.c + 1 }
+                ];
+
+                let nextTile = null;
+                for (let n of neighbors) {
+                    let nKey = getKey(n.r, n.c);
+                    if (tileMap.has(nKey) && !visited.has(nKey)) {
+                        nextTile = tileMap.get(nKey);
+                        break;
+                    }
+                }
+                current = nextTile;
+            }
+
+            layoutTiles.forEach(tile => {
+                if (!visited.has(getKey(tile.r, tile.c))) {
+                    orderedPath.push(tile);
+                }
+            });
+
+            let gridMatrix = Array(maxRow).fill().map(() => Array(4).fill(null));
+
+            orderedPath.forEach((item, index) => {
+                if (item.r < maxRow) {
+                    const rawArray = template.squaresRawText;
+                    const imgUrl = rawArray[index % rawArray.length];
+                    
+                    gridMatrix[item.r][item.c] = {
+                        ...item,
+                        imgUrl: imgUrl
+                    };
+                }
+            });
+
+            for (let r = 0; r < maxRow; r++) {
+                for (let c = 0; c < 4; c++) {
+                    const cellData = gridMatrix[r][c];
+                    const div = document.createElement('div');
+                    
+                    if (cellData) {
+                        div.className = 'path-tile';
+                        div.style.borderRadius = cellData.radius;
+                        div.style.borderTop = cellData.borders.top;
+                        div.style.borderBottom = cellData.borders.bottom;
+                        div.style.borderLeft = cellData.borders.left;
+                        div.style.borderRight = cellData.borders.right;
+
+                        const img = document.createElement('img');
+                        img.src = cellData.imgUrl;
+                        img.alt = "tile";
+                        div.appendChild(img);
+                    }
+                    boardGrid.appendChild(div);
+                }
+            }
+
+            gameContainer.insertBefore(boardGrid, boardLayer);
+        }
+
+        function processCardText(text, sourceName) {
+            cardPrompts = text.split(/\r?\n/).map(line => line.trim()).filter(line => line.length > 0);
+            
+            if (cardPrompts.length === 0) {
+                alert('The text file contained no valid prompts.');
+                return;
+            }
+
+            resetCardQueue();
+            showNextCard();
+            cardModal.style.display = 'flex';
+        }
+
+        onlineBoardSelect.addEventListener('change', (e) => {
+            const selectedVal = e.target.value;
+            if (!selectedVal) return;
+
+            if (selectedVal === 'LOCAL_FILE_TRIGGER') {
+                hiddenLocalBoardInput.click();
+            } else {
+                renderBoardTemplate(selectedVal);
+            }
+        });
+
+        hiddenLocalBoardInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const existingGrid = gameContainer.querySelector('.board-grid');
+                    if (existingGrid) existingGrid.remove();
+
+                    gameContainer.style.backgroundImage = 'none';
+                    boardImage.src = event.target.result;
+                    boardImage.style.display = 'block';
+                    placeholder.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                onlineBoardSelect.value = '';
+            }
+        });
+
+        onlineCardsSelect.addEventListener('change', (e) => {
+            const selectedVal = e.target.value;
+            if (!selectedVal) return;
+
+            if (selectedVal === 'LOCAL_FILE_TRIGGER') {
+                hiddenLocalCardsInput.click();
+            } else if (gameBoardTemplates[selectedVal]) {
+                processCardText(gameBoardTemplates[selectedVal].cardsRawText, "!!GB_Cards.txt");
+            }
+        });
+
+        hiddenLocalCardsInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    processCardText(event.target.result, file.name);
+                };
+                reader.readAsText(file);
+            } else {
+                onlineCardsSelect.value = '';
+            }
+        });
+
+        function resetCardQueue() {
+            cardQueue = [...cardPrompts].reverse();
+        }
+
+        function showNextCard() {
+            if (cardQueue.length === 0) {
+                resetCardQueue();
+            }
+            const promptText = cardQueue.pop();
+            cardContent.textContent = promptText;
+
+            const randomColor = pastelColors[Math.floor(Math.random() * pastelColors.length)];
+            cardModal.style.backgroundColor = randomColor;
+        }
+
+        let isCardFollowing = false;
+        const cardMoveHandle = document.getElementById('card-move-handle');
+
+        cardMoveHandle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            isCardFollowing = !isCardFollowing;
+            if (isCardFollowing) {
+                cardModal.classList.add('following');
+            } else {
+                cardModal.classList.remove('following');
+            }
+        });
+
+        window.addEventListener('click', (e) => {
+            if (isCardFollowing && !cardMoveHandle.contains(e.target)) {
+                isCardFollowing = false;
+                cardModal.classList.remove('following');
+            }
+        });
+
+        cardModal.addEventListener('click', (e) => {
+            if (!isCardFollowing && cardPrompts.length > 0) {
+                showNextCard();
+            }
+        });
+
+        window.addEventListener('pointermove', (e) => {
+            if (isCardFollowing) {
+                cardModal.style.transform = 'none';
+                cardModal.style.left = `${e.clientX - (cardModal.offsetWidth / 2)}px`;
+                cardModal.style.top = `${e.clientY - (cardModal.offsetHeight / 2)}px`;
+            }
+        });
+
+        function initPieces() {
+            pieces = [];
+            for (let p = 0; p < 4; p++) {
+                pieces.push({
+                    id: p,
+                    colorIndex: p,
+                    color: colors[p],
+                    x: null, 
+                    y: null
+                });
+            }
+            selectedPieceId = null;
+            renderGame();
+        }
+
+        function renderGame() {
+            trayContainer.innerHTML = '';
+            boardLayer.innerHTML = '';
+
+            pieces.forEach(piece => {
+                if (piece.x === null && piece.y === null) {
+                    const el = document.createElement('div');
+                    el.className = 'tray-piece';
+                    el.style.backgroundColor = piece.color;
+                    if (piece.id === selectedPieceId) {
+                        el.style.border = '2px solid #ffeb3b';
+                        el.style.transform = 'scale(1.15)';
+                    }
+                    el.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        selectedPieceId = piece.id;
+                        renderGame();
+                    });
+                    trayContainer.appendChild(el);
+                } else {
+                    const el = document.createElement('div');
+                    el.className = 'game-piece';
+                    el.style.backgroundColor = piece.color;
+                    el.style.left = `${piece.x}%`;
+                    el.style.top = `${piece.y}%`;
+                    if (piece.id === selectedPieceId) {
+                        el.classList.add('selected');
+                    }
+                    el.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        selectedPieceId = piece.id;
+                        renderGame();
+                    });
+                    boardLayer.appendChild(el);
+                }
+            });
+        }
+
+        gameContainer.addEventListener('click', (e) => {
+            if (selectedPieceId === null) return;
+            if (e.target.closest('#dice-slot-container')) return;
+
+            const rect = gameContainer.getBoundingClientRect();
+            let xClick = e.clientX - rect.left;
+            let yClick = e.clientY - rect.top;
+
+            let xNorm = xClick / rect.width;
+            let yNorm = yClick / rect.height;
+
+            xNorm = Math.max(0, Math.min(1, xNorm));
+            yNorm = Math.max(0, Math.min(1, yNorm));
+
+            const piece = pieces.find(p => p.id === selectedPieceId);
+            if (piece) {
+                piece.x = xNorm * 100;
+                piece.y = yNorm * 100;
+                selectedPieceId = null;
+                renderGame();
+            }
+        });
+
+        function renderDiceStructure() {
+            diceBox.innerHTML = '';
+            const val = diceCountSelect.value;
+            
+            if (val === 'spinner') {
+                diceCorner.style.display = 'none';
+                floatingSpinner.style.display = 'block';
+            } else if (!val) {
+                diceCorner.style.display = 'none';
+                floatingSpinner.style.display = 'none';
+            } else {
+                floatingSpinner.style.display = 'none';
+                diceCorner.style.display = 'flex';
+                diceCorner.title = "Tap to Roll Dice";
+                
+                const count = parseInt(val);
+                for (let i = 0; i < count; i++) {
+                    const die = document.createElement('div');
+                    die.className = 'dice';
+                    die.setAttribute('data-value', '6');
+                    die.innerHTML = `
+                        <div class="dot top-left"></div><div class="dot top-right"></div>
+                        <div class="dot middle-left"></div><div class="dot center"></div><div class="dot middle-right"></div>
+                        <div class="dot bottom-left"></div><div class="dot bottom-right"></div>
+                    `;
+                    diceBox.appendChild(die);
+                }
+            }
+        }
+
+        function spinWheel() {
+            let newColorIndex;
+            do {
+                newColorIndex = Math.floor(Math.random() * 4);
+            } while (newColorIndex === lastColorIndex && colors.length > 1);
+
+            lastColorIndex = newColorIndex;
+
+            const randomExtraTurns = (Math.floor(Math.random() * 3) + 4) * 360;
+            const sliceAngle = (newColorIndex * 90) + Math.floor(Math.random() * 70) + 10;
+            
+            currentNeedleAngle += randomExtraTurns + (sliceAngle - (currentNeedleAngle % 360));
+            spinnerArrow.style.transform = `translate(-50%, -50%) rotate(${currentNeedleAngle}deg)`;
+        }
+
+        function rollDice() {
+            const diceElements = diceBox.querySelectorAll('.dice');
+            diceElements.forEach(die => die.classList.add('rolling'));
+
+            setTimeout(() => {
+                diceElements.forEach(die => {
+                    die.classList.remove('rolling');
+                    const randomVal = Math.floor(Math.random() * 6) + 1;
+                    die.setAttribute('data-value', randomVal);
+                });
+            }, 400);
+        }
+
+        diceCorner.addEventListener('click', rollDice);
+        floatingSpinner.addEventListener('click', spinWheel);
+        diceCountSelect.addEventListener('change', renderDiceStructure);
+
+        initDropdowns();
+        initPieces();
+        renderDiceStructure();
+    </script>
+
+<script>
+
+(function(){
+
+/* =========================
+   RAW INSTRUCTIONS TEXT
+========================= */
+
+const RAW_TEXT = `
+How to use this page…
+
+• Overview: Manage an interactive mobile board game shell featuring customizable board templates, card prompt drawers, token tray pieces, and rolling dice or spinning wheels for turn-based classroom activities.
+
+• Boards Selection: Click the Boards dropdown menu at the top-left to select a pre-loaded game board template or choose Load Local... to upload a custom board image from your device.
+
+• Cards Selection: Click the Cards dropdown menu to load thematic card prompts linked to board templates or select Load Local... to upload a custom plain text prompt file.
+
+• Dice and Spinner Configuration: Click the Dice dropdown menu to select the number of dice (1 to 3) or switch to Spin to activate the interactive color spinner wheel.
+
+• Rolling and Spinning Actions: Tap the Dice Box area to roll the dice or tap the Floating Spinner wheel to spin and select a random color category.
+
+• Piece Tray and Movement: Click any colored token piece inside the Tray-Pieces container to select it, then tap anywhere on the board container to place or move the piece.
+
+• Card Prompt Interaction: Tap the center of the Card Modal box to draw and display the next prompt text, or click the bottom Card-Move-Handle to drag and reposition the card anywhere on screen.
+
+`;
+
+
+/* =========================
+   RAW TEXT PARSER
+========================= */
+
+function parseRawInstructions(text){
+
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+
+  lines.forEach(line => {
+
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
+
+    html.push(`<p>${line}</p>`);
+  });
+
+  return html.join("");
+}
+
+
+/* =========================
+   CREATE STYLE
+========================= */
+
+const style = document.createElement("style");
+
+style.textContent = `
+#instructionsBtn{
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  background: #2e8b57;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+#instructionsBtn:hover{
+  background: #257047;
+  transform: scale(1.05);
+}
+
+#instructionsRoot{
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+}
+
+#instructionsBackdrop{
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#instructionsModal{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid #cfe2f7;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+#instructionsHeader{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex: 0 0 auto;
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+#instructionsBack{
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  height: auto;
+  width: auto;
+}
+
+#instructionsBack:hover{
+  background-color: #eef6ff;
+}
+
+#instructionsContent{
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  flex: 1 1 auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #333;
+}
+
+#instructionsContent::-webkit-scrollbar{
+  display: none;
+}
+
+#instructionsContent h3{
+  margin-top: 10px;
+  margin-bottom: 4px;
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+#instructionsContent p{
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+#instructionsContent hr{
+  margin: 12px 0;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+`;
+
+document.head.appendChild(style);
+
+
+/* =========================
+   CREATE BUTTON
+========================= */
+
+const btn = document.createElement("button");
+btn.id = "instructionsBtn";
+btn.innerHTML = "?";
+btn.setAttribute("aria-label", "Instructions");
+
+document.body.appendChild(btn);
+
+
+/* =========================
+   CREATE MODAL
+========================= */
+
+const root = document.createElement("div");
+root.id = "instructionsRoot";
+
+root.innerHTML = `
+<div id="instructionsBackdrop"></div>
+
+<div id="instructionsModal">
+
+  <div id="instructionsHeader">
+    <span>Instructions</span>
+    <button id="instructionsBack" type="button">✕</button>
+  </div>
+
+  <div id="instructionsContent">
+    ${parseRawInstructions(RAW_TEXT)}
+  </div>
+
+</div>
+`;
+
+document.body.appendChild(root);
+
+
+/* =========================
+   SCROLL LOCK
+========================= */
+
+const modalContent = document.getElementById("instructionsContent");
+
+modalContent.addEventListener("wheel", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+modalContent.addEventListener("touchmove", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+
+/* =========================
+   OPEN / CLOSE
+========================= */
+
+function openModal(){
+  root.style.display = "block";
+  document.body.style.overflow = "hidden";
+  document.documentElement.style.overflow = "hidden";
+}
+
+function closeModal(){
+  root.style.display = "none";
+  document.body.style.overflow = "";
+  document.documentElement.style.overflow = "";
+}
+
+btn.onclick = openModal;
+
+document.getElementById("instructionsBack").onclick = closeModal;
+document.getElementById("instructionsBackdrop").onclick = closeModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key === "Escape") closeModal();
+});
+
+})();
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+</body>
+</html>

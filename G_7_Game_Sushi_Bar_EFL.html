@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sushi Bar</title>
+<style>
+:root {
+  --bg: #f7fdfb;
+  --blue: #1976d2;
+  --blue-hover: #1565c0;
+  --input-border-blue: #cfe2f7;
+  --section-item-default: #eaf6ff;
+  --section-item-hover: #d0e8ff;
+  --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --size-control: 12px;
+  --size-small: 11px;
+  --size-title: 18px;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; font-family:var(--font-main); }
+html { height: 100%; width: 100%; }
+
+body {
+  /* Bamboo simulation with atmospheric mist */
+  background:
+    radial-gradient(
+      circle at 50% 30%,
+      rgba(255,255,255,0.35) 0%,
+      rgba(255,255,255,0.25) 35%,
+      rgba(255,255,255,0.15) 55%,
+      rgba(255,255,255,0.05) 70%,
+      rgba(255,255,255,0.00) 100%
+    ),
+    repeating-linear-gradient(
+      to right,
+      #071b0c 0px,
+      #1b5e20 8px,
+      #81c784 19px,
+      #1b5e20 30px,
+      #071b0c 38px
+    ),
+    repeating-linear-gradient(
+      to bottom,
+      rgba(255,255,255,0.20) 0px,
+      rgba(255,255,255,0.20) 6px,
+      rgba(0,0,0,0.18) 6px,
+      rgba(0,0,0,0.18) 10px,
+      rgba(255,255,255,0.20) 10px,
+      rgba(255,255,255,0.20) 80px
+    );
+
+  background-attachment: fixed;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 0 20px 0;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+/* ===============================
+   GLOBAL BUTTON STYLE (MASTER)
+   =============================== */
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 36px;
+  padding: 0 12px;
+  min-width: 80px;
+
+  font-family: var(--font-main);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1;
+
+  background: linear-gradient(145deg, #ffffff, var(--section-item-default));
+  color: var(--blue);
+
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+
+  cursor: pointer;
+  user-select: none;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+
+  transition: background 0.15s ease, transform 0.1s ease, border-color 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+  background: linear-gradient(145deg, #ffffff, var(--section-item-hover));
+  border-color: var(--blue);
+}
+
+button:active:not(:disabled) { transform: scale(0.97); }
+
+button:disabled {
+  background: #f1f5f9;
+  color: #94a3b8;
+  border-color: var(--input-border-blue);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* ===============================
+   TOP BAR
+   =============================== */
+#topBar {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  width: calc(100% - 20px);
+  max-width: 450px;
+  white-space: nowrap;
+}
+
+#topBar input,
+#topBar button {
+  flex: 1;
+  min-width: 0;
+  width: 0;
+  height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  font-size: 11px;
+  background: linear-gradient(145deg, #ffffff, var(--section-item-default));
+  color: var(--blue);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-sizing: border-box;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+#topBar input {
+  color: #000000 !important;
+  text-align: left !important;
+  padding: 0 12px !important;
+}
+
+#topBar input::placeholder {
+  color: var(--blue) !important;
+  opacity: 1 !important;
+}
+
+/* ===============================
+   CONVEYOR
+   =============================== */
+#conveyorContainer {
+  position: relative;
+  overflow: visible;
+  margin-top: 10px;
+  height: 90px;
+  width: 100vw;
+  display: flex;
+  align-items: flex-end;
+  margin-bottom: 10px;
+}
+
+#conveyor {
+  display:flex;
+  gap:6px;
+  white-space:nowrap;
+  will-change:transform;
+  position:absolute;
+  left:0;
+  bottom:0;
+}
+
+.tileWrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  position: relative;
+  margin-top: 15px;
+  z-index: 1;
+}
+
+.plate {
+  width: 50px;
+  height: 12px;
+  border-radius: 50%;
+  background-color: #fff;
+  position: absolute;
+  bottom: -6px;
+  z-index: -1;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.25);
+}
+
+/* ===============================
+   DROP ZONE
+   =============================== */
+#dropBand {
+  width: 100vw;
+  height: 90px;
+  margin-top: 8px;
+  padding: 2px 0 0;
+  background: rgba(255,255,255,0.95);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+#dropContainer {
+  width: 90%;
+  max-width: 600px;
+  height: 84px;
+  padding: 8px 10px 0;
+
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: flex-start;
+
+  column-gap: 6px;
+  row-gap: 5px;
+
+  overflow: hidden;
+}
+
+#dropContainer .tileWrapper {
+  margin-top: 0;
+  padding: 0;
+  height: auto;
+  flex-direction: row;
+}
+
+.tile {
+  position: relative;
+  padding: 8px 12px;
+  background: #ffd8a8;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 14px;
+  display: inline-block;
+}
+
+/* Expanded invisible touch/click hot spot keeping the visual button size normal */
+.tile::before {
+  content: '';
+  position: absolute;
+  top: -24px;
+  bottom: -24px;
+  left: -20px;
+  right: -20px;
+}
+.tile:hover { transform:translateY(-1px); }
+.tile.sushi {
+  background: transparent;
+  font-size: 30px;
+  cursor: default;
+  padding: 0;
+  line-height: 1;
+}
+
+.ant {
+  font-size:11px;
+  line-height:1;
+  margin-top:-2px;
+  pointer-events:none;
+}
+
+/* ===============================
+   CONTROLS (BACK, NEXT, SUBMIT)
+   =============================== */
+.controls {
+  display: flex;
+  gap: 6px;
+  margin-top: 15px;
+  justify-content: center;
+  width: 100%;
+  max-width: 450px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+  z-index: 10;
+}
+
+.controls button,
+#backButton,
+#nextButton,
+#submitButton {
+  flex: 1;
+  min-width: 0;
+  width: 0;
+  height: 36px;
+  padding: 0 8px;
+  font-size: 11px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===============================
+   SECTION SELECTOR (DROPDOWN MODAL)
+   =============================== */
+#sectionSelectorBtn {
+  background: linear-gradient(145deg, #ffffff, var(--section-item-default));
+  color: var(--blue);
+  cursor: pointer;
+  text-align: center;
+  border: 1px solid var(--input-border-blue);
+  font-weight: 400;
+  padding: 0 6px;
+  font-size: 11px;
+  border-radius: 6px;
+  flex: 1;
+  height: 36px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#sectionSelectorBtn:hover,
+#instructionsBtn:hover {
+  background: linear-gradient(145deg, #ffffff, var(--section-item-hover));
+  border-color: var(--blue);
+}
+
+#sectionModalRoot {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 99999;
+}
+
+#sectionModalBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#sectionModalContent {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--input-border-blue);
+  font-family: var(--font-main);
+}
+
+#sectionModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex: 0 0 auto;
+  font-family: var(--font-main);
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+#sectionModalClose {
+  background: linear-gradient(145deg, #ffffff, var(--section-item-default));
+  border: 1px solid var(--input-border-blue);
+  color: var(--blue);
+  font-family: var(--font-main);
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0 8px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  height: 28px;
+  width: auto;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+#sectionModalClose:hover {
+  background: linear-gradient(145deg, #ffffff, var(--section-item-hover));
+  border-color: var(--blue);
+}
+
+#sectionListContainer {
+  padding: 0;
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+#sectionListContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.section-item {
+  height: 28px;
+  padding: 0 6px;
+  margin-bottom: 6px;
+  background: var(--section-item-default);
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-main);
+  font-size: 12px;
+  color: var(--blue);
+  font-weight: 400;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  transition: 0.12s;
+}
+
+.section-item:hover {
+  background: var(--section-item-hover);
+  border-color: var(--blue);
+}
+
+.section-item.selected {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #fff;
+}
+
+/* ===============================
+   SCOREBOARD
+   =============================== */
+#scoreboard {
+  margin-top:25px;
+  padding:6px;
+  background:#fff;
+  border:1px solid var(--input-border-blue);
+  border-radius:6px;
+  display:none;
+  font-size:12px;
+  position: relative;
+  z-index: 10;
+  max-width: 90vw;
+  width: 450px;
+  box-sizing: border-box;
+  overflow-x: auto;
+}
+
+#scoreData {
+  white-space: pre-wrap;
+  word-break: break-all;
+  font-family: monospace;
+  font-weight: bold;
+}
+
+/* ===============================
+   MOBILE
+   =============================== */
+@media (max-width: 500px) {
+  #topBar {
+    margin-left: 10px;
+    margin-right: 10px;
+    width: calc(100% - 20px);
+    max-width: none;
+    padding-left: 12px;
+    padding-right: 12px;
+    gap: 4px;
+  }
+
+  #topBar input,
+  #topBar button {
+    flex: 1;
+    min-width: 0;
+    width: auto;
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+}
+
+footer {
+  margin-top: 15px;
+  padding: 0 12px;
+  text-align: left;
+  font-size: 11px;
+  color: var(--blue);
+  background: linear-gradient(145deg, #ffffff, var(--section-item-default));
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  max-width: 450px;
+  width: 100%;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  position: relative;
+  z-index: 10;
+}
+
+footer p {
+  margin: 0;
+  padding: 0;
+  line-height: 1;
+  font-weight: 400;
+}
+</style>
+</head>
+<body>
+
+<div id="topBar">
+  <input type="text" id="idField" placeholder="ID">
+  <button id="sectionSelectorBtn" type="button">Select a section.</button>
+  <button id="instructionsBtn" type="button">Instructions</button>
+</div>
+
+<!-- Section Selection Modal -->
+<div id="sectionModalRoot">
+  <div id="sectionModalBackdrop"></div>
+  <div id="sectionModalContent">
+    <div id="sectionModalHeader">
+      <span>Select a Category</span>
+      <button id="sectionModalClose" type="button">✕</button>
+    </div>
+    <div id="sectionListContainer"></div>
+  </div>
+</div>
+
+<div id="conveyorContainer">
+  <div id="conveyor"></div>
+</div>
+
+<div id="dropBand">
+  <div id="dropContainer"></div>
+</div>
+
+<div class="controls">
+  <button id="backButton">Back</button>
+  <button id="nextButton">Next</button>
+  <button id="submitButton">Submit</button>
+</div>
+
+<div id="scoreboard">
+  <pre id="scoreData"></pre>
+  <div class="controls">
+    <button id="copyButton">Copy</button>
+    <button id="downloadTxtButton">↓TXT</button>
+    <button id="downloadPngButton">↓PNG</button>
+  </div>
+</div>
+
+<textarea id="rawTextInput" style="display:none;">
+
+~Determiners
+I saw |a| cat in the garden.
+She wants |some| water.
+There isn’t |any| milk left.
+He bought |an| umbrella.
+We need |more| time.
+She has |few| friends here.
+I don’t have |much| money.
+They own |several| houses.
+He ate |the| apple.
+She found |this| book helpful.
+
+
+~Nouns
+The |dog| barked loudly.
+Her |happiness| was obvious.
+The |children| are playing.
+That |city| is very old.
+His |advice| was useful.
+The |team| is winning.
+She opened the |box|.
+We visited the |museum|.
+The |teacher| arrived early.
+Music gives me |joy|.
+
+
+~Pronouns
+|She| is my best friend.
+This gift is |mine|.
+I spoke to |him|.
+|They| are waiting outside.
+The book belongs to |her|.
+I hurt |myself|.
+|We| are ready.
+Give it to |them|.
+That seat is |yours|.
+He blamed |himself|.
+
+
+~Indefinite Pronouns
+|Everyone| was excited.
+|Someone| is at the door.
+|Nothing| makes sense.
+|Anybody| can join.
+|Each| has a ticket.
+|Nobody| knows the answer.
+|Something| smells strange.
+|All| were invited.
+|One| must be careful.
+|Everything| is ready.
+
+
+~Verbs
+I |run| every morning.
+She |wrote| a letter.
+They |are playing| outside.
+He |has finished| his work.
+We |eat| dinner at six.
+She |opened| the door.
+I |will call| you later.
+They |were waiting| patiently.
+He |fixes| cars.
+We |have seen| it before.
+
+
+~State Verbs
+I |know| the answer.
+She |likes| chocolate.
+He |believes| you.
+We |own| this house.
+I |understand| the problem.
+She |hates| noise.
+They |prefer| coffee.
+He |needs| help.
+I |remember| her name.
+She |loves| music.
+
+
+~Present Simple
+I |work| on Mondays.
+She |teaches| English.
+They |live| nearby.
+He |plays| chess.
+We |study| at night.
+She |reads| daily.
+I |wake| early.
+They |watch| TV often.
+He |drives| carefully.
+We |eat| together.
+
+
+~Have Got
+I |have got| a bike.
+She |has got| a dog.
+We |have got| time.
+He |has got| an idea.
+They |have got| tickets.
+I |haven’t got| money.
+She |hasn’t got| keys.
+Have you |got| a pen?
+He |has got| a cold.
+We |has got| plans.
+
+
+~Verb To Be
+I |am| ready.
+She |is| happy.
+They |are| here.
+He |was| tired.
+We |were| late.
+It |is| cold.
+I |am not| angry.
+She |isn’t| home.
+They |aren’t| ready.
+He |wasn’t| sure.
+
+
+~State-of-Being Linking Verbs
+She |is| calm.
+He |seems| tired.
+They |remain| silent.
+I |feel| confident.
+The room |looks| clean.
+She |became| angry.
+He |stayed| quiet.
+The food |tastes| good.
+She |appears| nervous.
+The plan |sounds| risky.
+
+
+~Sensory Linking Verbs
+The soup |smells| good.
+She |looks| happy.
+The music |sounds| loud.
+The cake |tastes| sweet.
+The fabric |feels| soft.
+He |looks| tired.
+The air |smells| fresh.
+The idea |sounds| strange.
+The pillow |feels| hard.
+The coffee |tastes| bitter.
+
+
+~Present Continuous
+I |am studying| now.
+She |is cooking| dinner.
+They |are playing| outside.
+He |is working| late.
+We |are waiting| here.
+She |is reading| quietly.
+I |am listening| carefully.
+They |are watching| TV.
+He |is driving| fast.
+We |are learning| grammar.
+
+
+~Present Perfect
+I |have finished| my work.
+She |has visited| Rome.
+They |have seen| it.
+He |has broken| it.
+We |have learned| a lot.
+She |has lost| her keys.
+I |have eaten| already.
+They |have arrived| early.
+He |has written| a book.
+We |have tried| that.
+
+
+~Present Perfect Continuous
+I |have been studying| all day.
+She |has been working| hard.
+They |have been waiting| long.
+He |has been running| outside.
+We |have been learning| English.
+She |has been cooking| since noon.
+I |have been reading| for hours.
+They |have been traveling| a lot.
+He |has been fixing| cars.
+We |have been practicing| daily.
+
+
+~Past Simple
+I |walked| home.
+She |called| me.
+They |left| early.
+He |won| the game.
+We |studied| together.
+She |found| it.
+I |ate| lunch.
+They |watched| TV.
+He |drove| fast.
+We |slept| well.
+
+~Past Continuous
+I |was walking| home.
+She |was cooking| dinner.
+They |were playing| outside.
+He |was working| late.
+We |were studying| together.
+She |was reading| quietly.
+I |was listening| carefully.
+They |was waiting| patiently.
+He |was driving| fast.
+We |was sleeping| deeply.
+
+
+~Past Perfect
+I |had finished| before noon.
+She |had left| early.
+They |had seen| it before.
+He |had eaten| already.
+We |had studied| enough.
+She |had forgotten| his name.
+I |had cleaned| the room.
+They |had arrived| early.
+He |had written| the letter.
+We |had decided| already.
+
+
+~Future Simple
+I |will call| you later.
+She |will help| us.
+They |will arrive| soon.
+He |will finish| today.
+We |will start| tomorrow.
+She |will explain| everything.
+I |will try| again.
+They |will win| easily.
+He |will return| soon.
+We |will meet| later.
+
+
+~Going to for the Future
+I |am going to study| tonight.
+She |is going to travel| abroad.
+They |are going to move| soon.
+He |is going to start| work.
+We |are going to eat| out.
+She |is going to buy| a car.
+I |am going to rest| today.
+They |are going to visit| us.
+He |is going to fix| it.
+We |are going to learn| more.
+
+
+~Adjectives
+It is a |big| house.
+She has |beautiful| eyes.
+They bought a |new| car.
+He wore a |black| jacket.
+We saw an |interesting| movie.
+She felt |happy| today.
+It was a |cold| night.
+He gave a |quick| answer.
+They live in a |quiet| area.
+She made a |delicious| meal.
+
+
+~Intensifiers
+It is |very| cold.
+She is |extremely| tired.
+They are |really| happy.
+He was |too| angry.
+We are |quite| ready.
+She felt |so| excited.
+It is |absolutely| perfect.
+They were |very| late.
+He spoke |really| loudly.
+She was |too| nervous.
+
+
+~Yes/No Questions
+|Are| you ready?
+|Is| she home?
+|Did| they arrive?
+|Was| he late?
+|Have| we finished?
+|Can| you help?
+|Will| she come?
+|Do| they know?
+|Has| he left?
+|Were| we wrong?
+
+
+~Wh-Questions
+|What| is your name?
+|Where| do you live?
+|When| did they arrive?
+|Why| are you late?
+|Who| called you?
+|How| does it work?
+|Which| one is yours?
+|Whose| bag is this?
+|How many| students came?
+|What time| is it?
+
+
+~Conjunctions
+I stayed home |because| it rained.
+She called |and| apologized.
+He was tired |but| happy.
+We waited |so| we were late.
+They tried |although| it was hard.
+I ran |and| fell.
+She studied |because| she cared.
+He wanted tea |but| chose coffee.
+We hurried |so| we wouldn’t miss it.
+They stayed |although| it was late.
+
+
+~Modal Verbs
+I |can| swim.
+She |must| leave now.
+They |should| listen.
+He |may| arrive late.
+We |have to| work.
+She |could| help.
+I |might| go later.
+They |must| finish today.
+He |should| apologize.
+We |can| try again.
+
+
+~Conditionals
+If it rains, I |will stay| home.
+If I study, I |will pass|.
+If she calls, we |will answer|.
+If they hurry, they |will arrive| early.
+If he tries, he |will succeed|.
+If we leave now, we |will be| on time.
+If you ask, I |will help|.
+If it breaks, we |will fix| it.
+If she agrees, we |will start|.
+If they win, they |will celebrate|.
+
+
+~Passive Voice
+The letter |was written| yesterday.
+The cake |was eaten| quickly.
+The room |was cleaned| well.
+The song |was sung| loudly.
+The car |was fixed| today.
+The book |was read| twice.
+The window |was broken| accidentally.
+The work |was finished| early.
+The house |was built| recently.
+The rules |were explained| clearly.
+
+
+~Question Tags
+You are ready, |aren’t you|?
+She is here, |isn’t she|?
+They arrived late, |didn’t they|?
+He can swim, |can’t he|?
+We were right, |weren’t we|?
+She likes it, |doesn’t she|?
+They will come, |won’t they|?
+He finished early, |didn’t he|?
+We can start, |can’t he|?
+She was tired, |wasn’t she|?
+
+
+~Cause/Effect
+I stayed home |because| it rained.
+She studied hard, |so| she passed.
+They were tired |because| they worked late.
+He missed the bus, |so| he was late.
+We left early |because| it was dark.
+She practiced, |so| she improved.
+They stayed inside |because| it snowed.
+He forgot, |so| he apologized.
+We rushed |because| time was short.
+She smiled, |so| we relaxed.
+
+
+~Contrast/Contradiction
+He tried, |but| failed.
+She was tired, |yet| continued.
+They left early |although| it was fun.
+I like coffee, |but| prefer tea.
+She smiled |although| she was sad.
+He studied, |but| didn’t pass.
+They stayed, |yet| complained.
+We went out |although| it rained.
+She agreed, |but| hesitated.
+He helped, |yet| complained.
+
+
+~Frequency
+I |always| wake early.
+She |usually| eats lunch.
+They |often| travel.
+He |sometimes| forgets.
+We |rarely| argue.
+She |never| lies.
+I |often| read.
+They |usually| arrive on time.
+He |sometimes| cooks.
+We |always| try.
+
+
+~Intensity/Emphasis
+I |do| understand.
+She |did| try hard.
+They |really| care.
+He |does| know the answer.
+We |absolutely| agree.
+She |so| wants this.
+I |really| mean it.
+They |definitely| tried.
+He |truly| believes.
+We |certainly| agree.
+
+
+~Focus/Limitation
+I |only| asked once.
+She |just| arrived.
+They |only| wanted help.
+He |just| finished.
+We |only| need time.
+She |just| called.
+I |only| meant well.
+They |just| left.
+He |only| tried once.
+We |just| started.
+
+
+~Certainty/Probability
+It |must| be true.
+She |might| come later.
+They |will| arrive soon.
+He |could| be right.
+We |may| win.
+She |must| know.
+I |might| try.
+They |probably| forgot.
+He |will| succeed.
+We |could| help.
+
+
+~Deduction
+He |must| be tired.
+She |can’t| be serious.
+They |must| have left.
+He |can’t| know yet.
+We |must| be late.
+She |can’t| have done it.
+They |must| be home.
+He |can’t| understand.
+We |must| be careful.
+She |can’t| forget.
+
+
+~Obligation/Permission/Ability
+I |must| finish this.
+She |can| leave now.
+They |have to| work.
+He |may| stay.
+We |can| help.
+She |must| obey.
+I |am able to| swim.
+They |may| enter.
+He |has to| decide.
+We |can| try.
+
+
+~Similarity/Difference
+This is |like| that.
+She acts |similar to| her sister.
+They think |differently|.
+He works |unlike| me.
+We reacted |the same way|.
+She looks |like| her mother.
+They behave |differently|.
+He answered |similarly|.
+We think |differently|.
+She dresses |like| me.
+
+
+~Manner
+She spoke |politely|.
+He worked |carefully|.
+They moved |slowly|.
+I answered |honestly|.
+She smiled |warmly|.
+He reacted |quickly|.
+We listened |attentively|.
+They walked |quietly|.
+I drove |carefully|.
+She replied |calmly|.
+
+
+~Direction/Movement
+He walked |toward| me.
+She ran |into| the room.
+They moved |away from| danger.
+I went |to| school.
+He climbed |up| the hill.
+We walked |through| the park.
+She jumped |over| the fence.
+They came |back| home.
+I moved |forward|.
+He ran |across| the field.
+
+
+~Place/Location
+The keys are |on| the table.
+She lives |in| Paris.
+They met |at| school.
+The cat is |under| the chair.
+He stayed |inside| the house.
+We waited |outside|.
+The bag is |next to| the door.
+She stood |near| me.
+They sat |behind| us.
+I stayed |here|.
+
+
+~Adding Ideas
+She sings |and| dances.
+I like coffee |and| tea.
+He called |and| apologized.
+We studied |and| practiced.
+She bought apples |and| oranges.
+They laughed |and| talked.
+I wrote |and| revised.
+He cooked |and| cleaned.
+We planned |and| prepared.
+She listened |and| learned.
+
+</textarea>
+
+<footer>
+  <p>© <span id="currentYear"></span> Perfectly Practical English</p>
+</footer>
+
+<script>
+  document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+
+
+<script>
+async function resolveRaw(source) {
+  if (typeof source === "string" && !source.includes("\n")) {
+    try {
+      const res = await fetch(source, { cache: "no-store" });
+      if (res.ok) return await res.text();
+    } catch {}
+  }
+  return source;
+}
+</script>
+
+<!-- Add html2canvas for PNG export -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script>
+const conveyor = document.getElementById('conveyor');
+const dropContainer = document.getElementById('dropContainer');
+const backButton = document.getElementById('backButton');
+const nextButton = document.getElementById('nextButton');
+const submitButton = document.getElementById('submitButton');
+
+const idField = document.getElementById('idField');
+const scoreboard = document.getElementById('scoreboard');
+const scoreData = document.getElementById('scoreData');
+
+const copyButton = document.getElementById('copyButton');
+const downloadTxtButton = document.getElementById('downloadTxtButton');
+const downloadPngButton = document.getElementById('downloadPngButton');
+
+// Student ID lookup function connected to the Data Registry Module
+function getStudentName(id) {
+  return window.resolveStudentNameFromId ? window.resolveStudentNameFromId(id) : (id ? id.trim() : "Student");
+}
+
+function parseSections(raw) {
+  const lines = raw.split('\n').map(l => l.trim());
+  const sections = [];
+  let current = null;
+
+  for (const line of lines) {
+    if (!line) continue;
+
+    if (line.startsWith('~')) {
+      current = {
+        title: line.replace(/^~+/, '').trim(),
+        lines: []
+      };
+      sections.push(current);
+    } else if (current) {
+      current.lines.push(line);
+    }
+  }
+  return sections;
+}
+
+const rawText = document.getElementById('rawTextInput').value;
+const sections = parseSections(rawText);
+
+let currentSectionIndex = -1;
+let gameStarted = false;
+
+// Modal & Dropdown UI elements
+const btn = document.getElementById("sectionSelectorBtn");
+const modalRoot = document.getElementById("sectionModalRoot");
+const modalBackdrop = document.getElementById("sectionModalBackdrop");
+const modalClose = document.getElementById("sectionModalClose");
+const listContainer = document.getElementById("sectionListContainer");
+
+function openModal() {
+  listContainer.innerHTML = "";
+
+  if (sections.length === 0) {
+    const empty = document.createElement("div");
+    empty.style.cssText = "padding:10px; text-align:center; color:#666;";
+    empty.textContent = "No categories found.";
+    listContainer.appendChild(empty);
+  } else {
+    sections.forEach((sec, i) => {
+      const item = document.createElement("div");
+      item.className = "section-item" + (i === currentSectionIndex ? " selected" : "");
+      item.textContent = sec.title;
+      item.addEventListener("click", () => {
+        listContainer.querySelectorAll(".section-item").forEach(el => el.classList.remove("selected"));
+        item.classList.add("selected");
+        
+        currentSectionIndex = i;
+        btn.textContent = sec.title;
+        closeModal();
+        gameStarted = true;
+
+        currentIndex = 0;
+        dropContainer.innerHTML = '';
+        conveyor.innerHTML = '';
+        conveyorItems = [];
+        scrollPos = 0;
+
+        renderCurrent();
+      });
+      listContainer.appendChild(item);
+    });
+  }
+  modalRoot.style.display = "block";
+}
+
+function closeModal() {
+  modalRoot.style.display = "none";
+}
+
+if (btn) btn.addEventListener("click", openModal);
+if (modalClose) modalClose.addEventListener("click", closeModal);
+if (modalBackdrop) modalBackdrop.addEventListener("click", closeModal);
+
+let remainingWords = [];
+let selectedTile = null;
+const sushiEmojis = ['🍣','🍤','🍙','🍥','🥢','🍱'];
+
+let sushiIndex = 0;
+let conveyorItems = [];
+let scrollPos = 0;
+
+requestAnimationFrame(animateConveyor);
+
+let currentIndex = 0;
+let userAnswers = sections.map(sec => new Array(sec.lines.length).fill(null));
+
+function shuffle(arr){ const a=arr.slice(); for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+let maxSushiInRow = 3;
+
+function buildConveyor(){
+  conveyorItems = conveyorItems.filter(item => item && !item.consumed);
+  const targetLength = 30;
+  let sushiInRow = 0;
+  maxSushiInRow = maxSushiInRow || 3;
+
+  while(conveyorItems.length < targetLength){
+    const minSushiBeforeWord = 1 + Math.floor(Math.random() * 2);
+    const shouldAddWord =
+      remainingWords.length > 0 &&
+      (sushiInRow >= minSushiBeforeWord || sushiInRow >= maxSushiInRow);
+
+    if(shouldAddWord){
+      const w = remainingWords.shift();
+      conveyorItems.push({ text: w, sushi: false, consumed: false });
+      sushiInRow = 0;
+      maxSushiInRow = 2 + Math.floor(Math.random() * 4);
+    } else {
+      const s = sushiEmojis[sushiIndex] || '🍣';
+      sushiIndex = (sushiIndex + 1) % sushiEmojis.length;
+      conveyorItems.push({ text: s, sushi: true });
+      sushiInRow++;
+    }
+  }
+
+  conveyor.innerHTML = '';
+  conveyorItems.forEach(item=>{
+    const wrapper = document.createElement('div');
+    wrapper.className = 'tileWrapper';
+
+    const plate = document.createElement('div');
+    plate.className = 'plate';
+    wrapper.appendChild(plate);
+
+    const tile = document.createElement('span');
+    tile.className = item.sushi ? 'tile sushi' : 'tile';
+    tile.textContent = item.text;
+
+    if (!item.sushi && !item.consumed) {
+      tile.addEventListener('click', () => addToDrop(wrapper, item));
+    }
+
+    wrapper.appendChild(tile);
+    item.element = wrapper;
+    conveyor.appendChild(wrapper);
+  });
+}
+function animateConveyor(){
+  scrollPos -= 1;
+  const firstItem = conveyorItems[0];
+  if(firstItem && firstItem.element.getBoundingClientRect().right < conveyor.parentElement.getBoundingClientRect().left){
+    conveyorItems.shift();
+    conveyorItems.push(firstItem);
+    scrollPos += firstItem.element.offsetWidth + 6;
+    buildConveyor();
+  }
+  conveyor.style.transform = `translateX(${scrollPos}px)`;
+  requestAnimationFrame(animateConveyor);
+}
+
+function addToDrop(wrapper, item){
+  if(item.sushi || item.consumed) return;
+
+  const newWrapper = document.createElement('div');
+  newWrapper.className = 'tileWrapper';
+
+  const plate = document.createElement('div');
+  plate.className = 'plate';
+  newWrapper.appendChild(plate);
+
+  const newTile = document.createElement('span');
+  newTile.className = 'tile';
+  newTile.textContent = wrapper.querySelector('.tile').textContent;
+  newTile.addEventListener('click', ()=>selectDropTile(newTile));
+
+  newWrapper.appendChild(newTile);
+  dropContainer.appendChild(newWrapper);
+
+  item.consumed = true;
+  if(item.element) item.element.remove();
+
+  buildConveyor();
+}
+
+function selectDropTile(tile){
+  if(!selectedTile){ selectedTile=tile; tile.style.border='2px solid yellow'; }
+  else if(selectedTile===tile){ tile.style.border=''; selectedTile=null; }
+  else { const tmp=selectedTile.textContent; selectedTile.textContent=tile.textContent; tile.textContent=tmp; selectedTile.style.border=''; selectedTile=null; }
+}
+
+function saveAnswer() {
+  if (currentSectionIndex === -1) return;
+
+  const words = [...dropContainer.children]
+    .map(t => t.querySelector('.tile').textContent);
+
+  userAnswers[currentSectionIndex][currentIndex] = words;
+}
+
+function renderCurrent(){
+  dropContainer.innerHTML="";
+  const sentence = sections[currentSectionIndex].lines[currentIndex];
+  remainingWords = shuffle(sentence.match(/[\w'-]+[.,!?;:]?/g) || []);
+
+  if (userAnswers[currentSectionIndex][currentIndex]) {
+    userAnswers[currentSectionIndex][currentIndex].forEach(w => {
+      const wrapper=document.createElement('div');
+      wrapper.className='tileWrapper';
+      const t=document.createElement('span');
+      t.className='tile';
+      t.textContent=w;
+      t.addEventListener('click',()=>selectDropTile(t));
+      wrapper.appendChild(t);
+      dropContainer.appendChild(wrapper);
+      const idx = remainingWords.indexOf(w);
+      if(idx>-1) remainingWords.splice(idx,1);
+    });
+  }
+  conveyorItems = [];
+  sushiIndex = 0;
+  maxSushiInRow = 3;
+  buildConveyor();
+}
+
+backButton.addEventListener('click', () => {
+  saveAnswer();
+  currentIndex--;
+  if (currentIndex < 0) {
+    currentIndex = sections[currentSectionIndex].lines.length - 1;
+  }
+  renderCurrent();
+});
+
+nextButton.addEventListener('click', () => {
+  saveAnswer();
+  currentIndex++;
+  if (currentIndex >= sections[currentSectionIndex].lines.length) {
+    currentIndex = 0;
+  }
+  renderCurrent();
+});
+
+function getScoreboardFilename(extension) {
+  if (scoreData && scoreData.textContent.trim()) {
+    let firstLine = scoreData.textContent.split('\n')[0];
+    let baseName = firstLine
+      .replace(/\|/g, '_')
+      .replace(/\s+/g, '_')
+      .replace(/[:\/]/g, '-');
+    return baseName + '.' + extension;
+  }
+  return 'scoreboard.' + extension;
+}
+
+submitButton.addEventListener('click', () => {
+  saveAnswer();
+
+  const id = idField.value.trim() || 'N/A';
+  const name = getStudentName(idField.value);
+  let currentFile = window.location.pathname.split('/').pop() || 'unknown.html';
+  currentFile = currentFile.split('?')[0].split('#')[0];
+  const filenameWithoutExt = currentFile.replace(/\.[^/.]+$/, "");
+
+  if (currentSectionIndex === -1) {
+    alert("No section selected.");
+    return;
+  }
+
+  let correctCount = 0;
+  let total = 0;
+
+  const sec = sections[currentSectionIndex];
+  const answers = userAnswers[currentSectionIndex];
+
+  sec.lines.forEach((line, lIdx) => {
+    total++;
+    const orig = line.match(/[\w'-]+[.,!?;:]?/g) || [];
+    const ans = answers[lIdx];
+
+    if (
+      ans &&
+      ans.length === orig.length &&
+      ans.every((w, k) => w === orig[k])
+    ) {
+      correctCount++;
+    }
+  });
+
+  const percentage = Math.round((correctCount / total) * 100);
+  const pctStr = percentage + '%';
+
+  const now = new Date();
+  const pad = n => n.toString().padStart(2,'0');
+  const dateStr = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+  const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const sectionName = sec.title;
+
+  const resultText = `${filenameWithoutExt}|${sectionName}|${name}|${id}|${dateStr}|${timeStr}|${correctCount}/${total}|${pctStr}`;
+
+  saveResult(resultText);
+
+  scoreData.textContent += (scoreData.textContent ? '\n' : '') + resultText;
+  scoreboard.style.display = 'block';
+});
+
+copyButton.addEventListener('click', ()=>{ navigator.clipboard.writeText(scoreData.textContent).then(()=>alert('Copied to clipboard')); });
+downloadTxtButton.addEventListener('click', ()=>{
+  const downloadFileName = getScoreboardFilename('txt');
+  const blob = new Blob([scoreData.textContent], {type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = downloadFileName;
+  a.click();
+});
+downloadPngButton.addEventListener('click', () => {
+  const downloadFileName = getScoreboardFilename('png');
+  html2canvas(scoreData).then(canvas => {
+    canvas.toBlob(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = downloadFileName;
+      a.click();
+    });
+  });
+});
+</script>
+
+<script>
+const borderDiv=document.createElement("div");
+borderDiv.style.position="fixed"; borderDiv.style.inset="0";
+borderDiv.style.border="10px solid #39FF14";
+borderDiv.style.boxSizing="border-box";
+borderDiv.style.zIndex="9999";
+borderDiv.style.pointerEvents="none";
+document.body.appendChild(borderDiv);
+</script>
+
+<script>
+(function () {
+  const container = document.getElementById("conveyorContainer");
+  if (!container) return;
+
+  container.style.position ||= "relative";
+
+  const band = document.createElement("div");
+  band.setAttribute("aria-hidden", "true");
+
+  Object.assign(band.style, {
+    position: "absolute",
+    left: "0",
+    width: "100%",
+    height: "20px",
+    bottom: "-20px",
+    zIndex: "-4",
+    pointerEvents: "none",
+    background: `
+      linear-gradient(
+        120deg,
+        #bfc3c7 0%,
+        #e6e8ea 20%,
+        #9ea3a8 40%,
+        #f5f6f7 50%,
+        #9ea3a8 60%,
+        #e6e8ea 80%,
+        #bfc3c7 100%
+      )
+    `,
+    backgroundSize: "200% 100%"
+  });
+
+  container.appendChild(band);
+
+  let pos = 0;
+  function animate() {
+    pos -= 0.6;
+    band.style.backgroundPosition = `${pos}px 0`;
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+</script>
+
+<script>
+(function () {
+  const dropBand = document.getElementById("dropBand");
+  if (!dropBand) return;
+
+  const mask = document.createElement("div");
+  mask.setAttribute("aria-hidden", "true");
+
+  Object.assign(mask.style, {
+    position: "absolute",
+    left: "0",
+    top: `${dropBand.offsetTop + dropBand.offsetHeight}px`,
+    width: "100vw",
+    height: "100vh",
+    background: "#ffffff",
+    zIndex: "1",
+    pointerEvents: "none"
+  });
+
+  document.body.appendChild(mask);
+
+  function updateMask() {
+    mask.style.top = dropBand.offsetTop + dropBand.offsetHeight + "px";
+  }
+
+  window.addEventListener("resize", updateMask);
+  updateMask();
+})();
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let filename = window.location.pathname.split("/").pop();
+    filename = filename.replace(/\.html$/i, "");
+    filename = filename.replace(/^[^_]*_/, "");
+    const title = filename.replace(/_/g, " ");
+    const h1 = document.querySelector("h1");
+    if (h1) {
+        h1.textContent = title;
+    }
+});
+</script>
+
+<script>
+(function(){
+const RAW_TEXT = `
+How to use this page...
+
+• Enter your student ID into the ID field — Auto: Your name automatically populates if registered in the database, and entering your ID unlocks score tracking.
+• Click the Select a section button to open the category menu and pick a grammar topic.
+• Click the Instructions button anytime to view the gameplay guide modal.
+• Grab sentence words as they move along the sushi conveyor belt and place them into the drop zone in the correct order to form the sentence.
+• Use the Back and Next buttons to navigate through sentences within the selected category.
+• Click Submit to view your final score and percentage — Auto: Results are compiled into a formatted scoreboard record and logged automatically to the database.
+• Use the Copy, ↓TXT, or ↓PNG buttons to copy or download your score record.`;
+
+function parseRawInstructions(text){
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+
+  lines.forEach(line => {
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
+    html.push(`<p>${line}</p>`);
+  });
+
+  return html.join("");
+}
+
+const style = document.createElement("style");
+style.textContent = `
+#instructionsRoot{ position:fixed; inset:0; display:none; z-index:99999; }
+#instructionsBackdrop{ position:absolute; inset:0; background:rgba(0,0,0,.45); }
+#instructionsModal{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  width:min(500px,92vw);
+  max-height:min(80vh,calc(100dvh - 16px));
+  background:#fff;
+  border-radius:12px;
+  padding:18px;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  box-shadow:0 4px 12px rgba(0,0,0,0.2);
+  border:1px solid var(--input-border-blue);
+  font-family:var(--font-main);
+}
+#instructionsHeader{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:12px;
+  flex:0 0 auto;
+  font-family:var(--font-main);
+  font-size:18px;
+  line-height:1.3;
+  font-weight:700;
+  color:var(--blue);
+}
+#instructionsTitle{ color:var(--blue); font-weight:700; font-size:18px; }
+#instructionsBack{
+  background:linear-gradient(145deg, #ffffff, var(--section-item-default));
+  border:1px solid var(--input-border-blue);
+  color:var(--blue);
+  font-family:var(--font-main);
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  padding:0 8px;
+  line-height:1;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:6px;
+  height:28px;
+  width:auto;
+  box-shadow:0 1px 2px rgba(0, 0, 0, 0.04);
+}
+#instructionsBack:hover{
+  background:linear-gradient(145deg, #ffffff, var(--section-item-hover));
+  border-color:var(--blue);
+}
+#instructionsContent{
+  padding:0;
+  overflow-y:auto;
+  min-height:0;
+  flex:1 1 auto;
+  scrollbar-width:none;
+  -ms-overflow-style:none;
+  font-family:var(--font-main);
+  font-size:14px;
+  line-height:1.5;
+  font-weight:400;
+  color:#333;
+}
+#instructionsContent::-webkit-scrollbar{ display:none; }
+#instructionsContent h3{
+  margin-top:10px;
+  margin-bottom:4px;
+  font-family:var(--font-main);
+  font-size:15px;
+  line-height:1.3;
+  font-weight:700;
+  color:#1976d2;
+}
+#instructionsContent p{ margin-bottom:8px; font-weight:400; }
+#instructionsContent hr{ margin:12px 0; border:none; border-top:1px solid var(--input-border-blue); }
+`;
+document.head.appendChild(style);
+
+const btn = document.getElementById("instructionsBtn");
+
+const root = document.createElement("div");
+root.id = "instructionsRoot";
+root.innerHTML = `
+<div id="instructionsBackdrop"></div>
+<div id="instructionsModal">
+  <div id="instructionsHeader">
+    <span id="instructionsTitle">Instructions</span>
+    <button id="instructionsBack" type="button">✕</button>
+  </div>
+  <div id="instructionsContent">
+    ${parseRawInstructions(RAW_TEXT)}
+  </div>
+</div>
+`;
+document.body.appendChild(root);
+
+const modalContent = document.getElementById("instructionsContent");
+modalContent.addEventListener("wheel", e=>{ e.stopPropagation(); },{passive:false});
+modalContent.addEventListener("touchmove", e=>{ e.stopPropagation(); },{passive:false});
+
+function openModal(){
+  root.style.display="block";
+  document.body.style.overflow="hidden";
+  document.documentElement.style.overflow="hidden";
+}
+
+function closeModal(){
+  root.style.display="none";
+  document.body.style.overflow="";
+  document.documentElement.style.overflow="";
+}
+
+if(btn) btn.onclick = openModal;
+document.getElementById("instructionsBack").onclick = closeModal;
+document.getElementById("instructionsBackdrop").onclick = closeModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape") closeModal();
+});
+})();
+</script>
+
+<script>
+(function() {
+  function preventPinch(e) { if (e.touches.length > 1) e.preventDefault(); }
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) e.preventDefault();
+    lastTouchTime = now;
+  }
+  function preventGesture(e) { e.preventDefault(); }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<!-- SUPABASE LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseClient = window.supabase?.createClient(
+  'https://etwwriloppklhhkmswpr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+);
+
+if (!supabaseClient) {
+  console.error("❌ Supabase failed to initialize");
+}
+
+let lastUploadedScore = null;
+
+window.saveResult = async function saveResult(text) {
+  if (!supabaseClient) {
+    console.error("❌ No Supabase client");
+    return;
+  }
+
+  let cleaned;
+  try {
+    cleaned = (typeof text === "string") ? text : JSON.stringify(text);
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+  } catch (err) {
+    console.error("❌ Normalize error:", err);
+    return;
+  }
+
+  if (!cleaned) {
+    console.error("❌ Empty value blocked");
+    return;
+  }
+
+  if (cleaned === lastUploadedScore) {
+    console.log("⚠️ Duplicate blocked");
+    return;
+  }
+
+  lastUploadedScore = cleaned;
+
+  const { data, error } = await supabaseClient
+    .from("scoreboard_raw")
+    .insert([
+      { result_text: cleaned }
+    ])
+    .select();
+
+  if (error) {
+    console.error("❌ INSERT FAILED FULL ERROR:", error);
+    return;
+  }
+
+  console.log("✅ INSERT SUCCESS:", data);
+};
+</script>
+
+<!-- 3. STUDENT DATA REGISTRY MODULE -->
+<script>
+(function() {
+    'use strict';
+    const RAW_STUDENT_DATA = `
+        55555|David
+        55551|Matthew
+        12345|Sarah
+    `;
+    const studentDatabase = new Map();
+    RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+        const [id, name] = line.split('|'].map(s => s ? s.trim() : '');
+        if (id && name) studentDatabase.set(id, name);
+    });
+
+    window.resolveStudentNameFromId = function(idInput) {
+        if (!idInput) return "Student";
+        const trimmed = String(idInput).trim();
+        if (/^(x|g|guest)$/i.test(trimmed)) {
+            return "Guest";
+        }
+        return studentDatabase.get(trimmed) || "Guest";
+    };
+})();
+</script>
+
+</body>
+</html>
