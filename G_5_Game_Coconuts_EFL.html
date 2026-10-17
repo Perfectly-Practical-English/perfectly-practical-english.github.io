@@ -13,6 +13,23 @@ body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
     background:#d0e7f9; 
     user-select:none; 
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    margin: 0 auto !important;
+}
+
+html, body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
 }
 
 /* ===============================
@@ -23,11 +40,19 @@ body {
   display: flex;
   flex-direction: row;
   margin-top: 0;
+  margin-bottom: 10px;
   align-items: center;
-  gap: 6px;
+  gap: 3px;
   height: 38px;
   flex-wrap: nowrap;
   white-space: nowrap;
+  width: 100%;
+  max-width: calc(100% - 10px);
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 
 /* ===== UNIFORM TOP BAR & BUTTON STYLING ===== */
@@ -58,15 +83,15 @@ body {
 #topBar input[type="text"] {
   background: #fff !important;
   color: #000 !important;
-  flex: 0 0 150px !important;
-  width: 150px !important;
+  flex: 0 0 85px !important;
+  width: 85px !important;
+  min-width: 0 !important;
   cursor: text !important;
   text-align: left !important;
   justify-content: flex-start !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
 }
-
 #topBar input[type="text"]::placeholder {
   color: #1976d2 !important;
   opacity: 1 !important;
@@ -76,10 +101,11 @@ body {
 #topBar #sectionSelectorBtn {
   flex: 1 1 auto !important;
   min-width: 0 !important;
-  text-align: center !important;
-  justify-content: center !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
+  text-align: left !important;
+  justify-content: flex-start !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
 }
 
 #topBar button {
@@ -294,6 +320,12 @@ button:not(#mcButtonsContainer button):disabled {
     background: transparent;
     border: none;
     flex-wrap: nowrap;
+    width: 100%;
+    max-width: calc(100% - 10px);
+    margin: 12px auto 24px auto;
+    box-sizing: border-box;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 #scoreButtons button {
@@ -303,14 +335,18 @@ button:not(#mcButtonsContainer button):disabled {
 
 /* === SCOREBOARD DISPLAY === */
 #scoreboardContainer {
-    margin: 12px 0 0 0;
+    margin: 12px auto 0 auto;
     font-family: monospace;
     font-weight: bold;
     font-size: 18px;
     white-space: pre-wrap;
     word-break: break-word;
     overflow-wrap: anywhere;
-    max-width: 100%;
+    width: 100%;
+    max-width: calc(100% - 10px);
+    box-sizing: border-box;
+    padding-left: 5px;
+    padding-right: 5px;
 }
 
 /* === GAME AREA === */
@@ -318,12 +354,14 @@ button:not(#mcButtonsContainer button):disabled {
     position:relative; 
     margin:16px auto; 
     height:300px; 
-    width:calc(100% - 2px); 
+    width:calc(100% - 12px); 
+    max-width:calc(100% - 10px);
     padding:10px; 
     border-radius:6px; 
     background:#9fd0ff; 
     overflow:hidden; 
     box-shadow: inset 0 0 12px #5f9eff; 
+    box-sizing: border-box;
 }
 
 #terrainCanvas { 
@@ -410,6 +448,11 @@ footer {
     color: #666;
     background: #f0f8ff;
     border-radius: 6px;
+    width: 100%;
+    max-width: calc(100% - 10px);
+    margin-left: auto;
+    margin-right: auto;
+    box-sizing: border-box;
 }
 </style>
 </head>

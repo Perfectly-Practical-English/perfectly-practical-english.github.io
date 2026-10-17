@@ -34,10 +34,11 @@ html, body {
   background: #111;
   overflow: hidden;
   font-family: var(--font-main);
+  display: flex;
+  flex-direction: column;
 }
-canvas { display: block; }
+canvas { display: block; flex: 1; width: 100%; height: 100%; }
 
-/* ===== OVERLAY ===== */
 /* ===== OVERLAY ===== */
 #overlay {
   position: fixed;
@@ -53,13 +54,15 @@ canvas { display: block; }
 .top-bar {  
   display: flex;  
   gap: 3px;  
-  margin: 12px auto 8px auto;  
+  margin: 12px auto 3px auto;  
   max-width: 400px;
   flex-wrap: nowrap;  
   align-items: center;  
   position: relative;
   z-index: 10001;
   padding: 0 12px;
+  width: 100%;
+  flex: 0 0 auto;
 }
 
 .top-bar input[type="text"],
@@ -143,7 +146,7 @@ canvas { display: block; }
   white-space: pre-wrap;
   word-break: break-word;
   overflow-wrap: anywhere;
-  max-width: 600px;
+  width: 100%;
   color: #fff;
   text-align: center;
 }
@@ -152,7 +155,7 @@ canvas { display: block; }
   margin: 3px auto;
   display: none;
   gap: 3px;
-  max-width: 600px;
+  width: 100%;
   justify-content: center;
   flex-wrap: wrap;
 }
@@ -227,44 +230,50 @@ input[type=range] {
 }
 
 #typingBar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
+  position: relative;
   width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
   background: rgba(0, 0, 0, 0.75);
   z-index: 10000;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  padding: 8px 12px;
+  align-items: stretch;
+  padding: 0 12px;
+  flex: 0 0 auto;
 }
 
 #wordInput {
   width: 100%;
-  max-width: 800px;
-  padding: 12px;
-  font-size: 18px;
+  max-width: 100%;
+  height: 28px !important;
+  padding: 0 8px !important;
+  font-size: 11px !important;
   background: #111;
   color: #fff;
   border: 1px solid #444;
   outline: none;
   border-radius: 6px;
-  margin: 3px;
+  margin: 0;
+  box-sizing: border-box !important;
 }
-
 #wordInput::placeholder {
   color: #777;
 }
 
 /* Footer styles */
 #copyrightSection {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
   font-size: 10px;
   color: #aaa;
-  padding: 2px 12px 2px;
+  padding: 4px 12px;
   text-align: center;
-  margin-top: 3px;
+  background: rgba(17, 17, 17, 0.85); /* Optional: matches your dark theme background */
+  z-index: 10002;
 }
-
 /* ===== UNIFIED MODAL STYLING (Selection & Instructions) ===== */
 #sectionModalRoot,
 #instructionsRoot {
@@ -423,6 +432,26 @@ input[type=range] {
   <button id="submitBtn" type="button">Submit</button>
 </div>
 
+<!-- TYPING BAR -->
+<div id="typingBar">
+  <input
+    id="wordInput"
+    type="text"
+    placeholder="Type the words that you see."
+    autocomplete="off"
+    disabled
+  />
+  <div id="scoreboardContainer"></div>
+  <div id="scoreButtons">
+    <button id="copyBtn">Copy</button>
+    <button id="downloadTxtBtn">↓Text</button>
+    <button id="downloadPngBtn">↓PNG</button>
+  </div>
+  <div id="copyrightSection">
+    © <span id="currentYear"></span> Perfectly Practical English
+  </div>
+</div>
+
 <!-- Section Selection Modal -->
 <div id="sectionModalRoot">
   <div id="sectionModalBackdrop"></div>
@@ -494,24 +523,6 @@ input[type=range] {
   </div>
 </div>
 
-<div id="typingBar">
-  <input
-    id="wordInput"
-    type="text"
-    placeholder="Type the words that you see."
-    autocomplete="off"
-    disabled
-  />
-  <div id="scoreboardContainer"></div>
-  <div id="scoreButtons">
-    <button id="copyBtn">Copy</button>
-    <button id="downloadTxtBtn">↓Text</button>
-    <button id="downloadPngBtn">↓PNG</button>
-  </div>
-  <div id="copyrightSection">
-    © <span id="currentYear"></span> Perfectly Practical English
-  </div>
-</div>
 
 <script>
   document.getElementById('currentYear').textContent = new Date().getFullYear();

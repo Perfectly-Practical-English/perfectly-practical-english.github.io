@@ -1,0 +1,709 @@
+
+<style>
+:root {
+  --bg: #f7fdfb;
+  --blue: #1976d2;
+  --blue-hover: #1565c0;
+  --input-border-blue: #cfe2f7;
+  --section-item-default: #eaf6ff;
+  --section-item-hover: #d0e8ff;
+  --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+html {
+  overflow-x: hidden;
+  overflow-y: scroll;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+body {
+  font-family: var(--font-main);
+  padding: 0 15px;
+  background: var(--bg);
+  color: #222;
+  line-height: 1.5;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+*::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+h1 {
+  color: var(--blue);
+  font-family: var(--font-main);
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 0.3em;
+  margin-left: 0.3em;
+}
+
+p {
+  color: #333;
+  margin-left: 0.6em;
+}
+
+a {
+  color: var(--blue);
+  text-decoration: none;
+}
+
+a:hover,
+a:focus {
+  text-decoration: underline;
+}
+
+.section {
+  margin-bottom: 1.2em;
+}
+
+/* Section heading buttons */
+.collapsible {
+  width: 100%;
+  min-width: 0;
+  display: block;
+  font-family: var(--font-main);
+  font-size: 1.1em;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  user-select: none;
+  padding: 9px 12px;
+  margin-bottom: 0;
+  color: var(--blue);
+  background: linear-gradient(145deg, #ffffff, var(--section-item-default));
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: background 0.12s, border-color 0.12s;
+}
+
+.collapsible:hover {
+  background: linear-gradient(145deg, #ffffff, var(--section-item-hover));
+  border-color: var(--blue);
+}
+
+.collapsible:focus-visible,
+.content a:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 2px;
+}
+
+.collapsible::before {
+  content: "+ ";
+}
+
+.collapsible.active::before {
+  content: "− ";
+}
+
+/* Collapsible file-button grid */
+.content {
+  display: none;
+  margin-top: 0;
+  padding: 7px 0 0 10px;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 6px;
+  min-width: 0;
+}
+
+.content.open {
+  display: grid;
+}
+
+/* File buttons */
+.content a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  width: 100%;
+  min-height: 30px;
+  padding: 5px 6px;
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  background: linear-gradient(145deg, #ffffff, var(--section-item-default));
+  color: var(--blue);
+  font-family: var(--font-main);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.3;
+  text-align: center;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+
+.content a:hover,
+.content a:focus {
+  background: linear-gradient(145deg, #ffffff, var(--section-item-hover));
+  border-color: var(--blue);
+  color: var(--blue-hover);
+  text-decoration: none;
+}
+
+/* QR code */
+#qrBox {
+  width: 220px;
+  max-width: 75%;
+  margin: 2em auto 4em auto;
+  text-align: center;
+}
+
+#qrBox img {
+  width: 100%;
+  display: block;
+  margin-bottom: 0.5em;
+  filter:
+    drop-shadow(0 0 6px rgba(0,0,0,0.9))
+    drop-shadow(0 0 14px rgba(0,0,0,0.7))
+    drop-shadow(0 0 28px rgba(0,0,0,0.5));
+}
+
+.hotspot-info {
+  font-size: 10px;
+  color: #555;
+  margin-left: 0.6em;
+}
+
+/* Footer */
+footer {
+  position: fixed;
+  bottom: 10px;
+  left: 0;
+  width: 100%;
+  background: var(--bg);
+  border-top: 1px solid var(--input-border-blue);
+  text-align: left;
+  z-index: 5;
+  padding: 5px 0;
+}
+
+footer p {
+  margin: 0 0 0 20px;
+  font-size: 10px;
+  color: #666 !important;
+  font-style: normal;
+}
+
+/* Bottom-right corner image */
+#david-corner {
+  position: fixed;
+  right: 15px;
+  bottom: 0;
+  width: 20vw;
+  max-width: 320px;
+  min-width: 140px;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  z-index: 4;
+}
+
+#david-corner img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Green border retained */
+#greenBorder {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 10px solid #39FF14;
+  box-sizing: border-box;
+  z-index: 2147483647;
+  pointer-events: none;
+}
+
+/* Standard mobile portrait screens */
+@media (max-width: 600px) {
+  body {
+    font-size: 16px;
+    padding: 0 9px;
+    line-height: 1.45;
+  }
+
+  h1 {
+    font-size: 24px;
+    line-height: 1.2;
+    margin: 12px 4px 10px;
+  }
+
+  body > p {
+    margin: 0 4px 16px;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+  }
+
+  .section {
+    margin-bottom: 10px;
+  }
+
+  .collapsible {
+    min-height: 44px;
+    padding: 9px 10px;
+    font-size: 16px;
+    line-height: 1.3;
+    border-radius: 6px;
+    touch-action: manipulation;
+  }
+
+  /* Two columns on ordinary phones */
+  .content {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    padding: 7px 0 2px;
+  }
+
+  .content a {
+    min-height: 42px;
+    padding: 7px 5px;
+    font-size: 13px;
+    line-height: 1.3;
+    white-space: normal;
+    overflow: visible;
+    overflow-wrap: anywhere;
+    word-break: normal;
+    text-overflow: clip;
+    border-radius: 6px;
+    -webkit-tap-highlight-color: rgba(25, 118, 210, 0.2);
+  }
+
+  #qrBox {
+    width: 190px;
+    max-width: 80%;
+    margin: 28px auto 20px;
+  }
+
+  .hotspot-info {
+    font-size: 11px;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+
+  /* Footer returns to normal page flow */
+  footer {
+    position: static;
+    width: 100%;
+    margin-top: 20px;
+    padding: 10px 5px;
+  }
+
+  footer p {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+  /* Corner image no longer floats over the buttons */
+  #david-corner {
+    position: static;
+    width: 100px;
+    min-width: 0;
+    max-width: 30%;
+    margin: 10px 5px 12px auto;
+  }
+
+  #greenBorder {
+    border-width: 5px;
+  }
+}
+
+/* Very narrow phones */
+@media (max-width: 350px) {
+  body {
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+
+  h1 {
+    font-size: 21px;
+  }
+
+  .content {
+    gap: 5px;
+  }
+
+  .content a {
+    font-size: 12px;
+    padding: 6px 3px;
+  }
+
+  .collapsible {
+    font-size: 15px;
+  }
+}
+</style>
+
+</head>
+
+<body>
+
+<h1>Perfectly Practical English</h1>
+
+<p>
+  For instructions, click the green bar at the bottom of each page.
+  If you have questions, contact
+  <a href="mailto:PerfectlyPracticalEnglish@outlook.com">PerfectlyPracticalEnglish@outlook.com</a>.
+</p>
+
+<div id="indexSections"></div>
+
+<div id="qrBox">
+  <img
+    src="PerfectlyPracticalEnglish_with_Hotspot.app.png"
+    alt="QR Code"
+  >
+  <p class="hotspot-info">
+    IEP32 Hotspot: IEP32_FL3_PALME 2746<br>
+    Password: 0!92V2x8
+  </p>
+</div>
+
+<footer>
+  <p>© 2026 Perfectly Practical English™. All rights reserved.</p>
+</footer>
+
+<div id="david-corner">
+  <img src="David-large.png" alt="">
+</div>
+
+<div id="greenBorder"></div>
+
+<script>
+"use strict";
+
+/*
+  MASTER FILE LIST
+
+  Add new filenames anywhere in this array.
+  JavaScript sorts them automatically.
+*/
+
+const INTERNAL_FILES = [
+  "V_1_Flash_Cards_EFL.html",
+  "V_2_Flash_Cards_Signal_Words.html",
+  "V_3_Game_Recognize_Signal Words_EFL.html",
+  "V_4_Crossword_Puzzle_EFL.html",
+  "V_5_Game_Word_Bombs_EFL.html",
+  "V_6_Game_Bubbles_EFL.html",
+  "V_7_Game_Twister_EFL.html",
+  "V_8_Game_Kaleidoscope_EFL.html",
+  "V_9_Game_Space_Invaders_EFL.html",
+  "V_10_Game_UFO_Abduction_EFL.html",
+
+  "RG_1_Grammar_at_7-11.html",
+  "RG_2_Basic_English_Toolkit.html",
+  "RG_3_Grammar_Lesson_Tips.html",
+  "RG_4_Grammar_Lesson_Dialogues.html",
+
+  "G_1_Demo_Word_Scramble_EFL.html",
+  "G_2_Game_Ants_EFL.html",
+  "G_3_Game_Asteroids_EFL.html",
+  "G_4_Game_Cars_EFL.html",
+  "G_5_Game_Coconuts_EFL.html",
+  "G_6_Game_Grammar_Bomber.html",
+  "G_7_Game_Sushi_Bar_EFL.html",
+  "G_8_Game_Haunted_House_EFL.html",
+  "G_9_Quiz_Recognize_Parts_of_Speech_EFL.html",
+  "G_10_Game_Grammar_Mega-Quizzes_EFL.html",
+  "G_11_Game_Cards_DROP.html",
+
+  "CD_1_Discussion_Form.html",
+  "CD_2_Composition_Book.html",
+  "CD_3_Discussion_Questions.html",
+  "CD_4_Discussion_Responses.html",
+  "CD_5_Image_MC.html",
+  "CD_6_Image_Scramble.html",
+  "CD_7_Image_Captions.html",
+  "CD_8_EFL_Gameboard.html",
+  "CD_9_Universal_Gameboard.html",
+  "CD_10_Word_Squares_600.html",
+
+  "R_1_Personal_Profiles.html",
+  "R_2_Hobbies.html",
+  "R_3_School.html",
+  "R_4_Daily_Routines_and_Chores.html",
+  "R_5_Food-International_Cuisine.html",
+  "R_6_Food_Product.html",
+  "R_7_Music.html",
+  "R_8_World_Sports.html",
+  "R_9_Famous_Athletes.html",
+  "R_10_Famous_People.html",
+  "R_11_Career_Opportunities.html",
+  "R_12_Professionalism.html",
+  "R_13_Life_on_Planet_Earth.html",
+  "R_14_Travel.html",
+  "R_15_Mysteries.html",
+  "R_16_Disasters and Survival.html",
+  "R_17_Outer_Space.html",
+  "R_18_Warriors.html",
+  "R_19_Super_Heroes.html",
+  "R_20_Pirates_and_Bad_Guys.html",
+  "R_21_Joke_Book.html",
+  "R_22_Haiku.html",
+
+  "RL_1_Grammar_Fables_by_Aesop.html",
+  "RL_2_Treasure_Island.html",
+  "RL_3_20000_Leagues_Under_the_Sea.html",
+  "RL_4_The_Jungle_Book.html",
+  "RL_5_War_of_The_Worlds.html",
+  "RL_6_Sherlock_Holmes.html",
+  "RL_7_Scary_Stories.html",
+  "RL_8_Fairy_Tales.html",
+  "RL_9_The_Arabian_Nights.html",
+  "RL_10_Songs_and_Nursery_Rhymes.html",
+  "RL_11_Christmas_Stories.html",
+
+  "RW_1_Reading_Strategies.html",
+  "RW_2_Fluency_and_Pronunciation_Practice.html",
+  "RW_3-Logical Fallacies.html",
+  "RW_4_Projects.html",
+  "RW_5_Writing Projects.html",
+  "RW_6_Writing_Assignments_and_Examples_EFL.html",
+
+  "RT_1_Classroom_Emergencies.html",
+  "RT_2_First_Aid_Tips.html",
+  "RT_3_Survival_Tips.html",
+  "RT_4_Healthy_Eating_Tips.html",
+  "RT_5_Exercise_Tips.html",
+
+  "T_1_English-Thai_Demo_Flash_Cards.html",
+  "T_2_Thai_English_Dictionary.html",
+  "T_3_Thai-English_Demo_Flash_Cards.html",
+  "T_4_Thai_Alphabet_Flash_Cards.html",
+  "T_5_Thai-English_Basic_Flash_Cards.html",
+  "TT_6_English-Thai_Basic_Flash_Cards.html",
+  "T_7_Thai_Vocabulary_Flash_Cards.html",
+
+  "Bible_1_Old_Testament.html",
+  "Bible_2_New_Testament.html",
+  "Bible_3_NT_Verses.html",
+  "Bible_4_OT_Verses.html",
+  "Bible_5_Headlines.html",
+  "Bible_6_Chapter_Summaries.html",
+  "Bible_7_OT_Stories.html",
+  "Bible_8_NT_Stories.html",
+  "Bible_9_Counseling.html",
+  "Bible_10_Hymns.html",
+
+  "RA_1_About this Website.html",
+  "RA_2_About_Me.html",
+  "RA_3_Concise_EFL_Games.html",
+  "RA_4_My_Massive_Playlist.html",
+  "A_1_Meme_Maker.html",
+  "A_2_Memo_Maker.html",
+  "A_3_Basic_Kaleidoscope.html",
+  "A_4_Random_Name_Spinner.html",
+  "A_5_TallyMan.html",
+  "A_6_JellyBeans.html",
+  "A_7_CoffeeBreak.html",
+  "A_8_My_Calendar.html",
+  "A_9_Clock.html",
+  "A_10_My_Schedule.html",
+  "A_11_Calculator.html",
+  "A_12_Rustic_Compass.html",
+  "A_13_Seating_Chart_Roll_Sheet_Order to Transfer.html",
+  "A_14_Seating_Chart_Optimum.html",
+  "A_15_Focus_Grade_7_XRG-1.html",
+  "ART_16_Main_Reading_Template.html",
+
+  "RR_55_The_Pizzarena.html"
+];
+
+
+/* Section headings and their order */
+
+const SECTIONS = [
+  {
+    title: "Vocabulary Flash Cards and Games",
+    prefixes: ["V_"]
+  },
+  {
+    title: "Grammar Lessons",
+    prefixes: ["RG_"]
+  },
+  {
+    title: "Grammar Games",
+    prefixes: ["G_"]
+  },
+  {
+    title: "Class Discussion",
+    prefixes: ["CD_"]
+  },
+  {
+    title: "EFL Reading",
+    prefixes: ["R_"]
+  },
+  {
+    title: "Literature",
+    prefixes: ["RL_"]
+  },
+  {
+    title: "Literacy",
+    prefixes: ["RW_"]
+  },
+  {
+    title: "Useful Tips",
+    prefixes: ["RT_"]
+  },
+  {
+    title: "Thai Language",
+    prefixes: ["T_", "TT_"]
+  },
+  {
+    title: "Bible Study",
+    prefixes: ["Bible_"]
+  },
+  {
+    title: "Resources and Administration",
+    prefixes: ["RA_", "A_", "ART_"]
+  },
+  {
+    title: "Rogue Writers Gallery",
+    prefixes: ["RR_"]
+  }
+];
+
+
+/* Extract the numerical identifier from a filename */
+
+function getFileNumber(filename) {
+  const match = filename.match(/^[A-Za-z]+_(\d+)/);
+  return match ? Number(match[1]) : Number.MAX_SAFE_INTEGER;
+}
+
+
+/* Sort numerically, so item 9 comes before item 10 */
+
+function sortFiles(files) {
+  return [...files].sort((a, b) => {
+    const numberDifference = getFileNumber(a) - getFileNumber(b);
+
+    if (numberDifference !== 0) {
+      return numberDifference;
+    }
+
+    return a.localeCompare(b, undefined, {
+      numeric: true,
+      sensitivity: "base"
+    });
+  });
+}
+
+
+/*
+  Create numbered button labels.
+
+  Examples:
+  V_1_Flash_Cards_EFL.html
+  becomes "1. Flash Cards EFL"
+
+  G_10_Game_Grammar_Mega-Quizzes_EFL.html
+  becomes "10. Game Grammar Mega-Quizzes EFL"
+*/
+
+function getDisplayName(filename) {
+  const match = filename.match(/^[A-Za-z]+_(\d+)/);
+  const number = match ? Number(match[1]) : "";
+
+  const name = filename
+    .replace(/\.html?$/i, "")
+    .replace(/^[A-Za-z]+_\d+[_-]?/, "")
+    .replace(/_/g, " ")
+    .trim();
+
+  return number ? `${number}. ${name}` : name;
+}
+
+
+/* Find the matching section for a filename */
+
+function getSectionForFile(filename) {
+  return SECTIONS.find(section =>
+    section.prefixes.some(prefix => filename.startsWith(prefix))
+  );
+}
+
+
+/* Render the collapsible sections and their file buttons */
+
+function renderIndex() {
+  const root = document.getElementById("indexSections");
+  root.replaceChildren();
+
+  SECTIONS.forEach(section => {
+    const files = sortFiles(
+      INTERNAL_FILES.filter(filename =>
+        getSectionForFile(filename) === section
+      )
+    );
+
+    if (files.length === 0) return;
+
+    const sectionDiv = document.createElement("div");
+    sectionDiv.className = "section";
+
+    const heading = document.createElement("button");
+    heading.type = "button";
+    heading.className = "collapsible";
+    heading.textContent = section.title;
+    heading.setAttribute("aria-expanded", "false");
+
+    const content = document.createElement("div");
+    content.className = "content";
+
+    files.forEach(filename => {
+      const link = document.createElement("a");
+
+      /*
+        Relative links work when the index and HTML files
+        are in the same folder.
+      */
+      link.href = filename;
+      link.textContent = getDisplayName(filename);
+      link.title = filename;
+      link.target = "_self";
+
+      content.appendChild(link);
+    });
+
+    heading.addEventListener("click", () => {
+      const isOpen = heading.classList.toggle("active");
+      content.classList.toggle("open", isOpen);
+      heading.setAttribute("aria-expanded", String(isOpen));
+    });
+
+    sectionDiv.appendChild(heading);
+    sectionDiv.appendChild(content);
+    root.appendChild(sectionDiv);
+  });
+}
+
+renderIndex();
+</script>
+
+</body>
+</html>

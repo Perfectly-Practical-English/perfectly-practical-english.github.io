@@ -1,18 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <title>B-52</title>
 <style>
 * { box-sizing: border-box; }
 
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
 body { 
-    margin:0; 
-    padding:30px; 
-    font-family:system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
-    background:#d0e7f9; 
-    user-select:none; 
+    padding: 16px 12px 30px 12px; 
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+    background: #d0e7f9; 
+    user-select: none; 
 }
 
 /* Instant-load green viewport border */
@@ -20,7 +28,7 @@ body::after {
     content: '';
     position: fixed;
     inset: 0;
-    border: 10px solid #39FF14;
+    border: 6px solid #39FF14;
     box-sizing: border-box;
     z-index: 9999;
     pointer-events: none;
@@ -36,40 +44,39 @@ body::after {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
-  margin-top: 12px;    
-  align-items: center;   
-  gap: 6px;
-  height: 38px;         
+  margin-top: 6px;    
+  align-items: center;    
+  gap: 3px;
+  height: 36px;
+  width: 100%;
 }
 
 /* ===============================
     INPUT + BUTTON SIZING + COLORS
     =============================== */
 #topBar {
-  margin-top: 0;       
+  margin-top: 0;        
   width: 100%;
   white-space: nowrap;
 }
 
 #topBar button,
 .formRow > button {
-  flex: 0 0 38px;
-  height: 38px;
+  flex: 0 0 auto;
+  height: 36px;
   white-space: nowrap;
-
   background: linear-gradient(145deg, #ffffff, #eaf6ff);
   border: 1px solid #cfe2f7;
   color: #1976d2;
   cursor: pointer;
-  transition: background 0.2s ease, border-color 0.2s ease;
-  border-radius: 6px;
-  font-size: 14px;
+  border-radius: 4px;
+  font-size: 11px;
   font-weight: 400;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0 12px;
+  padding: 0 6px;
 }
 
 #topBar button:hover,
@@ -79,30 +86,32 @@ body::after {
 }
 
 #topBar input[type="text"] {
-  flex: 1 1 0;
-  min-width: 0;
-  height: 38px;         
-  padding: 0 10px;      
-  font-size: 14px;
-  line-height: 38px;    
-  border: 1px solid #cfe2f7;
-  border-radius: 6px;
-  color: #000;
-  background: #fff;
+  flex: 0 0 95px !important; 
+  width: 95px !important;
+  min-width: 0 !important;
+  height: 36px !important;         
+  padding: 0 6px !important;      
+  font-size: 12px !important;
+  line-height: 34px !important;    
+  border: 1px solid #cfe2f7 !important;
+  border-radius: 4px !important;
+  color: #000 !important;
+  background: #fff !important;
+  text-align: left !important;
 }
 
 #topBar input[type="text"]::placeholder {
-  color: #1976d2;
-  opacity: 1;
+  color: #1976d2 !important;
+  opacity: 1 !important;
 }
 
 input[type=text] {
-  width: 150px;
+  width: 95px;
   min-width: 0;
-  padding: 6px 10px;
-  font-size: 14px;
+  padding: 4px 6px;
+  font-size: 12px;
   border: 1px solid #cfe2f7;
-  border-radius: 6px;
+  border-radius: 4px;
   color: #000;
   background: #fff;
 }
@@ -112,20 +121,21 @@ input[type=text] {
   background: linear-gradient(145deg, #ffffff, #eaf6ff);
   color: #1976d2;
   cursor: pointer;
-  text-align: center !important;
+  text-align: left !important;
   border: 1px solid #cfe2f7;
   font-weight: 400;
-  padding: 0 12px;
-  font-size: 14px;
-  border-radius: 6px;
-  height: 38px;
-  flex: 1;
+  padding: 0 6px;
+  font-size: 11px;
+  border-radius: 4px;
+  height: 36px;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   display: flex;
   align-items: center;
-  justify-content: center !important;
-  overflow: visible !important;
-  text-overflow: clip !important;
+  justify-content: flex-start !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
   white-space: nowrap !important;
 }
 
@@ -158,11 +168,11 @@ input[type=text] {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: min(500px, 92vw);
+  width: min(240px, 92vw);
   max-height: min(80vh, calc(100dvh - 16px));
   background: #fff;
-  border-radius: 12px;
-  padding: 18px;
+  border-radius: 8px;
+  padding: 10px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
@@ -177,10 +187,10 @@ input[type=text] {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: 6px;
+  margin-bottom: 8px;
   flex: 0 0 auto;
-  font-size: 18px;
+  font-size: 14px;
   font-weight: 700;
   color: #1976d2;
 }
@@ -188,7 +198,7 @@ input[type=text] {
 #instructionsTitle {
   color: #1976d2;
   font-weight: 700;
-  font-size: 18px;
+  font-size: 14px;
 }
 
 #sectionModalClose,
@@ -196,10 +206,10 @@ input[type=text] {
   background: none;
   border: none;
   color: #1976d2;
-  font-size: 22px;
+  font-size: 18px;
   font-weight: 700;
   cursor: pointer;
-  padding: 4px 8px;
+  padding: 2px 6px;
   line-height: 1;
   display: inline-flex;
   align-items: center;
@@ -222,8 +232,8 @@ input[type=text] {
   flex: 1 1 auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 1.4;
   color: #333;
 }
 
@@ -233,16 +243,16 @@ input[type=text] {
 }
 
 .section-item {
-  height: 28px;
-  padding: 0 6px;
-  margin-bottom: 6px;
+  height: 32px;
+  padding: 0 8px;
+  margin-bottom: 4px;
   background: #eaf6ff;
   border: 1px solid #cfe2f7;
-  border-radius: 6px;
+  border-radius: 4px;
   cursor: pointer;
   font-size: 11px;
   color: #1976d2;
-  font-weight: 400;
+  font-weight: 600;
   box-sizing: border-box;
   display: flex;
   align-items: center;
@@ -264,31 +274,31 @@ input[type=text] {
 }
 
 #instructionsContent h3 {
-  margin-top: 10px;
-  margin-bottom: 4px;
-  font-size: 15px;
+  margin-top: 8px;
+  margin-bottom: 2px;
+  font-size: 13px;
   font-weight: 700;
   color: #1976d2;
 }
 
 #instructionsContent p {
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font-weight: 400;
 }
 
 #instructionsContent hr {
-  margin: 12px 0;
+  margin: 8px 0;
   border: none;
   border-top: 1px solid #cfe2f7;
 }
 
 button:not(#mcPanel button) {
-  height: 38px;
-  padding: 0 12px;
+  height: 36px;
+  padding: 0 8px;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 400;
-  border-radius: 6px;
+  border-radius: 4px;
   border: 1px solid #cfe2f7;
   background: linear-gradient(145deg, #ffffff, #eaf6ff);
   color: #1976d2;
@@ -310,33 +320,52 @@ button:disabled {
 }
 
 #scoreboardContainer {
-    margin: 12px 0 0 0;
+    margin: -2px 0 0 0 !important; /* Pulls the scoreboard up higher toward the terrain area */
     font-family: monospace;
     font-weight: bold;
-    font-size: 18px;
+    font-size: 14px;
     white-space: pre-wrap;
     overflow-wrap: anywhere;    
     word-break: break-word;
+    width: 100%;
 }
-#scoreButtons { margin:12px 0 24px 0; display:none; gap:10px; }
+#scoreButtons { 
+    margin: 2px 0 16px 0; 
+    display: none; 
+    gap: 6px; 
+    width: 100%; 
+}
 
 #scoreButtons button {
     white-space: nowrap;
     flex-shrink: 0;
+    font-size: 11px;
+    padding: 0 6px;
 }
 
 #gameArea {
     position: relative;
-    margin: 16px auto;
-    height: 300px;
+    margin: 0 auto !important; /* Removes the extra vertical space */
+    height: 260px;
     width: 100%;
-    padding: 10px;
-    border-radius: 6px;
+    padding: 6px;
+    border-radius: 4px;
     background: #f0dcc8;
     overflow: hidden;
-    box-shadow: inset 0 0 12px #d2bc9c;
+    box-shadow: inset 0 0 8px #d2bc9c;
+    box-sizing: border-box;
 }
-
+/* NEW: Safe drop track that keeps sentences 50px away from both sides */
+#dropArea {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50px;
+    right: 50px;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 2; /* Ensures sentences appear cleanly above background elements */
+}
 #terrainCanvas { 
     position: absolute; 
     top: 0; 
@@ -352,18 +381,44 @@ button:disabled {
     left: 0;
     width: 100%;
     height: 100%;
-    background: #f0dcc8;
-    z-index: 1;
+    background: #e8d5bc;
+    background-image: 
+        radial-gradient(ellipse 70% 60% at 20% 40%, rgba(255, 255, 255, 0.95) 0%, rgba(240, 220, 200, 0.85) 60%, transparent 100%),
+        radial-gradient(ellipse 80% 70% at 75% 60%, rgba(255, 255, 255, 0.92) 0%, rgba(230, 210, 190, 0.8) 55%, transparent 100%),
+        radial-gradient(ellipse 60% 80% at 50% 30%, rgba(255, 255, 255, 0.9) 0%, rgba(245, 225, 205, 0.85) 50%, transparent 100%),
+        radial-gradient(circle at 30% 80%, rgba(255, 255, 255, 0.95) 0%, transparent 60%),
+        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.9) 0%, transparent 50%);
+    background-size: 150% 150%;
+    z-index: 2;
     pointer-events: none;
     opacity: 1;
-    transition: opacity 0.8s ease-out;
+    animation: cloudSwirl 10s ease-in-out infinite alternate;
+    transition: opacity 5s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
-.sentence { 
+@keyframes cloudSwirl {
+    0% {
+        background-position: 0% 0%;
+        transform: scale(1);
+    }
+    50% {
+        background-position: 60% 40%;
+        transform: scale(1.04);
+    }
+    100% {
+        background-position: 30% 70%;
+        transform: scale(1);
+    }
+}
+
+#terrainFadeCover.hidden {
+    opacity: 0;
+    visibility: hidden;
+}.sentence { 
     position: absolute; 
-    font-size: 12px; 
+    font-size: 11px; 
     font-weight: 600; 
-    max-width: 200px; 
+    max-width: 170px; 
     word-wrap: break-word; 
     user-select: none; 
     pointer-events: none; 
@@ -371,44 +426,46 @@ button:disabled {
     transition: opacity 1s linear; 
     z-index: 2; 
     white-space: pre-line; 
-}.blank { display:inline-block; border-bottom:2px solid #000; min-width:30px; text-align:center; color:red; transition: all 0.2s ease; }
+}
+.blank { display:inline-block; border-bottom:2px solid #000; min-width:24px; text-align:center; color:red; transition: all 0.2s ease; }
 .blank.poof { transform: scale(1.4); opacity:0.7; }
 #typedDisplay {
     position: absolute;
-    bottom: 5px;
-    right: 5px;
-    font-size: 20px;
+    bottom: 4px;
+    right: 4px;
+    font-size: 16px;
     color: red;
     font-weight: bold;
     z-index: 2;
     display: none;  
 }
+
 #plane {
-    position:absolute;
-    bottom:100px;
-    width:90px;
-    height:auto;
-    transform:rotate(-90deg);
-    user-select:none;
-    pointer-events:none;
-    transition:left 0.05s linear;
-    z-index:3;
-    display:none;
+    position: absolute;
+    bottom: 60px !important;
+    left: 50%;
+    transform: rotate(-90deg);
+    width: 60px; /* Reduced from 70px */
+    height: auto;
+    user-select: none;
+    pointer-events: none;
+    z-index: 3;
+    display: none; 
 }
 
 #planeShadow {
-    position:absolute;
-    bottom:90px;
-    width:90px;
-    height:auto;
-    transform:rotate(-90deg);
-    user-select:none;
-    pointer-events:none;
+    position: absolute;
+    bottom: 52px !important;
+    left: 50%;
+    transform: translateX(calc(-50% + 35px)) rotate(-90deg);
+    width: 60px; /* Reduced from 70px to match */
+    height: auto;
+    user-select: none;
+    pointer-events: none;
     filter: brightness(0) blur(6px);
-    opacity:0.35;
-    transition:left 0.05s linear, bottom 0.05s linear;
-    z-index:2;
-    display:none;
+    opacity: 0.35; 
+    z-index: 2;
+    display: none; 
 }
 
 #typingInput {
@@ -428,84 +485,73 @@ button:disabled {
 }
 
 footer {
-    margin-top: 8px;
-    padding: 4px 8px;
+    margin-top: -12px !important; /* Pulls the footer straight up to close the gap */
+    padding: 2px 6px !important;
     text-align: left;
-    font-size: 10px;
+    font-size: 9px;
     line-height: 1.2;
     color: #666;
     background: #f0f8ff;
-    border-radius: 6px;
+    border-radius: 4px;
+    width: 100%;
 }
 #frostPanel { position: absolute; inset: 0; z-index: 1; backdrop-filter: blur(6px); background: rgba(255, 255, 255, 0.15); pointer-events: none; }
 
 #mcPanel {
     position: absolute;
-    bottom: 5px;             
+    bottom: 4px;             
     left: 50%;
     transform: translateX(-50%);
     display: grid;
     grid-template-columns: repeat(4, 1fr);  
-    grid-auto-rows: 40px;                 
-    gap: 4px;                                   
+    grid-auto-rows: 32px;                 
+    gap: 3px;                                         
     justify-items: center;                    
     align-items: center;                     
-    width: 90%;                                 
-    max-width: 360px;                           
+    width: 96%;                                   
+    max-width: 250px;                             
     z-index: 10000;
 }
-
 #mcPanel button {
-    width: 100%;               
-    height: 36px;              
-    min-width: 0;              
-    max-width: 100%;           
-    font-size: 12px;
-    font-weight: 600;          
+    width: 100%;                
+    height: 30px;               
+    min-width: 0;               
+    max-width: 100%;            
+    font-size: 10px;
+    font-weight: 600;           
     background: red;
     color: white;
     border: 1px solid #777;
-    border-radius: 4px;
+    border-radius: 3px;
     cursor: pointer;
-    padding: 0 6px;            
+    padding: 0 2px;             
     box-sizing: border-box;
-    white-space: nowrap;       
-    text-overflow: ellipsis;   
+    white-space: nowrap;        
+    text-overflow: ellipsis;    
     overflow: hidden;
 }
 
 #mcPanel button.correct { background: green; }
 #mcPanel button.wrong { background: #e74c3c; }
 
-@media (max-width: 420px) {
-    #topBar input[type="text"] {
-        min-width: 70px;
-        font-size: 14px;
-    }
-
-    #topBar button {
-        padding: 5px 8px;
-        font-size: 14px;
-    }
-}
-
 #mcPanelExtra {
     position: absolute;
-    bottom: 50px; 
+    bottom: 38px; 
     left: 50%;
     transform: translateX(-50%);
-    display: grid;
-    gap: 4px;
-    width: 90%;
-    max-width: 360px;
+    display: none;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+    width: 96%;
+    max-width: 250px;
     z-index: 10000;
 }
 
 /* Retro Pixel Shard Shrapnel & Smoke Effect */
 .pixel-shard {
     position: absolute;
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     background: #ff4500;
     pointer-events: none;
     z-index: 5;
@@ -525,8 +571,8 @@ footer {
 
 .pixel-smoke {
     position: absolute;
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
     background: #888888;
     border-radius: 2px;
     pointer-events: none;
@@ -546,53 +592,31 @@ footer {
     }
 }
 
+/* Tighten the wrapper margin to just 3px at the top */
+#gameWrapper {
+    position: relative;
+    margin: 3px auto 3px auto !important; /* Fixed: 3px all around */
+    width: calc(100% - 2px);
+}
 
-
-
-
-
-
-
-
-<style>
-#terrainFadeCover {
-    position: absolute;
-    top: 0;
-    left: 0;
+/* Remove vertical spacing margins on #gameArea and trim its inner padding */
+#gameArea {
+    position: relative;
+    margin: 0 auto !important; /* Removes default vertical gaps */
+    height: 260px;
     width: 100%;
-    height: 100%;
-    background: #e8d5bc;
-    background-image: 
-        radial-gradient(ellipse 70% 60% at 20% 40%, rgba(255, 255, 255, 0.95) 0%, rgba(240, 220, 200, 0.85) 60%, transparent 100%),
-        radial-gradient(ellipse 80% 70% at 75% 60%, rgba(255, 255, 255, 0.92) 0%, rgba(230, 210, 190, 0.8) 55%, transparent 100%),
-        radial-gradient(ellipse 60% 80% at 50% 30%, rgba(255, 255, 255, 0.9) 0%, rgba(245, 225, 205, 0.85) 50%, transparent 100%),
-        radial-gradient(circle at 30% 80%, rgba(255, 255, 255, 0.95) 0%, transparent 60%),
-        radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.9) 0%, transparent 50%);
-    background-size: 150% 150%;
-    z-index: 10;
-    pointer-events: none;
-    opacity: 1;
-    animation: cloudSwirl 10s ease-in-out infinite alternate;
-    transition: opacity 2.5s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 3px 6px !important; /* Thinner top/bottom padding */
+    border-radius: 4px;
+    background: #f0dcc8;
+    overflow: hidden;
+    box-shadow: inset 0 0 8px #d2bc9c;
+    box-sizing: border-box;
 }
 
-@keyframes cloudSwirl {
-    0% {
-        background-position: 0% 0%;
-        transform: scale(1);
-    }
-    50% {
-        background-position: 60% 40%;
-        transform: scale(1.04);
-    }
-    100% {
-        background-position: 30% 70%;
-        transform: scale(1);
-    }
-}
 
 </style>
-</style>
+
+
 </head>
 <body>
 
@@ -630,27 +654,20 @@ footer {
 <!-- =========================
      Game Section
 ========================= -->
-<div id="gameWrapper" style="position: relative; margin:16px auto; width: calc(100% - 2px);">
+<div id="gameWrapper" style="position: relative; margin:3px auto; width: calc(100% - 2px);">
 
   <!-- Game area -->
 <div id="gameArea" tabindex="0" aria-label="Typing game area">
     <canvas id="terrainCanvas"></canvas>
     <div id="terrainFadeCover"></div>
+    
+    <!-- Safe drop track keeping sentences 50px away from both edges -->
+    <div id="dropArea" style="position: absolute; top: 0; bottom: 0; left: 50px; right: 50px; pointer-events: none; overflow: hidden; z-index: 2;"></div>
+
     <div id="frostPanel"></div>
     <div id="typedDisplay"></div>
     <img id="plane" src="B52.png" alt="Plane">
     <img id="planeShadow" src="B52.png" alt="Plane Shadow">
-
-
-
-
-
-
-
-
-
-
-
 
     <!-- MC buttons inside game area -->
     <div id="mcPanelExtra"></div>
@@ -670,7 +687,6 @@ footer {
 <footer>
 <p>© <span id="copyrightYear"></span> Perfectly Practical English</p>
 </footer>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
 document.getElementById('copyrightYear').textContent = new Date().getFullYear();
@@ -715,6 +731,7 @@ document.addEventListener('visibilitychange', () => {
 });
 let totalWords=0, correctWords=0, nextSentenceIndex=0;
 let planeX=0, swayAngle=0, planeTargetX=null, planeSpeed=0, planeExiting=false;
+let planeVeerX=null, planeVeerTicks=0;
 let gameEnded = false;
 
 const gameArea = document.getElementById('gameArea');
@@ -1559,17 +1576,18 @@ Each student |doesn't take| a few cookies from the box until there are none left
           btn.textContent = sec.name;
           closeModal();
 
-          if (sec.text) {
-            rebuildMCPool(sec.text);
-            window.sectionSelectionChanged = true;
-            window.dispatchEvent(new CustomEvent("sectionchange", {
-              detail: {
-                name: sec.name,
-                text: sec.text
-              }
-            }));
-          }
-          startGame();
+if (sec.text) {
+           rebuildMCPool(sec.text);
+           window.sectionSelectionChanged = true;
+           window.dispatchEvent(new CustomEvent("sectionchange", {
+             detail: {
+               name: sec.name,
+               text: sec.text
+             }
+           }));
+         }
+         document.getElementById('terrainFadeCover').classList.add('hidden');
+         startGame();
         });
         listContainer.appendChild(item);
       });
@@ -1820,7 +1838,9 @@ function dropSentences(){
         planeX=-100; planeTargetX=gameArea.clientWidth/2; planeSpeed=5; planeExiting=false;
     }
 
-    let targetSentence = window.activeSentences.find(s=>!s.finished);
+    let targetSentence = window.activeSentences.find(s =>
+    !s.finished && s.blanks.some(b => !b.intercepted)
+);
     const planeY = plane.offsetTop + plane.offsetHeight/2;
 
     for(let s of window.activeSentences){
@@ -1834,13 +1854,22 @@ function dropSentences(){
                 const rect = blankObj.elem.getBoundingClientRect();
                 const blankY = rect.top - gameArea.getBoundingClientRect().top + rect.height / 2;
 
-                if (blankY >= plane.offsetTop + plane.offsetHeight / 2) {
-                    blankObj.intercepted = true;
-                    blankObj.elem.classList.add('poof');
-                    popSound.currentTime = 0;
-                    popSound.play().catch(() => {});
-                    setTimeout(() => blankObj.elem.classList.remove('poof'), 300);
-                }
+if (blankY >= plane.offsetTop + plane.offsetHeight / 2) {
+    blankObj.intercepted = true;
+if (planeVeerX === null && planeVeerTicks <= 0) {
+    planeVeerX = Math.max(
+        plane.offsetWidth / 2,
+        Math.min(
+            gameArea.clientWidth - plane.offsetWidth / 2,
+            planeX + (planeX < gameArea.clientWidth / 2 ? 20 : -20)
+        )
+    );
+    planeVeerTicks = 20;
+}    blankObj.elem.classList.add('poof');
+    popSound.currentTime = 0;
+    popSound.play().catch(() => {});
+    setTimeout(() => blankObj.elem.classList.remove('poof'), 300);
+}
             }
         });
     }
@@ -1853,8 +1882,20 @@ function dropSentences(){
         const rect = firstBlank.getBoundingClientRect();
         const gaRect = gameArea.getBoundingClientRect();
         const blankCenterX = rect.left-gaRect.left+rect.width/2;
-        planeTargetX = blankCenterX;
-        const dist = Math.abs(blankCenterX-planeX);
+if (planeVeerX !== null) {
+    planeTargetX = planeVeerX;
+
+    if (Math.abs(planeX - planeVeerX) < 3) {
+        planeVeerTicks--;
+
+        if (planeVeerTicks <= 0) {
+            planeVeerX = null;
+            planeTargetX = blankCenterX;
+        }
+    }
+} else {
+    planeTargetX = blankCenterX;
+}        const dist = Math.abs(blankCenterX-planeX);
         swayAmplitude += Math.min(15,dist/15);
         planeSpeed=0.08;
     } else if (
@@ -1882,17 +1923,34 @@ function dropSentences(){
             }
         };
         moveUp();
-    } else { swayAmplitude += 12; planeSpeed=0.08; }
+} else {
+    swayAmplitude += 12;
+    planeSpeed = 0.08;
 
-    if(!planeExiting && planeTargetX!==null) planeX += (planeTargetX-planeX)*planeSpeed;
-    if(!planeExiting){
-        plane.style.left = planeX + Math.sin(swayAngle)*swayAmplitude - plane.offsetWidth/2 + 'px';
-        planeShadow.style.left = planeX + Math.sin(swayAngle)*swayAmplitude - plane.offsetWidth/2 + 15 + 'px';
-        planeShadow.style.bottom = parseFloat(plane.style.bottom)-10+'px';
-        planeShadow.style.display='block';
+    if (!planeExiting && planeVeerX === null) {
+        planeTargetX = gameArea.clientWidth / 2;
     }
+}
+if(!planeExiting && planeTargetX!==null) {
+    planeX += (planeTargetX-planeX)*planeSpeed;
 
-    if(nextSentenceIndex < sentences.length){
+    const minX = plane.offsetWidth / 2;
+    const maxX = gameArea.clientWidth - plane.offsetWidth / 2;
+
+    planeX = Math.max(minX, Math.min(maxX, planeX));
+}
+if(!planeExiting){
+    const swayOffset = Math.sin(swayAngle) * swayAmplitude;
+    const halfWidth = plane.offsetWidth / 2;
+    const minX = 0;
+    const maxX = gameArea.clientWidth;
+    const visualX = Math.max(minX, Math.min(maxX, planeX + swayOffset));
+
+    plane.style.left = (visualX - halfWidth) + 'px';
+    planeShadow.style.left = (visualX - halfWidth + 15) + 'px';
+    planeShadow.style.bottom = (parseFloat(plane.style.bottom) - 10) + 'px';
+    planeShadow.style.display = 'block';
+}    if(nextSentenceIndex < sentences.length){
         const unfinished = window.activeSentences.some(s=>!s.finished);
         if(!unfinished){ spawnSentence(sentences[nextSentenceIndex]); nextSentenceIndex++; }
     }
@@ -1900,6 +1958,12 @@ function dropSentences(){
 
 async function startGame() {
     if (gameStarted) return;
+
+    // 1. Safely trigger the cinematic cloud fade immediately
+    const fadeCover = document.getElementById('terrainFadeCover');
+    if (fadeCover) {
+        fadeCover.classList.add('hidden');
+    }
 
     resetGame();
     await initSentences();
@@ -1913,10 +1977,12 @@ async function startGame() {
 
     plane.style.display = 'none';
 
-    dropInterval = setInterval(dropSentences, dropTickTime);
-    swoosh.start();
+    // 2. Delay sentence dropping and audio by 10 seconds to let the cloud fade play out
+    setTimeout(() => {
+        dropInterval = setInterval(dropSentences, dropTickTime);
+        swoosh.start();
+    }, 1500);
 }
-
 function getScoreboardFilename(extension) {
     if (scoreboardContainer && scoreboardContainer.textContent.trim()) {
         let firstLine = scoreboardContainer.textContent.split('\n')[0];
@@ -1969,7 +2035,7 @@ function resetGame(){
     window.activeSentences=[]; planeX=-100; plane.style.left=planeX+'px';
     plane.style.bottom='110px'; planeShadow.style.bottom='100px';
     plane.style.display='none'; planeShadow.style.display='none';
-    totalWords=0; correctWords=0; typedDisplay.textContent=''; swayAngle=0; planeTargetX=null; planeExiting=false;
+    totalWords=0; correctWords=0; typedDisplay.textContent=''; swayAngle=0; planeTargetX=null; planeExiting=false; planeVeerX=null; planeVeerTicks=0;
 }
 
 document.getElementById('copyBtn').addEventListener('click',()=>{navigator.clipboard.writeText(scoreboardContainer.textContent).then(()=>alert('Score copied to clipboard!'));});
@@ -2426,31 +2492,7 @@ window.saveResult = async function saveResult(text) {
 })();
 </script>
 
-<!-- ========================================== -->
-<!-- NARROW PHONE LAYOUT SAFETY PATCH (START) -->
-<!-- ========================================== -->
-<style>
-  html, body {
-    max-width: 100vw !important;
-    overflow-x: hidden !important;
-    box-sizing: border-box;
-  }
-  *, *:before, *:after {
-    box-sizing: inherit;
-  }
-  body {
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-    margin: 0 auto !important;
-  }
-  img, video, canvas, table {
-    max-width: 100% !important;
-    height: auto !important;
-  }
-</style>
-<!-- ========================================== -->
-<!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
-<!-- ========================================== -->
+
 
 </body>
 </html>

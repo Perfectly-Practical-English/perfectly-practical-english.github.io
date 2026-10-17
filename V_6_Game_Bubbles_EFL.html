@@ -50,6 +50,8 @@ body {
   max-width: 600px;
   flex-wrap: nowrap;  
   align-items: center;  
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .top-bar input[type="text"],
@@ -75,7 +77,8 @@ body {
 .top-bar input[type="text"] {
   background: #fff;
   color: #000;
-  flex: 1 1 25%;
+  flex: 0 0 55px;
+  width: 55px;
   cursor: text;
   text-align: left !important;
   justify-content: flex-start !important;
@@ -95,11 +98,11 @@ body {
   justify-content: center !important;
   text-align: center !important;
   overflow: visible !important;
-  flex: 1 1 25%;
+  flex: 0 0 auto;
 }
 
 .top-bar #sectionSelectorBtn {  
-  flex: 1 1 25%;  
+  flex: 1 1 auto;  
   min-width: 0;  
   text-align: center !important;
   justify-content: center !important;
@@ -122,7 +125,6 @@ body {
   border-color: var(--input-border-blue);
   cursor: not-allowed;
 }
-
 /* ===== MODALS (SECTION & INSTRUCTIONS) ===== */
 #sectionModalRoot,
 #instructionsRoot {

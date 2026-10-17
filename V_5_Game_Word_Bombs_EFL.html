@@ -50,6 +50,8 @@ body {
   max-width: 600px;
   flex-wrap: nowrap;  
   align-items: center;  
+  padding-left: 10px;
+  padding-right: 10px;
 }
 
 .top-bar input[type="text"],
@@ -75,7 +77,8 @@ body {
 .top-bar input[type="text"] {
   background: #fff;
   color: #000;
-  flex: 1 1 50%;
+  flex: 0 0 55px;
+  width: 55px;
   cursor: text;
   text-align: left !important;
   justify-content: flex-start !important;
@@ -96,7 +99,7 @@ body {
 }
 
 .top-bar #sectionSelectorBtn {  
-  flex: 1 1 50%;  
+  flex: 1 1 auto;  
   min-width: 0;  
   text-align: center !important;
   justify-content: center !important;
@@ -118,7 +121,6 @@ body {
   border-color: var(--input-border-blue);
   cursor: not-allowed;
 }
-
 /* ===== SECTION SELECTION MODAL STYLING ===== */
 #sectionModalRoot {
   position: fixed;

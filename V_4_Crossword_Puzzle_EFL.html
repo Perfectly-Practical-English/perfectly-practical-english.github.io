@@ -592,12 +592,11 @@ footer {
             55551|Matthew
             12345|Sarah
         `;
-        const studentDatabase = new Map();
-        RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
-            const [id, name] = line.split('|'].map(s => s ? s.trim() : '');
-            if (id && name) studentDatabase.set(id, name);
-        });
-
+const studentDatabase = new Map();
+RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+    const [id, name] = line.split('|').map(s => s ? s.trim() : '');
+    if (id && name) studentDatabase.set(id, name);
+});
         window.resolveStudentNameFromId = function(idInput) {
             if (!idInput) return "Guest";
             const trimmed = String(idInput).trim();
@@ -1388,13 +1387,12 @@ function parseRawInstructions(text){
   const html = [];
   lines.forEach(line => {
     if(line === "---"){ html.push(`<hr>`); return; }
-    if(/^\d+\./.test(line)){ html.path(`<p>${line}</p>`); return; }
+    if(/^\d+\./.test(line)){ html.push(`<p>${line}</p>`); return; }
     if(!/[.!?:]$/.test(line)){ html.push(`<h3>${line}</h3>`); return; }
     html.push(`<p>${line}</p>`);
   });
   return html.join("");
 }
-
 const instructionsContent = document.getElementById("instructionsContent");
 if(instructionsContent) {
   instructionsContent.innerHTML = parseRawInstructions(RAW_TEXT);
