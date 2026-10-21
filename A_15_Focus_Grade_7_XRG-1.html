@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
@@ -17,9 +20,8 @@ html,body{
     height:100%;
     overflow:hidden;
     font-family:Arial,sans-serif;
-    background:#d0d0d0;
+    background:black !important;
 }
-
 /* ==========================
    MAIN LAYOUT
 ========================== */
@@ -205,20 +207,20 @@ html,body{
    TILES
 ========================== */
 
-#tilesBar{
+#tilesBar {
     position: fixed;
     left: 0;
     right: 0;
     bottom: 24px;
-    height: 70px; /* Default starting height */
+    height: 8px; /* Loads closed */
     display: flex;
     flex-direction: column;
-    border-top: 1px solid #999;
-    background: black;
+    border-top: 1px solid #555;
+    background: #222; /* Instantly paints the grey bar on first frame */
     z-index: 9998;
     box-sizing: border-box;
+    overflow: hidden; /* Keeps the tiles hidden until dragged open */
 }
-
 #tiles{
     flex: 1;
     background: black !important;
@@ -722,7 +724,112 @@ div {
     scrollbar-width: none !important;     /* Firefox */
 }
 
-</style>
+
+/* --- Inset Control Buttons & Borderless Vignette Panels --- */
+
+/* --- Borderless packed vertical modal panels (200px wide, locked under top controls) --- */
+/* --- Borderless packed vertical modal panels --- */
+/* ==========================
+   VIGNETTE MODAL PANELS & DRAG HANDLE
+========================== */
+/* ==========================
+   VIGNETTE MODAL PANELS & TITLE DRAG BAR
+========================== */
+.vignette-modal-panel {
+  display: none;
+  position: fixed;
+  width: 200px;
+  top: 25px;                 /* <--- ADJUST THIS: Change from 75px to 0px (or 2px) to move it all the way to the top */
+  bottom: 48px;             /* Stops above the bottom tiles/script bar */
+  background: #000;
+  border: 1px solid #444;
+  z-index: 2147483646;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  border-radius: 6px;
+}
+
+.vignette-modal-panel.open {
+  display: flex;
+}
+
+/* Left Panel positioning */
+#vignetteLeftModal {
+  left: 90px;               /* Sits immediately to the right of #leftColumn (90px wide) */
+}
+
+/* Right Panel positioning - Locked flush against the left edge of #rightColumn (90px wide) */
+#vignetteRightModal {
+  right: 90px;              /* Matches the exact width of #rightColumn */
+  left: auto !important;    /* Prevents any script from overriding */
+}
+
+/* Distinct Drag Title Bar for precise control */
+.vignette-drag-handle {
+  height: 24px;
+  background: #1a1a1a;
+  color: #fff;
+  cursor: grab;
+  width: 100%;
+  flex-shrink: 0;
+  border-bottom: 1px solid #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  touch-action: none;
+  user-select: none;
+}
+.vignette-drag-handle:active {
+  cursor: grabbing;
+  background: #333;
+}
+
+/* Zero padding, zero margin packed scroll container */
+.vignette-scroll-box {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  scrollbar-width: none;
+}
+
+.vignette-scroll-box::-webkit-scrollbar {
+  display: none;
+}
+
+/* Packed 200px by 200px iframe items with zero borders/margins */
+.vignette-card {
+  width: 200px;
+  height: 200px;
+  min-width: 200px;
+  min-height: 200px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: #000;
+  display: block;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.vignette-card iframe {
+  width: 200px;
+  height: 200px;
+  border: none;
+  margin: 0;
+  padding: 0;
+  transform: none;          /* No scaling needed; full 200px size */
+  pointer-events: auto;     /* Enables direct interaction */
+}</style>
 </head>
 <body>
 
@@ -765,7 +872,14 @@ div {
         <button id="leftBtn">Jelly Beans</button>
         <button id="qrLeftBtn" onclick="toggleQrHotspot()" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;">QR</button>
         <button id="hsLeftBtn" onclick="toggleHsHotspot()" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;">HS</button>
-        <button id="buzzerLeftBtn" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer; background:black; color:white;">Buzzer</button>
+        <!--<button id="buzzerLeftBtn" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer; background:black; color:white;">Buzzer</button>-->
+
+<!-- Left Control Column Button -->
+<button type="button" id="leftVignetteBtn" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer; background:black; color:white;">Left Vignettes</button>
+
+
+
+
     </div>
 
     <!-- VIEWER -->
@@ -819,7 +933,11 @@ div {
         <button id="rightBtn">Jelly Beans</button>
         <button id="qrRightBtn" onclick="toggleQrHotspot()" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;">QR</button>
         <button id="hsRightBtn" onclick="toggleHsHotspot()" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;">HS</button>
-        <button id="buzzerRightBtn" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer; background:black; color:white;">Buzzer</button>
+        <!--<button id="buzzerRightBtn" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer; background:black; color:white;">Buzzer</button>-->
+
+
+<!-- Right Control Column Button (Replacing the buzzer) -->
+<button type="button" id="rightVignetteBtn" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer; background:black; color:white;">Game Vignettes</button>
     </div>
 
 </div>
@@ -1908,6 +2026,39 @@ document.addEventListener("DOMContentLoaded", () => {
     buildUnitFolders("unitGridContainerRight");
     // Default load starting spread
     loadSpread("BLACK_BLANK.jpg", "BLACK_BLANK.jpg");
+
+    // Automatically trigger onload activation: 
+    // 1. Answer Assembly, 2. Game Vignettes, 3. Tallyman (snug left of vignettes), 4. Spinner
+    setTimeout(() => {
+        // 1. Open Answer Assembly (~P Modal)
+        const loadAnswerBtn = document.getElementById("loadAnswerBtn");
+        if (loadAnswerBtn) loadAnswerBtn.click();
+
+        // 2. Open Game Vignettes first so its layout position is established
+        const rightVignetteBtn = document.getElementById("rightVignetteBtn");
+        if (rightVignetteBtn) rightVignetteBtn.click();
+
+        // 3. Open Tallyman and position it snug against the left edge of the Game Vignettes modal at the top
+        const tallymanBtn = document.getElementById("tallymanLeftBtn");
+        if (tallymanBtn) tallymanBtn.click();
+        
+        const tmWindow = document.getElementById("tmWindow");
+        const rightModal = document.getElementById("vignetteRightModal");
+        if (tmWindow && rightModal) {
+            const modalRect = rightModal.getBoundingClientRect();
+            const tallymanWidth = 250; // matches TM.width
+            const snugLeft = modalRect.left - tallymanWidth - 4;
+
+            tmWindow.style.setProperty("left", `${snugLeft}px`, "important");
+            tmWindow.style.setProperty("top", "25px", "important");
+            tmWindow.style.setProperty("right", "auto", "important");
+            tmWindow.style.setProperty("bottom", "auto", "important");
+        }
+
+        // 4. Open Spinner Wheel
+        const spinnerBtn = document.getElementById("spinnerBtn");
+        if (spinnerBtn) spinnerBtn.click();
+    }, 200);
 });
 
 const leftImage = document.getElementById("leftImage");
@@ -1916,9 +2067,7 @@ const rightImage = document.getElementById("rightImage");
 function loadSpread(leftPath, rightPath){
     leftImage.src = leftPath;
     rightImage.src = rightPath;
-}
-
-/* ==========================
+}/* ==========================
    FEATURE 5: ZOOM, PAN & CAMERA CLAMPING
 ========================== */
 
@@ -2579,13 +2728,14 @@ function(){
     // 1. Inject Styles
     const style = document.createElement('style');
     style.innerHTML = `
-        #pAnswerModal {
+#pAnswerModal {
             position: absolute;
             z-index: 9999;
-            top: 100px;
-            left: 100px;
+            top: 32px;   
+            left: 288px; /* Moved right an additional 3px */
             background: transparent;
             border: none;
+            outline: none !important;
             padding: 0;
             box-shadow: none;
             width: auto;
@@ -2595,8 +2745,7 @@ function(){
             display: inline-flex;
             align-items: center;
             touch-action: none;
-         }
-        #pCenterWrapper {
+         }        #pCenterWrapper {
             display: inline-flex;
             flex-direction: column;
             align-items: center;
@@ -2859,6 +3008,8 @@ document.getElementById('pNextBtn').addEventListener('click', (e) => {
         if (pAnswers.length === 0) return;
         currentIndex = (currentIndex + 1) % pAnswers.length;
         updatePModalDisplay();
+        
+        // Only trigger spinner if the wheel overlay is actually open and visible
         const wheelOverlay = document.getElementById("studentWheelOverlay");
         if (wheelOverlay && wheelOverlay.style.display === "flex" && typeof spinWheel === "function") {
             spinWheel();
@@ -2872,14 +3023,15 @@ document.getElementById('pNextBtn').addEventListener('click', (e) => {
         if (pAnswers.length === 0) return;
         currentIndex = (currentIndex - 1 + pAnswers.length) % pAnswers.length;
         updatePModalDisplay();
+        
+        // Only trigger spinner if the wheel overlay is actually open and visible
         const wheelOverlay = document.getElementById("studentWheelOverlay");
         if (wheelOverlay && wheelOverlay.style.display === "flex" && typeof spinWheel === "function") {
             spinWheel();
         } else if (typeof window.nextStudent === 'function') {
             window.nextStudent();
         }
-    });
-    document.getElementById('pSquareClearBtn').addEventListener('click', (e) => {
+    });    document.getElementById('pSquareClearBtn').addEventListener('click', (e) => {
         e.stopPropagation();
         const bodyEl = document.getElementById('pModalBody');
         if (bodyEl) {
@@ -3044,105 +3196,6 @@ handle.addEventListener("pointerup",()=>{
 
 </script>
 
-<script>
-
-(function(){
-
-const bar =
-document.getElementById("tilesResizeBar");
-
-const tilesBar =
-document.getElementById("tilesBar");
-
-const scriptBar =
-document.getElementById("scriptBar");
-
-const leftColumn =
-document.getElementById("leftColumn");
-
-let dragging=false;
-
-let minTop=0;
-
-
-function setTileLimit(){
-
-    if(!leftColumn) return;
-
-    minTop =
-        leftColumn.offsetHeight;
-
-    tilesBar.style.top =
-        minTop + "px";
-
-    tilesBar.style.bottom =
-        scriptBar.offsetHeight + "px";
-
-}
-
-
-window.addEventListener(
-"load",
-setTileLimit
-);
-
-
-window.addEventListener(
-"resize",
-setTileLimit
-);
-
-
-
-bar.addEventListener("pointerdown",e=>{
-
-    dragging=true;
-
-    bar.setPointerCapture(e.pointerId);
-
-});
-
-
-bar.addEventListener("pointermove",e=>{
-
-    if(!dragging) return;
-
-
-    let newTop =
-        e.clientY;
-
-
-    if(newTop > minTop){
-        newTop = minTop;
-    }
-
-
-    if(newTop < 0){
-        newTop = 0;
-    }
-
-
-    tilesBar.style.top =
-        newTop + "px";
-
-
-    tilesBar.style.bottom =
-        scriptBar.offsetHeight + "px";
-
-
-});
-
-
-bar.addEventListener("pointerup",()=>{
-
-    dragging=false;
-
-});
-
-
-})();
-
-</script>
 
 <script>
 
@@ -3183,10 +3236,12 @@ function setTileLimit(){
 }
 
 
-window.addEventListener(
-"load",
-setTileLimit
-);
+// Run immediately on DOMContentLoaded so the bar is positioned instantly on frame zero
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setTileLimit);
+} else {
+    setTileLimit();
+}
 
 
 window.addEventListener(
@@ -3197,7 +3252,6 @@ setTileLimit
 
 
 bar.addEventListener("pointerdown",e=>{
-
     dragging=true;
 
     bar.setPointerCapture(e.pointerId);
@@ -3391,53 +3445,67 @@ window.PlacementSound =
 <script>
 
 /* =====================================
-   DOWNLOAD SCRIPT TXT
+   DOWNLOAD SCRIPT TXT (WITH UPLOAD TRACKING)
 ===================================== */
 
 (function(){
 
-const btn =
-document.getElementById("downloadTxtBtn");
+const btn = document.getElementById("downloadTxtBtn");
+const field = document.getElementById("worksheetScript");
+const txtLoader = document.getElementById("txtLoader");
 
-const field =
-document.getElementById("worksheetScript");
-
+// Track the filename whenever a file is selected via the "Browse" button
+if (txtLoader) {
+    txtLoader.addEventListener("change", function(){
+        const file = this.files[0];
+        if (file) {
+            window.lastUploadedFilename = file.name;
+        }
+    });
+}
 
 if(!btn || !field) return;
 
-
-btn.onclick=function(){
-
-    const blob =
-    new Blob(
+btn.onclick = function(){
+    const blob = new Blob(
         [field.value],
         {type:"text/plain;charset=utf-8"}
     );
 
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
 
-    const a =
-    document.createElement("a");
+    // Generate International Date (YYYY-MM-DD) and Military Time (HHMM)
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const internationalDate = `${year}-${month}-${day}`;
 
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const militaryTime = `${hours}${minutes}`;
 
-    a.href =
-    URL.createObjectURL(blob);
+    // Determine the base name from the browsed file, or fallback to "Worksheet"
+    let baseName = "Worksheet";
+    if (window.lastUploadedFilename) {
+        // Removes the file extension (.txt) so it doesn't duplicate
+        baseName = window.lastUploadedFilename.replace(/\.[^/.]+$/, "");
+    }
 
+    // Set the final formatted filename
+    a.download = `${baseName}_${internationalDate}_${militaryTime}.txt`;
 
-    a.download =
-    "Worksheet.txt";
-
-
+    document.body.appendChild(a);
     a.click();
-
+    document.body.removeChild(a);
 
     URL.revokeObjectURL(a.href);
-
 };
 
 })();
 
 </script>
-
 
 <script>
 
@@ -3944,28 +4012,40 @@ background:transparent;
 pointer-events:none !important;
 z-index:100002;
 }
-#studentWheelPanel{
-position:relative;
-width:calc(var(--wheel-size) + 120px);
-height:calc(var(--wheel-size) + 120px);
-cursor:default;
-pointer-events:none !important;
-touch-action:none;
-display:flex;
-align-items:center;
-justify-content:center;
+#studentWheelPanel {
+    position: fixed !important;
+    left: calc(645px + (250px - calc(var(--wheel-size) + 120px)) / 2) !important;
+    top: 135px !important;
+    bottom: auto !important;
+    width: calc(var(--wheel-size) + 120px);
+    height: calc(var(--wheel-size) + 120px);
+    touch-action: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto !important;
 }
-#studentWheelCanvas{
-display:block;
-width:var(--wheel-size);
-height:var(--wheel-size);
-transform:none;
-background:transparent;
-pointer-events:auto !important;
-cursor:pointer;
-clip-path: circle(50% at center);
-}
-`;
+
+Wheel.canvas.addEventListener("pointerdown", e=>{
+        const canvasRect = Wheel.canvas.getBoundingClientRect();
+        const cx = canvasRect.width / 2;
+        const cy = canvasRect.height / 2;
+        const localX = e.clientX - canvasRect.left;
+        const localY = e.clientY - canvasRect.top;
+        const dx = localX - cx;
+        const dy = localY - cy;
+
+        // If clicking the brass center hub (radius 28), bypass drag so click-to-spin takes over
+        if(Math.sqrt(dx * dx + dy * dy) <= 28){
+            return; 
+        }
+
+        dragging=true;
+        const rect = Wheel.panel.getBoundingClientRect();
+        ox = e.clientX - rect.left;
+        oy = e.clientY - rect.top;
+        e.preventDefault();
+    });`;
     document.head.appendChild(style);
 
     Wheel.overlay=document.createElement("div");
@@ -3996,44 +4076,41 @@ clip-path: circle(50% at center);
     let ox=0;
     let oy=0;
 
-    Wheel.canvas.addEventListener("pointerdown",e=>{
+    Wheel.canvas.addEventListener("pointerdown", e=>{
         const canvasRect = Wheel.canvas.getBoundingClientRect();
-        const cx = (Wheel.size / 2) + extraSpace / 2;
-        const cy = (Wheel.size / 2) + extraSpace / 2;
-        const scaleX = Wheel.canvas.width / canvasRect.width;
-        const scaleY = Wheel.canvas.height / canvasRect.height;
-        const internalX = (e.clientX - canvasRect.left) * scaleX;
-        const internalY = (e.clientY - canvasRect.top) * scaleY;
-        const dx = internalX - cx;
-        const dy = internalY - cy;
+        const cx = canvasRect.width / 2;
+        const cy = canvasRect.height / 2;
+        const localX = e.clientX - canvasRect.left;
+        const localY = e.clientY - canvasRect.top;
+        const dx = localX - cx;
+        const dy = localY - cy;
 
+        // If clicking the brass center hub (radius 28), bypass drag so click-to-spin takes over
         if(Math.sqrt(dx * dx + dy * dy) <= 28){
             return; 
         }
 
-        const distFromTopPointer = Math.sqrt(Math.pow(internalX - cx, 2) + Math.pow(internalY - 26, 2));
-        if(distFromTopPointer > 15){
-            return;
-        }
-
         dragging=true;
-        const r=Wheel.panel.getBoundingClientRect();
-        ox=e.clientX-r.left;
-        oy=e.clientY-r.top;
-        Wheel.canvas.setPointerCapture(e.pointerId);
+        const rect = Wheel.panel.getBoundingClientRect();
+        ox = e.clientX - rect.left;
+        oy = e.clientY - rect.top;
+        e.preventDefault();
     });
 
-    Wheel.canvas.addEventListener("pointermove",e=>{
-        if(!dragging)return;
-        Wheel.panel.style.position="fixed";
-        Wheel.panel.style.left=(e.clientX-ox)+"px";
-        Wheel.panel.style.top=(e.clientY-oy)+"px";
-        Wheel.panel.style.transform="none";
+    document.addEventListener("pointermove", e=>{
+        if(!dragging) return;
+        Wheel.panel.style.setProperty("position", "fixed", "important");
+        Wheel.panel.style.setProperty("left", (e.clientX - ox) + "px", "important");
+        Wheel.panel.style.setProperty("top", (e.clientY - oy) + "px", "important");
+        Wheel.panel.style.setProperty("bottom", "auto", "important");
+        Wheel.panel.style.setProperty("right", "auto", "important");
+        Wheel.panel.style.setProperty("transform", "none", "important");
     });
 
-    Wheel.canvas.addEventListener("pointerup",e=>{
-        dragging=false;
-        try { Wheel.canvas.releasePointerCapture(e.pointerId); } catch(err) {}
+    document.addEventListener("pointerup", e=>{
+        if(dragging){
+            dragging=false;
+        }
     });
 }
 
@@ -4262,7 +4339,6 @@ function spinWheel(){
             loadWheelStudents();
             drawWheel();
 
-            // Sync final landing student across all components
             const landingStudent = Wheel.students[targetIndex];
             if (landingStudent) {
                 window.setGlobalStudent(landingStudent.name, landingStudent.color);
@@ -7755,6 +7831,202 @@ Blue Thanakorn
 <!-- ========================================== -->
 <!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
 <!-- ========================================== -->
+
+
+
+
+
+<script>
+"use strict";
+
+const VIGNETTE_GAMES = [
+  "Vid_Asteroids.html",
+  "Vid_Cars.html",
+  "Vid_Bomber.html",
+  "Vid_Flash_Cards.html",
+  "Vid_Bubbles.html"
+];
+
+function createVignetteModal(modalId) {
+  const existing = document.querySelectorAll("#" + modalId);
+  if (existing.length > 0) {
+    for (let i = 1; i < existing.length; i++) {
+      existing[i].remove();
+    }
+    return existing[0];
+  }
+
+  const modal = document.createElement("div");
+  modal.id = modalId;
+  modal.className = "vignette-modal-panel";
+
+  // Create title / drag handle bar
+  const dragHandle = document.createElement("div");
+  dragHandle.className = "vignette-drag-handle";
+  dragHandle.textContent = "DRAG / GAMES";
+  dragHandle.title = "Click and drag to move panel";
+  modal.appendChild(dragHandle);
+
+  const scrollBox = document.createElement("div");
+  scrollBox.className = "vignette-scroll-box";
+
+  // Duplicate the game list for seamless infinite looping
+  const loopingGames = [...VIGNETTE_GAMES, ...VIGNETTE_GAMES];
+
+  loopingGames.forEach(gameUrl => {
+    const card = document.createElement("a");
+    card.href = gameUrl;
+    card.target = "_blank";
+    card.className = "vignette-card";
+    card.title = "Click to play full game";
+
+    const iframe = document.createElement("iframe");
+    iframe.src = gameUrl;
+    iframe.loading = "lazy";
+    
+    card.appendChild(iframe);
+    scrollBox.appendChild(card);
+  });
+
+  modal.appendChild(scrollBox);
+
+  // --- Robust Dragging Logic with !important Overrides ---
+  let isDragging = false;
+  let hasMoved = false;
+  let startX = 0, startY = 0;
+  let initialLeft = 0, initialTop = 0;
+
+  dragHandle.addEventListener("pointerdown", (e) => {
+    isDragging = true;
+    hasMoved = false;
+    startX = e.clientX;
+    startY = e.clientY;
+
+    document.addEventListener("pointermove", onPointerMove);
+    document.addEventListener("pointerup", onPointerUp);
+
+    e.stopPropagation();
+    e.preventDefault();
+  });
+
+  function onPointerMove(e) {
+    if (!isDragging) return;
+
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    // Once the mouse moves past a 2px threshold, lock current layout into explicit pixels
+    if (!hasMoved && (Math.abs(dx) > 2 || Math.abs(dy) > 2)) {
+      hasMoved = true;
+      const rect = modal.getBoundingClientRect();
+      
+      // Use setProperty with 'important' to bypass CSS restrictions (like left: auto !important)
+      modal.style.setProperty("right", "auto", "important");
+      modal.style.setProperty("bottom", "auto", "important");
+      modal.style.setProperty("left", rect.left + "px", "important");
+      modal.style.setProperty("top", rect.top + "px", "important");
+      modal.style.setProperty("height", rect.height + "px", "important");
+      
+      initialLeft = rect.left;
+      initialTop = rect.top;
+    }
+
+    if (hasMoved) {
+      modal.style.setProperty("left", (initialLeft + (e.clientX - startX)) + "px", "important");
+      modal.style.setProperty("top", (initialTop + (e.clientY - startY)) + "px", "important");
+    }
+
+    e.stopPropagation();
+  }
+
+  function onPointerUp(e) {
+    if (isDragging) {
+      isDragging = false;
+      hasMoved = false;
+      document.removeEventListener("pointermove", onPointerMove);
+      document.removeEventListener("pointerup", onPointerUp);
+    }
+  }
+
+  // --- Seamless Loop Auto-Scroll & State Reset Logic ---
+  let autoScrollInterval = null;
+
+  function startAutoScroll() {
+    if (autoScrollInterval) return;
+    autoScrollInterval = setInterval(() => {
+      if (modal.matches(':hover')) return;
+
+      scrollBox.scrollTop += 0.5;
+
+      const halfHeight = scrollBox.scrollHeight / 2;
+      if (scrollBox.scrollTop >= halfHeight) {
+        scrollBox.scrollTop = scrollBox.scrollTop - halfHeight;
+      }
+    }, 30);
+  }
+
+  function stopAutoScroll() {
+    if (autoScrollInterval) {
+      clearInterval(autoScrollInterval);
+      autoScrollInterval = null;
+    }
+  }
+
+  const observer = new MutationObserver(() => {
+    if (modal.classList.contains("open")) {
+      startAutoScroll();
+    } else {
+      stopAutoScroll();
+      // Clear all custom inline layout properties when closed so it snaps back to default next time it opens
+      modal.style.removeProperty("left");
+      modal.style.removeProperty("right");
+      modal.style.removeProperty("top");
+      modal.style.removeProperty("bottom");
+      modal.style.removeProperty("height");
+    }
+  });
+  observer.observe(modal, { attributes: true, attributeFilter: ["class"] });
+
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function initDualBuzzerVignettes() {
+  if (window._vignettesInitialized) return;
+  window._vignettesInitialized = true;
+
+  const leftModal = createVignetteModal("vignetteLeftModal");
+  const rightModal = createVignetteModal("vignetteRightModal");
+
+  const leftBtn = document.getElementById("leftVignetteBtn");
+  const rightBtn = document.getElementById("rightVignetteBtn");
+
+  if (leftBtn) {
+    leftBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      rightModal.classList.remove("open");
+      leftModal.classList.toggle("open");
+    });
+  }
+
+  if (rightBtn) {
+    rightBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      leftModal.classList.remove("open");
+      rightModal.classList.toggle("open");
+    });
+  }
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initDualBuzzerVignettes);
+} else {
+  initDualBuzzerVignettes();
+}
+</script>
+
+
+
 
 
 </body>

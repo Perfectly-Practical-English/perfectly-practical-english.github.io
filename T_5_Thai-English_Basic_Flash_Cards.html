@@ -1040,6 +1040,11 @@ let currentSectionName = "No Section";
           closeModal();
           
           vocabPairs = parseVocabInput(sec.text);
+
+          // Ensure the vocab list stays closed when switching sections
+          const vList = document.getElementById('vocabList');
+          if (vList) vList.style.display = 'none';
+
           if (typeof studentSentences !== "undefined") {
             studentSentences = Array(vocabPairs.length).fill("");
           }
@@ -1067,12 +1072,16 @@ let currentSectionName = "No Section";
     currentSectionName = "No Section";
     btn.textContent = "Select a section.";
     vocabPairs = [];
+    
+    // Ensure the vocab list starts closed on initial page load
+    const vList = document.getElementById('vocabList');
+    if (vList) vList.style.display = 'none';
+
     if (typeof renderVocabList === "function") renderVocabList();
     if (typeof updateFlashcard === "function") updateFlashcard();
   });
 })();
 </script>
-
 <script>
 let studentSentences = [];
 let flashcardIndex = 0;
