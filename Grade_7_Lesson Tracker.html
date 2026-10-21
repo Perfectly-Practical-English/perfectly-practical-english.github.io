@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BCC ESL Weekly Class Planner</title>
+    <style>
+        :root {
+            --primary: #1e3a8a;
+            --primary-light: #3b82f6;
+            --accent: #d97706;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --activator-bg: #fef3c7;
+            --activator-border: #f59e0b;
+            --task-bg: #f0fdf4;
+            --task-border: #22c55e;
+            --holiday-bg: #fdf2f8;
+            --holiday-border: #ec4899;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+        body { background-color: var(--bg); color: var(--text); padding: 8px; max-width: 100%; margin: 0 auto; line-height: 1.3; font-size: 13px; }
+
+        /* Compact Top Control Bar */
+        .top-control-bar { display: flex; gap: 4px; margin-bottom: 8px; overflow-x: auto; padding-bottom: 2px; -webkit-overflow-scrolling: touch; align-items: center; }
+        
+        button { background-color: var(--primary); color: white; border: none; padding: 6px 9px; border-radius: 4px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+        button:hover { background-color: var(--primary-light); }
+        button.secondary { background-color: white; color: var(--text); border: 1px solid var(--border); }
+        button.secondary:hover { background-color: #f1f5f9; }
+
+        .class-btn { padding: 6px 9px; border-radius: 4px; font-weight: 700; border: 1px solid var(--border); background: white; color: var(--text-muted); cursor: pointer; flex-shrink: 0; font-size: 12px; }
+        .class-btn.active { border-color: var(--primary); background-color: var(--primary); color: white; }
+
+        /* Week Title Banner - Clean Date Range Focus */
+        .week-title-banner { background: white; padding: 6px 8px; border-radius: 6px; margin-bottom: 10px; border: 1px solid var(--border); font-size: 0.8rem; font-weight: 700; color: var(--primary); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Vertical Stack Layout for Mobile Portrait Viewports */
+        .grid-5day { display: flex; flex-direction: column; gap: 8px; }
+
+        /* Compact Day Card */
+        .day-card { background: var(--card-bg); border-radius: 6px; border: 1px solid var(--border); overflow: hidden; display: flex; flex-direction: column; }
+        .day-header { background: #f1f5f9; padding: 6px 10px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+        .day-name { font-weight: 700; color: var(--primary); font-size: 0.85rem; }
+        .day-date { font-size: 0.75rem; color: var(--text-muted); font-weight: 600; }
+        .day-body { padding: 8px; flex-grow: 1; display: flex; flex-direction: column; gap: 6px; }
+
+        /* Tight Lesson Items */
+        .unit-badge { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; background: #e0e7ff; color: var(--primary); display: inline-block; margin-bottom: 2px; }
+        .lesson-title { font-weight: 700; font-size: 0.8rem; color: var(--text); margin-bottom: 4px; border-bottom: 1px solid var(--border); padding-bottom: 2px; }
+        .item-card { padding: 6px 8px; border-radius: 4px; border-left: 3px solid var(--border); background: #fafafa; font-size: 0.75rem; margin-bottom: 4px; }
+        .item-card.activator { background: var(--activator-bg); border-left-color: var(--activator-border); }
+        .item-card.task { background: var(--task-bg); border-left-color: var(--task-border); }
+        .item-card.holiday { background: var(--holiday-bg); border-left-color: var(--holiday-border); font-weight: 700; color: #9d174d; }
+        .item-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; margin-bottom: 1px; display: block; opacity: 0.8; }
+        .empty-day { color: var(--text-muted); font-style: italic; font-size: 0.75rem; text-align: center; padding: 12px 4px; background: #f8fafc; border-radius: 4px; border: 1px dashed var(--border); }
+        .initial-prompt { color: var(--text-muted); text-align: center; padding: 30px 10px; font-style: italic; background: white; border-radius: 6px; border: 1px solid var(--border); font-size: 0.85rem; }
+
+        /* Compact Modal Base */
+        .modal-overlay { position: fixed; top:0; left:0; right:0; bottom:0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 1000; padding: 10px; }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal { background: white; padding: 15px; border-radius: 8px; max-width: 320px; width: 100%; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .modal-title { font-size: 1rem; font-weight: 700; }
+        .close-btn { background: none; border: none; color: var(--text-muted); font-size: 1.2rem; cursor: pointer; padding: 0; }
+
+        /* Calendar Grid */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; text-align: center; margin-top: 8px; }
+        .cal-cell { padding: 8px 4px; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+        .cal-cell:hover { background: #f1f5f9; }
+        .cal-cell.today { border: 2px solid var(--primary-light); font-weight: 700; background: #eff6ff; }
+        .cal-cell.selected { background: var(--primary); color: white; border-color: var(--primary); }
+    </style>
+</head>
+<body>
+
+    <!-- Single Top Control Bar -->
+    <div class="top-control-bar" id="topControlBar">
+        <button class="class-btn" onclick="selectClass('11.1')">11.1</button>
+        <button class="class-btn" onclick="selectClass('13.2')">13.2</button>
+        <button class="class-btn" onclick="selectClass('14.1')">14.1</button>
+        <button class="class-btn" onclick="selectClass('15.3')">15.3</button>
+        <button class="class-btn" onclick="selectClass('16.2')">16.2</button>
+
+        <button class="secondary" onclick="changeWeek(-1)">Prev</button>
+        <button class="secondary" onclick="changeWeek(1)">Next</button>
+        <button class="secondary" onclick="openCalendarModal()">Date</button>
+    </div>
+
+    <!-- Active Week Title Banner (Simple Date Span) -->
+    <div class="week-title-banner" id="weekTitleDisplay">Select a class</div>
+
+    <main class="grid-5day" id="weeklyGrid">
+        <div class="initial-prompt">Tap any class button above to view schedule.</div>
+    </main>
+
+    <!-- CALENDAR MODAL -->
+    <div class="modal-overlay" id="calendarModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">Select Date</div>
+                <button class="close-btn" onclick="closeModal('calendarModal')">&times;</button>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <button class="secondary" onclick="moveCalMonth(-1)">Prev</button>
+                <span id="calMonthTitle" style="font-weight: 700; font-size: 0.85rem;"></span>
+                <button class="secondary" onclick="moveCalMonth(1)">Next</button>
+            </div>
+            <div class="calendar-grid" id="calendarGrid"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- TIMEZONE CONFIGURATION ---
+        const CONFIG_TIMEZONE = "Asia/Bangkok";
+
+        let currentSelectedClass = null; 
+        let currentDate = getInitialTargetSchoolWeekDate();
+        let calViewDate = new Date(currentDate);
+
+        // --- MASTER RAW TEXT CONFIGURATION ENGINE ---
+        let rawCurriculumData = `
+Start: 2026-10-26 | Unit 5 Education | Week 1
+Holiday: 2026-12-25 | Christmas Day – No Classes!
+
+Unit 5 Education | Week 1 | Lesson 1 | Objectives: To describe school life | Priority 1: Activator 37: Writing What do you love/hate most about school? | Priority 2: Introduce new unit | Priority 3: Complete video worksheet
+Unit 5 Education | Week 1 | Lesson 2 | Objectives: To describe school life | Priority 1: Activator 38: Writing List subjects | Priority 2: Review yesterday | Priority 3: Role play performance
+Unit 5 Education | Week 1 | Lesson 3 | Objectives: To describe school life | Priority 1: Reading page 65 | Priority 2: Class reader scientists | Priority 3: Extension quiz
+
+Review: 2026-11-16 | Unit 5 Review Week | Week 1 | Objectives: Review and catch up | Priority 1: Comprehensive grammar review | Priority 2: Q&A session | Priority 3: Extra game board
+Exam: 2026-11-23 | Unit 5 Examination Week | Week 1 | Objectives: Unit testing | Priority 1: Written examination | Priority 2: Oral testing | Priority 3: Review test answers
+        `.trim();
+
+        // Daily Class Sequence Mapping
+        const masterDailySchedule = {
+            0: { '13.2': 1, 'M13.2': 1, '14.1': 2, 'M14.1': 2, '11.1': 3, 'M11.1': 3 },
+            1: { '15.3': 1, 'M15.3': 1, '14.1': 2, 'M14.1': 2, '13.2': 3, 'M13.2': 3 },
+            2: { '13.2': 1, 'M13.2': 1, '16.2': 2, 'M16.2': 2, '15.3': 3, 'M15.3': 3 },
+            3: { '14.1': 1, 'M14.1': 1, '11.1': 2, 'M11.1': 2, '16.2': 3, 'M16.2': 3 },
+            4: { '16.2': 1, 'M16.2': 1, '15.3': 2, 'M15.3': 2, '11.1': 3, 'M11.1': 3 }
+        };
+
+        function parseUTCDate(dateStr) {
+            let parts = dateStr.split('-');
+            return new Date(Date.UTC(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2])));
+        }
+
+        function formatDateKey(dateObj) {
+            let y = dateObj.getUTCFullYear();
+            let m = String(dateObj.getUTCMonth() + 1).padStart(2, '0');
+            let d = String(dateObj.getUTCDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        }
+
+        function getTodayUTCDate() {
+            let now = new Date();
+            return new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+        }
+
+        function getInitialTargetSchoolWeekDate() {
+            let utcNow = getTodayUTCDate();
+            let day = utcNow.getUTCDay();
+
+            if (day === 6) {
+                utcNow.setUTCDate(utcNow.getUTCDate() + 2);
+            } else if (day === 0) {
+                utcNow.setUTCDate(utcNow.getUTCDate() + 1);
+            } else {
+                utcNow.setUTCDate(utcNow.getUTCDate() - (day - 1));
+            }
+            return utcNow;
+        }
+
+        function selectClass(className) {
+            currentSelectedClass = className;
+            currentDate = getInitialTargetSchoolWeekDate();
+            calViewDate = new Date(currentDate);
+
+            document.querySelectorAll('.class-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.trim() === className);
+            });
+            renderPlanner();
+        }
+
+        function changeWeek(direction) {
+            currentDate.setUTCDate(currentDate.getUTCDate() + (direction * 7));
+            renderPlanner();
+        }
+
+        function openCalendarModal() {
+            calViewDate = new Date(currentDate);
+            renderCalendar();
+            document.getElementById('calendarModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            calViewDate = new Date(currentDate);
+        }
+
+        function parseRawEngine() {
+            const lines = rawCurriculumData.split('\n').filter(l => l.trim() !== '');
+            let timelineEvents = [];
+            let curriculumLessons = [];
+            let holidays = {};
+            let cancellations = {};
+
+            lines.forEach(line => {
+                let lower = line.toLowerCase();
+                let parts = line.split('|').map(p => p.trim());
+
+                if (lower.startsWith('start:') || lower.startsWith('review:') || lower.startsWith('exam:')) {
+                    let type = parts[0].split(':')[0].trim();
+                    let dateStr = parts[0].split(':')[1].trim();
+                    let dateObj = parseUTCDate(dateStr);
+                    timelineEvents.push({ date: dateObj, title: parts[1] || type, type: type });
+                } else if (lower.startsWith('holiday:')) {
+                    if (parts.length >= 2) {
+                        let dateStr = parts[0].split(':')[1].trim();
+                        holidays[dateStr] = parts[1];
+                    }
+                } else if (lower.startsWith('cancel:')) {
+                    if (parts.length >= 3) {
+                        let dateStr = parts[0].split(':')[1].trim();
+                        let cls = parts[1];
+                        let reason = parts[2];
+                        if (!cancellations[dateStr]) cancellations[dateStr] = {};
+                        cancellations[dateStr][cls] = reason;
+                    }
+                } else {
+                    curriculumLessons.push({
+                        unit: parts[0] || '',
+                        weekStr: parts[1] || '',
+                        lessonStr: parts[2] || '',
+                        objectives: parts[3] || '',
+                        content: parts.slice(4).join(' | ')
+                    });
+                }
+            });
+
+            timelineEvents.sort((a, b) => a.date - b.date);
+            return { timelineEvents, curriculumLessons, holidays, cancellations };
+        }
+
+        function getActiveEventForDate(date) {
+            let engine = parseRawEngine();
+            let active = null;
+            let checkTime = date.getTime();
+
+            for (let ev of engine.timelineEvents) {
+                if (checkTime >= ev.date.getTime()) {
+                    active = ev;
+                } else {
+                    break;
+                }
+            }
+            return { active, engine };
+        }
+
+        function renderPlanner() {
+            const titleDisplay = document.getElementById('weekTitleDisplay');
+            const grid = document.getElementById('weeklyGrid');
+            
+            if (!currentSelectedClass) {
+                titleDisplay.textContent = "Select a class";
+                grid.innerHTML = `<div class="initial-prompt">Tap any class button above to view schedule.</div>`;
+                return;
+            }
+
+            // Calculate Monday and Friday dates for the active week
+            let startOfWeek = new Date(currentDate);
+            let dayOfWeek = startOfWeek.getUTCDay();
+            let diff = startOfWeek.getUTCDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1);
+            startOfWeek.setUTCDate(diff);
+
+            let endOfWeek = new Date(startOfWeek);
+            endOfWeek.setUTCDate(startOfWeek.getUTCDate() + 4);
+
+            let monStr = startOfWeek.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+            let friStr = endOfWeek.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+
+            titleDisplay.textContent = `Class ${currentSelectedClass} | ${monStr} – ${friStr}`;
+
+            let { active, engine } = getActiveEventForDate(startOfWeek);
+
+            let html = '';
+            const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+            
+            for (let i = 0; i < 5; i++) {
+                let currDay = new Date(startOfWeek);
+                currDay.setUTCDate(startOfWeek.getUTCDate() + i);
+                let dateKey = formatDateKey(currDay);
+                let dateStr = currDay.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
+                
+                let dayScheduleMap = masterDailySchedule[i] || {};
+                let lessonIndex = dayScheduleMap[currentSelectedClass] || null;
+
+                html += `
+                    <div class="day-card">
+                        <div class="day-header">
+                            <span class="day-name">${dayNames[i]}</span>
+                            <span class="day-date">${dateStr}</span>
+                        </div>
+                        <div class="day-body">
+                `;
+
+                if (!active) {
+                    html += `<div class="empty-day">Term not started</div>`;
+                } else if (engine.holidays[dateKey]) {
+                    html += `
+                        <div class="item-card holiday">
+                            <span class="item-label">Holiday</span>
+                            ${engine.holidays[dateKey]}
+                        </div>
+                    `;
+                } else if (engine.cancellations[dateKey] && engine.cancellations[dateKey][currentSelectedClass]) {
+                    let cancelReason = engine.cancellations[dateKey][currentSelectedClass];
+                    html += `
+                        <div class="item-card holiday">
+                            <span class="item-label">Notice</span>
+                            ${cancelReason}
+                        </div>
+                    `;
+                } else if (lessonIndex === null) {
+                    html += `<div class="empty-day">No class today</div>`;
+                } else {
+                    // Cyclically pull lesson entries so all active weeks display schedule content
+                    let lessonMatch = engine.curriculumLessons.length > 0 
+                        ? engine.curriculumLessons[(lessonIndex - 1) % engine.curriculumLessons.length] 
+                        : null;
+
+                    if (!lessonMatch) {
+                        html += `<div class="empty-day">No lesson entry</div>`;
+                    } else {
+                        let isPartialCancel = engine.cancellations[dateKey] && engine.cancellations[dateKey][currentSelectedClass];
+                        
+                        html += `
+                            <div>
+                                <span class="unit-badge">${active.title.split('|')[0].trim()} (Lesson ${lessonIndex})</span>
+                                <div class="lesson-title">${lessonMatch.objectives}</div>
+                        `;
+
+                        let contentStr = lessonMatch.content;
+                        let p1 = contentStr.match(/Priority 1:\s*([^|]+)/i);
+                        let p2 = contentStr.match(/Priority 2:\s*([^|]+)/i);
+                        let p3 = contentStr.match(/Priority 3:\s*([^|]+)/i);
+
+                        if (p1) {
+                            html += `<div class="item-card activator"><span class="item-label">P1</span>${p1[1].trim()}</div>`;
+                        }
+                        if (p2 && (!isPartialCancel)) {
+                            html += `<div class="item-card task"><span class="item-label">P2</span>${p2[1].trim()}</div>`;
+                        }
+                        if (p3 && (!isPartialCancel)) {
+                            html += `<div class="item-card task"><span class="item-label">P3</span>${p3[1].trim()}</div>`;
+                        }
+
+                        html += `</div>`;
+                    }
+                }
+
+                html += `
+                        </div>
+                    </div>
+                `;
+            }
+
+            grid.innerHTML = html;
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const title = document.getElementById('calMonthTitle');
+            
+            let year = calViewDate.getUTCFullYear();
+            let month = calViewDate.getUTCMonth();
+            
+            title.textContent = calViewDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+            
+            let firstDay = new Date(Date.UTC(year, month, 1)).getUTCDay();
+            let daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+            let todayObj = getTodayUTCDate();
+            
+            let html = '';
+            ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].forEach(d => html += `<div style="font-weight:700; font-size:0.75rem; color:var(--text-muted);">${d}</div>`);
+            
+            for(let i=0; i<firstDay; i++) html += `<div></div>`;
+            
+            for(let d=1; d<=daysInMonth; d++) {
+                let cellDate = new Date(Date.UTC(year, month, d));
+                let isSelected = currentDate.getTime() === cellDate.getTime();
+                let isToday = todayObj.getTime() === cellDate.getTime();
+                
+                let cellClasses = ['cal-cell'];
+                if (isSelected) cellClasses.push('selected');
+                if (isToday) cellClasses.push('today');
+
+                html += `<div class="${cellClasses.join(' ')}" onclick="pickDate(${year}, ${month}, ${d})">${d}</div>`;
+            }
+            grid.innerHTML = html;
+        }
+
+        function moveCalMonth(dir) {
+            calViewDate.setUTCMonth(calViewDate.getUTCMonth() + dir);
+            renderCalendar();
+        }
+
+        function pickDate(y, m, d) {
+            currentDate = new Date(Date.UTC(y, m, d));
+            closeModal('calendarModal');
+            renderPlanner();
+        }
+    </script>
+
+<!-- === STANDALONE SCREENSHOT & DOWNLOAD MODULE === -->
+<!-- 1. External Library Dependency -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+(function() {
+    // 2. Inject "↓PNG" Button into Top Control Bar
+    const topBar = document.getElementById('topControlBar');
+    if (topBar && !document.getElementById('dlPngBtn')) {
+        const btn = document.createElement('button');
+        btn.id = 'dlPngBtn';
+        btn.className = 'secondary';
+        btn.textContent = '↓PNG';
+        btn.onclick = downloadPlannerScreenshot;
+        topBar.appendChild(btn);
+    }
+
+    // 3. Screenshot Capture & File Generation Function
+    function downloadPlannerScreenshot() {
+        if (!currentSelectedClass) {
+            alert("Please select a class first before downloading.");
+            return;
+        }
+
+        // Generate Naming Components in Local Time
+        const now = new Date();
+        const htmlFilename = "Grade_7_Lesson Tracker";
+        const classNum = currentSelectedClass;
+        
+        const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const dayOfWeek = days[now.getDay()];
+
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const day = String(now.getDate()).padStart(2, '0');
+        const intlDate = `${year}-${month}-${day}`;
+
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const militaryTime = `${hours}${minutes}`;
+
+        const downloadFilename = `${htmlFilename}_${classNum}_${dayOfWeek}_${intlDate}_${militaryTime}.png`;
+
+        // Create Temporary Render Container (Off-Screen Canvas Wrapper)
+        const container = document.createElement('div');
+        container.style.position = 'absolute';
+        container.style.left = '-9999px';
+        container.style.top = '0';
+        container.style.width = '420px';
+        container.style.padding = '15px';
+        container.style.background = '#f8fafc';
+        container.style.fontFamily = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+        container.style.color = '#1e293b';
+        container.style.fontSize = '13px';
+        container.style.lineHeight = '1.4';
+
+        // Construct Top Injected Header Message
+        const headerBlock = document.createElement('div');
+        headerBlock.style.marginBottom = '12px';
+        headerBlock.style.padding = '10px';
+        headerBlock.style.background = '#ffffff';
+        headerBlock.style.border = '1px solid #e2e8f0';
+        headerBlock.style.borderRadius = '6px';
+
+        const line1 = document.createElement('div');
+        line1.style.fontWeight = '700';
+        line1.style.color = '#1e3a8a';
+        line1.style.marginBottom = '6px';
+        line1.style.wordBreak = 'break-all';
+        line1.textContent = downloadFilename;
+
+        const msgDiv = document.createElement('div');
+        msgDiv.innerHTML = `Here are activities planned for this week.<br>` +
+                           `For a tentative schedule of all future activities, please follow this link at:<br>` +
+                           `<a href="https://Perfectly-Practical-English.github.io" style="color:#3b82f6; text-decoration:underline;">https://Perfectly-Practical-English.github.io</a><br>` +
+                           `And available on Perfectly-Practical-English.github.io`;
+
+        headerBlock.appendChild(line1);
+        headerBlock.appendChild(msgDiv);
+        container.appendChild(headerBlock);
+
+        // Append Active Week Banner and Schedule Grid Clones
+        const bannerClone = document.getElementById('weekTitleDisplay').cloneNode(true);
+        bannerClone.style.marginBottom = '10px';
+        container.appendChild(bannerClone);
+
+        const gridClone = document.getElementById('weeklyGrid').cloneNode(true);
+        container.appendChild(gridClone);
+
+        document.body.appendChild(container);
+
+        // Render Canvas & Export Download
+        html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
+            document.body.removeChild(container);
+            const link = document.createElement('a');
+            link.download = downloadFilename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }).catch(err => {
+            if (document.body.contains(container)) {
+                document.body.removeChild(container);
+            }
+            console.error("Screenshot export error:", err);
+            alert("Failed to create screenshot. Please try again.");
+        });
+    }
+})();
+</script>
+</body>
+</html>
