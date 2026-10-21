@@ -1070,7 +1070,7 @@ let currentSectionName = "No Section";
 
   window.addEventListener("DOMContentLoaded", () => {
     currentSectionName = "No Section";
-    btn.textContent = "Select a section.";
+    btn.textContent = "Topics";
     vocabPairs = [];
     
     // Ensure the vocab list starts closed on initial page load
@@ -1111,8 +1111,8 @@ vocabHeader.addEventListener('click', () => {
 
 function updateFlashcard() {
   if (!vocabPairs.length) {
-    front.textContent = "Select a section to begin.";
-    back.innerHTML = "Click 'Section' above";
+    front.textContent = "Word";
+    back.innerHTML = "Meaning";
     return;
   }
 
@@ -1432,7 +1432,6 @@ document.addEventListener("keydown", e=>{
 });
 })();
 </script>
-
 
 <!-- ========================================== -->
 <!-- NARROW PHONE LAYOUT SAFETY PATCH (START) -->
