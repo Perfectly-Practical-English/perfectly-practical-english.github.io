@@ -2404,7 +2404,7 @@ let currentSectionIndex = null; // start with no selection
 
 function updateWheel() {
   if (currentSectionIndex === null) {
-    wheel.textContent = "Select a category."; // placeholder text
+    wheel.textContent = "Topics"; // placeholder text
     document.getElementById('sectionStart').disabled = true;
   } else {
     wheel.textContent = sectionData[currentSectionIndex].name;

@@ -554,7 +554,7 @@ button:disabled {
   <div class="top-bar-container">
     <div class="top-bar-row-1">
       <input type="text" id="id" placeholder="ID">
-      <button id="sectionSelectorBtn" type="button">Select a section.</button>
+      <button id="sectionSelectorBtn" type="button">Topics</button>
       <button id="instructionsBtn" type="button">Instructions</button>
       <button id="grammarsubmit" type="button">Submit</button>
     </div>
@@ -593,7 +593,7 @@ document.getElementById('copyrightYear').textContent = new Date().getFullYear();
   <div id="sectionModalBackdrop"></div>
   <div id="sectionModalContent">
     <div id="sectionModalHeader">
-      <span>Select a Category</span>
+      <span>Topics</span>
       <button id="sectionModalClose" type="button">✕</button>
     </div>
     <div id="sectionListContainer"></div>
@@ -857,7 +857,7 @@ Step |back|.
   if (modalBackdrop) modalBackdrop.addEventListener("click", closeModal);
 
   window.addEventListener("DOMContentLoaded", () => {
-    btn.textContent = "Select a section.";
+    btn.textContent = "Topics";
   });
 
   function parseExercise(exerciseText, index) {
@@ -965,7 +965,7 @@ Step |back|.
 
   submitBtn.addEventListener('click', function () {
     if (window.SCRAMBLE_INDEX === undefined || window.RAW_SECTIONS[window.SCRAMBLE_INDEX] == null) {
-      alert('Please select a section first.');
+      alert('Topics');
       return;
     }
 

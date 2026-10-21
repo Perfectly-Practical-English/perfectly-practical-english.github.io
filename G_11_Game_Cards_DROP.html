@@ -385,7 +385,7 @@
             <!-- Right Image Field Area -->
             <div id="image-field">
                 <div class="image-container" id="visual-stack">
-                    <div class="placeholder-text">Select a topic to start</div>
+                    <div class="placeholder-text">Topics</div>
                 </div>
             </div>
         </div>
@@ -805,7 +805,7 @@ Drop:	12_Punctuation.png
 
             const placeholderOpt = document.createElement('option');
             placeholderOpt.value = "";
-            placeholderOpt.textContent = "Select a topic...";
+            placeholderOpt.textContent = "Topics";
             placeholderOpt.disabled = true;
             placeholderOpt.selected = true;
             topicSelect.appendChild(placeholderOpt);
@@ -826,7 +826,7 @@ Drop:	12_Punctuation.png
             if (activeSectionIndex === null) {
                 cardNumEl.textContent = "-";
                 cardContentEl.textContent = "";
-                visualStack.innerHTML = '<div class="placeholder-text">Select a topic to start</div>';
+                visualStack.innerHTML = '<div class="placeholder-text">Topics</div>';
                 return;
             }
 
