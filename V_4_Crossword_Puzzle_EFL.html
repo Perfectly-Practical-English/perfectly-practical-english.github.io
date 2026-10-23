@@ -53,7 +53,7 @@ body {
   z-index: 9998;
 }
 
-/* ===== TOP BAR (ID, Category, Instructions, Submit) ===== */
+/* ===== TOP BAR & EXTRA INPUT ROW ===== */
 .top-bar {  
   display: flex;  
   gap: 3px;  
@@ -64,12 +64,21 @@ body {
   align-items: center;  
 }
 
+.extra-input-row {
+  display: flex;
+  gap: 3px;
+  margin: 0 auto 3px auto;
+  max-width: 500px;
+  width: 100%;
+}
+
 .top-bar input[type="text"],
+.extra-input-row input[type="text"],
 .top-bar button {
   flex: 1 1 0;
   min-width: 0;
   height: 28px;
-  padding: 0 4px;
+  padding: 0 8px;
   font-size: var(--size-control);
   border: 1px solid var(--input-border-blue);
   border-radius: 6px;
@@ -85,7 +94,8 @@ body {
   white-space: nowrap;
 }
 
-.top-bar input[type="text"] {
+.top-bar input[type="text"],
+.extra-input-row input[type="text"] {
   background: #fff;
   cursor: text;
   text-align: left !important;
@@ -101,21 +111,26 @@ body {
   overflow: visible !important;
   text-overflow: clip !important;
 }
-.top-bar input[type="text"]::placeholder {
+
+.top-bar input[type="text"]::placeholder,
+.extra-input-row input[type="text"]::placeholder {
   color: var(--blue) !important;
-  opacity: 1 !important;
+  opacity: 0.8 !important;
 }
 
 .top-bar button:hover:not(:disabled),
-.top-bar input[type="text"]:hover {
+.top-bar input[type="text"]:hover,
+.extra-input-row input[type="text"]:hover {
   background: linear-gradient(145deg, #ffffff, var(--section-item-hover));
   border-color: var(--blue);
 }
 
-.top-bar input[type="text"]:focus {
+.top-bar input[type="text"]:focus,
+.extra-input-row input[type="text"]:focus {
   background: #fff;
   border-color: var(--blue);
   outline: none;
+  box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.15);
 }
 
 .top-bar button:disabled {
@@ -279,6 +294,102 @@ body {
   border-top: 1px solid var(--input-border-blue);
 }
 
+/* ===== SCROLLABLE CLUE FIELD (EXACTLY 3 PROMPTS & THICK SCROLLBAR) ===== */
+#prompt-panel {
+  height: 98px; /* Height fine-tuned to show exactly 3 prompt cards at a time */
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto 3px auto;
+}
+
+.carousel {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  gap: 3px;
+  padding: 6px;
+  align-items: center;
+  height: 100%;
+  list-style: none;
+  -webkit-overflow-scrolling: touch;
+  
+  /* Thicker Custom Scrollbar for Firefox */
+  scrollbar-width: auto;
+  scrollbar-color: #90caf9 #f1f5f9;
+}
+
+/* Thicker Custom Scrollbar for Chrome, Edge, and Safari */
+.carousel::-webkit-scrollbar {
+  width: 10px;
+}
+
+.carousel::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 0 6px 6px 0;
+}
+
+.carousel::-webkit-scrollbar-thumb {
+  background: #90caf9;
+  border-radius: 5px;
+  border: 2px solid #f1f5f9;
+}
+
+.carousel::-webkit-scrollbar-thumb:hover {
+  background: var(--blue);
+}
+
+.prompt-card {
+  flex: 0 0 auto;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 5px 8px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  cursor: pointer;
+}
+
+.prompt-card.active-prompt {
+  border-color: #065f46;
+  background: #d1fae5;
+  box-shadow: 0 1px 3px rgba(6, 95, 70, 0.15);
+}
+
+.prompt-card.completed-prompt {
+  border-color: #065f46;
+  background: #d1fae5;
+}
+
+.prompt-header {
+  font-size: 10px;
+  font-weight: 700;
+  color: #065f46;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.prompt-card.completed-prompt .prompt-header {
+  color: #065f46;
+}
+
+.prompt-text {
+  font-size: 12px;
+  color: #1f2937;
+  line-height: 1.2;
+}
+
 /* ===== GAME AREA CONTAINER ===== */
 #gameArea {
   position: relative;
@@ -370,81 +481,6 @@ body {
   pointer-events: none;
 }
 
-/* ===== SCROLLABLE CLUE FIELD ===== */
-#prompt-panel {
-  height: 140px;
-  background: #f9fafb;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  position: relative;
-  width: 100%;
-}
-
-.carousel {
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  scroll-behavior: smooth;
-  gap: 3px;
-  padding: 8px;
-  align-items: center;
-  height: 100%;
-  list-style: none;
-  -webkit-overflow-scrolling: touch;
-}
-
-.prompt-card {
-  flex: 0 0 auto;
-  width: 100%;
-  background: #ffffff;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  padding: 6px 10px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  transition: all 0.2s ease;
-  cursor: pointer;
-}
-
-.prompt-card.active-prompt {
-  border-color: #065f46;
-  background: #d1fae5;
-  box-shadow: 0 1px 3px rgba(6, 95, 70, 0.15);
-}
-
-.prompt-card.completed-prompt {
-  border-color: #065f46;
-  background: #d1fae5;
-}
-
-.prompt-header {
-  font-size: 10px;
-  font-weight: 700;
-  color: #065f46;
-  text-transform: uppercase;
-}
-
-.prompt-card.completed-prompt .prompt-header {
-  color: #065f46;
-}
-
-.prompt-text {
-  font-size: 12px;
-  color: #1f2937;
-  line-height: 1.2;
-}
-
-#gboard-trigger {
-  position: absolute;
-  opacity: 0;
-  pointer-events: none;
-  bottom: 0;
-}
-
 /* ===== SCOREBOARD & BUTTONS WRAPPER ===== */
 #scoreboardWrapper {
   display: none;
@@ -522,12 +558,23 @@ footer {
 <div id="overlay"></div>
 
 <!-- TOP BAR -->
-<!-- TOP BAR -->
 <div class="top-bar">
   <input id="studentId" type="text" placeholder="ID" autocomplete="off" />
-  <button id="sectionSelectorBtn" type="button">Select a section.</button>
+  <button id="sectionSelectorBtn" type="button">Topics</button>
   <button id="instructionsBtn" type="button">Instructions</button>
   <button id="submitBtn">Submit</button>
+</div>
+
+<!-- CLUE PANEL (3 PROMPTS VISIBLE) -->
+<div id="prompt-panel">
+  <ul class="carousel" id="prompt-carousel">
+    <li style="text-align:center; padding: 20px; color:#666; font-size:12px;">Clues will appear here...</li>
+  </ul>
+</div>
+
+<!-- VISIBLE CONNECTED EXTRA INPUT FIELD -->
+<div class="extra-input-row">
+  <input id="extraInput" type="text" placeholder="Type here (updates puzzle & clears on prompt switch/word completion)..." autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" />
 </div>
 
 <!-- SECTION SELECTION MODAL -->
@@ -535,7 +582,7 @@ footer {
   <div id="sectionModalBackdrop"></div>
   <div id="sectionModalContent">
     <div id="sectionModalHeader">
-      <span>Select a Category</span>
+      <span>Topics</span>
       <button id="sectionModalClose" type="button">✕</button>
     </div>
     <div id="sectionListContainer"></div>
@@ -560,11 +607,6 @@ footer {
       <div style="grid-column: span 20; text-align:center; padding: 40px; color:#666;">Select a category to load your crossword puzzle.</div>
     </div>
   </div>
-  <div id="prompt-panel">
-    <ul class="carousel" id="prompt-carousel">
-      <li style="text-align:center; padding: 20px; color:#666; font-size:12px;">Clues will appear here...</li>
-    </ul>
-  </div>
 </div>
 
 <!-- SCOREBOARD & BUTTONS WRAPPER -->
@@ -576,8 +618,6 @@ footer {
     <button id="downloadPngBtn">↓PNG</button>
   </div>
 </div>
-
-<input type="text" id="gboard-trigger" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
 
 <footer>
 <p>© 2026 Perfectly Practical English</p>
@@ -592,11 +632,11 @@ footer {
             55551|Matthew
             12345|Sarah
         `;
-const studentDatabase = new Map();
-RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
-    const [id, name] = line.split('|').map(s => s ? s.trim() : '');
-    if (id && name) studentDatabase.set(id, name);
-});
+        const studentDatabase = new Map();
+        RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+            const [id, name] = line.split('|').map(s => s ? s.trim() : '');
+            if (id && name) studentDatabase.set(id, name);
+        });
         window.resolveStudentNameFromId = function(idInput) {
             if (!idInput) return "Guest";
             const trimmed = String(idInput).trim();
@@ -607,11 +647,20 @@ RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
         };
     })();
 
-    /* --- 2. Vocab Parser & Crossword Generator --- */
+    /* --- 2. Vocab Parser & Crossword Generator (Deep Randomization) --- */
     const GRID_SIZE = 20;
 
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
     function parseVocabAndGenerateSections(rawText) {
-      const sections = [];
+      const rawSections = [];
       const blocks = rawText.split('~').slice(1);
 
       blocks.forEach(block => {
@@ -643,24 +692,91 @@ RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
         });
 
         if (uniqueWords.length >= 2) {
-          const crosswordWords = generateMaxDensityLayout(uniqueWords);
-          sections.push({ name: sectionName, words: crosswordWords });
+          rawSections.push({ name: sectionName, words: uniqueWords });
         }
       });
 
-      return sections;
+      return rawSections;
     }
 
+    const rawVocabText = `
+~Hobbies
+• activity 🎯 – something you do for enjoyment or interest
+• game 🎲 – an activity with rules played for fun
+• hobby 🎨 – an activity you do in your free time
+• interest ❤️ – something you like or care about
+• practice 🔁 – time spent learning or improving a skill
+• skill 🛠️ – an ability to do something well
+• sport ⚽ – a physical competitive activity
+• time ⏰ – hours or moments spent doing something
+
+~Helping Others
+• friend 🧑‍🤝‍🧑 – a person you like and trust
+• help 🆘 – support or assistance
+• kindness 💖 – being friendly and caring
+• support 🏗️ – help given to someone
+• care ❤️ – to feel concern for someone
+• share 🔄 – to give part of something to others
+• teach 📚 – to help someone learn
+
+~Heroes
+• advice 💬 – helpful ideas or suggestions
+• hero 🦸 – a person who helps or saves others
+• mentor 🎓 – a person who guides others
+• guide 🧭 – to lead or show the way
+• protect 🛡 – to keep someone safe
+• inspire ✨ – to make others feel motivated
+
+~My Best Friend
+• bond 🔗 – a close connection
+• friendship 💕 – a close relationship
+• trust 🔐 – belief in someone
+• care ❤ – to like and protect someone
+• talk 💬 – to speak with someone
+• close 🤗 – having a strong connection
+
+~Dream Job
+• career 📈 – a long-term job path
+• dream 💭 – a strong hope for the future
+• goal 🎯 – something you want to achieve
+• job 💼 – paid work
+• plan 📝 – an idea for the future
+• task 📋 – a piece of work
+
+~Healthy Food
+• dish 🍽️ – prepared food
+• food 🍎 – things people eat
+• fruit 🍓 – sweet healthy food from plants
+• health ❤ – the state of being well
+• meal 🍛 – food eaten at one time
+• recipe 📖 – instructions for cooking
+• snack 🍿 – small amount of food
+• vegetable 🥕 – healthy plant food
+
+~Famous Places
+• city 🏙️ – a large town
+• country 🌍 – a nation
+• journey 🚆 – a long trip
+• place 🗺️ – a specific area
+• vacation 🏖️ – time off for travel
+• explore 🧭 – to discover places
+• travel ✈️ – to go to places
+`;
+
+    const rawSectionData = parseVocabAndGenerateSections(rawVocabText);
+
     function generateMaxDensityLayout(wordsList) {
-      const sortedWords = [...wordsList].sort((a, b) => b.answer.length - a.answer.length);
+      const randomizedPool = shuffleArray(wordsList);
+      const sortedWords = randomizedPool.sort((a, b) => b.answer.length - a.answer.length);
+      
       let bestPlacement = [];
       let maxPlacedCount = -1;
 
-      const attempts = Math.min(sortedWords.length, 10);
+      const totalAttempts = Math.min(sortedWords.length * 2, 15);
 
-      for (let attempt = 0; attempt < attempts; attempt++) {
+      for (let attempt = 0; attempt < totalAttempts; attempt++) {
         const pool = [...sortedWords];
-        if (attempt > 0) {
+        for (let r = 0; r < attempt; r++) {
           const item = pool.shift();
           pool.push(item);
         }
@@ -674,9 +790,12 @@ RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
           if (word.length < 2) continue;
 
           if (placed.length === 0) {
-            const r = Math.floor(GRID_SIZE / 2);
-            const c = Math.max(2, Math.floor((GRID_SIZE - word.length) / 2));
-            if (c + word.length <= GRID_SIZE - 2) {
+            const rOffset = (attempt % 3) - 1;
+            const cOffset = ((attempt * 2) % 3) - 1;
+            const r = Math.floor(GRID_SIZE / 2) + rOffset;
+            const c = Math.max(2, Math.floor((GRID_SIZE - word.length) / 2) + cOffset);
+            
+            if (c + word.length <= GRID_SIZE - 2 && r >= 2 && r < GRID_SIZE - 2) {
               let canFit = true;
               for (let i = 0; i < word.length; i++) {
                 if (gridMatrix[r][c + i] !== '') canFit = false;
@@ -704,10 +823,11 @@ RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
             }
           } else {
             let placedSuccessfully = false;
+            const shuffledPlaced = shuffleArray(placed);
 
-            for (let pIndex = 0; pIndex < placed.length; pIndex++) {
+            for (let pIndex = 0; pIndex < shuffledPlaced.length; pIndex++) {
               if (placedSuccessfully) break;
-              const existing = placed[pIndex];
+              const existing = shuffledPlaced[pIndex];
 
               for (let i = 0; i < word.length; i++) {
                 if (placedSuccessfully) break;
@@ -835,72 +955,6 @@ RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
       return bestPlacement;
     }
 
-    const rawVocabText = `
-~Hobbies
-• activity 🎯 – something you do for enjoyment or interest
-• game 🎲 – an activity with rules played for fun
-• hobby 🎨 – an activity you do in your free time
-• interest ❤️ – something you like or care about
-• practice 🔁 – time spent learning or improving a skill
-• skill 🛠️ – an ability to do something well
-• sport ⚽ – a physical competitive activity
-• time ⏰ – hours or moments spent doing something
-
-~Helping Others
-• friend 🧑‍🤝‍🧑 – a person you like and trust
-• help 🆘 – support or assistance
-• kindness 💖 – being friendly and caring
-• support 🏗️ – help given to someone
-• care ❤️ – to feel concern for someone
-• share 🔄 – to give part of something to others
-• teach 📚 – to help someone learn
-
-~Heroes
-• advice 💬 – helpful ideas or suggestions
-• hero 🦸 – a person who helps or saves others
-• mentor 🎓 – a person who guides others
-• guide 🧭 – to lead or show the way
-• protect 🛡 – to keep someone safe
-• inspire ✨ – to make others feel motivated
-
-~My Best Friend
-• bond 🔗 – a close connection
-• friendship 💕 – a close relationship
-• trust 🔐 – belief in someone
-• care ❤ – to like and protect someone
-• talk 💬 – to speak with someone
-• close 🤗 – having a strong connection
-
-~Dream Job
-• career 📈 – a long-term job path
-• dream 💭 – a strong hope for the future
-• goal 🎯 – something you want to achieve
-• job 💼 – paid work
-• plan 📝 – an idea for the future
-• task 📋 – a piece of work
-
-~Healthy Food
-• dish 🍽️ – prepared food
-• food 🍎 – things people eat
-• fruit 🍓 – sweet healthy food from plants
-• health ❤ – the state of being well
-• meal 🍛 – food eaten at one time
-• recipe 📖 – instructions for cooking
-• snack 🍿 – small amount of food
-• vegetable 🥕 – healthy plant food
-
-~Famous Places
-• city 🏙️ – a large town
-• country 🌍 – a nation
-• journey 🚆 – a long trip
-• place 🗺️ – a specific area
-• vacation 🏖️ – time off for travel
-• explore 🧭 – to discover places
-• travel ✈️ – to go to places
-`;
-
-    const sectionData = parseVocabAndGenerateSections(rawVocabText);
-
     /* --- 3. Main Application Logic --- */
     (() => {
       const sectionSelectorBtn = document.getElementById('sectionSelectorBtn');
@@ -916,10 +970,11 @@ RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
       const downloadPngBtn = document.getElementById('downloadPngBtn');
       const gridEl = document.getElementById('crossword-grid');
       const carouselEl = document.getElementById('prompt-carousel');
-      const gboardTrigger = document.getElementById('gboard-trigger');
+      const extraInput = document.getElementById('extraInput');
 
       let currentSectionIndex = -1;
       let currentSectionName = "No Section";
+      let currentGameSection = null;
       let gameStarted = false;
       let gridData = [];
       let activeCell = null;
@@ -929,13 +984,13 @@ RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
         if (gameStarted) return;
         sectionListContainer.innerHTML = "";
 
-        if (sectionData.length === 0) {
+        if (rawSectionData.length === 0) {
           const emptyDiv = document.createElement("div");
           emptyDiv.style.cssText = "padding:10px; text-align:center; color:#666;";
           emptyDiv.textContent = "No categories found.";
           sectionListContainer.appendChild(emptyDiv);
         } else {
-          sectionData.forEach((sec, idx) => {
+          rawSectionData.forEach((sec, idx) => {
             const item = document.createElement("div");
             item.className = "section-item";
             if (idx === currentSectionIndex) {
@@ -973,12 +1028,20 @@ RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
         gameStarted = true;
         scoreboardWrapper.style.display = 'none';
         scoreboardContainer.textContent = '';
+        if (extraInput) extraInput.value = '';
 
-        const section = sectionData[currentSectionIndex];
-        if (!section) return;
+        const rawSec = rawSectionData[currentSectionIndex];
+        if (!rawSec) return;
 
-        buildGrid(section);
-        buildPrompts(section);
+        const shuffledPool = shuffleArray(rawSec.words);
+        const subsetSize = Math.min(shuffledPool.length, 8);
+        const selectedWords = shuffledPool.slice(0, subsetSize);
+
+        const crosswordWords = generateMaxDensityLayout(selectedWords);
+        currentGameSection = { name: rawSec.name, words: crosswordWords };
+
+        buildGrid(currentGameSection);
+        buildPrompts(currentGameSection);
       }
 
       function buildGrid(section) {
@@ -1043,12 +1106,13 @@ RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
           li.dataset.wordId = wObj.id;
           
           li.innerHTML = `
-            <span class="prompt-header">${wObj.id}. ${wObj.direction.toUpperCase()}</span>
+            <span class="prompt-header">${wObj.id}. ${wObj.direction.toUpperCase()}:</span>
             <span class="prompt-text">${wObj.clue}</span>
           `;
           
           li.addEventListener('click', () => {
             activeWordId = wObj.id;
+            if (extraInput) extraInput.value = '';
             highlightWordPrompts(wObj.id);
             const firstCellEl = gridEl.querySelector(`[data-row='${wObj.row}'][data-col='${wObj.col}']`);
             if (firstCellEl) selectCell(firstCellEl);
@@ -1072,11 +1136,14 @@ RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
           if (!targetWord) {
             targetWord = cellInfo.words[0];
             activeWordId = targetWord.id;
+            if (extraInput) extraInput.value = '';
           }
           highlightWordPrompts(activeWordId);
         }
 
-        gboardTrigger.focus();
+        if (extraInput) {
+          extraInput.focus();
+        }
       }
 
       function highlightWordPrompts(wordId) {
@@ -1106,10 +1173,9 @@ RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
       }
 
       function checkWordCompletion() {
-        if (currentSectionIndex < 0) return;
-        const section = sectionData[currentSectionIndex];
+        if (!currentGameSection) return;
         
-        section.words.forEach(wObj => {
+        currentGameSection.words.forEach(wObj => {
           let isComplete = true;
           for (let i = 0; i < wObj.answer.length; i++) {
             const r = wObj.direction === 'across' ? wObj.row : wObj.row + i;
@@ -1126,6 +1192,9 @@ RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
           if (promptCard) {
             if (isComplete) {
               promptCard.classList.add('completed-prompt');
+              if (activeWordId === wObj.id && extraInput) {
+                extraInput.value = '';
+              }
             } else {
               promptCard.classList.remove('completed-prompt');
             }
@@ -1133,77 +1202,84 @@ RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
         });
       }
 
-      gboardTrigger.addEventListener('keydown', (e) => {
-        if (e.key === 'Backspace' && activeCell) {
-          e.preventDefault();
-          const input = activeCell.querySelector('input');
-          if (input) {
-            input.value = '';
-            checkWordCompletion();
-          }
-          if (currentSectionIndex >= 0) {
-            const section = sectionData[currentSectionIndex];
-            const wObj = section.words.find(w => w.id === activeWordId);
-            if (wObj) {
-              const r = parseInt(activeCell.dataset.row);
-              const c = parseInt(activeCell.dataset.col);
-              const currentIndex = wObj.direction === 'across' ? c - wObj.col : r - wObj.row;
-              if (currentIndex > 0) {
-                const prevIndex = currentIndex - 1;
-                const prevR = wObj.direction === 'across' ? wObj.row : wObj.row + prevIndex;
-                const prevC = wObj.direction === 'across' ? wObj.col + prevIndex : wObj.col;
-                const prevCellEl = gridEl.querySelector(`[data-row='${prevR}'][data-col='${prevC}']`);
-                if (prevCellEl) {
-                  selectCell(prevCellEl);
-                  const prevInput = prevCellEl.querySelector('input');
-                  if (prevInput) {
-                    prevInput.value = '';
-                    checkWordCompletion();
+      // VISIBLE & CONNECTED EXTRA INPUT EVENT LISTENERS
+      if (extraInput) {
+        extraInput.addEventListener('keydown', (e) => {
+          if (e.key === 'Backspace' && activeCell) {
+            e.preventDefault();
+            if (extraInput.value.length > 0) {
+              extraInput.value = extraInput.value.slice(0, -1);
+            }
+
+            const input = activeCell.querySelector('input');
+            if (input) {
+              input.value = '';
+              checkWordCompletion();
+            }
+            if (currentGameSection) {
+              const wObj = currentGameSection.words.find(w => w.id === activeWordId);
+              if (wObj) {
+                const r = parseInt(activeCell.dataset.row);
+                const c = parseInt(activeCell.dataset.col);
+                const currentIndex = wObj.direction === 'across' ? c - wObj.col : r - wObj.row;
+                if (currentIndex > 0) {
+                  const prevIndex = currentIndex - 1;
+                  const prevR = wObj.direction === 'across' ? wObj.row : wObj.row + prevIndex;
+                  const prevC = wObj.direction === 'across' ? wObj.col + prevIndex : wObj.col;
+                  const prevCellEl = gridEl.querySelector(`[data-row='${prevR}'][data-col='${prevC}']`);
+                  if (prevCellEl) {
+                    selectCell(prevCellEl);
+                    const prevInput = prevCellEl.querySelector('input');
+                    if (prevInput) {
+                      prevInput.value = '';
+                      checkWordCompletion();
+                    }
                   }
                 }
               }
             }
           }
-        }
-      });
+        });
 
-      gboardTrigger.addEventListener('input', (e) => {
-        if (!activeCell || currentSectionIndex < 0) return;
-        const val = e.target.value.toUpperCase();
-        e.target.value = '';
-        if (val) {
-          const input = activeCell.querySelector('input');
-          if (input) {
-            input.value = val;
-            updateCellValidation(activeCell);
-          }
+        extraInput.addEventListener('input', (e) => {
+          if (!activeCell || !currentGameSection) return;
+          const rawVal = e.target.value;
+          const val = rawVal.slice(-1).toUpperCase();
           
-          const section = sectionData[currentSectionIndex];
-          const wObj = section.words.find(w => w.id === activeWordId);
-          
-          if (wObj) {
-            const r = parseInt(activeCell.dataset.row);
-            const c = parseInt(activeCell.dataset.col);
-            const nextIndex = wObj.direction === 'across' ? c - wObj.col + 1 : r - wObj.row + 1;
+          if (val) {
+            const input = activeCell.querySelector('input');
+            if (input) {
+              input.value = val;
+              updateCellValidation(activeCell);
+            }
             
-            if (nextIndex < wObj.answer.length) {
-              const nextR = wObj.direction === 'across' ? wObj.row : wObj.row + nextIndex;
-              const nextC = wObj.direction === 'across' ? wObj.col + nextIndex : wObj.col;
-              const nextCellEl = gridEl.querySelector(`[data-row='${nextR}'][data-col='${nextC}']`);
-              if (nextCellEl) selectCell(nextCellEl);
+            const wObj = currentGameSection.words.find(w => w.id === activeWordId);
+            
+            if (wObj) {
+              const r = parseInt(activeCell.dataset.row);
+              const c = parseInt(activeCell.dataset.col);
+              const nextIndex = wObj.direction === 'across' ? c - wObj.col + 1 : r - wObj.row + 1;
+              
+              if (nextIndex < wObj.answer.length) {
+                const nextR = wObj.direction === 'across' ? wObj.row : wObj.row + nextIndex;
+                const nextC = wObj.direction === 'across' ? wObj.col + nextIndex : wObj.col;
+                const nextCellEl = gridEl.querySelector(`[data-row='${nextR}'][data-col='${nextC}']`);
+                if (nextCellEl) selectCell(nextCellEl);
+              } else {
+                extraInput.value = '';
+              }
             }
           }
-        }
-      });
+        });
+      }
 
       function submitResults() {
-        if (!gameStarted || currentSectionIndex < 0) return;
+        if (!gameStarted || !currentGameSection) return;
 
-        const section = sectionData[currentSectionIndex];
-        let totalItems = section.words.length;
+        let totalItems = currentGameSection.words.length;
         let correctItems = 0;
 
-        section.words.forEach(wObj => {
+        currentGameSection.words.forEach(wObj => {
           let isComplete = true;
           for (let i = 0; i < wObj.answer.length; i++) {
             const r = wObj.direction === 'across' ? wObj.row : wObj.row + i;
@@ -1264,10 +1340,9 @@ RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
         
         let correctItems = 0;
         let totalItems = 10;
-        if (currentSectionIndex >= 0) {
-          const section = sectionData[currentSectionIndex];
-          totalItems = section.words.length;
-          section.words.forEach(wObj => {
+        if (currentGameSection) {
+          totalItems = currentGameSection.words.length;
+          currentGameSection.words.forEach(wObj => {
             let isComplete = true;
             for (let i = 0; i < wObj.answer.length; i++) {
               const r = wObj.direction === 'across' ? wObj.row : wObj.row + i;

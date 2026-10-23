@@ -36,8 +36,10 @@
         .class-btn { padding: 6px 9px; border-radius: 4px; font-weight: 700; border: 1px solid var(--border); background: white; color: var(--text-muted); cursor: pointer; flex-shrink: 0; font-size: 12px; }
         .class-btn.active { border-color: var(--primary); background-color: var(--primary); color: white; }
 
-        /* Week Title Banner - Clean Date Range Focus */
-        .week-title-banner { background: white; padding: 6px 8px; border-radius: 6px; margin-bottom: 10px; border: 1px solid var(--border); font-size: 0.8rem; font-weight: 700; color: var(--primary); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        /* Week Title Banner - Clean Date Range Focus with Integrated QR */
+        .week-title-banner { background: white; padding: 6px 8px; border-radius: 6px; margin-bottom: 10px; border: 1px solid var(--border); font-size: 0.8rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .week-title-text { flex-grow: 1; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .qr-icon { width: 48px; height: 48px; border-radius: 4px; flex-shrink: 0; display: inline-block; vertical-align: middle; }
 
         /* Vertical Stack Layout for Mobile Portrait Viewports */
         .grid-5day { display: flex; flex-direction: column; gap: 8px; }
@@ -91,8 +93,11 @@
         <button class="secondary" onclick="openCalendarModal()">Date</button>
     </div>
 
-    <!-- Active Week Title Banner (Simple Date Span) -->
-    <div class="week-title-banner" id="weekTitleDisplay">Select a class</div>
+    <!-- Active Week Title Banner with integrated QR code -->
+    <div class="week-title-banner" id="weekTitleDisplay">
+        <span class="week-title-text" id="weekTitleText">Select a class</span>
+        <img src="PerfectlyPracticalEnglish.app.png" alt="QR Code" class="qr-icon" id="bannerQrCode">
+    </div>
 
     <main class="grid-5day" id="weeklyGrid">
         <div class="initial-prompt">Tap any class button above to view schedule.</div>
@@ -262,11 +267,11 @@ Exam: 2026-11-23 | Unit 5 Examination Week | Week 1 | Objectives: Unit testing |
         }
 
         function renderPlanner() {
-            const titleDisplay = document.getElementById('weekTitleDisplay');
+            const titleText = document.getElementById('weekTitleText');
             const grid = document.getElementById('weeklyGrid');
             
             if (!currentSelectedClass) {
-                titleDisplay.textContent = "Select a class";
+                titleText.textContent = "Select a class";
                 grid.innerHTML = `<div class="initial-prompt">Tap any class button above to view schedule.</div>`;
                 return;
             }
@@ -283,7 +288,7 @@ Exam: 2026-11-23 | Unit 5 Examination Week | Week 1 | Objectives: Unit testing |
             let monStr = startOfWeek.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
             let friStr = endOfWeek.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
 
-            titleDisplay.textContent = `Class ${currentSelectedClass} | ${monStr} – ${friStr}`;
+            titleText.textContent = `Class ${currentSelectedClass} | ${monStr} – ${friStr}`;
 
             let { active, engine } = getActiveEventForDate(startOfWeek);
 
@@ -298,6 +303,15 @@ Exam: 2026-11-23 | Unit 5 Examination Week | Week 1 | Objectives: Unit testing |
                 
                 let dayScheduleMap = masterDailySchedule[i] || {};
                 let lessonIndex = dayScheduleMap[currentSelectedClass] || null;
+
+                let isHoliday = active && engine.holidays[dateKey];
+                let isCancel = active && engine.cancellations[dateKey] && engine.cancellations[dateKey][currentSelectedClass];
+                let isEmptyDay = !active || (!isHoliday && !isCancel && lessonIndex === null);
+
+                // Collapse empty days
+                if (isEmptyDay) {
+                    continue;
+                }
 
                 html += `
                     <div class="day-card">
@@ -369,7 +383,7 @@ Exam: 2026-11-23 | Unit 5 Examination Week | Week 1 | Objectives: Unit testing |
                 `;
             }
 
-            grid.innerHTML = html;
+            grid.innerHTML = html || `<div class="initial-prompt">No scheduled classes for this week.</div>`;
         }
 
         function renderCalendar() {
@@ -497,9 +511,8 @@ Exam: 2026-11-23 | Unit 5 Examination Week | Week 1 | Objectives: Unit testing |
         headerBlock.appendChild(msgDiv);
         container.appendChild(headerBlock);
 
-        // Append Active Week Banner and Schedule Grid Clones
+        // Append Active Week Banner (includes QR code) and Schedule Grid Clones
         const bannerClone = document.getElementById('weekTitleDisplay').cloneNode(true);
-        bannerClone.style.marginBottom = '10px';
         container.appendChild(bannerClone);
 
         const gridClone = document.getElementById('weeklyGrid').cloneNode(true);
@@ -508,7 +521,7 @@ Exam: 2026-11-23 | Unit 5 Examination Week | Week 1 | Objectives: Unit testing |
         document.body.appendChild(container);
 
         // Render Canvas & Export Download
-        html2canvas(container, { scale: 2, useCORS: true }).then(canvas => {
+        html2canvas(container, { scale: 2, useCORS: true, allowTaint: true }).then(canvas => {
             document.body.removeChild(container);
             const link = document.createElement('a');
             link.download = downloadFilename;
