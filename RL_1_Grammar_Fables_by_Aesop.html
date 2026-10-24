@@ -1524,7 +1524,7 @@ button:hover:not(:disabled),
         <input id="gsId" type="text" placeholder="ID">
 
         <button id="sectionSelectorBtn" type="button">
-          Select a section.
+          Topics
         </button>
       </div>
 
@@ -1567,7 +1567,7 @@ button:hover:not(:disabled),
   <div id="sectionModalBackdrop"></div>
   <div id="sectionModalContent" class="dynamic-modal-box">
     <div id="sectionModalHeader">
-      <span>Select a Section</span>
+      <span>Topics</span>
       <button id="sectionModalClose" type="button">✕</button>
     </div>
     <button id="sectionConfirmBtn" type="button">Confirm Selection</button>
@@ -1758,9 +1758,9 @@ button:hover:not(:disabled),
      (Line 1 = Section 1, Line 2 = Section 2, etc.)
      ===================================================== -->
 <div id="mediaRawText" style="display: none !important;">
-1. Speaking Exam Example.html
-The ant.html
-Update.html
+The Ant and the Grasshopper.html
+Tortoise and the Hare.html
+
 </div>
 
 <!-- =====================================================
@@ -9723,22 +9723,26 @@ document.addEventListener('DOMContentLoaded', () => {
             margin-left: 0 !important;
             clear: both !important;
         }
-        .standalone-ai-btn, .standalone-music-btn {
-            background-color: #4f46e5 !important;
-            color: #ffffff !important;
-            border: none !important;
-            padding: 8px 14px !important;
+.standalone-ai-btn, .standalone-music-btn {
+            height: 28px !important;
+            padding: 0 8px !important;
+            font-family: var(--font-main) !important;
+            font-size: var(--size-small) !important;
+            font-weight: 400 !important;
+            background: linear-gradient(145deg, #ffffff, var(--section-item-default)) !important;
+            color: var(--blue) !important;
+            border: 1px solid var(--input-border-blue) !important;
             border-radius: 6px !important;
             cursor: pointer !important;
-            font-weight: 600 !important;
-            font-size: 14px !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+            transition: 0.12s !important;
+            box-sizing: border-box !important;
             margin: 4px 4px 4px 0 !important;
-            transition: background-color 0.2s !important;
         }
-        .standalone-ai-btn:hover { background-color: #4338ca !important; }
-        .standalone-music-btn { background-color: #0d9488 !important; }
-        .standalone-music-btn:hover { background-color: #0f766e !important; }
-        
+        .standalone-ai-btn:hover, .standalone-music-btn:hover {
+            background: linear-gradient(145deg, #ffffff, var(--section-item-hover)) !important;
+            border-color: var(--blue) !important;
+        }
         #standalone-music-modal {
             display: none;
             position: fixed;
@@ -10650,8 +10654,36 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script>
+/* =========================================================
+   STANDALONE MEDIA TOGGLE CONFIGURATION
+   Set to `true` to enable the media feature, or `false` to turn it off completely.
+   ========================================================= */
+window.ENABLE_MEDIA = true; // <-- TOGGLE: Change to `false` to turn media JS/UI completely off, or `true` to turn it on.
+
+(function() {
+    'use strict';
+    
+    // Check if the feature toggle is switched off
+    if (window.ENABLE_MEDIA === false) {
+        // [TOGGLE OFF]: Neutralizes the openMedia function if called elsewhere
+        window.openMedia = function() { console.log("Media is disabled."); };
+        
+        // [TOGGLE OFF]: Injects CSS to hide the media button entirely
+        const blockStyle = document.createElement('style');
+        blockStyle.textContent = '.media-view-btn { display: none !important; }';
+        document.head.appendChild(blockStyle);
+        
+        return; // [TOGGLE OFF]: Exits script execution early so no media setup runs
+    }
+})();
+</script>
+
+<script>
 (function() {
   'use strict';
+
+  // Double check configuration before running core UI/functional logic
+  if (window.ENABLE_MEDIA === false) return; // <-- TOGGLE: Skips execution if media is turned off
 
   // 1. Inject Styles for Media Viewer Button
   if (!document.getElementById('pureMediaStyles')) {
@@ -10684,6 +10716,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Listen to section load events to keep index synchronized globally
   window.addEventListener('textSectionLoaded', () => {
+    if (window.ENABLE_MEDIA === false) return; // <-- TOGGLE: Skip listener action if turned off
     if (window.SCRAMBLE_SECTIONS && window.currentQuizSectionName) {
       const idx = window.SCRAMBLE_SECTIONS.findIndex(s => s.name === window.currentQuizSectionName);
       if (idx >= 0) {
@@ -10695,6 +10728,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Track clicks on section tiles to update index instantly
   document.addEventListener('click', function(e) {
+    if (window.ENABLE_MEDIA === false) return; // <-- TOGGLE: Skip tile event handling if turned off
     const tile = e.target.closest('.section-item');
     if (tile) {
       const container = document.getElementById('sectionListContainer');
@@ -10711,6 +10745,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // 2. Open Media Logic using synchronized index lookup
   async function openMedia() {
+    if (window.ENABLE_MEDIA === false) return; // <-- TOGGLE: Block modal launch if turned off
     const modalRoot = document.getElementById('mediaModalRoot');
     const contentArea = document.getElementById('media-modal-body');
     if (!modalRoot || !contentArea) {
@@ -10781,8 +10816,12 @@ document.addEventListener("DOMContentLoaded", function () {
     }
   }
 
+  // Make openMedia globally accessible so other bindings can invoke it safely
+  window.openMedia = openMedia;
+
   // 3. Button Injection into top-bar-row-1
   function initButton() {
+    if (window.ENABLE_MEDIA === false) return; // <-- TOGGLE: Prevent button creation if turned off
     const row1 = document.querySelector('.top-bar-row-1');
     if (row1 && !row1.querySelector('.media-view-btn')) {
       const btn = document.createElement('button');
@@ -10802,31 +10841,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   setTimeout(initButton, 500);
   setTimeout(initButton, 1500);
-})();
-</script>
-
-<script>
-/* =========================================================
-   STANDALONE MEDIA TOGGLE CONFIGURATION
-   Set to `false` to block the media button and script entirely.
-   ========================================================= */
-window.ENABLE_MEDIA = false; 
-
-(function() {
-    'use strict';
-    
-    // If disabled, intercept and disable the media function execution
-    if (window.ENABLE_MEDIA === false) {
-        // Prevent any external call to openMedia from doing anything
-        window.openMedia = function() { console.log("Media is disabled."); };
-        
-        // Ensure CSS hides or doesn't inject the button
-        const blockStyle = document.createElement('style');
-        blockStyle.textContent = '.media-view-btn { display: none !important; }';
-        document.head.appendChild(blockStyle);
-        
-        return; // Exit early so the button injection code never runs
-    }
 })();
 </script>
 

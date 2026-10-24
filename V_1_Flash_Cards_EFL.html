@@ -315,7 +315,7 @@
   <!-- TOP BAR -->
   <div class="top-bar" id="topFields">
     <input id="studentId" type="text" placeholder="ID" autocomplete="off" />
-    <button id="sectionSelectorBtn" type="button">Section</button>
+    <button id="sectionSelectorBtn" type="button">Topics</button>
     <button id="instructionsBtn" type="button">Instructions</button>
   </div>
 
@@ -367,7 +367,7 @@
   <div id="sectionModalBackdrop"></div>
   <div id="sectionModalContent">
     <div id="sectionModalHeader">
-      <span>Select a Category</span>
+      <span>Topics</span>
       <button id="sectionModalClose" type="button">✕</button>
     </div>
     <div id="sectionListContainer"></div>
@@ -1612,6 +1612,11 @@ let currentSectionName = "No Section";
           closeModal();
           
           vocabPairs = parseVocabInput(sec.text);
+
+          // Ensure the vocab list stays closed when switching sections
+          const vList = document.getElementById('vocabList');
+          if (vList) vList.style.display = 'none';
+
           if (typeof studentSentences !== "undefined") {
             studentSentences = Array(vocabPairs.length).fill("");
           }
@@ -1637,14 +1642,18 @@ let currentSectionName = "No Section";
 
   window.addEventListener("DOMContentLoaded", () => {
     currentSectionName = "No Section";
-    btn.textContent = "Select a section.";
+    btn.textContent = "Topics";
     vocabPairs = [];
+    
+    // Ensure the vocab list starts closed on initial page load
+    const vList = document.getElementById('vocabList');
+    if (vList) vList.style.display = 'none';
+
     if (typeof renderVocabList === "function") renderVocabList();
     if (typeof updateFlashcard === "function") updateFlashcard();
   });
 })();
 </script>
-
 <script>
 let studentSentences = [];
 let flashcardIndex = 0;
@@ -1674,8 +1683,8 @@ vocabHeader.addEventListener('click', () => {
 
 function updateFlashcard() {
   if (!vocabPairs.length) {
-    front.textContent = "Select a section to begin.";
-    back.innerHTML = "Click 'Section' above";
+    front.textContent = "Word";
+    back.innerHTML = "Meaning";
     return;
   }
 

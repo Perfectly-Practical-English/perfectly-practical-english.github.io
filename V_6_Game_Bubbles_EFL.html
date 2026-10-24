@@ -390,7 +390,7 @@ footer {
 <!-- TOP BAR -->
 <div class="top-bar">
   <input id="studentId" type="text" placeholder="ID" autocomplete="off" />
-  <button id="sectionSelectorBtn" type="button">Select a section.</button>
+  <button id="sectionSelectorBtn" type="button">Topics</button>
   <button id="instructionsBtn" type="button">Instructions</button>
   <button id="submitButton">Submit</button>
 </div>
@@ -400,7 +400,7 @@ footer {
   <div id="sectionModalBackdrop"></div>
   <div id="sectionModalContent">
     <div id="sectionModalHeader">
-      <span>Select a Category</span>
+      <span>Topics</span>
       <button id="sectionModalClose" type="button">✕</button>
     </div>
     <div id="sectionListContainer"></div>
@@ -703,7 +703,7 @@ on, at, in, before, after, since, until, during, for, now, yesterday, today, tom
 
   window.addEventListener("DOMContentLoaded", () => {
     currentSectionName = "No Section";
-    btn.textContent = "Select a section.";
+    btn.textContent = "Topics";
   });
 
   let activeBubbles = [];
@@ -758,7 +758,7 @@ on, at, in, before, after, since, until, during, for, now, yesterday, today, tom
       this.shadowColor = darkVariant(this.color);
       this.x = Math.random() * (canvas.width - this.radius*2) + this.radius;
       this.y = canvas.height + this.radius;
-      this.speed = (word ? 0.6 : 0.2) + Math.random()*0.6;
+      this.speed = (word ? 0.2 : 0.1) + Math.random()*0.2;
       this.swayAmplitude = (word ? 20 : 10) + Math.random()*20;
       this.swaySpeed = Math.random()*0.02 + 0.01;
       this.swayPhase = Math.random()*Math.PI*2;
@@ -972,7 +972,7 @@ on, at, in, before, after, since, until, during, for, now, yesterday, today, tom
 
   function startGame(){
     if(wordList.length === 0){
-      alert('Please select a category first.');
+      alert('Topics');
       return;
     }
 

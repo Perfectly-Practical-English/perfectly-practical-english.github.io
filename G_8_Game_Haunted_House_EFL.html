@@ -1,27 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Haunted House</title>
 <style>
-:root {
-  --bg: #f7fdfb;
-  --blue: #1976d2;
-  --blue-hover: #1565c0;
-  --input-border-blue: #cfe2f7;
-  --section-item-default: #eaf6ff;
-  --section-item-hover: #d0e8ff;
-  --border-thickness: 10px;
-  --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: monospace;
-  --size-main: 16px;
-  --size-control: 12px;
-  --size-small: 11px;
-  --size-label: 14px;
-  --size-title: 18px;
-}
-
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* { box-sizing: border-box; }
 
 body { 
     margin: 0; 
     padding: 30px; 
-    font-family: var(--font-main); 
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
     background: #000; 
     color: #fff;
     user-select: none; 
@@ -45,8 +34,8 @@ body::-webkit-scrollbar {
 }
 
 /* ===============================
-   TOP BAR & DROP_DOWN BUTTON
-   =============================== */
+    CORE ROW LAYOUT (Top bar)
+    =============================== */
 
 #topBar {
   display: flex;
@@ -67,21 +56,22 @@ body::-webkit-scrollbar {
   padding-right: 5px;
 }
 
-#topBar button,
+/* ===== UNIFORM TOP BAR & BUTTON STYLING ===== */
 #topBar input[type="text"],
+#topBar button,
 #sectionSelectorBtn {
   height: 38px !important;
   min-height: 38px !important;
   max-height: 38px !important;
   line-height: 36px !important;
   padding: 0 12px !important;
-  font-family: var(--font-main) !important;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
   font-size: 14px !important;
   font-weight: 400 !important;
   border-radius: 6px !important;
-  border: 1px solid var(--input-border-blue) !important;
-  background: linear-gradient(145deg, #ffffff, var(--section-item-default)) !important;
-  color: var(--blue) !important;
+  border: 1px solid #cfe2f7 !important;
+  background: linear-gradient(145deg, #ffffff, #eaf6ff) !important;
+  color: #1976d2 !important;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
   box-sizing: border-box !important;
   display: inline-flex !important;
@@ -94,7 +84,6 @@ body::-webkit-scrollbar {
 #topBar input[type="text"] {
   background: #fff !important;
   color: #000 !important;
-  -webkit-text-fill-color: #000 !important;
   flex: 0 0 85px !important;
   width: 85px !important;
   min-width: 0 !important;
@@ -106,8 +95,7 @@ body::-webkit-scrollbar {
 }
 
 #topBar input[type="text"]::placeholder {
-  color: var(--blue) !important;
-  -webkit-text-fill-color: var(--blue) !important;
+  color: #1976d2 !important;
   opacity: 1 !important;
   text-align: left !important;
 }
@@ -129,16 +117,11 @@ body::-webkit-scrollbar {
   overflow: visible !important;
 }
 
-#topBar button:active:not(:disabled),
-#topBar input[type="text"]:active:not(:disabled) {
-  transform: scale(0.96);
-}
-
+#topBar input[type="text"]:hover,
 #topBar button:hover:not(:disabled),
-#topBar input[type="text"]:hover:not(:disabled),
 #sectionSelectorBtn:hover {
-  background: linear-gradient(145deg, #ffffff, var(--section-item-hover)) !important;
-  border-color: var(--blue) !important;
+  background: linear-gradient(145deg, #ffffff, #d0e8ff) !important;
+  border-color: #1976d2 !important;
 }
 
 #topBar button:disabled,
@@ -147,10 +130,11 @@ body::-webkit-scrollbar {
   cursor: default;
   background: #f1f5f9 !important;
   color: #94a3b8 !important;
-  border-color: var(--input-border-blue) !important;
 }
 
-/* ===== SECTION SELECTION & INSTRUCTIONS MODAL STYLING ===== */
+/* ===============================
+    MODALS (Section Selection & Instructions)
+    =============================== */
 #sectionModalRoot,
 #instructionsRoot {
   position: fixed;
@@ -177,13 +161,13 @@ body::-webkit-scrollbar {
   background: #fff;
   border-radius: 12px;
   padding: 18px;
+  box-sizing: border-box;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  border: 1px solid var(--input-border-blue);
-  font-family: var(--font-main);
-  box-sizing: border-box;
+  border: 1px solid #cfe2f7;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
 #sectionModalHeader,
@@ -194,19 +178,19 @@ body::-webkit-scrollbar {
   gap: 10px;
   margin-bottom: 12px;
   flex: 0 0 auto;
-  font-family: var(--font-main);
-  font-size: var(--size-title);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 18px;
   line-height: 1.3;
   font-weight: 700;
-  color: var(--blue);
+  color: #1976d2;
 }
 
 #sectionModalClose,
-#instructionsClose {
+#instructionsBack {
   background: none;
   border: none;
-  color: var(--blue);
-  font-family: var(--font-main);
+  color: #1976d2;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 22px;
   font-weight: 700;
   cursor: pointer;
@@ -218,11 +202,10 @@ body::-webkit-scrollbar {
   border-radius: 4px;
   height: auto;
   width: auto;
-  box-shadow: none;
 }
 
 #sectionModalClose:hover,
-#instructionsClose:hover {
+#instructionsBack:hover {
   background-color: #eef6ff;
 }
 
@@ -238,32 +221,34 @@ body::-webkit-scrollbar {
   gap: 6px;
 }
 
-#sectionListContainer::-webkit-scrollbar { display: none; }
+#sectionListContainer::-webkit-scrollbar {
+  display: none;
+}
 
 .section-item {
   height: 38px;
   padding: 0 12px;
   margin-bottom: 0;
-  background: var(--section-item-default);
-  border: 1px solid var(--input-border-blue);
+  background: #eaf6ff;
+  border: 1px solid #cfe2f7;
   border-radius: 6px;
   cursor: pointer;
-  font-family: var(--font-main);
   font-size: 14px;
-  color: var(--blue);
+  color: #1976d2;
   font-weight: 600;
+  text-align: left;
+  width: 100%;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   box-sizing: border-box;
   display: flex;
   align-items: center;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   transition: 0.12s;
-  text-align: left;
-  width: 100%;
 }
 
 .section-item:hover {
-  background: var(--section-item-hover);
-  border-color: var(--blue);
+  background: #d0e8ff;
+  border-color: #1976d2;
 }
 
 #instructionsContent {
@@ -273,52 +258,52 @@ body::-webkit-scrollbar {
   flex: 1 1 auto;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  font-family: var(--font-main);
-  font-size: var(--size-label);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
   line-height: 1.5;
   font-weight: 400;
   color: #333;
 }
 
-#instructionsContent::-webkit-scrollbar { display: none; }
-#instructionsContent h3 { margin-top: 10px; margin-bottom: 4px; font-family: var(--font-main); font-size: 15px; line-height: 1.3; font-weight: 700; color: #1976d2; }
-#instructionsContent p { margin-bottom: 8px; font-weight: 400; }
-#instructionsContent hr { margin: 12px 0; }
+#instructionsContent::-webkit-scrollbar {
+  display: none;
+}
 
-input[type=text] {
-  width: 85px;
-  min-width: 0;
-  padding: 0 8px;
-  font-size: 12px;
-  height: 38px;
-  border: 1px solid var(--input-border-blue);
-  border-radius: 6px;
-  font-family: var(--font-main);
-  color: #000 !important;
+#instructionsContent h3 {
+  margin-top: 10px;
+  margin-bottom: 4px;
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+#instructionsContent p {
+  margin-bottom: 8px;
+  font-weight: 400;
 }
 
 /* ===============================
-   BASE BUTTON STYLE
-   =============================== */
-
+    UNIFORM GLOBAL BUTTON STYLING (EXCLUDING MC BUTTONS)
+    =============================== */
 button:not(#mcButtonsContainer button) {
   height: 38px;
   padding: 0 12px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   font-size: 14px;
-  border-radius: 6px;
-  border: 1px solid var(--input-border-blue);
-  background: linear-gradient(145deg, #ffffff, var(--section-item-default));
-  color: var(--blue);
-  cursor: pointer;
-  font-family: var(--font-main);
   font-weight: 400;
+  border-radius: 6px;
+  border: 1px solid #cfe2f7;
+  background: linear-gradient(145deg, #ffffff, #eaf6ff);
+  color: #1976d2;
+  cursor: pointer;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   transition: 0.12s;
 }
 
 button:not(#mcButtonsContainer button):hover:not(:disabled) {
-  background: linear-gradient(145deg, #ffffff, var(--section-item-hover));
-  border-color: var(--blue);
+  background: linear-gradient(145deg, #ffffff, #d0e8ff);
+  border-color: #1976d2;
 }
 
 button:not(#mcButtonsContainer button):disabled {
@@ -326,7 +311,6 @@ button:not(#mcButtonsContainer button):disabled {
   cursor: default;
   background: #f1f5f9;
   color: #94a3b8;
-  border-color: var(--input-border-blue);
 }
 
 /* === SCOREBOARD BUTTONS === */
@@ -347,36 +331,12 @@ button:not(#mcButtonsContainer button):disabled {
 }
 
 #scoreButtons button {
-  height: 38px !important;
-  padding: 0 12px !important;
-  font-size: 14px !important;
-  font-family: var(--font-main) !important;
-  font-weight: 400 !important;
-  background: linear-gradient(145deg, #ffffff, var(--section-item-default)) !important;
-  color: var(--blue) !important;
-  border: 1px solid var(--input-border-blue) !important;
-  border-radius: 6px !important;
-  cursor: pointer !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
-  transition: 0.12s !important;
-  box-sizing: border-box !important;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-#scoreButtons button:hover:not(:disabled) {
-  background: linear-gradient(145deg, #ffffff, var(--section-item-hover)) !important;
-  border-color: var(--blue) !important;
-}
-
-#scoreButtons button:disabled {
-    opacity: 0.5;
-    cursor: default;
+    white-space: nowrap;
+    flex-shrink: 0;
 }
 
 /* === SCOREBOARD DISPLAY === */
 #scoreboardContainer {
-    display: none;
     margin: 12px auto 0 auto;
     font-family: monospace;
     font-weight: bold;
@@ -389,6 +349,7 @@ button:not(#mcButtonsContainer button):disabled {
     box-sizing: border-box;
     padding-left: 5px;
     padding-right: 5px;
+    display: none;
 }
 
 /* === GAME AREA === */
@@ -462,6 +423,7 @@ button:not(#mcButtonsContainer button):disabled {
     color: #6B8E23; 
     user-select: none; 
     pointer-events: none; 
+    transition: left 0.05s linear; 
     z-index: 3; 
     display: none; 
 }
@@ -475,24 +437,9 @@ button:not(#mcButtonsContainer button):disabled {
     user-select: none; 
     pointer-events: none; 
     filter: blur(6px); 
+    transition: left 0.05s linear, bottom 0.05s linear; 
     z-index: 2; 
     display: none; 
-}
-
-#typingInput { 
-    position: fixed; 
-    left: 0; 
-    top: 0; 
-    width: 1px; 
-    height: 1px; 
-    opacity: 0.01; 
-    pointer-events: auto; 
-    background: transparent; 
-    border: none; 
-    z-index: 9999; 
-    font-size: 18px; 
-    color: black; 
-    caret-color: red; 
 }
 
 footer {
@@ -516,7 +463,7 @@ footer {
 
 <div id="topBar">
   <input type="text" id="idInput" placeholder="ID" autocomplete="off" />
-  <button id="sectionSelectorBtn" type="button">Select a section.</button>
+  <button id="sectionSelectorBtn" type="button">Topics</button>
   <button id="instructionsBtn" type="button">Instructions</button>
   <button id="submitBtn">Submit</button>
 </div>
@@ -527,7 +474,7 @@ footer {
   <div id="sectionModalContent">
     <div id="sectionModalHeader">
       <span>Select a Category</span>
-      <button id="sectionModalClose">✕</button>
+      <button id="sectionModalClose" type="button">✕</button>
     </div>
     <div id="sectionListContainer"></div>
   </div>
@@ -548,14 +495,13 @@ footer {
 </div>
 
 <audio id="popSound" src="pop-402322.mp3" preload="auto"></audio>
-<input id="typingInput" type="text" inputmode="text" autocapitalize="off" autocorrect="off" spellcheck="false" maxlength="1" autocomplete="off" />
 
 <footer>
 <p>© <span id="currentYear"></span> Perfectly Practical English</p>
 </footer>
 
 <script>
-document.getElementById('currentYear').textContent = new Date().getFullYear();
+  document.getElementById('currentYear').textContent = new Date().getFullYear();
 </script>
 
 <script>
@@ -570,7 +516,35 @@ tileCanvas.width = canvas.width;
 tileCanvas.height = tileHeight; 
 const tCtx = tileCanvas.getContext('2d'); 
 
-// --- Game Setup ---
+// --- Student Data Registry Module ---
+(function() {
+    'use strict';
+    const RAW_STUDENT_DATA = `
+        55555|David
+        55551|Matthew
+        12345|Sarah
+    `;
+    const studentDatabase = new Map();
+    RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+        const [id, name] = line.split('|').map(s => s ? s.trim() : '');
+        if (id && name) studentDatabase.set(id, name);
+    });
+
+    window.resolveStudentNameFromId = function(idInput) {
+        if (!idInput) return "Guest";
+        const trimmed = String(idInput).trim();
+        if (/^(x|g|guest)$/i.test(trimmed)) {
+            return "Guest";
+        }
+        return studentDatabase.get(trimmed) || "Guest";
+    };
+})();
+
+function getStudentName(id) {
+  return window.resolveStudentNameFromId(id);
+}
+
+// --- Game Setup & Corpus ---
 const wordListText = `
 
 ~Determiners
@@ -1225,7 +1199,7 @@ Does everyone |like| a good movie with plenty of action? # Do people always enjo
 
 Does something bad always |happen| in front of everyone? # Can things easily go badly, and do I sometimes have quite embarrassing bad luck?
 
-Does the large, friendly cat |know| all the people here in the neighborhood very well? # Does he seldom bother anyone, and is he really quite popular?
+Does the large, friendly cat |know| all the people here in the neighborhood very well? # Does he seldom bother anyone, and he is really quite popular?
 
 |Are| these little monsters a big problem, and do they cause too much trouble for the scientists? # Do they speak loudly, behave rudely, and rarely behave well?
 
@@ -1277,6 +1251,7 @@ They |don't drink| a lot of cold water during the day. # Their work doesn't norm
 We |don't receive| healthy meals at our school. # Each child doesn't regularly get enough warm milk with their hot food.
 
 Each student |doesn't take| a few cookies from the box until there are none left. # They don't enjoy the cookies very much, and there aren't always cookies left over.
+
 `;
 
 window.__RAW_SECTION_TEXT__ = wordListText;
@@ -1284,16 +1259,19 @@ window.__RAW_SECTION_TEXT__ = wordListText;
 
 <script>
 /* =========================================
-   HARD SECTION CORPUS OVERRIDE & DROPDOWN LOGIC
+   HARD SECTION CORPUS OVERRIDE (MC-IMMUNE)
    ========================================= */
-
 (function () {
   const FULL_TEXT = window.wordListText;
   window.activeExerciseText = "";
 
   Object.defineProperty(window, "wordListText", {
-    get() { return window.activeExerciseText || FULL_TEXT; },
-    set(val) { window._wordListText = val; }
+    get() {
+      return window.activeExerciseText || FULL_TEXT;
+    },
+    set(val) {
+      window._wordListText = val;
+    }
   });
 
   window.addEventListener("sectionchange", async (e) => {
@@ -1314,8 +1292,12 @@ window.__RAW_SECTION_TEXT__ = wordListText;
     console.log("🔒 Section loaded:", e.detail.name);
   });
 })();
+</script>
 
-// --- Dropdown Modal Controller ---
+<script>
+/* =========================================
+   MODAL DROPDOWN SECTION SELECTOR
+   ========================================= */
 document.addEventListener("DOMContentLoaded", () => {
   function parseSections(raw) {
     if (!raw) return [];
@@ -1327,12 +1309,12 @@ document.addEventListener("DOMContentLoaded", () => {
         const lines = chunk.split("\n");
         const name = lines.shift().replace(/^~+/, "").trim();
         const text = lines.join("\n").trim();
-        return { name, text };
+        const words = text.split('\n').map(l => l.match(/\|([^|]+)\|/)?.[1]).filter(Boolean);
+        return { name, text, words };
       });
   }
 
   const sectionData = parseSections(window.__RAW_SECTION_TEXT__);
-
   let currentSectionName = 'No Section';
   let wordList = [];
 
@@ -1347,12 +1329,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (sectionData.length === 0) {
       const emptyDiv = document.createElement("div");
-      emptyDiv.style.cssText = "padding:10px; text-align:center; color:#666;";
+      emptyDiv.style.cssText = 'padding:10px; text-align:center; color:#666;';
       emptyDiv.textContent = "No categories found.";
       listContainer.appendChild(emptyDiv);
     } else {
       sectionData.forEach(sec => {
-        const item = document.createElement("div");
+        const item = document.createElement("button");
+        item.type = "button";
         item.className = "section-item";
         item.textContent = sec.name;
         item.addEventListener("click", () => {
@@ -1368,6 +1351,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
           }));
 
+          // Automatically start game upon section selection
           if (!gameStarted) {
             startGame();
           }
@@ -1385,6 +1369,11 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btn) btn.addEventListener("click", openModal);
   if (modalClose) modalClose.addEventListener("click", closeModal);
   if (modalBackdrop) modalBackdrop.addEventListener("click", closeModal);
+
+  window.addEventListener("DOMContentLoaded", () => {
+    currentSectionName = "No Section";
+    if (btn) btn.textContent = "Topics";
+  });
 });
 </script>
 
@@ -1462,7 +1451,6 @@ if (!window.activeExerciseText) {
 
 const gameArea = document.getElementById('gameArea');
 const typedDisplay = document.getElementById('typedDisplay');
-const typingInput = document.getElementById('typingInput');
 const submitBtn = document.getElementById('submitBtn');
 const idInput = document.getElementById('idInput');
 const scoreboardContainer = document.getElementById('scoreboardContainer');
@@ -1484,7 +1472,6 @@ let planeTargetX = null;
 let planeSpeed = 0;
 let planeExiting = false;
 
-// --- Sentence Spawning ---
 function spawnSentence(exercise) {
     const span = document.createElement('span');
     span.className = 'sentence';
@@ -1503,6 +1490,7 @@ function spawnSentence(exercise) {
     }
 
     const optionsBox = document.createElement('div');
+    optionsBox.className = 'optionsBox';
     optionsBox.style.position = 'absolute';
     optionsBox.style.bottom = '10px';
     optionsBox.style.left = '50%';
@@ -1538,7 +1526,7 @@ function spawnSentence(exercise) {
         optionsBox.style.gridTemplateColumns = `repeat(${cols}, auto)`;
     }
 
-exercise.choices.forEach(choice => {
+    exercise.choices.forEach(choice => {
         const bar = document.createElement('div');
         bar.textContent = choice.label;
         bar.style.padding = '6px 12px';
@@ -1551,12 +1539,12 @@ exercise.choices.forEach(choice => {
         bar.style.fontSize = 'clamp(12px, 2vw, 18px)';
         bar.style.fontWeight = '600';
         bar.style.transition = 'transform 0.1s, background 0.2s';
+
         bar.addEventListener('click', () => {
             const currentSentence = activeSentences[activeSentences.length - 1];
             if (!currentSentence || currentSentence.finished) return;
 
             const blankObj = currentSentence.blanks[0];
-
             bar.style.background = choice.correct ? '#2ecc71' : '#e74c3c';
             bar.style.color = '#fff';
 
@@ -1616,6 +1604,7 @@ exercise.choices.forEach(choice => {
     span.style.visibility = 'hidden';
     span.style.whiteSpace = 'normal';
     span.style.maxWidth = maxSentenceWidth + 'px';
+    gameArea.appendChild(span);
     span.style.width = span.offsetWidth + 'px';
     span.style.visibility = 'visible';
 
@@ -1648,28 +1637,6 @@ exercise.choices.forEach(choice => {
     activeSentences.push(activeSentence);
 }
 
-function triggerExplosion(targetSentence){
-    popSound.currentTime = 0;
-    popSound.play().catch(()=>{});
-    targetSentence.span.style.opacity = '1';
-
-    setTimeout(() => {
-        targetSentence.span.style.transition = 'opacity 0.5s ease-out';
-        targetSentence.span.style.opacity = '0';
-    }, 100);
-
-    setTimeout(() => {
-        targetSentence.span.remove();
-        targetSentence.optionsBox?.remove();
-        targetSentence.finished = true;
-        typedDisplay.textContent = '';
-        if(activeSentences.length === 0 && nextSentenceIndex < sentences.length){
-            spawnSentence(sentences[nextSentenceIndex]);
-            nextSentenceIndex++;
-        }
-    }, 600);
-}
-
 function triggerFadeOut(targetSentence){
     targetSentence.span.style.transition='opacity 0.8s';
     targetSentence.span.style.opacity=0;
@@ -1689,7 +1656,7 @@ function dropSentences(){
     if(!gameStarted) return;
     if(activeSentences.length && plane.style.display==='none'){
         plane.style.display='block'; planeShadow.style.display='block';
-        planeX = gameArea.clientWidth + 100; planeTargetX = gameArea.clientWidth/2; planeSpeed=0.1; planeExiting=false;
+        planeX = gameArea.clientWidth + 100; planeTargetX = gameArea.clientWidth/2; planeSpeed=5; planeExiting=false;
     }
 
     const targetSentence = activeSentences.find(s=>!s.finished);
@@ -1715,13 +1682,14 @@ function dropSentences(){
 
     activeSentences = activeSentences.filter(s=>!s.finished);
 
-    swayAngle+=0.04; let swayAmplitude=8;
+    swayAngle+=0.03; let swayAmplitude=5;
     if(targetSentence && targetSentence.blanks.length>0){
         const rect = targetSentence.blanks[0].elem.getBoundingClientRect();
         const gaRect = gameArea.getBoundingClientRect();
         const blankCenterX = rect.left - gaRect.left + rect.width/2;
         planeTargetX = blankCenterX;
-        planeSpeed = 0.12;
+        swayAmplitude += Math.min(15, Math.abs(blankCenterX-planeX)/15);
+        planeSpeed = 0.08;
     } else {
         if(nextSentenceIndex>=sentences.length && activeSentences.length===0 && !planeExiting){
             planeExiting=true; let speed=2;
@@ -1734,18 +1702,14 @@ function dropSentences(){
                 planeShadow.style.left = planeX + Math.sin(swayAngle)*10 - plane.offsetWidth/2 + 15 + 'px';
                 if(parseFloat(plane.style.bottom) < gameArea.clientHeight+200) requestAnimationFrame(moveUp);
             }; moveUp();
-        } else { swayAmplitude += 15; planeSpeed = 0.08; }
+        } else { swayAmplitude +=12; planeSpeed=0.08; }
     }
 
-    if(!planeExiting && planeTargetX!==null) {
-        planeX += (planeTargetX - planeX) * planeSpeed;
-    }
-    
+    if(!planeExiting && planeTargetX!==null) planeX+=(planeTargetX-planeX)*planeSpeed;
     if(!planeExiting){
-        const currentSway = Math.sin(swayAngle) * swayAmplitude;
-        plane.style.left = (planeX + currentSway - plane.offsetWidth/2) + 'px';
-        planeShadow.style.left = (planeX + currentSway - plane.offsetWidth/2 + 15) + 'px';
-        planeShadow.style.bottom = '60px';
+        plane.style.left = planeX + Math.sin(swayAngle)*swayAmplitude - plane.offsetWidth/2 + 'px';
+        planeShadow.style.left = planeX + Math.sin(swayAngle)*swayAmplitude - plane.offsetWidth/2 + 15 + 'px';
+        planeShadow.style.bottom = parseFloat(plane.style.bottom)-10+'px';
         planeShadow.style.display='block';
     }
 
@@ -1754,22 +1718,8 @@ function dropSentences(){
         spawnSentence(sentences[nextSentenceIndex]);
         nextSentenceIndex++;
     }
-}function getScoreboardFilename(extension) {
-  const scoreboardContainer = document.getElementById('scoreboardContainer');
-  if (scoreboardContainer && scoreboardContainer.textContent.trim()) {
-    let firstLine = scoreboardContainer.textContent.split('\n')[0];
-    let baseName = firstLine
-      .replace(/\|/g, '_')
-      .replace(/\s+/g, '_')
-      .replace(/[:\/]/g, '-');
-    return baseName + '.' + extension;
-  }
-  return 'scoreboard.' + extension;
 }
 
-window.getScoreboardFilename = getScoreboardFilename;
-
-// --- Game Control ---
 async function startGame() {
     if(gameStarted) return;
 
@@ -1792,6 +1742,7 @@ async function startGame() {
     spawnSentence(sentences[nextSentenceIndex]); 
     nextSentenceIndex++;
 
+    if(dropInterval) clearInterval(dropInterval);
     dropInterval = setInterval(dropSentences, dropTickTime);
 }
 
@@ -1802,35 +1753,53 @@ function stopGame(){
     submitBtn.disabled = false; 
 }
 
+function getScoreboardFilename(extension) {
+    if (scoreboardContainer && scoreboardContainer.textContent.trim()) {
+        let firstLine = scoreboardContainer.textContent.split('\n')[0];
+        let baseName = firstLine
+            .replace(/\|/g, '_')
+            .replace(/\s+/g, '_')
+            .replace(/[:\/]/g, '-');
+        return baseName + '.' + extension;
+    }
+    return 'scoreboard.' + extension;
+}
+
 function submitResults(){
     if(!gameStarted) return;
     stopGame();
 
     const pct = totalExercises ? Math.round(correctExercises / totalExercises * 100) : 0;
+    const pctStr = pct + '%';
     const now = new Date();
     const pad = n => n.toString().padStart(2,'0');
+
     const dateStr = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
     const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-    const filename = window.location.pathname.split('/').pop() || 'unknown.html';
 
-    const studentId = idInput.value.trim() || "N/A";
-    const studentName = window.resolveStudentNameFromId(studentId);
-    const sectionName = document.getElementById("sectionSelectorBtn").textContent.trim() || "No Section";
+    let currentFile = window.location.pathname.split('/').pop() || 'unknown.html';
+    currentFile = currentFile.split('?')[0].split('#')[0];
+    const filenameWithoutExt = currentFile.replace(/\.[^/.]+$/, "");
 
-    const scoreLine = `${filename}|${sectionName}|${studentName}|${studentId}|${dateStr}|${timeStr}|${correctExercises}/${totalExercises}|${pct}%`;
+    const studentId = idInput.value.trim() || 'Guest';
+    const studentName = getStudentName(studentId);
+    const sectionName = typeof currentSectionName !== 'undefined' ? currentSectionName : 'Determiners';
+
+    const scoreLine = `${filenameWithoutExt}|${sectionName}|${studentName}|${studentId}|${dateStr}|${timeStr}|${correctExercises}/${totalExercises}|${pctStr}`;
 
     scoreboardContainer.textContent += (scoreboardContainer.textContent ? '\n' : '') + scoreLine;
-
-    if (window.saveResult) {
-        window.saveResult(scoreLine);
-    }
-
     scoreboardContainer.style.display = 'block';
     scoreButtons.style.display = 'flex';
+
+    if (typeof window.saveResult === "function") {
+        window.saveResult(scoreLine);
+    } else {
+        console.error("Supabase saveResult() not found");
+    }
 }
 
 function resetGame(){
-    activeSentences.forEach(s=>{ if(s.span.parentNode)s.span.remove(); });
+    activeSentences.forEach(s=>{ if(s.span.parentNode)s.span.remove(); if(s.optionsBox?.parentNode)s.optionsBox.remove(); });
     activeSentences=[]; planeX = gameArea.clientWidth + 100; plane.style.left=`${planeX}px`;
     plane.style.bottom='190px'; planeShadow.style.bottom='60px';
     plane.style.display='none'; planeShadow.style.display='none';
@@ -1841,30 +1810,29 @@ function resetGame(){
     planeExiting = false;
 }
 
-// --- Scoreboard Buttons ---
 document.getElementById('copyBtn').addEventListener('click',()=>{navigator.clipboard.writeText(scoreboardContainer.textContent).then(()=>alert('Score copied to clipboard!'));});
 document.getElementById('downloadTxtBtn').addEventListener('click',()=>{
-  const downloadFileName = getScoreboardFilename('txt');
-  const blob=new Blob([scoreboardContainer.textContent],{type:'text/plain'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download=downloadFileName;
-  a.click();
-  URL.revokeObjectURL(url);
+    const downloadFileName = getScoreboardFilename('txt');
+    const blob=new Blob([scoreboardContainer.textContent],{type:'text/plain'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=downloadFileName;
+    a.click();
+    URL.revokeObjectURL(url);
 });
 document.getElementById('downloadPngBtn').addEventListener('click',()=>{
-  const downloadFileName = getScoreboardFilename('png');
-  html2canvas(scoreboardContainer).then(canvas=>{
-    canvas.toBlob(blob=>{
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a');
-      a.href=url;
-      a.download=downloadFileName;
-      a.click();
-      URL.revokeObjectURL(url);
+    const downloadFileName = getScoreboardFilename('png');
+    html2canvas(scoreboardContainer).then(canvas=>{
+        canvas.toBlob(blob=>{
+            const url=URL.createObjectURL(blob);
+            const a=document.createElement('a');
+            a.href=url;
+            a.download=downloadFileName;
+            a.click();
+            URL.revokeObjectURL(url);
+        });
     });
-  });
 });
 
 submitBtn.addEventListener('click', submitResults);
@@ -1882,33 +1850,33 @@ borderDiv.style.pointerEvents='none';
 borderDiv.style.backgroundColor='transparent';
 document.body.appendChild(borderDiv);
 
-// --- Coconuts ---
+// --- Pumpkins (Haunted House Item) ---
 (function(){
     const alreadyDropped = new WeakSet();
-    function dropCoconut(blankElem){
+    function dropPumpkin(blankElem){
         if(alreadyDropped.has(blankElem)) return;
         alreadyDropped.add(blankElem);
-        const coconut = document.createElement('div');
-        coconut.textContent='🎃';
-        coconut.style.position='absolute';
-        coconut.style.fontSize='32px';
-        coconut.style.left=(plane.offsetLeft+plane.offsetWidth/2-16)+'px';
-        coconut.style.top=(plane.offsetTop+plane.offsetHeight-10)+'px';
-        coconut.style.transition='none';
-        coconut.style.zIndex=999;
-        coconut.style.pointerEvents='none';
-        coconut.style.transform=`rotate(${Math.random()*30-15}deg)`;
-        gameArea.appendChild(coconut);
+        const pumpkin = document.createElement('div');
+        pumpkin.textContent='🎃';
+        pumpkin.style.position='absolute';
+        pumpkin.style.fontSize='32px';
+        pumpkin.style.left=(plane.offsetLeft+plane.offsetWidth/2-16)+'px';
+        pumpkin.style.top=(plane.offsetTop+plane.offsetHeight-10)+'px';
+        pumpkin.style.transition='none';
+        pumpkin.style.zIndex=999;
+        pumpkin.style.pointerEvents='none';
+        pumpkin.style.transform=`rotate(${Math.random()*30-15}deg)`;
+        gameArea.appendChild(pumpkin);
         const gaRect = gameArea.getBoundingClientRect();
         const blankRect = blankElem.getBoundingClientRect();
         const targetTop = blankRect.top - gaRect.top + blankRect.height/2;
         const targetLeft = blankRect.left - gaRect.left + blankRect.width/2 - 16;
-        requestAnimationFrame(()=>{ coconut.style.transition='top 0.6s ease-in, left 0.6s ease-in, transform 0.6s ease-in'; coconut.style.top=targetTop+'px'; coconut.style.left=targetLeft+'px'; });
+        requestAnimationFrame(()=>{ pumpkin.style.transition='top 0.6s ease-in, left 0.6s ease-in, transform 0.6s ease-in'; pumpkin.style.top=targetTop+'px'; pumpkin.style.left=targetLeft+'px'; });
         setTimeout(()=>{
             let bounces=[-20,15,-10,5,0]; let delay=0;
-            bounces.forEach(offset=>{ setTimeout(()=>{ coconut.style.transition='top 0.08s ease-out'; coconut.style.top=(targetTop+offset)+'px'; }, delay); delay+=80; });
-            setTimeout(()=>{ coconut.style.transition='left 1s linear, transform 1s linear'; coconut.style.left=(gaRect.width+100)+'px'; coconut.style.transform='rotate(720deg)'; }, delay+50);
-            setTimeout(()=>coconut.remove(), delay+1100);
+            bounces.forEach(offset=>{ setTimeout(()=>{ pumpkin.style.transition='top 0.08s ease-out'; pumpkin.style.top=(targetTop+offset)+'px'; }, delay); delay+=80; });
+            setTimeout(()=>{ pumpkin.style.transition='left 1s linear, transform 1s linear'; pumpkin.style.left=(gaRect.width+100)+'px'; pumpkin.style.transform='rotate(720deg)'; }, delay+50);
+            setTimeout(()=>pumpkin.remove(), delay+1100);
         },650);
     }
     setInterval(() => {
@@ -1918,14 +1886,14 @@ document.body.appendChild(borderDiv);
                     blankObj.coconutAllowed &&
                     blankObj.elem.textContent === blankObj.elem.dataset.answer
                 ) {
-                    dropCoconut(blankObj.elem);
+                    dropPumpkin(blankObj.elem);
                 }
             });
         });
     }, 100);
 })();
 
-// --- Palm Trees ---
+// --- Haunted Castle Art ---
 (function(){
     const leftPalm = document.createElement('div');
     leftPalm.textContent = '🏰';
@@ -2035,16 +2003,11 @@ document.body.appendChild(borderDiv);
     const idInput = document.getElementById('idInput');
 
     const getFilename = () => {
-      const scoreboardContainer = document.getElementById('scoreboardContainer');
-      if (scoreboardContainer && scoreboardContainer.textContent.trim()) {
-        let firstLine = scoreboardContainer.textContent.split('\n')[0];
-        let baseName = firstLine
-          .replace(/\|/g, '_')
-          .replace(/\s+/g, '_')
-          .replace(/[:\/]/g, '-');
-        return baseName;
-      }
-      return 'scoreboard';
+      const rawFilename = window.location.pathname.split('/').pop() || 'score';
+      const id = idInput?.value.trim() || 'ID';
+      const name = getStudentName(id);
+      const dateStr = new Date().toISOString().split('T')[0];
+      return `${rawFilename}|${name}|${id}|${dateStr}`;
     };
 
     const buttons = document.querySelectorAll('#scoreButtons button');
@@ -2052,7 +2015,9 @@ document.body.appendChild(borderDiv);
       const btnId = btn.id.toLowerCase();
       const btnText = btn.innerText.toLowerCase();
 
-      if (/copy/.test(btnId) || /copy/.test(btnText)) return;
+      if (/copy/.test(btnId) || /copy/.test(btnText)) {
+        return;
+      }
 
       const isTextButton = /text|txt/.test(btnId) || /text|txt/.test(btnText);
       hijackDownloadButton(btn, () => scoreboard.textContent.trim(), getFilename, isTextButton);
@@ -2070,84 +2035,6 @@ document.body.appendChild(borderDiv);
   }
 
   setupScoreboardHijack();
-})();
-</script>
-
-<script>
-/* =====================================================
-   Swirling Storm Clouds (Vortex Field)
-   ===================================================== */
-(function () {
-  'use strict';
-
-  const gameArea = document.getElementById('gameArea');
-  if (!gameArea) return;
-
-  if (getComputedStyle(gameArea).position === 'static') {
-    gameArea.style.position = 'relative';
-  }
-
-  const canvas = document.createElement('canvas');
-  canvas.style.position = 'absolute';
-  canvas.style.inset = '0';
-  canvas.style.zIndex = '0';
-  canvas.style.pointerEvents = 'none';
-  gameArea.prepend(canvas);
-
-  const ctx = canvas.getContext('2d');
-
-  function resize() {
-    canvas.width = gameArea.clientWidth;
-    canvas.height = gameArea.clientHeight;
-  }
-  window.addEventListener('resize', resize);
-  resize();
-
-  let t = 0;
-
-  function swirl(x, y, t) {
-    const cx = canvas.width * 0.5;
-    const cy = canvas.height * 0.5;
-
-    const dx = x - cx;
-    const dy = y - cy;
-
-    const r = Math.sqrt(dx * dx + dy * dy);
-    const a = Math.atan2(dy, dx);
-
-    const spin =
-      Math.sin(r * 0.015 - t * 1.2) +
-      Math.sin(a * 3 + t * 0.7);
-
-    return Math.sin(a * 4 + r * 0.02 + spin);
-  }
-
-  function draw() {
-    const w = canvas.width;
-    const h = canvas.height;
-    const img = ctx.createImageData(w, h);
-    const d = img.data;
-
-    for (let y = 0; y < h; y++) {
-      for (let x = 0; x < w; x++) {
-        const n = swirl(x, y, t);
-        let v = 50 + n * 30;
-        v = Math.max(10, Math.min(130, v));
-
-        const i = (y * w + x) * 4;
-        d[i]     = v * 0.9;
-        d[i + 1] = v * 0.9;
-        d[i + 2] = v + 15;
-        d[i + 3] = 255;
-      }
-    }
-
-    ctx.putImageData(img, 0, 0);
-    t += 0.015;
-    requestAnimationFrame(draw);
-  }
-
-  draw();
 })();
 </script>
 
@@ -2180,13 +2067,125 @@ function parseRawInstructions(text){
   const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
   const html = [];
   lines.forEach(line => {
-    if(line === "---"){ html.push(`<hr>`); return; }
-    if(/^\d+\./.test(line)){ html.push(`<p>${line}</p>`); return; }
-    if(!/[.!?:]$/.test(line)){ html.push(`<h3>${line}</h3>`); return; }
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
     html.push(`<p>${line}</p>`);
   });
   return html.join("");
 }
+
+const style = document.createElement("style");
+style.textContent = `
+#instructionsRoot{
+  position:fixed;
+  inset:0;
+  display:none;
+  z-index:99999;
+}
+#instructionsBackdrop{
+  position:absolute;
+  inset:0;
+  background:rgba(0,0,0,0.45);
+}
+#instructionsModal{
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform:translate(-50%, -50%);
+  width:min(500px, 92vw);
+  max-height:min(80vh, calc(100dvh - 16px));
+  background:#fff;
+  border-radius:12px;
+  padding:18px;
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid #cfe2f7;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+#instructionsHeader{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex: 0 0 auto;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
+}
+#instructionsTitle{
+  color: #1976d2;
+  font-weight: 700;
+  font-size: 18px;
+}
+#instructionsBack{
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  height: auto;
+  width: auto;
+}
+#instructionsBack:hover{
+  background-color: #eef6ff;
+}
+#instructionsContent{
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  flex: 1 1 auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #333;
+}
+#instructionsContent::-webkit-scrollbar {
+  display: none;
+}
+#instructionsContent h3 {
+  margin-top: 10px;
+  margin-bottom: 4px;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
+}
+#instructionsContent p {
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+`;
+document.head.appendChild(style);
+
+const btn = document.getElementById("instructionsBtn");
 
 const root = document.createElement("div");
 root.id = "instructionsRoot";
@@ -2195,7 +2194,7 @@ root.innerHTML = `
 <div id="instructionsModal">
   <div id="instructionsHeader">
     <span id="instructionsTitle">Instructions</span>
-    <button id="instructionsClose">✕</button>
+    <button id="instructionsBack" type="button">✕</button>
   </div>
   <div id="instructionsContent">
     ${parseRawInstructions(RAW_TEXT)}
@@ -2204,23 +2203,24 @@ root.innerHTML = `
 `;
 document.body.appendChild(root);
 
-const btn = document.getElementById("instructionsBtn");
 const modalContent = document.getElementById("instructionsContent");
-modalContent.addEventListener("wheel", e=>{ e.stopPropagation(); },{passive:false});
-modalContent.addEventListener("touchmove", e=>{ e.stopPropagation(); },{passive:false});
+modalContent.addEventListener("wheel", e=>{e.stopPropagation();},{passive:false});
+modalContent.addEventListener("touchmove", e=>{e.stopPropagation();},{passive:false});
 
 function openModal(){
   root.style.display="block";
   document.body.style.overflow="hidden";
   document.documentElement.style.overflow="hidden";
 }
+
 function closeModal(){
   root.style.display="none";
   document.body.style.overflow="";
   document.documentElement.style.overflow="";
 }
+
 if(btn) btn.onclick = openModal;
-document.getElementById("instructionsClose").onclick = closeModal;
+document.getElementById("instructionsBack").onclick = closeModal;
 document.getElementById("instructionsBackdrop").onclick = closeModal;
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
 })();
@@ -2259,7 +2259,6 @@ if (!supabaseClient) {
 let lastUploadedScore = null;
 
 window.saveResult = async function saveResult(text) {
-  idInput = document.getElementById('idInput');
   if (!supabaseClient) {
     console.error("❌ No Supabase client");
     return;
@@ -2274,8 +2273,7 @@ window.saveResult = async function saveResult(text) {
     return;
   }
 
-  if (!cleaned) return;
-  if (cleaned === lastUploadedScore) return;
+  if (!cleaned || cleaned === lastUploadedScore) return;
   lastUploadedScore = cleaned;
 
   const { data, error } = await supabaseClient
@@ -2289,33 +2287,6 @@ window.saveResult = async function saveResult(text) {
   }
   console.log("✅ INSERT SUCCESS:", data);
 };
-</script>
-
-<!-- 3. STUDENT DATA REGISTRY MODULE -->
-<script>
-(function() {
-    'use strict';
-    const RAW_STUDENT_DATA = `
-        55555|David
-        55551|Matthew
-        12345|Sarah
-    `;
-    const studentDatabase = new Map();
-    RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
-        const [id, name] = line.split('|').map(s => s ? s.trim() : '');
-        if (id && name) studentDatabase.set(id, name);
-    });
-
-    window.resolveStudentNameFromId = function(idInput) {
-        idInput = document.getElementById('idInput');
-        if (!idInput) return "Guest";
-        const trimmed = String(idInput.value || "").trim();
-        if (/^(x|g|guest)$/i.test(trimmed)) {
-            return "Guest";
-        }
-        return studentDatabase.get(trimmed) || "Guest";
-    };
-})();
 </script>
 
 <!-- ========================================== -->

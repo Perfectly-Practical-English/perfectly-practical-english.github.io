@@ -455,7 +455,7 @@ footer {
 
 <div id="topBar">
   <input type="text" id="idInput" placeholder="ID" autocomplete="off" />
-  <button id="sectionSelectorBtn" type="button">Select a section.</button>
+  <button id="sectionSelectorBtn" type="button">Topics</button>
   <button id="submitBtn">Submit</button>
 </div>
 
@@ -464,7 +464,7 @@ footer {
   <div id="sectionModalBackdrop"></div>
   <div id="sectionModalContent">
     <div id="sectionModalHeader">
-      <span>Select a Category</span>
+      <span>Topics</span>
       <button id="sectionModalClose" type="button">✕</button>
     </div>
     <div id="sectionListContainer"></div>
@@ -508,23 +508,76 @@ async function resolveRaw(source) {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script>
-// --- Starfield ---
+// --- Natural Starfield ---
 const canvas = document.getElementById('terrainCanvas');
 const ctx = canvas.getContext('2d');
-canvas.width = canvas.clientWidth; canvas.height = canvas.clientHeight;
+
+function resizeCanvas() {
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
 const stars = [];
-for(let i=0;i<200;i++) stars.push({x: Math.random()*canvas.width, y: Math.random()*canvas.height, z: Math.random()*2+0.5});
-function drawStarfield(){
-  ctx.fillStyle='black'; ctx.fillRect(0,0,canvas.width,canvas.height);
-  for(let s of stars){
-    s.x -= 0.5*s.z;
-    if(s.x<0){ s.x=canvas.width; s.y=Math.random()*canvas.height; s.z=Math.random()*2+0.5; }
-    ctx.fillStyle='white'; ctx.fillRect(s.x,s.y,s.z,s.z);
+const starCount = 500; // Dense, rich starfield
+
+for (let i = 0; i < starCount; i++) {
+  // Create natural size distribution (mostly small, few large)
+  let rand = Math.random();
+  let size, alpha, speedMultiplier;
+
+  if (rand < 0.70) {
+    // 70% Small, distant stars
+    size = Math.random() * 0.8 + 0.6; // 0.6 to 1.4px
+    alpha = Math.random() * 0.4 + 0.3; // Dimmer
+    speedMultiplier = 0.3;
+  } else if (rand < 0.92) {
+    // 22% Medium stars
+    size = Math.random() * 1.0 + 1.5; // 1.5 to 2.5px
+    alpha = Math.random() * 0.4 + 0.6; // Moderately bright
+    speedMultiplier = 0.6;
+  } else {
+    // 8% Large, bright foreground stars
+    size = Math.random() * 1.5 + 2.5; // 2.5 to 4.0px
+    alpha = 1.0; // Fully bright
+    speedMultiplier = 1.0;
+  }
+
+  stars.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    size: size,
+    alpha: alpha,
+    speed: speedMultiplier
+  });
+}
+
+function drawStarfield() {
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  for (let s of stars) {
+    // Increased base speed multiplier from 0.4 to 1.2 for faster movement
+    s.x -= 1.2 * s.speed; 
+    
+    if (s.x < 0) {
+      s.x = canvas.width;
+      s.y = Math.random() * canvas.height;
+    }
+
+    ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
+    
+    if (s.size > 2) {
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.size / 2, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.fillRect(s.x, s.y, s.size, s.size);
+    }
   }
   requestAnimationFrame(drawStarfield);
-}
-drawStarfield();
-
+}drawStarfield();
 // --- Game Variables ---
 const wordListSource = `
 

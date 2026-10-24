@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Composition Book Word Wall</title>
 
 <style>
@@ -27,17 +27,36 @@
 
 html,body{
   margin:0;
+  padding:0;
   background:#dff2ff;
+  width:100%;
+  height:100%;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
 }
 
 body{
   display:flex;
-  justify-content:center;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Container to scale down full fixed page cleanly on narrow portrait devices */
+.viewport-scaler {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  padding: 8px 0;
+  overflow-x: hidden;
 }
 
 .frame{
   background:var(--outer);
   padding:8px;
+  border-radius: 4px;
+  transform-origin: top center;
 }
 
 .page{
@@ -132,7 +151,6 @@ body{
   outline:none;
   background:transparent;
   overflow:hidden;
-  /* Added repeating background lines so the left column background matches the main grid under the top bar */
   background-image: repeating-linear-gradient(
     to bottom,
     transparent 0,
@@ -207,6 +225,7 @@ body{
   white-space:pre-wrap;
   overflow-y:hidden;
 }
+
 /* ================= GRID ================= */
 
 .lines{
@@ -324,50 +343,73 @@ body{
 
 <body>
 
-<div class="frame">
-<div class="page">
+<div class="viewport-scaler" id="scaler">
+  <div class="frame" id="frame">
+    <div class="page">
 
-<div class="headerArea">
-  <textarea id="headerLeft" placeholder=""></textarea>
-  <textarea id="headerRight" placeholder=""></textarea>
-  <div style="position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #777; pointer-events: none; font-family: Arial, sans-serif;">&copy; <span id="currentYear"></span> Perfectly Practical English</div>
-</div>
-<div class="headerRed"></div>
+    <div class="headerArea">
+      <textarea id="headerLeft" placeholder=""></textarea>
+      <textarea id="headerRight" placeholder=""></textarea>
+      <div style="position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #777; pointer-events: none; font-family: Arial, sans-serif;">&copy; <span id="currentYear"></span> Perfectly Practical English</div>
+    </div>
+    <div class="headerRed"></div>
 
-<div class="topBar" id="topBarContainer">
-  <textarea id="leftInput" placeholder=""></textarea>
-  <div class="fileToolbarContainer">
-    <div class="toolbarRow">
-      <input type="text" id="studentIdInput" placeholder="ID" style="width:55px;">
-      <input type="text" id="headerTitleInput" placeholder="Title" style="width:110px;">
-      <input type="text" id="headerPageInput" placeholder="Page" style="width:50px;">
-      <button id="instructionsBtn" type="button">Instructions</button>
+    <div class="topBar" id="topBarContainer">
+      <textarea id="leftInput" placeholder=""></textarea>
+      <div class="fileToolbarContainer">
+        <div class="toolbarRow">
+          <input type="text" id="studentIdInput" placeholder="ID" style="width:55px;">
+          <input type="text" id="headerTitleInput" placeholder="Title" style="width:110px;">
+          <input type="text" id="headerPageInput" placeholder="Page" style="width:50px;">
+          <button id="instructionsBtn" type="button">Instructions</button>
 
-      <div style="margin-left:auto; display:flex; gap:6px;">
-        <input type="file" id="headerTxtLoader" accept=".txt" style="display:none">
-        <button id="loadHeaderBtn" type="button">Top Import</button>
-        <button id="saveHeaderBtn" type="button">Top Export</button>
+          <div style="margin-left:auto; display:flex; gap:6px;">
+            <input type="file" id="headerTxtLoader" accept=".txt" style="display:none">
+            <button id="loadHeaderBtn" type="button">Top Import</button>
+            <button id="saveHeaderBtn" type="button">Top Export</button>
 
-        <input type="file" id="txtLoader" accept=".txt" style="display:none">
-        <button id="loadTxtBtn" type="button">Import</button>
-        <button id="saveTxtBtn" type="button">Export</button>
+            <input type="file" id="txtLoader" accept=".txt" style="display:none">
+            <button id="loadTxtBtn" type="button">Import</button>
+            <button id="saveTxtBtn" type="button">Export</button>
+          </div>
+        </div>
+        <textarea id="rightInput" placeholder="Content goes here..."></textarea>
       </div>
     </div>
-    <textarea id="rightInput" placeholder="Content goes here..."></textarea>
+
+    <div class="lines" id="gridLines"></div>
+    <div class="red"></div>
+
+    <div class="sheet leftSheet" id="left"></div>
+    <div class="sheet rightSheet" id="right"></div>
+
+    </div>
   </div>
-</div>
-
-<div class="lines" id="gridLines"></div>
-<div class="red"></div>
-
-<div class="sheet leftSheet" id="left"></div>
-<div class="sheet rightSheet" id="right"></div>
-
-</div>
 </div>
 
 <script>
   document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+  // Responsive scaling to fit mobile portrait screens cleanly without adding new elements
+  function adjustResponsiveScale() {
+    const frame = document.getElementById('frame');
+    const scaler = document.getElementById('scaler');
+    const targetWidth = 868; // 852px page + 16px frame padding
+    const screenWidth = window.innerWidth - 16;
+
+    if (screenWidth < targetWidth) {
+      const scale = screenWidth / targetWidth;
+      frame.style.transform = `scale(${scale})`;
+      scaler.style.height = `${1216 * scale}px`;
+    } else {
+      frame.style.transform = 'none';
+      scaler.style.height = 'auto';
+    }
+  }
+
+  window.addEventListener('resize', adjustResponsiveScale);
+  window.addEventListener('orientationchange', adjustResponsiveScale);
+  document.addEventListener('DOMContentLoaded', adjustResponsiveScale);
 </script>
 
 <script>
@@ -702,18 +744,15 @@ function render(){
         const size = Math.max(8, 16 - (len - 10) * 0.5);
         tileEl.style.fontSize = size + "px";
 
-        // Click handler splitting left vs center-to-right
         tileEl.onpointerdown=(e)=>{
           e.stopPropagation();
           const rect = tileEl.getBoundingClientRect();
           const clickX = e.clientX - rect.left;
-          const leftThreshold = rect.width * 0.3; // Left 30% for text editing
+          const leftThreshold = rect.width * 0.3;
 
           if(clickX < leftThreshold){
-            // Left touch -> immediately enter field for input
             edit(R, tileEl, tile);
           } else {
-            // Center to right touch -> select tile for immediate next click placement
             if(selectedTile === tile){
               selectedTile = null;
             } else {
@@ -951,7 +990,7 @@ How to use this page…
 
 • File Import: Click the Top Import button to upload a header text file, or click the Import button to load a content text file into the workspace.
 
-• File Export: Click the Top Export button to download your header notes, or click the Export button to download your formatted content as a timestamped text file. [Automatic] Export filenames are automatically generated using your page number, title, resolved student name, ID number, and timestamp.• 
+• File Export: Click the Top Export button to download your header notes, or click the Export button to download your formatted content as a timestamped text file. [Automatic] Export filenames are automatically generated using your page number, title, resolved student name, ID number, and timestamp.
 `;
 
 function parseRawInstructions(text){
@@ -1017,31 +1056,5 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
 })();
 </script>
 
-
-<!-- ========================================== -->
-<!-- NARROW PHONE LAYOUT SAFETY PATCH (START) -->
-<!-- ========================================== -->
-<style>
-  html, body {
-    max-width: 100vw !important;
-    overflow-x: hidden !important;
-    box-sizing: border-box;
-  }
-  *, *:before, *:after {
-    box-sizing: inherit;
-  }
-  body {
-    padding-left: 12px !important;
-    padding-right: 12px !important;
-    margin: 0 auto !important;
-  }
-  img, video, canvas, table {
-    max-width: 100% !important;
-    height: auto !important;
-  }
-</style>
-<!-- ========================================== -->
-<!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
-<!-- ========================================== -->
 </body>
 </html>

@@ -1,4 +1,9 @@
-
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<title>Perfectly Practical English</title>
 <style>
 :root {
   --bg: #f7fdfb;
@@ -356,7 +361,6 @@ footer p {
   }
 }
 </style>
-
 </head>
 
 <body>
@@ -394,13 +398,6 @@ footer p {
 
 <script>
 "use strict";
-
-/*
-  MASTER FILE LIST
-
-  Add new filenames anywhere in this array.
-  JavaScript sorts them automatically.
-*/
 
 const INTERNAL_FILES = [
   "V_1_Flash_Cards_EFL.html",
@@ -533,113 +530,44 @@ const INTERNAL_FILES = [
   "RR_55_The_Pizzarena.html"
 ];
 
-
-/* Section headings and their order */
-
 const SECTIONS = [
-  {
-    title: "Vocabulary Flash Cards and Games",
-    prefixes: ["V_"]
-  },
-  {
-    title: "Grammar Lessons",
-    prefixes: ["RG_"]
-  },
-  {
-    title: "Grammar Games",
-    prefixes: ["G_"]
-  },
-  {
-    title: "Class Discussion",
-    prefixes: ["CD_"]
-  },
-  {
-    title: "EFL Reading",
-    prefixes: ["R_"]
-  },
-  {
-    title: "Literature",
-    prefixes: ["RL_"]
-  },
-  {
-    title: "Literacy",
-    prefixes: ["RW_"]
-  },
-  {
-    title: "Useful Tips",
-    prefixes: ["RT_"]
-  },
-  {
-    title: "Thai Language",
-    prefixes: ["T_", "TT_"]
-  },
-  {
-    title: "Bible Study",
-    prefixes: ["Bible_"]
-  },
-  {
-    title: "Resources and Administration",
-    prefixes: ["RA_", "A_", "ART_"]
-  },
-  {
-    title: "Rogue Writers Gallery",
-    prefixes: ["RR_"]
-  }
+  { title: "Vocabulary Flash Cards and Games", prefixes: ["V_"] },
+  { title: "Grammar Lessons", prefixes: ["RG_"] },
+  { title: "Grammar Games", prefixes: ["G_"] },
+  { title: "Class Discussion", prefixes: ["CD_"] },
+  { title: "EFL Reading", prefixes: ["R_"] },
+  { title: "Literature", prefixes: ["RL_"] },
+  { title: "Literacy", prefixes: ["RW_"] },
+  { title: "Useful Tips", prefixes: ["RT_"] },
+  { title: "Thai Language", prefixes: ["T_", "TT_"] },
+  { title: "Bible Study", prefixes: ["Bible_"] },
+  { title: "Resources and Administration", prefixes: ["RA_", "A_", "ART_"] },
+  { title: "Rogue Writers Gallery", prefixes: ["RR_"] }
 ];
-
-
-/* Extract the numerical identifier from a filename */
 
 function getFileNumber(filename) {
   const match = filename.match(/^[A-Za-z]+_(\d+)/);
   return match ? Number(match[1]) : Number.MAX_SAFE_INTEGER;
 }
 
-
-/* Sort numerically, so item 9 comes before item 10 */
-
 function sortFiles(files) {
   return [...files].sort((a, b) => {
     const numberDifference = getFileNumber(a) - getFileNumber(b);
-
-    if (numberDifference !== 0) {
-      return numberDifference;
-    }
-
-    return a.localeCompare(b, undefined, {
-      numeric: true,
-      sensitivity: "base"
-    });
+    if (numberDifference !== 0) return numberDifference;
+    return a.localeCompare(b, undefined, { numeric: true, sensitivity: "base" });
   });
 }
-
-
-/*
-  Create numbered button labels.
-
-  Examples:
-  V_1_Flash_Cards_EFL.html
-  becomes "1. Flash Cards EFL"
-
-  G_10_Game_Grammar_Mega-Quizzes_EFL.html
-  becomes "10. Game Grammar Mega-Quizzes EFL"
-*/
 
 function getDisplayName(filename) {
   const match = filename.match(/^[A-Za-z]+_(\d+)/);
   const number = match ? Number(match[1]) : "";
-
   const name = filename
     .replace(/\.html?$/i, "")
     .replace(/^[A-Za-z]+_\d+[_-]?/, "")
     .replace(/_/g, " ")
     .trim();
-
   return number ? `${number}. ${name}` : name;
 }
-
-
-/* Find the matching section for a filename */
 
 function getSectionForFile(filename) {
   return SECTIONS.find(section =>
@@ -647,18 +575,13 @@ function getSectionForFile(filename) {
   );
 }
 
-
-/* Render the collapsible sections and their file buttons */
-
 function renderIndex() {
   const root = document.getElementById("indexSections");
   root.replaceChildren();
 
   SECTIONS.forEach(section => {
     const files = sortFiles(
-      INTERNAL_FILES.filter(filename =>
-        getSectionForFile(filename) === section
-      )
+      INTERNAL_FILES.filter(filename => getSectionForFile(filename) === section)
     );
 
     if (files.length === 0) return;
@@ -677,16 +600,10 @@ function renderIndex() {
 
     files.forEach(filename => {
       const link = document.createElement("a");
-
-      /*
-        Relative links work when the index and HTML files
-        are in the same folder.
-      */
       link.href = filename;
       link.textContent = getDisplayName(filename);
       link.title = filename;
       link.target = "_self";
-
       content.appendChild(link);
     });
 
@@ -704,6 +621,32 @@ function renderIndex() {
 
 renderIndex();
 </script>
+
+<!-- ========================================== -->
+<!-- NARROW PHONE LAYOUT SAFETY PATCH (START) -->
+<!-- ========================================== -->
+<style>
+  html, body {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box;
+  }
+  *, *:before, *:after {
+    box-sizing: inherit;
+  }
+  body {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    margin: 0 auto !important;
+  }
+  img, video, canvas, table {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+</style>
+<!-- ========================================== -->
+<!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
+<!-- ========================================== -->
 
 </body>
 </html>

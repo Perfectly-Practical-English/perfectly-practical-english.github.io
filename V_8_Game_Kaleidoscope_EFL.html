@@ -427,7 +427,7 @@ input[type=range] {
 <!-- TOP BAR -->
 <div class="top-bar">
   <input id="studentId" type="text" placeholder="ID" autocomplete="off" />
-  <button id="sectionSelectorBtn" type="button">Select a section.</button>
+  <button id="sectionSelectorBtn" type="button">Topics</button>
   <button id="instructionsBtn" type="button">Instructions</button>
   <button id="submitBtn" type="button">Submit</button>
 </div>
@@ -457,7 +457,7 @@ input[type=range] {
   <div id="sectionModalBackdrop"></div>
   <div id="sectionModalContent">
     <div id="sectionModalHeader">
-      <span>Select a Category</span>
+      <span>Topics</span>
       <button id="sectionModalClose" type="button">✕</button>
     </div>
     <div id="sectionListContainer"></div>
@@ -1812,7 +1812,7 @@ if (modalBackdrop) modalBackdrop.addEventListener("click", closeModal);
 
 window.addEventListener("DOMContentLoaded", () => {
   currentSectionName = "No Section";
-  btn.textContent = "Select a section.";
+  btn.textContent = "Topics";
 });
 
 let selectedSectionIndex = -1;
@@ -1884,7 +1884,7 @@ function getScoreboardFilename(extension) {
 
 function submitResults() {
   if (selectedSectionIndex === -1) {
-    alert('Please select a section first.');
+    alert('Topics');
     return;
   }
 

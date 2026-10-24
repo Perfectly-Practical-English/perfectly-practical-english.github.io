@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  body, html { margin: 0; padding: 0; width: 200px; height: 200px; overflow: hidden; background: #dcdcdc; position: relative; font-family: Arial, sans-serif; }
+  
+  /* Larger header text */
+  .banner {
+    position: absolute;
+    top: 10px; left: 50%;
+    transform: translateX(-50%);
+    color: #222222;
+    font-size: 15px;
+    font-weight: 800;
+    z-index: 20;
+    pointer-events: none;
+    letter-spacing: 0.8px;
+    text-shadow: 0 1px 3px rgba(255,255,255,0.9);
+    white-space: nowrap;
+  }
+
+  /* Zoomed-in wrapper container */
+  #zoomWrapper {
+    position: absolute;
+    top: 0; left: 0; width: 200px; height: 200px;
+    transform: scale(1.25);
+    transform-origin: center center;
+  }
+
+  #skyline { 
+    position: absolute; 
+    bottom: 35px; 
+    left: 0; 
+    right: 0; 
+    display: flex; 
+    justify-content: flex-start; 
+    align-items: flex-end; 
+    width: 200px; 
+    pointer-events: none; 
+  }
+  .bldg { flex: 1; margin: 0; }
+
+  #road { width: 200px; height: 35px; background: #5f5f5f; position: absolute; bottom: 0; left: 0; }
+  
+  .carGroup { 
+    position: absolute; 
+    bottom: 12px; 
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    transform: translateX(240px);
+    animation: driveRightToLeft 8s linear infinite; 
+  }
+
+  .tile { 
+    background: #ffd8a8; 
+    font-size: 10px; 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+    font-weight: bold; 
+    border: 1px solid #c8a888; 
+    color: #222; 
+    white-space: nowrap; 
+    text-align: center; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3); 
+    margin-bottom: -4px; 
+    z-index: 2;
+  }
+
+  .car { 
+    font-size: 32px; 
+    line-height: 1; 
+    z-index: 1;
+  }
+
+  @keyframes driveRightToLeft { 
+    0% { transform: translateX(200px); opacity: 0; } 
+    8% { opacity: 1; }
+    92% { opacity: 1; }
+    100% { transform: translateX(-80px); opacity: 0; } 
+  }
+</style>
+</head>
+<body>
+  <div class="banner">Cars</div>
+  <div id="zoomWrapper">
+    <div id="skyline">
+      <div class="bldg" style="width: 14px; height: 60px; background: #999;"></div>
+      <div class="bldg" style="width: 10px; height: 95px; background: #bbb;"></div>
+      <div class="bldg" style="width: 16px; height: 75px; background: #a5a5a5;"></div>
+      <div class="bldg" style="width: 12px; height: 110px; background: #ccc;"></div>
+      <div class="bldg" style="width: 15px; height: 80px; background: #888;"></div>
+      <div class="bldg" style="width: 11px; height: 100px; background: #b0b0b0;"></div>
+      <div class="bldg" style="width: 14px; height: 70px; background: #959595;"></div>
+      <div class="bldg" style="width: 13px; height: 105px; background: #c2c2c2;"></div>
+      <div class="bldg" style="width: 10px; height: 55px; background: #828282;"></div>
+      <div class="bldg" style="width: 16px; height: 90px; background: #b5b5b5;"></div>
+      <div class="bldg" style="width: 12px; height: 85px; background: #a0a0a0;"></div>
+      <div class="bldg" style="width: 15px; height: 115px; background: #d0d0d0;"></div>
+    </div>
+
+    <div id="road"></div>
+
+    <div class="carGroup" style="animation-delay: 0s;"><span class="tile">I</span><span class="car">🚗</span></div>
+    <div class="carGroup" style="animation-delay: 1.6s;"><span class="tile">saw</span><span class="car">🚙</span></div>
+    <div class="carGroup" style="animation-delay: 3.2s;"><span class="tile">cat</span><span class="car">🚚</span></div>
+    <div class="carGroup" style="animation-delay: 4.8s;"><span class="tile">garden</span><span class="car">🚗</span></div>
+  </div>
+</body>
+</html>

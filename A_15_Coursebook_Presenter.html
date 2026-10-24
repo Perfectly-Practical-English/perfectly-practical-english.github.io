@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
+
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
@@ -17,9 +20,8 @@ html,body{
     height:100%;
     overflow:hidden;
     font-family:Arial,sans-serif;
-    background:#d0d0d0;
+    background:black !important;
 }
-
 /* ==========================
    MAIN LAYOUT
 ========================== */
@@ -181,15 +183,19 @@ html,body{
     height:100%;
     overflow:hidden;
     position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
 }
 
 .pageImage{
     display:block;
     height:100%;
+    max-height:100%;
     width:auto;
+    object-fit:contain;
     pointer-events: none;
 }
-
 .leftPage{
     left:0;
     width:100%;
@@ -205,20 +211,20 @@ html,body{
    TILES
 ========================== */
 
-#tilesBar{
+#tilesBar {
     position: fixed;
     left: 0;
     right: 0;
     bottom: 24px;
-    height: 70px; /* Default starting height */
+    height: 8px; /* Loads closed */
     display: flex;
     flex-direction: column;
-    border-top: 1px solid #999;
-    background: black;
+    border-top: 1px solid #555;
+    background: #222; /* Instantly paints the grey bar on first frame */
     z-index: 9998;
     box-sizing: border-box;
+    overflow: hidden; /* Keeps the tiles hidden until dragged open */
 }
-
 #tiles{
     flex: 1;
     background: black !important;
@@ -722,7 +728,110 @@ div {
     scrollbar-width: none !important;     /* Firefox */
 }
 
-</style>
+
+/* --- Inset Control Buttons & Borderless Vignette Panels --- */
+
+/* --- Borderless packed vertical modal panels (200px wide, locked under top controls) --- */
+/* --- Borderless packed vertical modal panels --- */
+/* ==========================
+   VIGNETTE MODAL PANELS & DRAG HANDLE
+========================== */
+
+.vignette-modal-panel {
+  display: none;
+  position: fixed;
+  width: 200px;
+  top: 25px;
+  /* bottom: 48px; Removed so height is controlled strictly by content */
+  background: #000;
+  border: 1px solid #444;
+  z-index: 2147483646;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  border-radius: 6px;
+  box-sizing: border-box;
+}
+
+.vignette-modal-panel.open {
+  display: flex;
+}
+/* Left Panel positioning */
+#vignetteLeftModal {
+  left: 90px;               /* Sits immediately to the right of #leftColumn (90px wide) */
+}
+
+/* Right Panel positioning - Locked flush against the left edge of #rightColumn (90px wide) */
+#vignetteRightModal {
+  right: 90px;              /* Matches the exact width of #rightColumn */
+  left: auto !important;    /* Prevents any script from overriding */
+}
+
+/* Distinct Drag Title Bar for precise control */
+.vignette-drag-handle {
+  height: 24px;
+  background: #1a1a1a;
+  color: #fff;
+  cursor: grab;
+  width: 100%;
+  flex-shrink: 0;
+  border-bottom: 1px solid #444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: Arial, sans-serif;
+  font-size: 10px;
+  font-weight: bold;
+  letter-spacing: 1px;
+  touch-action: none;
+  user-select: none;
+}
+.vignette-drag-handle:active {
+  cursor: grabbing;
+  background: #333;
+}
+
+/* Zero padding, zero margin packed scroll container */
+.vignette-scroll-box {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  scrollbar-width: none;
+}
+
+.vignette-scroll-box::-webkit-scrollbar {
+  display: none;
+}
+
+/* Packed 200px by 200px iframe items with zero borders/margins */
+.vignette-card {
+  width: 200px;
+  height: 200px;
+  min-width: 200px;
+  min-height: 200px;
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: #000;
+  display: block;
+  position: relative;
+  flex-shrink: 0;
+}
+
+.vignette-card iframe {
+  width: 200px;
+  height: 200px;
+  border: none;
+  margin: 0;
+  padding: 0;
+  transform: none;          /* No scaling needed; full 200px size */
+  pointer-events: auto;     /* Enables direct interaction */
+}</style>
 </head>
 <body>
 
@@ -765,7 +874,14 @@ div {
         <button id="leftBtn">Jelly Beans</button>
         <button id="qrLeftBtn" onclick="toggleQrHotspot()" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;">QR</button>
         <button id="hsLeftBtn" onclick="toggleHsHotspot()" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;">HS</button>
-        <button id="buzzerLeftBtn" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer; background:black; color:white;">Buzzer</button>
+        <!--<button id="buzzerLeftBtn" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer; background:black; color:white;">Buzzer</button>-->
+
+<!-- Left Control Column Button -->
+<button type="button" id="leftVignetteBtn" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer; background:black; color:white;">Left Vignettes</button>
+
+
+
+
     </div>
 
     <!-- VIEWER -->
@@ -819,7 +935,11 @@ div {
         <button id="rightBtn">Jelly Beans</button>
         <button id="qrRightBtn" onclick="toggleQrHotspot()" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;">QR</button>
         <button id="hsRightBtn" onclick="toggleHsHotspot()" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; background:#f7f7f7; cursor:pointer;">HS</button>
-        <button id="buzzerRightBtn" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer; background:black; color:white;">Buzzer</button>
+        <!--<button id="buzzerRightBtn" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer; background:black; color:white;">Buzzer</button>-->
+
+
+<!-- Right Control Column Button (Replacing the buzzer) -->
+<button type="button" id="rightVignetteBtn" style="height:24px; width:100%; font-size:10px; border:none; border-bottom:1px solid #999; cursor:pointer; background:black; color:white;">Game Vignettes</button>
     </div>
 
 </div>
@@ -1908,6 +2028,39 @@ document.addEventListener("DOMContentLoaded", () => {
     buildUnitFolders("unitGridContainerRight");
     // Default load starting spread
     loadSpread("BLACK_BLANK.jpg", "BLACK_BLANK.jpg");
+
+    // Automatically trigger onload activation: 
+    // 1. Answer Assembly, 2. Game Vignettes, 3. Tallyman (snug left of vignettes), 4. Spinner
+    setTimeout(() => {
+        // 1. Open Answer Assembly (~P Modal)
+        const loadAnswerBtn = document.getElementById("loadAnswerBtn");
+        if (loadAnswerBtn) loadAnswerBtn.click();
+
+        // 2. Open Game Vignettes first so its layout position is established
+        const rightVignetteBtn = document.getElementById("rightVignetteBtn");
+        if (rightVignetteBtn) rightVignetteBtn.click();
+
+        // 3. Open Tallyman and position it snug against the left edge of the Game Vignettes modal at the top
+        const tallymanBtn = document.getElementById("tallymanLeftBtn");
+        if (tallymanBtn) tallymanBtn.click();
+        
+        const tmWindow = document.getElementById("tmWindow");
+        const rightModal = document.getElementById("vignetteRightModal");
+        if (tmWindow && rightModal) {
+            const modalRect = rightModal.getBoundingClientRect();
+            const tallymanWidth = 250; // matches TM.width
+            const snugLeft = modalRect.left - tallymanWidth - 4;
+
+            tmWindow.style.setProperty("left", `${snugLeft}px`, "important");
+            tmWindow.style.setProperty("top", "25px", "important");
+            tmWindow.style.setProperty("right", "auto", "important");
+            tmWindow.style.setProperty("bottom", "auto", "important");
+        }
+
+        // 4. Open Spinner Wheel
+        const spinnerBtn = document.getElementById("spinnerBtn");
+        if (spinnerBtn) spinnerBtn.click();
+    }, 200);
 });
 
 const leftImage = document.getElementById("leftImage");
@@ -1916,9 +2069,7 @@ const rightImage = document.getElementById("rightImage");
 function loadSpread(leftPath, rightPath){
     leftImage.src = leftPath;
     rightImage.src = rightPath;
-}
-
-/* ==========================
+}/* ==========================
    FEATURE 5: ZOOM, PAN & CAMERA CLAMPING
 ========================== */
 
@@ -2579,13 +2730,14 @@ function(){
     // 1. Inject Styles
     const style = document.createElement('style');
     style.innerHTML = `
-        #pAnswerModal {
+#pAnswerModal {
             position: absolute;
             z-index: 9999;
-            top: 100px;
-            left: 100px;
+            top: 32px;   
+            left: 288px; /* Moved right an additional 3px */
             background: transparent;
             border: none;
+            outline: none !important;
             padding: 0;
             box-shadow: none;
             width: auto;
@@ -2595,8 +2747,7 @@ function(){
             display: inline-flex;
             align-items: center;
             touch-action: none;
-         }
-        #pCenterWrapper {
+         }        #pCenterWrapper {
             display: inline-flex;
             flex-direction: column;
             align-items: center;
@@ -2859,6 +3010,8 @@ document.getElementById('pNextBtn').addEventListener('click', (e) => {
         if (pAnswers.length === 0) return;
         currentIndex = (currentIndex + 1) % pAnswers.length;
         updatePModalDisplay();
+        
+        // Only trigger spinner if the wheel overlay is actually open and visible
         const wheelOverlay = document.getElementById("studentWheelOverlay");
         if (wheelOverlay && wheelOverlay.style.display === "flex" && typeof spinWheel === "function") {
             spinWheel();
@@ -2872,14 +3025,15 @@ document.getElementById('pNextBtn').addEventListener('click', (e) => {
         if (pAnswers.length === 0) return;
         currentIndex = (currentIndex - 1 + pAnswers.length) % pAnswers.length;
         updatePModalDisplay();
+        
+        // Only trigger spinner if the wheel overlay is actually open and visible
         const wheelOverlay = document.getElementById("studentWheelOverlay");
         if (wheelOverlay && wheelOverlay.style.display === "flex" && typeof spinWheel === "function") {
             spinWheel();
         } else if (typeof window.nextStudent === 'function') {
             window.nextStudent();
         }
-    });
-    document.getElementById('pSquareClearBtn').addEventListener('click', (e) => {
+    });    document.getElementById('pSquareClearBtn').addEventListener('click', (e) => {
         e.stopPropagation();
         const bodyEl = document.getElementById('pModalBody');
         if (bodyEl) {
@@ -3044,105 +3198,6 @@ handle.addEventListener("pointerup",()=>{
 
 </script>
 
-<script>
-
-(function(){
-
-const bar =
-document.getElementById("tilesResizeBar");
-
-const tilesBar =
-document.getElementById("tilesBar");
-
-const scriptBar =
-document.getElementById("scriptBar");
-
-const leftColumn =
-document.getElementById("leftColumn");
-
-let dragging=false;
-
-let minTop=0;
-
-
-function setTileLimit(){
-
-    if(!leftColumn) return;
-
-    minTop =
-        leftColumn.offsetHeight;
-
-    tilesBar.style.top =
-        minTop + "px";
-
-    tilesBar.style.bottom =
-        scriptBar.offsetHeight + "px";
-
-}
-
-
-window.addEventListener(
-"load",
-setTileLimit
-);
-
-
-window.addEventListener(
-"resize",
-setTileLimit
-);
-
-
-
-bar.addEventListener("pointerdown",e=>{
-
-    dragging=true;
-
-    bar.setPointerCapture(e.pointerId);
-
-});
-
-
-bar.addEventListener("pointermove",e=>{
-
-    if(!dragging) return;
-
-
-    let newTop =
-        e.clientY;
-
-
-    if(newTop > minTop){
-        newTop = minTop;
-    }
-
-
-    if(newTop < 0){
-        newTop = 0;
-    }
-
-
-    tilesBar.style.top =
-        newTop + "px";
-
-
-    tilesBar.style.bottom =
-        scriptBar.offsetHeight + "px";
-
-
-});
-
-
-bar.addEventListener("pointerup",()=>{
-
-    dragging=false;
-
-});
-
-
-})();
-
-</script>
 
 <script>
 
@@ -3183,10 +3238,12 @@ function setTileLimit(){
 }
 
 
-window.addEventListener(
-"load",
-setTileLimit
-);
+// Run immediately on DOMContentLoaded so the bar is positioned instantly on frame zero
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", setTileLimit);
+} else {
+    setTileLimit();
+}
 
 
 window.addEventListener(
@@ -3197,7 +3254,6 @@ setTileLimit
 
 
 bar.addEventListener("pointerdown",e=>{
-
     dragging=true;
 
     bar.setPointerCapture(e.pointerId);
@@ -3391,53 +3447,67 @@ window.PlacementSound =
 <script>
 
 /* =====================================
-   DOWNLOAD SCRIPT TXT
+   DOWNLOAD SCRIPT TXT (WITH UPLOAD TRACKING)
 ===================================== */
 
 (function(){
 
-const btn =
-document.getElementById("downloadTxtBtn");
+const btn = document.getElementById("downloadTxtBtn");
+const field = document.getElementById("worksheetScript");
+const txtLoader = document.getElementById("txtLoader");
 
-const field =
-document.getElementById("worksheetScript");
-
+// Track the filename whenever a file is selected via the "Browse" button
+if (txtLoader) {
+    txtLoader.addEventListener("change", function(){
+        const file = this.files[0];
+        if (file) {
+            window.lastUploadedFilename = file.name;
+        }
+    });
+}
 
 if(!btn || !field) return;
 
-
-btn.onclick=function(){
-
-    const blob =
-    new Blob(
+btn.onclick = function(){
+    const blob = new Blob(
         [field.value],
         {type:"text/plain;charset=utf-8"}
     );
 
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
 
-    const a =
-    document.createElement("a");
+    // Generate International Date (YYYY-MM-DD) and Military Time (HHMM)
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const day = String(now.getDate()).padStart(2, "0");
+    const internationalDate = `${year}-${month}-${day}`;
 
+    const hours = String(now.getHours()).padStart(2, "0");
+    const minutes = String(now.getMinutes()).padStart(2, "0");
+    const militaryTime = `${hours}${minutes}`;
 
-    a.href =
-    URL.createObjectURL(blob);
+    // Determine the base name from the browsed file, or fallback to "Worksheet"
+    let baseName = "Worksheet";
+    if (window.lastUploadedFilename) {
+        // Removes the file extension (.txt) so it doesn't duplicate
+        baseName = window.lastUploadedFilename.replace(/\.[^/.]+$/, "");
+    }
 
+    // Set the final formatted filename
+    a.download = `${baseName}_${internationalDate}_${militaryTime}.txt`;
 
-    a.download =
-    "Worksheet.txt";
-
-
+    document.body.appendChild(a);
     a.click();
-
+    document.body.removeChild(a);
 
     URL.revokeObjectURL(a.href);
-
 };
 
 })();
 
 </script>
-
 
 <script>
 
@@ -3944,28 +4014,40 @@ background:transparent;
 pointer-events:none !important;
 z-index:100002;
 }
-#studentWheelPanel{
-position:relative;
-width:calc(var(--wheel-size) + 120px);
-height:calc(var(--wheel-size) + 120px);
-cursor:default;
-pointer-events:none !important;
-touch-action:none;
-display:flex;
-align-items:center;
-justify-content:center;
+#studentWheelPanel {
+    position: fixed !important;
+    left: calc(645px + (250px - calc(var(--wheel-size) + 120px)) / 2) !important;
+    top: 135px !important;
+    bottom: auto !important;
+    width: calc(var(--wheel-size) + 120px);
+    height: calc(var(--wheel-size) + 120px);
+    touch-action: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: auto !important;
 }
-#studentWheelCanvas{
-display:block;
-width:var(--wheel-size);
-height:var(--wheel-size);
-transform:none;
-background:transparent;
-pointer-events:auto !important;
-cursor:pointer;
-clip-path: circle(50% at center);
-}
-`;
+
+Wheel.canvas.addEventListener("pointerdown", e=>{
+        const canvasRect = Wheel.canvas.getBoundingClientRect();
+        const cx = canvasRect.width / 2;
+        const cy = canvasRect.height / 2;
+        const localX = e.clientX - canvasRect.left;
+        const localY = e.clientY - canvasRect.top;
+        const dx = localX - cx;
+        const dy = localY - cy;
+
+        // If clicking the brass center hub (radius 28), bypass drag so click-to-spin takes over
+        if(Math.sqrt(dx * dx + dy * dy) <= 28){
+            return; 
+        }
+
+        dragging=true;
+        const rect = Wheel.panel.getBoundingClientRect();
+        ox = e.clientX - rect.left;
+        oy = e.clientY - rect.top;
+        e.preventDefault();
+    });`;
     document.head.appendChild(style);
 
     Wheel.overlay=document.createElement("div");
@@ -3996,44 +4078,41 @@ clip-path: circle(50% at center);
     let ox=0;
     let oy=0;
 
-    Wheel.canvas.addEventListener("pointerdown",e=>{
+    Wheel.canvas.addEventListener("pointerdown", e=>{
         const canvasRect = Wheel.canvas.getBoundingClientRect();
-        const cx = (Wheel.size / 2) + extraSpace / 2;
-        const cy = (Wheel.size / 2) + extraSpace / 2;
-        const scaleX = Wheel.canvas.width / canvasRect.width;
-        const scaleY = Wheel.canvas.height / canvasRect.height;
-        const internalX = (e.clientX - canvasRect.left) * scaleX;
-        const internalY = (e.clientY - canvasRect.top) * scaleY;
-        const dx = internalX - cx;
-        const dy = internalY - cy;
+        const cx = canvasRect.width / 2;
+        const cy = canvasRect.height / 2;
+        const localX = e.clientX - canvasRect.left;
+        const localY = e.clientY - canvasRect.top;
+        const dx = localX - cx;
+        const dy = localY - cy;
 
+        // If clicking the brass center hub (radius 28), bypass drag so click-to-spin takes over
         if(Math.sqrt(dx * dx + dy * dy) <= 28){
             return; 
         }
 
-        const distFromTopPointer = Math.sqrt(Math.pow(internalX - cx, 2) + Math.pow(internalY - 26, 2));
-        if(distFromTopPointer > 15){
-            return;
-        }
-
         dragging=true;
-        const r=Wheel.panel.getBoundingClientRect();
-        ox=e.clientX-r.left;
-        oy=e.clientY-r.top;
-        Wheel.canvas.setPointerCapture(e.pointerId);
+        const rect = Wheel.panel.getBoundingClientRect();
+        ox = e.clientX - rect.left;
+        oy = e.clientY - rect.top;
+        e.preventDefault();
     });
 
-    Wheel.canvas.addEventListener("pointermove",e=>{
-        if(!dragging)return;
-        Wheel.panel.style.position="fixed";
-        Wheel.panel.style.left=(e.clientX-ox)+"px";
-        Wheel.panel.style.top=(e.clientY-oy)+"px";
-        Wheel.panel.style.transform="none";
+    document.addEventListener("pointermove", e=>{
+        if(!dragging) return;
+        Wheel.panel.style.setProperty("position", "fixed", "important");
+        Wheel.panel.style.setProperty("left", (e.clientX - ox) + "px", "important");
+        Wheel.panel.style.setProperty("top", (e.clientY - oy) + "px", "important");
+        Wheel.panel.style.setProperty("bottom", "auto", "important");
+        Wheel.panel.style.setProperty("right", "auto", "important");
+        Wheel.panel.style.setProperty("transform", "none", "important");
     });
 
-    Wheel.canvas.addEventListener("pointerup",e=>{
-        dragging=false;
-        try { Wheel.canvas.releasePointerCapture(e.pointerId); } catch(err) {}
+    document.addEventListener("pointerup", e=>{
+        if(dragging){
+            dragging=false;
+        }
     });
 }
 
@@ -4262,7 +4341,6 @@ function spinWheel(){
             loadWheelStudents();
             drawWheel();
 
-            // Sync final landing student across all components
             const landingStudent = Wheel.students[targetIndex];
             if (landingStudent) {
                 window.setGlobalStudent(landingStudent.name, landingStudent.color);
@@ -5681,7 +5759,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (hsExisting) hsExisting.remove();
 
         createHotspot(
-            "PerfectlyPracticalEnglish_with_Hotspot.app.jpg",
+            "PerfectlyPracticalEnglish.app.png",
             "qrHotspotImg"
         );
     };
@@ -7755,6 +7833,503 @@ Blue Thanakorn
 <!-- ========================================== -->
 <!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
 <!-- ========================================== -->
+
+
+
+
+
+
+<script>
+"use strict";
+
+const VIGNETTE_GAMES = [
+  "Vid_Flash_Cards.html",
+  "Vid_Asteroids.html",
+  "Vid_Cars.html",
+  "Vid_Grammar_Bomber.html"
+];
+
+(function () {
+  // Container size scaled to 75% (150px)
+  const ITEM_HEIGHT = 150;
+  const HANDLE_HEIGHT = 18;
+  const ITEM_WIDTH = 150;
+  const SCROLL_SPEED = 0.5;
+
+  // Remove old styles so obsolete dimensions cannot conflict.
+  document.getElementById("vignetteBulletproofStyles")?.remove();
+
+  const style = document.createElement("style");
+  style.id = "vignetteBulletproofStyles";
+  style.textContent = `
+    .vignette-modal-panel {
+      position: fixed !important;
+      width: ${ITEM_WIDTH}px !important;
+      height: ${HANDLE_HEIGHT + ITEM_HEIGHT * 3}px !important;
+      max-height: calc(100vh - 20px) !important;
+      bottom: auto !important;
+      overflow: hidden !important;
+      box-sizing: border-box !important;
+      display: none;
+      flex-direction: column !important;
+      z-index: 2147483646 !important;
+      background: #000 !important;
+      border: 1px solid #444 !important;
+      border-radius: 6px !important;
+      box-shadow: 0 8px 24px rgba(0,0,0,.5) !important;
+    }
+
+    .vignette-modal-panel.open {
+      display: flex !important;
+    }
+
+    .vignette-drag-handle {
+      flex: 0 0 ${HANDLE_HEIGHT}px !important;
+      height: ${HANDLE_HEIGHT}px !important;
+      min-height: ${HANDLE_HEIGHT}px !important;
+      max-height: ${HANDLE_HEIGHT}px !important;
+      background: #222 !important;
+      color: #fff !important;
+      font: bold 9px Arial, sans-serif !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      cursor: grab !important;
+      user-select: none !important;
+      box-sizing: border-box !important;
+      border-bottom: 1px solid #444 !important;
+    }
+
+    .vignette-scroll-box {
+      flex: 1 1 auto !important;
+      min-height: 0 !important;
+      width: ${ITEM_WIDTH}px !important;
+      overflow-x: hidden !important;
+      overflow-y: auto !important;
+      box-sizing: border-box !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      position: relative !important;
+      scrollbar-width: none !important;
+      overscroll-behavior: contain !important;
+    }
+
+    .vignette-scroll-box::-webkit-scrollbar {
+      display: none !important;
+    }
+
+    .vignette-card {
+      display: block !important;
+      position: relative !important;
+      flex: 0 0 ${ITEM_HEIGHT}px !important;
+      width: ${ITEM_WIDTH}px !important;
+      height: ${ITEM_HEIGHT}px !important;
+      min-height: ${ITEM_HEIGHT}px !important;
+      max-height: ${ITEM_HEIGHT}px !important;
+      box-sizing: border-box !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      line-height: 0 !important;
+      overflow: hidden !important;
+    }
+
+    .vignette-card iframe {
+      display: block !important;
+      width: 200px !important;
+      height: 200px !important;
+      transform: scale(0.75) !important;
+      transform-origin: top left !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      box-sizing: border-box !important;
+      border: 0 !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      pointer-events: auto !important;
+    }
+  `;
+  document.head.appendChild(style);
+
+  // Remove stale modal instances before rebuilding them.
+  document.getElementById("vignetteLeftModal")?.remove();
+  document.getElementById("vignetteRightModal")?.remove();
+
+  // Prevent duplicate button listeners from previous runs.
+  window._vignettesInitialized = false;
+
+  function createVignetteModal(modalId) {
+    const modal = document.createElement("div");
+    modal.id = modalId;
+    modal.className = "vignette-modal-panel";
+
+    const dragHandle = document.createElement("div");
+    dragHandle.className = "vignette-drag-handle";
+    dragHandle.textContent = "DRAG / GAMES";
+    dragHandle.title = "Click and drag to move panel";
+    modal.appendChild(dragHandle);
+
+    const scrollBox = document.createElement("div");
+    scrollBox.className = "vignette-scroll-box";
+
+    const originalCards = [];
+
+    function makeCard(url, duplicate) {
+      const card = document.createElement("a");
+      card.href = url;
+      card.target = "_blank";
+      card.className = "vignette-card";
+      card.title = "Click to play full game";
+
+      if (duplicate) {
+        card.setAttribute("aria-hidden", "true");
+        card.tabIndex = -1;
+      }
+
+      const iframe = document.createElement("iframe");
+      iframe.src = url;
+      iframe.loading = "lazy";
+      iframe.title = url;
+      card.appendChild(iframe);
+
+      return card;
+    }
+
+    // First complete set.
+    VIGNETTE_GAMES.forEach(url => {
+      const card = makeCard(url, false);
+      originalCards.push(card);
+      scrollBox.appendChild(card);
+    });
+
+    // Second identical set for seamless looping.
+    VIGNETTE_GAMES.forEach(url => {
+      scrollBox.appendChild(makeCard(url, true));
+    });
+
+    modal.appendChild(scrollBox);
+
+    // Dragging.
+    let dragging = false;
+    let moved = false;
+    let startX = 0;
+    let startY = 0;
+    let initialLeft = 0;
+    let initialTop = 0;
+
+    dragHandle.addEventListener("pointerdown", e => {
+      dragging = true;
+      moved = false;
+      startX = e.clientX;
+      startY = e.clientY;
+
+      document.addEventListener("pointermove", onMove);
+      document.addEventListener("pointerup", onUp);
+      document.addEventListener("pointercancel", onUp);
+
+      e.preventDefault();
+      e.stopPropagation();
+    });
+
+    function onMove(e) {
+      if (!dragging) return;
+
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      if (!moved && (Math.abs(dx) > 2 || Math.abs(dy) > 2)) {
+        moved = true;
+        const rect = modal.getBoundingClientRect();
+
+        modal.style.setProperty("left", rect.left + "px", "important");
+        modal.style.setProperty("top", rect.top + "px", "important");
+        modal.style.setProperty("right", "auto", "important");
+        modal.style.setProperty("bottom", "auto", "important");
+
+        initialLeft = rect.left;
+        initialTop = rect.top;
+      }
+
+      if (moved) {
+        modal.style.setProperty(
+          "left", initialLeft + dx + "px", "important"
+        );
+        modal.style.setProperty(
+          "top", initialTop + dy + "px", "important"
+        );
+      }
+    }
+
+    function onUp() {
+      dragging = false;
+      moved = false;
+      document.removeEventListener("pointermove", onMove);
+      document.removeEventListener("pointerup", onUp);
+      document.removeEventListener("pointercancel", onUp);
+    }
+
+    // Measure one original set, including any actual card spacing.
+    function getLoopHeight() {
+      if (!originalCards.length) return 0;
+
+      const first = originalCards[0].getBoundingClientRect();
+      const last =
+        originalCards[originalCards.length - 1].getBoundingClientRect();
+
+      return last.bottom - first.top;
+    }
+
+    let timer = null;
+
+    function stopScrolling() {
+      if (timer !== null) {
+        clearInterval(timer);
+        timer = null;
+      }
+    }
+
+    function startScrolling() {
+      if (timer !== null || VIGNETTE_GAMES.length < 2) return;
+
+      timer = setInterval(() => {
+        if (!modal.classList.contains("open")) {
+          stopScrolling();
+          return;
+        }
+
+        if (modal.matches(":hover")) return;
+
+        const loopHeight = getLoopHeight();
+        if (loopHeight <= 0) return;
+
+        scrollBox.scrollTop += SCROLL_SPEED;
+
+        // Reset exactly at the start of the duplicate set.
+        if (scrollBox.scrollTop >= loopHeight) {
+          scrollBox.scrollTop -= loopHeight;
+        }
+      }, 30);
+    }
+
+    const observer = new MutationObserver(() => {
+      if (modal.classList.contains("open")) {
+        startScrolling();
+      } else {
+        stopScrolling();
+        scrollBox.scrollTop = 0;
+
+        ["left", "right", "top", "bottom"].forEach(prop => {
+          modal.style.removeProperty(prop);
+        });
+      }
+    });
+
+    observer.observe(modal, {
+      attributes: true,
+      attributeFilter: ["class"]
+    });
+
+    document.body.appendChild(modal);
+    return modal;
+  }
+
+  function initDualBuzzerVignettes() {
+    if (window._vignettesInitialized) return;
+    window._vignettesInitialized = true;
+
+    const leftModal = createVignetteModal("vignetteLeftModal");
+    const rightModal = createVignetteModal("vignetteRightModal");
+
+    const leftBtn = document.getElementById("leftVignetteBtn");
+    const rightBtn = document.getElementById("rightVignetteBtn");
+
+    if (leftBtn) {
+      leftBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        rightModal.classList.remove("open");
+        leftModal.classList.toggle("open");
+      });
+    }
+
+    if (rightBtn) {
+      rightBtn.addEventListener("click", e => {
+        e.stopPropagation();
+        leftModal.classList.remove("open");
+        rightModal.classList.toggle("open");
+      });
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener(
+      "DOMContentLoaded", initDualBuzzerVignettes, { once: true }
+    );
+  } else {
+    initDualBuzzerVignettes();
+  }
+})();
+</script>
+<script>
+(function() {
+    "use strict";
+
+    // 1. Define the bogus default images and preloaded script text
+    const BOGUS_LEFT_IMAGE = "Bogus (1).jfif";
+    const BOGUS_RIGHT_IMAGE = "Bogus (2).jfif";
+
+    const BOGUS_ANSWER_SCRIPT = `Unit 1 P. 1
+
+~P.1 Ex.1A.1 - S+V
+~P.1 Ex.1A.2 - S+V+N
+~P.1 Ex.1A.3 - S+V+O
+
+~P.1 Ex.1B.1 - talk
+~P.1 Ex.1B.2 - student
+~P.1 Ex.1B.3 - live
+~P.1 Ex.1B.4 - work
+~P.1 Ex.1B.5 - study
+
+~P.1 Ex.2B.1 - [Noun: student] / [Verb: is] / [Adjective: five]
+~P.1 Ex.2B.2 - [Noun: London] / [Verb: live] / [Adjective: small]
+~P.1 Ex.2B.3 - [Noun: Alex] / [Verb: works] / [Adjective: happy]
+~P.1 Ex.2B.4 - [Noun: profile] / [Verb: write] / [Adjective: personal]
+
+~P.1 Ex.3C.1 - David Chen
+~P.1 Ex.3C.2 - 24
+~P.1 Ex.3C.3 - Graphic designer
+~P.1 Ex.3C.4 - Traveling, photography, hiking
+~P.1 Ex.3C.5 - Kyoto
+
+~P.1 Ex.3D.1 - 1
+~P.1 Ex.3D.2 - 2
+~P.1 Ex.3D.3 - 3
+~P.1 Ex.3D.4 - 4
+
+
+Unit 1 P. 2
+
+~P.2 Ex.5A.1 - walk
+~P.2 Ex.5A.2 - studies
+~P.2 Ex.5A.3 - work
+~P.2 Ex.5A.4 - wake
+~P.2 Ex.5A.5 - live
+
+~P.2 Ex.6A - visited, played, watched, cleaned, listened
+
+~P.2 Ex.6B.1 - walked
+~P.2 Ex.6B.2 - played
+~P.2 Ex.6B.3 - studied
+
+~P.2 Ex.7A.1 - What time do you wake up?
+~P.2 Ex.7A.2 - How do you get to school?
+~P.2 Ex.7A.3 - What is your favorite time of day?
+
+~P.2 Ex.8A.1 - Maintain good eye contact.
+~P.2 Ex.8A.2 - Use confident hand gestures.
+~P.2 Ex.8A.3 - Practice often with friends.`;
+
+    // 2. Define 15 Common Biblical Names grouped into the 4 Team Colors
+    const BIBLE_CLASS_NAME = "Bible 15";
+    const BIBLE_STUDENTS = [
+        // Blue Team
+        { name: "David", team: "Blue", color: "#93c5fd" },
+        { name: "Daniel", team: "Blue", color: "#93c5fd" },
+        { name: "Joseph", team: "Blue", color: "#93c5fd" },
+        { name: "Samuel", team: "Blue", color: "#93c5fd" },
+        // Green Team
+        { name: "Michael", team: "Green", color: "#86efac" },
+        { name: "Gabriel", team: "Green", color: "#86efac" },
+        { name: "Joshua", team: "Green", color: "#86efac" },
+        { name: "Elijah", team: "Green", color: "#86efac" },
+        // Orange Team
+        { name: "Benjamin", team: "Orange", color: "#fdba74" },
+        { name: "Matthew", team: "Orange", color: "#fdba74" },
+        { name: "Jacob", team: "Orange", color: "#fdba74" },
+        { name: "Noah", team: "Orange", color: "#fdba74" },
+        // Red Team
+        { name: "Sarah", team: "Red", color: "#fca5a5" },
+        { name: "Rachel", team: "Red", color: "#fca5a5" },
+        { name: "Hannah", team: "Red", color: "#fca5a5" }
+    ];
+
+    // Helper to preload bogus answer key
+    function preloadBogusScript() {
+        const worksheetScript = document.getElementById("worksheetScript");
+        if (worksheetScript) {
+            worksheetScript.value = BOGUS_ANSWER_SCRIPT;
+            worksheetScript.dispatchEvent(new Event("input", { bubbles: true }));
+        }
+    }
+
+    // Helper to inject the Bible class into global studentData and dropdowns
+    function injectBibleClass() {
+        if (typeof studentData !== "undefined") {
+            // Register class in global dataset
+            studentData[BIBLE_CLASS_NAME] = BIBLE_STUDENTS;
+
+            // Populate all class select dropdowns in left and right panels
+            const classSelects = document.querySelectorAll(".classSelect, #jbClassSelect");
+            classSelects.forEach(select => {
+                // Check if option already exists
+                let exists = Array.from(select.options).some(opt => opt.value === BIBLE_CLASS_NAME);
+                if (!exists) {
+                    const opt = document.createElement("option");
+                    opt.value = BIBLE_CLASS_NAME;
+                    opt.textContent = BIBLE_CLASS_NAME;
+                    select.appendChild(opt);
+                }
+            });
+
+            // Set Bible class as active selection
+            classSelects.forEach(select => {
+                select.value = BIBLE_CLASS_NAME;
+            });
+
+            // Initialize class queue & trigger initial student display
+            if (typeof loadClass === "function") {
+                loadClass(BIBLE_CLASS_NAME);
+            }
+            if (typeof nextStudent === "function") {
+                nextStudent();
+            }
+        }
+    }
+
+    // Initialization on page ready
+    document.addEventListener("DOMContentLoaded", () => {
+        // Load default bogus spread pages
+        if (typeof window.loadSpread === "function") {
+            window.loadSpread(BOGUS_LEFT_IMAGE, BOGUS_RIGHT_IMAGE);
+        }
+
+        // Reset scale and pan zoom baseline to 100% on initial load
+        if (typeof viewerScale !== "undefined") {
+            viewerScale = 1;
+            panX = 0;
+            panY = 0;
+            if (typeof updateTransform === "function") {
+                updateTransform();
+            }
+        }
+
+        // Preload bogus exercise answers into script bar
+        preloadBogusScript();
+
+        // Inject and select the fake Bible class
+        injectBibleClass();
+
+        // Track spread change events to release default state when user browses away
+        const originalLoadSpread = window.loadSpread;
+        window.loadSpread = function(leftPath, rightPath) {
+            if (typeof originalLoadSpread === "function") {
+                originalLoadSpread.apply(this, arguments);
+            }
+        };
+    });
+})();
+</script>
+
+
 
 
 </body>
