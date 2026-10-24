@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Tallyman Scoreboard</title>
+<style>
+*{box-sizing:border-box;}
+html,body{
+    margin:0;
+    height:100%;
+    overflow:hidden;
+    font-family:Arial,sans-serif;
+    background:black;
+    color:white;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+}
+#tmContainer{
+    width:100%;
+    max-width:360px;
+    background:#dbeafe;
+    border-radius:8px;
+    padding:10px;
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+    color:#111;
+}
+#tmScoreboard{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:4px;
+}
+.tmTeam{
+    border:1px solid #ccc;
+    border-radius:4px;
+    background:#fff;
+    display:flex;
+    flex-direction:column;
+}
+.tmHeader{
+    font-size:11px;
+    font-weight:bold;
+    text-align:center;
+    padding:4px;
+    background:#f1f5f9;
+}
+.tmTallies{
+    min-height:120px;
+    padding:4px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:2px;
+    cursor:pointer;
+    background:#fff;
+}
+.tmGroup{
+    position:relative;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:2px;
+    width:100%;
+}
+.tmGroup svg{
+    position:absolute;
+    inset:0;
+    width:100%;
+    height:100%;
+    pointer-events:none;
+}
+.tmStick{
+    width:2px;
+    height:22px;
+    background:#111;
+}
+.tmScore{
+    border-top:1px solid #ddd;
+    text-align:center;
+    font-size:12px;
+    font-weight:bold;
+    padding:4px;
+    background:#f8fafc;
+}
+.tmDelete{
+    width:100%;
+    border:none;
+    border-top:1px solid #ddd;
+    background:#f1f5f9;
+    font-size:10px;
+    padding:4px 0;
+    cursor:pointer;
+}
+.tmDelete:hover{
+    background:#fee2e2;
+}
+#bottomBar{
+    display:flex;
+    gap:6px;
+    width:100%;
+    max-width:360px;
+    margin-top:8px;
+}
+.actionBtn{
+    flex:1;
+    height:30px;
+    font-size:11px;
+    background:#222;
+    color:white;
+    border:1px solid #444;
+    border-radius:4px;
+    cursor:pointer;
+}
+.actionBtn:hover{
+    background:#444;
+}
+</style>
+</head>
+<body>
+
+<div id="tmContainer">
+  <div style="font-size:13px; font-weight:bold; text-align:center; margin-bottom:2px;">Team Tally Scoreboard</div>
+  <div id="tmScoreboard">
+    <div class="tmTeam">
+      <div class="tmHeader" style="color:#2563eb;">Blue</div>
+      <div class="tmTallies" data-team="Blue"></div>
+      <div class="tmScore" id="tmScoreBlue">0</div>
+      <button class="tmDelete" data-team="Blue">Del</button>
+    </div>
+    <div class="tmTeam">
+      <div class="tmHeader" style="color:#16a34a;">Green</div>
+      <div class="tmTallies" data-team="Green"></div>
+      <div class="tmScore" id="tmScoreGreen">0</div>
+      <button class="tmDelete" data-team="Green">Del</button>
+    </div>
+    <div class="tmTeam">
+      <div class="tmHeader" style="color:#ea580c;">Orange</div>
+      <div class="tmTallies" data-team="Orange"></div>
+      <div class="tmScore" id="tmScoreOrange">0</div>
+      <button class="tmDelete" data-team="Orange">Del</button>
+    </div>
+    <div class="tmTeam">
+      <div class="tmHeader" style="color:#dc2626;">Red</div>
+      <div class="tmTallies" data-team="Red"></div>
+      <div class="tmScore" id="tmScoreRed">0</div>
+      <button class="tmDelete" data-team="Red">Del</button>
+    </div>
+  </div>
+</div>
+
+<div id="bottomBar">
+    <button class="actionBtn" id="resetBtn">Reset All</button>
+    <button class="actionBtn" id="instructionsBtn">Instructions</button>
+</div>
+
+<script>
+const tmScores = { Blue:0, Green:0, Orange:0, Red:0 };
+
+function tmAddTally(team){
+  tmScores[team]++;
+  const area = document.querySelector('.tmTallies[data-team="'+team+'"]');
+  if(!area) return;
+  let groups = area.querySelectorAll(".tmGroup");
+  let group = groups[groups.length-1];
+  if(!group || Number(group.dataset.count)>=5){
+    group = document.createElement("div");
+    group.className="tmGroup";
+    group.dataset.count=0;
+    area.appendChild(group);
+  }
+  let count = Number(group.dataset.count);
+  if(count<4){
+    const stick = document.createElement("div");
+    stick.className="tmStick";
+    group.appendChild(stick);
+  }
+  count++;
+  if(count===5){
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 20 20");
+    svg.innerHTML=`<line x1="1" y1="1" x2="19" y2="19" stroke="#111" stroke-width="2.5" stroke-linecap="round"/>`;
+    group.appendChild(svg);
+  }
+  group.dataset.count=count;
+  document.getElementById("tmScore"+team).textContent=tmScores[team];
+}
+
+function tmDeleteTally(team){
+  if(tmScores[team]===0) return;
+  tmScores[team]--;
+  const area = document.querySelector('.tmTallies[data-team="'+team+'"]');
+  if(!area) return;
+  const groups = area.querySelectorAll(".tmGroup");
+  if(!groups.length) return;
+  const group = groups[groups.length-1];
+  let count = Number(group.dataset.count);
+  if(count===5){
+    const svg = group.querySelector("svg");
+    if(svg) svg.remove();
+  } else {
+    const sticks = group.querySelectorAll(".tmStick");
+    if(sticks.length) sticks[sticks.length-1].remove();
+  }
+  count--;
+  group.dataset.count=count;
+  if(count===0) group.remove();
+  document.getElementById("tmScore"+team).textContent=tmScores[team];
+}
+
+function tmResetScores(){
+  Object.keys(tmScores).forEach(team=>{
+      tmScores[team]=0;
+      document.getElementById("tmScore"+team).textContent=0;
+      const area = document.querySelector('.tmTallies[data-team="'+team+'"]');
+      if(area) area.innerHTML="";
+  });
+}
+
+document.querySelectorAll(".tmTallies").forEach(panel=>{
+    panel.addEventListener("click", function(){
+        tmAddTally(panel.dataset.team);
+    });
+});
+
+document.querySelectorAll(".tmDelete").forEach(btn=>{
+    btn.addEventListener("click", function(e){
+        e.stopPropagation();
+        tmDeleteTally(btn.dataset.team);
+    });
+});
+
+document.getElementById("resetBtn").onclick = tmResetScores;
+
+document.addEventListener("keydown", function(e){
+    switch(e.key){
+      case "1": tmAddTally("Blue"); break;
+      case "2": tmAddTally("Green"); break;
+      case "3": tmAddTally("Orange"); break;
+      case "4": tmAddTally("Red"); break;
+    }
+});
+</script>
+
+<!-- INSTRUCTIONS MODAL -->
+<div id="instModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:9999; align-items:center; justify-content:center;">
+    <div style="background:#fff; color:#333; width:90%; max-width:400px; padding:20px; border-radius:8px; font-family:sans-serif;">
+        <h3 style="margin-top:0; color:#1976d2;">Instructions</h3>
+        <p style="font-size:13px; line-height:1.4;">Click any team's tally box to add a point (every 5th stroke crosses the block). Use number keys 1–4 to quickly add tallies for Blue, Green, Orange, and Red.</p>
+        <button id="closeInst" style="background:#1976d2; color:white; border:none; padding:6px 12px; border-radius:4px; cursor:pointer; float:right;">Close</button>
+    </div>
+</div>
+<script>
+document.getElementById("instructionsBtn").onclick = () => document.getElementById("instModal").style.display = "flex";
+document.getElementById("closeInst").onclick = () => document.getElementById("instModal").style.display = "none";
+
+console.log(`© ${new Date().getFullYear()} Tallyman Scoreboard - Standalone Edition`);
+</script>
+
+<!-- ========================================== -->
+<!-- NARROW PHONE LAYOUT SAFETY PATCH (START) -->
+<!-- ========================================== -->
+<style>
+  html, body {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box;
+  }
+  *, *:before, *:after {
+    box-sizing: inherit;
+  }
+  body {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    margin: 0 auto !important;
+  }
+  img, video, canvas, table {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+</style>
+<!-- ========================================== -->
+<!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
+<!-- ========================================== -->
+</body>
+</html>

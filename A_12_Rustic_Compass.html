@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rustic Compass</title>
+
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #d8c3a5;
+    font-family: Georgia, serif;
+    box-sizing: border-box;
+    padding: 20px;
+  }
+
+  .compass-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+  }
+
+  .compass {
+    width: 320px;
+    height: 320px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #e6d3b3, #bfa37a);
+    border: 6px solid #8b6b4f;
+    box-shadow: inset 0 0 25px rgba(0,0,0,0.35), 0 12px 30px rgba(0,0,0,0.4);
+    position: relative;
+  }
+
+  .compass::before {
+    content: "";
+    position: absolute;
+    inset: 12px;
+    border-radius: 50%;
+    border: 2px dashed rgba(90,70,50,0.5);
+  }
+
+  .directions {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    color: #5a4632;
+    font-weight: bold;
+  }
+
+  .north { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); }
+  .south { position: absolute; bottom: 12px; left: 50%; transform: translateX(-50%); }
+  .east  { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); }
+  .west  { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); }
+
+  /* Needle */
+  .needle {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 10px;
+    height: 150px;
+    transform: translate(-50%, -50%) rotate(0deg);
+    transform-origin: center;
+  }
+
+  .needle::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 50%;
+    top: 0;
+    background: #b33a2b;
+    clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
+  }
+
+  .needle::after {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 50%;
+    bottom: 0;
+    background: #5a4632;
+    clip-path: polygon(0% 0%, 100% 0%, 50% 100%);
+  }
+
+  .center {
+    width: 14px;
+    height: 14px;
+    background: #5a4632;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .button {
+    margin-top: 25px;
+    background: #8b6b4f;
+    color: #f5f0e6;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-family: Georgia, serif;
+    cursor: pointer;
+  }
+
+  .status {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #5a4632;
+    text-align: center;
+  }
+
+  footer {
+    margin-top: 20px;
+    font-size: 10px;
+    color: #5a4632;
+    text-align: center;
+  }
+</style>
+</head>
+
+<body>
+
+<div class="compass-container">
+  <div class="compass">
+    <div class="directions">
+      <div class="north">N</div>
+      <div class="south">S</div>
+      <div class="east">E</div>
+      <div class="west">W</div>
+    </div>
+
+    <div class="needle" id="needle"></div>
+    <div class="center"></div>
+  </div>
+
+  <button class="button" onclick="startCompass()">Enable Compass</button>
+  <div class="status" id="status">Tap to enable</div>
+
+  <footer>
+    <p>&copy; <span id="currentYear"></span> Perfectly Practical English</p>
+  </footer>
+</div>
+
+<script>
+let currentAngle = 0;
+let running = false;
+
+/* START */
+async function startCompass() {
+  const status = document.getElementById("status");
+
+  try {
+    // iOS permission
+    if (typeof DeviceOrientationEvent.requestPermission === "function") {
+      const permission = await DeviceOrientationEvent.requestPermission();
+
+      if (permission !== "granted") {
+        status.innerText = "Permission denied";
+        return;
+      }
+    }
+
+    if (!running) {
+      window.addEventListener("deviceorientation", handleOrientation);
+      running = true;
+      status.innerText = "Compass active";
+    }
+
+  } catch (e) {
+    console.error(e);
+    status.innerText = "Failed to start";
+  }
+}
+
+/* SENSOR HANDLING (portrait-only optimized) */
+function handleOrientation(event) {
+  let heading;
+
+  if (event.webkitCompassHeading !== undefined) {
+    heading = event.webkitCompassHeading; // iOS (best)
+  } 
+  else if (event.alpha !== null) {
+    heading = 360 - event.alpha; // fallback (portrait)
+  } 
+  else {
+    return;
+  }
+
+  // Normalize
+  heading = (heading + 360) % 360;
+
+  // Smooth motion
+  currentAngle = currentAngle * 0.85 + heading * 0.15;
+
+  rotateNeedle(currentAngle);
+}
+
+/* ROTATION */
+function rotateNeedle(angle) {
+  const needle = document.getElementById("needle");
+  needle.style.transform = `translate(-50%, -50%) rotate(${-angle}deg)`;
+}
+</script>
+
+<script>
+  document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+
+<script>
+
+(function(){
+
+/* =========================
+   RAW INSTRUCTIONS TEXT
+========================= */
+
+const RAW_TEXT = `
+How to use this page…
+
+• Overview: Use an interactive rustic compass visualizer that tracks device orientation to rotate a directional needle in real-time.
+• Compass Display: View the compass face featuring cardinal direction markers for North, South, East, and West, along with the rotating needle and center pivot.
+• Enabling Compass Sensors: Click the Enable Compass button to request device orientation permissions and activate sensor tracking.
+• Status Monitoring: Read status text updates displayed below the button to confirm permission status and active sensor tracking.
+
+`;
+
+
+/* =========================
+   RAW TEXT PARSER
+========================= */
+
+function parseRawInstructions(text){
+
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+
+  lines.forEach(line => {
+
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
+
+    html.push(`<p>${line}</p>`);
+  });
+
+  return html.join("");
+}
+
+
+/* =========================
+   CREATE STYLE
+========================= */
+
+const style = document.createElement("style");
+
+style.textContent = `
+#instructionsBtn{
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  background: #2e8b57;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+#instructionsBtn:hover{
+  background: #257047;
+  transform: scale(1.05);
+}
+
+#instructionsRoot{
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+}
+
+#instructionsBackdrop{
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#instructionsModal{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid #cfe2f7;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+#instructionsHeader{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex: 0 0 auto;
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+#instructionsBack{
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  height: auto;
+  width: auto;
+}
+
+#instructionsBack:hover{
+  background-color: #eef6ff;
+}
+
+#instructionsContent{
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  flex: 1 1 auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #333;
+}
+
+#instructionsContent::-webkit-scrollbar{
+  display: none;
+}
+
+#instructionsContent h3{
+  margin-top: 10px;
+  margin-bottom: 4px;
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+#instructionsContent p{
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+#instructionsContent hr{
+  margin: 12px 0;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+`;
+
+document.head.appendChild(style);
+
+
+/* =========================
+   CREATE BUTTON
+========================= */
+
+const btn = document.createElement("button");
+btn.id = "instructionsBtn";
+btn.innerHTML = "?";
+btn.setAttribute("aria-label", "Instructions");
+
+document.body.appendChild(btn);
+
+
+/* =========================
+   CREATE MODAL
+========================= */
+
+const root = document.createElement("div");
+root.id = "instructionsRoot";
+
+root.innerHTML = `
+<div id="instructionsBackdrop"></div>
+
+<div id="instructionsModal">
+
+  <div id="instructionsHeader">
+    <span>Instructions</span>
+    <button id="instructionsBack" type="button">✕</button>
+  </div>
+
+  <div id="instructionsContent">
+    ${parseRawInstructions(RAW_TEXT)}
+  </div>
+
+</div>
+`;
+
+document.body.appendChild(root);
+
+
+/* =========================
+   SCROLL LOCK
+========================= */
+
+const modalContent = document.getElementById("instructionsContent");
+
+modalContent.addEventListener("wheel", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+modalContent.addEventListener("touchmove", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+
+/* =========================
+   OPEN / CLOSE
+========================= */
+
+function openModal(){
+  root.style.display = "block";
+  document.body.style.overflow = "hidden";
+  document.documentElement.style.overflow = "hidden";
+}
+
+function closeModal(){
+  root.style.display = "none";
+  document.body.style.overflow = "";
+  document.documentElement.style.overflow = "";
+}
+
+btn.onclick = openModal;
+
+document.getElementById("instructionsBack").onclick = closeModal;
+document.getElementById("instructionsBackdrop").onclick = closeModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key === "Escape") closeModal();
+});
+
+})();
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<!-- ========================================== -->
+<!-- NARROW PHONE LAYOUT SAFETY PATCH (START) -->
+<!-- ========================================== -->
+<style>
+  html, body {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box;
+  }
+  *, *:before, *:after {
+    box-sizing: inherit;
+  }
+  body {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    margin: 0 auto !important;
+  }
+  img, video, canvas, table {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+</style>
+<!-- ========================================== -->
+<!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
+<!-- ========================================== -->
+
+
+</body>
+</html>

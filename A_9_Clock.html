@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Clock</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      font-weight: 600;
+      background: #000;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+      padding: 24px;
+      box-sizing: border-box;
+      min-height: 100vh;
+      margin: 0;
+    }
+
+    .panel {
+      background: #111;
+      color: #fff;
+      border-radius: 10px;
+      padding: 14px 18px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+      width: 100%;
+      max-width: 360px;
+      box-sizing: border-box;
+      text-align: left;
+    }
+
+    .panel h3 {
+      margin: 0;
+      font-size: 1rem;
+      display: inline-block;
+    }
+
+    .time-display {
+      display: inline-block;
+      font-size: 1.2rem;
+      margin-left: 6px;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      margin-top: 8px;
+      flex-wrap: nowrap;
+    }
+
+    input[type="number"] {
+      flex: 1;
+      height: 42px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-align: center;
+      background: #222;
+      color: #fff;
+      border: 1px solid #444;
+      border-radius: 4px;
+      min-width: 0;
+    }
+
+    input[type="number"]::placeholder {
+      text-align: center;
+      color: #888;
+    }
+
+    .row.buttons {
+      justify-content: space-between;
+      margin-top: 8px;
+    }
+
+    button {
+      flex: 1;
+      height: 42px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-align: center;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      min-width: 0;
+    }
+
+    button.start { background-color: #2e7d32; color: #fff; }
+    button.stop { background-color: #c62828; color: #fff; }
+    button.reset { background-color: #424242; color: #fff; }
+
+    footer p {
+      color: #777;
+      font-size: 10px;
+      margin: 0;
+      text-align: center;
+    }
+
+    #date {
+      display: inline-block;
+      margin-left: -4px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="panel">
+    <span class="time-display" id="date"></span>
+  </div>
+
+  <div class="panel">
+    <h3>24-Hour Clock:</h3><span class="time-display" id="clock24"></span>
+  </div>
+
+  <div class="panel">
+    <h3>12-Hour Clock:</h3><span class="time-display" id="clock12"></span>
+  </div>
+
+  <div class="panel">
+    <h3>Countdown Timer:</h3><span class="time-display" id="countdownDisplay">00:00:00</span>
+    <div class="row">
+      <input type="number" id="countHours" min="0" max="99" placeholder="HH" />
+      <input type="number" id="countMinutes" min="0" max="59" placeholder="MM" />
+      <input type="number" id="countSeconds" min="0" max="59" placeholder="SS" />
+    </div>
+    <div class="row buttons">
+      <button class="start" onclick="startCountdown()">Start</button>
+      <button class="stop" onclick="stopCountdown()">Stop</button>
+      <button class="reset" onclick="resetCountdown()">Reset</button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3>Stopwatch:</h3><span class="time-display" id="stopwatchDisplay">00:00:00</span>
+    <div class="row buttons">
+      <button class="start" onclick="startStopwatch()">Start</button>
+      <button class="stop" onclick="stopStopwatch()">Stop</button>
+      <button class="reset" onclick="resetStopwatch()">Reset</button>
+    </div>
+  </div>
+
+  <script>
+    function updateDate() {
+      const now = new Date();
+      const weekday = now.toLocaleDateString('en-GB', { weekday: 'long' });
+      const day = now.getDate();
+      const month = now.toLocaleDateString('en-GB', { month: 'long' });
+      const year = now.getFullYear();
+      document.getElementById('date').textContent = `${weekday} ${day} ${month} ${year}`;
+    }
+
+    function updateClocks() {
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      document.getElementById('clock24').textContent = `${h}:${m}:${s}`;
+      let hour12 = now.getHours() % 12 || 12;
+      let ampm = now.getHours() < 12 ? 'AM' : 'PM';
+      document.getElementById('clock12').textContent = `${hour12.toString().padStart(2, '0')}:${m}:${s} ${ampm}`;
+    }
+
+    function formatTime(t) {
+      const hrs = String(Math.floor(t / 3600)).padStart(2, '0');
+      const mins = String(Math.floor((t % 3600) / 60)).padStart(2, '0');
+      const secs = String(t % 60).padStart(2, '0');
+      return `${hrs}:${mins}:${secs}`;
+    }
+
+    let countdownInterval, countdownTime = 0, countdownRunning = false, buzzerPlayed = false;
+
+    function updateCountdownDisplay() {
+      document.getElementById('countdownDisplay').textContent = formatTime(countdownTime);
+    }
+
+    function playBuzzer() {
+      try {
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+        oscillator.type = 'square';
+        oscillator.frequency.setValueAtTime(440, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.3);
+        oscillator.onended = () => audioCtx.close();
+      } catch (e) {
+        console.error('AudioContext error:', e);
+      }
+    }
+
+    function countdownTick() {
+      if (countdownTime > 0) {
+        countdownTime--;
+        updateCountdownDisplay();
+      } else {
+        if (!buzzerPlayed) { playBuzzer(); buzzerPlayed = true; }
+        clearInterval(countdownInterval);
+        countdownRunning = false;
+      }
+    }
+
+    function startCountdown() {
+      if (countdownTime <= 0) { alert("Please enter a time greater than zero!"); return; }
+      if (!countdownRunning) { buzzerPlayed = false; countdownRunning = true; countdownInterval = setInterval(countdownTick, 1000); }
+    }
+
+    function stopCountdown() { clearInterval(countdownInterval); countdownRunning = false; }
+    function resetCountdown() {
+      countdownTime = 0; updateCountdownDisplay(); buzzerPlayed = false; stopCountdown();
+      document.getElementById('countHours').value = '';
+      document.getElementById('countMinutes').value = '';
+      document.getElementById('countSeconds').value = '';
+    }
+
+    document.getElementById('countHours').addEventListener('input', handleCountdownInput);
+    document.getElementById('countMinutes').addEventListener('input', handleCountdownInput);
+    document.getElementById('countSeconds').addEventListener('input', handleCountdownInput);
+
+    function handleCountdownInput() {
+      stopCountdown(); buzzerPlayed = false;
+      const hrs = parseInt(document.getElementById('countHours').value) || 0;
+      const mins = parseInt(document.getElementById('countMinutes').value) || 0;
+      const secs = parseInt(document.getElementById('countSeconds').value) || 0;
+      countdownTime = hrs*3600 + mins*60 + secs;
+      updateCountdownDisplay();
+    }
+
+    let stopwatchTime = 0, stopwatchInterval, stopwatchRunning = false;
+
+    function updateStopwatchDisplay() { document.getElementById('stopwatchDisplay').textContent = formatTime(stopwatchTime); }
+    function stopwatchTick() { stopwatchTime++; updateStopwatchDisplay(); }
+    function startStopwatch() { if (!stopwatchRunning) { stopwatchRunning = true; stopwatchInterval = setInterval(stopwatchTick, 1000); } }
+    function stopStopwatch() { clearInterval(stopwatchInterval); stopwatchRunning = false; }
+    function resetStopwatch() { stopwatchTime = 0; updateStopwatchDisplay(); }
+
+    updateDate(); updateClocks(); updateCountdownDisplay(); updateStopwatchDisplay();
+    setInterval(updateDate, 60000); setInterval(updateClocks, 1000);
+  </script>
+
+  <footer>
+    <p style="font-size: 10px;">&copy; <span id="currentYear"></span> Perfectly Practical English</p>
+  </footer>
+
+  <script>
+    document.getElementById('currentYear').textContent = new Date().getFullYear();
+  </script>
+
+  <script>
+    const borderDiv = document.createElement('div');
+    borderDiv.style.position = 'fixed';
+    borderDiv.style.inset = '0';
+    borderDiv.style.border = '12px solid #39FF14';
+    borderDiv.style.boxSizing = 'border-box';
+    borderDiv.style.zIndex = '9999';
+    borderDiv.style.pointerEvents = 'none';
+    document.body.appendChild(borderDiv);
+  </script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      let filename = window.location.pathname.split("/").pop();
+      filename = filename.replace(/\.html$/i, "");
+      filename = filename.replace(/^[^_]*_/, "");
+      const title = filename.replace(/_/g, " ");
+      const h1 = document.querySelector("h1");
+      if (h1) {
+          h1.textContent = title;
+      }
+    });
+  </script>
+
+  <script>
+    (function() {
+      function preventPinch(e) {
+        if (e.touches.length > 1) e.preventDefault();
+      }
+
+      let lastTouchTime = 0;
+      function preventDoubleTap(e) {
+        const now = Date.now();
+        if (now - lastTouchTime < 300) {
+          e.preventDefault();
+        }
+        lastTouchTime = now;
+      }
+
+      function preventGesture(e) {
+        e.preventDefault();
+      }
+
+      document.addEventListener('touchstart', preventPinch, { passive: false });
+      document.addEventListener('touchend', preventDoubleTap, { passive: false });
+      document.addEventListener('gesturestart', preventGesture, { passive: false });
+    })();
+  </script>
+
+<script>
+
+(function(){
+
+/* =========================
+   RAW INSTRUCTIONS TEXT
+========================= */
+
+const RAW_TEXT = `
+How to use this page...
+
+• Overview: View and track current local time, date, 24-hour clock, 12-hour clock, interactive countdown timer, and stopwatch.
+• Instructions Button: Click the round green question mark button located at the top-left corner of the screen anytime to open or close the instruction guide modal.
+• Date and Clocks Display: Monitor real-time calendar dates, 24-hour time, and 12-hour time updates automatically displayed in header panels.
+• Countdown Timer Setup: Enter target hours, minutes, and seconds into the respective number input fields to configure a countdown duration.
+• Countdown Controls: Click Start to begin the countdown, Stop to pause it, or Reset to clear all time values and stop execution.
+• Stopwatch Controls: Click Start to run the stopwatch, Stop to pause timing, or Reset to set the stopwatch back to zero.
+• Auto: Audio Buzzer Alert: An audio tone plays automatically when a countdown timer reaches zero.
+
+`;
+
+
+/* =========================
+   RAW TEXT PARSER
+========================= */
+
+function parseRawInstructions(text){
+
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+
+  lines.forEach(line => {
+
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
+
+    html.push(`<p>${line}</p>`);
+  });
+
+  return html.join("");
+}
+
+
+/* =========================
+   CREATE STYLE
+========================= */
+
+const style = document.createElement("style");
+
+style.textContent = `
+#instructionsBtn{
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  background: #2e8b57;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+#instructionsBtn:hover{
+  background: #257047;
+  transform: scale(1.05);
+}
+
+#instructionsRoot{
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+}
+
+#instructionsBackdrop{
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#instructionsModal{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid #cfe2f7;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+#instructionsHeader{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex: 0 0 auto;
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+#instructionsBack{
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  height: auto;
+  width: auto;
+}
+
+#instructionsBack:hover{
+  background-color: #eef6ff;
+}
+
+#instructionsContent{
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  flex: 1 1 auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #333;
+}
+
+#instructionsContent::-webkit-scrollbar{
+  display: none;
+}
+
+#instructionsContent h3{
+  margin-top: 10px;
+  margin-bottom: 4px;
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+#instructionsContent p{
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+#instructionsContent hr{
+  margin: 12px 0;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+`;
+
+document.head.appendChild(style);
+
+
+/* =========================
+   CREATE BUTTON
+========================= */
+
+const btn = document.createElement("button");
+btn.id = "instructionsBtn";
+btn.innerHTML = "?";
+btn.setAttribute("aria-label", "Instructions");
+
+document.body.appendChild(btn);
+
+
+/* =========================
+   CREATE MODAL
+========================= */
+
+const root = document.createElement("div");
+root.id = "instructionsRoot";
+
+root.innerHTML = `
+<div id="instructionsBackdrop"></div>
+
+<div id="instructionsModal">
+
+  <div id="instructionsHeader">
+    <span>Instructions</span>
+    <button id="instructionsBack" type="button">✕</button>
+  </div>
+
+  <div id="instructionsContent">
+    ${parseRawInstructions(RAW_TEXT)}
+  </div>
+
+</div>
+`;
+
+document.body.appendChild(root);
+
+
+/* =========================
+   SCROLL LOCK
+========================= */
+
+const modalContent = document.getElementById("instructionsContent");
+
+modalContent.addEventListener("wheel", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+modalContent.addEventListener("touchmove", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+
+/* =========================
+   OPEN / CLOSE
+========================= */
+
+function openModal(){
+  root.style.display = "block";
+  document.body.style.overflow = "hidden";
+  document.documentElement.style.overflow = "hidden";
+}
+
+function closeModal(){
+  root.style.display = "none";
+  document.body.style.overflow = "";
+  document.documentElement.style.overflow = "";
+}
+
+btn.onclick = openModal;
+
+document.getElementById("instructionsBack").onclick = closeModal;
+document.getElementById("instructionsBackdrop").onclick = closeModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key === "Escape") closeModal();
+});
+
+})();
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<!-- ========================================== -->
+<!-- NARROW PHONE LAYOUT SAFETY PATCH (START) -->
+<!-- ========================================== -->
+<style>
+  html, body {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box;
+  }
+  *, *:before, *:after {
+    box-sizing: inherit;
+  }
+  body {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    margin: 0 auto !important;
+  }
+  img, video, canvas, table {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+</style>
+<!-- ========================================== -->
+<!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
+<!-- ========================================== -->
+
+</body>
+</html>
