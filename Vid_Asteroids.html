@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -180,4 +181,188 @@ setTimeout(runVignetteCycle, 500);
 </script>
 
 </body>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  body, html { 
+    margin: 0; 
+    padding: 0; 
+    width: 200px; 
+    height: 200px; 
+    overflow: hidden; 
+    background: black; 
+    position: relative; 
+    font-family: monospace; 
+  }
+  
+  canvas { 
+    position: absolute; 
+    top: 0; 
+    left: 0; 
+    width: 200px; 
+    height: 200px; 
+    z-index: 0; 
+  }
+
+  #gameArea {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    overflow: hidden;
+  }
+
+  .sentence {
+    position: absolute;
+    top: 80px; /* Aligned with the higher rocket vertical laser height */
+    font-size: 8px;
+    font-weight: 600;
+    white-space: pre-wrap;
+    width: 130px;
+    word-break: break-word;
+    user-select: none;
+    pointer-events: none;
+    color: #fff;
+    text-shadow: 0 0 3px rgba(0,0,0,0.3);
+    z-index: 1;
+    opacity: 0; /* Starts transparent */
+  }
+
+  .blank {
+    display: inline-block;
+    min-width: 20px;
+    border-bottom: 1.5px solid #fff;
+    text-align: center;
+    color: red;
+    font-weight: bold;
+  }
+
+  #plane {
+    position: absolute;
+    left: 15px;
+    top: 65px; /* Repositioned higher up */
+    font-size: 24px;
+    user-select: none;
+    pointer-events: none;
+    z-index: 4;
+    transform: rotate(45deg);
+  }
+</style>
+</head>
+<body>
+
+<div id="gameArea">
+  <canvas id="terrainCanvas" width="200" height="200"></canvas>
+  <div id="plane">🚀</div>
+</div>
+
+<script>
+// --- Starfield Loop ---
+const canvas = document.getElementById('terrainCanvas');
+const ctx = canvas.getContext('2d');
+const stars = [];
+for(let i = 0; i < 80; i++) {
+  stars.push({ x: Math.random() * 200, y: Math.random() * 200, z: Math.random() * 1.5 + 0.5 });
+}
+
+function drawStarfield() {
+  ctx.fillStyle = 'black'; 
+  ctx.fillRect(0, 0, 200, 200);
+  for(let s of stars) {
+    s.x -= 0.5 * s.z;
+    if(s.x < 0) { 
+      s.x = 200; 
+      s.y = Math.random() * 200; 
+      s.z = Math.random() * 1.5 + 0.5; 
+    }
+    ctx.fillStyle = 'white'; 
+    ctx.fillRect(s.x, s.y, s.z, s.z);
+  }
+  requestAnimationFrame(drawStarfield);
+}
+drawStarfield();
+
+// --- Original Laser Burst Simulation (adjusted for higher rocket position) ---
+const gameArea = document.getElementById('gameArea');
+const plane = document.getElementById('plane');
+
+function spawnPlaneBurst() {
+  const startX = 42;
+  const startY = 76; // Adjusted to match new higher rocket position
+  const laserLength = 110;
+  const numDots = 20;
+
+  for(let i = 0; i < numDots; i++) {
+    setTimeout(() => {
+      const dot = document.createElement('div');
+      dot.textContent = '-';
+      dot.style.position = 'absolute';
+      dot.style.color = 'white';
+      dot.style.fontSize = '14px';
+      dot.style.left = startX + (laserLength / numDots) * i + 'px';
+      dot.style.top = startY + 'px';
+      dot.style.opacity = 1;
+      dot.style.zIndex = 4;
+      gameArea.appendChild(dot);
+
+      setTimeout(() => { dot.style.opacity = 0; }, 80);
+      setTimeout(() => { if(dot.parentNode) dot.parentNode.removeChild(dot); }, 250);
+    }, i * 8);
+  }
+}
+
+// --- Automated Vignette Loop: Immediate Smooth Fade-In & Slow Glide ---
+function runVignetteCycle() {
+  const span = document.createElement('span');
+  span.className = 'sentence';
+  span.style.left = '220px'; // Starts off-screen to the right
+
+  span.appendChild(document.createTextNode('I like to '));
+  const blank = document.createElement('span');
+  blank.className = 'blank';
+  blank.textContent = '';
+  span.appendChild(blank);
+  span.appendChild(document.createTextNode(' pizza.'));
+
+  gameArea.appendChild(span);
+
+  // Apply transition styles immediately so fade-in and movement begin simultaneously without delay
+  span.style.transition = 'left 3.0s linear, opacity 2.5s ease-in-out';
+
+  requestAnimationFrame(() => {
+    span.style.opacity = '1';
+    span.style.left = '75px';
+  });
+
+  // Simulated typing of "eat" while it rests in place
+  setTimeout(() => { blank.textContent = 'e'; }, 3200);
+  setTimeout(() => { blank.textContent = 'ea'; }, 3500);
+  setTimeout(() => { blank.textContent = 'eat'; }, 3800);
+
+  // Hold for reading, fire laser, and smoothly fade out
+  setTimeout(() => {
+    spawnPlaneBurst();
+
+    setTimeout(() => {
+      span.style.transition = 'opacity 1.5s ease-in-out';
+      span.style.opacity = '0';
+      setTimeout(() => {
+        if(span.parentNode) span.parentNode.removeChild(span);
+      }, 1500);
+    }, 400);
+
+  }, 4800);
+
+  // Repeat loop seamlessly
+  setTimeout(runVignetteCycle, 7500);
+}
+
+// Start the loop
+setTimeout(runVignetteCycle, 500);
+</script>
+
+</body>
+>>>>>>> c76eb69b50f05b4798f53dfe215594e2f268fb31
 </html>

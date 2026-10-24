@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -73,4 +74,81 @@
     }, 4800);
   </script>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  body, html { margin: 0; padding: 0; width: 200px; height: 200px; overflow: hidden; background: linear-gradient(to top, #ffffff, #a0e0ff); position: relative; }
+  
+  .bubble { 
+    position: absolute; 
+    border-radius: 50%; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-weight: bold; 
+    color: rgba(255, 255, 255, 0.9); 
+    box-shadow: inset -2px -2px 5px rgba(0,0,0,0.1), 0 0 8px rgba(255,255,255,0.4); 
+    animation: floatUp 5s linear infinite; 
+    animation-fill-mode: backwards; 
+    top: 220px; 
+    opacity: 0;
+  }
+  
+  /* Closely grouped horizontally with staggered animation delays to ensure continuous coverage */
+  .b1 { width: 62px; height: 62px; font-size: 15px; background: hsla(200, 90%, 65%, 0.45); left: 32px; animation-delay: 0s; }
+  .b2 { width: 70px; height: 70px; font-size: 18px; background: hsla(340, 90%, 70%, 0.45); left: 74px; animation-delay: 1.6s; }
+  .b3 { width: 56px; height: 56px; font-size: 14px; background: hsla(120, 80%, 55%, 0.45); left: 122px; animation-delay: 3.2s; }
+  
+  @keyframes floatUp { 
+    0% { top: 220px; transform: scale(0.9); opacity: 0; }
+    15% { opacity: 1; }
+    85% { transform: scale(1.02); opacity: 0.9; }
+    100% { top: -80px; transform: scale(0.6); opacity: 0; }
+  }
+
+  /* Fully onscreen pop effect with green success flash */
+  .pop {
+    animation: popAnim 0.35s ease-out forwards !important;
+  }
+  @keyframes popAnim {
+    0% { transform: scale(1); opacity: 0.9; }
+    40% { transform: scale(1.35); background: hsla(120, 80%, 50%, 0.75); color: white; box-shadow: 0 0 15px rgba(46,204,113,0.8); }
+    100% { transform: scale(1.5); opacity: 0; }
+  }
+</style>
+</head>
+<body>
+  <div class="bubble b1" id="b1">cat</div>
+  <div class="bubble b2" id="b2">dog</div>
+  <div class="bubble b3" id="b3">fish</div>
+
+  <script>
+    const bubbles = [
+      document.getElementById('b1'),
+      document.getElementById('b2'),
+      document.getElementById('b3')
+    ];
+
+    let cycleCount = 0;
+
+    // Continuously check and trigger occasional onscreen pops without leaving dead air
+    setInterval(() => {
+      cycleCount++;
+      bubbles.forEach((b, index) => {
+        if ((cycleCount + index * 2) % 3 === 0) {
+          setTimeout(() => {
+            b.classList.add('pop');
+            setTimeout(() => {
+              b.classList.remove('pop');
+            }, 500);
+          }, 2000); 
+        }
+      });
+    }, 4800);
+  </script>
+</body>
+>>>>>>> c76eb69b50f05b4798f53dfe215594e2f268fb31
 </html>

@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -136,4 +137,144 @@
     setInterval(runSimulation, 4500);
   </script>
 </body>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  body, html { margin: 0; padding: 0; width: 200px; height: 200px; overflow: hidden; background: #f0dcc8; position: relative; font-family: sans-serif; }
+
+  /* B-52 Plane */
+  #plane { position: absolute; top: 32px; left: 68px; width: 55px; height: auto; transform: rotate(-90deg); z-index: 3; animation: planeSway 4s ease-in-out infinite alternate; }
+
+  /* Dropping exercise sentence */
+  .sentence { position: absolute; font-size: 8px; font-weight: 600; color: #111; text-shadow: 0 0 2px rgba(255,255,255,0.9); z-index: 2; white-space: nowrap; animation: dropExercise 4.5s linear infinite; }
+  .blank { display: inline-block; border-bottom: 1.5px solid #000; min-width: 22px; text-align: center; color: #d9534f; font-weight: bold; }
+
+  /* Retro Pixel Shard Shrapnel Effect */
+  .pixel-shard {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: #ff4500;
+    pointer-events: none;
+    z-index: 5;
+    animation: shardFly 0.6s steps(4, end) forwards;
+  }
+
+  @keyframes shardFly {
+    0% { transform: translate(0, 0) scale(1); opacity: 1; }
+    100% { transform: translate(var(--vx), var(--vy)) scale(0.2); opacity: 0; }
+  }
+
+  /* Smoke drift effect */
+  .pixel-smoke {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: #888888;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 4;
+    animation: smokeDrift 0.8s ease-out forwards;
+  }
+
+  @keyframes smokeDrift {
+    0% { transform: translate(0, 0) scale(1); opacity: 0.7; }
+    100% { transform: translate(var(--vx), var(--vy)) scale(2); opacity: 0; background: #bbb; }
+  }
+
+  @keyframes dropExercise {
+    0% { top: -20px; left: 12px; opacity: 0; }
+    15% { opacity: 1; }
+    52% { top: 78px; left: 12px; }
+    57% { opacity: 0; }
+    100% { top: 220px; opacity: 0; }
+  }
+
+  @keyframes planeSway {
+    0% { transform: rotate(-90deg) translateX(0); }
+    100% { transform: rotate(-90deg) translateX(10px); }
+  }
+</style>
+</head>
+<body>
+  <img id="plane" src="B52.png" alt="B-52">
+  
+  <!-- Correct exercise sentence from the file -->
+  <div class="sentence" id="execSentence">
+    I love to <span class="blank" id="blankWord"></span> pizza.  </div>
+
+  <script>
+    // --- Typing Simulation & Explosion Trigger ---
+    const blankWord = document.getElementById('blankWord');
+    
+    function runSimulation() {
+      blankWord.textContent = "";
+      
+      // Simulate typing character by character: "eat"
+      setTimeout(() => blankWord.textContent = "e", 900);
+      setTimeout(() => blankWord.textContent = "ea", 1100);
+      setTimeout(() => blankWord.textContent = "eat", 1300);
+
+
+      // Trigger explosion matching game logic at impact timestamp (2.3s)
+      setTimeout(() => {
+        const startX = 95;
+        const startY = 85;
+        
+        // Hide sentence text on hit
+        document.getElementById('execSentence').style.display = 'none';
+
+        // Spawn pixel shards
+        const shardColors = ['#ff4500', '#ffea00', '#ff0000', '#ffffff', '#ff8800'];
+        for (let i = 0; i < 28; i++) {
+          const shard = document.createElement('div');
+          shard.className = 'pixel-shard';
+          shard.style.left = startX + 'px';
+          shard.style.top = startY + 'px';
+          shard.style.background = shardColors[Math.floor(Math.random() * shardColors.length)];
+          
+          const angle = Math.random() * Math.PI * 2;
+          const speed = 40 + Math.random() * 120;
+          shard.style.setProperty('--vx', (Math.cos(angle) * speed) + 'px');
+          shard.style.setProperty('--vy', (Math.sin(angle) * speed) + 'px');
+          
+          document.body.appendChild(shard);
+          setTimeout(() => shard.remove(), 600);
+        }
+
+        // Spawn trailing smoke
+        setTimeout(() => {
+          for (let i = 0; i < 12; i++) {
+            const smoke = document.createElement('div');
+            smoke.className = 'pixel-smoke';
+            smoke.style.left = startX + 'px';
+            smoke.style.top = startY + 'px';
+            
+            const angle = Math.random() * Math.PI * 2;
+            const speed = 20 + Math.random() * 50;
+            smoke.style.setProperty('--vx', (Math.cos(angle) * speed) + 'px');
+            smoke.style.setProperty('--vy', ((Math.sin(angle) * speed) - 15) + 'px');
+            
+            document.body.appendChild(smoke);
+            setTimeout(() => smoke.remove(), 800);
+          }
+        }, 150);
+
+        // Reset sentence element for seamless looping
+        setTimeout(() => {
+          const sentenceEl = document.getElementById('execSentence');
+          sentenceEl.style.display = 'block';
+        }, 2000);
+
+      }, 2300);
+    }
+
+    runSimulation();
+    setInterval(runSimulation, 4500);
+  </script>
+</body>
+>>>>>>> c76eb69b50f05b4798f53dfe215594e2f268fb31
 </html>

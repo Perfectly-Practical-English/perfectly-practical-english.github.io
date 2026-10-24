@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -986,4 +987,994 @@ document.addEventListener("keydown", e=>{
 <!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
 <!-- ========================================== -->
 </body>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Discussion Form</title>
+
+<style>
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    min-height: 100%;
+    font-family: Arial, sans-serif;
+    background: #fff;
+    color: #111;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  html::-webkit-scrollbar,
+  body::-webkit-scrollbar {
+    display: none;
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 375px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  h1 {
+    font-size: 20px;
+    margin: 0;
+    color: #222;
+  }
+
+  #thread {
+    height: 300px;
+    overflow-y: auto;
+    border: 2px solid #39FF14;
+    border-radius: 6px;
+    padding: 10px;
+    background: #fafafa;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  #thread::-webkit-scrollbar {
+    display: none;
+  }
+
+  .post {
+    border-bottom: 1px solid #ddd;
+    padding: 6px 0;
+  }
+
+  .postHeader {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #444;
+  }
+
+  .postName {
+    font-weight: bold;
+    color: #222;
+  }
+
+  .postBody {
+    font-size: 15px;
+    margin-top: 4px;
+    white-space: pre-wrap;
+  }
+
+  #inputRow {
+    display: flex;
+    gap: 6px;
+  }
+
+  #idInput {
+    width: 140px;
+    height: 28px;
+    padding: 0 8px;
+    border-radius: 6px;
+    border: 1px solid var(--input-border-blue, #aaa);
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    color: #000 !important;
+  }
+
+  #idInput::placeholder {
+    color: var(--blue, #1976d2) !important;
+    opacity: 1 !important;
+  }
+
+  #postBtn {
+    flex: 1;
+    height: 28px;
+    padding: 0 8px;
+    border: 1px solid var(--input-border-blue, #aaa);
+    border-radius: 6px;
+    background: linear-gradient(145deg, #ffffff, var(--section-item-default, #eaf6ff));
+    color: var(--blue, #007aff);
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  }
+
+  #postBtn:hover:not(:disabled) {
+    background: linear-gradient(145deg, #ffffff, var(--section-item-hover, #d0e8ff));
+    border-color: var(--blue, #007aff);
+  }
+
+  #messageInput {
+    width: 100%;
+    min-height: 60px;
+    max-width: 100%;
+    resize: vertical;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid var(--input-border-blue, #aaa);
+    font-size: 15px;
+    color: #000;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  #messageInput::-webkit-scrollbar {
+    display: none;
+  }
+
+  #messageInput::placeholder {
+    color: #1976d2 !important;
+    opacity: 1 !important;
+  }
+
+  #speechRow {
+    display: flex;
+    gap: 6px;
+  }
+
+  #speechToggleBtn, #copyBtn, #downloadBtn {
+    flex: 1;
+    height: 28px;
+    padding: 0 6px;
+    border: 1px solid var(--input-border-blue, #aaa);
+    border-radius: 6px;
+    font-family: Arial, sans-serif;
+    font-size: 11px;
+    font-weight: 400;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    background: linear-gradient(145deg, #ffffff, var(--section-item-default, #eaf6ff));
+    color: var(--blue, #007aff);
+  }
+
+  #speechToggleBtn:hover:not(:disabled),
+  #copyBtn:hover:not(:disabled),
+  #downloadBtn:hover:not(:disabled) {
+    background: linear-gradient(145deg, #ffffff, var(--section-item-hover, #d0e8ff));
+    border-color: var(--blue, #007aff);
+  }
+
+  #border {
+    position: fixed;
+    inset: 0;
+    border: 10px solid #39FF14;
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ===== TOP BAR BUTTON ===== */
+  #sectionSelectorBtn {
+    height: 28px;
+    padding: 0 8px;
+    background: linear-gradient(145deg, #ffffff, var(--section-item-default, #eaf6ff));
+    color: var(--blue, #1976d2);
+    cursor: pointer;
+    text-align: left;
+    border: 1px solid var(--input-border-blue, #aaa);
+    font-family: Arial, sans-serif;
+    font-size: 12px;
+    font-weight: 400;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    display: inline-flex;
+    align-items: center;
+  }
+
+  #sectionSelectorBtn:hover {
+    background: linear-gradient(145deg, #ffffff, var(--section-item-hover, #d0e8ff));
+    border-color: var(--blue, #1976d2);
+  }
+
+  /* ===== SECTION SELECTION MODAL STYLING ===== */
+  #sectionModalRoot {
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 99999;
+  }
+
+  #sectionModalBackdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+  }
+
+  #sectionModalContent {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(400px, 90vw);
+    max-height: 80vh;
+    background: #fff;
+    border-radius: 10px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  #sectionModalHeader {
+    padding: 12px 16px;
+    background: #1976d2;
+    color: white;
+    font-weight: bold;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  #sectionModalClose {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+  }
+
+  #sectionListContainer {
+    padding: 10px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  #sectionListContainer::-webkit-scrollbar {
+    display: none;
+  }
+
+  .section-item {
+    padding: 10px 12px;
+    margin-bottom: 6px;
+    background: #eaf6ff;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #1976d2;
+    font-weight: 600;
+  }
+
+  .section-item:hover {
+    background: #d0e8ff;
+  }
+
+  footer {
+    font-size: 10px;
+    text-align: center;
+    color: #777;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<div id="border"></div>
+
+<div class="container">
+  <h1>Comments</h1>
+  <div id="thread"></div>
+
+  <div id="inputRow">
+    <button id="sectionSelectorBtn" type="button">Topics</button>
+    <input id="idInput" placeholder="ID">
+    <button id="postBtn">Post</button>
+  </div>
+
+  <textarea id="messageInput" placeholder="Type your message…"></textarea>
+
+  <div id="speechRow">
+    <button id="speechToggleBtn">Start Speech</button>
+    <button id="copyBtn">Copy Data</button>
+    <button id="downloadBtn">Download TXT</button>
+  </div>
+
+  <footer>
+    <p>&copy; <span id="currentYear"></span> Perfectly Practical English</p>
+  </footer>
+</div>
+
+<!-- Section Selection Modal -->
+<div id="sectionModalRoot">
+  <div id="sectionModalBackdrop"></div>
+  <div id="sectionModalContent">
+    <div id="sectionModalHeader">
+      <span>Select a Category</span>
+      <button id="sectionModalClose">✕</button>
+    </div>
+    <div id="sectionListContainer"></div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseClient = supabase.createClient(
+  "https://etwwriloppklhhkmswpr.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ"
+);
+
+/* SECTION DATA & DROPDOWN MODAL LOGIC */
+const sectionData = [
+  { name: "General Discussion" },
+  { name: "Questions & Help" },
+  { name: "Project Ideas" },
+  { name: "Feedback" }
+];
+
+let currentSectionName = 'General Discussion';
+
+const btn = document.getElementById("sectionSelectorBtn");
+const modalRoot = document.getElementById("sectionModalRoot");
+const modalBackdrop = document.getElementById("sectionModalBackdrop");
+const modalClose = document.getElementById("sectionModalClose");
+const listContainer = document.getElementById("sectionListContainer");
+
+function openModal() {
+  listContainer.innerHTML = "";
+  if (sectionData.length === 0) {
+    listContainer.innerHTML = "<div style='padding:10px; text-align:center; color:#666;'>No categories found.</div>";
+  } else {
+    sectionData.forEach(sec => {
+      const item = document.createElement("div");
+      item.className = "section-item";
+      item.textContent = sec.name;
+      item.addEventListener("click", () => {
+        currentSectionName = sec.name;
+        btn.textContent = sec.name;
+        closeModal();
+      });
+      listContainer.appendChild(item);
+    });
+  }
+  modalRoot.style.display = "block";
+}
+
+function closeModal() {
+  modalRoot.style.display = "none";
+}
+
+if (btn) btn.addEventListener("click", openModal);
+if (modalClose) modalClose.addEventListener("click", closeModal);
+if (modalBackdrop) modalBackdrop.addEventListener("click", closeModal);
+
+window.addEventListener("DOMContentLoaded", () => {
+  currentSectionName = "General Discussion";
+  if (btn) btn.textContent = currentSectionName;
+});
+
+/* STUDENT NAME MATCHING SCRIPT HOOKED TO REGISTRY */
+function getStudentName(id) {
+  return window.resolveStudentNameFromId ? window.resolveStudentNameFromId(id) : ("Student_" + (id ? id.trim() : ""));
+}
+
+/* ELEMENTS */
+const thread = document.getElementById("thread");
+const idInput = document.getElementById("idInput");
+const msgInput = document.getElementById("messageInput");
+
+const speechToggleBtn = document.getElementById("speechToggleBtn");
+const copyBtn = document.getElementById("copyBtn");
+const downloadBtn = document.getElementById("downloadBtn");
+const postBtn = document.getElementById("postBtn");
+
+/* DATA STRING GENERATOR */
+function generateDataString() {
+  let filename = window.location.pathname.split('/').pop() || 'CDF_Discussion_Form';
+  filename = filename.replace(/\.[^/.]+$/, "");
+  
+  const studentId = idInput.value.trim() || '-';
+  const studentName = getStudentName(studentId);
+  
+  const message = msgInput.value.trim();
+  const words = message ? message.split(/\s+/) : [];
+  const first3Words = words.slice(0, 3).join(' ') || '(no text)';
+  
+  const now = new Date();
+  const datePart = now.toISOString().slice(0, 10);
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const militaryTime = `${hours}${minutes}`;
+  
+  const headerLine = `${filename}|${studentName}|${studentId}|${first3Words}|${datePart} ${militaryTime}`;
+  const fullText = msgInput.value;
+
+  return `${headerLine}\n${fullText}`;
+}
+
+/* COPY BUTTON LOGIC */
+copyBtn.onclick = () => {
+  const dataStr = generateDataString();
+  navigator.clipboard.writeText(dataStr).then(() => {}).catch(err => {});
+};
+
+/* DOWNLOAD TXT FILE BUTTON LOGIC */
+downloadBtn.onclick = () => {
+  let filename = window.location.pathname.split('/').pop() || 'CDF_Discussion_Form';
+  filename = filename.replace(/\.[^/.]+$/, "");
+
+  const studentId = idInput.value.trim() || '-';
+  const studentName = getStudentName(studentId);
+  
+  const message = msgInput.value.trim();
+  const words = message ? message.split(/\s+/) : [];
+  const first3Words = words.slice(0, 3).join(' ') || 'no_text';
+  
+  const now = new Date();
+  const datePart = now.toISOString().slice(0, 10);
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const militaryTime = `${hours}${minutes}`;
+  
+  const dataStr = generateDataString();
+  const rawHeaderForFilename = `${filename}|${studentName}|${studentId}|${first3Words}|${datePart} ${militaryTime}`;
+  const customDownloadName = rawHeaderForFilename.replace(/[| ]+/g, '_') + '.txt';
+
+  const blob = new Blob([dataStr], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = customDownloadName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+/* OPEN-SOURCE LOCAL TRANSCRIPT FORMATTER (NO KEYS, NO APIS) */
+function formatTranscriptLocally(rawText) {
+  if (!rawText.trim()) return rawText;
+  
+  let text = rawText.trim().replace(/\s+/g, ' ');
+  
+  // Capitalize standalone "i" to "I"
+  text = text.replace(/\b(i)\b/g, 'I');
+  
+  // Capitalize first letter of the string
+  text = text.charAt(0).toUpperCase() + text.slice(1);
+  
+  // Capitalize letter following a sentence-ending punctuation mark if present
+  text = text.replace(/([.?!]\s+)([a-z])/g, (match, p1, p2) => p1 + p2.toUpperCase());
+  
+  // If there's no ending punctuation, add a period cleanly
+  if (!/[.?!]$/.test(text)) {
+    text += '.';
+  }
+  
+  return text;
+}
+
+/* SPEECH RECOGNITION TOGGLE */
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = new SpeechRecognition();
+
+recognition.continuous = true;
+recognition.interimResults = true;
+recognition.lang = "en-US";
+
+let isRecording = false;
+
+recognition.onresult = (event) => {
+  let transcript = "";
+  for (let i = 0; i < event.results.length; i++) {
+    transcript += event.results[i][0].transcript;
+  }
+  msgInput.value = transcript;
+};
+
+recognition.onerror = (e) => {
+  isRecording = false;
+  speechToggleBtn.textContent = "Start Speech";
+};
+
+recognition.onend = () => {
+  isRecording = false;
+  speechToggleBtn.textContent = "Start Speech";
+  
+  if (msgInput.value.trim()) {
+    msgInput.value = formatTranscriptLocally(msgInput.value);
+  }
+};
+
+speechToggleBtn.onclick = () => {
+  if (!isRecording) {
+    try {
+      recognition.start();
+      isRecording = true;
+      speechToggleBtn.textContent = "Stop Speech";
+    } catch (e) {
+      console.error(e);
+    }
+  } else {
+    recognition.stop();
+  }
+};
+
+/* THREAD RENDER */
+function renderPost(p) {
+  const div = document.createElement("div");
+  div.className = "post";
+  const sectionLabel = p.section ? `[${p.section}] ` : "";
+  div.innerHTML = `
+    <div class="postHeader">
+      <span class="postName">${sectionLabel}${p.name} (${p.student_id})</span>
+      <span>${p.time}</span>
+    </div>
+    <div class="postBody">${p.message}</div>
+  `;
+  thread.appendChild(div);
+  thread.scrollTop = thread.scrollHeight;
+}
+
+/* TIME */
+function timeStamp() {
+  return new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+}
+
+/* POST → SUPABASE */
+postBtn.onclick = async () => {
+  const studentId = idInput.value.trim();
+  const studentName = getStudentName(studentId);
+  const payload = {
+    name: studentName,
+    student_id: studentId || "-",
+    section: currentSectionName,
+    time: timeStamp(),
+    message: msgInput.value || ""
+  };
+
+  if (!payload.message.trim()) return;
+
+  const { error } = await supabaseClient
+    .from("instant_input")
+    .insert({
+      entry: payload
+    });
+
+  if (!error) {
+    msgInput.value = "";
+  }
+};
+
+/* LOAD THREAD & REALTIME */
+async function loadThread() {
+  const { data, error } = await supabaseClient
+    .from("instant_input")
+    .select("entry")
+    .order("created_at", { ascending: true });
+
+  if (error) {
+    console.error("Load error:", error);
+    return;
+  }
+
+  thread.innerHTML = "";
+  for (const row of data) {
+    try {
+      const post = typeof row.entry === 'string' ? JSON.parse(row.entry) : row.entry;
+      renderPost(post);
+    } catch (e) {
+      console.warn("Bad row:", row.entry);
+    }
+  }
+}
+
+loadThread();
+
+supabaseClient
+  .channel('public:instant_input')
+  .on(
+    'postgres_changes',
+    { event: 'INSERT', schema: 'public', table: 'instant_input' },
+    (payload) => {
+      try {
+        const post = typeof payload.new.entry === 'string' ? JSON.parse(payload.new.entry) : payload.new.entry;
+        renderPost(post);
+      } catch (e) {
+        console.warn("Realtime parse error:", e);
+      }
+    }
+  )
+  .subscribe();
+</script>
+
+<!-- STUDENT DATA REGISTRY MODULE -->
+<script>
+(function() {
+    'use strict';
+    const RAW_STUDENT_DATA = `
+        55555|David
+        55551|Matthew
+        12345|Sarah
+    `;
+    const studentDatabase = new Map();
+    RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+        const [id, name] = line.split('|').map(s => s ? s.trim() : '');
+        if (id && name) studentDatabase.set(id, name);
+    });
+
+    window.resolveStudentNameFromId = function(idInput) {
+        if (!idInput) return "Student";
+        const trimmed = String(idInput).trim();
+        if (/^(x|g|guest)$/i.test(trimmed)) {
+            return "Guest";
+        }
+        return studentDatabase.get(trimmed) || "Guest";
+    };
+})();
+</script>
+
+<script>
+
+(function(){
+
+/* =========================
+   RAW INSTRUCTIONS TEXT
+========================= */
+
+const RAW_TEXT = `
+How to use this page…
+
+• Overview: Participate in live discussions by posting messages, selecting categories, and syncing real-time comments through an interactive database forum.
+• Selecting a Category: Click the Select a section. button at the top-left to open the category modal and choose a discussion topic.
+• Entering Student ID: Type your identification number into the ID input field.
+• Typing Messages: Enter your comment or discussion text into the Type your message… text box.
+• Voice Dictation: Click the Start Speech button to dictate your message using speech recognition, which automatically formats transcripts upon stopping.
+• Submitting Posts: Click the Post button to publish your comment live to the discussion thread.
+• Exporting and Copying Data: Click the Copy Data button to copy your formatted post record to the clipboard, or click Download TXT to download it as a text file.
+
+
+`;
+
+
+/* =========================
+   RAW TEXT PARSER
+========================= */
+
+function parseRawInstructions(text){
+
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+
+  lines.forEach(line => {
+
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
+
+    html.push(`<p>${line}</p>`);
+  });
+
+  return html.join("");
+}
+
+
+/* =========================
+   CREATE STYLE
+========================= */
+
+const style = document.createElement("style");
+
+style.textContent = `
+#instructionsBtn{
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  background: #2e8b57;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+#instructionsBtn:hover{
+  background: #257047;
+  transform: scale(1.05);
+}
+
+#instructionsRoot{
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+}
+
+#instructionsBackdrop{
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#instructionsModal{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid #cfe2f7;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+#instructionsHeader{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex: 0 0 auto;
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+#instructionsBack{
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  height: auto;
+  width: auto;
+}
+
+#instructionsBack:hover{
+  background-color: #eef6ff;
+}
+
+#instructionsContent{
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  flex: 1 1 auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #333;
+}
+
+#instructionsContent::-webkit-scrollbar{
+  display: none;
+}
+
+#instructionsContent h3{
+  margin-top: 10px;
+  margin-bottom: 4px;
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+#instructionsContent p{
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+#instructionsContent hr{
+  margin: 12px 0;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+`;
+
+document.head.appendChild(style);
+
+
+/* =========================
+   CREATE BUTTON
+========================= */
+
+const btn = document.createElement("button");
+btn.id = "instructionsBtn";
+btn.innerHTML = "?";
+btn.setAttribute("aria-label", "Instructions");
+
+document.body.appendChild(btn);
+
+
+/* =========================
+   CREATE MODAL
+========================= */
+
+const root = document.createElement("div");
+root.id = "instructionsRoot";
+
+root.innerHTML = `
+<div id="instructionsBackdrop"></div>
+
+<div id="instructionsModal">
+
+  <div id="instructionsHeader">
+    <span>Instructions</span>
+    <button id="instructionsBack" type="button">✕</button>
+  </div>
+
+  <div id="instructionsContent">
+    ${parseRawInstructions(RAW_TEXT)}
+  </div>
+
+</div>
+`;
+
+document.body.appendChild(root);
+
+
+/* =========================
+   SCROLL LOCK
+========================= */
+
+const modalContent = document.getElementById("instructionsContent");
+
+modalContent.addEventListener("wheel", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+modalContent.addEventListener("touchmove", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+
+/* =========================
+   OPEN / CLOSE
+========================= */
+
+function openModal(){
+  root.style.display = "block";
+  document.body.style.overflow = "hidden";
+  document.documentElement.style.overflow = "hidden";
+}
+
+function closeModal(){
+  root.style.display = "none";
+  document.body.style.overflow = "";
+  document.documentElement.style.overflow = "";
+}
+
+btn.onclick = openModal;
+
+document.getElementById("instructionsBack").onclick = closeModal;
+document.getElementById("instructionsBackdrop").onclick = closeModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key === "Escape") closeModal();
+});
+
+})();
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<!-- ========================================== -->
+<!-- NARROW PHONE LAYOUT SAFETY PATCH (START) -->
+<!-- ========================================== -->
+<style>
+  html, body {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box;
+  }
+  *, *:before, *:after {
+    box-sizing: inherit;
+  }
+  body {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    margin: 0 auto !important;
+  }
+  img, video, canvas, table {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+</style>
+<!-- ========================================== -->
+<!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
+<!-- ========================================== -->
+</body>
+>>>>>>> c76eb69b50f05b4798f53dfe215594e2f268fb31
 </html>

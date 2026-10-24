@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1057,4 +1058,1065 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
 </script>
 
 </body>
+=======
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Composition Book Word Wall</title>
+
+<style>
+:root{
+  --paper:#e9e9e9;
+  --outer:#b28ae8;
+  --rule:#3f74ad;
+  --red:#b82b2b;
+
+  --pageW:852px;
+  --pageH:1200px;
+
+  --row:34px;
+  --headerH:120px;
+  --topH:68px;
+
+  --leftW:135px;
+  --rightW:calc(var(--pageW) - var(--leftW));
+}
+
+*{box-sizing:border-box;}
+
+html,body{
+  margin:0;
+  padding:0;
+  background:#dff2ff;
+  width:100%;
+  height:100%;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x: hidden;
+}
+
+body{
+  display:flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* Container to scale down full fixed page cleanly on narrow portrait devices */
+.viewport-scaler {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  width: 100%;
+  padding: 8px 0;
+  overflow-x: hidden;
+}
+
+.frame{
+  background:var(--outer);
+  padding:8px;
+  border-radius: 4px;
+  transform-origin: top center;
+}
+
+.page{
+  position:relative;
+  width:var(--pageW);
+  height:var(--pageH);
+  background:var(--paper);
+  overflow:hidden;
+  font-family:"Comic Sans MS",cursive;
+}
+
+/* ================= HEADER LABEL AREA ================= */
+
+.headerArea{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  height:var(--headerH);
+  display:flex;
+  z-index:25;
+  border-bottom:2px solid var(--rule);
+  background:var(--paper);
+}
+
+#headerLeft{
+  width:var(--leftW);
+  height:100%;
+  resize:none;
+  font-family:inherit;
+  font-size:14px;
+  padding:8px;
+  border:none;
+  outline:none;
+  background:transparent;
+  white-space:pre-wrap;
+  overflow:hidden;
+}
+
+#headerRight{
+  flex:1;
+  height:100%;
+  resize:none;
+  font-family:inherit;
+  font-size:14px;
+  padding:8px;
+  border:none;
+  outline:none;
+  background:transparent;
+  white-space:pre-wrap;
+  overflow-y:auto;
+}
+
+.headerRed{
+  position:absolute;
+  left:var(--leftW);
+  top:0;
+  height:var(--headerH);
+  width:3px;
+  background:var(--red);
+  z-index:9999;
+  pointer-events:none;
+  box-shadow:0 0 6px rgba(184,43,43,.4);
+}
+
+/* ================= TOP BAR & INPUTS ================= */
+
+.topBar{
+  position:absolute;
+  top:var(--headerH);
+  left:0;
+  right:0;
+  height:var(--topH);
+  min-height:68px;
+  max-height:calc(var(--pageH) - var(--headerH) - 100px);
+  display:flex;
+  z-index:20;
+  border-bottom:2px solid var(--rule);
+  background:var(--paper);
+  resize:vertical;
+  overflow:hidden;
+}
+
+#leftInput{
+  width:var(--leftW);
+  height:100%;
+  resize:none;
+  font-family:inherit;
+  font-size:14px;
+  padding:6px;
+  border:none;
+  outline:none;
+  background:transparent;
+  overflow:hidden;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--row) - 1px),
+    var(--rule) calc(var(--row) - 1px),
+    var(--rule) var(--row)
+  );
+}
+
+.fileToolbarContainer {
+  width:var(--rightW);
+  height:100%;
+  display:flex;
+  flex-direction:column;
+  background:transparent;
+  overflow:hidden;
+}
+
+.toolbarRow {
+  height: 34px;
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  gap: 6px;
+  border-bottom: 1px solid var(--rule);
+  background: var(--paper);
+  font-size: 12px;
+}
+
+.toolbarRow input[type="text"] {
+  padding: 2px 6px;
+  font-family: "Comic Sans MS", cursive;
+  font-size: 12px;
+  border: 1px solid #999;
+  border-radius: 4px;
+  outline: none;
+  background: #ffffff;
+  color: #333;
+  cursor: text;
+}
+
+#loadHeaderBtn, #saveHeaderBtn, #loadTxtBtn, #saveTxtBtn, #instructionsBtn {
+  padding: 2px 6px;
+  font-family: "Comic Sans MS", cursive;
+  font-size: 12px;
+  border: 1px solid #999;
+  border-radius: 4px;
+  outline: none;
+  background: #ffffff;
+  color: #666;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  cursor: pointer;
+}
+
+#loadHeaderBtn:hover, #saveHeaderBtn:hover, #loadTxtBtn:hover, #saveTxtBtn:hover, #instructionsBtn:hover {
+  background: #e0e0e0;
+}
+
+#rightInput{
+  flex:1;
+  height:100%;
+  resize:none;
+  font-family:inherit;
+  font-size:12px;
+  padding:4px 6px;
+  border:none;
+  outline:none;
+  background:transparent;
+  white-space:pre-wrap;
+  overflow-y:hidden;
+}
+
+/* ================= GRID ================= */
+
+.lines{
+  position:absolute;
+  inset:calc(var(--headerH) + var(--topH)) 0 0 0;
+
+  background:repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent calc(var(--row) - 1px),
+    var(--rule) calc(var(--row) - 1px),
+    var(--rule) var(--row)
+  );
+}
+
+.red{
+  position:absolute;
+  left:var(--leftW);
+  top:var(--headerH);
+  bottom:0;
+  width:3px;
+  background:var(--red);
+  z-index:9999;
+  pointer-events:none;
+  box-shadow:0 0 6px rgba(184,43,43,.4);
+}
+
+/* ================= SHEETS ================= */
+
+.sheet{
+  position:absolute;
+  top:calc(var(--headerH) + var(--topH));
+  bottom:0;
+  display:grid;
+  grid-auto-rows:var(--row);
+  align-content:start;
+}
+
+.leftSheet{
+  left:0;
+  width:var(--leftW);
+  grid-template-columns:var(--leftW);
+}
+
+.rightSheet{
+  left:var(--leftW);
+  width:var(--rightW);
+  grid-template-columns:repeat(6,1fr);
+}
+
+.cell{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  height: var(--row);
+  min-height: var(--row);
+  max-height: var(--row);
+  padding: 0 1mm; 
+  white-space: nowrap;
+  overflow: hidden;
+  user-select: none;
+  cursor: pointer;
+  border-right: 1px solid rgba(0,0,0,.35);
+  border-bottom: none;
+  margin: 0;
+}
+
+.leftSheet .cell {
+  border-right: none;
+  justify-content: flex-start;
+  padding-left: calc(8px + 1mm);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.cell.selected{
+  background:rgba(90,160,255,.28);
+  outline:1px solid rgba(40,100,220,.8);
+}
+
+.tile{
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  text-align:left;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  margin: 3px;
+  padding: 2px 6px;
+  border: 1px solid #666;
+  border-radius: 6px;
+  background: white;
+  cursor: pointer;
+  user-select: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.tile.selected-tile {
+  outline: 2px solid #2864dc;
+  box-shadow: 0 0 5px rgba(40,100,220,0.5);
+}
+
+.color-Interjections { background:#8f8f8f; color:#ffffff; }
+.color-Verbs { background:#ffcccc; color:#333; }
+.color-Adjectives { background:#d9f7b2; color:#333; }
+.color-Adverbs { background:#ffd1dc; color:#333; }
+.color-Determiners { background:#c8f7c5; color:#333; }
+.color-Pronouns { background:#e0c3fc; color:#333; }
+.color-Prepositions { background:#ffd8b1; color:#333; }
+.color-Conjunctions { background:#cfe8ff; color:#333; }
+.color-Nouns { background:#ffeeba; color:#333; }
+</style>
+</head>
+
+<body>
+
+<div class="viewport-scaler" id="scaler">
+  <div class="frame" id="frame">
+    <div class="page">
+
+    <div class="headerArea">
+      <textarea id="headerLeft" placeholder=""></textarea>
+      <textarea id="headerRight" placeholder=""></textarea>
+      <div style="position: absolute; bottom: 4px; right: 8px; font-size: 10px; color: #777; pointer-events: none; font-family: Arial, sans-serif;">&copy; <span id="currentYear"></span> Perfectly Practical English</div>
+    </div>
+    <div class="headerRed"></div>
+
+    <div class="topBar" id="topBarContainer">
+      <textarea id="leftInput" placeholder=""></textarea>
+      <div class="fileToolbarContainer">
+        <div class="toolbarRow">
+          <input type="text" id="studentIdInput" placeholder="ID" style="width:55px;">
+          <input type="text" id="headerTitleInput" placeholder="Title" style="width:110px;">
+          <input type="text" id="headerPageInput" placeholder="Page" style="width:50px;">
+          <button id="instructionsBtn" type="button">Instructions</button>
+
+          <div style="margin-left:auto; display:flex; gap:6px;">
+            <input type="file" id="headerTxtLoader" accept=".txt" style="display:none">
+            <button id="loadHeaderBtn" type="button">Top Import</button>
+            <button id="saveHeaderBtn" type="button">Top Export</button>
+
+            <input type="file" id="txtLoader" accept=".txt" style="display:none">
+            <button id="loadTxtBtn" type="button">Import</button>
+            <button id="saveTxtBtn" type="button">Export</button>
+          </div>
+        </div>
+        <textarea id="rightInput" placeholder="Content goes here..."></textarea>
+      </div>
+    </div>
+
+    <div class="lines" id="gridLines"></div>
+    <div class="red"></div>
+
+    <div class="sheet leftSheet" id="left"></div>
+    <div class="sheet rightSheet" id="right"></div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+  // Responsive scaling to fit mobile portrait screens cleanly without adding new elements
+  function adjustResponsiveScale() {
+    const frame = document.getElementById('frame');
+    const scaler = document.getElementById('scaler');
+    const targetWidth = 868; // 852px page + 16px frame padding
+    const screenWidth = window.innerWidth - 16;
+
+    if (screenWidth < targetWidth) {
+      const scale = screenWidth / targetWidth;
+      frame.style.transform = `scale(${scale})`;
+      scaler.style.height = `${1216 * scale}px`;
+    } else {
+      frame.style.transform = 'none';
+      scaler.style.height = 'auto';
+    }
+  }
+
+  window.addEventListener('resize', adjustResponsiveScale);
+  window.addEventListener('orientationchange', adjustResponsiveScale);
+  document.addEventListener('DOMContentLoaded', adjustResponsiveScale);
+</script>
+
+<script>
+const ROWS = Math.ceil(1200 / 34);
+const COLS = 6;
+
+const leftEl = document.getElementById("left");
+const rightEl = document.getElementById("right");
+const leftInput = document.getElementById("leftInput");
+const rightInput = document.getElementById("rightInput");
+const headerLeft = document.getElementById("headerLeft");
+const headerRight = document.getElementById("headerRight");
+const studentIdInput = document.getElementById("studentIdInput");
+const headerTitleInput = document.getElementById("headerTitleInput");
+const headerPageInput = document.getElementById("headerPageInput");
+
+let dragging = false;
+let editing = false;
+let anchorCell = null;
+let focusCell = null;
+let tiles = [];
+let selectedTile = null;
+
+let leftRows = {};
+
+function getFormattedTimestamp() {
+  const now = new Date();
+  const month = String(now.getMonth() + 1).padStart(2, '0');
+  const day = String(now.getDate()).padStart(2, '0');
+  const year = now.getFullYear();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const seconds = String(now.getSeconds()).padStart(2, '0');
+  return `${month}-${day}-${year}- ${hours}_${minutes}_${seconds}`;
+}
+
+function parseFileContent(text){
+  text = text.replace(/\r/g,"");
+  const lines = text.split("\n");
+  
+  let mode = null;
+  let leftMap = {};
+  let currentLeftLineNum = null;
+
+  for(let i = 0; i < lines.length; i++){
+    const line = lines[i];
+    const trimmed = line.trim();
+
+    if(trimmed.startsWith("Left Lines:")){
+      mode = "left";
+      continue;
+    } else if(trimmed.startsWith("Cells:") || trimmed.startsWith("Title:") || trimmed.startsWith("Page:") || trimmed.startsWith("Instructions:")){
+      mode = null;
+    }
+
+    if(mode === "left"){
+      const match = trimmed.match(/^Line\s+(\d+)\b(.*)/i);
+      if(match){
+        currentLeftLineNum = parseInt(match[1], 10) - 1;
+        const remainder = match[2].replace(/^[:\.]\s*/, "").trim();
+        leftMap[currentLeftLineNum] = remainder;
+      } else if(trimmed && currentLeftLineNum !== null){
+        leftMap[currentLeftLineNum] = (leftMap[currentLeftLineNum] ? leftMap[currentLeftLineNum] + "\n" : "") + line;
+      }
+    }
+  }
+  return leftMap;
+}
+
+function update(){
+  const content = rightInput.value;
+  leftRows = parseFileContent(content);
+  buildTiles(content);
+  render();
+  if(window.applyPOS) applyPOS();
+}
+
+rightInput.addEventListener("input", update);
+
+leftInput.addEventListener("input", () => {
+  const text = leftInput.value.replace(/\r/g, "");
+  const lines = text.split("\n");
+  leftRows = {};
+  lines.forEach(l => {
+    const trimmed = l.trim();
+    const match = trimmed.match(/^Line\s+(\d+)\b(.*)/i);
+    if(match){
+      const rNum = parseInt(match[1], 10) - 1;
+      const val = match[2].replace(/^[:\.]\s*/, "").trim();
+      if(rNum >= 0) leftRows[rNum] = val;
+    }
+  });
+  render();
+});
+
+const topBarContainer = document.getElementById("topBarContainer");
+const gridLines = document.getElementById("gridLines");
+
+const resizeObserver = new ResizeObserver(entries => {
+  for (let entry of entries) {
+    const h = entry.contentRect.height;
+    document.documentElement.style.setProperty('--topH', h + 'px');
+    const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--headerH')) || 120;
+    const totalTop = headerH + h;
+    gridLines.style.inset = `${totalTop}px 0 0 0`;
+    leftEl.style.top = `${totalTop}px`;
+    rightEl.style.top = `${totalTop}px`;
+  }
+});
+resizeObserver.observe(topBarContainer);
+
+const loadHeaderBtn = document.getElementById("loadHeaderBtn");
+const headerTxtLoader = document.getElementById("headerTxtLoader");
+const saveHeaderBtn = document.getElementById("saveHeaderBtn");
+
+loadHeaderBtn.onclick = () => headerTxtLoader.click();
+
+headerTxtLoader.onchange = (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    headerRight.value = event.target.result;
+  };
+  reader.readAsText(file);
+};
+
+saveHeaderBtn.onclick = () => {
+  const content = headerRight.value;
+  const pageNo = headerPageInput.value.trim().replace(/[^a-zA-Z0-9]/g, "") || "1";
+  const titleText = headerTitleInput.value.trim().replace(/[<>:"/\\|?*]/g, "") || "Dog";
+  const studentIdVal = studentIdInput.value.trim() || "55555";
+  const studentNameVal = window.resolveStudentNameFromId ? window.resolveStudentNameFromId(studentIdVal) : "David";
+  
+  const dateTimeStr = getFormattedTimestamp();
+  const fileName = `Purple_Book_Instructions_${pageNo}_${titleText}_${studentNameVal}_${studentIdVal}_${dateTimeStr}.txt`;
+
+  const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+const loadTxtBtn = document.getElementById("loadTxtBtn");
+const txtLoader = document.getElementById("txtLoader");
+const saveTxtBtn = document.getElementById("saveTxtBtn");
+
+loadTxtBtn.onclick = () => txtLoader.click();
+
+txtLoader.onchange = (e) => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    rightInput.value = event.target.result;
+    update();
+  };
+  reader.readAsText(file);
+};
+
+saveTxtBtn.onclick = () => {
+  const exportContent = rightInput.value;
+  const pageNo = headerPageInput.value.trim().replace(/[^a-zA-Z0-9]/g, "") || "1";
+  const titleText = headerTitleInput.value.trim().replace(/[<>:"/\\|?*]/g, "") || "Dog";
+  const studentIdVal = studentIdInput.value.trim() || "55555";
+  const studentNameVal = window.resolveStudentNameFromId ? window.resolveStudentNameFromId(studentIdVal) : "David";
+  
+  const dateTimeStr = getFormattedTimestamp();
+  const fileName = `Purple_Book_${pageNo}_${titleText}_${studentNameVal}_${studentIdVal}_${dateTimeStr}.txt`;
+
+  const blob = new Blob([exportContent], { type: "text/plain;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+function clearSelection(){
+  document.querySelectorAll(".cell.selected").forEach(c=>c.classList.remove("selected"));
+}
+
+function renderSelection(){
+  clearSelection();
+  if(!anchorCell || !focusCell) return;
+  if(anchorCell.dataset.side !== focusCell.dataset.side) return;
+
+  const side = anchorCell.dataset.side;
+  const r1 = Math.min(+anchorCell.dataset.r, +focusCell.dataset.r);
+  const r2 = Math.max(+anchorCell.dataset.r, +focusCell.dataset.r);
+  const c1 = Math.min(+(anchorCell.dataset.c||0), +(focusCell.dataset.c||0));
+  const c2 = Math.max(+(anchorCell.dataset.c||0), +(focusCell.dataset.c||0));
+  const target = side === "L" ? leftEl : rightEl;
+
+  for(let r=r1;r<=r2;r++){
+    for(let c=c1;c<=c2;c++){
+      const el = side === "L"
+        ? target.querySelector(`[data-r="${r}"][data-side="L"]`)
+        : target.querySelector(`[data-r="${r}"][data-c="${c}"][data-side="R"]`);
+      if(el) el.classList.add("selected");
+    }
+  }
+}
+
+function setSelection(a, b, additive=false){
+  if(editing) return;
+  if(!additive || !anchorCell) anchorCell = a;
+  focusCell = b;
+  renderSelection();
+}
+
+function syncCellsToRightInput(){
+  let rowMap = {};
+  tiles.forEach(t => {
+    if(!rowMap[t.row]) rowMap[t.row] = [];
+    rowMap[t.row][t.col] = t.text.trim();
+  });
+
+  let newLines = [];
+  const maxR = Math.max(-1, ...tiles.map(t => t.row));
+  for(let r=0; r<=maxR; r++){
+    if(rowMap[r]){
+      let rowItems = [];
+      for(let c=0; c<COLS; c++){
+        if(rowMap[r][c]) rowItems.push(rowMap[r][c]);
+      }
+      if(rowItems.length > 0){
+        newLines.push(rowItems.join(" "));
+      } else {
+        newLines.push("");
+      }
+    } else {
+      newLines.push("");
+    }
+  }
+  
+  rightInput.value = newLines.filter((l, i, arr) => l !== "" || (i > 0 && arr[i-1] !== "")).join("\n\n");
+}
+
+function edit(cell, tileEl=null, tile=null){
+  editing = true;
+  dragging = false;
+  clearSelection();
+  
+  const targetEl = tileEl || cell;
+  targetEl.contentEditable = true;
+  targetEl.focus();
+  const range = document.createRange();
+  range.selectNodeContents(targetEl);
+  const sel = window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+
+  targetEl.onblur = () => {
+    if(tile){
+      const val = targetEl.textContent.trim();
+      if(val){
+        tile.text = val;
+      } else {
+        const idx = tiles.indexOf(tile);
+        if(idx !== -1) tiles.splice(idx, 1);
+      }
+      syncCellsToRightInput();
+      render();
+    } else if(cell.dataset.side==="R"){
+      const r=+cell.dataset.r;
+      const c=+cell.dataset.c;
+      const val = cell.textContent.trim();
+      
+      const tIdx = tiles.findIndex(t => t.row === r && t.col === c);
+      if(tIdx !== -1){
+        if(val){
+          tiles[tIdx].text = val;
+        } else {
+          tiles.splice(tIdx, 1);
+        }
+      } else if(val){
+        tiles.push({ id: Date.now() + Math.random(), text: val, row: r, col: c });
+      }
+      syncCellsToRightInput();
+      render();
+    } else if(cell.dataset.side==="L"){
+      const r=+cell.dataset.r;
+      leftRows[r]=cell.textContent;
+    }
+    editing=false;
+    targetEl.contentEditable=false;
+  };
+}
+
+function render(){
+  leftEl.innerHTML="";
+  rightEl.innerHTML="";
+
+  for(let r=0;r<ROWS;r++){
+    const L=document.createElement("div");
+    L.className="cell";
+    L.dataset.side="L";
+    L.dataset.r=r;
+    L.textContent=leftRows[r] || "";
+    
+    L.onpointerdown=(e)=>{ if(editing) return; dragging=true; setSelection(L,L,e.shiftKey); };
+    L.onpointerenter=()=>{ if(dragging && anchorCell?.dataset.side==="L"){ focusCell=L; renderSelection(); } };
+    L.ondblclick=()=>edit(L);
+    leftEl.appendChild(L);
+
+    for(let c=0;c<COLS;c++){
+      const R=document.createElement("div");
+      R.className="cell";
+      R.dataset.side="R";
+      R.dataset.r=r;
+      R.dataset.c=c;
+      
+      const tile = tiles.find(t => t.row===r && t.col===c);
+
+      if(tile){
+        const tileEl=document.createElement("div");
+        const cls = window.POS_COLORS_INDEX?.get((tile.text || "").trim().toLowerCase()) || "";
+        tileEl.className = "tile " + cls;
+        if(selectedTile === tile) tileEl.classList.add("selected-tile");
+        tileEl.textContent=tile.text;
+        
+        const len = tile.text.length;
+        const size = Math.max(8, 16 - (len - 10) * 0.5);
+        tileEl.style.fontSize = size + "px";
+
+        tileEl.onpointerdown=(e)=>{
+          e.stopPropagation();
+          const rect = tileEl.getBoundingClientRect();
+          const clickX = e.clientX - rect.left;
+          const leftThreshold = rect.width * 0.3;
+
+          if(clickX < leftThreshold){
+            edit(R, tileEl, tile);
+          } else {
+            if(selectedTile === tile){
+              selectedTile = null;
+            } else {
+              selectedTile = tile;
+            }
+            render();
+          }
+        };
+
+        R.appendChild(tileEl);
+      }
+
+      R.onpointerdown=(e)=>{
+        if(selectedTile){
+          const occupied = tiles.some(t => t !== selectedTile && t.row === r && t.col === c);
+          if(occupied){ selectedTile = null; render(); return; }
+          selectedTile.row = r;
+          selectedTile.col = c;
+          selectedTile = null;
+          syncCellsToRightInput();
+          render();
+          return;
+        }
+        if(editing) return;
+        dragging = true;
+        setSelection(R,R,e.shiftKey);
+      };
+      
+      R.onpointerenter=()=>{
+        if(dragging && anchorCell?.dataset.side==="R"){
+          focusCell=R;
+          renderSelection();
+        }
+      };
+
+      R.ondblclick=()=>{
+        const occupied = tiles.some(t => t.row===r && t.col===c);
+        if(occupied) return;
+        edit(R);
+      };
+
+      rightEl.appendChild(R);
+    }
+  }
+}
+
+document.addEventListener("pointermove",(e)=>{
+  if(!dragging || !anchorCell) return;
+  const el=document.elementFromPoint(e.clientX,e.clientY);
+  if(!el || !el.classList.contains("cell")) return;
+  if(el.dataset.side!==anchorCell.dataset.side) return;
+  focusCell=el;
+  renderSelection();
+});
+
+document.addEventListener("pointerup",()=>{ dragging=false; });
+
+(function(){
+  window.getTileSourceText = function getTileSourceText(){
+    return (rightInput.value || "").trim();
+  }
+
+  function parseSectionedText(text){
+    text = text.replace(/\r/g,"");
+    const sections = [];
+    let current = null;
+    text.split("\n").forEach(line => {
+      const trimmed = line.trim();
+      if(trimmed.startsWith("Cells:")){
+        current = { heading: "Cells:", body:[] };
+        sections.push(current);
+        const remainder = trimmed.replace("Cells:", "").trim();
+        if(remainder) current.body.push(remainder);
+        return;
+      }
+      if(trimmed.startsWith("~") || trimmed.startsWith("Left Lines:")){
+        current = { heading: trimmed.startsWith("~") ? trimmed.slice(1).trim() : "Left Lines:", body:[] };
+        sections.push(current);
+        return;
+      }
+      if(!current) return;
+      current.body.push(line);
+    });
+    return sections;
+  }
+
+  buildTiles = function(){
+    const sourceText = getTileSourceText();
+    const sections = parseSectionedText(sourceText);
+    const cellsSection = sections.find(section => /^Cells:/i.test(section.heading));
+
+    tiles = [];
+    let currentRow = 0;
+    let currentCol = 0;
+    
+    const rawLines = cellsSection ? cellsSection.body : sourceText.split("\n");
+
+    let joined = rawLines.join("\n");
+    const blocks = joined.split(/\n\s*\n+/);
+
+    blocks.forEach((block, blockIndex) => {
+      if(blockIndex > 0){
+        currentRow++;
+        currentCol = 0;
+      }
+
+      const lines = block.split("\n");
+      lines.forEach(line => {
+        const trimmed = line.trim();
+        if(!trimmed) return;
+        if(trimmed.startsWith("Cells:") || trimmed.startsWith("~") || trimmed.startsWith("Left Lines:")) return;
+        if(trimmed.startsWith("|") && trimmed.endsWith("|")) return;
+        if(trimmed.startsWith("Title:") || trimmed.startsWith("Page:") || trimmed.startsWith("Instructions:")) return;
+
+        const tokens = trimmed.split(/[\s,]+/).map(t => t.trim()).filter(Boolean);
+        tokens.forEach(token => {
+          if(!token) return;
+          if(currentCol >= COLS){
+            currentRow++;
+            currentCol = 0;
+          }
+          tiles.push({
+            id: tiles.length,
+            text: token,
+            row: currentRow,
+            col: currentCol
+          });
+          currentCol++;
+        });
+      });
+
+      if(lines.length > 0){
+        currentRow++;
+        currentCol = 0;
+      }
+    });
+  };
+
+  update();
+})();
+
+(function(){
+  window.POS_COLORS = {
+    Nouns: "color-Nouns",
+    Verbs: "color-Verbs",
+    Adjectives: "color-Adjectives",
+    Adverbs: "color-Adverbs",
+    Determiners: "color-Determiners",
+    Pronouns: "color-Pronouns",
+    Prepositions: "color-Prepositions",
+    Conjunctions: "color-Conjunctions",
+    Interjections: "color-Interjections"
+  };
+
+  function parsePOSSections(text){
+    text = text.replace(/\r/g,"");
+    const sections = [];
+    let current = null;
+    text.split("\n").forEach(line => {
+      const t = line.trim();
+      if(!t) return;
+      if(t.startsWith("|") && t.endsWith("|")){
+        current = t.replaceAll("|","").trim();
+        return;
+      }
+      if(current) sections.push({ pos: current, word: t });
+    });
+    return sections;
+  }
+
+  function buildPOSMap(){
+    const sourceText = (typeof getTileSourceText === "function") ? getTileSourceText() : "";
+    const parsed = parsePOSSections(sourceText);
+    const map = new Map();
+    parsed.forEach(item => {
+      const phrases = (item.word || "").split(",").map(w => w.trim().toLowerCase()).filter(Boolean);
+      phrases.forEach(w => map.set(w, POS_COLORS[item.pos] || ""));
+    });
+    return map;
+  }
+
+  window.applyPOS = function applyPOS(){
+    const posMap = buildPOSMap();
+    window.POS_COLORS_INDEX = posMap;
+    document.querySelectorAll(".tile").forEach(tileEl => {
+      const word = (tileEl.textContent || "").trim().toLowerCase();
+      const cls = posMap.get(word);
+      tileEl.className = "tile " + (cls || "");
+    });
+  };
+
+  applyPOS();
+})();
+</script>
+
+<script>
+(function() {
+    'use strict';
+    const RAW_STUDENT_DATA = `
+        55555|David
+        55551|Matthew
+        12345|Sarah
+    `;
+    const studentDatabase = new Map();
+    RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+        const [id, name] = line.split('|').map(s => s ? s.trim() : '');
+        if (id && name) studentDatabase.set(id, name);
+    });
+
+    window.resolveStudentNameFromId = function(idInput) {
+        if (!idInput) return "Guest";
+        const trimmed = String(idInput).trim();
+        if (/^(x|g|guest)$/i.test(trimmed)) {
+            return "Guest";
+        }
+        return studentDatabase.get(trimmed) || "Guest";
+    };
+})();
+</script>
+
+<script>
+(function(){
+const RAW_TEXT = `
+How to use this page…
+
+• Overview: The Composition Book Word Wall tool provides an interactive lined notebook interface to organize, edit, and categorize vocabulary words across a structured grid layout.
+
+• Student Identification: Type your student ID number into the ID text box located in the top toolbar to link your record. [Automatic] The application instantly resolves and matches your ID to your student name from the internal registry.
+
+• Document Metadata: Enter a custom document title into the Title field and a page number into the Page field to customize your working sheet.
+
+• Instructions Modal: Click the Instructions button in the top toolbar to open a popup guide displaying the step-by-step workflow.
+
+• Header and Content Textareas: Type or paste notes into the top header textareas or the main Content goes here... text box to populate the notebook interface. [Automatic] Changes entered into the main text content area automatically parse and update the grid tiles in real-time.
+
+• File Import: Click the Top Import button to upload a header text file, or click the Import button to load a content text file into the workspace.
+
+• File Export: Click the Top Export button to download your header notes, or click the Export button to download your formatted content as a timestamped text file. [Automatic] Export filenames are automatically generated using your page number, title, resolved student name, ID number, and timestamp.
+`;
+
+function parseRawInstructions(text){
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+  lines.forEach(line => {
+    if(line === "---"){ html.push(`<hr>`); return; }
+    if(/^\d+\./.test(line)){ html.push(`<p>${line}</p>`); return; }
+    if(!/[.!?:]$/.test(line)){ html.push(`<h3>${line}</h3>`); return; }
+    html.push(`<p>${line}</p>`);
+  });
+  return html.join("");
+}
+
+const btn = document.getElementById("instructionsBtn");
+if(btn) {
+  btn.textContent = "Instructions";
+  btn.type = "button";
+}
+
+const root = document.createElement("div");
+root.id = "instructionsRoot";
+root.innerHTML = `
+<div id="instructionsBackdrop" style="position:absolute; inset:0; background:rgba(0,0,0,.35);"></div>
+<div id="instructionsModal" style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); width:min(650px,90vw); max-height:90vh; background:#fff; border-radius:10px; display:flex; flex-direction:column; overflow:hidden; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);">
+  <div id="sectionModalHeader" style="padding:12px 16px; background:#1976d2; color:white; font-weight:bold; display:flex; justify-content:space-between; align-items:center;">
+    <span>Instructions</span>
+    <button id="instructionsBack" type="button" style="background:none; border:none; color:white; font-size:18px; cursor:pointer; height:auto; width:auto;">✕</button>
+  </div>
+  <div id="instructionsContent" style="padding:16px 18px; overflow-y:auto; line-height:1.6; scrollbar-width:none; -ms-overflow-style:none;">
+    ${parseRawInstructions(RAW_TEXT)}
+  </div>
+</div>
+`;
+root.style.cssText = "position:fixed; inset:0; display:none; z-index:99999;";
+document.body.appendChild(root);
+
+const modalContent = document.getElementById("instructionsContent");
+if(modalContent) {
+  modalContent.addEventListener("wheel", e=>{ e.stopPropagation(); },{passive:false});
+  modalContent.addEventListener("touchmove", e=>{ e.stopPropagation(); },{passive:false});
+}
+
+function openModal(){
+  root.style.display="block";
+  document.body.style.overflow="hidden";
+  document.documentElement.style.overflow="hidden";
+}
+
+function closeModal(){
+  root.style.display="none";
+  document.body.style.overflow="";
+  document.documentElement.style.overflow="";
+}
+
+if(btn) btn.onclick = openModal;
+const backBtn = document.getElementById("instructionsBack");
+if(backBtn) backBtn.onclick = closeModal;
+const backdrop = document.getElementById("instructionsBackdrop");
+if(backdrop) backdrop.onclick = closeModal;
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeModal(); });
+
+})();
+</script>
+
+</body>
+>>>>>>> c76eb69b50f05b4798f53dfe215594e2f268fb31
 </html>

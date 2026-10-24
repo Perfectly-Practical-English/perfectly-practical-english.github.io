@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html> 
 <html lang="en">
 <head>
@@ -1997,4 +1998,2005 @@ document.addEventListener("keydown", e=>{
 <!-- ========================================== -->
 
 </body>
+=======
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Squares 600 Ideas</title>
+    <style>
+        /* Customizable CSS Variables */
+        :root {
+            /* Base Colors */
+            --primary-bg-color: #4CAF50;        /* Primary background color */
+            --button-bg-color: #4CAF50;          /* Button background color */
+            --button-text-color: white;          /* Button text color */
+            --grid-border-color: #ddd;           /* Grid item border color */
+            --grid-item-font-size: 16px;         /* Font size for grid items */
+            --title-font-size: 24px;             /* Font size for title */
+            --title-color: #333;                 /* Title color */
+            --grid-item-text-color: #000;        /* Text color for grid items */
+            --grid-gap: 10px;                    /* Gap between grid items */
+            --grid-item-size: 100px;             /* Size of each grid item */
+            --generate-button-size: 16px;        /* Font size of the button */
+            --generate-button-padding: 10px 20px; /* Button padding */
+            
+            /* Hover Effects */
+            --button-hover-bg-color: #45a049;    /* Button hover background color */
+            --grid-item-hover-bg-color: #f0f0f0; /* Grid item hover background color */
+        }
+
+        /* Background color for the whole page - light grey stone */
+        body {
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: url('https://www.transparenttextures.com/patterns/stonewall.png'), #dcdcdc;
+            font-family: Arial, sans-serif;
+            background-size: cover;
+            background-position: center;
+            flex-direction: column; /* Ensures footer will be at the bottom */
+        }
+
+        /* Darker grey container for the entire content (title, grid, and button) */
+        .game-container {
+            text-align: center;
+            background-color: #333333; /* Even darker grey background for the container */
+            border-radius: 8px; /* Rounded corners for container */
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4); /* Subtle shadow around the container */
+        }
+
+        /* Title with bold font */
+        h1 {
+            font-size: var(--title-font-size);
+            color: var(--title-color);
+            font-weight: bold; /* Make the title bold */
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, var(--grid-item-size));
+            grid-template-rows: repeat(3, var(--grid-item-size));
+            gap: var(--grid-gap);
+            margin-top: 20px;
+        }
+
+        /* Grid item style with bold text */
+        .grid-item {
+          width: var(--grid-item-size);
+          height: var(--grid-item-size);
+
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          font-size: var(--grid-item-font-size);
+          line-height: 1;
+          font-family:
+            "Apple Color Emoji",
+            "Segoe UI Emoji",
+            "Noto Color Emoji",
+            sans-serif;
+
+          color: var(--grid-item-text-color);
+
+          border: 2px solid var(--grid-border-color);
+          border-radius: 8px;
+          background-color: #000000;
+
+          box-shadow:
+            inset 1px 1px 5px rgba(0, 0, 0, 0.2),
+            0 4px 6px rgba(0, 0, 0, 0.2);
+
+          transition:
+            background-color 0.3s ease,
+            transform 0.3s ease,
+            box-shadow 0.3s ease;
+
+          font-weight: bold;
+        }
+
+        /* Emoji override — fills the square */
+        .grid-item .emoji {
+          font-size: calc(var(--grid-item-size) * 0.8);
+          line-height: 1;
+          display: block;
+
+          position: relative;
+          top: -5px;   /* ⬆ bump emoji up ~5px */
+        }
+
+        .grid-item:hover {
+            background-color: var(--grid-item-hover-bg-color); /* Light background on hover */
+            transform: scale(1.05); /* Slight scale on hover */
+            box-shadow: inset 2px 2px 10px rgba(0, 0, 0, 0.3), 0 6px 12px rgba(0, 0, 0, 0.3); /* Enhanced shadow */
+        }
+
+        #generateButton {
+          margin-top: -100px;   /* move button up */
+          padding: var(--generate-button-padding);
+          font-size: var(--generate-button-size);
+          cursor: pointer;
+          background-color: var(--button-bg-color);
+          color: var(--button-text-color);
+          border: none;
+          border-radius: 5px;
+          transition: background-color 0.3s ease;
+          font-weight: bold;
+        }
+
+        #generateButton:hover {
+            background-color: var(--button-hover-bg-color);
+        }
+
+        /* ===============================
+           FORM ROW & SECTION SELECTOR
+           =============================== */
+        .formRow {
+          display: flex;
+          flex-shrink: 0;
+          flex-direction: row;
+          flex-wrap: nowrap;
+          gap: 6px;
+          width: calc(3 * var(--grid-item-size) + 2 * var(--grid-gap));
+          height: 38px;
+          margin-bottom: 10px;
+          align-items: stretch;
+        }
+
+        #sectionSelectorBtn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: flex-start;
+          height: 38px;
+          padding: 0 12px;
+          font-family: Arial, sans-serif;
+          font-size: 14px;
+          font-weight: 400;
+          background: #292929;
+          color: #b5b5b5;
+          border: 5px solid #3a3a3a;
+          border-radius: 6px;
+          cursor: pointer;
+          user-select: none;
+          white-space: nowrap;
+          flex: 1 1 auto;
+          text-align: left;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          width: 100%;
+        }
+        #sectionSelectorBtn:hover {
+          background: #333333;
+        }
+
+        /* ===============================
+           MODAL STYLING
+           =============================== */
+        #sectionModalRoot {
+          position: fixed;
+          inset: 0;
+          display: none;
+          z-index: 99999;
+        }
+        #sectionModalBackdrop {
+          position: absolute;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.35);
+        }
+        #sectionModalContent {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: min(400px, 90vw);
+          max-height: 80vh;
+          background: #fff;
+          border-radius: 10px;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        #sectionModalHeader {
+          padding: 12px 16px;
+          background: #1976d2;
+          color: white;
+          font-weight: bold;
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-family: Arial, sans-serif;
+        }
+        #sectionModalClose {
+          background: none;
+          border: none;
+          color: white;
+          font-size: 18px;
+          cursor: pointer;
+        }
+        #sectionListContainer {
+          padding: 10px;
+          overflow-y: auto;
+          max-height: 60vh;
+        }
+        .section-item {
+          padding: 10px 12px;
+          margin-bottom: 6px;
+          background: #eaf6ff;
+          border-radius: 6px;
+          cursor: pointer;
+          font-family: Arial, sans-serif;
+          font-size: 14px;
+          color: #1976d2;
+          font-weight: 600;
+          text-align: left;
+        }
+        .section-item:hover {
+          background: #d0e8ff;
+        }
+
+        /* Game footer styling */
+        footer.game-footer,
+        footer.game-footer p {
+          margin-top: 10px;
+          font-size: 8px;
+          line-height: 1.1;
+          opacity: 0.8;
+          color: #b5b5b5;
+          text-align: center;
+        }
+
+        @media (max-height: 700px) {
+          #generateButton {
+            margin-top: -40px;
+          }
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-container">
+    <h1>Random Word Grid</h1>
+
+    <div class="formRow">
+        <button type="button" id="sectionSelectorBtn">Topics</button>
+    </div>
+
+    <!-- Section Selection Modal -->
+    <div id="sectionModalRoot">
+      <div id="sectionModalBackdrop"></div>
+      <div id="sectionModalContent">
+        <div id="sectionModalHeader">
+          <span>Topics</span>
+          <button id="sectionModalClose">✕</button>
+        </div>
+        <div id="sectionListContainer"></div>
+      </div>
+    </div>
+
+    <div class="grid-container">
+        <div class="grid-item" id="square1"></div>
+        <div class="grid-item" id="square2"></div>
+        <div class="grid-item" id="square3"></div>
+        <div class="grid-item" id="square4"></div>
+        <div class="grid-item" id="square5"></div>
+        <div class="grid-item" id="square6"></div>
+    </div>
+
+    <button id="generateButton">What's next?</button>
+
+    <footer class="game-footer">
+        <p>&copy; 2026 Perfectly Practical English™. All rights reserved.</p>
+    </footer>
+</div>
+
+<script>
+// Raw input as a multi-line string
+const rawInput = `
+~Set 1
+
+|Square 1 Time:
+now
+then
+today
+tomorrow
+yesterday
+soon
+always
+never
+sometimes
+frequently
+often
+already
+before
+after
+late
+early
+recently
+lately
+currently
+in the morning
+in the evening
+at night
+this week
+next week
+last week
+in a while
+in a moment
+in a bit
+at once
+immediately
+recently
+all the time
+every day
+once
+twice
+again
+every week
+every month
+every year
+for now
+from time to time
+in the past
+in the future
+in the long run
+at present
+at the moment
+this year
+next month
+last month
+a while ago
+in the past few days
+in a few hours
+sooner or later
+before long
+once in a while
+a long time ago
+not long ago
+a short time ago
+in the blink of an eye
+after a while
+as soon as
+by the time
+in time
+at some point
+eventually
+in a few minutes
+for the time being
+at this moment
+in the interim
+for a while
+right away
+in no time
+in the near future
+momentarily
+long ago
+on time
+ahead of time
+as of now
+for the past few days
+at some time
+for some time
+at that time
+afterwards
+all the while
+constantly
+in the meantime
+at the earliest
+in the meantime
+shortly
+in due time
+by now
+in a few seconds
+any minute now
+by tomorrow
+at once
+on a daily basis
+in the foreseeable future
+as long as
+for ages
+in a second
+
+|Square 2 Adjectives:
+other
+new
+good
+high
+old
+great
+big
+American
+small
+large
+national
+young
+different
+black
+long
+little
+important
+political
+bad
+white
+real
+best
+right
+social
+only
+public
+sure
+low
+early
+able
+human
+local
+late
+hard
+major
+better
+economic
+strong
+possible
+whole
+free
+military
+true
+federal
+international
+full
+special
+easy
+clear
+recent
+certain
+personal
+open
+red
+difficult
+available
+likely
+short
+single
+medical
+current
+wrong
+private
+past
+foreign
+fine
+common
+poor
+natural
+significant
+similar
+hot
+dead
+central
+happy
+serious
+ready
+simple
+left
+physical
+general
+environmental
+financial
+blue
+democratic
+dark
+various
+entire
+close
+legal
+religious
+cold
+final
+main
+green
+nice
+huge
+popular
+traditional
+cultural
+
+|Square 3 Subject:
+time
+year
+people
+way
+day
+man
+thing
+woman
+life
+child
+world
+school
+state
+family
+student
+group
+country
+problem
+hand
+part
+place
+case
+week
+company
+system
+program
+question
+work
+government
+number
+night
+point
+home
+water
+room
+mother
+area
+money
+story
+fact
+month
+lot
+right
+study
+book
+eye
+job
+word
+business
+issue
+side
+kind
+head
+house
+service
+friend
+father
+power
+hour
+game
+line
+end
+member
+law
+car
+city
+community
+name
+president
+team
+minute
+idea
+kid
+body
+information
+back
+parent
+face
+others
+level
+office
+door
+health
+person
+art
+war
+history
+party
+result
+change
+morning
+reason
+research
+girl
+guy
+moment
+air
+teacher
+force
+education
+
+|Square 4 Verb:
+be
+have
+do
+say
+go
+can
+get
+would
+make
+know
+will
+think
+take
+see
+come
+could
+want
+look
+use
+find
+give
+tell
+work
+may
+should
+call
+try
+ask
+need
+feel
+become
+leave
+put
+mean
+keep
+let
+begin
+seem
+help
+talk
+turn
+start
+might
+show
+hear
+play
+run
+move
+like
+live
+believe
+hold
+bring
+happen
+must
+write
+provide
+sit
+stand
+lose
+pay
+meet
+include
+continue
+set
+learn
+change
+lead
+understand
+watch
+follow
+stop
+create
+speak
+read
+allow
+add
+spend
+grow
+open
+walk
+win
+offer
+remember
+love
+consider
+appear
+buy
+wait
+serve
+die
+send
+expect
+build
+stay
+fall
+cut
+reach
+kill
+remain
+
+|Square 5 Adverb:
+up
+so
+out
+just
+now
+how
+then
+more
+also
+here
+well
+only
+very
+even
+back
+there
+down
+still
+in
+as
+to
+when
+never
+really
+most
+on
+why
+about
+over
+again
+where
+right
+off
+always
+today
+all
+far
+long
+away
+yet
+often
+ever
+however
+almost
+later
+much
+once
+least
+ago
+together
+around
+already
+enough
+both
+maybe
+actually
+probably
+home
+of course
+perhaps
+little
+else
+sometimes
+finally
+less
+better
+early
+especially
+either
+quite
+simply
+nearly
+soon
+certainly
+quickly
+not
+recently
+before
+usually
+thus
+exactly
+hard
+particularly
+pretty
+forward
+ok
+clearly
+indeed
+rather
+that
+tonight
+close
+suddenly
+best
+instead
+ahead
+fast
+alone
+eventually
+directly
+
+|Square 6 Object:
+time
+year
+people
+way
+day
+man
+thing
+woman
+life
+child
+world
+school
+state
+family
+student
+group
+country
+problem
+hand
+part
+place
+case
+week
+company
+system
+program
+question
+work
+government
+number
+night
+point
+home
+water
+room
+mother
+area
+money
+story
+fact
+month
+lot
+right
+study
+book
+eye
+job
+word
+business
+issue
+side
+kind
+head
+house
+service
+friend
+father
+power
+hour
+game
+line
+end
+member
+law
+car
+city
+community
+name
+president
+team
+minute
+idea
+kid
+body
+information
+back
+parent
+face
+others
+level
+office
+door
+health
+person
+art
+war
+history
+party
+result
+change
+morning
+reason
+research
+girl
+guy
+moment
+air
+teacher
+force
+education
+
+~Set 2
+
+|Square 1 Time:
+⏱️
+⏳
+📅
+➡️
+⬅️
+🔜
+♾️
+🚫
+🔀
+🔁
+🔂
+✅
+⬅️
+➡️
+⏰
+🌅
+🕒
+🕰️
+📍
+🌄
+🌆
+🌙
+📆
+➡️
+⬅️
+⏳
+⏱️
+⌛
+⚡
+⚡
+🕰️
+♾️
+📅
+1️⃣
+2️⃣
+🔁
+📆
+🗓️
+📅
+⏸️
+🔄
+⬅️
+➡️
+📈
+📍
+⏱️
+📅
+➡️
+⬅️
+🕰️
+📆
+⏰
+🔜
+🔄
+🕰️
+🕰️
+🕰️
+👁️
+⏳
+⚡
+⏱️
+⏰
+📍
+🏁
+⏰
+⏸️
+📍
+🔄
+⏳
+⚡
+⚡
+➡️
+⏱️
+🕰️
+⏰
+⏱️
+📆
+⏰
+⏳
+🕰️
+➡️
+♾️
+🔁
+⏳
+⏰
+⏳
+🔜
+⏳
+✅
+⏱️
+⏰
+➡️
+⚡
+📅
+🔮
+⏳
+⚡
+
+|Square 2 Adjectives:
+🔄
+🆕
+👍
+⬆️
+👴
+⭐
+📦
+🇺🇸
+🐜
+📦
+🏛️
+👶
+🔀
+⚫
+📏
+🤏
+❗
+🗳️
+👎
+⚪
+🎯
+🏆
+➡️
+👥
+☝️
+🏛️
+✔️
+⬇️
+⏰
+💪
+🧍
+📍
+⏰
+🪨
+⭐
+💰
+💪
+✔️
+🌍
+🆓
+🪖
+✔️
+🏛️
+🌐
+🈵
+✨
+👌
+🔍
+🕰️
+✔️
+👤
+🚪
+🔴
+🧩
+📦
+⏳
+1️⃣
+🩺
+📍
+❌
+🔒
+⬅️
+🌍
+👌
+📦
+👎
+🌱
+❗
+🔁
+🔥
+💀
+🎯
+😁
+⚠️
+✅
+⭕
+⬅️
+💪
+🌐
+🌱
+💰
+🔵
+🗳️
+🌑
+🎨
+🌍
+📍
+⚖️
+⛪
+❄️
+🏁
+⭐
+🟢
+😊
+🐘
+⭐
+🏺
+🎭
+
+|Square 3 Subject:
+⏰
+📅
+👥
+➡️
+📆
+👨
+📦
+👩
+❤️
+🧒
+🌍
+🏫
+🏛️
+👨‍👩‍👧‍👦
+🎓
+👥
+🌎
+❓
+✋
+🧩
+📍
+📂
+📆
+🏢
+⚙️
+💻
+❓
+💼
+🏛️
+🔢
+🌙
+📍
+🏠
+💧
+🚪
+🤱
+🗺️
+💰
+📖
+📊
+📅
+📦
+➡️
+📚
+📖
+👁️
+💼
+🔤
+🏬
+⚠️
+➡️
+🧬
+🧠
+🏠
+🛎️
+👫
+👨
+⚡
+⏰
+🎮
+📏
+🏁
+👤
+⚖️
+🚗
+🏙️
+🏘️
+🏷️
+🇺🇸
+👥
+⏱️
+💡
+🧒
+🧍
+🧠
+ℹ️
+🔙
+👪
+🙂
+👥
+📊
+🏢
+🚪
+❤️‍🩹
+🧍
+🎨
+⚔️
+📜
+🎉
+📈
+🔄
+🌅
+❓
+🔬
+👧
+👦
+⏱️
+🌬️
+👩‍🏫
+💪
+🎓
+
+|Square 4 Verb:
+⭕
+🤲
+⚙️
+🗣️
+➡️
+🔓
+📥
+🤔
+🛠️
+🧠
+➡️
+💭
+✋
+👀
+➡️
+🔓
+❤️
+👀
+🧰
+🔎
+🎁
+🗣️
+💼
+❓
+✔️
+📞
+🎯
+❓
+🆘
+❤️
+➡️
+🚪
+📍
+💡
+🔒
+➕
+🚦
+🎬
+🤷
+🆘
+🗣️
+🔄
+▶️
+❓
+📺
+👂
+🎮
+🏃
+➡️
+👍
+🏡
+🙏
+✊
+🎁
+⚡
+❗
+✍️
+📦
+🪑
+🧍
+📉
+💸
+🤝
+➕
+🔄
+📍
+📘
+🔁
+➡️
+🧠
+📺
+➡️
+🛑
+🎨
+🗣️
+📖
+✅
+➕
+💰
+🌱
+🚪
+🚶
+🏆
+🎁
+🧠
+❤️
+🤔
+👀
+🛒
+⏳
+🍽️
+💀
+📤
+⏰
+🏗️
+📍
+🍂
+✂️
+📍
+⚔️
+⏸️
+
+|Square 5 Adverb:
+⬆️
+🔥
+➡️
+⚖️
+⏰
+❓
+➡️
+➕
+➕
+📍
+👍
+☝️
+🔥
+⚖️
+⬅️
+📍
+⬇️
+⏸️
+📍
+↔️
+➡️
+⏰
+🚫
+🎯
+🏆
+📍
+❓
+💭
+🔁
+🔄
+📍
+➡️
+❌
+♾️
+📅
+🌐
+📏
+⏳
+➡️
+⏰
+🔁
+📍
+⏳
+📍
+🔮
+⚡
+➖
+🕰️
+👥
+🔄
+✔️
+➖
+❓
+🎭
+🏠
+📜
+❓
+🤏
+🔄
+🏁
+➖
+⭐
+⏰
+✨
+❓
+⚖️
+🎯
+🔜
+✔️
+⚡
+🚫
+🕰️
+⬅️
+🔁
+➡️
+🎯
+💪
+🎯
+✨
+🛣️
+👌
+🔍
+✔️
+⚖️
+➡️
+🌙
+📍
+⚡
+🏆
+🔄
+➡️
+🏃
+🚶
+🏁
+➡️
+
+|Square 6 Object:
+⏰
+📅
+👥
+➡️
+📆
+👨
+📦
+👩
+❤️
+🧒
+🌍
+🏫
+🏛️
+👨‍👩‍👧‍👦
+🎓
+👥
+🌎
+❓
+✋
+🧩
+📍
+📂
+📆
+🏢
+⚙️
+💻
+❓
+💼
+🏛️
+🔢
+🌙
+📍
+🏠
+💧
+🚪
+🤱
+🗺️
+💰
+📖
+📊
+📅
+📦
+➡️
+📚
+📖
+👁️
+💼
+🔤
+🏬
+⚠️
+➡️
+🧬
+🧠
+🏠
+🛎️
+👫
+👨
+⚡
+⏰
+🎮
+📏
+🏁
+👤
+⚖️
+🚗
+🏙️
+🏘️
+🏷️
+🇺🇸
+👥
+⏱️
+💡
+🧒
+🧍
+🧠
+ℹ️
+🔙
+👪
+🙂
+👥
+📊
+🏢
+🚪
+❤️‍🩹
+🧍
+🎨
+⚔️
+📜
+🎉
+📈
+🔄
+🌅
+❓
+🔬
+👧
+👦
+⏱️
+🌬️
+👩‍🏫
+💪
+🎓
+`;
+
+// Function to parse raw input into an array of square objects
+function parseSets(input) {
+  const sets = {};
+  const setBlocks = input.split(/~Set\s+/).slice(1);
+
+  setBlocks.forEach(block => {
+    const [setNameLine, ...rest] = block.split('\n');
+    const setName = `Set ${setNameLine.trim()}`;
+    sets[setName] = {};
+
+    const squarePattern = /\|Square (\d+ [^:]+):\n([^|]+)/g;
+    let match;
+
+    while ((match = squarePattern.exec(block)) !== null) {
+      const squareName = match[1].trim();
+      const items = match[2]
+        .split('\n')
+        .map(v => v.trim())
+        .filter(Boolean);
+
+      sets[setName][squareName] = items;
+    }
+  });
+
+  return sets;
+}
+
+const data = parseSets(rawInput);
+const setNames = Object.keys(data);
+
+let activeSet = null;
+let squareKeys = [];
+
+const sectionSelectorBtn = document.getElementById('sectionSelectorBtn');
+const modalRoot = document.getElementById("sectionModalRoot");
+const modalBackdrop = document.getElementById("sectionModalBackdrop");
+const modalClose = document.getElementById("sectionModalClose");
+const listContainer = document.getElementById("sectionListContainer");
+
+function openModal() {
+  listContainer.innerHTML = "";
+  if (setNames.length === 0) {
+    listContainer.innerHTML = "<div style='padding:10px; text-align:center; color:#666;'>No sets found.</div>";
+  } else {
+    setNames.forEach((setName) => {
+      const item = document.createElement("div");
+      item.className = "section-item";
+      item.textContent = setName;
+      item.addEventListener("click", () => {
+        activeSet = setName;
+        sectionSelectorBtn.textContent = setName;
+        closeModal();
+        
+        // Automatically start/generate grid upon selection
+        if (activeSet && data[activeSet]) {
+          squareKeys = Object.keys(data[activeSet]);
+          generateWords();
+        }
+      });
+      listContainer.appendChild(item);
+    });
+  }
+  modalRoot.style.display = "block";
+}
+
+function closeModal() {
+  modalRoot.style.display = "none";
+}
+
+if (sectionSelectorBtn) sectionSelectorBtn.addEventListener("click", openModal);
+if (modalClose) modalClose.addEventListener("click", closeModal);
+if (modalBackdrop) modalBackdrop.addEventListener("click", closeModal);
+
+// Function to generate a random color
+function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
+}
+
+function isEmoji(value) {
+  return /\p{Extended_Pictographic}/u.test(value);
+}
+
+function generateWords() {
+  if (!activeSet) return;
+
+  const gridItems = document.querySelectorAll('.grid-item');
+  const squares = data[activeSet];
+
+  gridItems.forEach((item, index) => {
+    const squareName = squareKeys[index];
+    const list = squares[squareName];
+    const value = list[Math.floor(Math.random() * list.length)];
+
+    item.style.backgroundColor = getRandomColor();
+
+    if (isEmoji(value)) {
+      item.innerHTML = `<span class="emoji">${value}</span>`;
+    } else {
+      item.textContent = value;
+    }
+  });
+}
+
+// Attach event listener to generate button
+document.getElementById('generateButton').addEventListener('click', generateWords);
+</script>
+
+<script>
+  // Create a div element for the border
+  const borderDiv = document.createElement('div');
+
+  // Style it to be a narrow green border around the whole viewport
+  borderDiv.style.position = 'fixed';
+  borderDiv.style.inset = '0';
+  borderDiv.style.border = '10px solid #39FF14'; // Green border
+  borderDiv.style.boxSizing = 'border-box';
+  borderDiv.style.zIndex = '9999';
+  borderDiv.style.pointerEvents = 'none';
+  borderDiv.style.backgroundColor = 'transparent';
+
+  document.body.appendChild(borderDiv);
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let filename = window.location.pathname.split("/").pop();
+    filename = filename.replace(/\.html$/i, "");
+    filename = filename.replace(/^[^_]*_/, "");
+    const title = filename.replace(/_/g, " ");
+
+    const h1 = document.querySelector("h1");
+    if (h1) {
+        h1.textContent = title;
+    }
+});
+</script>
+
+<script>
+
+(function(){
+
+/* =========================
+   RAW INSTRUCTIONS TEXT
+========================= */
+
+const RAW_TEXT = `
+• How to use this page…
+
+• Overview: The Word Squares tool generates random combinations of vocabulary words and emoji icons across a 3x3 grid layout to inspire creative sentence and story building.
+
+• Category Selection: Click the Select a section button at the top of the interface to open the category modal, then choose a set (such as Set 1 for text vocabulary or Set 2 for emoji icons).
+
+• [Automatic] Instant Generation: Selecting a category automatically initializes and populates the word grid with randomized terms.
+
+• Grid Display: View the randomized words and icons across the grid squares, each styled with distinct background colors and centered text or oversized emojis.
+
+• Generate Next Combination: Click the What's next? button below the grid to instantly shuffle and generate a fresh set of random words for all grid positions.
+
+`;
+
+
+/* =========================
+   RAW TEXT PARSER
+========================= */
+
+function parseRawInstructions(text){
+
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+
+  lines.forEach(line => {
+
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
+
+    html.push(`<p>${line}</p>`);
+  });
+
+  return html.join("");
+}
+
+
+/* =========================
+   CREATE STYLE
+========================= */
+
+const style = document.createElement("style");
+
+style.textContent = `
+#instructionsBtn{
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  background: #2e8b57;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+#instructionsBtn:hover{
+  background: #257047;
+  transform: scale(1.05);
+}
+
+#instructionsRoot{
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+}
+
+#instructionsBackdrop{
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#instructionsModal{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid #cfe2f7;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+#instructionsHeader{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex: 0 0 auto;
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+#instructionsBack{
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  height: auto;
+  width: auto;
+}
+
+#instructionsBack:hover{
+  background-color: #eef6ff;
+}
+
+#instructionsContent{
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  flex: 1 1 auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #333;
+}
+
+#instructionsContent::-webkit-scrollbar{
+  display: none;
+}
+
+#instructionsContent h3{
+  margin-top: 10px;
+  margin-bottom: 4px;
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+#instructionsContent p{
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+#instructionsContent hr{
+  margin: 12px 0;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+`;
+
+document.head.appendChild(style);
+
+
+/* =========================
+   CREATE BUTTON
+========================= */
+
+const btn = document.createElement("button");
+btn.id = "instructionsBtn";
+btn.innerHTML = "?";
+btn.setAttribute("aria-label", "Instructions");
+
+document.body.appendChild(btn);
+
+
+/* =========================
+   CREATE MODAL
+========================= */
+
+const root = document.createElement("div");
+root.id = "instructionsRoot";
+
+root.innerHTML = `
+<div id="instructionsBackdrop"></div>
+
+<div id="instructionsModal">
+
+  <div id="instructionsHeader">
+    <span>Instructions</span>
+    <button id="instructionsBack" type="button">✕</button>
+  </div>
+
+  <div id="instructionsContent">
+    ${parseRawInstructions(RAW_TEXT)}
+  </div>
+
+</div>
+`;
+
+document.body.appendChild(root);
+
+
+/* =========================
+   SCROLL LOCK
+========================= */
+
+const modalContent = document.getElementById("instructionsContent");
+
+modalContent.addEventListener("wheel", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+modalContent.addEventListener("touchmove", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+
+/* =========================
+   OPEN / CLOSE
+========================= */
+
+function openModal(){
+  root.style.display = "block";
+  document.body.style.overflow = "hidden";
+  document.documentElement.style.overflow = "hidden";
+}
+
+function closeModal(){
+  root.style.display = "none";
+  document.body.style.overflow = "";
+  document.documentElement.style.overflow = "";
+}
+
+btn.onclick = openModal;
+
+document.getElementById("instructionsBack").onclick = closeModal;
+document.getElementById("instructionsBackdrop").onclick = closeModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key === "Escape") closeModal();
+});
+
+})();
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<!-- ========================================== -->
+<!-- NARROW PHONE LAYOUT SAFETY PATCH (START) -->
+<!-- ========================================== -->
+<style>
+  html, body {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box;
+  }
+  *, *:before, *:after {
+    box-sizing: inherit;
+  }
+  body {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    margin: 0 auto !important;
+  }
+  img, video, canvas, table {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+</style>
+<!-- ========================================== -->
+<!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
+<!-- ========================================== -->
+
+</body>
+>>>>>>> c76eb69b50f05b4798f53dfe215594e2f268fb31
 </html>

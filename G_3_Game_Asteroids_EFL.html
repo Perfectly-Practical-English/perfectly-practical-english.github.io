@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 <!DOCTYPE html> 
 <html lang="en">
 <head>
@@ -2354,4 +2355,2362 @@ window.saveResult = async function saveResult(text) {
 <!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
 <!-- ========================================== -->
 </body>
+=======
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Asteroids</title>
+
+<style>
+:root { --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+* { 
+  box-sizing: border-box; 
+}
+
+/* PAGE BASE */
+body {
+  margin: 0;
+  padding: 30px;
+  font-family: var(--font-main);
+  background: black;
+  user-select: none;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100vw !important;
+  overflow-x: hidden !important;
+  box-sizing: border-box;
+  padding-left: 12px !important;
+  padding-right: 12px !important;
+  margin: 0 auto !important;
+}
+
+html, body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+
+/* ===============================
+    CORE ROW LAYOUT
+    =============================== */
+
+#topBar,
+.formRow {
+  padding: 0px;
+  width: 100%;
+  max-width: calc(100% - 10px);
+  margin: 0 auto 10px;
+
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: nowrap;
+  gap: 3px;
+  box-sizing: border-box;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#topBar {
+  background: #000;
+  border-radius: 6px;
+  color: #fff;
+}
+
+/* ===============================
+    UNIFORM GLOBAL BUTTON STYLING
+    =============================== */
+button,
+.top-bar #sectionSelectorBtn,
+#sectionSelectorBtn,
+#scoreButtons button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 38px;               /* Uniform fixed height for ALL buttons */
+  padding: 0 12px;            /* Uniform padding */
+  
+  font-family: var(--font-main);
+  font-size: 14px;            /* Uniform font size across every button */
+  font-weight: 400;
+  line-height: 1;
+
+  background: #222;
+  color: #fff;
+
+  border: 1px solid #777;
+  border-radius: 6px;
+
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+
+  transition: background 0.15s ease, transform 0.08s ease;
+}
+
+button:hover:not(:disabled),
+#scoreButtons button:hover:not(:disabled) {
+  background: #333;
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Uniform sizing and flex distribution across the width of the star container */
+#topBar input[type=text],
+#topBar button {
+  flex: 1 1 0;
+  width: 0;
+  min-width: 0;
+  height: 38px;
+  padding: 0 10px;
+  font-family: var(--font-main);
+  font-size: 14px;
+  font-weight: 400;
+  box-sizing: border-box;
+  background: #222;
+  color: #fff;
+  border: 1px solid #777;
+  border-radius: 6px;
+  outline: none;
+  white-space: nowrap;
+}
+
+#topBar input[type=text] {
+  flex: 0 0 85px !important;
+  width: 85px !important;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#topBar button,
+#sectionSelectorBtn,
+#submitBtn {
+  justify-content: center;
+  text-align: center;
+  overflow: visible;
+}
+
+/* Specific override for the Section Selector Button to truncate cleanly when too long */
+#sectionSelectorBtn {
+  text-align: left !important;
+  justify-content: flex-start !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+/* Explicit placeholder styling to ensure font size matches inputs/buttons */
+#topBar input[type=text]::placeholder {
+  font-family: var(--font-main);
+  font-size: 14px;
+  color: #aaa;
+  opacity: 1;
+}
+
+/* ===============================
+    FORM ROW BUTTON ALIGNMENT
+    =============================== */
+
+.formRow > button {
+  padding: 0 12px;
+}
+
+/* ===============================
+    MODAL STYLING (Matched Style)
+    =============================== */
+#sectionModalRoot,
+#instructionsRoot {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 99999;
+}
+
+#sectionModalBackdrop,
+#instructionsBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#sectionModalContent,
+#instructionsModal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--input-border-blue, #cfe2f7);
+  font-family: var(--font-main);
+}
+
+#sectionModalHeader,
+#instructionsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex: 0 0 auto;
+  font-family: var(--font-main);
+  font-size: var(--size-title, 18px);
+  line-height: 1.3;
+  font-weight: 700;
+  color: var(--blue, #1976d2);
+  background: none;
+  padding: 0;
+}
+
+#instructionsTitle {
+  color: var(--blue, #1976d2);
+  font-weight: 700;
+  font-size: var(--size-title, 18px);
+}
+
+#sectionModalClose,
+#instructionsBack {
+  background: none;
+  border: none;
+  color: var(--blue, #1976d2);
+  font-family: var(--font-main);
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  height: auto;
+  width: auto;
+}
+
+#sectionModalClose:hover,
+#instructionsBack:hover {
+  background-color: #eef6ff;
+}
+
+#sectionListContainer,
+#instructionsContent {
+  padding: 0;
+  overflow-y: auto;
+  min-height: 0;
+  flex: 1 1 auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  font-family: var(--font-main);
+  font-size: var(--size-label, 14px);
+  line-height: 1.5;
+  color: #333;
+}
+
+#sectionListContainer::-webkit-scrollbar,
+#instructionsContent::-webkit-scrollbar {
+  display: none;
+}
+
+#instructionsContent h3 {
+  color: var(--blue, #1976d2);
+  margin: 10px 0 4px 0;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+#instructionsContent p {
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+.section-item {
+  height: 28px;
+  padding: 0 6px;
+  margin-bottom: 6px;
+  background: var(--section-item-default, #eaf6ff);
+  border: 1px solid var(--input-border-blue, #cfe2f7);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-main);
+  font-size: var(--size-small, 12px);
+  color: var(--blue, #1976d2);
+  font-weight: 400;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  transition: 0.12s;
+}
+
+.section-item:hover {
+  background: var(--section-item-hover, #d0e8ff);
+  border-color: var(--blue, #1976d2);
+}
+
+.section-item.selected {
+  background: var(--blue, #1976d2);
+  border-color: var(--blue, #1976d2);
+  color: #fff;
+}
+
+/* ===============================
+    EXTRA UI (NON-LAYOUT)
+    =============================== */
+
+#scoreboardContainer {
+  margin: 12px auto 0 auto;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 18px;
+  color: #0f0;
+  white-space: pre-wrap;       /* Allows text to wrap normally */
+  overflow-wrap: break-word;   /* Breaks long strings/IDs to fit container width */
+  word-break: break-word;      /* Fallback for word wrapping */
+  max-width: calc(100% - 10px);/* Constrains container to star area width */
+  width: 100%;                 /* Fills available width */
+  box-sizing: border-box;      /* Includes padding in width calculations */
+  padding-left: 5px;
+  padding-right: 5px;
+}
+#scoreButtons {
+  margin: 12px auto 24px auto;
+  display: none;
+  gap: 10px;
+  max-width: calc(100% - 10px);
+  width: 100%;
+  box-sizing: border-box;
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
+#gameArea {
+  position: relative;
+  margin: -2px auto;
+  height: 400px;
+  width: calc(100% - 12px);
+  max-width: calc(100% - 10px);
+  border-radius: 6px;
+  overflow: hidden;
+  background: black;
+  white-space: normal;
+  word-wrap: break-word;
+  border: 1px solid #888;
+  box-sizing: border-box;
+}
+
+#terrainCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.sentence {
+  position: absolute;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: pre-wrap;
+  width: 360px;               
+  word-break: break-word;
+  overflow-wrap: break-word;
+  user-select: none;
+  pointer-events: none;
+  color: #fff;
+  text-shadow: 0 0 3px rgba(0,0,0,0.3);
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 2.0s ease-in-out; /* Much slower, smoother fade out (2.0s) */
+}
+.blank {
+  display: inline-block;
+  min-width: 60px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-bottom: 2px solid #fff;
+  text-align: center;
+  color: red;
+  vertical-align: bottom;
+}
+
+#typedDisplay {
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  font-size: 20px;
+  color: red;
+  font-weight: bold;
+  z-index: 3;
+  display: none;
+}
+
+#plane {
+  position: absolute;
+  left: 50px;
+  font-size: 50px;
+  user-select: none;
+  pointer-events: none;
+  transition: top 0.05s linear;
+  z-index: 4;
+  display: none;
+  transform: rotate(45deg);
+}
+
+#mcButtonsContainer {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  flex-wrap: wrap;
+  max-width: 80%;
+}
+
+footer {
+  margin-top: 2px;
+  padding: 2px 5px;
+  text-align: left;
+  font-size: 10px;
+  color: #666;
+  background: #000;
+  border-radius: 6px;
+  width: 100%;
+  max-width: calc(100% - 10px);
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
+}
+</style>
+</head>
+<body>
+
+
+<div id="topBar">
+  <input type="text" id="idInput" placeholder="ID" autocomplete="off" />
+  <button id="sectionSelectorBtn" type="button">Topics</button>
+  <button id="submitBtn">Submit</button>
+</div>
+
+<!-- Section Selection Modal -->
+<div id="sectionModalRoot">
+  <div id="sectionModalBackdrop"></div>
+  <div id="sectionModalContent">
+    <div id="sectionModalHeader">
+      <span>Topics</span>
+      <button id="sectionModalClose" type="button">✕</button>
+    </div>
+    <div id="sectionListContainer"></div>
+  </div>
+</div>
+
+<div id="gameArea" tabindex="0" aria-label="MC game area">
+  <canvas id="terrainCanvas"></canvas>
+  <div id="typedDisplay"></div>
+  <div id="plane">🚀</div>
+  <div id="mcButtonsContainer"></div>
+</div>
+
+<audio id="popSound" src="explosion-fx-343683.mp3" preload="auto"></audio>
+
+<div id="scoreboardContainer"></div>
+<div id="scoreButtons">
+  <button id="copyBtn">Copy</button>
+  <button id="downloadTxtBtn">↓Text</button>
+  <button id="downloadPngBtn">↓PNG</button>
+</div>
+
+<footer>
+<p>© <span id="currentYear"></span> Perfectly Practical English</p>
+</footer>
+
+<script>
+document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+
+
+<script>
+async function resolveRaw(source) {
+  if (source.includes('\n')) return source.trim();
+  const res = await fetch(source);
+  if (!res.ok) throw new Error("Failed to load " + source);
+  return (await res.text()).trim();
+}
+</script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+// --- Natural Starfield ---
+const canvas = document.getElementById('terrainCanvas');
+const ctx = canvas.getContext('2d');
+
+function resizeCanvas() {
+  canvas.width = canvas.clientWidth;
+  canvas.height = canvas.clientHeight;
+}
+resizeCanvas();
+window.addEventListener('resize', resizeCanvas);
+
+const stars = [];
+const starCount = 500; // Dense, rich starfield
+
+for (let i = 0; i < starCount; i++) {
+  // Create natural size distribution (mostly small, few large)
+  let rand = Math.random();
+  let size, alpha, speedMultiplier;
+
+  if (rand < 0.70) {
+    // 70% Small, distant stars
+    size = Math.random() * 0.8 + 0.6; // 0.6 to 1.4px
+    alpha = Math.random() * 0.4 + 0.3; // Dimmer
+    speedMultiplier = 0.3;
+  } else if (rand < 0.92) {
+    // 22% Medium stars
+    size = Math.random() * 1.0 + 1.5; // 1.5 to 2.5px
+    alpha = Math.random() * 0.4 + 0.6; // Moderately bright
+    speedMultiplier = 0.6;
+  } else {
+    // 8% Large, bright foreground stars
+    size = Math.random() * 1.5 + 2.5; // 2.5 to 4.0px
+    alpha = 1.0; // Fully bright
+    speedMultiplier = 1.0;
+  }
+
+  stars.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    size: size,
+    alpha: alpha,
+    speed: speedMultiplier
+  });
+}
+
+function drawStarfield() {
+  ctx.fillStyle = 'black';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  for (let s of stars) {
+    // Increased base speed multiplier from 0.4 to 1.2 for faster movement
+    s.x -= 1.2 * s.speed; 
+    
+    if (s.x < 0) {
+      s.x = canvas.width;
+      s.y = Math.random() * canvas.height;
+    }
+
+    ctx.fillStyle = `rgba(255, 255, 255, ${s.alpha})`;
+    
+    if (s.size > 2) {
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.size / 2, 0, Math.PI * 2);
+      ctx.fill();
+    } else {
+      ctx.fillRect(s.x, s.y, s.size, s.size);
+    }
+  }
+  requestAnimationFrame(drawStarfield);
+}drawStarfield();
+// --- Game Variables ---
+const wordListSource = `
+
+~Determiners
+
+I sometimes need to go through |a| little important information slowly and carefully. # Do you have time for me to speak with you?
+
+This boy buys |a lot of| interesting books about animals and science. # He is very smart, and he always studies hard.
+
+|The| busy woman quickly eats an apple before work. # She rarely has much time to get ready, and almost no time for breakfast.
+
+You have such |an| old mobile phone. # Do you seriously think about buying a new one occasionally?
+
+She strongly prefers |that| expensive doctor. # Her health plan usually covers the cost.
+
+The sad, lonely dog quietly sits there under the tree and sees |several| happy families at the park. # It seldom has enough food and sadly wishes it had a home.
+
+We proudly make |many| beautiful products. # Our company is always very successful.
+
+Often, after work, the man conveniently uses |a| small computer at home. # He likes it better than his large computer at work.
+
+All parents give their children |some| advice on how to plan their lives. # But not all children listen respectfully to their parents, some never listen, and some react angrily.
+
+They cleverly find |an| easy way to work on their projects by using AI behind the teacher's back. # Sometimes the teacher quietly scolds them for it.
+
+No one wants |any| cheap clothes. # Every stylish person always buys expensive, fashionable, beautifully made clothes, and never buys cheap ones.
+
+Those girls cheerfully go to |the| new school near the factory over the river. # They go to an all-girls school and they never talk to any boys.
+
+Everyone likes |a| good movie with plenty of action. # People always enjoy exciting movies about heroes who behave bravely.
+
+Unfortunately, something bad always happens in front of everyone. # |The| day can easily go badly, and I have very bad luck, and sometimes it is quite embarrassing.
+
+The large, friendly cat knows |all| the people here in the neighborhood very well. # He seldom bothers anyone, and he is really quite popular.
+
+These little monsters are |a| big problem and cause too much trouble for the scientists. # They speak loudly and behave rudely and rarely behave well.
+
+I patiently do |the| difficult work between 8:00 A.M. and noon. # My schedule is usually very organized.
+
+They eagerly drink |lots of| cold water during the day. # Their work normally makes them very thirsty.
+
+We gratefully receive healthy meals at our school. # Each child regularly gets |enough| warm milk with their hot food.
+
+Each student politely takes |a| few cookies from the box until there are none left. # They enjoy the cookies very much and there are never any cookies left over.
+
+
+~Adjectives, Comparatives, and Superlatives
+
+I sometimes need to go through a little |important| information slowly and carefully. # Do you have time for me to speak with you?
+
+This boy buys many |interesting| books about animals and science. # He is very smart, and he always studies hard.
+
+The |busy| woman quickly eats an apple before work. # She rarely has much time to get ready, and almost no time for breakfast.
+
+You have such an |old| mobile phone. # Do you seriously think about buying a new one occasionally?
+
+She strongly prefers that |expensive| doctor. # Her health plan usually covers the cost.
+
+The |sad|, lonely dog quietly sits there under the tree and sees several happy families at the park. # It seldom has enough food and sadly wishes it had a home.
+
+We proudly make lots of |beautiful| products. # Our company is always very successful.
+
+Often, after work, the man conveniently uses a |small| computer at home. # He likes it better than his large computer at work.
+
+All parents give their children some advice on how to plan their lives. # But not all children listen respectfully to their parents, some never listen, and some react angrily.
+
+They cleverly find an |easy| way to work on their projects by using AI behind the teacher's back. # Sometimes the teacher quietly scolds them for it.
+
+No one wants any |cheap| clothes. # Every stylish person always buys expensive, fashionable, beautifully made clothes, and never buys cheap ones.
+
+Those girls cheerfully go to the |new| school near the factory over the river. # They go to an all-girls school and they never talk to any boys.
+
+Everyone likes a |good| movie with plenty of action. # People always enjoy exciting movies about heroes who behave bravely.
+
+Unfortunately, something |bad| always happens in front of everyone. # Things can easily go badly, and I have very bad luck, and sometimes it is quite embarrassing.
+
+The |large|, friendly cat knows all the people here in the neighborhood very well. # He seldom bothers anyone, and he is really quite popular.
+
+These little monsters are a |big| problem and cause too much trouble for the scientists. # They speak loudly and behave rudely and rarely behave well.
+
+I patiently do the |difficult| work between 8:00 A.M. and noon. # My schedule is usually very organized.
+
+They eagerly drink a lot of |cold| water during the day. # Their work normally makes them very thirsty.
+
+We gratefully receive |healthy| meals at our school. # Each child regularly gets enough warm milk with their hot food.
+
+Each student politely takes a few |delicious| cookies from the box until there are none left. # They enjoy the cookies very much and there are never any cookies left over.
+
+~Present Simple for Facts, Habits, and Routines
+
+I sometimes |need| to go through a little important information slowly and carefully. # Do you have time for me to speak with you?
+
+This boy |buys| many interesting books about animals and science. # He is very smart, and he always studies hard.
+
+The busy woman quickly |eats| an apple before work. # She rarely has much time to get ready, and almost no time for breakfast.
+
+You |have| such an old mobile phone. # Do you seriously think about buying a new one occasionally?
+
+She strongly |prefers| that expensive doctor. # Her health plan usually covers the cost.
+
+The sad, lonely dog quietly sits there under the tree and |sees| several happy families at the park. # It seldom has enough food and sadly wishes it had a home.
+
+We proudly |make| lots of beautiful products. # Our company is always very successful.
+
+Often, after work, the man conveniently |uses| a small computer at home. # He likes it better than his large computer at work.
+
+All parents |give| their children some advice on how to plan their lives. # But not all children listen respectfully to their parents, some never listen, and some react angrily.
+
+They cleverly |find| an easy way to work on their projects by using AI behind the teacher's back. # Sometimes the teacher quietly scolds them for it.
+
+No one |wants| any cheap clothes. # Every stylish person always buys expensive, fashionable, beautifully made clothes, and never buys cheap ones.
+
+Those girls cheerfully |go| to the new school near the factory over the river. # They go to an all-girls school and they never talk to any boys.
+
+Everyone |likes| a good movie with plenty of action. # People always enjoy exciting movies about heroes who behave bravely.
+
+Unfortunately, something bad always |happens| in front of everyone. # Things can easily go badly, and I have very bad luck, and sometimes it is quite embarrassing.
+
+The large, friendly cat |knows| all the people here in the neighborhood very well. # He seldom bothers anyone, and he is really quite popular.
+
+These little monsters |are| a big problem and cause too much trouble for the scientists. # They speak loudly and behave rudely and rarely behave well.
+
+I patiently |do| the difficult work between 8:00 A.M. and noon. # My schedule is usually very organized.
+
+They eagerly |drink| a lot of cold water during the day. # Their work normally makes them very thirsty.
+
+We gratefully |receive| healthy meals at our school. # Each child regularly gets enough warm milk with their hot food.
+
+Each student politely |takes| a few cookies from the box until there are none left. # They enjoy the cookies very much and there are never any cookies left over.
+
+~Past Simple for Completed Actions in the Past
+
+I sometimes \|needed\| to go through a little important information slowly and carefully. # Did you have time for me to speak with you?
+
+This boy \|bought\| many interesting books about animals and science. # He was very smart, and he always studied hard.
+
+The busy woman quickly \|ate\| an apple before work. # She rarely had much time to get ready, and almost no time for breakfast.
+
+You \|had\| such an old mobile phone. # Did you seriously think about buying a new one occasionally?
+
+She strongly \|preferred\| that expensive doctor. # Her health plan usually covered the cost.
+
+The sad, lonely dog quietly sat there under the tree and \|saw\| several happy families at the park. # It seldom had enough food and sadly wished it had a home.
+
+We proudly \|made\| lots of beautiful products. # Our company was always very successful.
+
+Often, after work, the man conveniently \|used\| a small computer at home. # He liked it better than his large computer at work.
+
+All parents \|gave\| their children some advice on how to plan their lives. # But not all children listened respectfully to their parents; some never listened, and some reacted angrily.
+
+They cleverly \|found\| an easy way to work on their projects by using AI behind the teacher's back. # Sometimes the teacher quietly scolded them for it.
+
+No one \|wanted\| any cheap clothes. # Every stylish person always bought expensive, fashionable, beautifully made clothes, and never bought cheap ones.
+
+Those girls cheerfully \|went\| to the new school near the factory over the river. # They went to an all-girls school and never talked to any boys.
+
+Everyone \|liked\| a good movie with plenty of action. # People always enjoyed exciting movies about heroes who behaved bravely.
+
+Unfortunately, something bad always \|happened\| in front of everyone. # Things easily went badly, and I had very bad luck, and sometimes it was quite embarrassing.
+
+The large, friendly cat \|knew\| all the people here in the neighborhood very well. # It seldom bothered anyone, and it was really quite popular.
+
+These little monsters \|were\| a big problem and caused too much trouble for the scientists. # They spoke loudly, behaved rudely, and rarely behaved well.
+
+I patiently \|did\| the difficult work between 8:00 A.M. and noon. # My schedule was usually very organized.
+
+They eagerly \|drank\| a lot of cold water during the day. # Their work normally made them very thirsty.
+
+We gratefully \|received\| healthy meals at our school. # Each child regularly got enough warm milk with their hot food.
+
+Each student politely \|took\| a few cookies from the box until there were none left. # They enjoyed the cookies very much, and there were never any cookies left over.
+
+I sometimes \|needed\| to go through a little important information slowly and carefully. # Did you have time for me to speak with you?
+~Present Continuous for Actions Happening Now
+
+I am sometimes \|going\| through a little important information slowly and carefully. # Are you having time for me to speak with you?
+
+This boy is \|buying\| many interesting books about animals and science. # He is being very smart, and he is studying hard.
+
+The busy woman is quickly \|eating\| an apple before work. # She is rarely having much time to get ready, and she is having almost no time for breakfast.
+
+You are \|using\| such an old mobile phone. # Are you seriously thinking about buying a new one?
+
+She is strongly \|preferring\| that expensive doctor. # Her health plan is usually covering the cost.
+
+The sad, lonely dog is quietly sitting under the tree and \|watching\| several happy families at the park. # It is not having enough food and is sadly wishing it had a home.
+
+We are proudly \|making\| lots of beautiful products. # Our company is being very successful.
+
+After work, the man is conveniently \|using\| a small computer at home. # He is liking it better than his large computer at work.
+
+All parents are \|giving\| their children some advice on how to plan their lives. # Some children are listening respectfully to their parents, but others are not listening and are reacting angrily.
+
+They are cleverly \|finding\| an easy way to work on their projects by using AI behind the teacher's back. # The teacher is quietly scolding them for it.
+
+No one is \|wanting\| any cheap clothes. # Stylish people are buying expensive, fashionable, beautifully made clothes.
+
+Those girls are cheerfully \|going\| to the new school near the factory over the river. # They are attending an all-girls school and are not talking to any boys.
+
+Everyone is \|liking\| a good movie with plenty of action. # People are enjoying exciting movies about heroes who are behaving bravely.
+
+Unfortunately, something bad is \|happening\| in front of everyone. # Things are going badly, and I am having bad luck, so the situation is becoming quite embarrassing.
+
+The large, friendly cat is \|knowing\| all the people here in the neighborhood very well. # He is not bothering anyone, and he is being quite popular.
+
+These little monsters are \|being\| a big problem and are causing too much trouble for the scientists. # They are speaking loudly, behaving rudely, and not behaving well.
+
+I am patiently \|doing\| the difficult work between 8:00 A.M. and noon. # My schedule is being very organized.
+
+They are eagerly \|drinking\| a lot of cold water right now. # Their work is making them very thirsty.
+
+We are gratefully \|receiving\| healthy meals at our school. # Each child is getting enough warm milk with their hot food.
+
+Each student is politely \|taking\| a few cookies from the box. # They are enjoying the cookies very much, and the number of cookies is getting smaller.
+~Past Continuous and Past Simple for Background, Simultaneous, and Interrupted Actions
+
+I \|was going\| through a little important information slowly and carefully when you called. # You were waiting for me to finish speaking.
+
+This boy \|was buying\| interesting books about animals and science while his brother was studying. # He was choosing a book when the shop assistant offered to help him.
+
+The busy woman \|was eating\| an apple before work when the phone rang. # She was getting ready while her children were eating breakfast.
+
+You \|were using\| such an old mobile phone when I saw you. # Were you thinking about buying a new one when it stopped working?
+
+She \|was visiting\| that expensive doctor when her health plan changed. # Her health plan covered the cost while she was receiving treatment.
+
+The sad, lonely dog \|was sitting\| under the tree and watching several happy families at the park when it began to rain. # It was looking for food when a kind person offered it a meal.
+
+We \|were making\| lots of beautiful products when the machine suddenly stopped. # Our company was doing very well while the workers were producing the goods.
+
+After work, the man \|was using\| a small computer at home when the power went out. # He was working on his computer while his wife was preparing dinner.
+
+The parents \|were giving\| their children advice when the children started arguing. # Some children were listening respectfully while others were reacting angrily.
+
+They \|were finding\| an easy way to work on their projects using AI when the teacher walked into the room. # The teacher was approaching their desks when they quickly closed their screens.
+
+No one \|was looking\| for cheap clothes when the sale began. # Some shoppers were choosing expensive, fashionable clothes while others were searching for bargains.
+
+Those girls \|were going\| to the new school near the factory when it started raining. # They were walking across the river bridge when one girl dropped her bag.
+
+Everyone \|was watching\| a good movie with plenty of action when the electricity went out. # People were enjoying the exciting scenes while the heroes were fighting bravely.
+
+Something bad \|was happening\| in front of everyone when I arrived. # Things were going badly, and I was trying to help when the situation became embarrassing.
+
+The large, friendly cat \|was watching\| the people in the neighborhood when a stranger approached. # It was resting peacefully when a loud noise frightened it.
+
+These little monsters \|were causing\| too much trouble for the scientists when the alarm sounded. # They were speaking loudly and behaving rudely while the scientists were trying to work.
+
+I \|was doing\| the difficult work when the head teacher came into the room. # I was working between 8:00 A.M. and noon when someone interrupted me.
+
+They \|were drinking\| cold water when their teacher called them back to work. # They were resting in the shade while the sun was shining brightly.
+
+We \|were receiving\| healthy meals at our school when the delivery arrived late. # Each child was eating warm food while the teachers were handing out milk.
+
+Each student \|was taking\| a few cookies from the box when the teacher entered the room. # They were enjoying the cookies when someone noticed that the box was empty.
+~Present Perfect for Actions That Connect the Past to the Present
+
+I sometimes \|have needed\| to go through a little important information slowly and carefully. # Have you had time to speak with me?
+
+This boy \|has bought\| many interesting books about animals and science. # He has always been very smart, and he has studied hard.
+
+The busy woman \|has eaten\| an apple before work. # She has rarely had much time to get ready, and she has had almost no time for breakfast.
+
+You \|have had\| such an old mobile phone for years. # Have you seriously thought about buying a new one?
+
+She \|has preferred\| that expensive doctor for a long time. # Her health plan has usually covered the cost.
+
+The sad, lonely dog \|has sat\| under the tree and watched several happy families at the park. # It has seldom had enough food and has sadly wished it had a home.
+
+We \|have made\| lots of beautiful products. # Our company has always been very successful.
+
+After work, the man \|has used\| a small computer at home for several years. # He has liked it better than his large computer at work.
+
+All parents \|have given\| their children advice on how to plan their lives. # But not all children have listened respectfully to their parents; some have never listened, and some have reacted angrily.
+
+They \|have found\| an easy way to work on their projects by using AI behind the teacher's back. # Sometimes the teacher has quietly scolded them for it.
+
+No one \|has wanted\| any cheap clothes. # Every stylish person has always bought expensive, fashionable, beautifully made clothes.
+
+Those girls \|have gone\| to the new school near the factory over the river. # They have attended an all-girls school and have never talked to any boys.
+
+Everyone \|has liked\| a good movie with plenty of action. # People have always enjoyed exciting movies about heroes who have behaved bravely.
+
+Unfortunately, something bad \|has happened\| in front of everyone. # Things have often gone badly, and I have had very bad luck; sometimes it has been quite embarrassing.
+
+The large, friendly cat \|has known\| all the people here in the neighborhood for years. # It has seldom bothered anyone, and it has become quite popular.
+
+These little monsters \|have been\| a big problem and have caused too much trouble for the scientists. # They have spoken loudly, behaved rudely, and rarely behaved well.
+
+I \|have done\| the difficult work between 8:00 A.M. and noon for many years. # My schedule has usually been very organized.
+
+They \|have drunk\| a lot of cold water during the day. # Their work has normally made them very thirsty.
+
+We \|have received\| healthy meals at our school for many years. # Each child has regularly received enough warm milk with their hot food.
+
+Each student \|has taken\| a few cookies from the box until there have been none left. # They have enjoyed the cookies very much, and there have never been any cookies left over.
+~Past Perfect for an Action That Happened Before Another Past Action
+
+I \|had needed\| to go through a little important information before you arrived. # Did you have time to speak with me before the meeting began?
+
+This boy \|had bought\| many interesting books about animals and science before he started his project. # He was very smart, and he had studied hard before the exam.
+
+The busy woman \|had eaten\| an apple before she left for work. # She rarely had much time to get ready because she had spent so long preparing breakfast.
+
+You \|had had\| such an old mobile phone before you bought a new one. # Had you thought about replacing it before it stopped working?
+
+She \|had preferred\| that expensive doctor before her health plan changed. # Her health plan had covered the cost before the policy ended.
+
+The sad, lonely dog had quietly sat under the tree and \|had seen\| several happy families at the park before it started to rain. # It had seldom had enough food before a kind person gave it a meal.
+
+We \|had made\| lots of beautiful products before the company closed. # Our company had been very successful before it faced financial problems.
+
+After work, the man \|had used\| a small computer at home before he bought a larger one. # He had liked it better than his large computer at work before it broke.
+
+All parents \|had given\| their children advice on how to plan their lives before the children left home. # Some children had listened respectfully, while others had ignored the advice.
+
+They \|had found\| an easy way to work on their projects using AI before the teacher discovered what they were doing. # The teacher had quietly scolded them before they changed their behavior.
+
+No one \|had wanted\| cheap clothes before the prices increased. # Every stylish person had bought expensive, fashionable clothes before the sale began.
+
+Those girls \|had gone\| to the new school near the factory before they moved to another area. # They had attended an all-girls school before they transferred.
+
+Everyone \|had liked\| the movie before the disappointing ending changed their opinion. # People had enjoyed the exciting scenes before the heroes behaved foolishly.
+
+Unfortunately, something bad \|had happened\| before everyone arrived. # Things had gone badly before I could do anything to help, and the situation was embarrassing.
+
+The large, friendly cat \|had known\| all the people in the neighborhood before its owner moved away. # It had seldom bothered anyone before it became frightened by the noise.
+
+These little monsters \|had been\| a big problem before the scientists found a solution. # They had caused too much trouble before the scientists changed their approach.
+
+I \|had done\| the difficult work before the head teacher arrived at noon. # My schedule had been well organized before the timetable changed.
+
+They \|had drunk\| a lot of cold water before they returned to work. # Their work had made them very thirsty before they took a break.
+
+We \|had received\| healthy meals at our school before the meal program ended. # Each child had regularly received warm milk with their hot food before the school changed its menu.
+
+Each student \|had taken\| a few cookies from the box before the teacher returned. # They had eaten all the cookies before anyone noticed that the box was empty.
+~Will and Going to
+
+I sometimes \|will need\| to go through a little important information slowly and carefully. # Will you have time for me to speak with you?
+
+This boy \|is going to buy\| many interesting books about animals and science. # He is very smart, and he will study hard.
+
+The busy woman \|is going to eat\| an apple before work. # She rarely has much time to get ready, and she isn't going to have much time for breakfast.
+
+You \|are going to have\| such an old mobile phone for a while longer. # Will you think about buying a new one soon?
+
+She strongly \|is going to prefer\| that expensive doctor. # Her health plan will cover the cost.
+
+The sad, lonely dog quietly \|will sit\| under the tree and see several happy families at the park. # It is going to need more food and a home.
+
+We proudly \|are going to make\| lots of beautiful products. # Our company will continue to be very successful.
+
+After work, the man \|is going to use\| a small computer at home. # He will like it better than his large computer at work.
+
+All parents \|will give\| their children some advice on how to plan their lives. # But not all children will listen respectfully to their parents; some will never listen, and some are going to react angrily.
+
+They cleverly \|are going to find\| an easy way to work on their projects by using AI behind the teacher's back. # The teacher will quietly scold them for it.
+
+No one \|will want\| any cheap clothes. # Every stylish person is going to buy expensive, fashionable, beautifully made clothes.
+
+Those girls cheerfully \|are going to go\| to the new school near the factory over the river. # They will attend an all-girls school and will never talk to any boys.
+
+Everyone \|will like\| a good movie with plenty of action. # People are going to enjoy exciting movies about heroes who behave bravely.
+
+Unfortunately, something bad \|is going to happen\| in front of everyone. # Things will go badly, and I will have very bad luck, so the situation may become quite embarrassing.
+
+The large, friendly cat \|will know\| all the people here in the neighborhood very well. # It isn't going to bother anyone, and it will be quite popular.
+
+These little monsters \|are going to be\| a big problem and cause too much trouble for the scientists. # They will speak loudly, behave rudely, and rarely behave well.
+
+I patiently \|will do\| the difficult work between 8:00 A.M. and noon. # My schedule is going to be very organized.
+
+They eagerly \|are going to drink\| a lot of cold water during the day. # Their work will make them very thirsty.
+
+We gratefully \|will receive\| healthy meals at our school. # Each child is going to get enough warm milk with their hot food.
+
+Each student politely \|is going to take\| a few cookies from the box until there are none left. # They will enjoy the cookies very much, and there won't be any cookies left over.
+
+~Make, Have, Do, Play, Create, Build, Work, Take, Go, Get
+
+I sometimes \|do\| a little important work slowly and carefully. # Do you have time for me to speak with you?
+
+This boy \|gets\| many interesting books about animals and science. # He is very smart, and he always does his homework.
+
+The busy woman quickly \|has\| an apple before work. # She rarely has much time to get ready, and almost no time to make breakfast.
+
+You \|have\| such an old mobile phone. # Do you seriously think about getting a new one occasionally?
+
+She strongly \|prefers\| that expensive doctor. # Her health plan usually covers the cost.
+
+The sad, lonely dog quietly \|sits\| under the tree and watches several happy families at the park. # It seldom gets enough food and sadly wishes it had a home.
+
+We proudly \|create\| lots of beautiful products. # Our company is always very successful.
+
+Often, after work, the man conveniently \|uses\| a small computer at home. # He likes working on it better than using his large computer at work.
+
+All parents \|give\| their children some advice on how to plan their lives. # But not all children take their parents' advice; some never do, and some react angrily.
+
+They cleverly \|build\| an easy way to work on their projects by using AI behind the teacher's back. # Sometimes the teacher quietly scolds them for it.
+
+No one \|wants\| any cheap clothes. # Every stylish person always gets expensive, fashionable, beautifully made clothes.
+
+Those girls cheerfully \|go\| to the new school near the factory over the river. # They go to an all-girls school and never talk to any boys.
+
+Everyone \|likes\| a good movie with plenty of action. # People always enjoy exciting movies about heroes who do brave things.
+
+Unfortunately, something bad always \|happens\| in front of everyone. # Things can easily go badly, and I have very bad luck, so sometimes I get embarrassed.
+
+The large, friendly cat \|knows\| all the people here in the neighborhood very well. # He seldom bothers anyone, and he gets along well with everyone.
+
+These little monsters \|cause\| a big problem and create too much trouble for the scientists. # They speak loudly, behave rudely, and rarely do what they are told.
+
+I patiently \|do\| the difficult work between 8:00 A.M. and noon. # My schedule is usually very organized.
+
+They eagerly \|drink\| a lot of cold water during the day. # Their work normally makes them very thirsty.
+
+We gratefully \|get\| healthy meals at our school. # Each child regularly gets enough warm milk with their hot food.
+
+Each student politely \|takes\| a few cookies from the box until there are none left. # They enjoy the cookies very much, and there are never any cookies left over.
+~Can, Let, and Allow
+
+I sometimes \|can\| go through a little important information slowly and carefully. # Will you let me speak with you?
+
+This boy \|can buy\| many interesting books about animals and science. # His parents allow him to study hard and read widely.
+
+The busy woman \|can eat\| an apple before work. # Her schedule rarely allows her much time to get ready or make breakfast.
+
+You \|can use\| such an old mobile phone. # Will your parents let you buy a new one occasionally?
+
+She \|can visit\| that expensive doctor. # Her health plan allows her to claim the cost.
+
+The sad, lonely dog quietly sits under the tree and \|can see\| several happy families at the park. # Its owner doesn't let it have enough food, and no one allows it to come into their home.
+
+We \|can make\| lots of beautiful products. # Our company allows workers to be creative.
+
+After work, the man \|can use\| a small computer at home. # His employer lets him use a larger computer at work, too.
+
+All parents \|can give\| their children advice on how to plan their lives. # But parents cannot make all children listen respectfully; they can only let them make their own choices.
+
+They \|can find\| an easy way to work on their projects by using AI behind the teacher's back. # The teacher doesn't allow them to use AI without permission.
+
+No one \|can buy\| cheap clothes if the shops don't sell them. # Fashion stores allow customers to choose from expensive, fashionable, beautifully made clothes.
+
+Those girls \|can go\| to the new school near the factory over the river. # Their parents let them attend an all-girls school and don't allow them to talk to boys during lessons.
+
+Everyone \|can enjoy\| a good movie with plenty of action. # Parents may let their children watch exciting movies about heroes who behave bravely.
+
+Unfortunately, something bad \|can happen\| in front of everyone. # We cannot always prevent things from going badly, and sometimes circumstances allow embarrassing situations to occur.
+
+The large, friendly cat \|can recognize\| all the people here in the neighborhood. # Its owner lets it wander around, but doesn't allow it to bother anyone.
+
+These little monsters \|can cause\| a big problem and create too much trouble for the scientists. # The scientists don't let them behave rudely or make too much noise.
+
+I \|can do\| the difficult work between 8:00 A.M. and noon. # My schedule allows me enough time to finish it.
+
+They \|can drink\| a lot of cold water during the day. # Their work allows them to take regular water breaks.
+
+We \|can receive\| healthy meals at our school. # The school allows each child to get enough warm milk with their hot food.
+
+Each student \|can take\| a few cookies from the box. # The teacher lets them enjoy the cookies, but doesn't allow anyone to take too many.
+~Have to, Must not, Must, Don't have to
+
+I sometimes |have to| go through a little important information slowly and carefully. # Do you have to speak with me now?
+
+This boy |must| read many interesting books about animals and science. # He is very smart, and he always studies hard.
+
+The busy woman |has to| eat an apple before work. # She rarely has much time to get ready, and almost no time for breakfast.
+
+You |don't have to| buy a new mobile phone yet. # Do you really think you must buy one occasionally?
+
+She |must| visit that expensive doctor. # Her health plan usually covers the cost.
+
+The sad, lonely dog quietly sits under the tree and |must not| chase the happy families at the park. # It seldom has enough food and sadly wishes it had a home.
+
+We |have to| make lots of beautiful products. # Our company must always maintain its high standards.
+
+Often, after work, the man |has to| use a small computer at home. # He doesn't have to use his large computer at work.
+
+All parents |must| give their children some advice on how to plan their lives. # But children don't have to follow every piece of advice, and they must not treat their parents disrespectfully.
+
+They |must not| use AI behind the teacher's back to work on their projects. # Sometimes the teacher has to quietly scold them for it.
+
+No one |has to| buy cheap clothes. # Stylish people don't have to buy expensive, fashionable, beautifully made clothes.
+
+Those girls |have to| go to the new school near the factory over the river. # They must not talk to boys during lessons at their all-girls school.
+
+Everyone |must| follow the rules when watching a good movie at school. # People don't have to enjoy every exciting movie about heroes who behave bravely.
+
+Unfortunately, something bad can happen in front of everyone. # We |must not| assume that everything will go badly, and we don't have to feel embarrassed about every mistake.
+
+The large, friendly cat |doesn't have to| avoid all the people here in the neighborhood. # He seldom bothers anyone, and he is really quite popular.
+
+These little monsters |must not| cause trouble for the scientists. # They must not speak loudly or behave rudely, but they don't have to be perfectly quiet all the time.
+
+I |have to| do the difficult work between 8:00 A.M. and noon. # My schedule is usually very organized.
+
+They |have to| drink a lot of cold water during the day. # Their work normally makes them very thirsty, but they don't have to drink it all at once.
+
+We |must| receive healthy meals at our school. # Each child must get enough warm milk with their hot food.
+
+Each student |must not| take too many cookies from the box. # They don't have to eat all the cookies, and there must be some left over.
+~Basic Connectors: and, but, or, because, so
+
+I sometimes need to go through a little important information slowly |and| carefully. # Do you have time for me to speak with you?
+
+This boy buys many interesting books about animals |and| science. # He is very smart, |so| he always studies hard.
+
+The busy woman quickly eats an apple before work, |but| she rarely has much time to get ready. # She has almost no time for breakfast, |so| she must hurry.
+
+You have such an old mobile phone, |so| do you seriously think about buying a new one occasionally? # You can keep your old phone, |or| you can buy a new one.
+
+She strongly prefers that expensive doctor |because| her health plan usually covers the cost. # She can visit that doctor, |or| she can look for a cheaper one.
+
+The sad, lonely dog quietly sits under the tree |and| sees several happy families at the park. # It seldom has enough food, |so| it sadly wishes it had a home.
+
+We proudly make lots of beautiful products, |and| our company is always very successful. # We work hard, |so| our customers are happy.
+
+Often, after work, the man conveniently uses a small computer at home, |because| he likes it better than his large computer at work. # He can use the small computer, |or| he can use the large one.
+
+All parents give their children some advice on how to plan their lives, |but| not all children listen respectfully to their parents. # Some children never listen, |and| some react angrily.
+
+They cleverly find an easy way to work on their projects by using AI behind the teacher's back, |but| sometimes the teacher quietly scolds them for it. # They can work honestly, |or| they can risk getting into trouble.
+
+No one wants cheap clothes, |because| everyone wants to look stylish. # People buy expensive, fashionable clothes, |but| they don't always buy beautifully made ones.
+
+Those girls cheerfully go to the new school near the factory over the river, |and| they attend an all-girls school. # They never talk to any boys, |because| they study at an all-girls school.
+
+Everyone likes a good movie with plenty of action, |because| people enjoy exciting stories about heroes. # Heroes behave bravely, |so| audiences admire them.
+
+Unfortunately, something bad sometimes happens in front of everyone, |and| I have very bad luck. # Things can easily go badly, |so| embarrassing situations sometimes occur.
+
+The large, friendly cat knows all the people here in the neighborhood very well, |and| he seldom bothers anyone. # He is really quite popular, |because| he is friendly.
+
+These little monsters are a big problem, |and| they cause too much trouble for the scientists. # They speak loudly |and| behave rudely, |so| they rarely behave well.
+
+I patiently do the difficult work between 8:00 A.M. |and| noon. # My schedule is usually very organized, |so| I can finish my work on time.
+
+They eagerly drink a lot of cold water during the day |because| their work normally makes them very thirsty. # They can drink water regularly, |or| they can wait until they finish work.
+
+We gratefully receive healthy meals at our school, |and| each child regularly gets enough warm milk with their hot food. # The meals are healthy, |so| the children can eat well.
+
+Each student politely takes a few cookies from the box, |but| soon there are none left. # They enjoy the cookies very much, |so| they eat them all.
+~Yes/No Questions
+
+|Do| I sometimes need to go through a little important information slowly and carefully? # Do you have time for me to speak with you?
+
+|Does| this boy buy many interesting books about animals and science? # Is he very smart, and does he always study hard?
+
+|Does| the busy woman quickly eat an apple before work? # Does she rarely have much time to get ready, and does she have almost no time for breakfast?
+
+|Do| you have such an old mobile phone? # Do you seriously think about buying a new one occasionally?
+
+|Does| she strongly prefer that expensive doctor? # Does her health plan usually cover the cost?
+
+|Does| the sad, lonely dog quietly sit under the tree and see several happy families at the park? # Does it seldom have enough food, and does it sadly wish it had a home?
+
+|Do| we proudly make lots of beautiful products? # Is our company always very successful?
+
+|Does| the man often use a small computer at home after work? # Does he like it better than his large computer at work?
+
+|Do| all parents give their children some advice on how to plan their lives? # Do all children listen respectfully to their parents, or do some never listen and react angrily?
+
+|Do| they cleverly find an easy way to work on their projects by using AI behind the teacher's back? # Does the teacher sometimes quietly scold them for it?
+
+|Does| anyone want cheap clothes? # Does every stylish person always buy expensive, fashionable, beautifully made clothes?
+
+|Do| those girls cheerfully go to the new school near the factory over the river? # Do they go to an all-girls school, and do they never talk to any boys?
+
+|Does| everyone like a good movie with plenty of action? # Do people always enjoy exciting movies about heroes who behave bravely?
+
+|Does| something bad always happen in front of everyone? # Do things easily go badly, and do I sometimes have quite embarrassing bad luck?
+
+|Does| the large, friendly cat know all the people here in the neighborhood very well? # Does he seldom bother anyone, and is he really quite popular?
+
+|Are| these little monsters a big problem, and do they cause too much trouble for the scientists? # Do they speak loudly, behave rudely, and rarely behave well?
+
+|Do| I patiently do the difficult work between 8:00 A.M. and noon? # Is my schedule usually very organized?
+
+|Do| they eagerly drink a lot of cold water during the day? # Does their work normally make them very thirsty?
+
+|Do| we gratefully receive healthy meals at our school? # Does each child regularly get enough warm milk with their hot food?
+
+|Does| each student politely take a few cookies from the box until there are none left? # Do they enjoy the cookies very much, and are there ever any cookies left over?
+~Wh- Questions
+
+|What information| do I sometimes need to go through slowly and carefully? # |When| do you have time for me to speak with you?
+
+|What kinds of books| does this boy buy about animals and science? # |Why| is he very smart, and how does he study?
+
+|What| does the busy woman quickly eat before work? # |Why| does she rarely have much time to get ready, and how much time does she have for breakfast?
+
+|What kind of mobile phone| do you have? # |How often| do you seriously think about buying a new one?
+
+|Which doctor| does she strongly prefer? # |What| does her health plan usually cover?
+
+|What| does the sad, lonely dog quietly see while sitting under the tree? # |Why| does it seldom have enough food, and what does it sadly wish for?
+
+|What| do we proudly make? # |Why| is our company always very successful?
+
+|When| does the man conveniently use a small computer at home? # |Why| does he like it better than his large computer at work?
+
+|What kind of advice| do all parents give their children about planning their lives? # |Why| do some children never listen respectfully to their parents, and how do some react?
+
+|How| do they cleverly find an easy way to work on their projects behind the teacher's back? # |Why| does the teacher sometimes quietly scold them?
+
+|What kind of clothes| does everyone want? # |What| does every stylish person always buy, and what do they never buy?
+
+|Where| do those girls cheerfully go to school? # |Why| do they go to an all-girls school, and who do they never talk to?
+
+|What kind of movie| does everyone like? # |What kind of heroes| do people always enjoy watching?
+
+|What| unfortunately always happens in front of everyone? # |Why| do things sometimes go badly, and how do I feel when something embarrassing happens?
+
+|Who| does the large, friendly cat know very well in the neighborhood? # |Why| is he really quite popular?
+
+|What| are these little monsters, and what problems do they cause for the scientists? # |How| do they speak and behave?
+
+|When| do I patiently do the difficult work? # |How| is my schedule usually organized?
+
+|What| do they eagerly drink a lot of during the day? # |Why| does their work normally make them very thirsty?
+
+|What| do we gratefully receive at our school? # |What| does each child regularly get with their hot food?
+
+|How many cookies| does each student politely take from the box? # |Why| are there never any cookies left over?
+~Questions
+
+Do I sometimes |need| to go through a little important information slowly and carefully? # Do you have time for me to speak with you?
+
+Does this boy |buy| many interesting books about animals and science? # Is he very smart, and does he always study hard?
+
+Does the busy woman quickly |eat| an apple before work? # Does she rarely have much time to get ready, and does she have almost no time for breakfast?
+
+Do you |have| such an old mobile phone? # Do you seriously think about buying a new one occasionally?
+
+Does she strongly |prefer| that expensive doctor? # Does her health plan usually cover the cost?
+
+Does the sad, lonely dog quietly sit under the tree and |see| several happy families at the park? # Does it seldom have enough food, and does it sadly wish it had a home?
+
+Do we proudly |make| lots of beautiful products? # Is our company always very successful?
+
+Does the man often conveniently |use| a small computer at home after work? # Does he like it better than his large computer at work?
+
+Do all parents |give| their children some advice on how to plan their lives? # Do all children listen respectfully to their parents, or do some never listen and some react angrily?
+
+Do they cleverly |find| an easy way to work on their projects by using AI behind the teacher's back? # Does the teacher sometimes quietly scold them for it?
+
+Does anyone |want| any cheap clothes? # Does every stylish person always buy expensive, fashionable, beautifully made clothes?
+
+Do those girls cheerfully |go| to the new school near the factory over the river? # Do they go to an all-girls school, and do they never talk to any boys?
+
+Does everyone |like| a good movie with plenty of action? # Do people always enjoy exciting movies about heroes who behave bravely?
+
+Does something bad always |happen| in front of everyone? # Can things easily go badly, and do I sometimes have quite embarrassing bad luck?
+
+Does the large, friendly cat |know| all the people here in the neighborhood very well? # Does he seldom bother anyone, and is he really quite popular?
+
+|Are| these little monsters a big problem, and do they cause too much trouble for the scientists? # Do they speak loudly, behave rudely, and rarely behave well?
+
+Do I patiently |do| the difficult work between 8:00 A.M. and noon? # Is my schedule usually very organized?
+
+Do they eagerly |drink| a lot of cold water during the day? # Does their work normally make them very thirsty?
+
+Do we gratefully |receive| healthy meals at our school? # Does each child regularly get enough warm milk with their hot food?
+
+Does each student politely |take| a few cookies from the box until there are none left? # Do they enjoy the cookies very much, and are there ever any cookies left over?
+~Negatives
+
+I sometimes |don't need| to go through a little important information slowly and carefully. # I don't always have time to speak with you.
+
+This boy |doesn't buy| many interesting books about animals and science. # He isn't very smart, and he doesn't always study hard.
+
+The busy woman |doesn't eat| an apple before work. # She rarely has much time to get ready, and she has almost no time for breakfast.
+
+You |don't have| such an old mobile phone. # You don't seriously think about buying a new one occasionally.
+
+She |doesn't prefer| that expensive doctor. # Her health plan doesn't usually cover the cost.
+
+The sad, lonely dog quietly sits under the tree and |doesn't see| several happy families at the park. # It doesn't often have enough food and sadly wishes it had a home.
+
+We |don't make| lots of beautiful products. # Our company isn't always very successful.
+
+Often, after work, the man |doesn't use| a small computer at home. # He doesn't like it better than his large computer at work.
+
+All parents |don't give| their children advice on how to plan their lives. # Not all children listen respectfully to their parents; some never listen, and some don't react calmly.
+
+They |don't find| an easy way to work on their projects by using AI behind the teacher's back. # The teacher doesn't always quietly scold them for it.
+
+No one |wants| any cheap clothes. # Not every stylish person buys expensive, fashionable, beautifully made clothes, and some never buy them.
+
+Those girls |don't go| to the new school near the factory over the river. # They don't go to an all-girls school, and they don't always avoid talking to boys.
+
+Everyone |doesn't like| a good movie with plenty of action. # People don't always enjoy exciting movies about heroes who behave bravely.
+
+Unfortunately, something bad |doesn't always happen| in front of everyone. # Things don't always go badly, and I don't always have bad luck or feel embarrassed.
+
+The large, friendly cat |doesn't know| all the people here in the neighborhood very well. # He doesn't often bother anyone, and he isn't unpopular.
+
+These little monsters |aren't| a big problem and don't cause too much trouble for the scientists. # They don't always speak loudly or behave rudely, and they don't rarely behave well.
+
+I |don't do| the difficult work between 8:00 A.M. and noon. # My schedule isn't usually very organized.
+
+They |don't drink| a lot of cold water during the day. # Their work doesn't normally make them very thirsty.
+
+We |don't receive| healthy meals at our school. # Each child doesn't regularly get enough warm milk with their hot food.
+
+Each student |doesn't take| a few cookies from the box until there are none left. # They don't enjoy the cookies very much, and there aren't always cookies left over.
+
+
+`;
+</script>
+
+<script>
+(function () {
+  window.__RAW_SECTION_TEXT__ = wordListSource;
+  console.log("✅ RAW SECTION TEXT FROZEN", window.__RAW_SECTION_TEXT__.length);
+})();
+</script>
+
+<script>
+/* =========================================
+   HARD SECTION CORPUS OVERRIDE (MC-IMMUNE)
+   ========================================= */
+
+(function () {
+  const FULL_TEXT = window.wordListText;
+  window.activeExerciseText = "";
+
+  Object.defineProperty(window, "wordListText", {
+    get() {
+      return window.activeExerciseText || FULL_TEXT;
+    },
+    set(val) {
+      window._wordListText = val;
+    }
+  });
+
+window.addEventListener("sectionchange", (e) => {
+    const sectionText = e.detail?.text || "";
+
+    sentences.length = 0;
+    allCorrectAnswers.length = 0;
+
+    const lines = sectionText
+      .split("\n")
+      .map(s => s.trim())
+      .filter(line => line && line.includes("|"));
+
+    // Divide entries into fixed groups of 3
+    const groups = [];
+    for (let i = 0; i < lines.length; i += 3) {
+      const group = lines.slice(i, i + 3);
+      if (group.length > 0) groups.push(group);
+    }
+
+    const generatedQuestions = [];
+    groups.forEach((group, groupIndex) => {
+      group.forEach((entryLine, itemIndex) => {
+        // Skip question generation for Entry 21 (3rd item in Group 7, if present)
+        if (groupIndex === 6 && itemIndex === 2) return;
+
+        const match = entryLine.match(/\|([^\|]+)\|/);
+        const correctAnswer = match ? match[1] : "";
+
+        // Distractors exclusively from the other entries in the same group
+        let distractors = group
+          .filter((_, idx) => idx !== itemIndex)
+          .map(e => {
+            const m = e.match(/\|([^\|]+)\|/);
+            return m ? m[1] : "";
+          })
+          .filter(Boolean);
+
+        // If the group is short (e.g., last group with only 2 items), borrow an extra distractor from the first group
+        if (distractors.length < 2 && groups.length > 0) {
+          const firstGroup = groups[0];
+          for (const g1Entry of firstGroup) {
+            const m1 = g1Entry.match(/\|([^\|]+)\|/);
+            if (m1 && m1[1] !== correctAnswer && !distractors.includes(m1[1])) {
+              distractors.push(m1[1]);
+              break;
+            }
+          }
+        }
+
+        let choices = [correctAnswer, ...distractors];
+        choices.sort(() => Math.random() - 0.5);
+
+        generatedQuestions.push({
+          text: entryLine,
+          correct: correctAnswer,
+          choices: choices
+        });
+      });
+    });
+    sentences = generatedQuestions;
+
+    nextSentenceIndex = 0;
+    activeSentences.length = 0;
+    totalWords = 0;
+    correctWords = 0;
+
+    mcButtonsContainer.innerHTML = "";
+    typedDisplay.textContent = "";
+
+    console.log("✅ Section locked & 20 questions generated:", e.detail.name);
+  });
+})();
+</script>
+
+
+<script>
+/* =========================================
+   DROPDOWN MODAL SECTION SELECTOR
+   ========================================= */
+
+(function () {
+  let sectionData = [];
+  window.sectionAnswerPool = [];
+
+  function rebuildMCPool(sectionText) {
+    window.sectionAnswerPool = sectionText
+      .split("\n")
+      .map(line => {
+        const m = line.match(/\|([^|]+)\|/);
+        return m ? m[1] : null;
+      })
+      .filter(Boolean);
+  }
+
+  function parseSections(raw) {
+    const chunks = raw.split(/\n(?=~+)/);
+    return chunks
+      .map(chunk => chunk.trim())
+      .filter(chunk => chunk.startsWith("~"))
+      .map(chunk => {
+        const lines = chunk.split("\n");
+        const name = lines.shift().replace(/^~+/, "").trim();
+        const text = lines.join("\n").trim();
+        const words = [];
+        text.split("\n").forEach(line => {
+          const matches = line.match(/\|(.+?)\|/g);
+          if (matches) {
+            matches.forEach(m => words.push(m.replace(/\|/g, "")));
+          }
+        });
+        return { name, text, words: [...new Set(words)] };
+      });
+  }
+
+  sectionData = parseSections(window.__RAW_SECTION_TEXT__);
+
+  let currentSectionName = 'No Section';
+  let wordList = [];
+
+  const btn = document.getElementById("sectionSelectorBtn");
+  const modalRoot = document.getElementById("sectionModalRoot");
+  const modalBackdrop = document.getElementById("sectionModalBackdrop");
+  const modalClose = document.getElementById("sectionModalClose");
+  const listContainer = document.getElementById("sectionListContainer");
+
+  function openModal() {
+    listContainer.innerHTML = "";
+    if (sectionData.length === 0) {
+      listContainer.innerHTML = "<div style='padding:10px; text-align:center; color:#666;'>No categories found.</div>";
+    } else {
+      sectionData.forEach((sec, index) => {
+        const item = document.createElement("div");
+        item.className = "section-item";
+        item.textContent = sec.name;
+        item.addEventListener("click", () => {
+          currentSectionName = sec.name;
+          wordList = sec.words;
+          btn.textContent = sec.name;
+          closeModal();
+          rebuildMCPool(sec.text);
+          window.dispatchEvent(new CustomEvent("sectionchange", {
+            detail: {
+              index: index + 1,
+              name: sec.name,
+              text: sec.text
+            }
+          }));
+          startGame();
+        });
+        listContainer.appendChild(item);
+      });
+    }
+    modalRoot.style.display = "block";
+  }
+
+  function closeModal() {
+    modalRoot.style.display = "none";
+  }
+
+  if (btn) btn.addEventListener("click", openModal);
+  if (modalClose) modalClose.addEventListener("click", closeModal);
+  if (modalBackdrop) modalBackdrop.addEventListener("click", closeModal);
+
+  window.getSelectedSectionText = function () {
+    const sec = sectionData.find(s => s.name === currentSectionName);
+    return sec ? sec.text : "";
+  };
+})();
+</script>
+
+<script>
+let sentences = [];
+let contentReady = false;
+window.sentences = sentences;
+let allCorrectAnswers = [];
+let mcOptionCount = 8;
+
+(async () => {
+  try {
+    const raw = await resolveRaw(wordListSource);
+    sentences = raw
+      .split('\n')
+      .map(s => s.trim())
+      .filter(Boolean);
+
+    const answerSet = new Set();
+    sentences.forEach(s => {
+      const matches = s.match(/\|(.+?)\|/g);
+      if (matches) {
+        matches.forEach(m => answerSet.add(m.replace(/\|/g, '')));
+      }
+    });
+    allCorrectAnswers = Array.from(answerSet);
+
+    if (!sentences.length) {
+      throw new Error("No sentences loaded");
+    }
+
+    contentReady = true;
+    console.log("Sentences loaded:", sentences);
+  } catch (err) {
+    console.error("Failed to load word list:", err);
+    alert("Error loading game content.");
+  }
+})();
+
+const gameArea=document.getElementById('gameArea');
+const typedDisplay=document.getElementById('typedDisplay');
+const mcButtonsContainer=document.getElementById('mcButtonsContainer');
+
+const submitBtn=document.getElementById('submitBtn');
+const idInput=document.getElementById('idInput');
+const scoreboardContainer=document.getElementById('scoreboardContainer');
+const scoreButtons=document.getElementById('scoreButtons');
+const popSound=document.getElementById('popSound');
+const plane=document.getElementById('plane');
+
+let activeSentences=[], dropInterval=null, dropTickTime=25, gameStarted=false;
+let totalWords=0, correctWords=0, nextSentenceIndex=0;
+let planeY=gameArea.clientHeight/2, driftFrame=0;
+const rocketLeftOffset = 10*3.78;
+
+// --- Student Name Matching Script ---
+function getStudentName(id) {
+  if (typeof window.resolveStudentNameFromId === "function") {
+    return window.resolveStudentNameFromId(id);
+  }
+  const cleanId = (id || "").trim();
+  if (!cleanId) return "Student Unknown";
+  return `Student ${cleanId}`;
+}
+
+// --- Plane & Laser Burst ---
+function spawnPlaneBurst(){
+  const planeRect = plane.getBoundingClientRect();
+  const gaRect = gameArea.getBoundingClientRect();
+  const startX = planeRect.right - gaRect.left - 5;
+  const startY = planeRect.top - gaRect.top + planeRect.height/3;
+  const laserLength = 200;
+  const numDots = 25;
+
+  for(let i=0;i<numDots;i++){
+    setTimeout(()=>{
+      const dot = document.createElement('div');
+      dot.textContent = '-';
+      dot.style.position = 'absolute';
+      dot.style.color = 'white';
+      dot.style.fontSize = '18px';
+      dot.style.left = startX + (laserLength/numDots)*i + 'px';
+      dot.style.top = startY + 'px';
+      dot.style.opacity = 1;
+      dot.style.transition = 'all 0.3s linear';
+      dot.style.zIndex = 4;
+      gameArea.appendChild(dot);
+
+      setTimeout(()=>{dot.style.opacity=0;},100);
+      setTimeout(()=>{if(dot.parentNode) dot.parentNode.removeChild(dot);},400);
+    }, i*10);
+  }
+}
+
+// --- Spawn Sentences (Robust & Pre-wrapped) ---
+function spawnSentence(item){
+  if(!item) return;
+  
+  let text = '';
+  let choices = null;
+  let correct = '';
+
+  // Handle both structured question objects and raw string lines
+  if (typeof item === 'object' && item.text) {
+    text = item.text;
+    choices = item.choices;
+    correct = item.correct;
+  } else if (typeof item === 'string') {
+    text = item;
+    const match = text.match(/\|([^\|]+)\|/);
+    correct = match ? match[1] : '';
+    let distractors = allCorrectAnswers.filter(a => a !== correct);
+    choices = [correct, distractors[0] || 'A', distractors[1] || 'B'];
+    choices.sort(() => Math.random() - 0.5);
+  }
+
+const span = document.createElement('span'); 
+  span.className = 'sentence'; 
+  
+  // Replace '#' with a space to unify text smoothly
+  const cleanText = text.replace(/#/g, ' ').trim();
+  const parts = cleanText.split(/\|(.+?)\|/);
+  
+  let blanks = [];
+  for(let i = 0; i < parts.length; i++) {
+    if(i % 2 === 0) {
+      if(parts[i]) {
+        span.appendChild(document.createTextNode(parts[i]));
+      }
+    } else {
+      const b = document.createElement('span'); 
+      b.className = 'blank';
+      b.dataset.answer = parts[i]; 
+      b.innerHTML = '&nbsp;'.repeat(10); 
+      blanks.push({elem: b, answered: false});
+      span.appendChild(b);
+    }
+  }
+
+
+gameArea.appendChild(span);
+  const containerWidth = gameArea.clientWidth || 800;
+  const containerHeight = gameArea.clientHeight || 400;
+  
+  // Constrain vertical range safely within the top half of the game area (leaving room for buttons)
+  const minY = 20;
+  const maxY = Math.max(minY, containerHeight * 0.4 - 40);
+  span.style.top = (Math.random() * (maxY - minY) + minY) + 'px';
+
+const rocketRightEdge = 130;
+  const maxAllowedWidth = containerWidth - rocketRightEdge - 20;
+  const sentenceWidth = Math.min(360, maxAllowedWidth);
+  span.style.maxWidth = sentenceWidth + 'px';
+
+  const targetX = rocketRightEdge + Math.max(10, (containerWidth - rocketRightEdge - sentenceWidth) / 2);
+
+  let startX = containerWidth + 10;
+  span.style.left = startX + 'px';
+
+activeSentences.push({
+    span,
+    x: startX,
+    targetX: targetX,
+    state: 'sliding',
+    freezeTimer: 500, // ~12 seconds display time before timing out
+    blanks,
+    finished: false
+  });
+
+  requestAnimationFrame(() => {
+    span.style.opacity = '1';
+  });
+  generateMCButtons(choices, correct);
+}
+function generateMCButtons(choices, correct) {
+    mcButtonsContainer.innerHTML = '';
+
+    const row1 = document.createElement('div');
+    row1.style.display = 'flex';
+    row1.style.justifyContent = 'center';
+    row1.style.gap = '10px';
+    row1.style.width = '100%';
+
+    choices.forEach((choice) => {
+        const btn = document.createElement('button');
+        btn.textContent = choice;
+        btn.dataset.used = 'false';
+        btn.onclick = () => handleMCAnswer(choice, correct, btn);
+        row1.appendChild(btn);
+    });
+
+    mcButtonsContainer.appendChild(row1);
+    mcButtonsContainer.style.display = 'flex';
+    mcButtonsContainer.style.flexDirection = 'column';
+    mcButtonsContainer.style.alignItems = 'center';
+
+    unifyMCButtonWidths();
+}
+// --- MC Answer ---
+function handleMCAnswer(selected, correct, btn) {
+    const targetSentence = activeSentences.find(s => !s.finished && s.state !== 'fading');
+    if (!targetSentence) return;
+    const blank = targetSentence.blanks[0];
+
+    typedDisplay.textContent = selected;
+
+    if (!blank.answered) {
+        blank.answered = true;
+
+        if (selected === correct) {
+            btn.style.backgroundColor = 'green';
+            blank.elem.textContent = correct;
+
+            spawnPlaneBurst();
+            popSound.currentTime = 0;
+            popSound.play().catch(() => {});
+
+            correctWords++;
+
+            const spanRect = targetSentence.span.getBoundingClientRect();
+            const gaRect = gameArea.getBoundingClientRect();
+            plane.style.display = 'block';
+            planeY = spanRect.top - gaRect.top + spanRect.height / 2;
+            plane.style.top = planeY - plane.offsetHeight / 2 + 'px';
+
+            // Clear buttons immediately so next question can load cleanly
+            mcButtonsContainer.innerHTML = '';
+            targetSentence.state = 'fading';
+            targetSentence.span.style.opacity = '0';
+
+            // Hold answered sentence in place before fully removing it
+            setTimeout(() => {
+                targetSentence.finished = true;
+                typedDisplay.textContent = '';
+                if (targetSentence.span.parentNode) {
+                    targetSentence.span.parentNode.removeChild(targetSentence.span);
+                }
+
+                if (nextSentenceIndex >= sentences.length &&
+                    activeSentences.filter(s => !s.finished).length === 0) {
+                    accelerateRocketExit();
+                }
+            }, 2500);
+
+        } else {
+            btn.style.backgroundColor = 'red';
+            typedDisplay.textContent = '✗';
+            setTimeout(() => typedDisplay.textContent = '', 500);
+        }
+    } else {
+        if (selected === correct) {
+            btn.style.backgroundColor = 'green';
+            blank.elem.textContent = correct;
+        } else {
+            btn.style.backgroundColor = 'red';
+        }
+    }
+}// --- Rocket exit after last sentence ---
+function accelerateRocketExit(){
+  let speed = 2;
+  const exitInterval = setInterval(()=>{
+    let left = parseFloat(plane.style.left);
+    left += speed;
+    speed *= 1.05;
+    plane.style.left = left+'px';
+    if(left > gameArea.clientWidth){
+      clearInterval(exitInterval);
+    }
+  },20);
+}
+
+// --- Drop Sentences (Slide, Freeze/Timeout, Fade) ---
+function dropSentences(){
+  if(!gameStarted) return;
+  const gaRect = gameArea.getBoundingClientRect();
+
+  activeSentences.forEach(s => {
+    if(s.finished) return;
+
+    if(s.state === 'sliding') {
+      s.x += (s.targetX - s.x) * 0.1;
+      if(Math.abs(s.targetX - s.x) < 1) {
+        s.x = s.targetX;
+        s.state = 'frozen';
+      }
+      s.span.style.left = s.x + 'px';
+    } 
+    else if(s.state === 'frozen') {
+      s.freezeTimer--;
+      if(s.freezeTimer <= 0) {
+        s.state = 'fading';
+        s.span.style.opacity = '0';
+        mcButtonsContainer.innerHTML = ''; // Clear buttons when timing out
+      }
+    } 
+    else if(s.state === 'fading') {
+      if(!s.fadeTimeoutSet) {
+        s.fadeTimeoutSet = true;
+        setTimeout(() => {
+          s.finished = true;
+          if(s.span.parentNode) s.span.parentNode.removeChild(s.span);
+          mcButtonsContainer.innerHTML = '';
+
+          if (nextSentenceIndex >= sentences.length &&
+              activeSentences.filter(st => !st.finished).length === 0) {
+              accelerateRocketExit();
+          }
+        }, 2000); // Matches the 2.0s CSS fade transition
+      }
+    }
+  });
+
+  activeSentences = activeSentences.filter(s => !s.finished);
+
+  if(nextSentenceIndex < sentences.length && !activeSentences.some(s => !s.finished)) {
+    spawnSentence(sentences[nextSentenceIndex]);
+    nextSentenceIndex++;
+  }
+
+if(activeSentences.length > 0) {
+    const target = activeSentences[0];
+    const rect = target.span.getBoundingClientRect();
+    const sentenceY = rect.top - gaRect.top + rect.height / 2;
+    planeY += (sentenceY - planeY) * 0.1;
+  } else {
+    planeY += Math.sin(driftFrame / 10) * 2;
+  }
+  driftFrame++;
+  plane.style.top = planeY - plane.offsetHeight / 2 + 'px';
+}
+
+// Override spawn condition in dropSentences loop to strictly enforce 1 active sentence at a time
+function dropSentences(){
+  if(!gameStarted) return;
+  const gaRect = gameArea.getBoundingClientRect();
+
+  activeSentences.forEach(s => {
+    if(s.finished) return;
+
+    if(s.state === 'sliding') {
+      s.x += (s.targetX - s.x) * 0.1;
+      if(Math.abs(s.targetX - s.x) < 1) {
+        s.x = s.targetX;
+        s.state = 'frozen';
+      }
+      s.span.style.left = s.x + 'px';
+    } 
+    else if(s.state === 'frozen') {
+      s.freezeTimer--;
+      if(s.freezeTimer <= 0) {
+        s.state = 'fading';
+        s.span.style.opacity = '0';
+        mcButtonsContainer.innerHTML = '';
+      }
+    } 
+    else if(s.state === 'fading') {
+      if(!s.fadeTimeoutSet) {
+        s.fadeTimeoutSet = true;
+        setTimeout(() => {
+          s.finished = true;
+          if(s.span.parentNode) s.span.parentNode.removeChild(s.span);
+          mcButtonsContainer.innerHTML = '';
+
+          if (nextSentenceIndex >= sentences.length &&
+              activeSentences.filter(st => !st.finished).length === 0) {
+              accelerateRocketExit();
+          }
+        }, 2000);
+      }
+    }
+  });
+
+  activeSentences = activeSentences.filter(s => !s.finished);
+
+  // Strictly enforce only ONE active sentence on screen at any time
+  if(nextSentenceIndex < sentences.length && activeSentences.length === 0) {
+    spawnSentence(sentences[nextSentenceIndex]);
+    nextSentenceIndex++;
+  }
+
+  if(activeSentences.length > 0) {
+    const target = activeSentences[0];
+    const rect = target.span.getBoundingClientRect();
+    const sentenceY = rect.top - gaRect.top + rect.height / 2;
+    planeY += (sentenceY - planeY) * 0.1;
+  } else {
+    planeY += Math.sin(driftFrame / 10) * 2;
+  }
+  driftFrame++;
+  plane.style.top = planeY - plane.offsetHeight / 2 + 'px';
+}
+
+function getScoreboardFilename(extension) {
+  const scoreboardContainer = document.getElementById('scoreboardContainer');
+  if (scoreboardContainer && scoreboardContainer.textContent.trim()) {
+    let firstLine = scoreboardContainer.textContent.split('\n')[0];
+    let baseName = firstLine
+      .replace(/\|/g, '_')
+      .replace(/\s+/g, '_')
+      .replace(/[:\/]/g, '-');
+    return baseName + '.' + extension;
+  }
+  return 'scoreboard.' + extension;
+}
+
+window.getScoreboardFilename = getScoreboardFilename;
+
+// --- Game Controls ---
+function startGame() {
+  if (!contentReady) {
+    alert("Game content is still loading. Please try again.");
+    return;
+  }
+
+  if (gameStarted) return;
+
+  resetGame();
+  gameStarted = true;
+  gameStopped = false;
+  submitBtn.disabled = false;
+  nextSentenceIndex = 0;
+  
+  // Explicitly lock totalWords to the total generated questions count for the section
+  totalWords = sentences.length;
+
+  swoosh.start();
+
+  plane.style.display = 'block';
+  plane.style.left = (-100 - rocketLeftOffset) + 'px';
+  planeY = gameArea.clientHeight / 2;
+  plane.style.top = planeY + 'px';
+
+  let leftPos = -100;
+  const introAnim = setInterval(() => {
+    leftPos += 5;
+    plane.style.left = (leftPos - rocketLeftOffset) + 'px';
+    if (leftPos >= 50) {
+      clearInterval(introAnim);
+      dropInterval = setInterval(dropSentences, dropTickTime);
+    }
+  }, 20);
+}
+function submitResults() {
+  if (!gameStarted) return;
+
+  gameStarted = false;
+  clearInterval(dropInterval);
+
+  submitBtn.disabled = true;
+
+  let exitY = planeY;
+  const exitInterval = setInterval(() => {
+    exitY -= 6;
+    plane.style.top = exitY + 'px';
+
+    if (exitY + plane.offsetHeight < 0) {
+      clearInterval(exitInterval);
+      swoosh.stop();
+    }
+  }, 20);
+
+  const pct = totalWords
+    ? Math.round((correctWords / totalWords) * 100)
+    : 0;
+
+  const now = new Date();
+  const pad = n => n.toString().padStart(2,'0');
+  const dateStr = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+  const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const fileName = location.pathname.split('/').pop() || 'UnknownFile.html';
+
+  const studentId = idInput.value.trim() || "N/A";
+  const studentName = getStudentName(studentId);
+  const sectionName = document.getElementById("sectionSelectorBtn").textContent.trim() || "No Section";
+
+  const scoreLine =
+    `${fileName}|${sectionName}|${studentName}|${studentId}|` +
+    `${dateStr}|${timeStr}|${correctWords}/${totalWords}|${pct}%`;
+
+  scoreboardContainer.textContent = scoreLine;
+  scoreButtons.style.display = 'flex';
+  saveResult(scoreLine);
+}
+
+// --- Score Buttons ---
+document.getElementById('copyBtn').addEventListener('click', () => {
+  navigator.clipboard
+    .writeText(scoreboardContainer.textContent)
+    .then(() => alert('Score copied!'));
+});
+
+document.getElementById('downloadTxtBtn').addEventListener('click', () => {
+  const downloadFileName = getScoreboardFilename('txt');
+  const blob = new Blob([scoreboardContainer.textContent], {
+    type: 'text/plain'
+  });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = downloadFileName;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+document.getElementById('downloadPngBtn').addEventListener('click', () => {
+  const downloadFileName = getScoreboardFilename('png');
+  const el = scoreboardContainer;
+
+  const originalColor = el.style.color;
+  const originalBg = el.style.backgroundColor;
+
+  el.style.color = '#000';
+  el.style.backgroundColor = '#fff';
+
+  html2canvas(el, { backgroundColor: 'white', scale: 2 }).then(canvas => {
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = canvas.width + 20;
+    tempCanvas.height = canvas.height + 20;
+
+    const tempCtx = tempCanvas.getContext('2d');
+    tempCtx.fillStyle = 'white';
+    tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+    tempCtx.drawImage(canvas, 10, 10);
+
+    el.style.color = originalColor;
+    el.style.backgroundColor = originalBg;
+
+    tempCanvas.toBlob(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = downloadFileName;
+      a.click();
+      URL.revokeObjectURL(a.href);
+    });
+  });
+});
+
+function resetGame() {
+  activeSentences.forEach(s => {
+    if (s.span.parentNode) s.span.parentNode.removeChild(s.span);
+  });
+  activeSentences = [];
+  planeY = gameArea.clientHeight / 2;
+  plane.style.top = planeY + 'px';
+  plane.style.display = 'none';
+  plane.style.left = (10 - rocketLeftOffset) + 'px';
+  totalWords = 0;
+  correctWords = 0;
+  typedDisplay.textContent = '';
+  driftFrame = 0;
+  mcButtonsContainer.innerHTML = '';
+}
+
+submitBtn.addEventListener('click', submitResults);
+</script>
+
+
+<script>
+class AsteroidZSwoosh {
+    constructor() {
+        this.audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        const bufferSize = 2 * this.audioCtx.sampleRate;
+        const noiseBuffer = this.audioCtx.createBuffer(1, bufferSize, this.audioCtx.sampleRate);
+        const data = noiseBuffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+            data[i] = Math.random() * 2 - 1;
+        }
+
+        this.noise = this.audioCtx.createBufferSource();
+        this.noise.buffer = noiseBuffer;
+        this.noise.loop = true;
+
+        this.filter = this.audioCtx.createBiquadFilter();
+        this.filter.type = 'lowpass';
+        this.filter.frequency.value = 1200;
+
+        this.gainNode = this.audioCtx.createGain();
+        this.gainNode.gain.value = 0;
+
+        this.noise.connect(this.filter);
+        this.filter.connect(this.gainNode);
+        this.gainNode.connect(this.audioCtx.destination);
+
+        this.noise.start();
+        this.maxGain = 0.2;
+    }
+
+    start() {
+        if (this.audioCtx.state === 'suspended') {
+            this.audioCtx.resume();
+        }
+        const now = this.audioCtx.currentTime;
+        this.gainNode.gain.cancelScheduledValues(now);
+        this.gainNode.gain.setValueAtTime(this.gainNode.gain.value, now);
+        this.gainNode.gain.linearRampToValueAtTime(this.maxGain, now + 0.1);
+    }
+
+    stop() {
+        const now = this.audioCtx.currentTime;
+        this.gainNode.gain.cancelScheduledValues(now);
+        this.gainNode.gain.setValueAtTime(this.gainNode.gain.value, now);
+        this.gainNode.gain.linearRampToValueAtTime(0, now + 1);
+    }
+
+    setFrequency(freq) {
+        this.filter.frequency.setValueAtTime(
+            freq,
+            this.audioCtx.currentTime
+        );
+    }
+}
+
+const swoosh = new AsteroidZSwoosh();
+
+function unifyMCButtonWidths() {
+    const allBtns = mcButtonsContainer.querySelectorAll('button');
+    let maxWidth = 0;
+
+    allBtns.forEach(btn => {
+        btn.style.width = 'auto';
+        const w = btn.offsetWidth;
+        if (w > maxWidth) maxWidth = w;
+    });
+
+    allBtns.forEach(btn => {
+        btn.style.width = maxWidth + 'px';
+    });
+
+    // Automatically set blank width to match the maximum answer/button width
+    activeSentences.forEach(s => {
+        if (!s.finished && s.blanks) {
+            s.blanks.forEach(b => {
+                b.elem.style.width = maxWidth + 'px';
+            });
+        }
+    });
+}</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    let filename = window.location.pathname.split("/").pop();
+    filename = filename.replace(/\.html$/i, "");
+    filename = filename.replace(/^[^_]*_/, "");
+    const title = filename.replace(/_/g, " ");
+    const h1 = document.querySelector("h1");
+    if (h1) {
+        h1.textContent = title;
+    }
+});
+</script>
+
+<script>
+(function(){
+const RAW_TEXT = `
+How to use this page...
+• Enter your ID number into the ID field — Auto: Your name will automatically populate if registered, and entering your ID unlocks game tracking.
+• Click the Select a section button to choose a grammar category from the pop-up menu.
+• Click the Instructions button anytime to view the gameplay guide.
+• Click Submit or start the game to begin the flying rocket sequence.
+• Click the correct multiple-choice response buttons positioned at the bottom of the game area as sentences float past.
+• Click Submit to view your final score and percentage — Auto: Your results are compiled into a scoreboard record and logged automatically to the database.
+• Use the Copy, Text, or PNG buttons to download or copy your score record.
+`;
+
+function parseRawInstructions(text){
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+  lines.forEach(line => {
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
+    html.push(`<p>${line}</p>`);
+  });
+  return html.join("");
+}
+
+const btn = document.createElement("button");
+btn.id = "instructionsBtn";
+btn.textContent = "Instructions";
+btn.type = "button";
+document.getElementById("topBar").insertBefore(btn, document.getElementById("submitBtn"));
+
+const root = document.createElement("div");
+root.id = "instructionsRoot";
+root.innerHTML = `
+<div id="instructionsBackdrop"></div>
+<div id="instructionsModal">
+  <div id="instructionsHeader">
+    <span id="instructionsTitle">Instructions</span>
+    <button id="instructionsBack" type="button">✕</button>
+  </div>
+  <div id="instructionsContent">
+    ${parseRawInstructions(RAW_TEXT)}
+  </div>
+</div>
+`;
+document.body.appendChild(root);
+
+const modalContent = document.getElementById("instructionsContent");
+modalContent.addEventListener("wheel", e=>{e.stopPropagation();},{passive:false});
+modalContent.addEventListener("touchmove", e=>{e.stopPropagation();},{passive:false});
+
+function openModal(){
+  root.style.display="block";
+  document.body.style.overflow="hidden";
+  document.documentElement.style.overflow="hidden";
+}
+
+function closeModal(){
+  root.style.display="none";
+  document.body.style.overflow="";
+  document.documentElement.style.overflow="";
+}
+
+btn.onclick = openModal;
+document.getElementById("instructionsBack").onclick = closeModal;
+document.getElementById("instructionsBackdrop").onclick = closeModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape") closeModal();
+});
+})();
+</script>
+
+<script>
+(function() {
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+
+<script>
+(function () {
+  const border = document.createElement('div');
+  Object.assign(border.style, {
+    position: 'fixed',
+    inset: '0',
+    pointerEvents: 'none',
+    zIndex: '2147483647',
+    boxSizing: 'border-box',
+    border: '6px solid #39FF14'
+  });
+  (document.documentElement || document.body).appendChild(border);
+})();
+</script>
+
+<!-- SUPABASE LIBRARY -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+const supabaseClient = window.supabase?.createClient(
+  'https://etwwriloppklhhkmswpr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+);
+
+if (!supabaseClient) {
+  console.error("❌ Supabase failed to initialize");
+}
+
+let lastUploadedScore = null;
+
+window.saveResult = async function saveResult(text) {
+  if (!supabaseClient) {
+    console.error("❌ No Supabase client");
+    return;
+  }
+
+  let cleaned;
+  try {
+    cleaned = (typeof text === "string") ? text : JSON.stringify(text);
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+  } catch (err) {
+    console.error("❌ Normalize error:", err);
+    return;
+  }
+
+  if (!cleaned) return;
+  if (cleaned === lastUploadedScore) return;
+  lastUploadedScore = cleaned;
+
+  const { data, error } = await supabaseClient
+    .from("scoreboard_raw")
+    .insert([{ result_text: cleaned }])
+    .select();
+
+  if (error) {
+    console.error("❌ INSERT FAILED FULL ERROR:", error);
+    return;
+  }
+  console.log("✅ INSERT SUCCESS:", data);
+};
+</script>
+
+
+<!-- 3. STUDENT DATA REGISTRYMODULE -->
+<script>
+(function() {
+    'use strict';
+    const RAW_STUDENT_DATA = `
+        55555|David
+        55551|Matthew
+        12345|Sarah
+    `;
+    const studentDatabase = new Map();
+    RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+        const [id, name] = line.split('|').map(s => s ? s.trim() : '');
+        if (id && name) studentDatabase.set(id, name);
+    });
+
+    window.resolveStudentNameFromId = function(idInput) {
+        if (!idInput) return "Student";
+        const trimmed = String(idInput).trim();
+        if (/^(x|g|guest)$/i.test(trimmed)) {
+            return "Guest";
+        }
+        return studentDatabase.get(trimmed) || "Guest";
+    };
+})();
+
+</script>
+
+<!-- ========================================== -->
+<!-- NARROW PHONE LAYOUT SAFETY PATCH (START) -->
+<!-- ========================================== -->
+<style>
+  html, body {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box;
+  }
+  *, *:before, *:after {
+    box-sizing: inherit;
+  }
+  body {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    margin: 0 auto !important;
+  }
+  img, video, canvas, table {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+</style>
+<!-- ========================================== -->
+<!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
+<!-- ========================================== -->
+</body>
+>>>>>>> c76eb69b50f05b4798f53dfe215594e2f268fb31
 </html>
