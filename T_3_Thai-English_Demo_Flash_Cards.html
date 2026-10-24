@@ -1,0 +1,1706 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" />
+<title>English-Thai Basic Flash Cards</title>
+<script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+  :root { --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; }
+
+  /* Base */
+  body { font-family: var(--font-main); margin:0; padding:0; background:#f7fdfb; }
+  #layout { max-width: 480px; margin:0 auto; padding:20px; box-sizing: border-box; }
+  h2 { text-align:left; margin-bottom:12px; font-size:20px; }
+
+.top-bar { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: nowrap; align-items: center; }
+  
+  /* Unified styling for top bar elements to match other buttons */
+  .top-bar input[type="text"],
+  .top-bar #sectionSelectorBtn,
+  .top-bar #instructionsBtn { 
+    flex: 1 1 50%; 
+    height: 28px;
+    padding: 0 4px; /* Tightened padding for ultra-narrow screens */
+    font-size: 11px; /* Reduced font size to prevent text wrapping */
+    letter-spacing: -0.2px;
+    border: 1px solid #cfe2f7; 
+    border-radius: 6px; 
+    box-sizing: border-box; 
+    min-width: 0; 
+    background: linear-gradient(145deg, #ffffff, #eaf6ff);
+    color: #1976d2;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    font-weight: 400;
+    transition: 0.12s;
+    text-align: left;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .top-bar input[type="text"] {
+    cursor: text;
+    text-align: left;
+  }
+
+  .top-bar input[type="text"]::placeholder {
+    color: #1976d2;
+    opacity: 0.8;
+  }
+  
+  /* Top bar elements hover styling */
+  .top-bar #sectionSelectorBtn:hover,
+  .top-bar input[type="text"]:hover,
+  .top-bar input[type="text"]:focus,
+  .top-bar #instructionsBtn:hover {
+    background: linear-gradient(145deg, #ffffff, #d0e8ff);
+    border-color: #1976d2;
+    outline: none;
+  }
+  .flashcard-container { perspective: 1000px; margin-bottom: 12px; }
+  .flashcard { width: 100%; min-height: 100px; background: #eaf6ff; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; cursor: pointer; transform-style: preserve-3d; transition: transform 0.6s; position: relative; border: 1px solid #9aaed1; box-sizing: border-box; }
+  .flashcard.flipped { transform: rotateY(180deg); }
+  .flashcard .front, .flashcard .back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; display: flex; align-items: center; justify-content: center; border-radius: 12px; padding: 12px; text-align: center; box-sizing: border-box; }
+
+  .flashcard .back {
+    transform: rotateY(180deg);
+    background: #ffeacf;
+    font-size: 14px;
+    text-align: left;
+    align-items: center;         
+    justify-content: center;    
+    display: flex;
+    flex-direction: column;
+    padding: 12px 16px;
+    overflow-wrap: break-word;
+  }
+
+  #vocabHeader { 
+    font-size: 16px; 
+    font-weight: 400; 
+    color: #1976d2; 
+    background: linear-gradient(145deg, #ffffff, #eaf6ff); 
+    border: 1px solid #cfe2f7; 
+    padding: 8px 16px; 
+    border-radius: 6px; 
+    cursor: pointer; 
+    margin-bottom: 12px; 
+    text-align: center; 
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    transition: 0.12s; 
+  }
+  #vocabHeader:hover { 
+    background: linear-gradient(145deg, #ffffff, #d0e8ff);
+    border-color: #1976d2; 
+  }
+
+  #vocabList { list-style-type: disc; list-style-position: outside; padding-left: 20px; margin:0; }
+  #vocabList li { margin-bottom: 6px; font-size: 14px; text-align: left; }
+
+  #exampleInput { width: 100%; height: 28px; padding: 0 8px; font-size: 14px; border: 1px solid #9aaed1; border-radius: 6px; margin-bottom: 12px; box-sizing: border-box; background: #fff; }
+
+  #navButtons { display: flex; gap: 12px; justify-content: space-between; margin-bottom: 12px; }
+
+  #navButtons button {
+    background: linear-gradient(145deg, #ffffff, #eaf6ff);
+    color: #1976d2;
+    border: 1px solid #cfe2f7;
+    border-radius: 6px;
+    padding: 0 12px;
+    height: 28px;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    font-weight: 400;
+    transition: 0.12s;
+  }
+  #navButtons button:hover {
+    background: linear-gradient(145deg, #ffffff, #d0e8ff);
+    border-color: #1976d2;
+  }
+
+  #scoreboard { display: none; border: 2px solid #39FF14; padding: 20px; border-radius: 10px; background: #fff; font-family: monospace; font-size: 14px; max-height: 50vh; overflow-y: auto; box-sizing: border-box; }
+  #scoreboard pre { margin: 0; }
+  
+  #scoreboard .btn-group { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  #scoreboard .btn-group button {
+    background: linear-gradient(145deg, #ffffff, #eaf6ff);
+    color: #1976d2;
+    border: 1px solid #cfe2f7;
+    border-radius: 6px;
+    padding: 0 12px;
+    height: 28px;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+    font-weight: 400;
+    transition: 0.12s;
+  }
+  #scoreboard .btn-group button:hover {
+    background: linear-gradient(145deg, #ffffff, #d0e8ff);
+    border-color: #1976d2;
+  }
+
+  @media (max-width: 480px) {
+    h2 { font-size: 18px; }
+    .flashcard { font-size: 16px; min-height: 90px; }
+    #exampleInput { font-size: 13px; height: 28px; padding: 0 6px; }
+    #navButtons button, #scoreboard button { font-size: 13px; height: 28px; padding: 0 10px; }
+    .top-bar input[type="text"], .top-bar #sectionSelectorBtn, .top-bar #instructionsBtn { font-size: 13px; height: 28px; padding: 0 5px; }
+  }
+
+  #copyrightSection {
+    margin-top: 0px;   
+    text-align: left;    
+    padding: 0;          
+    font-size: 8px;
+  }
+
+  .reading-highlight {
+    background: #cce5ff;
+    transition: background 0.2s ease;
+  }
+
+  .read-line {
+    display: block;
+  }
+
+  #scoreOutput {
+    white-space: pre-wrap;     
+    word-break: break-word;     
+    overflow-wrap: anywhere;    
+  }
+
+  /* ===== UNIFIED MODAL STYLING (Selection & Instructions) ===== */
+  #sectionModalRoot,
+  #instructionsRoot {
+    position: fixed;
+    inset: 0;
+    display: none;
+    z-index: 99999;
+  }
+  #sectionModalBackdrop,
+  #instructionsBackdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+  }
+  #sectionModalContent,
+  #instructionsModal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: min(500px, 92vw);
+    max-height: min(80vh, calc(100dvh - 16px));
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border: 1px solid #cfe2f7;
+    font-family: var(--font-main);
+  }
+  #sectionModalHeader,
+  #instructionsHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex: 0 0 auto;
+    font-size: 18px;
+    font-weight: 700;
+    color: #1976d2;
+  }
+  #instructionsTitle {
+    color: #1976d2;
+    font-weight: 700;
+    font-size: 18px;
+  }
+  #sectionModalClose,
+  #instructionsBack {
+    background: none;
+    border: none;
+    color: #1976d2;
+    font-size: 22px;
+    font-weight: 700;
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    width: auto;
+    height: auto;
+  }
+  #sectionModalClose:hover,
+  #instructionsBack:hover {
+    background-color: #eef6ff;
+  }
+  #sectionListContainer,
+  #instructionsContent {
+    padding: 0;
+    overflow-y: auto;
+    min-height: 0;
+    flex: 1 1 auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #333;
+  }
+  #sectionListContainer::-webkit-scrollbar,
+  #instructionsContent::-webkit-scrollbar {
+    display: none;
+  }
+  .section-item {
+    height: 28px;
+    padding: 0 6px;
+    margin-bottom: 6px;
+    background: #eaf6ff;
+    border: 1px solid #cfe2f7;
+    border-radius: 6px;
+    cursor: pointer;
+    font-family: var(--font-main);
+    font-size: 11px;
+    color: #1976d2;
+    font-weight: 400;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    transition: 0.12s;
+    width: 100%;
+  }
+  .section-item:hover {
+    background: #d0e8ff;
+    border-color: #1976d2;
+  }
+  .section-item.selected {
+    background: #1976d2;
+    border-color: #1976d2;
+    color: #fff;
+  }
+  #instructionsContent h3 {
+    margin-top: 10px;
+    margin-bottom: 4px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #1976d2;
+  }
+  #instructionsContent p {
+    margin-bottom: 8px;
+    font-weight: 400;
+  }
+  #instructionsContent hr {
+    margin: 12px 0;
+    border: none;
+    border-top: 1px solid #cfe2f7;
+  }
+</style>
+</head>
+<body>
+
+
+<div id="layout">
+  <h2></h2>
+
+  <!-- TOP BAR -->
+  <div class="top-bar" id="topFields">
+    <input id="studentId" type="text" placeholder="ID" autocomplete="off" />
+    <button id="sectionSelectorBtn" type="button">Section</button>
+    <button id="instructionsBtn" type="button">Instructions</button>
+  </div>
+
+  <!-- HEADER -->
+  <div id="vocabHeader" style="margin: 6px 0 10px 0;">
+    Click to view / hide the complete list.
+  </div>
+
+  <!-- READING AREA -->
+  <div id="readingArea">
+
+    <!-- VOCAB LIST -->
+    <ul id="vocabList"></ul>
+
+    <!-- FLASHCARD -->
+    <div class="flashcard-container" id="flashcardContainer">
+      <div class="flashcard" id="flashcard">
+        <div class="front read-line"></div>
+        <div class="back read-line"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <input type="text" id="exampleInput" class="visible" placeholder="Type your example sentence..." />
+
+  <div id="navButtons" class="visible">
+    <button id="prevBtn">Previous</button>
+    <button id="nextBtn">Next</button>
+  </div>
+
+  <div id="scoreboard">
+    <pre id="scoreOutput"></pre>
+    <div class="btn-group" id="scoreBtns">
+      <button id="copyBtn">Copy</button>
+      <button id="downloadTextBtn">↓TXT</button>
+      <button id="downloadPngBtn">↓PNG</button>
+    </div>
+  </div>
+
+<section id="copyrightSection">
+  <div class="footer-note copyright">© <span id="currentYear"></span> Perfectly Practical English™. All rights reserved.</div>
+</section>
+
+</div>
+
+<!-- SECTION SELECTION MODAL -->
+<div id="sectionModalRoot">
+  <div id="sectionModalBackdrop"></div>
+  <div id="sectionModalContent">
+    <div id="sectionModalHeader">
+      <span>Select a Category</span>
+      <button id="sectionModalClose" type="button">✕</button>
+    </div>
+    <div id="sectionListContainer"></div>
+  </div>
+</div>
+
+<!-- INSTRUCTIONS MODAL -->
+<div id="instructionsRoot">
+  <div id="instructionsBackdrop"></div>
+  <div id="instructionsModal">
+    <div id="instructionsHeader">
+      <span id="instructionsTitle">Instructions</span>
+      <button id="instructionsBack" type="button">✕</button>
+    </div>
+    <div id="instructionsContent"></div>
+  </div>
+</div>
+
+
+<script>
+document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+
+<!-- 3. STUDENT DATA REGISTRY MODULE -->
+<script>
+(function() {
+    'use strict';
+    const RAW_STUDENT_DATA = `
+        55555|David
+        55551|Matthew
+        12345|Sarah
+    `;
+    const studentDatabase = new Map();
+    RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+        const [id, name] = line.split('|').map(s => s ? s.trim() : '');
+        if (id && name) studentDatabase.set(id, name);
+    });
+
+    window.resolveStudentNameFromId = function(idInput) {
+        if (!idInput) return "Guest";
+        const trimmed = String(idInput).trim();
+        if (/^(x|g|guest)$/i.test(trimmed)) {
+            return "Guest";
+        }
+        return studentDatabase.get(trimmed) || "Guest";
+    };
+})();
+</script>
+
+<script>
+function parseVocabInput(input) {
+  const lines = input.split("\n").map(l => l.trim()).filter(l => l.length > 0);
+  const result = [];
+  let currentWord = null;
+  let currentDef = "";
+
+  lines.forEach(line => {
+    if (/^[•*-]/.test(line)) {
+      if (currentWord) result.push({ word: currentWord, definition: currentDef.trim() });
+      const match = line.match(/^[•*-]\s*(.+?)\s*(?:–|—|-)\s*(.+)/);
+      if (match) { currentWord = match[1].trim(); currentDef = match[2].trim(); }
+      else { currentWord = line.replace(/^[•*-]\s*/, ""); currentDef = ""; }
+    } 
+    else if (/\s[-–—]\s/.test(line)) {
+      if (currentWord) {
+        result.push({
+          word: currentWord,
+          definition: currentDef.trim()
+        });
+      }
+
+      const match = line.match(/^(.+?)\s[-–—]\s(.+)$/);
+      if (match) {
+        currentWord = match[1].trim();
+        currentDef = match[2].trim();
+      }
+    }
+    else { 
+      currentDef = currentDef ? currentDef + "<br/>" + line : line;
+    }
+  });
+  if (currentWord) result.push({ word: currentWord, definition: currentDef.trim() });
+  return result;
+}
+
+const rawVocabText = `
+// You can paste either format here
+~ Determiners
+• nùeng หนึ่ง - a
+• nùeng หนึ่ง - an
+• - the -
+• níi นี้ - this
+• nán นั้น - that
+• lào-níi เหล่านี้ - these
+• lào-nán เหล่านั้น - those
+• baang บาง - some
+• dai-dai ใดๆ - any
+• mâak มาก - much
+• lǎai หลาย - many
+ 
+~ Pronouns - 
+• chǎn ฉัน - I
+• khun คุณ - you
+• khǎo เขา - he
+• khǎo เขา - she
+• man มัน - it
+• phûak-rao พวกเรา - we
+• phûak-khun พวกคุณ - you
+• phûak-khǎo พวกเขา - they
+• chǎn ฉัน - me
+• khun คุณ - you
+• khǎo เขา - him
+• khǎo เขา - her
+• man มัน - it
+• phûak-rao พวกเรา - us
+• phûak-khun พวกคุณ - you
+• phûak-khǎo พวกเขา - them
+• khrai-baang-khon ใครบางคน - someone
+• khrai-baang-khon ใครบางคน - somebody
+• baang-sìng บางสิ่ง - something
+• thúk-khon ทุกคน - everyone
+• thúk-khon ทุกคน - everybody
+• thúk-sìng ทุกสิ่ง - everything
+• mâi-mii-khrai ไม่มีใคร - no one
+• mâi-mii-khrai ไม่มีใคร - nobody
+• mâi-mii-à-rai ไม่มีอะไร - nothing
+• khrai-gâw-dâai ใครก็ได้ - anyone
+• khrai-gâw-dâai ใครก็ได้ - anybody
+• à-rai-gâw-dâai อะไรก็ได้ - anything
+ 
+~ Nouns
+• wee-laa เวลา - time
+• wan วัน - day
+• thaang ทาง - way
+• lôhk โลก - world
+• chii-wít ชีวิต - life
+• sìng สิ่ง - thing
+• sà-thǎan-thîi สถานที่ - place
+• khon คน - person
+• khon คน - people/man/woman
+• dèk เด็ก - child
+• phâw-mâae / lûuk พ่อแม่/ลูก - parent/child
+• khrâwp-khrua ครอบครัว - family
+• phûean เพื่อน - friend
+• klùm กลุ่ม - group
+• thiim ทีม - team
+• phûean-bâan เพื่อนบ้าน - neighbor
+• phûu-nam ผู้นำ - leader
+• jâo-naai เจ้านาย - boss
+• khruu ครู - teacher
+• nák-rian นักเรียน - student
+• khon-ngaan คนงาน - worker
+• lûuk-kháa ลูกค้า - customer
+• phûu-yài / dèk / thaa-rók ผู้ใหญ่/เด็ก/ทารก - adult/child/baby
+• kham คำ - word
+• phaa-sǎa ภาษา - language
+• khwaam-mǎai ความหมาย - meaning
+• khwaam-khít ความคิด - idea
+• kham-thǎam คำถาม - question
+• kham-tàwp คำตอบ - answer
+• khâaw-khwaam ข้อความ - message/note
+• rʉ̂ang เรื่อง - story
+• khâaw-muun ข้อมูล - fact/information
+• tua-yàang ตัวอย่าง - example
+• gòt กฎ - rule
+• raai-gaan รายการ - list
+• hèt-phǒn เหตุผล - reason
+• kaan-dtàt-sǐn-jai การตัดสินใจ - decision/choice
+• pan-hǎa ปัญหา - problem
+• phǒn-láp ผลลัพธ์ - result
+• bâan บ้าน - home
+• hâwng ห้อง - room
+• hâwng-khrua ห้องครัว - kitchen
+• tó / gâo-îi / dtiiang โต๊ะ/เก้าอี้/เตียง - table/desk/chair/bed
+• bprà-dtuu / nâa-dtàang ประตู/หน้าต่าง - door/window
+• glàawng / grà-bpǎo กล่อง/กระเป๋า - box/bag
+• gun-jaae กุญแจ - key
+• sǎaeng แสง - light
+• grà-dàat กระดาษ - paper
+• nǎng-sʉ̌ʉ หนังสือ - book
+• bpàak-gaa / din-sǎw ปากกา/ดินสอ - pen/pencil
+• ngaan งาน - work/job
+• roong-rian โรงเรียน - school
+• sǎm-nák-ngaan สำนักงาน - office
+• ráan-kháa ร้านค้า - store
+• aa-khaan อาคาร - building
+• mʉang / mùu-bâan เมือง/หมู่บ้าน - city/village
+• bprà-thêet ประเทศ - country
+• thà-nǒn ถนน - road/street
+• rót รถ - car/vehicle
+• ngern เงิน - money
+• thoo-rá-sàp โทรศัพท์ - phone
+• khawm-phiw-dtêr คอมพิวเตอร์ - device/computer
+• khrʉ̂ang-jàk / hùn-yon เครื่องจักร/หุ่นยนต์ - machine/robot
+• râang-gaai ร่างกาย - body
+• hǔa / nâa หัว/หน้า - head/face
+• dtaa / hǔu / jà-mùuk / bpàak ตา/หู/จมูก/ปาก - eye/ear/nose/mouth
+• khǎaen / khǎa แขน/ขา - arm/leg
+• mʉʉ มือ - hand
+• khɔɔ คอ - neck
+• jìt-jai จิตใจ - mind
+• hǔa-jai หัวใจ - heart
+• sǐiang เสียง - voice
+• sùk-khà-phâap สุขภาพ - health
+• pha-lang-ngaan พลังงาน - energy
+• kaan-nawn การนอน - sleep
+• khwaam-jèp-bpùat ความเจ็บปวด - pain
+• aa-gàat อากาศ - air
+• náam น้ำ - water
+• fai ไฟ - fire
+• tháawng-fáa ท้องฟ้า - sky
+• duang-aa-thít ดวงอาทิตย์ - sun
+• fǒn ฝน - rain
+• lom ลม - wind
+• aa-gàat อากาศ - weather
+• dtôn-mái ต้นไม้ - plant/tree
+• sàt สัตว์ - animal
+• chûa-moong ชั่วโมง - hour
+• dʉan เดือน - month
+• bpii ปี - year
+• naa-lí-gaa นาฬิกา - clock
+• kaan-bplìian-bplaaeng การเปลี่ยนแปลง - change
+• phǎen แผน - plan
+• bpâo-mǎai เป้าหมาย - goal
+• rá-bòp ระบบ - system
+• grà-buan-gaan กระบวนการ - process
+• geem เกม - game
+• bpaa-dtîi ปาร์ตี้ - party
+• chʉ̂ʉ ชื่อ - name
+• khwaam-rák ความรัก - love
+• thít-thaang ทิศทาง - direction
+ 
+~ Verbs
+• bpen เป็น - be
+• mii มี - have
+• tham ทำ - do
+• bpai ไป - go
+• dâai ได้ - get
+• tham ทำ - make
+• ao เอา - take
+• khít คิด - think
+• rúu รู้ - know
+• khâo-jai เข้าใจ - understand
+• jam จำ - remember
+• luuem ลืม - forget
+• rian-rúu เรียนรู้ - learn
+• rian เรียน - study
+• à-thí-baai อธิบาย - explain
+• lʉ̂ak เลือก - decide/choose
+• hěn-dûai / mâi-hěn-dûai เห็นด้วย/ไม่เห็นด้วย - agree/disagree
+• phûut พูด - say
+• bàawk บอก - tell
+• phûut พูด - speak
+• khui คุย - talk
+• thǎam ถาม - ask
+• tàwp ตอบ - answer
+• thoo โทร - call
+• sòng ส่ง - send
+• sà-daaeng แสดง - show
+• khǐan เขียน - write
+• àan อ่าน - read
+• fang ฟัง - listen
+• phóp พบ - meet
+• chûai ช่วย - help
+• rák รัก - love
+• sà-nàp-sà-nǔn สนับสนุน - support
+• bɔɔ-ri-gaan บริการ - serve
+• dtaam ตาม - follow
+• nam นำ - lead
+• lên เล่น - play
+• aa-sǎi อาศัย - live
+• gin กิน - eat
+• nawn นอน - sleep
+• tham-aa-hǎan ทำอาหาร - cook
+• tham-khwaam-sà-àat ทำความสะอาด - clean
+• tham-ngaan ทำงาน - work
+• chái ใช้ - use
+• maa / bpai มา/ไป - come/go
+• khlʉ̂an-yáai เคลื่อนย้าย - move
+• dern เดิน - walk
+• wîng วิ่ง - run
+• wâai-náam ว่ายน้ำ - swim
+• maa-thʉ̌ng มาถึง - arrive
+• khâo เข้า - enter
+• òk ออก - exit
+• glàp กลับ - return
+• yùu อยู่ - stay
+• òk ออก - leave
+• yʉʉn ยืน - stand
+• nâng นั่ง - sit
+• hâi ให้ - give
+• ao เอา - take
+• nam-maa นำมา - bring
+• waang วาง - put
+• gèp เก็บ - keep
+• thʉ̌ʉ ถือ - hold
+• bpə̀ət เปิด - open
+• bpìt ปิด - close
+• mǔn หมุน - turn
+• dtâng ตั้ง - set
+• sâang สร้าง - build
+• sâang สร้าง - create
+• sʉ́ʉ ซื้อ - buy
+• jàai จ่าย - pay
+• khǎai ขาย - sell
+• raa-khaa ราคา - cost
+• hěn เห็น - see
+• mawng มอง - look
+• duu ดู - watch
+• rúu-sʉ̀k รู้สึก - feel
+• rʉ̂ʉm / yùt เริ่ม/หยุด - start/stop
+• rʉ̂ʉm / jòp เริ่ม/จบ - begin/end
+• bplìian เปลี่ยน - change
+• dtə̀əp-dtoo เติบโต - grow
+• raw รอ - wait
+• lawng ลอง - try
+• dtâwng-gaan ต้องการ - need
+• yàak อยาก - want
+• lóm-lěo ล้มเหลว - fail
+• sǎm-rèt สำเร็จ - succeed
+• chá-ná / pháae ชนะ/แพ้ - win/lose
+• sǎa-mâat สามารถ - can
+• sǎa-mâat สามารถ - could
+• àat อาจ - may
+• àat-jà อาจจะ - might
+• jà จะ - will
+• jà จะ - would
+• jà จะ - shall
+• khuan ควร - should
+• dtâwng ต้อง - must
+• hâi ให้ - let
+• mii-yùu มีอยู่ - exist/be located
+• lìik-lîiang หลีกเลี่ยง - avoid
+ 
+ 
+~ Adjectives
+• dii ดี - good
+• mâi-dii ไม่ดี - bad
+• sǎm-khan สำคัญ - important
+• sǔai สวย - beautiful
+• nâa-glìiat น่าเกลียด - ugly
+• nâa-sǒn-jai น่าสนใจ - interesting
+• nâa-bʉ̀a น่าเบื่อ - boring
+• ngâai ง่าย - easy
+• yâak ยาก - difficult
+• mii-khwaam-sùk มีความสุข - happy
+• sâo เศร้า - sad
+• gròot โกรธ - angry
+• yài ใหญ่ - big
+• yài ใหญ่ - large
+• lék เล็ก - small
+• khǎaeng-raaeng แข็งแรง - strong
+• òn-ae อ่อนแอ - weak
+• mài ใหม่ - new
+• gào เก่า - old
+• nùm-sǎao หนุ่มสาว - young
+• sǐi สี - red, green, etc.
+• thaawng ทอง - gold
+• ngern เงิน - silver
+• ang-grìt อังกฤษ - English
+• ì-dtaa-lii อิตาลี - Italian
+• jiin จีน - Chinese
+• à-mee-rí-gan อเมริกัน - American
+• thai ไทย - Thai
+• phâa ผ้า - material/fabric
+• loo-hà โลหะ - metal
+• mái ไม้ - wooden
+• hǐn หิน - stone
+• nǎng หนัง - leather
+• fâai ฝ้าย - cotton
+• khǒn-gàe ขนแกะ - wool
+• grà-dàat กระดาษ - paper
+• phláat-sà-dtìk พลาสติก - plastic
+• gâaeo แก้ว - glass
+• lèk เหล็ก - steel
+• à-luu-mí-nii-yam อลูมิเนียม - aluminum
+• mǎi ไหม - silk
+• li-nin ลินิน - linen
+• kaan-tham-aa-hǎan การทำอาหาร - cooking
+• kaan-tham-khwaam-sà-àat การทำความสะอาด - cleaning
+• dern-bpàa เดินป่า - hiking
+• dtâng-khɛ́mp ตั้งแคมป์ - camping
+• dtòk-bplaa ตกปลา - fishing
+• lâa-sàt ล่าสัตว์ - hunting
+• khǎaeng-raaeng แข็งแรง - athletic
+• rɔ́ɔn / ùn / yen ร้อน/อุ่น/เย็น - hot/warm/cold
+ 
+ 
+~ Adverbs
+• dii ดี - well
+• reo เร็ว - fast
+• cháa ช้า - slowly
+• yàang rá-mát rá-wang อย่างระมัดระวัง - carefully
+• sǐang dang เสียงดัง - loudly
+• ngîiap ngîiap เงียบๆ - quietly
+• dton-níi ตอนนี้ - now
+• dton-nán ตอนนั้น - then
+• phêung เพิ่ง - just
+• láaeo แล้ว - already
+• yang ยัง - still
+• wan-níi วันนี้ - today
+• mûea-waan เมื่อวาน - yesterday
+• phrûng-níi พรุ่งนี้ - tomorrow
+• reo reo níi เร็วๆนี้ - soon
+• thii-lǎng ทีหลัง - later
+• nai thîi-sùt ในที่สุด - finally
+• ìik khráŋ อีกครั้ง - again
+• sà-mə̌ə เสมอ - always
+• dooi bpòk-gà-dtì โดยปกติ - usually
+• bòi บ่อย - often
+• baang khráŋ บางครั้ง - sometimes
+• mâi khoei ไม่เคย - never
+• thîi-nîi / thîi-nân ที่นี่/ที่นั่น - here/there
+• khâang nai ข้างใน - inside
+• khâang nâawk ข้างนอก - outside
+• thúk thîi ทุกที่ - everywhere
+• glàp กลับ - back
+• òk bpai ออกไป - away
+• mâak มาก - very
+• jing jing จริงๆ - really
+• mâak มาก - so
+• geern bpai เกินไป - too
+• khâawn khâang ค่อนข้าง - quite
+• nít nòi นิดหน่อย - a little
+• gùeap เกือบ - almost
+• phaaw พอ - enough
+• àat jà อาจจะ - maybe
+• nâa jà น่าจะ - probably
+• nâae-naawn แน่นอน - of course
+• dûay ด้วย - also
+• máae dtàae แม้แต่ - even
+• dooi chà-pháw โดยเฉพาะ - especially
+• dûay gan ด้วยกัน - together
+• khon diao คนเดียว - alone
+• yàang rai อย่างไร - how
+• mûea rài เมื่อไหร่ - when
+• thîi nǎi ที่ไหน - where
+• tham-mai ทำไม - why
+• khâang nâa ข้างหน้า - forward
+ 
+~ Prepositions
+• nai ใน - in
+• bon บน - on
+• thîi ที่ - at
+• dtâai ใต้ - under
+• nǔea เหนือ - over
+• nǔea เหนือ - above
+• khâang lâang ข้างล่าง - below
+• rá-wàang ระหว่าง - between
+• thâam-glaang ท่ามกลาง - among
+• khâang nai ข้างใน - inside
+• khâang nâawk ข้างนอก - outside
+• glâi ใกล้ - near
+• glai ไกล - far
+• râawp râawp รอบๆ - around
+• bpai ไป - to
+• jàak จาก - from
+• khâo bpai nai เข้าไปใน - into
+• khûen bpai bon ขึ้นไปบน - onto
+• òk jàak ออกจาก - out of
+• long jàak ลงจาก - off
+• khâam ข้าม - across
+• phàan ผ่าน - through
+• dtaam ตาม - along
+• gòn ก่อน - before
+• lǎng jàak หลังจาก - after
+• rá-wàang ระหว่าง - during
+• jon thǔeng จนถึง - until
+• dtâng dtàae ตั้งแต่ - since
+• bpen wee-laa เป็นเวลา - for
+• gàp กับ - with
+• dooi mâi mii โดยไม่มี - without
+• gìeow gàp เกี่ยวกับ - about
+• dooi โดย - by
+• khǎawng ของ - of
+• khâang khâang ข้างๆ - next to
+
+~ All Words
+• nùeng หนึ่ง - a
+• nùeng หนึ่ง - an
+• - the -
+• níi นี้ - this
+• nán นั้น - that
+• lào-níi เหล่านี้ - these
+• lào-nán เหล่านั้น - those
+• baang บาง - some
+• dai-dai ใดๆ - any
+• mâak มาก - much
+• lǎai หลาย - many
+• chǎn ฉัน - I
+• khun คุณ - you
+• khǎo เขา - he
+• khǎo เขา - she
+• man มัน - it
+• phûak-rao พวกเรา - we
+• phûak-khun พวกคุณ - you
+• phûak-khǎo พวกเขา - they
+• chǎn ฉัน - me
+• khun คุณ - you
+• khǎo เขา - him
+• khǎo เขา - her
+• man มัน - it
+• phûak-rao พวกเรา - us
+• phûak-khun พวกคุณ - you
+• phûak-khǎo พวกเขา - them
+• khrai-baang-khon ใครบางคน - someone
+• khrai-baang-khon ใครบางคน - somebody
+• baang-sìng บางสิ่ง - something
+• thúk-khon ทุกคน - everyone
+• thúk-khon ทุกคน - everybody
+• thúk-sìng ทุกสิ่ง - everything
+• mâi-mii-khrai ไม่มีใคร - no one
+• mâi-mii-khrai ไม่มีใคร - nobody
+• mâi-mii-à-rai ไม่มีอะไร - nothing
+• khrai-gâw-dâai ใครก็ได้ - anyone
+• khrai-gâw-dâai ใครก็ได้ - anybody
+• à-rai-gâw-dâai อะไรก็ได้ - anything
+• wee-laa เวลา - time
+• wan วัน - day
+• thaang ทาง - way
+• lôhk โลก - world
+• chii-wít ชีวิต - life
+• sìng สิ่ง - thing
+• sà-thǎan-thîi สถานที่ - place
+• khon คน - person
+• khon คน - people/man/woman
+• dèk เด็ก - child
+• phâw-mâae / lûuk พ่อแม่/ลูก - parent/child
+• khrâwp-khrua ครอบครัว - family
+• phûean เพื่อน - friend
+• klùm กลุ่ม - group
+• thiim ทีม - team
+• phûean-bâan เพื่อนบ้าน - neighbor
+• phûu-nam ผู้นำ - leader
+• jâo-naai เจ้านาย - boss
+• khruu ครู - teacher
+• nák-rian นักเรียน - student
+• khon-ngaan คนงาน - worker
+• lûuk-kháa ลูกค้า - customer
+• phûu-yài / dèk / thaa-rók ผู้ใหญ่/เด็ก/ทารก - adult/child/baby
+• kham คำ - word
+• phaa-sǎa ภาษา - language
+• khwaam-mǎai ความหมาย - meaning
+• khwaam-khít ความคิด - idea
+• kham-thǎam คำถาม - question
+• kham-tàwp คำตอบ - answer
+• khâaw-khwaam ข้อความ - message/note
+• rʉ̂ang เรื่อง - story
+• khâaw-muun ข้อมูล - fact/information
+• tua-yàang ตัวอย่าง - example
+• gòt กฎ - rule
+• raai-gaan รายการ - list
+• hèt-phǒn เหตุผล - reason
+• kaan-dtàt-sǐn-jai การตัดสินใจ - decision/choice
+• pan-hǎa ปัญหา - problem
+• phǒn-láp ผลลัพธ์ - result
+• bâan บ้าน - home
+• hâwng ห้อง - room
+• hâwng-khrua ห้องครัว - kitchen
+• tó / gâo-îi / dtiiang โต๊ะ/เก้าอี้/เตียง - table/desk/chair/bed
+• bprà-dtuu / nâa-dtàang ประตู/หน้าต่าง - door/window
+• glàawng / grà-bpǎo กล่อง/กระเป๋า - box/bag
+• gun-jaae กุญแจ - key
+• sǎaeng แสง - light
+• grà-dàat กระดาษ - paper
+• nǎng-sʉ̌ʉ หนังสือ - book
+• bpàak-gaa / din-sǎw ปากกา/ดินสอ - pen/pencil
+• ngaan งาน - work/job
+• roong-rian โรงเรียน - school
+• sǎm-nák-ngaan สำนักงาน - office
+• ráan-kháa ร้านค้า - store
+• aa-khaan อาคาร - building
+• mʉang / mùu-bâan เมือง/หมู่บ้าน - city/village
+• bprà-thêet ประเทศ - country
+• thà-nǒn ถนน - road/street
+• rót รถ - car/vehicle
+• ngern เงิน - money
+• thoo-rá-sàp โทรศัพท์ - phone
+• khawm-phiw-dtêr คอมพิวเตอร์ - device/computer
+• khrʉ̂ang-jàk / hùn-yon เครื่องจักร/หุ่นยนต์ - machine/robot
+• râang-gaai ร่างกาย - body
+• hǔa / nâa หัว/หน้า - head/face
+• dtaa / hǔu / jà-mùuk / bpàak ตา/หู/จมูก/ปาก - eye/ear/nose/mouth
+• khǎaen / khǎa แขน/ขา - arm/leg
+• mʉʉ มือ - hand
+• khɔɔ คอ - neck
+• jìt-jai จิตใจ - mind
+• hǔa-jai หัวใจ - heart
+• sǐiang เสียง - voice
+• sùk-khà-phâap สุขภาพ - health
+• pha-lang-ngaan พลังงาน - energy
+• kaan-nawn การนอน - sleep
+• khwaam-jèp-bpùat ความเจ็บปวด - pain
+• aa-gàat อากาศ - air
+• náam น้ำ - water
+• fai ไฟ - fire
+• tháawng-fáa ท้องฟ้า - sky
+• duang-aa-thít ดวงอาทิตย์ - sun
+• fǒn ฝน - rain
+• lom ลม - wind
+• aa-gàat อากาศ - weather
+• dtôn-mái ต้นไม้ - plant/tree
+• sàt สัตว์ - animal
+• chûa-moong ชั่วโมง - hour
+• dʉan เดือน - month
+• bpii ปี - year
+• naa-lí-gaa นาฬิกา - clock
+• kaan-bplìian-bplaaeng การเปลี่ยนแปลง - change
+• phǎen แผน - plan
+• bpâo-mǎai เป้าหมาย - goal
+• rá-bòp ระบบ - system
+• grà-buan-gaan กระบวนการ - process
+• geem เกม - game
+• bpaa-dtîi ปาร์ตี้ - party
+• chʉ̂ʉ ชื่อ - name
+• khwaam-rák ความรัก - love
+• thít-thaang ทิศทาง - direction
+• bpen เป็น - be
+• mii มี - have
+• tham ทำ - do
+• bpai ไป - go
+• dâai ได้ - get
+• tham ทำ - make
+• ao เอา - take
+• khít คิด - think
+• rúu รู้ - know
+• khâo-jai เข้าใจ - understand
+• jam จำ - remember
+• luuem ลืม - forget
+• rian-rúu เรียนรู้ - learn
+• rian เรียน - study
+• à-thí-baai อธิบาย - explain
+• lʉ̂ak เลือก - decide/choose
+• hěn-dûai / mâi-hěn-dûai เห็นด้วย/ไม่เห็นด้วย - agree/disagree
+• phûut พูด - say
+• bàawk บอก - tell
+• phûut พูด - speak
+• khui คุย - talk
+• thǎam ถาม - ask
+• tàwp ตอบ - answer
+• thoo โทร - call
+• sòng ส่ง - send
+• sà-daaeng แสดง - show
+• khǐan เขียน - write
+• àan อ่าน - read
+• fang ฟัง - listen
+• phóp พบ - meet
+• chûai ช่วย - help
+• rák รัก - love
+• sà-nàp-sà-nǔn สนับสนุน - support
+• bɔɔ-ri-gaan บริการ - serve
+• dtaam ตาม - follow
+• nam นำ - lead
+• lên เล่น - play
+• aa-sǎi อาศัย - live
+• gin กิน - eat
+• nawn นอน - sleep
+• tham-aa-hǎan ทำอาหาร - cook
+• tham-khwaam-sà-àat ทำความสะอาด - clean
+• tham-ngaan ทำงาน - work
+• chái ใช้ - use
+• maa / bpai มา/ไป - come/go
+• khlʉ̂an-yáai เคลื่อนย้าย - move
+• dern เดิน - walk
+• wîng วิ่ง - run
+• wâai-náam ว่ายน้ำ - swim
+• maa-thʉ̌ng มาถึง - arrive
+• khâo เข้า - enter
+• òk ออก - exit
+• glàp กลับ - return
+• yùu อยู่ - stay
+• òk ออก - leave
+• yʉʉn ยืน - stand
+• nâng นั่ง - sit
+• hâi ให้ - give
+• ao เอา - take
+• nam-maa นำมา - bring
+• waang วาง - put
+• gèp เก็บ - keep
+• thʉ̌ʉ ถือ - hold
+• bpə̀ət เปิด - open
+• bpìt ปิด - close
+• mǔn หมุน - turn
+• dtâng ตั้ง - set
+• sâang สร้าง - build
+• sâang สร้าง - create
+• sʉ́ʉ ซื้อ - buy
+• jàai จ่าย - pay
+• khǎai ขาย - sell
+• raa-khaa ราคา - cost
+• hěn เห็น - see
+• mawng มอง - look
+• duu ดู - watch
+• rúu-sʉ̀k รู้สึก - feel
+• rʉ̂ʉm / yùt เริ่ม/หยุด - start/stop
+• rʉ̂ʉm / jòp เริ่ม/จบ - begin/end
+• bplìian เปลี่ยน - change
+• dtə̀əp-dtoo เติบโต - grow
+• raw รอ - wait
+• lawng ลอง - try
+• dtâwng-gaan ต้องการ - need
+• yàak อยาก - want
+• lóm-lěo ล้มเหลว - fail
+• sǎm-rèt สำเร็จ - succeed
+• chá-ná / pháae ชนะ/แพ้ - win/lose
+• sǎa-mâat สามารถ - can
+• sǎa-mâat สามารถ - could
+• àat อาจ - may
+• àat-jà อาจจะ - might
+• jà จะ - will
+• jà จะ - would
+• jà จะ - shall
+• khuan ควร - should
+• dtâwng ต้อง - must
+• hâi ให้ - let
+• mii-yùu มีอยู่ - exist/be located
+• lìik-lîiang หลีกเลี่ยง - avoid
+• dii ดี - good
+• mâi-dii ไม่ดี - bad
+• sǎm-khan สำคัญ - important
+• sǔai สวย - beautiful
+• nâa-glìiat น่าเกลียด - ugly
+• nâa-sǒn-jai น่าสนใจ - interesting
+• nâa-bʉ̀a น่าเบื่อ - boring
+• ngâai ง่าย - easy
+• yâak ยาก - difficult
+• mii-khwaam-sùk มีความสุข - happy
+• sâo เศร้า - sad
+• gròot โกรธ - angry
+• yài ใหญ่ - big
+• yài ใหญ่ - large
+• lék เล็ก - small
+• khǎaeng-raaeng แข็งแรง - strong
+• òn-ae อ่อนแอ - weak
+• mài ใหม่ - new
+• gào เก่า - old
+• nùm-sǎao หนุ่มสาว - young
+• sǐi สี - red, green, etc.
+• thaawng ทอง - gold
+• ngern เงิน - silver
+• ang-grìt อังกฤษ - English
+• ì-dtaa-lii อิตาลี - Italian
+• jiin จีน - Chinese
+• à-mee-rí-gan อเมริกัน - American
+• thai ไทย - Thai
+• phâa ผ้า - material/fabric
+• loo-hà โลหะ - metal
+• mái ไม้ - wooden
+• hǐn หิน - stone
+• nǎng หนัง - leather
+• fâai ฝ้าย - cotton
+• khǒn-gàe ขนแกะ - wool
+• grà-dàat กระดาษ - paper
+• phláat-sà-dtìk พลาสติก - plastic
+• gâaeo แก้ว - glass
+• lèk เหล็ก - steel
+• à-luu-mí-nii-yam อลูมิเนียม - aluminum
+• mǎi ไหม - silk
+• li-nin ลินิน - linen
+• kaan-tham-aa-hǎan การทำอาหาร - cooking
+• kaan-tham-khwaam-sà-àat การทำความสะอาด - cleaning
+• dern-bpàa เดินป่า - hiking
+• dtâng-khɛ́mp ตั้งแคมป์ - camping
+• dtòk-bplaa ตกปลา - fishing
+• lâa-sàt ล่าสัตว์ - hunting
+• khǎaeng-raaeng แข็งแรง - athletic
+• rɔ́ɔn / ùn / yen ร้อน/อุ่น/เย็น - hot/warm/cold
+• dii ดี - well
+• reo เร็ว - fast
+• cháa ช้า - slowly
+• yàang rá-mát rá-wang อย่างระมัดระวัง - carefully
+• sǐang dang เสียงดัง - loudly
+• ngîiap ngîiap เงียบๆ - quietly
+• dton-níi ตอนนี้ - now
+• dton-nán ตอนนั้น - then
+• phêung เพิ่ง - just
+• láaeo แล้ว - already
+• yang ยัง - still
+• wan-níi วันนี้ - today
+• mûea-waan เมื่อวาน - yesterday
+• phrûng-níi พรุ่งนี้ - tomorrow
+• reo reo níi เร็วๆนี้ - soon
+• thii-lǎng ทีหลัง - later
+• nai thîi-sùt ในที่สุด - finally
+• ìik khráŋ อีกครั้ง - again
+• sà-mə̌ə เสมอ - always
+• dooi bpòk-gà-dtì โดยปกติ - usually
+• bòi บ่อย - often
+• baang khráŋ บางครั้ง - sometimes
+• mâi khoei ไม่เคย - never
+• thîi-nîi / thîi-nân ที่นี่/ที่นั่น - here/there
+• khâang nai ข้างใน - inside
+• khâang nâawk ข้างนอก - outside
+• thúk thîi ทุกที่ - everywhere
+• glàp กลับ - back
+• òk bpai ออกไป - away
+• mâak มาก - very
+• jing jing จริงๆ - really
+• mâak มาก - so
+• geern bpai เกินไป - too
+• khâawn khâang ค่อนข้าง - quite
+• nít nòi นิดหน่อย - a little
+• gùeap เกือบ - almost
+• phaaw พอ - enough
+• àat jà อาจจะ - maybe
+• nâa jà น่าจะ - probably
+• nâae-naawn แน่นอน - of course
+• dûay ด้วย - also
+• máae dtàae แม้แต่ - even
+• dooi chà-pháw โดยเฉพาะ - especially
+• dûay gan ด้วยกัน - together
+• khon diao คนเดียว - alone
+• yàang rai อย่างไร - how
+• mûea rài เมื่อไหร่ - when
+• thîi nǎi ที่ไหน - where
+• tham-mai ทำไม - why
+• khâang nâa ข้างหน้า - forward
+• nai ใน - in
+• bon บน - on
+• thîi ที่ - at
+• dtâai ใต้ - under
+• nǔea เหนือ - over
+• nǔea เหนือ - above
+• khâang lâang ข้างล่าง - below
+• rá-wàang ระหว่าง - between
+• thâam-glaang ท่ามกลาง - among
+• khâang nai ข้างใน - inside
+• khâang nâawk ข้างนอก - outside
+• glâi ใกล้ - near
+• glai ไกล - far
+• râawp râawp รอบๆ - around
+• bpai ไป - to
+• jàak จาก - from
+• khâo bpai nai เข้าไปใน - into
+• khûen bpai bon ขึ้นไปบน - onto
+• òk jàak ออกจาก - out of
+• long jàak ลงจาก - off
+• khâam ข้าม - across
+• phàan ผ่าน - through
+• dtaam ตาม - along
+• gòn ก่อน - before
+• lǎng jàak หลังจาก - after
+• rá-wàang ระหว่าง - during
+• jon thǔeng จนถึง - until
+• dtâng dtàae ตั้งแต่ - since
+• bpen wee-laa เป็นเวลา - for
+• gàp กับ - with
+• dooi mâi mii โดยไม่มี - without
+• gìeow gàp เกี่ยวกับ - about
+• dooi โดย - by
+• khǎawng ของ - of
+• khâang khâang ข้างๆ - next to
+
+			
+`;
+</script>
+
+<script>
+(function () {
+  window.__RAW_SECTION_TEXT__ = rawVocabText;
+})();
+</script>
+
+<script>
+let vocabPairs = [];
+let currentSectionName = "No Section";
+
+(function () {
+  function parseSections(raw) {
+    const chunks = raw.split(/\n(?=~+)/);
+    return chunks
+      .map(chunk => chunk.trim())
+      .filter(chunk => chunk.startsWith("~"))
+      .map(chunk => {
+        const lines = chunk.split("\n");
+        const name = lines.shift().replace(/^~+/, "").trim();
+        const text = lines.join("\n").trim();
+        return { name, text };
+      });
+  }
+
+  const sections = parseSections(window.__RAW_SECTION_TEXT__);
+  
+  window.getSelectedSectionName = () => currentSectionName;
+  window.getSelectedSectionText = () => {
+    const found = sections.find(s => s.name === currentSectionName);
+    return found ? found.text : "";
+  };
+
+  const btn = document.getElementById("sectionSelectorBtn");
+  const modalRoot = document.getElementById("sectionModalRoot");
+  const modalBackdrop = document.getElementById("sectionModalBackdrop");
+  const modalClose = document.getElementById("sectionModalClose");
+  const listContainer = document.getElementById("sectionListContainer");
+
+  let selectedModalIndex = -1;
+
+  function openModal() {
+    listContainer.innerHTML = "";
+    if (sections.length === 0) {
+      listContainer.innerHTML = "<div style='padding:10px; text-align:center; color:#666;'>No categories found.</div>";
+    } else {
+      sections.forEach((sec, index) => {
+        const item = document.createElement("div");
+        item.className = "section-item" + (selectedModalIndex === index ? " selected" : "");
+        item.textContent = sec.name;
+        item.addEventListener("click", () => {
+          document.querySelectorAll('.section-item').forEach(i => i.classList.remove('selected'));
+          item.classList.add("selected");
+          selectedModalIndex = index;
+
+          currentSectionName = sec.name;
+          btn.textContent = sec.name;
+          closeModal();
+          
+          vocabPairs = parseVocabInput(sec.text);
+
+          // Ensure the vocab list stays closed when switching sections
+          const vList = document.getElementById('vocabList');
+          if (vList) vList.style.display = 'none';
+
+          if (typeof studentSentences !== "undefined") {
+            studentSentences = Array(vocabPairs.length).fill("");
+          }
+          if (typeof flashcardIndex !== "undefined") {
+            flashcardIndex = 0;
+          }
+          if (typeof renderVocabList === "function") renderVocabList();
+          if (typeof updateFlashcard === "function") updateFlashcard();
+        });
+        listContainer.appendChild(item);
+      });
+    }
+    modalRoot.style.display = "block";
+  }
+
+  function closeModal() {
+    modalRoot.style.display = "none";
+  }
+
+  if (btn) btn.addEventListener("click", openModal);
+  if (modalClose) modalClose.addEventListener("click", closeModal);
+  if (modalBackdrop) modalBackdrop.addEventListener("click", closeModal);
+
+  window.addEventListener("DOMContentLoaded", () => {
+    currentSectionName = "No Section";
+    btn.textContent = "Topics";
+    vocabPairs = [];
+    
+    // Ensure the vocab list starts closed on initial page load
+    const vList = document.getElementById('vocabList');
+    if (vList) vList.style.display = 'none';
+
+    if (typeof renderVocabList === "function") renderVocabList();
+    if (typeof updateFlashcard === "function") updateFlashcard();
+  });
+})();
+</script>
+<script>
+let studentSentences = [];
+let flashcardIndex = 0;
+
+const flashcard = document.getElementById('flashcard');
+const front = flashcard.querySelector('.front');
+const back = flashcard.querySelector('.back');
+const exampleInput = document.getElementById('exampleInput');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const finishBtn = document.getElementById('finishBtn');
+const idEl = document.getElementById('studentId');
+const scoreboard = document.getElementById('scoreboard');
+const scoreOutput = document.getElementById('scoreOutput');
+const vocabList = document.getElementById('vocabList');
+const vocabHeader = document.getElementById('vocabHeader');
+
+function renderVocabList() {
+  vocabList.innerHTML = vocabPairs.map(p =>
+    `<li class="read-line">${p.word}: ${p.definition}</li>`
+  ).join('');
+}
+
+vocabHeader.addEventListener('click', () => {
+  vocabList.style.display = vocabList.style.display === 'none' ? 'block' : 'none';
+});
+
+function updateFlashcard() {
+  if (!vocabPairs.length) {
+    front.textContent = "Word";
+    back.innerHTML = "Meaning";
+    return;
+  }
+
+  front.textContent = vocabPairs[flashcardIndex].word;
+  back.innerHTML = vocabPairs[flashcardIndex].definition;
+  exampleInput.value = studentSentences[flashcardIndex] || '';
+
+  prevBtn.style.display = flashcardIndex === 0 ? "none" : "inline-block";
+  nextBtn.textContent =
+    flashcardIndex === vocabPairs.length - 1 ? "Finish" : "Next";
+
+  flashcard.classList.remove('flipped');
+}
+
+function checkInputs() {
+  if (finishBtn) finishBtn.style.display = 'inline-block';
+}
+
+flashcard.addEventListener('click', () => flashcard.classList.toggle('flipped'));
+exampleInput.addEventListener('input', () =>
+  studentSentences[flashcardIndex] = exampleInput.value.trim()
+);
+
+idEl.addEventListener('input', checkInputs);
+
+prevBtn.addEventListener('click', () => {
+  if (flashcardIndex > 0) {
+    flashcardIndex--;
+    updateFlashcard();
+  }
+});
+
+nextBtn.addEventListener('click', () => {
+  if (!vocabPairs.length) return;
+  studentSentences[flashcardIndex] = exampleInput.value.trim();
+
+  if (flashcardIndex < vocabPairs.length - 1) {
+    flashcardIndex++;
+    updateFlashcard();
+  } else {
+    showScoreboard();
+  }
+});
+
+function showScoreboard() {
+  const rawId = idEl.value.trim();
+  const sid = rawId || 'N/A';
+  const resolvedName = window.resolveStudentNameFromId ? window.resolveStudentNameFromId(rawId) : "Guest";
+  
+  const now = new Date();
+  const formattedDate =
+    `${String(now.getDate()).padStart(2,'0')}/` +
+    `${String(now.getMonth()+1).padStart(2,'0')}/` +
+    `${now.getFullYear()} ` +
+    `${String(now.getHours()).padStart(2,'0')}:` +
+    `${String(now.getMinutes()).padStart(2,'0')}`;
+
+  const fileName = window.location.pathname.split('/').pop() || 'unknown.html';
+  const sectionName = window.getSelectedSectionName ? window.getSelectedSectionName() : "No Section";
+
+  let output = `${fileName}|${sectionName}|${resolvedName}|${sid}|${formattedDate}|0/10|100%`;
+
+  const sentenceLines = [];
+  vocabPairs.forEach((p, i) => {
+    const sentence = (studentSentences[i] || "").trim();
+    if (sentence) {
+      sentenceLines.push(`${i+1}. ${sentence}`);
+    }
+  });
+
+  if (sentenceLines.length > 0) {
+    output += "\n\n" + sentenceLines.join("\n");
+  }
+
+  scoreOutput.textContent = output;
+  scoreboard.style.display = 'block';
+
+  window.saveResult?.(output);
+}
+
+document.getElementById('copyBtn').addEventListener('click', () => 
+  navigator.clipboard.writeText(scoreOutput.textContent).then(() => alert('Copied!'))
+); 
+
+document.getElementById('downloadTextBtn').addEventListener('click', () => {
+  const rawId = idEl.value.trim() || 'N/A';
+  const resolvedName = window.resolveStudentNameFromId ? window.resolveStudentNameFromId(rawId) : "Guest";
+  const sectionName = window.getSelectedSectionName ? window.getSelectedSectionName() : "NoSection";
+  const downloadFileName = getScoreboardFilename('txt');
+
+  const blob = new Blob([scoreOutput.textContent], {type: 'text/plain'}); 
+  const a = document.createElement('a'); 
+  a.href = URL.createObjectURL(blob); 
+  a.download = downloadFileName; 
+  a.click();
+});
+
+document.getElementById('downloadPngBtn').addEventListener('click', () => {
+  const rawId = idEl.value.trim() || 'N/A';
+  const resolvedName = window.resolveStudentNameFromId ? window.resolveStudentNameFromId(rawId) : "Guest";
+  const sectionName = window.getSelectedSectionName ? window.getSelectedSectionName() : "NoSection";
+  const downloadFileName = getScoreboardFilename('png');
+
+  const btnGroup = document.getElementById('scoreBtns'); 
+  btnGroup.style.display = 'none';
+  html2canvas(scoreboard).then(canvas => { 
+    btnGroup.style.display = 'flex'; 
+    const link = document.createElement('a'); 
+    link.download = downloadFileName; 
+    link.href = canvas.toDataURL('image/png'); 
+    link.click(); 
+  });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabaseClient = window.supabase?.createClient(
+  'https://etwwriloppklhhkmswpr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+);
+
+let lastUploadedScore = null;
+
+window.saveResult = async function saveResult(text) {
+  if (!supabaseClient) return;
+  let cleaned;
+  try {
+    cleaned = (typeof text === "string") ? text : JSON.stringify(text);
+    cleaned = cleaned.replace(/\s+/g, " ").trim();
+  } catch (err) {
+    return;
+  }
+  if (!cleaned || cleaned === lastUploadedScore) return;
+  lastUploadedScore = cleaned;
+
+  await supabaseClient.from("scoreboard_raw").insert([{ result_text: cleaned }]);
+};
+</script>
+
+<script>
+(function() {
+  function getScoreboardFilename(extension) {
+    const scoreOutput = document.getElementById('scoreOutput');
+    if (scoreOutput && scoreOutput.textContent.trim()) {
+      let firstLine = scoreOutput.textContent.split('\n')[0];
+      let baseName = firstLine
+        .replace(/\|/g, '_')
+        .replace(/\s+/g, '_')
+        .replace(/[:\/]/g, '-');
+      return baseName + '.' + extension;
+    }
+    return 'scoreboard.' + extension;
+  }
+
+  window.getScoreboardFilename = getScoreboardFilename;
+
+  window.showScoreboard = function() {
+    const idEl = document.getElementById('studentId');
+    const scoreboard = document.getElementById('scoreboard');
+    const scoreOutput = document.getElementById('scoreOutput');
+
+    const rawId = idEl.value.trim();
+    const sid = rawId || 'N/A';
+    const resolvedName = window.resolveStudentNameFromId ? window.resolveStudentNameFromId(rawId) : "Guest";
+    
+    const now = new Date();
+    const formattedDate =
+      `${String(now.getDate()).padStart(2,'0')}/` +
+      `${String(now.getMonth()+1).padStart(2,'0')}/` +
+      `${now.getFullYear()} ` +
+      `${String(now.getHours()).padStart(2,'0')}:` +
+      `${String(now.getMinutes()).padStart(2,'0')}`;
+
+    const fileName = window.location.pathname.split('/').pop() || 'unknown.html';
+    const sectionName = window.getSelectedSectionName ? window.getSelectedSectionName() : "No Section";
+
+    let output = `${fileName}|${sectionName}|${resolvedName}|${sid}|${formattedDate}|0/10|100%`;
+
+    const sentenceLines = [];
+    if (typeof vocabPairs !== 'undefined' && typeof studentSentences !== 'undefined') {
+      vocabPairs.forEach((p, i) => {
+        const sentence = (studentSentences[i] || "").trim();
+        if (sentence) {
+          sentenceLines.push(`${i+1}. ${sentence}`);
+        }
+      });
+    }
+
+    if (sentenceLines.length > 0) {
+      output += "\n\n" + sentenceLines.join("\n");
+    }
+
+    scoreOutput.textContent = output;
+    scoreboard.style.display = 'block';
+
+    if (typeof window.saveResult === 'function') {
+      window.saveResult(output);
+    }
+  };
+
+  const copyBtn = document.getElementById('copyBtn');
+  if (copyBtn) {
+    copyBtn.replaceWith(copyBtn.cloneNode(true));
+    document.getElementById('copyBtn').addEventListener('click', () => {
+      const scoreOutput = document.getElementById('scoreOutput');
+      navigator.clipboard.writeText(scoreOutput.textContent).then(() => alert('Copied!'));
+    });
+  }
+
+  const downloadTextBtn = document.getElementById('downloadTextBtn');
+  if (downloadTextBtn) {
+    downloadTextBtn.replaceWith(downloadTextBtn.cloneNode(true));
+    document.getElementById('downloadTextBtn').addEventListener('click', () => {
+      const scoreOutput = document.getElementById('scoreOutput');
+      const downloadFileName = getScoreboardFilename('txt');
+
+      const blob = new Blob([scoreOutput.textContent], {type: 'text/plain'}); 
+      const a = document.createElement('a'); 
+      a.href = URL.createObjectURL(blob); 
+      a.download = downloadFileName; 
+      a.click();
+    });
+  }
+
+  const downloadPngBtn = document.getElementById('downloadPngBtn');
+  if (downloadPngBtn) {
+    downloadPngBtn.replaceWith(downloadPngBtn.cloneNode(true));
+    document.getElementById('downloadPngBtn').addEventListener('click', () => {
+      const scoreboard = document.getElementById('scoreboard');
+      const downloadFileName = getScoreboardFilename('png');
+
+      const btnGroup = document.getElementById('scoreBtns'); 
+      if (btnGroup) btnGroup.style.display = 'none';
+      
+      html2canvas(scoreboard).then(canvas => { 
+        if (btnGroup) btnGroup.style.display = 'flex'; 
+        const link = document.createElement('a'); 
+        link.download = downloadFileName; 
+        link.href = canvas.toDataURL('image/png'); 
+        link.click(); 
+      });
+    });
+  }
+})();
+</script>
+
+<script>
+(function(){
+const RAW_TEXT = `
+How to use this page…
+
+Overview: The English-Thai Basic Flash Cards tool enables students to study bilingual English-Thai vocabulary flashcards, write custom example sentences, and export or submit formatted completion scoreboards.
+
+Student Identification: Type your student ID number into the ID input field located at the top-left corner. [Automatic] The application instantly resolves and matches your ID to your student name from the internal registry.
+
+Category Selection: Click the Section button in the top bar to open the category selection modal, and choose a vocabulary module (such as Top 100 Verbs, Adjectives, Nouns, or Numbers). [Automatic] Selecting a section loads the respective vocabulary deck and resets card progress.
+
+Instructions Modal: Click the Instructions button in the top bar to open a popup guide explaining the step-by-step student workflow.
+
+Vocabulary List Toggle: Click the Click to view / hide the complete list. header bar to expand or collapse the full scrollable text list of vocabulary words and definitions.
+
+Flashcard Interaction: View the English term on the front of the card, then click anywhere on the flashcard container to flip it over and inspect the Thai translation, definition, and pronunciation notes on the back.
+
+Example Sentence Input: Type your practice sentence into the Type your example sentence... text field below the flashcard area. [Automatic] Your sentence is saved in real-time to the active card index as you type.
+
+Card Navigation: Click the Previous or Next buttons to navigate through the deck. [Automatic] The Next button automatically converts into a Finish button upon reaching the final card.
+
+Scoreboard & Cloud Submission: Advancing past the final card reveals the formatted scoreboard containing your user details, timestamp, and sentence history. [Automatic] Completion data is automatically transmitted and saved to the backend database registry.
+
+Export Options: Use the action buttons at the bottom of the scoreboard to copy data via Copy, save a text file via ↓TXT, or download an image snapshot via ↓PNG.`;
+
+function parseRawInstructions(text){
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+  lines.forEach(line => {
+    if(line === "---"){ html.push(`<hr>`); return; }
+    if(/^\d+\./.test(line)){ html.push(`<p>${line}</p>`); return; }
+    if(!/[.!?:]$/.test(line)){ html.push(`<h3>${line}</h3>`); return; }
+    html.push(`<p>${line}</p>`);
+  });
+  return html.join("");
+}
+
+const instructionsBtn = document.getElementById("instructionsBtn");
+const instructionsRoot = document.getElementById("instructionsRoot");
+const instructionsBackdrop = document.getElementById("instructionsBackdrop");
+const instructionsBack = document.getElementById("instructionsBack");
+const instructionsContent = document.getElementById("instructionsContent");
+
+if(instructionsContent) {
+  instructionsContent.innerHTML = parseRawInstructions(RAW_TEXT);
+  instructionsContent.addEventListener("wheel", e=>{ e.stopPropagation(); },{passive:false});
+  instructionsContent.addEventListener("touchmove", e=>{ e.stopPropagation(); },{passive:false});
+}
+
+function openInstructionsModal(){
+  if(instructionsRoot) instructionsRoot.style.display="block";
+  document.body.style.overflow="hidden";
+  document.documentElement.style.overflow="hidden";
+}
+
+function closeInstructionsModal(){
+  if(instructionsRoot) instructionsRoot.style.display="none";
+  document.body.style.overflow="";
+  document.documentElement.style.overflow="";
+}
+
+if(instructionsBtn) instructionsBtn.onclick = openInstructionsModal;
+if(instructionsBack) instructionsBack.onclick = closeInstructionsModal;
+if(instructionsBackdrop) instructionsBackdrop.onclick = closeInstructionsModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape") {
+    closeInstructionsModal();
+  }
+});
+})();
+</script>
+
+<!-- ========================================== -->
+<!-- NARROW PHONE LAYOUT SAFETY PATCH (START) -->
+<!-- ========================================== -->
+<style>
+  html, body {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box;
+  }
+  *, *:before, *:after {
+    box-sizing: inherit;
+  }
+  body {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    margin: 0 auto !important;
+  }
+  img, video, canvas, table {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+</style>
+<!-- ========================================== -->
+<!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
+<!-- ========================================== -->
+</body>
+</html>
