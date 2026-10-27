@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
 <title>Schedule</title>
 <style>
-  body {
+body {
     font-family: Arial, sans-serif;
     background: #000;
     color: #fff;
@@ -26,7 +26,7 @@
   }
 
 .schedule-wrapper {
-  background: #2a2a2a;
+  background: #ffffff;
   border-radius: 8px;
   padding: 4px;
   margin-top: 15px;
@@ -44,22 +44,23 @@
   display: none;              /* Chrome, Safari, Edge, Opera */
 }
 
-  table {
+table {
+  background-color: #fff;
     border-collapse: collapse;
     font-size: 11px;
     table-layout: fixed;
     width: 100%;
   }
 
-  th, td {
-    border: 1px solid #444;
+th, td {
+    border: 1px solid #ccc;
     text-align: center;
     height: 14.25px;
     padding: 4px 1px;
     word-wrap: break-word;
     overflow-wrap: break-word;
-    background: #333;
-    color: #fff;
+    background: #ffffff;
+    color: #000;
   }
 
   th:first-child, td:first-child { width: 22px; min-width: 22px; }
@@ -68,8 +69,8 @@
   th:nth-child(n+4), td:nth-child(n+4) { width: 36px; min-width: 36px; }
 
   th {
-    background-color: #444;
-    color: #bbb;
+    background-color: #f0f0f0;
+    color: #333;
     font-weight: bold;
   }
 
@@ -95,101 +96,120 @@
 <h1>Weekly Schedule</h1>
 
 <div class="schedule-wrapper">
-  <table>
-    <thead>
-      <tr>
-        <th>Per.</th>
-        <th>Time</th>
-        <th>24H</th>
-        <th>Mon</th>
-        <th>Tue</th>
-        <th>Wed</th>
-        <th>Thu</th>
-        <th>Fri</th>
-      </tr>
-    </thead>
-    <tbody>
-<tbody>
-<tbody>
-  <tr><td>1</td><td>8:10</td><td>8:10</td>
-    <td class="c132">13.2/</td>
-    <td class="c153">15.3/</td>
-    <td class="c132">13.2/</td>
-    <td></td>
-    <td class="c162">16.2</td>
-  </tr>
+<table>
+  <thead>
+    <tr>
+      <th>Per.</th>
+      <th>Time</th>
+      <th>24H</th>
+      <th>Mon</th>
+      <th>Tue</th>
+      <th>Wed</th>
+      <th>Thu</th>
+      <th>Fri</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>1</td><td>8:10</td><td>8:10</td>
+      <td></td>
+      <td class="c153">15.3</td>
+      <td class="c111">11.1</td>
+      <td class="c153">15.3</td>
+      <td></td>
+    </tr>
 
-  <tr><td>2</td><td>8:40</td><td>8:40</td>
-    <td class="c132">13.2/</td>
-    <td class="c153">15.3/</td>
-    <td class="c132">13.2/</td>
-    <td></td>
-    <td class="c162">16.2</td>
-  </tr>
+    <tr>
+      <td>2</td><td>8:40</td><td>8:40</td>
+      <td></td>
+      <td class="c153">15.3</td>
+      <td class="c111">11.1</td>
+      <td class="c153">15.3</td>
+      <td></td>
+    </tr>
 
-  <tr><td></td><td>9:30</td><td>9:30</td>
-    <td class="cgreen"></td><td class="cgreen"></td><td class="cgreen"></td><td class="cgreen"></td><td class="cgreen"></td>
-  </tr>
+    <tr>
+      <td></td><td>9:30</td><td>9:30</td>
+      <td class="cgreen"></td>
+      <td class="cgreen"></td>
+      <td class="cgreen"></td>
+      <td class="cgreen"></td>
+      <td class="cgreen"></td>
+    </tr>
 
-  <tr><td>3</td><td>10:10</td><td>10:10</td>
-    <td class="c141">14.1</td>
-    <td></td>
-    <td class="c162">16.2/</td>
-    <td class="c141">14.1/</td>
-    <td class="c153">15.3/</td>
-  </tr>
+    <tr>
+      <td>3</td><td>10:10</td><td>10:10</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td class="c141">14.1</td>
+      <td class="c141">14.1</td>
+    </tr>
 
-  <tr><td>4</td><td>10:50</td><td>10:50</td>
-    <td class="c141">14.1</td>
-    <td></td>
-    <td class="c153">15.3</td>
-    <td></td>
-    <td></td>
-  </tr>
+    <tr>
+      <td>4</td><td>10:50</td><td>10:50</td>
+      <td class="c162">16.2</td>
+      <td></td>
+      <td></td>
+      <td class="c132">13.2</td>
+      <td class="c141">14.1</td>
+    </tr>
 
-  <tr><td>5</td><td>11:30</td><td>11:30</td>
-    <td></td>
-    <td></td>
-    <td class="c153">15.3</td>
-    <td class="c111">11.1</td>
-    <td></td>
-  </tr>
+    <tr>
+      <td>5</td><td>11:30</td><td>11:30</td>
+      <td class="c162">16.2</td>
+      <td class="c111">11.1</td>
+      <td class="c153">15.3</td>
+      <td class="c132">13.2</td>
+      <td></td>
+    </tr>
 
-  <tr><td></td><td>12:10</td><td>12:10</td>
-    <td class="cgreen"></td><td class="cgreen"></td><td class="cgreen"></td><td class="cgreen"></td><td class="cgreen"></td>
-  </tr>
+    <tr>
+      <td></td><td>12:10</td><td>12:10</td>
+      <td class="cgreen"></td>
+      <td class="cgreen"></td>
+      <td class="cgreen"></td>
+      <td class="cgreen"></td>
+      <td class="cgreen"></td>
+    </tr>
 
-  <tr><td>6</td><td>13:00</td><td>13:00</td>
-    <td></td>
-    <td class="c141">14.1/</td>
-    <td></td>
-    <td></td>
-    <td class="c111">11.1</td>
-  </tr>
+    <tr>
+      <td>6</td><td>13:00</td><td>13:00</td>
+      <td class="c132">13.2</td>
+      <td class="c141">14.1</td>
+      <td class="c132">13.2</td>
+      <td class="c162">16.2</td>
+      <td></td>
+    </tr>
 
-  <tr><td>7</td><td>13:40</td><td>13:40</td>
-    <td class="c111">11.1</td>
-    <td class="c141">14.1/</td>
-    <td></td>
-    <td class="c162">16.2/</td>
-    <td class="c111">11.1</td>
-  </tr>
+    <tr>
+      <td>7</td><td>13:40</td><td>13:40</td>
+      <td class="c111">11.1</td>
+      <td class="c141">14.1</td>
+      <td class="c162">16.2</td>
+      <td></td>
+      <td></td>
+    </tr>
 
-  <tr><td>8</td><td>14:20</td><td>14:20</td>
-    <td class="c111">11.1</td>
-    <td class="c132">13.2/</td>
-    <td></td>
-    <td class="c162">16.2/</td>
-    <td></td>
-  </tr>
+    <tr>
+      <td>8</td><td>14:20</td><td>14:20</td>
+      <td class="c111">11.1</td>
+      <td class="c132">13.2</td>
+      <td class="c162">16.2</td>
+      <td></td>
+      <td></td>
+    </tr>
 
-  <tr><td></td><td>15:00</td><td>15:00</td>
-    <td></td><td></td><td></td><td></td><td></td>
-  </tr>
-</tbody>
-
-</tbody>    </tbody>
-  </table>
+    <tr>
+      <td></td><td>15:00</td><td>15:00</td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  </tbody>
+</table>
 </div>
 
 <footer>
