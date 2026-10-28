@@ -403,6 +403,11 @@ footer p {
 "use strict";
 
 const INTERNAL_FILES = [
+  // Grade 7 files (will appear in the top section)
+  "Grade_7_V_5_Game_Word_Bombs_EFL.html",
+  "Grade_7_V_1_Flash_Cards_EFL.html",
+
+  // Standard files
   "V_1_Flash_Cards_EFL.html",
   "V_2_Flash_Cards_Signal_Words.html",
   "V_3_Game_Recognize_Signal Words_EFL.html",
@@ -534,6 +539,7 @@ const INTERNAL_FILES = [
 ];
 
 const SECTIONS = [
+  { title: "Grade 7", prefixes: ["Grade_7_"] },
   { title: "Vocabulary Flash Cards and Games", prefixes: ["V_"] },
   { title: "Grammar Lessons", prefixes: ["RG_"] },
   { title: "Grammar Games", prefixes: ["G_"] },
@@ -548,8 +554,14 @@ const SECTIONS = [
   { title: "Rogue Writers Gallery", prefixes: ["RR_"] }
 ];
 
+function getCleanFilename(filename) {
+  // Strips prefixes like "Grade_7_" so number parsing and display formatting work correctly
+  return filename.replace(/^Grade_\d+_/, "");
+}
+
 function getFileNumber(filename) {
-  const match = filename.match(/^[A-Za-z]+_(\d+)/);
+  const clean = getCleanFilename(filename);
+  const match = clean.match(/^[A-Za-z]+_(\d+)/);
   return match ? Number(match[1]) : Number.MAX_SAFE_INTEGER;
 }
 
@@ -562,9 +574,10 @@ function sortFiles(files) {
 }
 
 function getDisplayName(filename) {
-  const match = filename.match(/^[A-Za-z]+_(\d+)/);
+  const clean = getCleanFilename(filename);
+  const match = clean.match(/^[A-Za-z]+_(\d+)/);
   const number = match ? Number(match[1]) : "";
-  const name = filename
+  const name = clean
     .replace(/\.html?$/i, "")
     .replace(/^[A-Za-z]+_\d+[_-]?/, "")
     .replace(/_/g, " ")
@@ -624,7 +637,6 @@ function renderIndex() {
 
 renderIndex();
 </script>
-
 <!-- ========================================== -->
 <!-- NARROW PHONE LAYOUT SAFETY PATCH (START) -->
 <!-- ========================================== -->
