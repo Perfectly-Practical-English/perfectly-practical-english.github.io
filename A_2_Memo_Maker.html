@@ -26,27 +26,7 @@ h1 {
     margin: 0 0 10px;
     color: #111;
 }
-textarea {
-    width: 100%;
-    height: 90px;
-    min-height: 90px;
-    resize: vertical;
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    padding: 10px;
-    border: 2px solid #ccc;
-    border-radius: 8px;
-    outline: none;
-    margin-bottom: 10px;
-    /* Enforces text wrapping in browser view */
-    white-space: pre-wrap;
-    word-break: break-word;
-    overflow-wrap: break-word;
-}
 
-textarea:focus {
-    border-color: #555;
-}
 .label {
     font-size: 12px;
     font-weight: bold;
@@ -94,18 +74,50 @@ button.action {
     background: #111;
     color: white;
 }
-.preview {
-    display: flex;
-    justify-content: center;
-}
-canvas {
-    width: 425px;
-    height: 425px;
-    border: 1px solid #ddd;
+
+/* Post-it Wrapper Container */
+.postit-container {
+    position: relative;
+    width: 100%;
+    max-width: 425px;
+    aspect-ratio: 1;
+    margin: 0 auto;
     border-radius: 6px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    cursor: text;
+    overflow: hidden;
 }
+
+canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+/* On-canvas Text Overlay (Regular, non-bold text) */
+#postitInput {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    border: none;
+    outline: none;
+    background: transparent;
+    resize: none;
+    font-family: Arial, sans-serif;
+    font-weight: normal;
+    color: #1a1a1a;
+    line-height: 1.25;
+    white-space: pre-wrap;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    overflow: hidden;
+}
+
 footer p {
     color: #777;
     font-size: 10px;
@@ -118,10 +130,6 @@ footer p {
 
 <div class="app">
     <h1>Post-it Maker</h1>
-    <textarea id="textInput">Clean Post-it Note
-⏰ 09:00 Meeting
-📍 Office Room A
-✔️ Complete task</textarea>
     
     <div class="label">COLOR</div>
     <div class="palette" id="colorPalette"></div>
@@ -131,8 +139,13 @@ footer p {
         <button class="action" id="saveBtn">SAVE AS .JPG</button>
     </div>
 
-    <div class="preview">
+    <!-- Integrated Post-it Input Container -->
+    <div class="postit-container" id="postitBox">
         <canvas id="canvas" width="425" height="425"></canvas>
+        <textarea id="postitInput" spellcheck="false">Clean Post-it Note
+⏰ 09:00 Meeting
+📍 Office Room A
+✔️ Complete task</textarea>
     </div>
 
     <footer>
@@ -147,7 +160,7 @@ footer p {
 <script>
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d", { alpha: false });
-const textInput = document.getElementById("textInput");
+const textInput = document.getElementById("postitInput");
 const colorPalette = document.getElementById("colorPalette");
 const randomBtn = document.getElementById("randomBtn");
 const saveBtn = document.getElementById("saveBtn");
@@ -156,7 +169,6 @@ const R = 1;
 
 const COLORS = ["#FFF59D", "#FFD1DC", "#BFE8FF", "#C8F7C5", "#FFD6A5", "#E1C6FF", "#CFF5E7", "#FFE0B2", "#D7E3FC", "#F4D6FF"];
 let selectedColor = COLORS[0];
-let textContent = textInput.value;
 
 COLORS.forEach(color => {
     const swatch = document.createElement("button");
@@ -182,9 +194,96 @@ randomBtn.onclick = () => {
 };
 
 textInput.oninput = () => {
-    textContent = textInput.value;
+    adjustFontSize();
     drawPostIt();
 };
+
+function adjustFontSize() {
+    const W = 425;
+    const padding = 40; 
+    const maxWidth = W - padding;
+    const maxHeight = W - padding;
+    const rawText = textInput.value.replace(/\r/g, "");
+    const paragraphs = rawText.split("\n");
+
+    let fontSize = 28; // Max starting size set to 28
+    const minFontSize = 11; // Min size floor set to 11
+
+    function buildLayout(size) {
+        const lines = [];
+        ctx.font = `${size}px Arial, sans-serif`;
+
+        for (let p = 0; p < paragraphs.length; p++) {
+            const pText = paragraphs[p];
+            if (pText.trim() === "") {
+                lines.push({ text: "", isNewEntry: true });
+                continue;
+            }
+
+            const words = pText.trim().split(/\s+/);
+            let current = "";
+            let isFirst = true;
+
+            for (let w = 0; w < words.length; w++) {
+                const word = words[w];
+                if (ctx.measureText(word).width > maxWidth) {
+                    if (current) {
+                        lines.push({ text: current, isNewEntry: isFirst });
+                        isFirst = false;
+                        current = "";
+                    }
+                    const chars = Array.from(word);
+                    for (let c = 0; c < chars.length; c++) {
+                        const char = chars[c];
+                        const testChar = current + char;
+                        if (ctx.measureText(testChar).width <= maxWidth) {
+                            current = testChar;
+                        } else {
+                            lines.push({ text: current, isNewEntry: isFirst });
+                            isFirst = false;
+                            current = char;
+                        }
+                    }
+                } else {
+                    const test = current ? current + " " + word : word;
+                    if (ctx.measureText(test).width <= maxWidth) {
+                        current = test;
+                    } else {
+                        if (current) {
+                            lines.push({ text: current, isNewEntry: isFirst });
+                            isFirst = false;
+                        }
+                        current = word;
+                    }
+                }
+            }
+            if (current) {
+                lines.push({ text: current, isNewEntry: isFirst });
+            }
+        }
+        return lines;
+    }
+
+    while (fontSize >= minFontSize) {
+        const wrappedLines = buildLayout(fontSize);
+        const lineHeight = fontSize * 1.25;
+        const entryGap = fontSize * 0.4;
+
+        let totalH = 0;
+        for (let i = 0; i < wrappedLines.length; i++) {
+            if (i > 0 && wrappedLines[i].isNewEntry) totalH += entryGap;
+            totalH += lineHeight;
+        }
+        if (totalH <= maxHeight) break;
+        fontSize -= 1;
+    }
+
+    const containerWidth = textInput.clientWidth || 425;
+    const scale = containerWidth / 425;
+    
+    textInput.style.fontSize = `${fontSize * scale}px`;
+    textInput.style.lineHeight = `1.25`;
+}
 
 function drawPostIt() {
     const W = canvas.width;
@@ -202,22 +301,26 @@ function drawPostIt() {
         ctx.fillRect(x, y, size, size);
     }
     ctx.globalAlpha = 1;
+}
 
-    const rawText = textContent.replace(/\r/g, "");
+function renderTextToCanvas() {
+    drawPostIt();
+
+    const rawText = textInput.value.replace(/\r/g, "");
     const paragraphs = rawText.split("\n");
 
     const padding = 20 * R;
-    const maxWidth = W - padding * 2;
-    const maxHeight = H - padding * 2;
+    const maxWidth = canvas.width - padding * 2;
+    const maxHeight = canvas.height - padding * 2;
 
-    let fontSize = 38 * R;
-    const minFontSize = 11 * R;
+    let fontSize = 28 * R; // Max starting size set to 28
+    const minFontSize = 11 * R; // Min size floor set to 11
     let wrappedLines = [];
     let lineHeight, entryGap;
 
     function buildLayout(size) {
         const lines = [];
-        ctx.font = `bold ${size}px Arial, sans-serif`;
+        ctx.font = `${size}px Arial, sans-serif`;
 
         for (let p = 0; p < paragraphs.length; p++) {
             const pText = paragraphs[p];
@@ -230,10 +333,8 @@ function drawPostIt() {
             let current = "";
             let isFirst = true;
 
-for (let w = 0; w < words.length; w++) {
+            for (let w = 0; w < words.length; w++) {
                 const word = words[w];
-
-                // If a single word itself is wider than the allowed canvas width, break character-by-character
                 if (ctx.measureText(word).width > maxWidth) {
                     if (current) {
                         lines.push({ text: current, isNewEntry: isFirst });
@@ -286,13 +387,12 @@ for (let w = 0; w < words.length; w++) {
         fontSize -= 1;
     }
 
-    ctx.font = `bold ${fontSize}px Arial, sans-serif`;
+    ctx.font = `${fontSize}px Arial, sans-serif`;
     ctx.fillStyle = "#1a1a1a";
     ctx.textAlign = "left";
     ctx.textBaseline = "top";
 
     let y = padding;
-
     for (let i = 0; i < wrappedLines.length; i++) {
         const line = wrappedLines[i];
         if (i > 0 && line.isNewEntry) y += entryGap;
@@ -301,12 +401,10 @@ for (let w = 0; w < words.length; w++) {
     }
 }
 
-// Generates international date (YYYY-MM-DD), military time (HHMMSS), and uses the first line as filename
 function makeFilename() {
-    const rawText = textContent.replace(/\r/g, "");
+    const rawText = textInput.value.replace(/\r/g, "");
     const firstLine = rawText.split("\n")[0] || "Post-it";
     
-    // Sanitize unsafe filename characters and limit length
     let safeName = firstLine.replace(/[<>:"/\\|?*\x00-\x1F]/g, "").trim().substring(0, 30);
     if (!safeName) safeName = "Post-it";
 
@@ -319,14 +417,11 @@ function makeFilename() {
     const minutes = String(d.getMinutes()).padStart(2, "0");
     const seconds = String(d.getSeconds()).padStart(2, "0");
 
-    const dateStr = `${year}-${month}-${day}`;
-    const timeStr = `${hours}${minutes}${seconds}`;
-
-    return `${safeName} - ${dateStr} - ${timeStr}.jpg`;
+    return `${safeName} - ${year}-${month}-${day} - ${hours}${minutes}${seconds}.jpg`;
 }
 
 function triggerDownload() {
-    drawPostIt();
+    renderTextToCanvas();
     canvas.toBlob((blob) => {
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
@@ -334,89 +429,49 @@ function triggerDownload() {
         link.href = url;
         link.click();
         setTimeout(() => URL.revokeObjectURL(url), 1000);
+        drawPostIt(); 
     }, "image/jpeg", 0.95);
 }
 
 saveBtn.onclick = triggerDownload;
 
-canvas.onclick = () => {
-    const input = prompt("Enter note text:", textContent);
-    if (input !== null) {
-        textContent = input;
-        textInput.value = textContent;
-        drawPostIt();
-    }
-};
-
-canvas.oncontextmenu = (e) => {
+textInput.oncontextmenu = (e) => {
     e.preventDefault();
     triggerDownload();
 };
 
+window.onresize = () => adjustFontSize();
+
 drawPostIt();
+adjustFontSize();
 </script>
 
 <script>
-
 (function(){
-
-/* =========================
-   RAW INSTRUCTIONS TEXT
-========================= */
-
 const RAW_TEXT = `
 How to use this page…
 
 • Overview: Create, customize, and export printable digital Post-it note images featuring dynamic text scaling and interactive color palettes.
-• Entering Note Text: Type or edit your custom message directly into the Textarea input box to update the post-it note preview instantly.
+• Entering Note Text: Type or edit your custom message directly on the Post-it note area.
 • Selecting Note Colors: Click any color swatch within the COLOR palette grid to change the background color of the post-it note.
 • Randomizing Colors: Click the RANDOM button to automatically pick a new random background color from the available palette.
 • Exporting Note Images: Click the SAVE AS .JPG button to render and download your custom note as a high-resolution JPEG image file.
-• Interactive Canvas Actions: Click directly on the preview Canvas to open a text prompt for editing note content, or right-click on the canvas to trigger an immediate JPEG download.
-
-
+• Interactive Canvas Actions: Right-click directly on the post-it area to trigger an immediate JPEG download.
 `;
 
-
-/* =========================
-   RAW TEXT PARSER
-========================= */
-
 function parseRawInstructions(text){
-
   const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
   const html = [];
-
   lines.forEach(line => {
-
-    if(line === "---"){
-      html.push(`<hr>`);
-      return;
-    }
-
-    if(/^\d+\./.test(line)){
-      html.push(`<p>${line}</p>`);
-      return;
-    }
-
-    if(!/[.!?:]$/.test(line)){
-      html.push(`<h3>${line}</h3>`);
-      return;
-    }
-
+    if(line === "---"){ html.push(`<hr>`); return; }
+    if(/^\d+\./.test(line)){ html.push(`<p>${line}</p>`); return; }
+    if(!/[.!?:]$/.test(line)){ html.push(`<h3>${line}</h3>`); return; }
     html.push(`<p>${line}</p>`);
   });
-
   return html.join("");
 }
 
-
-/* =========================
-   CREATE STYLE
-========================= */
-
 const style = document.createElement("style");
-
 style.textContent = `
 #instructionsBtn{
   position: fixed;
@@ -440,222 +495,71 @@ style.textContent = `
   transition: background 0.2s, transform 0.2s;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
-
-#instructionsBtn:hover{
-  background: #257047;
-  transform: scale(1.05);
-}
-
-#instructionsRoot{
-  display: none;
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-}
-
-#instructionsBackdrop{
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-}
-
+#instructionsBtn:hover{ background: #257047; transform: scale(1.05); }
+#instructionsRoot{ display: none; position: fixed; inset: 0; z-index: 99999; }
+#instructionsBackdrop{ position: absolute; inset: 0; background: rgba(0, 0, 0, 0.45); }
 #instructionsModal{
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: min(500px, 92vw);
-  max-height: min(80vh, calc(100dvh - 16px));
-  background: #fff;
-  border-radius: 12px;
-  padding: 18px;
-  box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-  border: 1px solid #cfe2f7;
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  width: min(500px, 92vw); max-height: min(80vh, calc(100dvh - 16px));
+  background: #fff; border-radius: 12px; padding: 18px; box-sizing: border-box;
+  display: flex; flex-direction: column; overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); border: 1px solid #cfe2f7;
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
-
-#instructionsHeader{
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  margin-bottom: 12px;
-  flex: 0 0 auto;
-  font-size: 18px;
-  line-height: 1.3;
-  font-weight: 700;
-  color: #1976d2;
-}
-
-#instructionsBack{
-  background: none;
-  border: none;
-  color: #1976d2;
-  font-size: 22px;
-  font-weight: 700;
-  cursor: pointer;
-  padding: 4px 8px;
-  line-height: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  height: auto;
-  width: auto;
-}
-
-#instructionsBack:hover{
-  background-color: #eef6ff;
-}
-
-#instructionsContent{
-  overflow-y: auto;
-  overflow-x: hidden;
-  min-height: 0;
-  flex: 1 1 auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  font-size: 14px;
-  line-height: 1.5;
-  font-weight: 400;
-  color: #333;
-}
-
-#instructionsContent::-webkit-scrollbar{
-  display: none;
-}
-
-#instructionsContent h3{
-  margin-top: 10px;
-  margin-bottom: 4px;
-  font-size: 15px;
-  line-height: 1.3;
-  font-weight: 700;
-  color: #1976d2;
-}
-
-#instructionsContent p{
-  margin-bottom: 8px;
-  font-weight: 400;
-}
-
-#instructionsContent hr{
-  margin: 12px 0;
-  border: none;
-  border-top: 1px solid #ddd;
-}
+#instructionsHeader{ display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; flex: 0 0 auto; font-size: 18px; line-height: 1.3; font-weight: 700; color: #1976d2; }
+#instructionsBack{ background: none; border: none; color: #1976d2; font-size: 22px; font-weight: 700; cursor: pointer; padding: 4px 8px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; border-radius: 4px; height: auto; width: auto; }
+#instructionsBack:hover{ background-color: #eef6ff; }
+#instructionsContent{ overflow-y: auto; overflow-x: hidden; min-height: 0; flex: 1 1 auto; scrollbar-width: none; -ms-overflow-style: none; font-size: 14px; line-height: 1.5; font-weight: 400; color: #333; }
+#instructionsContent::-webkit-scrollbar{ display: none; }
+#instructionsContent h3{ margin-top: 10px; margin-bottom: 4px; font-size: 15px; line-height: 1.3; font-weight: 700; color: #1976d2; }
+#instructionsContent p{ margin-bottom: 8px; font-weight: 400; }
+#instructionsContent hr{ margin: 12px 0; border: none; border-top: 1px solid #ddd; }
 `;
-
 document.head.appendChild(style);
-
-
-/* =========================
-   CREATE BUTTON
-========================= */
 
 const btn = document.createElement("button");
 btn.id = "instructionsBtn";
 btn.innerHTML = "?";
 btn.setAttribute("aria-label", "Instructions");
-
 document.body.appendChild(btn);
-
-
-/* =========================
-   CREATE MODAL
-========================= */
 
 const root = document.createElement("div");
 root.id = "instructionsRoot";
-
 root.innerHTML = `
 <div id="instructionsBackdrop"></div>
-
 <div id="instructionsModal">
-
   <div id="instructionsHeader">
     <span>Instructions</span>
     <button id="instructionsBack" type="button">✕</button>
   </div>
-
-  <div id="instructionsContent">
-    ${parseRawInstructions(RAW_TEXT)}
-  </div>
-
-</div>
-`;
-
+  <div id="instructionsContent">${parseRawInstructions(RAW_TEXT)}</div>
+</div>`;
 document.body.appendChild(root);
 
-
-/* =========================
-   SCROLL LOCK
-========================= */
-
 const modalContent = document.getElementById("instructionsContent");
+modalContent.addEventListener("wheel", e=>{ e.stopPropagation(); },{passive:false});
+modalContent.addEventListener("touchmove", e=>{ e.stopPropagation(); },{passive:false});
 
-modalContent.addEventListener("wheel", e=>{
-  e.stopPropagation();
-},{passive:false});
-
-modalContent.addEventListener("touchmove", e=>{
-  e.stopPropagation();
-},{passive:false});
-
-
-/* =========================
-   OPEN / CLOSE
-========================= */
-
-function openModal(){
-  root.style.display = "block";
-  document.body.style.overflow = "hidden";
-  document.documentElement.style.overflow = "hidden";
-}
-
-function closeModal(){
-  root.style.display = "none";
-  document.body.style.overflow = "";
-  document.documentElement.style.overflow = "";
-}
+function openModal(){ root.style.display = "block"; document.body.style.overflow = "hidden"; document.documentElement.style.overflow = "hidden"; }
+function closeModal(){ root.style.display = "none"; document.body.style.overflow = ""; document.documentElement.style.overflow = ""; }
 
 btn.onclick = openModal;
-
 document.getElementById("instructionsBack").onclick = closeModal;
 document.getElementById("instructionsBackdrop").onclick = closeModal;
-
-document.addEventListener("keydown", e=>{
-  if(e.key === "Escape") closeModal();
-});
-
+document.addEventListener("keydown", e=>{ if(e.key === "Escape") closeModal(); });
 })();
 </script>
 
 <script>
 (function() {
-  // Prevent pinch-to-zoom
-  function preventPinch(e) {
-    if (e.touches.length > 1) e.preventDefault();
-  }
-
-  // Prevent double-tap zoom
+  function preventPinch(e) { if (e.touches.length > 1) e.preventDefault(); }
   let lastTouchTime = 0;
   function preventDoubleTap(e) {
     const now = Date.now();
-    if (now - lastTouchTime < 300) {
-      e.preventDefault();
-    }
+    if (now - lastTouchTime < 300) { e.preventDefault(); }
     lastTouchTime = now;
   }
-
-  // Block gesture events on iOS
-  function preventGesture(e) {
-    e.preventDefault();
-  }
+  function preventGesture(e) { e.preventDefault(); }
 
   document.addEventListener('touchstart', preventPinch, { passive: false });
   document.addEventListener('touchend', preventDoubleTap, { passive: false });
@@ -663,9 +567,6 @@ document.addEventListener("keydown", e=>{
 })();
 </script>
 
-<!-- ========================================== -->
-<!-- NARROW PHONE LAYOUT SAFETY PATCH (START) -->
-<!-- ========================================== -->
 <style>
   html, body {
     max-width: 100vw !important;
@@ -685,9 +586,6 @@ document.addEventListener("keydown", e=>{
     height: auto !important;
   }
 </style>
-<!-- ========================================== -->
-<!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
-<!-- ========================================== -->
 
 </body>
 </html>
