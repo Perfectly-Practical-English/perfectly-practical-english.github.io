@@ -2400,60 +2400,42 @@ document.getElementById('copyrightYear').textContent = new Date().getFullYear();
     }
   }
 
+</script>
+
+<script>
+
 // =========================================================
-// TELEPROMPTER COPY — NATIVE SELECTION COPY
+// TELEPROMPTER COPY — CONSISTENT WITH QUIZ
 // =========================================================
 
-const teleCopyBtn =
-  document.getElementById('teleCopyBtn');
+const teleCopyBtn = document.getElementById('teleCopyBtn');
 
 if (teleCopyBtn) {
+    teleCopyBtn.addEventListener('mousedown', function (e) {
+        e.preventDefault();
+    });
 
-  teleCopyBtn.addEventListener(
-    'mousedown',
-    function (e) {
-      e.preventDefault();
-    }
-  );
+    teleCopyBtn.addEventListener('click', async function (e) {
+        e.preventDefault();
+        e.stopPropagation();
 
-  teleCopyBtn.addEventListener(
-    'click',
-    function (e) {
+        const selection = window.getSelection();
+        const selectedText = selection ? selection.toString() : '';
 
-      e.preventDefault();
-      e.stopPropagation();
-
-      /*
-       * Ask the browser to copy its current selection.
-       * Do not read the editor contents.
-       * Do not reconstruct the selection.
-       */
-      try {
-
-        const success =
-          document.execCommand('copy');
-
-        if (success) {
-          showToast('Copied selection');
+        if (selectedText && selectedText.trim()) {
+            try {
+                await navigator.clipboard.writeText(selectedText.trim());
+                // Exact same native browser alert message used by the quiz
+                alert('Quiz scoreboard copied to clipboard!'); 
+            } catch (err) {
+                console.error('Copy failed:', err);
+                alert('Copy failed.');
+            }
         } else {
-          showToast('Please select text first');
+            alert('Please select text first.');
         }
-
-      } catch (err) {
-
-        console.error(
-          'Teleprompter copy failed:',
-          err
-        );
-
-        showToast('Copy failed');
-      }
-
-    }
-  );
-
+    });
 }
-
 </script>
 
 <script>
@@ -4733,7 +4715,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ==========================================
+// ==========================================
     // 8. AUDIO RECORDING MODULE
     // ==========================================
     if (captureAudioBtn) {
@@ -4754,6 +4736,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     mediaRecorder.start();
                     captureAudioBtn.textContent = '🛑';
                     captureAudioBtn.classList.add('recording');
+                    captureAudioBtn.style.setProperty('background', '#39FF14', 'important');
+                    captureAudioBtn.style.setProperty('color', '#000', 'important');
                 } catch (err) {
                     alert('Microphone access denied or unavailable.');
                 }
@@ -4761,6 +4745,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 mediaRecorder.stop();
                 captureAudioBtn.textContent = '🔴';
                 captureAudioBtn.classList.remove('recording');
+                captureAudioBtn.style.removeProperty('background');
+                captureAudioBtn.style.removeProperty('color');
             }
         });
     }
@@ -4768,10 +4754,45 @@ document.addEventListener('DOMContentLoaded', () => {
     if (downloadBlobBtn) {
         downloadBlobBtn.addEventListener('click', () => {
             if (!audioBlob) return;
+
+            // 1. Get current file base name without extension
+            let pageName = window.location.pathname.split('/').pop().replace(/\.[^/.]+$/, "") || "Teleprompter";
+            
+            // 2. Extract section name using exact file logic
+            let sectionName = (window.currentQuizSectionName && String(window.currentQuizSectionName).trim()) 
+                ? String(window.currentQuizSectionName).trim() 
+                : ((window.SCRAMBLE_SECTIONS && typeof selectedSectionIndex !== 'undefined' && selectedSectionIndex >= 0 && window.SCRAMBLE_SECTIONS[selectedSectionIndex]) 
+                    ? window.SCRAMBLE_SECTIONS[selectedSectionIndex].name 
+                    : 'Section');
+
+            // 3. Extract student ID from gsId input
+            const studentIdInput = document.getElementById('gsId');
+            let studentID = studentIdInput ? studentIdInput.value.trim() : 'Student';
+            if (!studentID) studentID = 'Student';
+
+            // 4. Resolve student name using file's resolveStudentNameFromId logic
+            let studentName = 'Student';
+            if (studentID && studentID !== 'Student' && typeof window.resolveStudentNameFromId === 'function') {
+                let resolved = window.resolveStudentNameFromId(studentID);
+                if (resolved && String(resolved).trim() && String(resolved).trim() !== 'Guest') {
+                    studentName = String(resolved).trim();
+                }
+            }
+
+            // 5. Generate International Date (DD-MM-YYYY) and Military Time (HHMM)
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            const dateStr = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${now.getFullYear()}`;
+            const timeStr = `${pad(now.getHours())}${pad(now.getMinutes())}`;
+
+            // 6. Construct underscore-delimited filename using exact file conventions
+            const filename = `${pageName}_${sectionName}_${studentName}_${studentID}_${dateStr}_${timeStr}.webm`;
+
+            // 7. Trigger download
             const url = URL.createObjectURL(audioBlob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'recorded-audio.webm';
+            a.download = filename;
             a.click();
             URL.revokeObjectURL(url);
         });
@@ -4793,7 +4814,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 });
 </script>
-
 
 
 
@@ -12664,7 +12684,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 })();
 </script>
-=======
->>>>>>> 8474f9fcd57602317a6a6a9b9e79de5c6dca371f
+
 </body>
 </html>
