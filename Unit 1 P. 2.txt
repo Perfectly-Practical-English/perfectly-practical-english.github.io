@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 Unit 1 P. 2
 
 ~P.2 Ex.5A.1 - walk
@@ -40,5 +39,4 @@ Unit 1 P. 2
 
 ~P.2 Ex.8A.1 - Maintain good eye contact.
 ~P.2 Ex.8A.2 - Use confident hand gestures.
->>>>>>> 8474f9fcd57602317a6a6a9b9e79de5c6dca371f
 ~P.2 Ex.8A.3 - Practice often with friends.

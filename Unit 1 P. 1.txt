@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 Unit 1 P. 1
 
 ~P.1 Ex.1A.1 - S+V
@@ -52,5 +51,4 @@ Unit 1 P. 1
 ~P.1 Ex.3D.1 - 1
 ~P.1 Ex.3D.2 - 2
 ~P.1 Ex.3D.3 - 3
->>>>>>> 8474f9fcd57602317a6a6a9b9e79de5c6dca371f
 ~P.1 Ex.3D.4 - 4
