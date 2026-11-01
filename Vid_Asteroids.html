@@ -1,3 +1,178 @@
+<<<<<<< HEAD
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  body, html { 
+    margin: 0; padding: 0; 
+    width: 200px; height: 200px; 
+    overflow: hidden; 
+    background: black; 
+    position: relative; 
+    font-family: Arial, sans-serif; 
+  }
+  
+  /* Larger header text */
+  .banner {
+    position: absolute;
+    top: 10px; left: 50%;
+    transform: translateX(-50%);
+    color: #00ffff;
+    font-size: 14px;
+    font-weight: 800;
+    z-index: 20;
+    pointer-events: none;
+    letter-spacing: 0.8px;
+    text-shadow: 0 0 6px rgba(0,255,255,0.8);
+    white-space: nowrap;
+  }
+
+  canvas { 
+    position: absolute; 
+    top: 0; left: 0; 
+    width: 200px; height: 200px; 
+    z-index: 0; 
+  }
+
+  #gameArea {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    overflow: hidden;
+  }
+
+  .sentence {
+    position: absolute;
+    top: 85px; 
+    font-size: 11px;
+    font-weight: bold;
+    white-space: pre-wrap;
+    width: 125px;
+    color: #fff;
+    text-shadow: 0 0 5px rgba(0,255,255,0.8);
+    z-index: 1;
+    opacity: 0;
+  }
+
+  .blank {
+    display: inline-block;
+    min-width: 26px;
+    border-bottom: 2px solid #00ffff;
+    text-align: center;
+    color: #ff3333;
+    font-weight: bold;
+  }
+
+  #plane {
+    position: absolute;
+    left: 14px;
+    top: 66px; 
+    font-size: 36px;
+    z-index: 4;
+    transform: rotate(45deg);
+  }
+</style>
+</head>
+<body>
+
+<div class="banner">Asteroids</div>
+<div id="gameArea">
+  <canvas id="terrainCanvas" width="200" height="200"></canvas>
+  <div id="plane">🚀</div>
+</div>
+
+<script>
+const canvas = document.getElementById('terrainCanvas');
+const ctx = canvas.getContext('2d');
+const stars = [];
+for(let i = 0; i < 80; i++) {
+  stars.push({ x: Math.random() * 200, y: Math.random() * 200, z: Math.random() * 1.5 + 0.5 });
+}
+
+function drawStarfield() {
+  ctx.fillStyle = 'black'; 
+  ctx.fillRect(0, 0, 200, 200);
+  for(let s of stars) {
+    s.x -= 0.6 * s.z;
+    if(s.x < 0) { 
+      s.x = 200; 
+      s.y = Math.random() * 200; 
+      s.z = Math.random() * 1.5 + 0.5; 
+    }
+    ctx.fillStyle = 'white'; 
+    ctx.fillRect(s.x, s.y, s.z, s.z);
+  }
+  requestAnimationFrame(drawStarfield);
+}
+drawStarfield();
+
+const gameArea = document.getElementById('gameArea');
+
+function spawnPlaneBurst() {
+  const startX = 52;
+  const startY = 82;
+  const laserLength = 90;
+  const numDots = 16;
+
+  for(let i = 0; i < numDots; i++) {
+    setTimeout(() => {
+      const dot = document.createElement('div');
+      dot.textContent = '—';
+      dot.style.position = 'absolute';
+      dot.style.color = '#00ffff';
+      dot.style.fontSize = '16px';
+      dot.style.left = startX + (laserLength / numDots) * i + 'px';
+      dot.style.top = startY + 'px';
+      dot.style.zIndex = 4;
+      gameArea.appendChild(dot);
+
+      setTimeout(() => { dot.style.opacity = 0; }, 80);
+      setTimeout(() => { if(dot.parentNode) dot.parentNode.removeChild(dot); }, 220);
+    }, i * 7);
+  }
+}
+
+function runVignetteCycle() {
+  const span = document.createElement('span');
+  span.className = 'sentence';
+  span.style.left = '220px';
+
+  span.appendChild(document.createTextNode('I like to '));
+  const blank = document.createElement('span');
+  blank.className = 'blank';
+  blank.textContent = '';
+  span.appendChild(blank);
+  span.appendChild(document.createTextNode('.'));
+
+  gameArea.appendChild(span);
+  span.style.transition = 'left 2.8s linear, opacity 2.0s ease-in-out';
+
+  requestAnimationFrame(() => {
+    span.style.opacity = '1';
+    span.style.left = '75px';
+  });
+
+  setTimeout(() => { blank.textContent = 'e'; }, 2800);
+  setTimeout(() => { blank.textContent = 'eat'; }, 3400);
+
+  setTimeout(() => {
+    spawnPlaneBurst();
+    setTimeout(() => {
+      span.style.transition = 'opacity 1.2s ease-in-out';
+      span.style.opacity = '0';
+      setTimeout(() => { if(span.parentNode) span.parentNode.removeChild(span); }, 1200);
+    }, 300);
+  }, 4400);
+
+  setTimeout(runVignetteCycle, 7000);
+}
+
+setTimeout(runVignetteCycle, 400);
+</script>
+
+</body>
+=======
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -180,4 +355,5 @@ setTimeout(runVignetteCycle, 500);
 </script>
 
 </body>
+>>>>>>> 8474f9fcd57602317a6a6a9b9e79de5c6dca371f
 </html>
