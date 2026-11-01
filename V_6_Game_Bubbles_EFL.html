@@ -1306,5 +1306,206 @@ document.addEventListener("keydown", e => {
 <!-- ========================================== -->
 <!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
 <!-- ========================================== -->
+
+<script>
+(function() {
+    'use strict';
+
+    let sampleActive = true;
+    let sampleInterval = null;
+    let currentSampleBubble = null;
+    const sampleEntries = ['activity', 'achievement', 'fun', 'game', 'hobby'];
+    let entryIdx = 0;
+
+    function initWordBubblesSimulation() {
+        const canvas = document.getElementById('gameArea');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        if (canvas.clientWidth && canvas.clientHeight) {
+            canvas.width = canvas.clientWidth;
+            canvas.height = canvas.clientHeight;
+        }
+
+        // 1. Warning Banner positioned 10px higher (top: 70px)
+        const banner = document.createElement('div');
+        banner.id = 'wordBubblesSampleBanner';
+        banner.style.cssText = `
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 99999;
+            background: #e0f2fe;
+            color: #0f172a;
+            border: 2px solid #38bdf8;
+            border-radius: 8px;
+            padding: 8px 14px;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-size: 12px;
+            font-weight: 800;
+            text-align: center;
+            letter-spacing: 0.3px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            width: calc(100% - 40px);
+            max-width: 420px;
+            box-sizing: border-box;
+            white-space: nowrap;
+            overflow: hidden;
+            pointer-events: auto;
+        `;
+        banner.textContent = '⚠️ This is a sample game. Click a topic to play! ⚠️';
+        
+        const parent = canvas.parentNode;
+        if (parent && getComputedStyle(parent).position === 'static') {
+            parent.style.position = 'relative';
+        }
+        parent.appendChild(banner);
+
+        // 2. Neutralize Topics Button & Hide Banner on Click
+        const sectionBtn = document.getElementById('sectionSelectorBtn');
+        if (sectionBtn) {
+            sectionBtn.textContent = 'Topics';
+            sectionBtn.addEventListener('click', () => {
+                if (banner) banner.style.display = 'none';
+            });
+        }
+
+        const modalClose = document.getElementById('sectionModalClose');
+        const modalBackdrop = document.getElementById('sectionModalBackdrop');
+        const restoreBanner = () => {
+            if (sampleActive && banner) banner.style.display = 'block';
+        };
+        if (modalClose) modalClose.addEventListener('click', restoreBanner);
+        if (modalBackdrop) modalBackdrop.addEventListener('click', restoreBanner);
+
+        // 3. Spawning black sample word bubbles one at a time (rising from bottom)
+        function spawnSingleSampleBubble() {
+            if (!sampleActive || currentSampleBubble) return;
+
+            const word = sampleEntries[entryIdx % sampleEntries.length];
+            entryIdx++;
+
+            const fontSize = 24;
+            ctx.font = `bold ${fontSize}px system-ui, -apple-system, sans-serif`;
+            const textWidth = ctx.measureText(word).width;
+            const radius = Math.max(45, (textWidth / 2) + 20) + 10;
+
+            const x = Math.random() * (canvas.width - radius * 2) + radius;
+            const y = canvas.height + radius;
+
+            currentSampleBubble = {
+                word,
+                x,
+                y,
+                radius,
+                fontSize,
+                speed: 0.7 + Math.random() * 0.3,
+                typedIndex: 0,
+                color: 'hsla(200, 90%, 65%, 0.35)',
+                shadowColor: 'rgba(0,0,0,0.5)'
+            };
+        }
+
+        // Game loop for rising bubble & simulated typing/pop
+        sampleInterval = setInterval(() => {
+            if (!sampleActive) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (!currentSampleBubble) {
+                spawnSingleSampleBubble();
+                return;
+            }
+
+            const b = currentSampleBubble;
+            b.y -= b.speed;
+
+            // Typing threshold: starts when the bubble is about 30px above the bottom of the game area
+            const typingStartThreshold = canvas.height - 30;
+
+            if (b.y < typingStartThreshold && b.y > 60 && b.typedIndex < b.word.length && Math.random() < 0.15) {
+                b.typedIndex++;
+
+                if (b.typedIndex === b.word.length) {
+                    const popSound = document.getElementById('popSound');
+                    if (popSound) {
+                        popSound.currentTime = 0;
+                        popSound.play().catch(() => {});
+                    }
+
+                    setTimeout(() => {
+                        currentSampleBubble = null;
+                    }, 300);
+                }
+            }
+
+            // Draw bubble background
+            const gradient = ctx.createRadialGradient(
+                b.x - b.radius * 0.2, b.y - b.radius * 0.2, b.radius * 0.05,
+                b.x, b.y, b.radius * 1.8
+            );
+            gradient.addColorStop(0, 'rgba(255,255,255,0.2)');
+            gradient.addColorStop(0.3, b.color);
+            gradient.addColorStop(1, b.color);
+
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.radius, 0, Math.PI * 2);
+            ctx.fillStyle = gradient;
+            ctx.fill();
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+            ctx.stroke();
+
+            // Draw text
+            ctx.font = `bold ${b.fontSize}px system-ui, -apple-system, sans-serif`;
+            ctx.textBaseline = 'middle';
+            ctx.shadowColor = b.shadowColor;
+            ctx.shadowBlur = 10;
+
+            let startX = b.x - ctx.measureText(b.word).width / 2;
+            for (let i = 0; i < b.word.length; i++) {
+                ctx.fillStyle = (i < b.typedIndex) ? 'red' : '#000000';
+                ctx.fillText(b.word[i], startX, b.y);
+                startX += ctx.measureText(b.word[i]).width;
+            }
+            ctx.shadowBlur = 0;
+
+            if (b.y + b.radius < 0) {
+                currentSampleBubble = null;
+            }
+        }, 30);
+
+        // 4. Clean Termination upon Topic Selection
+        const listContainer = document.getElementById('sectionListContainer');
+        if (listContainer) {
+            listContainer.addEventListener('click', (e) => {
+                const item = e.target.closest('.section-item');
+                if (item) {
+                    terminateSimulation();
+                }
+            }, true);
+        }
+
+        function terminateSimulation() {
+            if (!sampleActive) return;
+            sampleActive = false;
+
+            if (sampleInterval) clearInterval(sampleInterval);
+            if (banner) banner.remove();
+            currentSampleBubble = null;
+            if (ctx && canvas) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', initWordBubblesSimulation);
+    } else {
+        initWordBubblesSimulation();
+    }
+})();
+</script>
 </body>
 </html>
