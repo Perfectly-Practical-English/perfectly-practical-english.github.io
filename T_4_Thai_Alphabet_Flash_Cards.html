@@ -981,5 +981,105 @@ document.addEventListener("keydown", e=>{
 <!-- ========================================== -->
 <!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
 <!-- ========================================== -->
+<<<<<<< HEAD
+
+<script>
+(function() {
+    'use strict';
+
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            // 1. Find the sample section from __RAW_SECTION_TEXT__ or sections
+            if (typeof window.__RAW_SECTION_TEXT__ === 'string' && typeof parseVocabInput === 'function') {
+                // Parse sections to find "Sample Cards"
+                const chunks = window.__RAW_SECTION_TEXT__.split(/\n(?=~+)/);
+                const sections = chunks
+                    .map(chunk => chunk.trim())
+                    .filter(chunk => chunk.startsWith("~"))
+                    .map(chunk => {
+                        const lines = chunk.split("\n");
+                        const name = lines.shift().replace(/^~+/, "").trim();
+                        const text = lines.join("\n").trim();
+                        return { name, text };
+                    });
+
+                const sampleSec = sections.find(s => s.name === "Sample Cards") || sections[0];
+                if (sampleSec) {
+                    currentSectionName = sampleSec.name;
+                    vocabPairs = parseVocabInput(sampleSec.text);
+
+                    const sectionBtn = document.getElementById('sectionSelectorBtn');
+                    if (sectionBtn) {
+                        sectionBtn.textContent = 'Topics';
+                    }
+
+                    if (typeof studentSentences !== "undefined") {
+                        studentSentences = Array(vocabPairs.length).fill("");
+                    }
+                    if (typeof flashcardIndex !== "undefined") {
+                        flashcardIndex = 0;
+                    }
+                    if (typeof renderVocabList === "function") renderVocabList();
+                    if (typeof updateFlashcard === "function") updateFlashcard();
+                }
+            }
+
+            // 2. Set the requested header text with updated instructions
+            const vocabHeader = document.getElementById('vocabHeader');
+            if (vocabHeader) {
+                vocabHeader.textContent = "These are sample cards. Select a topic to view other cards. Then click here to hide or display the main list, and click on flash cards to flip them.";
+            }
+
+            // 3. Automated List Open/Close & 5-Flip Periodic Loop
+            const vocabList = document.getElementById('vocabList');
+            const flashcard = document.getElementById('flashcard');
+
+            if (vocabList && flashcard) {
+                // Start with the list closed so the sequence kicks off cleanly with card flips
+                vocabList.style.display = 'none';
+
+                if (typeof window.autoFlipInterval !== 'undefined') {
+                    clearInterval(window.autoFlipInterval);
+                }
+
+                let flipCount = 0;
+                window.autoFlipInterval = setInterval(() => {
+                    flashcard.classList.toggle('flipped');
+                    flipCount++;
+
+                    // Every 5 flips, open the main list, keep it open for 2 seconds, then close it again
+                    if (flipCount % 5 === 0) {
+                        vocabList.style.display = 'block';
+                        setTimeout(() => {
+                            vocabList.style.display = 'none';
+                        }, 2000);
+                    }
+                }, 2000); // Flips every 2 seconds
+            }
+
+            // 4. Hook into the topic selection to clear the auto-flip loop permanently when a user picks a topic
+            document.addEventListener('click', (e) => {
+                if (e.target && e.target.classList && e.target.classList.contains('section-item')) {
+                    if (window.autoFlipInterval) {
+                        clearInterval(window.autoFlipInterval);
+                        window.autoFlipInterval = null;
+                    }
+                    if (vocabHeader) {
+                        vocabHeader.textContent = "Click to view / hide the complete list.";
+                    }
+                    // Ensure list remains closed when entering a real topic
+                    if (vocabList) {
+                        vocabList.style.display = 'none';
+                    }
+                }
+            });
+
+            console.log('Sample cards, 5-flip loop, and periodic list toggle initialized.');
+        }, 150);
+    });
+})();
+</script>
+=======
+>>>>>>> 8474f9fcd57602317a6a6a9b9e79de5c6dca371f
 </body>
 </html>
