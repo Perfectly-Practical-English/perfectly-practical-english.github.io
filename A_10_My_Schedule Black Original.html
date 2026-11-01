@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Schedule</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #000;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px;
+    margin: 0;
+    margin-top: 25px;
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 0 4px 0;
+    color: #fff;
+  }
+
+.schedule-wrapper {
+  background: #2a2a2a;
+  border-radius: 8px;
+  padding: 4px;
+  margin-top: 15px;
+  max-width: 357px;
+  overflow-x: auto;
+  overflow-y: auto;
+  height: 280px;
+
+  /* Hide scrollbars */
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* IE/old Edge */
+}
+
+.schedule-wrapper::-webkit-scrollbar {
+  display: none;              /* Chrome, Safari, Edge, Opera */
+}
+
+  table {
+    border-collapse: collapse;
+    font-size: 11px;
+    table-layout: fixed;
+    width: 100%;
+  }
+
+  th, td {
+    border: 1px solid #444;
+    text-align: center;
+    height: 14.25px;
+    padding: 4px 1px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    background: #333;
+    color: #fff;
+  }
+
+  th:first-child, td:first-child { width: 22px; min-width: 22px; }
+  th:nth-child(2), td:nth-child(2) { width: 36px; min-width: 36px; }
+  th:nth-child(3), td:nth-child(3) { width: 36px; min-width: 36px; }
+  th:nth-child(n+4), td:nth-child(n+4) { width: 36px; min-width: 36px; }
+
+  th {
+    background-color: #444;
+    color: #bbb;
+    font-weight: bold;
+  }
+
+  /* Subject colors */
+.sub-11 { background-color: #d9f0ff !important; color: #000 !important; }
+.sub-12 { background-color: #dcedc8 !important; color: #000 !important; }
+.sub-13 { background-color: #ffe0e0 !important; color: #000 !important; }
+.sub-14 { background-color: #e0e0ff !important; color: #000 !important; }
+.sub-15 { background-color: #f0d9ff !important; color: #000 !important; }
+.sub-16 { background-color: #ccffcc !important; color: #000 !important; }
+.sub-17 { background-color: #ffd9b3 !important; color: #000 !important; }
+
+  footer {
+    font-size: 10px;
+    text-align: center;
+    color: #777;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Weekly Schedule</h1>
+
+<div class="schedule-wrapper">
+  <table>
+    <thead>
+      <tr>
+        <th>Per.</th>
+        <th>Time</th>
+        <th>24H</th>
+        <th>Mon</th>
+        <th>Tue</th>
+        <th>Wed</th>
+        <th>Thu</th>
+        <th>Fri</th>
+      </tr>
+    </thead>
+    <tbody>
+<tbody>
+<tbody>
+  <tr><td>1</td><td>8:10</td><td>8:10</td>
+    <td class="c132">13.2/</td>
+    <td class="c153">15.3/</td>
+    <td class="c132">13.2/</td>
+    <td></td>
+    <td class="c162">16.2</td>
+  </tr>
+
+  <tr><td>2</td><td>8:40</td><td>8:40</td>
+    <td class="c132">13.2/</td>
+    <td class="c153">15.3/</td>
+    <td class="c132">13.2/</td>
+    <td></td>
+    <td class="c162">16.2</td>
+  </tr>
+
+  <tr><td></td><td>9:30</td><td>9:30</td>
+    <td class="cgreen"></td><td class="cgreen"></td><td class="cgreen"></td><td class="cgreen"></td><td class="cgreen"></td>
+  </tr>
+
+  <tr><td>3</td><td>10:10</td><td>10:10</td>
+    <td class="c141">14.1</td>
+    <td></td>
+    <td class="c162">16.2/</td>
+    <td class="c141">14.1/</td>
+    <td class="c153">15.3/</td>
+  </tr>
+
+  <tr><td>4</td><td>10:50</td><td>10:50</td>
+    <td class="c141">14.1</td>
+    <td></td>
+    <td class="c153">15.3</td>
+    <td></td>
+    <td></td>
+  </tr>
+
+  <tr><td>5</td><td>11:30</td><td>11:30</td>
+    <td></td>
+    <td></td>
+    <td class="c153">15.3</td>
+    <td class="c111">11.1</td>
+    <td></td>
+  </tr>
+
+  <tr><td></td><td>12:10</td><td>12:10</td>
+    <td class="cgreen"></td><td class="cgreen"></td><td class="cgreen"></td><td class="cgreen"></td><td class="cgreen"></td>
+  </tr>
+
+  <tr><td>6</td><td>13:00</td><td>13:00</td>
+    <td></td>
+    <td class="c141">14.1/</td>
+    <td></td>
+    <td></td>
+    <td class="c111">11.1</td>
+  </tr>
+
+  <tr><td>7</td><td>13:40</td><td>13:40</td>
+    <td class="c111">11.1</td>
+    <td class="c141">14.1/</td>
+    <td></td>
+    <td class="c162">16.2/</td>
+    <td class="c111">11.1</td>
+  </tr>
+
+  <tr><td>8</td><td>14:20</td><td>14:20</td>
+    <td class="c111">11.1</td>
+    <td class="c132">13.2/</td>
+    <td></td>
+    <td class="c162">16.2/</td>
+    <td></td>
+  </tr>
+
+  <tr><td></td><td>15:00</td><td>15:00</td>
+    <td></td><td></td><td></td><td></td><td></td>
+  </tr>
+</tbody>
+
+</tbody>    </tbody>
+  </table>
+</div>
+
+<footer>
+  <p style="font-size: 10px; color: #777; margin: 0; text-align: center;">&copy; <span id="currentYear"></span> Perfectly Practical English</p>
+</footer>
+
+<script>
+  document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+
+<script>
+  const borderDiv = document.createElement('div');
+  borderDiv.style.position = 'fixed';
+  borderDiv.style.inset = '0';
+  borderDiv.style.border = '10px solid #39FF14';
+  borderDiv.style.boxSizing = 'border-box';
+  borderDiv.style.zIndex = '9999';
+  borderDiv.style.pointerEvents = 'none';
+  borderDiv.style.backgroundColor = 'transparent';
+  document.body.appendChild(borderDiv);
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // Get filename only
+    let filename = window.location.pathname.split("/").pop();
+
+    // Remove .html
+    filename = filename.replace(/\.html$/i, "");
+
+    // Remove everything up to and including the first underscore
+    // (treats that as the prefix)
+    filename = filename.replace(/^[^_]*_/, "");
+
+    // Convert underscores to spaces
+    const title = filename.replace(/_/g, " ");
+
+    // Replace the first <h1>
+    const h1 = document.querySelector("h1");
+    if (h1) {
+        h1.textContent = title;
+    }
+});
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  // Target ONLY table cells inside your schedule (safer than all td)
+  document.querySelectorAll(".schedule-wrapper td").forEach(td => {
+
+    const val = td.textContent.trim();
+
+    // skip empty cells
+    if (!val) return;
+
+    // extract number before the dot (e.g. 11.1 → 11)
+    const base = val.split(".")[0];
+
+    // only apply if it's a valid number
+    if (!isNaN(base)) {
+      td.classList.add("sub-" + base);
+    }
+
+  });
+
+});
+</script>
+
+<script>
+
+(function(){
+
+/* =========================
+   RAW INSTRUCTIONS TEXT
+========================= */
+
+const RAW_TEXT = `
+How to use this page…
+
+• Overview: View and consult a weekly class timetable structured across periods, times, and weekdays from Monday to Friday.
+• Schedule Table: Read through the Weekly Schedule table displaying period numbers, time slots, 24-hour time references, and class codes mapped across weekdays.
+
+`;
+
+
+/* =========================
+   RAW TEXT PARSER
+========================= */
+
+function parseRawInstructions(text){
+
+  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+  const html = [];
+
+  lines.forEach(line => {
+
+    if(line === "---"){
+      html.push(`<hr>`);
+      return;
+    }
+
+    if(/^\d+\./.test(line)){
+      html.push(`<p>${line}</p>`);
+      return;
+    }
+
+    if(!/[.!?:]$/.test(line)){
+      html.push(`<h3>${line}</h3>`);
+      return;
+    }
+
+    html.push(`<p>${line}</p>`);
+  });
+
+  return html.join("");
+}
+
+
+/* =========================
+   CREATE STYLE
+========================= */
+
+const style = document.createElement("style");
+
+style.textContent = `
+#instructionsBtn{
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  background: #2e8b57;
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, transform 0.2s;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+#instructionsBtn:hover{
+  background: #257047;
+  transform: scale(1.05);
+}
+
+#instructionsRoot{
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+}
+
+#instructionsBackdrop{
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#instructionsModal{
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid #cfe2f7;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+#instructionsHeader{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex: 0 0 auto;
+  font-size: 18px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+#instructionsBack{
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  height: auto;
+  width: auto;
+}
+
+#instructionsBack:hover{
+  background-color: #eef6ff;
+}
+
+#instructionsContent{
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  flex: 1 1 auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  font-size: 14px;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #333;
+}
+
+#instructionsContent::-webkit-scrollbar{
+  display: none;
+}
+
+#instructionsContent h3{
+  margin-top: 10px;
+  margin-bottom: 4px;
+  font-size: 15px;
+  line-height: 1.3;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+#instructionsContent p{
+  margin-bottom: 8px;
+  font-weight: 400;
+}
+
+#instructionsContent hr{
+  margin: 12px 0;
+  border: none;
+  border-top: 1px solid #ddd;
+}
+`;
+
+document.head.appendChild(style);
+
+
+/* =========================
+   CREATE BUTTON
+========================= */
+
+const btn = document.createElement("button");
+btn.id = "instructionsBtn";
+btn.innerHTML = "?";
+btn.setAttribute("aria-label", "Instructions");
+
+document.body.appendChild(btn);
+
+
+/* =========================
+   CREATE MODAL
+========================= */
+
+const root = document.createElement("div");
+root.id = "instructionsRoot";
+
+root.innerHTML = `
+<div id="instructionsBackdrop"></div>
+
+<div id="instructionsModal">
+
+  <div id="instructionsHeader">
+    <span>Instructions</span>
+    <button id="instructionsBack" type="button">✕</button>
+  </div>
+
+  <div id="instructionsContent">
+    ${parseRawInstructions(RAW_TEXT)}
+  </div>
+
+</div>
+`;
+
+document.body.appendChild(root);
+
+
+/* =========================
+   SCROLL LOCK
+========================= */
+
+const modalContent = document.getElementById("instructionsContent");
+
+modalContent.addEventListener("wheel", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+modalContent.addEventListener("touchmove", e=>{
+  e.stopPropagation();
+},{passive:false});
+
+
+/* =========================
+   OPEN / CLOSE
+========================= */
+
+function openModal(){
+  root.style.display = "block";
+  document.body.style.overflow = "hidden";
+  document.documentElement.style.overflow = "hidden";
+}
+
+function closeModal(){
+  root.style.display = "none";
+  document.body.style.overflow = "";
+  document.documentElement.style.overflow = "";
+}
+
+btn.onclick = openModal;
+
+document.getElementById("instructionsBack").onclick = closeModal;
+document.getElementById("instructionsBackdrop").onclick = closeModal;
+
+document.addEventListener("keydown", e=>{
+  if(e.key === "Escape") closeModal();
+});
+
+})();
+</script>
+
+<script>
+(function() {
+  // Prevent pinch-to-zoom
+  function preventPinch(e) {
+    if (e.touches.length > 1) e.preventDefault();
+  }
+
+  // Prevent double-tap zoom
+  let lastTouchTime = 0;
+  function preventDoubleTap(e) {
+    const now = Date.now();
+    if (now - lastTouchTime < 300) {
+      e.preventDefault();
+    }
+    lastTouchTime = now;
+  }
+
+  // Block gesture events on iOS
+  function preventGesture(e) {
+    e.preventDefault();
+  }
+
+  document.addEventListener('touchstart', preventPinch, { passive: false });
+  document.addEventListener('touchend', preventDoubleTap, { passive: false });
+  document.addEventListener('gesturestart', preventGesture, { passive: false });
+})();
+</script>
+
+<!-- ========================================== -->
+<!-- NARROW PHONE LAYOUT SAFETY PATCH (START) -->
+<!-- ========================================== -->
+<style>
+  html, body {
+    max-width: 100vw !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box;
+  }
+  *, *:before, *:after {
+    box-sizing: inherit;
+  }
+  body {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    margin: 0 auto !important;
+  }
+  img, video, canvas, table {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+</style>
+<!-- ========================================== -->
+<!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
+<!-- ========================================== -->
+
+
+</body>
+</html>
