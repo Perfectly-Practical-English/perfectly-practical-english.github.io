@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Vocabulary Tiles Battle - Classroom Version</title>
+<script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<!-- PDF libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+<style>
+* { box-sizing: border-box; user-select: none; -webkit-user-select: none; }
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  margin: 0;
+  padding: 6px;
+  background: linear-gradient(to bottom, #a0e0ff 0%, #ffffff 95%);
+  color: #222;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background-color: #d0e7f9;
+  z-index: 9998;
+}
+
+.top-bar {  
+  display: flex;  
+  gap: 4px;  
+  margin: 0 auto 4px auto;  
+  width: 100%;
+  max-width: 900px;
+  flex-wrap: nowrap;  
+  align-items: center;  
+  flex-shrink: 0;
+}
+
+.top-bar input[type="text"],
+.top-bar button,
+.top-bar .wheel-container {
+  height: 30px;
+  padding: 0 8px;
+  font-family: Arial, sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  background: linear-gradient(145deg, #ffffff, #eaf6ff);
+  color: #1976d2;
+  border: 1px solid #cfe2f7;
+  border-radius: 6px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: 0.12s;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+}
+
+.top-bar input[type="text"] {
+  background: #fff;
+  color: #000;
+  width: 70px;
+  cursor: text;
+  text-align: left !important;
+}
+
+.top-bar .wheel-container {
+  flex: 1 1 auto;
+  justify-content: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+#roundToggleBtn {
+  background: linear-gradient(145deg, #ff9800, #f57c00) !important;
+  color: white !important;
+  font-weight: bold;
+  padding: 0 12px;
+  display: none; /* hidden by default until checked */
+}
+
+/* ===== MODAL ===== */
+#sectionModalRoot {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 99999;
+}
+
+#sectionModalBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+}
+
+#sectionModalContent {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid #cfe2f7;
+}
+
+#sectionModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #1976d2;
+}
+
+#sectionModalClose {
+  background: none;
+  border: none;
+  color: #1976d2;
+  font-size: 20px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+#sectionListContainer {
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.section-item {
+  height: 30px;
+  padding: 0 8px;
+  margin-bottom: 5px;
+  background: #eaf6ff;
+  border: 1px solid #cfe2f7;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  color: #1976d2;
+  display: flex;
+  align-items: center;
+}
+
+.section-item:hover {
+  background: #d0e8ff;
+  border-color: #1976d2;
+}
+
+/* ===== BATTLE ARENA (SPLIT LANDSCAPE) ===== */
+.battle-arena {
+  display: flex;
+  flex: 1;
+  gap: 8px;
+  min-height: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.team-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  padding: 6px;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  min-width: 0;
+  overflow: hidden;
+}
+
+.team-panel.team-a {
+  border: 2px solid #1976d2;
+  background: linear-gradient(180deg, #ffffff 0%, #eef6ff 100%);
+}
+
+.team-panel.team-b {
+  border: 2px solid #e53935;
+  background: linear-gradient(180deg, #ffffff 0%, #fff5f5 100%);
+}
+
+.team-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  padding-bottom: 2px;
+  border-bottom: 2px solid rgba(0,0,0,0.08);
+  flex-shrink: 0;
+}
+
+.team-title {
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.team-a .team-title { color: #1565c0; }
+.team-b .team-title { color: #c62828; }
+
+.btn-stop {
+  background: #d32f2f;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-stop:hover:not(:disabled) { background: #b71c1c; }
+.btn-stop:disabled { background: #9e9e9e; cursor: not-allowed; }
+
+/* VOCAB SECTION */
+.game-board {
+  display: none;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 4px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  align-items: start;
+}
+
+.game-board.active {
+  display: grid;
+}
+
+.column {
+  background: #fff;
+  border: 1px solid #c4d3eb;
+  border-radius: 6px;
+  padding: 6px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  font-size: 10px;
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+.tile {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 2px 4px;
+  margin: 3px 0;
+  background: #eaf6ff;
+  border: 1px solid #9aaed1;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 10px;
+  position: relative;
+  height: 32px;
+  box-sizing: border-box;
+}
+
+.tile-number {
+  position: absolute;
+  left: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 10px;
+  color: #123;
+  font-weight: bold;
+}
+.tile-number::after { content: '.'; }
+
+.tile-input {
+  margin-left: 16px;
+  width: calc(100% - 16px);
+  height: 22px;
+  padding: 0 4px;
+  border-radius: 4px;
+  border: 1px solid #bfcfe6;
+  font-size: 10px;
+  background-color: #fff;
+}
+
+.tile-input::placeholder {
+  color: #999;
+  font-style: italic;
+}
+
+.tile.valid { background: #CFF3D6; }
+.tile.invalid { background: #F8D1D1; }
+.tile.scored { box-shadow: 0 0 0 3px rgba(34,139,34,0.15) inset; }
+.selected-tile { border: 2px solid #ff9800 !important; background: #fff3e0 !important; }
+
+/* ===== FAKE ON-SCREEN KEYBOARD ===== */
+.fake-keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+  flex-shrink: 0;
+}
+
+.kb-row {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+}
+
+.kb-key {
+  flex: 1;
+  height: 26px;
+  background: #f0f4f8;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-family: Arial, sans-serif;
+  font-size: 11px;
+  font-weight: bold;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.kb-key:active {
+  background: #cbd5e1;
+  transform: scale(0.95);
+}
+
+.kb-key.backspace {
+  flex: 1.5;
+  font-size: 10px;
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+/* Scoreboard container & buttons */
+.scoreboard-container {
+  display: none;
+  margin: 4px auto 0 auto;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 11px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-width: 900px;
+  background: #fff;
+  padding: 6px;
+  border: 1px solid #cfe2f7;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.score-buttons {
+  margin: 4px auto 0 auto;
+  display: none;
+  gap: 6px;
+  max-width: 900px;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.score-buttons button {
+  height: 26px;
+  padding: 0 10px;
+  font-weight: bold;
+  border-radius: 6px;
+  border: 1px solid #cfe2f7;
+  background: #fff;
+  color: #1976d2;
+  cursor: pointer;
+}
+
+footer {
+  margin-top: 3px;
+  padding: 2px 6px;
+  font-size: 10px;
+  color: #666;
+  background: #f0f8ff;
+  border-radius: 6px;
+  flex-shrink: 0;
+  text-align: center;
+}
+
+/* ===== PDF EXPORT STYLES ===== */
+.pdf-export-canvas {
+    background: #ffffff;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #000000;
+    font-size: 10pt;
+    line-height: 1.35;
+    box-sizing: border-box;
+    width: 210mm;
+}
+.pdf-page {
+    width: 210mm;
+    min-height: 297mm;
+    max-height: 297mm;
+    padding: 6.35mm;
+    box-sizing: border-box;
+    position: relative;
+    background: #ffffff;
+    overflow: hidden;
+}
+.pdf-export-canvas h2 {
+    font-size: 10pt;
+    font-weight: bold;
+    color: #1976d2;
+    margin-bottom: 4px;
+    margin-top: 0;
+    padding-bottom: 2px;
+    break-after: avoid;
+    page-break-after: avoid;
+}
+.pdf-export-canvas h3 {
+    font-size: 10pt;
+    font-weight: bold;
+    color: #1976d2;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+.pdf-export-canvas .quiz-exercise {
+    font-size: 10pt;
+    margin-bottom: 6px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+</style>
+</head>
+<body>
+
+<div id="overlay"></div>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <input id="studentId" type="text" placeholder="ID" autocomplete="off" />
+  <div class="wheel-container" id="wheelContainer">Select Topic</div>
+  <button id="roundToggleBtn" type="button">Round 1</button>
+</div>
+
+<!-- TOPIC SELECTION MODAL -->
+<div id="sectionModalRoot">
+  <div id="sectionModalBackdrop"></div>
+  <div id="sectionModalContent">
+    <div id="sectionModalHeader">
+      <span id="modalTitle">Select Topic</span>
+      <button id="sectionModalClose" type="button">✕</button>
+    </div>
+    <div id="sectionListContainer"></div>
+  </div>
+</div>
+
+<!-- BATTLE ARENA -->
+<div class="battle-arena">
+  <!-- TEAM A PANEL -->
+  <div class="team-panel team-a" id="panelA">
+    <div class="team-header">
+      <button class="btn-stop" id="stopTeamA" type="button" disabled>STOP A</button>
+      <span class="team-title">TEAM A (<span id="scoreA">0</span>)</span>
+    </div>
+    <div class="game-board" id="boardA">
+      <div class="column" id="wordTilesA"></div>
+      <div class="column" id="definitionTilesA"></div>
+    </div>
+    <div class="fake-keyboard" id="keyboardA"></div>
+  </div>
+
+  <!-- TEAM B PANEL -->
+  <div class="team-panel team-b" id="panelB">
+    <div class="team-header">
+      <span class="team-title">TEAM B (<span id="scoreB">0</span>)</span>
+      <button class="btn-stop" id="stopTeamB" type="button" disabled>STOP B</button>
+    </div>
+    <div class="game-board" id="boardB">
+      <div class="column" id="wordTilesB"></div>
+      <div class="column" id="definitionTilesB"></div>
+    </div>
+    <div class="fake-keyboard" id="keyboardB"></div>
+  </div>
+</div>
+
+<!-- SCOREBOARD & EXPORT BUTTONS -->
+<div class="scoreboard-container" id="scoreboardContainer"></div>
+<div class="score-buttons" id="scoreButtons">
+  <button id="copyBtn">Copy</button>
+  <button id="downloadTxtBtn">↓Text</button>
+  <button id="downloadPngBtn">↓PNG</button>
+</div>
+
+<footer>
+<p>© <span id="currentYear"></span> Perfectly Practical English™. All rights reserved.</p>
+</footer>
+
+<script>
+  document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+
+<script>
+// ===== SINGLE RAW TEXT DATA SOURCE =====
+const rawVocabTextSource = `
+~Hobbies
+• activity  – something you do for enjoyment or interest
+• achievement  – something you succeed in doing well
+• fun  – enjoyment or pleasure
+• game  – an activity with rules played for fun
+• hobby  – an activity you do in your free time
+• interest  – something you like or care about
+• practice  – time spent learning or improving a skill
+• skill  – an ability to do something well
+• sport  – a physical competitive activity
+• time  – hours or moments spent doing something
+• action  – something done to help someone
+• family  – people you are related to
+• friend  – a person you like and trust
+• help  – support or assistance
+• kindness  – being friendly and caring
+• moment  – a short time
+• need  – something required or wanted
+• person  – a human being
+• support  – help given to someone
+• advice  – helpful ideas or suggestions
+
+~Helping Others
+• action  – something done to help someone
+• family  – people you are related to
+• friend  – a person you like and trust
+• help  – support or assistance
+• kindness  – being friendly and caring
+• moment  – a short time
+• need  – something required or wanted
+• person  – a human being
+• support  – help given to someone
+• time  – when something happens
+`;
+
+function parseVocabInput(text){
+  const lines = text.trim().split('\n');
+  const pairs = [];
+  const EMOJI_REGEX = /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}]/gu;
+
+  for(let i = 0; i < lines.length; i++){
+    const line = lines[i].trim();
+    if(!line) continue;
+    if(/[-–]/.test(line)){
+      let [wordPart, defPart] = line.split(/\s*[-–]\s*/);
+      wordPart = wordPart.replace(/^•\s*/, '').replace(EMOJI_REGEX, '').trim();
+      const definition = defPart.split('<br>')[0].trim();
+      pairs.push({ word: wordPart, definition });
+    }
+  }
+  return pairs;
+}
+
+function parseSections(raw) {
+  const chunks = raw.split(/\n(?=~+)/).map(c => c.trim()).filter(c => c.startsWith("~"));
+  return chunks.map(chunk => {
+    const lines = chunk.split("\n");
+    const name = lines.shift().replace(/^~+/, "").trim();
+    const text = lines.join("\n").trim();
+    return { name, pairs: parseVocabInput(text) };
+  });
+}
+
+const allSections = parseSections(rawVocabTextSource);
+
+let currentRound = 1;
+let currentSelectedSection = null;
+let activePairs = [];
+let gameEnded = true;
+
+// Round Toggle Button Logic
+const roundToggleBtn = document.getElementById('roundToggleBtn');
+const wheelContainer = document.getElementById('wheelContainer');
+
+roundToggleBtn.addEventListener('click', () => {
+  currentRound = currentRound === 1 ? 2 : 1;
+  roundToggleBtn.textContent = `Round ${currentRound}`;
+  if (currentSelectedSection) {
+    setupRoundSubset(currentSelectedSection);
+  }
+});
+
+function setupRoundSubset(sec) {
+  currentSelectedSection = sec;
+  if (sec.pairs.length > 10) {
+    roundToggleBtn.style.display = 'flex';
+    activePairs = currentRound === 1 ? sec.pairs.slice(0, 10) : sec.pairs.slice(10, 20);
+  } else {
+    roundToggleBtn.style.display = 'none';
+    currentRound = 1;
+    activePairs = sec.pairs;
+  }
+  startMatch(activePairs);
+}
+
+// Modal & Selection Management
+const modalRoot = document.getElementById('sectionModalRoot');
+const modalList = document.getElementById('sectionListContainer');
+
+function openModal() {
+  modalList.innerHTML = '';
+  document.getElementById('modalTitle').textContent = `Select Topic`;
+
+  allSections.forEach((sec, idx) => {
+    const item = document.createElement('div');
+    item.className = 'section-item';
+    item.textContent = sec.name;
+    item.dataset.index = idx;
+    item.addEventListener('click', () => {
+      wheelContainer.textContent = sec.name;
+      closeModal();
+      currentRound = 1;
+      roundToggleBtn.textContent = `Round 1`;
+      setupRoundSubset(sec);
+    });
+    modalList.appendChild(item);
+  });
+  modalRoot.style.display = 'block';
+  
+  if (typeof window.injectPdfButtonDirectly === 'function') {
+    window.injectPdfButtonDirectly();
+  }
+}
+
+function closeModal() { modalRoot.style.display = 'none'; }
+document.getElementById('sectionModalClose').onclick = closeModal;
+document.getElementById('sectionModalBackdrop').onclick = closeModal;
+wheelContainer.onclick = openModal;
+
+// Shuffle helper
+function shuffle(array){
+  const arr = [...array];
+  for(let i = arr.length-1; i>0; i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// Team Engine Class with Keyboard Integration & Input Suppression
+class TeamGameInstance {
+  constructor(key) {
+    this.key = key;
+    this.pairs = [];
+    this.selectedTile = null;
+    this.activeInput = null;
+    this.correctCount = 0;
+  }
+
+  init(pairs) {
+    this.pairs = pairs;
+    this.selectedTile = null;
+    this.activeInput = null;
+
+    const wordCol = document.getElementById(`wordTiles${this.key}`);
+    const defCol = document.getElementById(`definitionTiles${this.key}`);
+    wordCol.innerHTML = '';
+    defCol.innerHTML = '';
+
+    const placeholders = shuffle(pairs.map(p => p.word));
+
+    this.pairs.forEach((_, i) => wordCol.appendChild(this.createTile(i, placeholders[i])));
+    this.pairs.forEach(p => {
+      const d = document.createElement('div');
+      d.className = 'tile';
+      d.textContent = p.definition;
+      defCol.appendChild(d);
+    });
+
+    document.getElementById(`board${this.key}`).classList.add('active');
+    this.buildKeyboard(`keyboard${this.key}`);
+  }
+
+  createTile(index, placeholderText) {
+    const tile = document.createElement('div');
+    tile.className = 'tile';
+    tile.dataset.index = index;
+
+    const num = document.createElement('div');
+    num.className = 'tile-number';
+    num.textContent = index + 1;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'tile-input';
+    input.placeholder = placeholderText || 'Type word...';
+
+    // Suppress system keyboards and enforce fake keyboard targeting
+    input.setAttribute('readonly', 'true');
+    input.addEventListener('focus', () => { this.activeInput = input; });
+    input.addEventListener('mousedown', e => { e.preventDefault(); input.focus(); });
+    input.addEventListener('touchstart', e => { e.preventDefault(); input.focus(); }, {passive: false});
+
+    input.addEventListener('input', () => {
+      const v = input.value.trim().toLowerCase();
+      if(!v){ tile.classList.remove('valid', 'invalid'); return; }
+      const match = this.pairs.some(p => p.word.toLowerCase() === v);
+      tile.classList.toggle('valid', match);
+      tile.classList.toggle('invalid', !match);
+    });
+
+    tile.addEventListener('click', e => {
+      if(e.target.tagName === 'INPUT') return;
+      if(!this.selectedTile) {
+        this.selectedTile = tile;
+        tile.classList.add('selected-tile');
+      } else if(this.selectedTile === tile) {
+        this.selectedTile.classList.remove('selected-tile');
+        this.selectedTile = null;
+      } else {
+        const parent = tile.parentNode;
+        const tiles = Array.from(parent.children);
+        const a = tiles.indexOf(this.selectedTile);
+        const b = tiles.indexOf(tile);
+        parent.insertBefore(this.selectedTile, a < b ? tile.nextSibling : tile);
+        this.selectedTile.classList.remove('selected-tile');
+        this.selectedTile = null;
+      }
+    });
+
+    tile.append(num, input);
+    return tile;
+  }
+
+  buildKeyboard(containerId) {
+    const kbContainer = document.getElementById(containerId);
+    kbContainer.innerHTML = "";
+    const rows = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
+    rows.forEach((rowChars, rIdx) => {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'kb-row';
+      for (let ch of rowChars) {
+        const keyBtn = document.createElement('button');
+        keyBtn.type = 'button';
+        keyBtn.className = 'kb-key';
+        keyBtn.textContent = ch.toUpperCase();
+
+        keyBtn.addEventListener('mousedown', e => e.preventDefault());
+        keyBtn.addEventListener('touchstart', e => e.preventDefault(), {passive: false});
+
+        keyBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (gameEnded) return;
+          if (!this.activeInput) {
+            const firstInput = document.querySelector(`#wordTiles${this.key} .tile-input`);
+            if (firstInput) {
+              firstInput.removeAttribute('readonly');
+              firstInput.focus();
+              firstInput.setAttribute('readonly', 'true');
+              this.activeInput = firstInput;
+            }
+          }
+          if (this.activeInput) {
+            this.activeInput.removeAttribute('readonly');
+            this.activeInput.value += ch;
+            this.activeInput.dispatchEvent(new Event('input'));
+            this.activeInput.setAttribute('readonly', 'true');
+          }
+        });
+        rowEl.appendChild(keyBtn);
+      }
+      if (rIdx === 2) {
+        const backBtn = document.createElement('button');
+        backBtn.type = 'button';
+        backBtn.className = 'kb-key backspace';
+        backBtn.textContent = '⌫';
+
+        backBtn.addEventListener('mousedown', e => e.preventDefault());
+        backBtn.addEventListener('touchstart', e => e.preventDefault(), {passive: false});
+
+        backBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (gameEnded) return;
+          if (this.activeInput) {
+            this.activeInput.removeAttribute('readonly');
+            this.activeInput.value = this.activeInput.value.slice(0, -1);
+            this.activeInput.dispatchEvent(new Event('input'));
+            this.activeInput.setAttribute('readonly', 'true');
+          }
+        });
+        rowEl.appendChild(backBtn);
+      }
+      kbContainer.appendChild(rowEl);
+    });
+  }
+
+  evaluate() {
+    const wordCol = document.getElementById(`wordTiles${this.key}`);
+    let score = 0;
+    this.pairs.forEach((p, i) => {
+      const tileEl = wordCol.children[i];
+      const input = tileEl?.querySelector('input');
+      if(!input) return;
+      if(input.value.trim().toLowerCase() === p.word.toLowerCase()) {
+        tileEl.classList.add('valid', 'scored');
+        score++;
+      } else {
+        tileEl.classList.add('invalid');
+      }
+    });
+    this.correctCount = score;
+    document.getElementById(`score${this.key}`).textContent = score;
+    return score;
+  }
+}
+
+const teamAState = new TeamGameInstance('A');
+const teamBState = new TeamGameInstance('B');
+
+function startMatch(pairs) {
+  gameEnded = false;
+  teamAState.init(pairs);
+  teamBState.init(pairs);
+  document.getElementById('stopTeamA').disabled = false;
+  document.getElementById('stopTeamB').disabled = false;
+  document.getElementById('scoreboardContainer').style.display = 'none';
+  document.getElementById('scoreButtons').style.display = 'none';
+}
+
+function handleMatchEnd() {
+  if (gameEnded) return;
+  gameEnded = true;
+
+  teamAState.evaluate();
+  teamBState.evaluate();
+
+  document.getElementById('stopTeamA').disabled = true;
+  document.getElementById('stopTeamB').disabled = true;
+
+  const idVal = document.getElementById('studentId').value.trim() || 'Classroom_Group';
+  const dt = new Date().toLocaleString('en-GB',{hour12:false});
+  const total = activePairs.length;
+
+  const resultText = `Round${currentRound}|VocabularyTilesBattle|Topic:${currentSelectedSection?.name || 'None'}|ID:${idVal}|${dt}|TeamA_${teamAState.correctCount}/${total}|TeamB_${teamBState.correctCount}/${total}`;
+
+  const container = document.getElementById('scoreboardContainer');
+  container.textContent = resultText;
+  container.style.display = 'block';
+  document.getElementById('scoreButtons').style.display = 'flex';
+
+  if(window.saveResult) window.saveResult(resultText);
+}
+
+document.getElementById('stopTeamA').onclick = handleMatchEnd;
+document.getElementById('stopTeamB').onclick = handleMatchEnd;
+
+// Export buttons
+document.getElementById('copyBtn').onclick = () => {
+  navigator.clipboard.writeText(document.getElementById('scoreboardContainer').textContent).then(() => alert('Copied scoreboard!'));
+};
+document.getElementById('downloadTxtBtn').onclick = () => {
+  const blob = new Blob([document.getElementById('scoreboardContainer').textContent], {type:'text/plain'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Round${currentRound}_vocab_score.txt`; a.click();
+};
+document.getElementById('downloadPngBtn').onclick = async () => {
+  const container = document.getElementById('scoreboardContainer');
+  if(!window.html2canvas) return;
+  const canvas = await html2canvas(container, {backgroundColor:'#fff'});
+  canvas.toBlob(blob => {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Round${currentRound}_vocab_score.png`; a.click();
+  });
+};
+</script>
+
+<!-- SUPABASE INTEGRATION -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabaseClient = window.supabase?.createClient(
+  'https://etwwriloppklhhkmswpr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+);
+window.saveResult = async function(text) {
+  if(!supabaseClient) return;
+  await supabaseClient.from("scoreboard_raw").insert([{ result_text: text }]);
+};
+</script>
+
+<!-- Green Border -->
+<script>
+  const borderDiv = document.createElement("div");
+  borderDiv.style.cssText = "position:fixed;inset:0;border:10px solid #39FF14;box-sizing:border-box;z-index:9999;pointer-events:none;";
+  document.body.appendChild(borderDiv);
+</script>
+
+<!-- PDF libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+<style>
+.pdf-export-canvas {
+    background: #ffffff;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #000000;
+    font-size: 10pt;
+    line-height: 1.3;
+    box-sizing: border-box;
+    width: 210mm;
+}
+.pdf-page {
+    width: 210mm;
+    min-height: 297mm;
+    max-height: 297mm;
+    padding: 6.35mm;
+    box-sizing: border-box;
+    position: relative;
+    background: #ffffff;
+    overflow: hidden;
+}
+.pdf-export-canvas h2 {
+    font-size: 10pt;
+    font-weight: bold;
+    color: #1976d2;
+    margin-bottom: 2px;
+    margin-top: 0;
+    padding-bottom: 2px;
+    break-after: avoid;
+    page-break-after: avoid;
+}
+.pdf-export-canvas h3 {
+    font-size: 10pt;
+    font-weight: bold;
+    color: #1976d2;
+    margin-top: 2px;
+    margin-bottom: 4px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+.pdf-export-canvas .quiz-exercise-left {
+    font-size: 10pt;
+    margin-bottom: 9px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+.pdf-export-canvas .quiz-exercise-right {
+    font-size: 10pt;
+    margin-bottom: 16px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+</style>
+
+<script>
+(function() {
+    'use strict';
+
+    let pdfModePrimed = false;
+
+    function patchTopicModalItems() {
+        const listContainer = document.getElementById('sectionListContainer');
+        if (!listContainer) return;
+
+        const items = listContainer.querySelectorAll('.section-item');
+        items.forEach((item, idx) => {
+            if (!item.hasAttribute('data-index')) {
+                item.dataset.index = idx;
+            }
+        });
+    }
+
+    async function removeTrailingBlankPDFPages(pdfBlob) {
+        const pdfjs = window.pdfjsLib;
+        const PDFDocument = window.PDFLib.PDFDocument;
+
+        if (!pdfjs || !PDFDocument) {
+            throw new Error("PDF cleanup libraries failed to load.");
+        }
+
+        pdfjs.GlobalWorkerOptions.workerSrc =
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const buffer = await pdfBlob.arrayBuffer();
+        const pdfjsData = new Uint8Array(buffer.slice(0));
+
+        const pdf = await pdfjs.getDocument({
+            data: pdfjsData
+        }).promise;
+
+        const totalPages = pdf.numPages;
+        const blankPages = [];
+
+        for (let pageNum = totalPages; pageNum >= 1; pageNum--) {
+            const page = await pdf.getPage(pageNum);
+            const viewport = page.getViewport({ scale: 0.75 });
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+            canvas.width = Math.ceil(viewport.width);
+            canvas.height = Math.ceil(viewport.height);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            await page.render({
+                canvasContext: ctx,
+                viewport: viewport,
+                background: '#ffffff'
+            }).promise;
+
+            const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            let visiblePixels = 0;
+
+            for (let i = 0; i < pixels.length; i += 4) {
+                if (pixels[i] < 245 || pixels[i + 1] < 245 || pixels[i + 2] < 245) {
+                    visiblePixels++;
+                    if (visiblePixels > 10) break;
+                }
+            }
+
+            if (visiblePixels <= 10) {
+                blankPages.push(pageNum - 1);
+            } else {
+                break;
+            }
+
+            canvas.width = 0;
+            canvas.height = 0;
+        }
+
+        await pdf.destroy();
+
+        if (blankPages.length === 0 || blankPages.length >= totalPages) {
+            return pdfBlob;
+        }
+
+        const editablePDF = await PDFDocument.load(buffer.slice(0));
+        blankPages.forEach(pageIndex => {
+            editablePDF.removePage(pageIndex);
+        });
+
+        const cleanedBytes = await editablePDF.save();
+        return new Blob([cleanedBytes], { type: 'application/pdf' });
+    }
+
+    function injectPdfButtonDirectly() {
+        const header = document.getElementById('sectionModalHeader');
+        if (!header) return;
+
+        patchTopicModalItems();
+
+        if (header.querySelector('.pdf-header-toggle')) return;
+
+        const pdfBtn = document.createElement('button');
+        pdfBtn.type = 'button';
+        pdfBtn.className = 'pdf-header-toggle';
+        pdfBtn.innerHTML = '↓ PDF: <strong>OFF</strong>';
+
+        pdfBtn.style.cssText = `
+            background: #e2e8f0;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: auto;
+            margin-right: 8px;
+            display: inline-flex;
+            align-items: center;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        `;
+
+        const closeBtn = document.getElementById('sectionModalClose');
+        if (closeBtn) {
+            header.insertBefore(pdfBtn, closeBtn);
+        } else {
+            header.appendChild(pdfBtn);
+        }
+
+        pdfBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            pdfModePrimed = !pdfModePrimed;
+
+            if (pdfModePrimed) {
+                pdfBtn.style.background = '#dbeafe';
+                pdfBtn.style.borderColor = '#3b82f6';
+                pdfBtn.style.color = '#1e40af';
+                pdfBtn.innerHTML = '↓ PDF: <strong style="color: #1d4ed8;">ACTIVE</strong>';
+            } else {
+                resetPdfButton(pdfBtn);
+            }
+        });
+    }
+
+    window.injectPdfButtonDirectly = injectPdfButtonDirectly;
+
+    function resetPdfButton(pdfBtn) {
+        pdfBtn.style.background = '#e2e8f0';
+        pdfBtn.style.borderColor = '#cbd5e1';
+        pdfBtn.style.color = '#1e293b';
+        pdfBtn.innerHTML = '↓ PDF: <strong>OFF</strong>';
+    }
+
+    document.addEventListener('click', (e) => {
+        const item = e.target.closest('.section-item');
+        if (!item || !pdfModePrimed) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        patchTopicModalItems();
+
+        const index = parseInt(item.dataset.index, 10);
+        if (isNaN(index) || typeof allSections === 'undefined' || !allSections[index]) {
+            alert("Could not locate section data for PDF export.");
+            return;
+        }
+
+        const section = allSections[index];
+        exportFullWorksheetToPDF(section);
+
+        pdfModePrimed = false;
+        const pdfBtn = document.querySelector('.pdf-header-toggle');
+        if (pdfBtn) resetPdfButton(pdfBtn);
+
+        const modalRoot = document.getElementById('sectionModalRoot');
+        if (modalRoot) modalRoot.style.display = 'none';
+    }, true);
+
+    function shuffleArray(array) {
+        const arr = [...array];
+        for (let i = arr.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [arr[i], arr[j]] = [arr[j], arr[i]];
+        }
+        return arr;
+    }
+
+    function exportFullWorksheetToPDF(section) {
+        let rawFilename = window.location.pathname.split('/').pop() || 'file.html';
+        let cleanFilename = rawFilename
+            .replace(/\.html$/i, '')
+            .replace(/^[a-zA-Z0-9]+[_\-]*/, '')
+            .replace(/^[\d\-_]+/, '')
+            .replace(/_/g, ' ');
+
+        const exportContainer = document.createElement('div');
+        exportContainer.className = 'pdf-export-canvas';
+        exportContainer.style.cssText = 'width: 210mm; background: #ffffff; box-sizing: border-box;';
+
+        const currentYear = new Date().getFullYear();
+        const fullPairs = section.pairs || [];
+
+        const infoElements = [];
+        const infoDiv = document.createElement('div');
+        infoDiv.style.cssText = 'margin-bottom: 4px; font-size: 10pt; page-break-inside: avoid;';
+
+        infoDiv.innerHTML = `
+            <div style="font-size: 10pt; font-weight: bold; color: #444; margin-bottom: 1px;">Perfectly Practical Printables</div>
+            <div style="font-size: 10pt; color: #666; margin-bottom: 1px;">PerfectlyPracticalEnglish@outlook.com</div>
+            <div style="font-size: 10pt; color: #666; margin-bottom: 3px;">&copy; ${currentYear} Perfectly Practical English</div>
+
+            <div style="font-size: 10pt; line-height: 1.3; margin-bottom: 4px;">
+                <div>Name ____________________</div>
+                <div>ID ____________________</div>
+                <div>Date ____________________</div>
+            </div>
+
+            <h2 style="font-size: 10pt; color: #1976d2; margin-bottom: 2px; padding-bottom: 0;">${cleanFilename}</h2>
+            <h2 style="font-size: 10pt; color: #1976d2; margin-bottom: 3px; padding-bottom: 2px;">${section.name} (Rounds 1 & 2)</h2>
+        `;
+        infoElements.push(infoDiv);
+
+        const leftColElements = [];
+        const leftHeader = document.createElement('h3');
+        leftHeader.style.cssText = 'font-size: 10pt; font-weight: bold; color: #1976d2; margin-top: 2px; margin-bottom: 4px;';
+        leftHeader.textContent = 'Words (1 – 20)';
+        leftColElements.push(leftHeader);
+
+        const rightColElements = [];
+        const rightHeader = document.createElement('h3');
+        rightHeader.style.cssText = 'font-size: 10pt; font-weight: bold; color: #1976d2; margin-top: 2px; margin-bottom: 4px;';
+        rightHeader.textContent = 'Definitions (1 – 20)';
+        rightColElements.push(rightHeader);
+
+        const wordIndices = fullPairs.map((_, idx) => idx);
+        const shuffledWordIndices = shuffleArray(wordIndices);
+
+        const defIndices = fullPairs.map((_, idx) => idx);
+        const shuffledDefIndices = shuffleArray(defIndices);
+
+        shuffledWordIndices.forEach((origIdx, displayIdx) => {
+            const pair = fullPairs[origIdx];
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'quiz-exercise-left';
+            itemDiv.style.cssText = 'font-size: 10pt; margin-bottom: 9px; page-break-inside: avoid; break-inside: avoid;';
+
+            itemDiv.innerHTML = `
+                <div style="font-weight: bold; color: #1e293b; margin-bottom: 2px;">${displayIdx + 1}. <span style="text-decoration: underline; text-decoration-color: #cbd5e1; color: #a0aec0; font-weight: 500;">${pair.word}</span></div>
+                <div style="border-bottom: 1px dotted #94a3b8; height: 14px; margin-top: 1px;"></div>
+            `;
+            leftColElements.push(itemDiv);
+        });
+
+        shuffledDefIndices.forEach((origIdx, displayIdx) => {
+            const pair = fullPairs[origIdx];
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'quiz-exercise-right';
+            itemDiv.style.cssText = 'font-size: 10pt; margin-bottom: 16px; page-break-inside: avoid; break-inside: avoid; line-height: 1.35;';
+
+            itemDiv.innerHTML = `
+                <div style="font-weight: bold; color: #1976d2;">
+                    ${displayIdx + 1}. <span style="color: #94a3b8; font-weight: normal; letter-spacing: 0.5px; margin-right: 4px;">_______________</span> <span style="font-weight: normal; color: #000000;">${pair.definition}</span>
+                </div>
+            `;
+            rightColElements.push(itemDiv);
+        });
+
+        const col1Content = [...infoElements, ...leftColElements];
+        const col2Content = [...rightColElements];
+
+        const pageDiv = document.createElement('div');
+        pageDiv.className = 'pdf-page';
+        pageDiv.style.cssText = `
+            width: 210mm;
+            height: 297mm;
+            padding: 6.35mm;
+            box-sizing: border-box;
+            position: relative;
+            background: #ffffff;
+            overflow: hidden;
+        `;
+
+        const flexWrapper = document.createElement('div');
+        flexWrapper.style.cssText = 'display: flex; gap: 3mm; width: 197mm; height: 282mm; box-sizing: border-box; overflow: hidden;';
+
+        const col1Div = document.createElement('div');
+        col1Div.style.cssText = 'width: 97mm; height: 282mm; max-height: 282mm; overflow: hidden; box-sizing: border-box; font-size: 10pt; line-height: 1.3;';
+        col1Content.forEach(el => col1Div.appendChild(el.cloneNode(true)));
+        flexWrapper.appendChild(col1Div);
+
+        const col2Div = document.createElement('div');
+        col2Div.style.cssText = 'width: 97mm; height: 282mm; max-height: 282mm; overflow: hidden; box-sizing: border-box; font-size: 10pt; line-height: 1.3;';
+        col2Content.forEach(el => col2Div.appendChild(el.cloneNode(true)));
+        flexWrapper.appendChild(col2Div);
+
+        pageDiv.appendChild(flexWrapper);
+        exportContainer.appendChild(pageDiv);
+
+        let currentScale = 1.0;
+        while (exportContainer.scrollHeight > 1120 && currentScale > 0.8) {
+            currentScale -= 0.02;
+            exportContainer.style.transform = `scale(${currentScale})`;
+            exportContainer.style.transformOrigin = 'top left';
+        }
+
+        const opt = {
+            margin: 0,
+            filename: `Vocabulary_Matching_Worksheet_${section.name.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+            pagebreak: { mode: [] },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', putOnlyUsedFonts: true, floatPrecision: 16 }
+        };
+
+        html2pdf()
+            .set(opt)
+            .from(exportContainer)
+            .outputPdf('blob')
+            .then(async pdfBlob => {
+                const cleanedPDF = await removeTrailingBlankPDFPages(pdfBlob);
+                const downloadURL = URL.createObjectURL(cleanedPDF);
+                const downloadLink = document.createElement('a');
+
+                downloadLink.href = downloadURL;
+                downloadLink.download = opt.filename;
+
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                downloadLink.remove();
+
+                setTimeout(() => { URL.revokeObjectURL(downloadURL); }, 1000);
+                exportContainer.remove();
+            })
+            .catch(err => {
+                console.error("PDF Generation Error:", err);
+                exportContainer.remove();
+                alert("PDF ERROR:\n\n" + (err.message || err.toString()));
+            });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('#wheelContainer')) {
+            setTimeout(injectPdfButtonDirectly, 30);
+            setTimeout(injectPdfButtonDirectly, 100);
+        }
+    });
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectPdfButtonDirectly);
+    } else {
+        injectPdfButtonDirectly();
+    }
+
+    setInterval(injectPdfButtonDirectly, 400);
+
+})();
+</script>
+</body>
+</html>

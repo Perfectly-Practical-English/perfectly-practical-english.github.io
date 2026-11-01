@@ -2492,7 +2492,6 @@ window.saveResult = async function saveResult(text) {
 })();
 </script>
 
-<<<<<<< HEAD
 <!-- PDF libraries -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -3003,9 +3002,387 @@ window.saveResult = async function saveResult(text) {
 })();
 </script>
 
-=======
->>>>>>> 8474f9fcd57602317a6a6a9b9e79de5c6dca371f
+<script>
+(function() {
+    'use strict';
 
+    let sampleActive = false;
+    let sampleAnimFrame = null;
+    let sampleSentenceObj = null;
+    let sampleExerciseIndex = 0;
+
+    // Your exact 3 exercises parsed into structure
+    const sampleExercises = [
+        { before: "I sometimes need to review ", answer: "a", after: " little important information. Do you have time for me to speak with you?" },
+        { before: "This boy buys ", answer: "a lot of", after: " books about animals and science. He studies hard." },
+        { before: "", answer: "The", after: " busy woman eats an apple before work. She has little time for breakfast." }
+    ];
+
+    // 1. Initialize Sample Game on Load
+    function initGrammarBomberSample() {
+        if (window.__sampleAutoStarted || sampleActive) return;
+
+        const gameArea = document.getElementById('gameArea');
+        if (gameArea && !document.getElementById('wordBombsLayoutSampleBanner')) {
+            const areaStyle = window.getComputedStyle(gameArea);
+            if (areaStyle.position === 'static') {
+                gameArea.style.position = 'relative';
+            }
+
+            const banner = document.createElement('div');
+            banner.id = 'wordBombsLayoutSampleBanner';
+            banner.style.cssText = `
+                position: absolute;
+                top: 15px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 99999;
+                background: #e0f2fe;
+                color: #0f172a;
+                border: 2px solid #38bdf8;
+                border-radius: 8px;
+                padding: 8px 14px;
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: 12px;
+                font-weight: 800;
+                text-align: center;
+                letter-spacing: 0.3px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+                width: calc(100% - 40px);
+                max-width: 420px;
+                box-sizing: border-box;
+                white-space: nowrap;
+                overflow: hidden;
+                pointer-events: auto;
+            `;
+            banner.textContent = '⚠️ This is a sample game. Click a topic to play the game! ⚠️';
+            gameArea.appendChild(banner);
+        }
+
+        // Ensure Topics button shows neutral label and dismisses banner on click
+        const sectionBtn = document.getElementById('sectionSelectorBtn');
+        if (sectionBtn) {
+            sectionBtn.textContent = 'Topics';
+            
+            if (!sectionBtn.dataset.bannerDismissListenerAttached) {
+                sectionBtn.dataset.bannerDismissListenerAttached = 'true';
+                sectionBtn.addEventListener('click', () => {
+                    window.__sampleAutoStarted = true;
+                    stopGrammarBomberSample();
+                    const banner = document.getElementById('wordBombsLayoutSampleBanner');
+                    if (banner) banner.remove();
+                });
+            }
+        }
+
+        // Attach dismissal listener to remove banner and stop sample mode on actual topic item selection
+        const listContainer = document.getElementById('sectionListContainer');
+        if (listContainer && !listContainer.dataset.bannerListenerAttached) {
+            listContainer.dataset.bannerListenerAttached = 'true';
+            listContainer.addEventListener('click', (e) => {
+                const item = e.target.closest('.section-item');
+                if (item) {
+                    window.__sampleAutoStarted = true;
+                    stopGrammarBomberSample();
+                    const banner = document.getElementById('wordBombsLayoutSampleBanner');
+                    if (banner) banner.remove();
+                }
+            });
+        }
+
+        setTimeout(() => {
+            if (!window.__sampleAutoStarted) {
+                sampleExerciseIndex = 0;
+                startSampleGrammarEngine();
+            }
+        }, 300);
+    }
+
+    function startSampleGrammarEngine() {
+        if (window.__sampleAutoStarted || sampleActive) return;
+        sampleActive = true;
+
+        const gameArea = document.getElementById('gameArea');
+        const mcPanel = document.getElementById('mcPanel');
+        const mcPanelExtra = document.getElementById('mcPanelExtra');
+        if (!gameArea || !mcPanel) return;
+
+        // Start ambient swoosh noise
+        if (typeof swoosh !== 'undefined' && swoosh.start) {
+            swoosh.start();
+        }
+
+        // Create dedicated fake sample plane & shadow using B52.png
+        let samplePlane = document.getElementById('samplePlane');
+        let samplePlaneShadow = document.getElementById('samplePlaneShadow');
+        if (!samplePlane) {
+            samplePlane = document.createElement('img');
+            samplePlane.id = 'samplePlane';
+            samplePlane.src = 'B52.png';
+            samplePlane.style.cssText = `
+                position: absolute;
+                width: 60px;
+                height: auto;
+                transform: rotate(-90deg);
+                user-select: none;
+                pointer-events: none;
+                z-index: 3;
+            `;
+            gameArea.appendChild(samplePlane);
+        }
+        if (!samplePlaneShadow) {
+            samplePlaneShadow = document.createElement('img');
+            samplePlaneShadow.id = 'samplePlaneShadow';
+            samplePlaneShadow.src = 'B52.png';
+            samplePlaneShadow.style.cssText = `
+                position: absolute;
+                width: 60px;
+                height: auto;
+                transform: rotate(-90deg);
+                user-select: none;
+                pointer-events: none;
+                filter: brightness(0) blur(6px);
+                opacity: 0.35;
+                z-index: 2;
+            `;
+            gameArea.appendChild(samplePlaneShadow);
+        }
+
+        let planeX = 50;
+        let planeTargetX = 200;
+        let planeSpeed = 5;
+        let swayAngle = 0;
+        let planeVeerX = null;
+        let planeVeerTicks = 0;
+
+        samplePlane.style.display = 'block';
+        samplePlaneShadow.style.display = 'block';
+
+        function loadNextExercise() {
+            if (window.__sampleAutoStarted) return;
+
+            if (sampleExerciseIndex >= sampleExercises.length) {
+                sampleExerciseIndex = 0;
+            }
+
+            const currentEx = sampleExercises[sampleExerciseIndex];
+
+            const dropArea = document.getElementById('dropArea') || gameArea;
+            const span = document.createElement('span');
+            span.className = 'sentence';
+            span.style.opacity = '1';
+            span.style.maxWidth = '170px';
+
+            if (currentEx.before) {
+                span.appendChild(document.createTextNode(currentEx.before));
+            }
+            
+            const blank = document.createElement('span');
+            blank.className = 'blank';
+            blank.dataset.answer = currentEx.answer;
+            blank.innerHTML = '&nbsp;'.repeat(Math.max(4, currentEx.answer.length * 3));
+            span.appendChild(blank);
+            
+            if (currentEx.after) {
+                span.appendChild(document.createTextNode(currentEx.after));
+            }
+
+            dropArea.appendChild(span);
+
+            // Spawn sentence at top of drop track
+            const containerWidth = dropArea.clientWidth || 300;
+            const x = Math.random() * Math.max(50, (containerWidth - 120)) + 10;
+            const y = -30;
+            span.style.left = x + 'px';
+            span.style.top = y + 'px';
+
+            sampleSentenceObj = {
+                span: span,
+                blank: blank,
+                correct: currentEx.answer,
+                y: y,
+                speed: 0.45 + Math.random() * 0.2, // Real game drop speed
+                answered: false,
+                intercepted: false,
+                pendingExplosion: false
+            };
+
+            // Generate 3 choices
+            let choices = [currentEx.answer];
+            const pool = ['a', 'an', 'the', 'a lot of', 'some', 'several'];
+            while (choices.length < 3) {
+                const rand = pool[Math.floor(Math.random() * pool.length)];
+                if (!choices.includes(rand)) {
+                    choices.push(rand);
+                }
+            }
+            choices.sort(() => Math.random() - 0.5);
+
+            mcPanel.innerHTML = '';
+            if (mcPanelExtra) mcPanelExtra.innerHTML = '';
+            mcPanel.style.gridTemplateColumns = `repeat(3, 1fr)`;
+
+            choices.forEach((choice) => {
+                const btn = document.createElement('button');
+                btn.textContent = choice;
+                btn.type = 'button';
+                btn.style.cssText = `
+                    width: 100%; height: 30px; font-size: 10px; font-weight: 600;
+                    background: red; color: white; border: 1px solid #777; border-radius: 3px; cursor: pointer;
+                `;
+                btn.onclick = () => {
+                    if (window.__sampleAutoStarted || !sampleSentenceObj || sampleSentenceObj.answered) return;
+
+                    if (choice === currentEx.answer) {
+                        sampleSentenceObj.answered = true;
+                        btn.style.background = 'green';
+                        blank.textContent = currentEx.answer;
+
+                        // Arm explosion when correct button is clicked
+                        sampleSentenceObj.pendingExplosion = true;
+                    } else {
+                        btn.style.background = '#e74c3c';
+                        setTimeout(() => { btn.style.background = 'red'; }, 500);
+                    }
+                };
+                mcPanel.appendChild(btn);
+            });
+        }
+
+        loadNextExercise();
+
+        function sampleLoop() {
+            if (window.__sampleAutoStarted || !sampleSentenceObj) return;
+
+            const s = sampleSentenceObj;
+            if (!s.intercepted) {
+                s.y += s.speed;
+                s.span.style.top = s.y + 'px';
+                const areaH = gameArea.offsetHeight || 260;
+                if (s.y > areaH + 20) {
+                    if (s.span.parentNode) s.span.parentNode.removeChild(s.span);
+                    loadNextExercise();
+                    return;
+                }
+            }
+
+            const areaH = gameArea.offsetHeight || 260;
+            const planeYPos = areaH - 110; 
+            const gaRect = gameArea.getBoundingClientRect();
+            const blankRect = s.blank.getBoundingClientRect();
+            const blankCenterX = blankRect.left - gaRect.left + blankRect.width / 2;
+            const blankCenterY = blankRect.top - gaRect.top + blankRect.height / 2;
+
+            if (planeVeerX !== null) {
+                planeTargetX = planeVeerX;
+                if (Math.abs(planeX - planeVeerX) < 3) {
+                    planeVeerTicks--;
+                    if (planeVeerTicks <= 0) {
+                        planeVeerX = null;
+                        planeTargetX = blankCenterX;
+                    }
+                }
+            } else {
+                planeTargetX = blankCenterX;
+            }
+
+            let swayAmplitude = 5;
+            const dist = Math.abs(blankCenterX - planeX);
+            swayAmplitude += Math.min(15, dist / 15);
+            planeSpeed = 0.08;
+
+            planeX += (planeTargetX - planeX) * planeSpeed;
+            const minX = samplePlane.offsetWidth / 2;
+            const maxX = (gameArea.clientWidth || 300) - samplePlane.offsetWidth / 2;
+            planeX = Math.max(minX, Math.min(maxX, planeX));
+
+            // Check intersection with cruising plane level
+            if (s.pendingExplosion && !s.intercepted) {
+                if (blankCenterY >= planeYPos - 20) {
+                    s.intercepted = true;
+                    s.pendingExplosion = false;
+
+                    if (planeVeerX === null && planeVeerTicks <= 0) {
+                        planeVeerX = Math.max(
+                            samplePlane.offsetWidth / 2,
+                            Math.min(
+                                (gameArea.clientWidth || 300) - samplePlane.offsetWidth / 2,
+                                planeX + (planeX < (gameArea.clientWidth || 300) / 2 ? 20 : -20)
+                            )
+                        );
+                        planeVeerTicks = 20;
+                    }
+
+                    const popSound = document.getElementById('popSound');
+                    if (popSound) {
+                        try {
+                            popSound.currentTime = 0;
+                            popSound.play().catch(() => {});
+                        } catch (e) {}
+                    }
+
+                    // Triggering .poof on the blank automatically invokes the real game's native mutation observer explosion effects (shards & smoke)
+                    s.blank.classList.add('poof');
+
+                    sampleExerciseIndex++;
+
+                    setTimeout(() => {
+                        if (window.__sampleAutoStarted) return;
+                        mcPanel.innerHTML = '';
+                        if (s.span.parentNode) s.span.parentNode.removeChild(s.span);
+                        loadNextExercise();
+                    }, 1200);
+                }
+            }
+
+            swayAngle += 0.03;
+            const swayOffset = Math.sin(swayAngle) * swayAmplitude;
+            const visualX = Math.max(0, Math.min((gameArea.clientWidth || 300), planeX + swayOffset));
+            const halfWidth = samplePlane.offsetWidth / 2;
+
+            samplePlane.style.left = (visualX - halfWidth) + 'px';
+            samplePlaneShadow.style.left = (visualX - halfWidth + 15) + 'px';
+            samplePlane.style.bottom = '110px';
+            samplePlaneShadow.style.bottom = '100px';
+
+            sampleAnimFrame = requestAnimationFrame(sampleLoop);
+        }
+
+        sampleAnimFrame = requestAnimationFrame(sampleLoop);
+    }
+
+    function stopGrammarBomberSample() {
+        sampleActive = false;
+        window.__sampleAutoStarted = true;
+        if (sampleAnimFrame) {
+            cancelAnimationFrame(sampleAnimFrame);
+            sampleAnimFrame = null;
+        }
+        if (sampleSentenceObj && sampleSentenceObj.span && sampleSentenceObj.span.parentNode) {
+            sampleSentenceObj.span.parentNode.removeChild(sampleSentenceObj.span);
+            sampleSentenceObj = null;
+        }
+        const mcPanel = document.getElementById('mcPanel');
+        const mcPanelExtra = document.getElementById('mcPanelExtra');
+        if (mcPanel) mcPanel.innerHTML = '';
+        if (mcPanelExtra) mcPanelExtra.innerHTML = '';
+
+        if (typeof swoosh !== 'undefined' && swoosh.stop) {
+            swoosh.stop();
+        }
+        const samplePlane = document.getElementById('samplePlane');
+        const samplePlaneShadow = document.getElementById('samplePlaneShadow');
+        if (samplePlane) samplePlane.remove();
+        if (samplePlaneShadow) samplePlaneShadow.remove();
+    }
+
+    if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', initGrammarBomberSample);
+    } else {
+        initGrammarBomberSample();
+    }
+})();
+</script>
 
 </body>
 </html>
