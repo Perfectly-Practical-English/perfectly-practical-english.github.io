@@ -2492,6 +2492,519 @@ window.saveResult = async function saveResult(text) {
 })();
 </script>
 
+<<<<<<< HEAD
+<!-- PDF libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+<style>
+.pdf-export-canvas {
+    background: #ffffff;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #000000;
+    font-size: 10pt;
+    line-height: 1.35;
+    box-sizing: border-box;
+    width: 210mm;
+}
+.pdf-page {
+    width: 210mm;
+    min-height: 297mm;
+    max-height: 297mm;
+    padding: 6.35mm;
+    box-sizing: border-box;
+    position: relative;
+    background: #ffffff;
+    overflow: hidden;
+}
+.pdf-export-canvas h2 {
+    font-size: 10pt;
+    font-weight: bold;
+    color: #1976d2;
+    margin-bottom: 4px;
+    margin-top: 0;
+    padding-bottom: 2px;
+    break-after: avoid;
+    page-break-after: avoid;
+}
+.pdf-export-canvas h3 {
+    font-size: 10pt;
+    font-weight: bold;
+    color: #1976d2;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+.pdf-export-canvas .quiz-exercise {
+    font-size: 10pt;
+    margin-bottom: 14px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+</style>
+
+<script>
+(function() {
+    'use strict';
+
+    let pdfModePrimed = false;
+
+    // =========================================================
+    // 1. PDF TEXT FITTER
+    // =========================================================
+    window.fitPdfTextToColumns = function(container) {
+        const MIN_FONT_SIZE = 9.5;
+        const MAX_FONT_SIZE = 10;
+        const STEP = 0.1;
+
+        const testContainer = container.cloneNode(true);
+        testContainer.style.cssText += `
+            position: absolute !important;
+            left: -10000px !important;
+            top: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        `;
+        document.body.appendChild(testContainer);
+
+        const testColumns = testContainer.querySelectorAll('.pdf-page > div > div');
+        const originalColumns = container.querySelectorAll('.pdf-page > div > div');
+
+        testContainer.getBoundingClientRect();
+
+        testColumns.forEach((testColumn, index) => {
+            const originalColumn = originalColumns[index];
+            if (!originalColumn) return;
+
+            let fontSize = MAX_FONT_SIZE;
+
+            function applyFontSize(column, size) {
+                column.style.setProperty('font-size', size + 'pt', 'important');
+                column.querySelectorAll('*').forEach(element => {
+                    element.style.setProperty('font-size', size + 'pt', 'important');
+                });
+            }
+
+            function contentOverflows() {
+                return testColumn.scrollHeight > testColumn.clientHeight + 1;
+            }
+
+            applyFontSize(testColumn, fontSize);
+
+            while (contentOverflows() && fontSize > MIN_FONT_SIZE) {
+                fontSize = Math.max(MIN_FONT_SIZE, Math.round((fontSize - STEP) * 10) / 10);
+                applyFontSize(testColumn, fontSize);
+                testColumn.getBoundingClientRect();
+            }
+
+            applyFontSize(originalColumn, fontSize);
+        });
+
+        testContainer.remove();
+    };
+
+    // =========================================================
+    // 2. PDF CLEANUP: REMOVE BLANK TRAILING PAGES
+    // =========================================================
+    async function removeTrailingBlankPDFPages(pdfBlob) {
+        const pdfjs = window.pdfjsLib;
+        const PDFDocument = window.PDFLib.PDFDocument;
+
+        if (!pdfjs || !PDFDocument) {
+            throw new Error("PDF cleanup libraries failed to load.");
+        }
+
+        pdfjs.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        const buffer = await pdfBlob.arrayBuffer();
+        const pdfjsData = new Uint8Array(buffer.slice(0));
+        const pdf = await pdfjs.getDocument({ data: pdfjsData }).promise;
+        const totalPages = pdf.numPages;
+        const blankPages = [];
+
+        for (let pageNum = totalPages; pageNum >= 1; pageNum--) {
+            const page = await pdf.getPage(pageNum);
+            const viewport = page.getViewport({ scale: 0.75 });
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+            canvas.width = Math.ceil(viewport.width);
+            canvas.height = Math.ceil(viewport.height);
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            await page.render({ canvasContext: ctx, viewport: viewport, background: '#ffffff' }).promise;
+            const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+            let visiblePixels = 0;
+
+            for (let i = 0; i < pixels.length; i += 4) {
+                if (pixels[i] < 245 || pixels[i + 1] < 245 || pixels[i + 2] < 245) {
+                    visiblePixels++;
+                    if (visiblePixels > 10) break;
+                }
+            }
+
+            if (visiblePixels <= 10) {
+                blankPages.push(pageNum - 1);
+            } else {
+                break;
+            }
+            canvas.width = 0;
+            canvas.height = 0;
+        }
+
+        await pdf.destroy();
+
+        if (blankPages.length === 0 || blankPages.length >= totalPages) {
+            return pdfBlob;
+        }
+
+        const editablePDF = await PDFDocument.load(buffer.slice(0));
+        blankPages.forEach(pageIndex => editablePDF.removePage(pageIndex));
+        const cleanedBytes = await editablePDF.save();
+
+        return new Blob([cleanedBytes], { type: 'application/pdf' });
+    }
+
+    // =========================================================
+    // 3. UI BUTTON INJECTION & LIST INDEX TAGGING
+    // =========================================================
+    function injectPdfButtonDirectly() {
+        const header = document.getElementById('sectionModalHeader');
+        if (!header) return;
+
+        const listContainer = document.getElementById('sectionListContainer');
+        if (listContainer) {
+            const items = listContainer.querySelectorAll('.section-item');
+            items.forEach((item, idx) => {
+                if (!item.hasAttribute('data-index')) {
+                    item.setAttribute('data-index', idx);
+                }
+            });
+        }
+
+        if (header.querySelector('.pdf-header-toggle')) return;
+
+        const pdfBtn = document.createElement('button');
+        pdfBtn.type = 'button';
+        pdfBtn.className = 'pdf-header-toggle';
+        pdfBtn.innerHTML = '↓ PDF: <strong>OFF</strong>';
+        pdfBtn.style.cssText = `
+            background: #e2e8f0;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: auto;
+            margin-right: 8px;
+            display: inline-flex;
+            align-items: center;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        `;
+
+        const closeBtn = document.getElementById('sectionModalClose');
+        if (closeBtn) {
+            header.insertBefore(pdfBtn, closeBtn);
+        } else {
+            header.appendChild(pdfBtn);
+        }
+
+        pdfBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            pdfModePrimed = !pdfModePrimed;
+            if (pdfModePrimed) {
+                pdfBtn.style.background = '#dbeafe';
+                pdfBtn.style.borderColor = '#3b82f6';
+                pdfBtn.style.color = '#1e40af';
+                pdfBtn.innerHTML = '↓ PDF: <strong style="color: #1d4ed8;">ACTIVE</strong>';
+            } else {
+                resetPdfButton(pdfBtn);
+            }
+        });
+    }
+
+    function resetPdfButton(pdfBtn) {
+        pdfBtn.style.background = '#e2e8f0';
+        pdfBtn.style.borderColor = '#cbd5e1';
+        pdfBtn.style.color = '#1e293b';
+        pdfBtn.innerHTML = '↓ PDF: <strong>OFF</strong>';
+    }
+
+    // =========================================================
+    // 4. UNIVERSAL SECTION RESOLVER & EXPORT HANDLER
+    // =========================================================
+    function parseRawSectionsUniversal(rawText) {
+        if (!rawText) return [];
+        const chunks = rawText.split(/\n(?=~+)/);
+        return chunks
+            .map(chunk => chunk.trim())
+            .filter(chunk => chunk.startsWith("~"))
+            .map(chunk => {
+                const lines = chunk.split("\n");
+                const name = lines.shift().replace(/^~+/, "").trim();
+                const text = lines.join("\n").trim();
+                return { name, text };
+            });
+    }
+
+    document.addEventListener('click', (e) => {
+        const item = e.target.closest('.section-item');
+        if (!item || !pdfModePrimed) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        let index = parseInt(item.getAttribute('data-index'), 10);
+        if (isNaN(index)) {
+            const listContainer = document.getElementById('sectionListContainer');
+            if (listContainer) {
+                index = Array.from(listContainer.children).indexOf(item);
+            }
+        }
+
+        let section = null;
+        if (!isNaN(index) && index >= 0) {
+            // Check global or local scopes
+            if (window.SCRAMBLE_SECTIONS && window.SCRAMBLE_SECTIONS[index]) {
+                section = window.SCRAMBLE_SECTIONS[index];
+            } else if (typeof window.GLOBAL_SECTION_DATA !== 'undefined' && window.GLOBAL_SECTION_DATA[index]) {
+                section = window.GLOBAL_SECTION_DATA[index];
+            } else if (typeof sectionData !== 'undefined' && sectionData[index]) {
+                section = sectionData[index];
+            } else if (typeof wordListText !== 'undefined' && wordListText) {
+                const parsed = parseRawSectionsUniversal(wordListText);
+                section = parsed[index];
+            }
+        }
+
+        if (!section) {
+            alert("Could not locate section data for PDF export.");
+            return;
+        }
+
+        exportFullWorksheetToPDF(section);
+
+        pdfModePrimed = false;
+        const pdfBtn = document.querySelector('.pdf-header-toggle');
+        if (pdfBtn) resetPdfButton(pdfBtn);
+
+        const modalRoot = document.getElementById('sectionModalRoot');
+        if (modalRoot) modalRoot.style.display = 'none';
+    }, true);
+
+    // =========================================================
+    // 5. BUILD & EXPORT WORKFLOW (EXACT MATCHED 20-ITEM PARSING)
+    // =========================================================
+    function exportFullWorksheetToPDF(section) {
+        let rawFilename = window.location.pathname.split('/').pop() || 'file.html';
+        let cleanFilename = rawFilename
+            .replace(/\.html$/i, '')
+            .replace(/^[a-zA-Z0-9]+[_\-]*/, '')
+            .replace(/^[\d\-_]+/, '')
+            .replace(/_/g, ' ');
+
+        const exportContainer = document.createElement('div');
+        exportContainer.className = 'pdf-export-canvas';
+        exportContainer.style.cssText = 'width: 210mm; background: #ffffff; box-sizing: border-box;';
+
+        const questionElements = [];
+
+        let fullText = section.text || '';
+        const lines = fullText.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+
+        const filteredLines = lines.filter(line => line && line.includes("|"));
+        const groups = [];
+        for (let i = 0; i < filteredLines.length; i += 3) {
+            const group = filteredLines.slice(i, i + 3);
+            if (group.length > 0) groups.push(group);
+        }
+
+        const sectionAnswers = [];
+        filteredLines.forEach(line => {
+            const match = line.match(/\|([^|]+)\|/);
+            if (match) sectionAnswers.push(match[1]);
+        });
+        const uniqueAnswers = [...new Set(sectionAnswers)];
+
+        let qCount = 1;
+        groups.forEach((group, groupIndex) => {
+            group.forEach((entryLine, itemIndex) => {
+                if (groupIndex === 6 && itemIndex === 2) return;
+
+                const match = entryLine.match(/\|([^|]+)\|/);
+                if (!match) return;
+
+                const correctAnswer = match[1];
+                const sentenceText = entryLine.replace(/\|([^|]+)\|/g, '<strong>_____</strong>');
+
+                let distractors = uniqueAnswers.filter(a => a !== correctAnswer);
+                distractors.sort(() => Math.random() - 0.5);
+                
+                let choices = [correctAnswer, distractors[0] || 'A', distractors[1] || 'B', distractors[2] || 'C'];
+                choices = [...new Set(choices)].slice(0, 4);
+                choices.sort(() => Math.random() - 0.5);
+
+                const exDiv = document.createElement('div');
+                exDiv.className = 'quiz-exercise';
+                exDiv.style.cssText = 'font-size: 10pt; margin-bottom: 14px; page-break-inside: avoid; break-inside: avoid;';
+
+                let qHtml = `<strong>${qCount}.</strong> ${sentenceText}<div style="font-size: 10pt; margin-left: 12px; margin-top: 3px;">`;
+                choices.forEach((choice, optIdx) => {
+                    const letter = String.fromCharCode(65 + optIdx);
+                    qHtml += `<span style="display: inline-block; margin-right: 12px;">${letter}) ${choice}</span>`;
+                });
+                qHtml += `</div>`;
+
+                exDiv.innerHTML = qHtml;
+                questionElements.push(exDiv);
+                qCount++;
+            });
+        });
+
+        const currentYear = new Date().getFullYear();
+        const infoDiv = document.createElement('div');
+        infoDiv.style.cssText = 'margin-bottom: 12px; font-size: 10pt; page-break-inside: avoid;';
+        infoDiv.innerHTML = `
+            <div style="font-size: 10pt; font-weight: bold; color: #444; margin-bottom: 1px;">Perfectly Practical Printables</div>
+            <div style="font-size: 10pt; color: #666; margin-bottom: 1px;">PerfectlyPracticalEnglish@outlook.com</div>
+            <div style="font-size: 10pt; color: #666; margin-bottom: 4px;">&copy; ${currentYear} Perfectly Practical English</div>
+
+            <div style="font-size: 10pt; line-height: 1.4; margin-bottom: 8px;">
+                <div>Name ____________________</div>
+                <div>ID ____________________</div>
+                <div>Date ____________________</div>
+            </div>
+
+            <h2 style="font-size: 10pt; color: #1976d2; margin-bottom: 2px; padding-bottom: 0;">${cleanFilename}</h2>
+            <h2 style="font-size: 10pt; color: #1976d2; margin-bottom: 4px; padding-bottom: 2px;">${section.name}</h2>
+        `;
+
+        const EXERCISES_PER_COLUMN = 10;
+        const exerciseChunks = [];
+        for (let i = 0; i < questionElements.length; i += EXERCISES_PER_COLUMN) {
+            exerciseChunks.push(questionElements.slice(i, i + EXERCISES_PER_COLUMN));
+        }
+
+        const pages = [];
+        let p1_col1 = [infoDiv];
+        let p1_col2 = [];
+
+        if (exerciseChunks.length > 0) {
+            p1_col1 = p1_col1.concat(exerciseChunks[0] || []);
+        }
+        if (exerciseChunks.length > 1) {
+            p1_col2 = p1_col2.concat(exerciseChunks[1] || []);
+        }
+
+        pages.push({ col1: p1_col1, col2: p1_col2 });
+
+        let chunkIdx = 2;
+        while (chunkIdx < exerciseChunks.length) {
+            let c1 = exerciseChunks[chunkIdx] || [];
+            let c2 = exerciseChunks[chunkIdx + 1] || [];
+            pages.push({ col1: c1, col2: c2 });
+            chunkIdx += 2;
+        }
+
+        pages.forEach((pageData) => {
+            const pageDiv = document.createElement('div');
+            pageDiv.className = 'pdf-page';
+            pageDiv.style.cssText = `
+                width: 210mm;
+                height: 297mm;
+                padding: 6.35mm;
+                box-sizing: border-box;
+                position: relative;
+                background: #ffffff;
+                overflow: hidden;
+            `;
+
+            const flexWrapper = document.createElement('div');
+            flexWrapper.style.cssText = 'display: flex; gap: 6mm; width: 197mm; height: 282mm; box-sizing: border-box; overflow: hidden;';
+
+            const col1Div = document.createElement('div');
+            col1Div.style.cssText = 'width: 95.5mm; height: 282mm; max-height: 282mm; overflow: hidden; box-sizing: border-box; font-size: 10pt; line-height: 1.35;';
+            if (pageData.col1) {
+                pageData.col1.forEach(el => col1Div.appendChild(el.cloneNode(true)));
+            }
+            flexWrapper.appendChild(col1Div);
+
+            const col2Div = document.createElement('div');
+            col2Div.style.cssText = 'width: 95.5mm; height: 282mm; max-height: 282mm; overflow: hidden; box-sizing: border-box; font-size: 10pt; line-height: 1.35;';
+            if (pageData.col2) {
+                pageData.col2.forEach(el => col2Div.appendChild(el.cloneNode(true)));
+            }
+            flexWrapper.appendChild(col2Div);
+
+            pageDiv.appendChild(flexWrapper);
+            exportContainer.appendChild(pageDiv);
+        });
+
+        if (typeof window.fitPdfTextToColumns === 'function') {
+            window.fitPdfTextToColumns(exportContainer);
+        }
+
+        document.body.appendChild(exportContainer);
+
+        const opt = {
+            margin: 0,
+            filename: `EFL_Worksheet_${section.name.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, letterRendering: true },
+            pagebreak: { mode: [] },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait', putOnlyUsedFonts: true, floatPrecision: 16 }
+        };
+
+        html2pdf()
+            .set(opt)
+            .from(exportContainer)
+            .outputPdf('blob')
+            .then(async pdfBlob => {
+                const cleanedPDF = await removeTrailingBlankPDFPages(pdfBlob);
+                const downloadURL = URL.createObjectURL(cleanedPDF);
+                const downloadLink = document.createElement('a');
+
+                downloadLink.href = downloadURL;
+                downloadLink.download = opt.filename;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                downloadLink.remove();
+
+                setTimeout(() => URL.revokeObjectURL(downloadURL), 1000);
+                exportContainer.remove();
+            })
+            .catch(err => {
+                console.error("PDF Generation Error:", err);
+                exportContainer.remove();
+                alert("PDF ERROR:\n\n" + (err.message || err.toString()));
+            });
+    }
+
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('#sectionSelectorBtn')) {
+            setTimeout(injectPdfButtonDirectly, 50);
+            setTimeout(injectPdfButtonDirectly, 200);
+        }
+    });
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectPdfButtonDirectly);
+    } else {
+        injectPdfButtonDirectly();
+    }
+
+    setInterval(injectPdfButtonDirectly, 500);
+
+})();
+</script>
+
+=======
+>>>>>>> 8474f9fcd57602317a6a6a9b9e79de5c6dca371f
 
 
 </body>
