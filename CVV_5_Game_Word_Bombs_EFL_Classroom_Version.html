@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Word Bombs Battle</title>
+<style>
+:root {
+  --bg: #f7fdfb;
+  --blue: #1976d2;
+  --blue-hover: #1565c0;
+  --input-border-blue: #cfe2f7;
+  --section-item-default: #eaf6ff;
+  --section-item-hover: #d0e8ff;
+  --team-a-bg: #eef6ff;
+  --team-a-border: #1976d2;
+  --team-b-bg: #fff5f5;
+  --team-b-border: #e53935;
+  --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --size-control: 12px;
+  --size-small: 11px;
+}
+
+/* ===== GLOBAL RESET ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  font-family: var(--font-main);
+  background: linear-gradient(to bottom, #a0e0ff 0%, #ffffff 95%);
+  padding: 8px;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== OVERLAY ===== */
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background-color: #d0e7f9;
+  z-index: 9998;
+}
+
+/* ===== TOP BAR ===== */
+.top-bar {  
+  display: flex;  
+  gap: 6px;  
+  margin: 0 auto 6px auto;  
+  width: 100%;
+  max-width: 900px;
+  flex-wrap: nowrap;  
+  align-items: center;  
+  flex-shrink: 0;
+}
+
+.top-bar input[type="text"],
+.top-bar button,
+#sectionSelectorBtn {
+  height: 32px;
+  padding: 0 10px;
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 600;
+  background: linear-gradient(145deg, #ffffff, var(--section-item-default));
+  color: var(--blue);
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: 0.12s;
+  white-space: nowrap;
+}
+
+.top-bar input[type="text"] {
+  background: #fff;
+  color: #000;
+  width: 80px;
+  cursor: text;
+  text-align: left !important;
+}
+
+.top-bar #sectionSelectorBtn {  
+  flex: 1 1 auto;  
+  min-width: 0;  
+  text-align: center !important;
+  justify-content: center !important;
+  display: inline-flex;
+  align-items: center;
+}
+
+.top-bar button:hover:not(:disabled),
+#sectionSelectorBtn:hover {
+  background: linear-gradient(145deg, #ffffff, var(--section-item-hover));
+  border-color: var(--blue);
+}
+
+.btn-submit-all {
+  background: linear-gradient(145deg, #ff9800, #f57c00) !important;
+  color: white !important;
+}
+
+/* ===== SECTION SELECTION MODAL ===== */
+#sectionModalRoot {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 99999;
+}
+
+#sectionModalBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+}
+
+#sectionModalContent {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--input-border-blue);
+  font-family: var(--font-main);
+}
+
+#sectionModalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+#sectionModalClose {
+  background: none;
+  border: none;
+  color: var(--blue);
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+#sectionListContainer {
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.section-item {
+  height: 32px;
+  padding: 0 10px;
+  margin-bottom: 6px;
+  background: var(--section-item-default);
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+}
+
+.section-item:hover {
+  background: var(--section-item-hover);
+  border-color: var(--blue);
+}
+
+/* ===== BATTLE ARENA (SPLIT LANDSCAPE) ===== */
+.battle-arena {
+  display: flex;
+  flex: 1;
+  gap: 12px;
+  min-height: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.team-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  padding: 10px;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  min-width: 0;
+}
+
+.team-panel.team-a {
+  border: 2px solid var(--team-a-border);
+  background: linear-gradient(180deg, #ffffff 0%, var(--team-a-bg) 100%);
+}
+
+.team-panel.team-b {
+  border: 2px solid var(--team-b-border);
+  background: linear-gradient(180deg, #ffffff 0%, var(--team-b-bg) 100%);
+}
+
+.team-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 2px solid rgba(0,0,0,0.08);
+  flex-shrink: 0;
+}
+
+.team-title {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.team-a .team-title { color: #1565c0; }
+.team-b .team-title { color: #c62828; }
+
+.btn-stop {
+  background: #d32f2f;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-stop:hover:not(:disabled) { background: #b71c1c; }
+.btn-stop:disabled { background: #9e9e9e; cursor: not-allowed; }
+
+/* Game Viewport with Sky Blue Gradient Background */
+.game-area {
+  position: relative;
+  flex: 1;
+  background: linear-gradient(to bottom, #1e88e5 0%, #64b5f6 50%, #bbdefb 100%);
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  overflow: hidden;
+  min-height: 140px;
+}
+
+/* ===== FAKE ON-SCREEN KEYBOARD ===== */
+.fake-keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.kb-row {
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+}
+
+.kb-key {
+  flex: 1;
+  height: 32px;
+  background: #f0f4f8;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: bold;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  transition: background 0.1s, transform 0.05s;
+}
+
+.kb-key:active {
+  background: #cbd5e1;
+  transform: scale(0.95);
+}
+
+.kb-key.backspace {
+  flex: 1.5;
+  font-size: 11px;
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+/* ===== WORD BOMBS STYLES ===== */
+.word {
+  position: absolute;
+  font-size: 20px;
+  font-weight: 700;
+  white-space: nowrap;
+  user-select: none;
+  pointer-events: none;
+  text-shadow: 0 1px 3px rgba(255,255,255,0.8);
+}
+
+.letter {
+  display: inline-block;
+  color: #0d1b2a; /* Very dark blue for untyped text */
+  transition: color 0.2s ease;
+}
+
+.typed {
+  color: #d90429 !important; /* Bright red for typed text */
+}
+
+.exploding {
+  animation: explodeAnim 0.4s ease forwards;
+}
+
+@keyframes explodeAnim {
+  0% { transform: scale(1) rotate(0deg); opacity: 1; }
+  100% { transform: scale(2.5) rotate(720deg); opacity: 0; }
+}
+
+/* ===== SCOREBOARD & EXPORT BUTTONS ===== */
+.scoreboard-container {
+  display: none;
+  margin: 6px auto 0 auto;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-width: 900px;
+  background: #fff;
+  padding: 8px;
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.score-buttons {
+  margin: 4px auto 0 auto;
+  display: none;
+  gap: 6px;
+  max-width: 900px;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.score-buttons button {
+  height: 28px;
+  padding: 0 12px;
+  font-weight: bold;
+  border-radius: 6px;
+  border: 1px solid var(--input-border-blue);
+  background: #fff;
+  color: var(--blue);
+  cursor: pointer;
+}
+
+footer {
+  margin-top: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  color: #666;
+  background: #f0f8ff;
+  border-radius: 6px;
+  flex-shrink: 0;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div id="overlay"></div>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <input id="studentId" type="text" placeholder="ID" autocomplete="off" />
+  <button id="sectionSelectorBtn" type="button">Topics</button>  
+  <button id="instructionsBtn" type="button">Instructions</button>
+  <button class="btn-submit-all" id="submitBtn">Submit Final</button>
+</div>
+
+<!-- SECTION SELECTION MODAL -->
+<div id="sectionModalRoot">
+  <div id="sectionModalBackdrop"></div>
+  <div id="sectionModalContent">
+    <div id="sectionModalHeader">
+      <span>Topics</span>
+      <button id="sectionModalClose" type="button">✕</button>
+    </div>
+    <div id="sectionListContainer"></div>
+  </div>
+</div>
+
+<!-- BATTLE ARENA -->
+<div class="battle-arena">
+  <!-- TEAM A PANEL -->
+  <div class="team-panel team-a">
+    <div class="team-header">
+      <button class="btn-stop" id="stopTeamA" type="button">STOP A</button>
+      <span class="team-title">TEAM A (<span id="scoreA">0</span>)</span>
+    </div>
+    <div class="game-area" id="gameAreaA"></div>
+    <div class="fake-keyboard" id="keyboardA"></div>
+  </div>
+
+  <!-- TEAM B PANEL -->
+  <div class="team-panel team-b">
+    <div class="team-header">
+      <span class="team-title">TEAM B (<span id="scoreB">0</span>)</span>
+      <button class="btn-stop" id="stopTeamB" type="button">STOP B</button>
+    </div>
+    <div class="game-area" id="gameAreaB"></div>
+    <div class="fake-keyboard" id="keyboardB"></div>
+  </div>
+</div>
+
+<!-- SCOREBOARD & EXPORT BUTTONS -->
+<div class="scoreboard-container" id="scoreboardContainer"></div>
+<div class="score-buttons" id="scoreButtons">
+  <button id="copyBtn">Copy</button>
+  <button id="downloadTxtBtn">↓Text</button>
+  <button id="downloadPngBtn">↓PNG</button>
+</div>
+
+<audio id="popSound" src="pop-331049.mp3" preload="auto"></audio>
+
+<footer>
+<p>© <span id="currentYear"></span> Perfectly Practical English</p>
+</footer>
+
+<script>
+  document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+
+<script>
+    /* --- Student Name & ID Matching Module --- */
+    (function() {
+        'use strict';
+        const RAW_STUDENT_DATA = `
+            55555|David
+            55551|Matthew
+            12345|Sarah
+        `;
+        const studentDatabase = new Map();
+        RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+            const [id, name] = line.split('|').map(s => s ? s.trim() : '');
+            if (id && name) studentDatabase.set(id, name);
+        });
+
+        window.resolveStudentNameFromId = function(idInput) {
+            if (!idInput) return "Guest";
+            const trimmed = String(idInput).trim();
+            if (/^(x|g|guest)$/i.test(trimmed)) return "Guest";
+            return studentDatabase.get(trimmed) || "Guest";
+        };
+    })();
+
+    (() => {
+      const wordListText = ` 
+~Hobbies
+• activity 🎯 – something you do for enjoyment or interest
+• achievement 🏆 – something you succeed in doing well
+• fun 🎉 – enjoyment or pleasure
+• game 🎲 – an activity with rules played for fun
+• hobby 🎨 – an activity you do in your free time
+• interest ❤️ – something you like or care about
+• practice 🔁 – time spent learning or improving a skill
+• skill 🛠️ – an ability to do something well
+• sport ⚽ – a physical competitive activity
+• time ⏰ – hours or moments spent doing something
+
+~Helping Others
+• action 🤲 – something done to help someone
+• family 👨‍👩‍👧‍👦 – people you are related to
+• friend 🧑‍🤝‍🧑 – a person you like and trust
+• help 🆘 – support or assistance
+• kindness 💖 – being friendly and caring
+• moment ⏳ – a short time
+• need ❗ – something required or wanted
+• person 🧍 – a human being
+• support 🏗️ – help given to someone
+• time ⏰ – when something happens
+
+~Heroes
+• advice 💬 – helpful ideas or suggestions
+• friend 🧑‍🤝‍🧑 – someone who supports you
+• hero 🦸 – a person who helps or saves others
+• help 🤝 – support given to others
+• kindness 💛 – caring behavior
+• mentor 🎓 – a person who guides others
+• person 🧍 – a human being
+• support 🏗️ – help and encouragement
+• teacher 📘 – someone who helps others learn
+• wisdom 🧠 – knowledge and good judgment
+`;
+
+      function parseSections(raw) {
+        const sections = [];
+        const blocks = raw.split(/^\s*~\s*/m).map(b => b.trim()).filter(Boolean);
+        blocks.forEach(block => {
+          const lines = block.split(/\r?\n/).map(l => l.replace(/<br\s*\/?>/gi, '').trim()).filter(Boolean);
+          if (!lines.length) return;
+          const sectionName = lines[0];
+          const entries = [];
+          lines.forEach(line => {
+            if (!line.startsWith('•')) return;
+            const entry = line.replace(/^•\s*/, '').split(/[–—-]/)[0].replace(/[^\p{L}\s]/gu, '').trim().toLowerCase().split(/\s+/)[0];
+            if (entry) entries.push(entry);
+          });
+          if (entries.length) sections.push({ name: sectionName, entries });
+        });
+        return sections;
+      }
+
+      const sections = parseSections(wordListText);
+
+      // Game State Variables
+      let gameStarted = false;
+      let gameStopped = false;
+      let gameInterval = null;
+      let currentSectionIndex = -1;
+      let currentSectionName = "No Section";
+      let wordList = [];
+
+      // Team States
+      const teamA = { area: document.getElementById('gameAreaA'), scoreEl: document.getElementById('scoreA'), activeWords: [], currentTypedWord: null, correct: 0, total: 0, nextIdx: 0, stopped: false };
+      const teamB = { area: document.getElementById('gameAreaB'), scoreEl: document.getElementById('scoreB'), activeWords: [], currentTypedWord: null, correct: 0, total: 0, nextIdx: 0, stopped: false };
+
+      // Section Selection Modal Logic
+      const sectionSelectorBtn = document.getElementById('sectionSelectorBtn');
+      const sectionModalRoot = document.getElementById('sectionModalRoot');
+      const sectionModalBackdrop = document.getElementById('sectionModalBackdrop');
+      const sectionModalClose = document.getElementById('sectionModalClose');
+      const sectionListContainer = document.getElementById('sectionListContainer');
+
+      function openModal() {
+        if (gameStarted) return;
+        sectionListContainer.innerHTML = "";
+        sections.forEach((sec, idx) => {
+          const item = document.createElement("div");
+          item.className = "section-item";
+          item.textContent = sec.name;
+          item.addEventListener("click", () => {
+            currentSectionName = sec.name;
+            currentSectionIndex = idx;
+            wordList = sec.entries.slice();
+            if (sectionSelectorBtn) sectionSelectorBtn.textContent = sec.name;
+            closeModal();
+            startGame();
+          });
+          sectionListContainer.appendChild(item);
+        });
+        sectionModalRoot.style.display = "block";
+      }
+
+      function closeModal() { sectionModalRoot.style.display = "none"; }
+
+      sectionSelectorBtn.addEventListener("click", openModal);
+      sectionModalClose.addEventListener("click", closeModal);
+      sectionModalBackdrop.addEventListener("click", closeModal);
+
+      // Keyboard Setup Function
+      function buildKeyboard(containerId, teamObj) {
+        const kbContainer = document.getElementById(containerId);
+        kbContainer.innerHTML = "";
+        const rows = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
+        rows.forEach((rowChars, rIdx) => {
+          const rowEl = document.createElement('div');
+          rowEl.className = 'kb-row';
+          for (let ch of rowChars) {
+            const keyBtn = document.createElement('button');
+            keyBtn.type = 'button';
+            keyBtn.className = 'kb-key';
+            keyBtn.textContent = ch.toUpperCase();
+            keyBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              handleTeamInput(teamObj, ch);
+            });
+            rowEl.appendChild(keyBtn);
+          }
+          if (rIdx === 2) {
+            const backBtn = document.createElement('button');
+            backBtn.type = 'button';
+            backBtn.className = 'kb-key backspace';
+            backBtn.textContent = '⌫';
+            backBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              handleTeamBackspace(teamObj);
+            });
+            rowEl.appendChild(backBtn);
+          }
+          kbContainer.appendChild(rowEl);
+        });
+      }
+
+      buildKeyboard('keyboardA', teamA);
+      buildKeyboard('keyboardB', teamB);
+
+      function handleTeamInput(team, char) {
+        if (!gameStarted || gameStopped || team.stopped) return;
+        if (team.activeWords.length === 0) return;
+
+        let wordToType = team.currentTypedWord;
+        const canType = w => !w.exploded && w.typedIndex < w.text.length && w.text[w.typedIndex].toLowerCase() === char;
+
+        if (!wordToType || !canType(wordToType)) {
+          const candidate = team.activeWords.find(w => canType(w));
+          if (candidate) {
+            team.currentTypedWord = candidate;
+            wordToType = candidate;
+          } else {
+            return;
+          }
+        }
+
+        wordToType.typedIndex++;
+        updateTypedColors(wordToType);
+        if (wordToType.typedIndex === wordToType.text.length) {
+          explodeWord(team, wordToType, true);
+        }
+      }
+
+      function handleTeamBackspace(team) {
+        if (!gameStarted || gameStopped || team.stopped) return;
+        if (team.currentTypedWord && team.currentTypedWord.typedIndex > 0) {
+          team.currentTypedWord.typedIndex--;
+          updateTypedColors(team.currentTypedWord);
+          if (team.currentTypedWord.typedIndex === 0) {
+            team.currentTypedWord = null;
+          }
+        }
+      }
+
+      function createWordElement(area, word) {
+        const span = document.createElement('span');
+        span.className = 'word';
+        for (let ch of word) {
+          const letterSpan = document.createElement('span');
+          letterSpan.textContent = ch;
+          letterSpan.className = 'letter';
+          span.appendChild(letterSpan);
+        }
+        area.appendChild(span);
+        return span;
+      }
+
+      function spawnWord(team, text) {
+        const element = createWordElement(team.area, text);
+        const x = Math.random() * (team.area.clientWidth - 80) + 10;
+        element.style.left = `${x}px`;
+        element.style.top = `-30px`;
+        return { text, y: -30, speed: 0.25 + Math.random() * 0.2, element, typedIndex: 0, exploded: false };
+      }
+
+      function updateTypedColors(wordObj) {
+        if (!wordObj || !wordObj.element) return;
+        const letters = wordObj.element.querySelectorAll('.letter');
+        letters.forEach((letter, i) => {
+          letter.classList.toggle('typed', i < wordObj.typedIndex);
+        });
+      }
+
+      function explodeWord(team, wordObj, success) {
+        if (wordObj.exploded) return;
+        wordObj.exploded = true;
+        const popSound = document.getElementById('popSound');
+        popSound.currentTime = 0;
+        popSound.play().catch(() => {});
+        wordObj.element.classList.add('exploding');
+        if (success) {
+          team.correct++;
+          team.scoreEl.textContent = team.correct;
+        }
+        setTimeout(() => { if (wordObj.element.parentNode) wordObj.element.remove(); }, 400);
+        if (team.currentTypedWord === wordObj) team.currentTypedWord = null;
+      }
+
+      function gameLoop() {
+        if (gameStopped) return;
+        [teamA, teamB].forEach(team => {
+          if (!team.stopped) {
+            team.activeWords.forEach(w => {
+              if (w.exploded) return;
+              w.y += w.speed;
+              if (w.y + w.element.offsetHeight >= team.area.clientHeight) {
+                explodeWord(team, w, false);
+              } else {
+                w.element.style.top = w.y + 'px';
+              }
+            });
+            team.activeWords = team.activeWords.filter(w => !w.exploded);
+            if (team.activeWords.length === 0 && team.nextIdx < wordList.length) {
+              team.activeWords.push(spawnWord(team, wordList[team.nextIdx]));
+              team.nextIdx++;
+            }
+          }
+        });
+      }
+
+      function startGame() {
+        if (currentSectionIndex === -1) {
+          alert('Please select a category first.');
+          return;
+        }
+        clearInterval(gameInterval);
+        teamA.area.innerHTML = "";
+        teamB.area.innerHTML = "";
+        
+        [teamA, teamB].forEach(t => {
+          t.activeWords = [];
+          t.currentTypedWord = null;
+          t.correct = 0;
+          t.total = wordList.length;
+          t.nextIdx = 0;
+          t.stopped = false;
+          t.scoreEl.textContent = "0";
+        });
+
+        document.getElementById('stopTeamA').disabled = false;
+        document.getElementById('stopTeamB').disabled = false;
+        document.getElementById('scoreboardContainer').style.display = 'none';
+        document.getElementById('scoreButtons').style.display = 'none';
+
+        gameStarted = true;
+        gameStopped = false;
+
+        teamA.activeWords.push(spawnWord(teamA, wordList[teamA.nextIdx++]));
+        teamB.activeWords.push(spawnWord(teamB, wordList[teamB.nextIdx++]));
+
+        gameInterval = setInterval(gameLoop, 20);
+      }
+
+      document.getElementById('stopTeamA').addEventListener('click', () => {
+        teamA.stopped = true;
+        document.getElementById('stopTeamA').disabled = true;
+        teamA.activeWords.forEach(w => w.element.remove());
+        teamA.activeWords = [];
+        checkBothStopped();
+      });
+
+      document.getElementById('stopTeamB').addEventListener('click', () => {
+        teamB.stopped = true;
+        document.getElementById('stopTeamB').disabled = true;
+        teamB.activeWords.forEach(w => w.element.remove());
+        teamB.activeWords = [];
+        checkBothStopped();
+      });
+
+      function checkBothStopped() {
+        if (teamA.stopped && teamB.stopped) {
+          gameStopped = true;
+          clearInterval(gameInterval);
+        }
+      }
+
+      function submitResults() {
+        if (!gameStarted) return;
+        gameStopped = true;
+        clearInterval(gameInterval);
+
+        const now = new Date();
+        const pad = n => n.toString().padStart(2,'0');
+        const dateStr = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+        const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+        let currentFile = window.location.pathname.split('/').pop() || 'unknown.html';
+        currentFile = currentFile.split('?')[0].split('#')[0];
+        const filenameWithoutExt = currentFile.replace(/\.[^/.]+$/, "");
+
+        const idVal = document.getElementById('studentId')?.value.trim() || 'Guest';
+        const resolvedName = window.resolveStudentNameFromId ? window.resolveStudentNameFromId(idVal) : "Guest";
+
+        const total = wordList.length;
+        const pctA = total ? Math.round((teamA.correct / total) * 100) + '%' : '0%';
+        const pctB = total ? Math.round((teamB.correct / total) * 100) + '%' : '0%';
+
+        const scoreLine = `${filenameWithoutExt}|${currentSectionName}|${resolvedName}|${idVal}|${dateStr}|${timeStr}|TeamA_${teamA.correct}/${total}_${pctA}|TeamB_${teamB.correct}/${total}_${pctB}`;
+
+        const scoreContainer = document.getElementById('scoreboardContainer');
+        scoreContainer.textContent = scoreLine;
+        scoreContainer.style.display = 'block';
+        document.getElementById('scoreButtons').style.display = 'flex';
+
+        if (window.saveResult) window.saveResult(scoreLine);
+      }
+
+      document.getElementById('submitBtn').addEventListener('click', submitResults);
+
+      // Export Buttons
+      document.getElementById('copyBtn').addEventListener('click', () => {
+        const text = document.getElementById('scoreboardContainer').textContent;
+        if (text) navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard.'));
+      });
+
+      document.getElementById('downloadTxtBtn').addEventListener('click', () => {
+        const text = document.getElementById('scoreboardContainer').textContent;
+        if (!text) return;
+        const blob = new Blob([text], { type: "text/plain" });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'scoreboard.txt';
+        a.click();
+        a.remove();
+      });
+
+      document.getElementById('downloadPngBtn').addEventListener('click', async () => {
+        const container = document.getElementById('scoreboardContainer');
+        if (!container.textContent) return;
+        if (!window.html2canvas) {
+          await new Promise((res, rej) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+            s.onload = res; s.onerror = rej;
+            document.head.appendChild(s);
+          });
+        }
+        const canvas = await html2canvas(container, { backgroundColor: '#fff' });
+        canvas.toBlob(blob => {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'scoreboard.png';
+          a.click();
+          a.remove();
+        });
+      });
+    })();
+  </script>
+
+  <!-- Instructions Modal Script -->
+  <script>
+  (function(){
+  const RAW_TEXT = `
+  How to use this page...
+  • Enter your ID number into the ID field.
+  • Click the Topics button to select a vocabulary category.
+  • Teams A and B compete side-by-side using their own on-screen fake keyboards to type and pop falling word bombs.
+  • Click STOP A or STOP B when each team finishes, then click Submit Final to log and export scores.
+  `;
+  const style = document.createElement("style");
+  style.textContent = `
+  #instructionsRoot{position:fixed;inset:0;display:none;z-index:99999;}
+  #instructionsBackdrop{position:absolute;inset:0;background:rgba(0,0,0,0.45);}
+  #instructionsModal{position:absolute;top:50%;left:50%;transform:translate(-50%, -50%);width:min(500px, 92vw);background:#fff;border-radius:12px;padding:18px;box-shadow: 0 4px 12px rgba(0,0,0,0.2);border:1px solid var(--input-border-blue);font-family:var(--font-main);}
+  #instructionsHeader{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;font-size:18px;font-weight:700;color:var(--blue);}
+  #instructionsBack{background:none;border:none;color:var(--blue);font-size:22px;cursor:pointer;}
+  `;
+  document.head.appendChild(style);
+
+  const btn = document.getElementById("instructionsBtn");
+  const root = document.createElement("div");
+  root.id = "instructionsRoot";
+  root.innerHTML = `<div id="instructionsBackdrop"></div><div id="instructionsModal"><div id="instructionsHeader"><span>Instructions</span><button id="instructionsBack" type="button">✕</button></div><div id="instructionsContent">${RAW_TEXT.replace(/\n/g, '<br>')}</div></div>`;
+  document.body.appendChild(root);
+
+  btn.onclick = () => root.style.display="block";
+  document.getElementById("instructionsBack").onclick = () => root.style.display="none";
+  document.getElementById("instructionsBackdrop").onclick = () => root.style.display="none";
+  })();
+  </script>
+
+  <!-- Green Border -->
+  <script>
+    const borderDiv = document.createElement('div');
+    borderDiv.style.cssText = 'position:fixed;inset:0;border:10px solid #39FF14;box-sizing:border-box;z-index:9999;pointer-events:none;background:transparent;';
+    document.body.appendChild(borderDiv);
+  </script>
+
+  <!-- SUPABASE LIBRARY -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabaseClient = window.supabase?.createClient(
+      'https://etwwriloppklhhkmswpr.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+    );
+    window.saveResult = async function saveResult(text) {
+      if (!supabaseClient) return;
+      await supabaseClient.from("scoreboard_raw").insert([{ result_text: text }]);
+    };
+  </script>
+
+<script>
+(function() {
+    'use strict';
+
+    let sampleInterval = null;
+    let activeWords = { A: null, B: null };
+
+    // 1. Create a word element using the game's exact DOM structure
+    function createFakeWordElement(area, wordText) {
+        const span = document.createElement('span');
+        span.className = 'word';
+        for (let ch of wordText) {
+            const letterSpan = document.createElement('span');
+            letterSpan.textContent = ch;
+            letterSpan.className = 'letter';
+            span.appendChild(letterSpan);
+        }
+        area.appendChild(span);
+        return span;
+    }
+
+    // 2. Spawn a single word for a team
+    function spawnSampleWord(teamKey) {
+        if (window.__sampleAutoStarted) return;
+        const area = document.getElementById(teamKey === 'A' ? 'gameAreaA' : 'gameAreaB');
+        if (!area) return;
+
+        const sampleWords = ['activity', 'fun', 'game', 'hobby', 'interest', 'practice', 'skill', 'sport', 'hero', 'friend'];
+        const text = sampleWords[Math.floor(Math.random() * sampleWords.length)];
+        const element = createFakeWordElement(area, text);
+        
+        const x = Math.random() * (area.clientWidth - 100) + 10;
+        element.style.left = `${x}px`;
+        element.style.top = `-30px`;
+
+        activeWords[teamKey] = {
+            text: text,
+            element: element,
+            area: area,
+            y: -30,
+            speed: 0.5 + Math.random() * 0.3,
+            typedIndex: 0,
+            exploded: false
+        };
+    }
+
+    // 3. Update letter colors when typed
+    function updateTypedColors(wordObj) {
+        if (!wordObj || !wordObj.element) return;
+        const letters = wordObj.element.querySelectorAll('.letter');
+        letters.forEach((letter, i) => {
+            letter.classList.toggle('typed', i < wordObj.typedIndex);
+        });
+    }
+
+    // 4. Handle explosion animation + sound effect
+    function explodeSampleWord(teamKey, wordObj, success) {
+        if (wordObj.exploded) return;
+        wordObj.exploded = true;
+
+        // Play pop sound effect
+        const popSound = document.getElementById('popSound');
+        if (popSound) {
+            popSound.currentTime = 0;
+            popSound.play().catch(() => {});
+        }
+
+        wordObj.element.classList.add('exploding');
+        
+        if (success) {
+            const scoreEl = document.getElementById(teamKey === 'A' ? 'scoreA' : 'scoreB');
+            if (scoreEl) {
+                scoreEl.textContent = parseInt(scoreEl.textContent || '0', 10) + 1;
+            }
+        }
+
+        setTimeout(() => {
+            if (wordObj.element.parentNode) wordObj.element.remove();
+            activeWords[teamKey] = null;
+            // Spawn next word after explosion
+            if (!window.__sampleAutoStarted) {
+                spawnSampleWord(teamKey);
+            }
+        }, 400);
+    }
+
+    // 5. Interactive input handler for on-screen keyboards during sample mode
+    function handleSampleInput(teamKey, char) {
+        const wordObj = activeWords[teamKey];
+        if (!wordObj || wordObj.exploded) return;
+
+        if (wordObj.text[wordObj.typedIndex].toLowerCase() === char) {
+            wordObj.typedIndex++;
+            updateTypedColors(wordObj);
+
+            if (wordObj.typedIndex === wordObj.text.length) {
+                explodeSampleWord(teamKey, wordObj, true);
+            }
+        }
+    }
+
+    function handleSampleBackspace(teamKey) {
+        const wordObj = activeWords[teamKey];
+        if (!wordObj || wordObj.exploded) return;
+
+        if (wordObj.typedIndex > 0) {
+            wordObj.typedIndex--;
+            updateTypedColors(wordObj);
+        }
+    }
+
+    // 6. Main fake game movement loop
+    function startSampleGameLoop() {
+        if (window.__sampleAutoStarted) return;
+
+        spawnSampleWord('A');
+        spawnSampleWord('B');
+
+        // Listen for keyboard clicks on on-screen fake keyboards
+        ['keyboardA', 'keyboardB'].forEach(kbId => {
+            const kbContainer = document.getElementById(kbId);
+            if (kbContainer && !kbContainer.dataset.sampleListener) {
+                kbContainer.dataset.sampleListener = 'true';
+                const teamKey = kbId === 'keyboardA' ? 'A' : 'B';
+                kbContainer.addEventListener('click', (e) => {
+                    if (window.__sampleAutoStarted) return;
+                    const btn = e.target.closest('.kb-key');
+                    if (!btn) return;
+
+                    if (btn.classList.contains('backspace')) {
+                        handleSampleBackspace(teamKey);
+                    } else {
+                        const char = btn.textContent.trim().toLowerCase();
+                        if (char.length === 1) {
+                            handleSampleInput(teamKey, char);
+                        }
+                    }
+                }, true);
+            }
+        });
+
+        // Loop movement
+        sampleInterval = setInterval(() => {
+            if (window.__sampleAutoStarted) {
+                stopSampleGame();
+                return;
+            }
+
+            ['A', 'B'].forEach(teamKey => {
+                const w = activeWords[teamKey];
+                if (w && !w.exploded) {
+                    w.y += w.speed;
+                    if (w.y + w.element.offsetHeight >= w.area.clientHeight) {
+                        explodeSampleWord(teamKey, w, false);
+                    } else {
+                        w.element.style.top = w.y + 'px';
+                    }
+                }
+            });
+        }, 20);
+    }
+
+    // 7. Cleanup fake game elements when real topic is selected
+    function stopSampleGame() {
+        if (sampleInterval) {
+            clearInterval(sampleInterval);
+            sampleInterval = null;
+        }
+        ['A', 'B'].forEach(teamKey => {
+            if (activeWords[teamKey] && activeWords[teamKey].element) {
+                activeWords[teamKey].element.remove();
+            }
+            activeWords[teamKey] = null;
+        });
+
+        // Reset sample score counters back to zero
+        const scoreA = document.getElementById('scoreA');
+        const scoreB = document.getElementById('scoreB');
+        if (scoreA) scoreA.textContent = '0';
+        if (scoreB) scoreB.textContent = '0';
+    }
+
+    // 8. Main Initialization
+    function initSampleSetup() {
+        // Warning Banner at top: 115px
+        if (!document.getElementById('wordBombsLayoutSampleBanner')) {
+            const banner = document.createElement('div');
+            banner.id = 'wordBombsLayoutSampleBanner';
+            banner.style.cssText = `
+                position: fixed;
+                top: 115px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 999999;
+                background: #fffbeb;
+                color: #b45309;
+                border: 2px solid #f59e0b;
+                border-radius: 8px;
+                padding: 10px 18px;
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: 13px;
+                font-weight: 800;
+                text-align: center;
+                letter-spacing: 0.3px;
+                box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+                width: calc(100% - 24px);
+                max-width: 550px;
+                box-sizing: border-box;
+                white-space: nowrap;
+                overflow: hidden;
+                pointer-events: auto;
+            `;
+            banner.textContent = '⚠️ This is a sample game. Click "Topics" above to select a game! ⚠️';
+            document.body.appendChild(banner);
+        }
+
+        const sectionBtn = document.getElementById('sectionSelectorBtn');
+        if (sectionBtn) {
+            sectionBtn.textContent = 'Topics';
+        }
+
+        // Attach dismissal listener: removes sample game and banner when any topic is selected
+        const listContainer = document.getElementById('sectionListContainer');
+        if (listContainer && !listContainer.dataset.bannerListenerAttached) {
+            listContainer.dataset.bannerListenerAttached = 'true';
+            listContainer.addEventListener('click', (e) => {
+                const item = e.target.closest('.section-item');
+                if (item) {
+                    window.__sampleAutoStarted = true;
+                    stopSampleGame();
+                    const banner = document.getElementById('wordBombsLayoutSampleBanner');
+                    if (banner) banner.remove();
+                }
+            });
+        }
+
+        startSampleGameLoop();
+    }
+
+    if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', () => setTimeout(initSampleSetup, 50));
+    } else {
+        setTimeout(initSampleSetup, 50);
+    }
+})();
+</script>
+</body>
+</html>

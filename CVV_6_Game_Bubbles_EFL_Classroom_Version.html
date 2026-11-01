@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>Word Bubbles Battle</title>
+<style>
+:root {
+  --bg: #f7fdfb;
+  --blue: #1976d2;
+  --blue-hover: #1565c0;
+  --input-border-blue: #cfe2f7;
+  --section-item-default: #eaf6ff;
+  --section-item-hover: #d0e8ff;
+  --team-a-bg: #eef6ff;
+  --team-a-border: #1976d2;
+  --team-b-bg: #fff5f5;
+  --team-b-border: #e53935;
+  --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --size-control: 12px;
+  --size-small: 11px;
+}
+
+/* ===== GLOBAL RESET ===== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+body {
+  font-family: var(--font-main);
+  background: linear-gradient(to bottom, #a0e0ff 0%, #ffffff 95%);
+  padding: 8px;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ===== OVERLAY ===== */
+#overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background-color: #d0e7f9;
+  z-index: 9998;
+}
+
+/* ===== TOP BAR ===== */
+.top-bar {  
+  display: flex;  
+  gap: 6px;  
+  margin: 0 auto 6px auto;  
+  width: 100%;
+  max-width: 900px;
+  flex-wrap: nowrap;  
+  align-items: center;  
+  flex-shrink: 0;
+}
+
+.top-bar input[type="text"],
+.top-bar button,
+#sectionSelectorBtn {
+  height: 32px;
+  padding: 0 10px;
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: 600;
+  background: linear-gradient(145deg, #ffffff, var(--section-item-default));
+  color: var(--blue);
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  box-sizing: border-box;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  cursor: pointer;
+  transition: 0.12s;
+  white-space: nowrap;
+}
+
+.top-bar input[type="text"] {
+  background: #fff;
+  color: #000;
+  width: 80px;
+  cursor: text;
+  text-align: left !important;
+}
+
+.top-bar #sectionSelectorBtn {  
+  flex: 1 1 auto;  
+  min-width: 0;  
+  text-align: center !important;
+  justify-content: center !important;
+  display: inline-flex;
+  align-items: center;
+}
+
+.top-bar button:hover:not(:disabled),
+#sectionSelectorBtn:hover {
+  background: linear-gradient(145deg, #ffffff, var(--section-item-hover));
+  border-color: var(--blue);
+}
+
+.btn-submit-all {
+  background: linear-gradient(145deg, #ff9800, #f57c00) !important;
+  color: white !important;
+}
+
+/* ===== MODALS ===== */
+#sectionModalRoot,
+#instructionsRoot {
+  position: fixed;
+  inset: 0;
+  display: none;
+  z-index: 99999;
+}
+
+#sectionModalBackdrop,
+#instructionsBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#sectionModalContent,
+#instructionsModal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--input-border-blue);
+  font-family: var(--font-main);
+}
+
+#sectionModalHeader,
+#instructionsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+#sectionModalClose,
+#instructionsBack {
+  background: none;
+  border: none;
+  color: var(--blue);
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+}
+
+#sectionListContainer,
+#instructionsContent {
+  padding: 0;
+  overflow-y: auto;
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+}
+
+.section-item {
+  height: 32px;
+  padding: 0 10px;
+  margin-bottom: 6px;
+  background: var(--section-item-default);
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+}
+
+.section-item:hover {
+  background: var(--section-item-hover);
+  border-color: var(--blue);
+}
+
+/* ===== BATTLE ARENA (SPLIT LANDSCAPE) ===== */
+.battle-arena {
+  display: flex;
+  flex: 1;
+  gap: 12px;
+  min-height: 0;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.team-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  padding: 10px;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  min-width: 0;
+}
+
+.team-panel.team-a {
+  border: 2px solid var(--team-a-border);
+  background: linear-gradient(180deg, #ffffff 0%, var(--team-a-bg) 100%);
+}
+
+.team-panel.team-b {
+  border: 2px solid var(--team-b-border);
+  background: linear-gradient(180deg, #ffffff 0%, var(--team-b-bg) 100%);
+}
+
+.team-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  padding-bottom: 4px;
+  border-bottom: 2px solid rgba(0,0,0,0.08);
+  flex-shrink: 0;
+}
+
+.team-title {
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.team-a .team-title { color: #1565c0; }
+.team-b .team-title { color: #c62828; }
+
+.btn-stop {
+  background: #d32f2f;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.btn-stop:hover:not(:disabled) { background: #b71c1c; }
+.btn-stop:disabled { background: #9e9e9e; cursor: not-allowed; }
+
+/* Game Canvas Viewport with Sky Blue Gradient Background */
+.game-canvas-wrap {
+  position: relative;
+  flex: 1;
+  background: linear-gradient(to bottom, #1e88e5 0%, #64b5f6 50%, #bbdefb 100%);
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  overflow: hidden;
+  min-height: 140px;
+}
+
+.game-canvas-wrap canvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ===== FAKE ON-SCREEN KEYBOARD ===== */
+.fake-keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 6px;
+  flex-shrink: 0;
+}
+
+.kb-row {
+  display: flex;
+  justify-content: center;
+  gap: 3px;
+}
+
+.kb-key {
+  flex: 1;
+  height: 32px;
+  background: #f0f4f8;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  font-family: var(--font-main);
+  font-size: 13px;
+  font-weight: bold;
+  color: #334155;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  transition: background 0.1s, transform 0.05s;
+}
+
+.kb-key:active {
+  background: #cbd5e1;
+  transform: scale(0.95);
+}
+
+.kb-key.backspace {
+  flex: 1.5;
+  font-size: 11px;
+  background: #fee2e2;
+  color: #991b1b;
+  border-color: #fca5a5;
+}
+
+/* ===== SCOREBOARD & EXPORT BUTTONS ===== */
+.scoreboard-container {
+  display: none;
+  margin: 6px auto 0 auto;
+  font-family: monospace;
+  font-weight: bold;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-width: 900px;
+  background: #fff;
+  padding: 8px;
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.score-buttons {
+  margin: 4px auto 0 auto;
+  display: none;
+  gap: 6px;
+  max-width: 900px;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.score-buttons button {
+  height: 28px;
+  padding: 0 12px;
+  font-weight: bold;
+  border-radius: 6px;
+  border: 1px solid var(--input-border-blue);
+  background: #fff;
+  color: var(--blue);
+  cursor: pointer;
+}
+
+footer {
+  margin-top: 6px;
+  padding: 4px 8px;
+  font-size: 11px;
+  color: #666;
+  background: #f0f8ff;
+  border-radius: 6px;
+  flex-shrink: 0;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+
+<div id="overlay"></div>
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <input id="studentId" type="text" placeholder="ID" autocomplete="off" />
+  <button id="sectionSelectorBtn" type="button">Topics</button>  
+  <button id="instructionsBtn" type="button">Instructions</button>
+  <button class="btn-submit-all" id="submitBtn">Submit Final</button>
+</div>
+
+<!-- SECTION SELECTION MODAL -->
+<div id="sectionModalRoot">
+  <div id="sectionModalBackdrop"></div>
+  <div id="sectionModalContent">
+    <div id="sectionModalHeader">
+      <span>Topics</span>
+      <button id="sectionModalClose" type="button">✕</button>
+    </div>
+    <div id="sectionListContainer"></div>
+  </div>
+</div>
+
+<!-- INSTRUCTIONS MODAL -->
+<div id="instructionsRoot">
+  <div id="instructionsBackdrop"></div>
+  <div id="instructionsModal">
+    <div id="instructionsHeader">
+      <span id="instructionsTitle">Instructions</span>
+      <button id="instructionsBack" type="button">✕</button>
+    </div>
+    <div id="instructionsContent">
+      <p>How to use this page...</p>
+      <p>• Enter your ID number into the ID field.</p>
+      <p>• Click the Topics button to select a vocabulary category.</p>
+      <p>• Teams A and B compete side-by-side using their own on-screen fake keyboards to type and pop rising word bubbles.</p>
+      <p>• Click STOP A or STOP B when each team finishes, then click Submit Final to log and export scores.</p>
+    </div>
+  </div>
+</div>
+
+<!-- BATTLE ARENA -->
+<div class="battle-arena">
+  <!-- TEAM A PANEL -->
+  <div class="team-panel team-a">
+    <div class="team-header">
+      <button class="btn-stop" id="stopTeamA" type="button">STOP A</button>
+      <span class="team-title">TEAM A (<span id="scoreA">0</span>)</span>
+    </div>
+    <div class="game-canvas-wrap">
+      <canvas id="canvasA"></canvas>
+    </div>
+    <div class="fake-keyboard" id="keyboardA"></div>
+  </div>
+
+  <!-- TEAM B PANEL -->
+  <div class="team-panel team-b">
+    <div class="team-header">
+      <span class="team-title">TEAM B (<span id="scoreB">0</span>)</span>
+      <button class="btn-stop" id="stopTeamB" type="button">STOP B</button>
+    </div>
+    <div class="game-canvas-wrap">
+      <canvas id="canvasB"></canvas>
+    </div>
+    <div class="fake-keyboard" id="keyboardB"></div>
+  </div>
+</div>
+
+<!-- SCOREBOARD & EXPORT BUTTONS -->
+<div class="scoreboard-container" id="scoreboardContainer"></div>
+<div class="score-buttons" id="scoreButtons">
+  <button id="copyBtn">Copy</button>
+  <button id="downloadTxtBtn">↓Text</button>
+  <button id="downloadPngBtn">↓PNG</button>
+</div>
+
+<audio id="popSound" src="bubble-pop-406640.mp3" preload="auto"></audio>
+
+<footer>
+<p>© <span id="currentYear"></span> Perfectly Practical English</p>
+</footer>
+
+<script>
+  document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+
+<script>
+    /* --- Student Name & ID Matching Module --- */
+    (function() {
+        'use strict';
+        const RAW_STUDENT_DATA = `
+            55555|David
+            55551|Matthew
+            12345|Sarah
+        `;
+        const studentDatabase = new Map();
+        RAW_STUDENT_DATA.trim().split('\n').forEach(line => {
+            const [id, name] = line.split('|').map(s => s ? s.trim() : '');
+            if (id && name) studentDatabase.set(id, name);
+        });
+
+        window.resolveStudentNameFromId = function(idInput) {
+            if (!idInput) return "Guest";
+            const trimmed = String(idInput).trim();
+            if (/^(x|g|guest)$/i.test(trimmed)) return "Guest";
+            return studentDatabase.get(trimmed) || "Guest";
+        };
+    })();
+
+    (() => {
+      const wordListText = `
+~Hobbies
+• activity 🎯 – something you do for enjoyment or interest
+• achievement 🏆 – something you succeed in doing well
+• fun 🎉 – enjoyment or pleasure
+• game 🎲 – an activity with rules played for fun
+• hobby 🎨 – an activity you do in your free time
+• interest ❤️ – something you like or care about
+• practice 🔁 – time spent learning or improving a skill
+• skill 🛠️ – an ability to do something well
+• sport ⚽ – a physical competitive activity
+• time ⏰ – hours or moments spent doing something
+
+~Helping Others
+• action 🤲 – something done to help someone
+• family 👨‍👩‍👧‍👦 – people you are related to
+• friend 🧑‍🤝‍🧑 – a person you like and trust
+• help 🆘 – support or assistance
+• kindness 💖 – being friendly and caring
+• moment ⏳ – a short time
+• need ❗ – something required or wanted
+• person 🧍 – a human being
+• support 🏗️ – help given to someone
+• time ⏰ – when something happens
+
+~Heroes
+• advice 💬 – helpful ideas or suggestions
+• friend 🧑‍🤝‍🧑 – someone who supports you
+• hero 🦸 – a person who helps or saves others
+• help 🤝 – support given to others
+• kindness 💛 – caring behavior
+• mentor 🎓 – a person who guides others
+• person 🧍 – a human being
+• support 🏗️ – help and encouragement
+• teacher 📘 – someone who helps others learn
+• wisdom 🧠 – knowledge and good judgment
+`;
+
+      function parseSections(raw) {
+        const chunks = raw.split(/\n(?=~+)/);
+        return chunks
+          .map(chunk => chunk.trim())
+          .filter(chunk => chunk.startsWith("~"))
+          .map(chunk => {
+            const lines = chunk.split("\n");
+            const name = lines.shift().replace(/^~+/, "").trim();
+            const text = lines.join("\n").trim();
+            return { name, text };
+          });
+      }
+
+      function extractWords(sectionText) {
+        return sectionText
+          .split("\n")
+          .map(line => {
+            const match = line.match(/•\s*([^\s–]+)/);
+            return match ? match[1] : null;
+          })
+          .filter(Boolean);
+      }
+
+      const sections = parseSections(wordListText);
+      const sectionData = sections.map(sec => ({
+        name: sec.name,
+        words: extractWords(sec.text)
+      }));
+
+      let gameStarted = false;
+      let gameStopped = false;
+      let animationFrameId = null;
+      let currentSectionIndex = -1;
+      let currentSectionName = "No Section";
+      let wordList = [];
+
+      // Setup Canvas Teams
+      const canvasA = document.getElementById('canvasA');
+      const canvasB = document.getElementById('canvasB');
+
+      function setupCanvasSize(canvas) {
+        canvas.width = canvas.clientWidth;
+        canvas.height = canvas.clientHeight;
+      }
+      setupCanvasSize(canvasA);
+      setupCanvasSize(canvasB);
+      window.addEventListener('resize', () => {
+        setupCanvasSize(canvasA);
+        setupCanvasSize(canvasB);
+      });
+
+      const teamA = { canvas: canvasA, ctx: canvasA.getContext('2d'), scoreEl: document.getElementById('scoreA'), activeBubbles: [], ambientBubbles: [], explodingBubbles: [], currentTypedWord: null, correct: 0, total: 0, nextIdx: 0, stopped: false };
+      const teamB = { canvas: canvasB, ctx: canvasB.getContext('2d'), scoreEl: document.getElementById('scoreB'), activeBubbles: [], ambientBubbles: [], explodingBubbles: [], currentTypedWord: null, correct: 0, total: 0, nextIdx: 0, stopped: false };
+
+      // Modal Logic
+      const sectionSelectorBtn = document.getElementById('sectionSelectorBtn');
+      const sectionModalRoot = document.getElementById('sectionModalRoot');
+      const sectionModalBackdrop = document.getElementById('sectionModalBackdrop');
+      const sectionModalClose = document.getElementById('sectionModalClose');
+      const sectionListContainer = document.getElementById('sectionListContainer');
+
+      function openModal() {
+        if (gameStarted) return;
+        sectionListContainer.innerHTML = "";
+        sectionData.forEach((sec, idx) => {
+          const item = document.createElement("div");
+          item.className = "section-item";
+          item.textContent = sec.name;
+          item.addEventListener("click", () => {
+            currentSectionName = sec.name;
+            currentSectionIndex = idx;
+            wordList = sec.words.slice();
+            sectionSelectorBtn.textContent = sec.name;
+            closeModal();
+            startGame();
+          });
+          sectionListContainer.appendChild(item);
+        });
+        sectionModalRoot.style.display = "block";
+      }
+
+      function closeModal() { sectionModalRoot.style.display = "none"; }
+
+      sectionSelectorBtn.addEventListener("click", openModal);
+      sectionModalClose.addEventListener("click", closeModal);
+      sectionModalBackdrop.addEventListener("click", closeModal);
+
+      // Keyboard Setup Function
+      function buildKeyboard(containerId, teamObj) {
+        const kbContainer = document.getElementById(containerId);
+        kbContainer.innerHTML = "";
+        const rows = ["qwertyuiop", "asdfghjkl", "zxcvbnm"];
+        rows.forEach((rowChars, rIdx) => {
+          const rowEl = document.createElement('div');
+          rowEl.className = 'kb-row';
+          for (let ch of rowChars) {
+            const keyBtn = document.createElement('button');
+            keyBtn.type = 'button';
+            keyBtn.className = 'kb-key';
+            keyBtn.textContent = ch.toUpperCase();
+            keyBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              handleTeamInput(teamObj, ch);
+            });
+            rowEl.appendChild(keyBtn);
+          }
+          if (rIdx === 2) {
+            const backBtn = document.createElement('button');
+            backBtn.type = 'button';
+            backBtn.className = 'kb-key backspace';
+            backBtn.textContent = '⌫';
+            backBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              handleTeamBackspace(teamObj);
+            });
+            rowEl.appendChild(backBtn);
+          }
+          kbContainer.appendChild(rowEl);
+        });
+      }
+
+      buildKeyboard('keyboardA', teamA);
+      buildKeyboard('keyboardB', teamB);
+
+      function handleTeamInput(team, char) {
+        if (!gameStarted || gameStopped || team.stopped) return;
+        if (team.activeBubbles.length === 0) return;
+
+        let wordToType = team.currentTypedWord;
+        if (!wordToType) {
+          wordToType = team.activeBubbles.find(b => !b.exploded);
+          if (!wordToType) return;
+          team.currentTypedWord = wordToType;
+        }
+
+        const expected = wordToType.word[wordToType.typedIndex]?.toLowerCase();
+        if (char !== expected) return;
+
+        wordToType.typedIndex++;
+        if (wordToType.typedIndex === wordToType.word.length) {
+          explodeWord(team, wordToType, true);
+          team.currentTypedWord = null;
+        }
+      }
+
+      function handleTeamBackspace(team) {
+        if (!gameStarted || gameStopped || team.stopped) return;
+        if (team.currentTypedWord && team.currentTypedWord.typedIndex > 0) {
+          team.currentTypedWord.typedIndex--;
+          if (team.currentTypedWord.typedIndex === 0) {
+            team.currentTypedWord = null;
+          }
+        }
+      }
+
+      function brightColor(alpha=0.6) {
+        const hue = Math.random()*360;
+        return `hsla(${hue},85%,70%,${alpha})`;
+      }
+
+      function darkVariant(color) {
+        const match = color.match(/hsla\((\d+),\s*(\d+)\%,\s*(\d+)\%,\s*([\d.]+)\)/);
+        if(!match) return 'rgba(0,0,0,0.5)';
+        const h = match[1], s = match[2], l = Math.max(0, match[3]-35), a = match[4];
+        return `hsla(${h},${s}%,${l}%,${a})`;
+      }
+
+      class Bubble {
+        constructor(canvas, word=null) {
+          this.canvas = canvas;
+          this.ctx = canvas.getContext('2d');
+          this.word = word;
+          this.typedIndex = 0;
+          this.exploded = false;
+          if(word){
+            this.fontSize = 22;
+            this.ctx.font = `bold ${this.fontSize}px system-ui, -apple-system, sans-serif`;
+            const textWidth = this.ctx.measureText(word).width;
+            const minRadius = Math.max(40, (textWidth / 2) + 15);
+            this.radius = minRadius + Math.random() * 10;
+            this.color = brightColor(0.6);
+          } else {
+            this.fontSize = 0;
+            this.radius = 8 + Math.random()*25;
+            this.color = brightColor(0.3);
+          }
+          this.shadowColor = darkVariant(this.color);
+          this.x = Math.random() * (canvas.width - this.radius*2) + this.radius;
+          this.y = canvas.height + this.radius;
+          this.speed = (word ? 0.25 : 0.15) + Math.random()*0.2;
+          this.swayAmplitude = (word ? 15 : 8) + Math.random()*15;
+          this.swaySpeed = Math.random()*0.02 + 0.01;
+          this.swayPhase = Math.random()*Math.PI*2;
+        }
+
+        draw() {
+          const offsetX = Math.sin(this.swayPhase + this.y*this.swaySpeed) * this.swayAmplitude;
+          const gradient = this.ctx.createRadialGradient(
+            this.x - this.radius*0.2 + offsetX,
+            this.y - this.radius*0.2,
+            this.radius*0.05,
+            this.x + offsetX,
+            this.y,
+            this.radius*1.8
+          );
+          gradient.addColorStop(0, 'rgba(255,255,255,0.6)');
+          gradient.addColorStop(0.3, this.color);
+          gradient.addColorStop(1, this.color);
+
+          this.ctx.beginPath();
+          this.ctx.arc(this.x + offsetX, this.y, this.radius, 0, Math.PI*2);
+          this.ctx.fillStyle = gradient;
+          this.ctx.fill();
+          this.ctx.lineWidth = 1.5;
+          this.ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+          this.ctx.stroke();
+
+          if(this.word){
+            this.ctx.font = `bold ${this.fontSize}px system-ui, -apple-system, sans-serif`;
+            this.ctx.textAlign = 'left';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.shadowColor = 'rgba(255,255,255,0.6)';
+            this.ctx.shadowBlur = 4;
+
+            let startX = this.x + offsetX;
+            for (let i = 0; i < this.word.length; i++) {
+              // Very dark blue (#0d1b2a) for un-typed text, red for typed text
+              this.ctx.fillStyle = (i < this.typedIndex) ? '#d90429' : '#0d1b2a';
+              this.ctx.fillText(
+                this.word[i],
+                startX - this.ctx.measureText(this.word).width / 2,
+                this.y
+              );
+              startX += this.ctx.measureText(this.word[i]).width;
+            }
+            this.ctx.shadowBlur = 0;
+          }
+        }
+
+        update() {
+          this.y -= this.speed;
+          if(this.y + this.radius < 0) this.exploded = true;
+        }
+      }
+
+      class ExplodingBubble {
+        constructor(canvas, bubble) {
+          this.canvas = canvas;
+          this.ctx = canvas.getContext('2d');
+          this.x = bubble.x;
+          this.y = bubble.y;
+          this.radius = bubble.radius;
+          this.color = bubble.color;
+          this.shadowColor = bubble.shadowColor;
+          this.word = bubble.word;
+          this.fontSize = bubble.fontSize || 22;
+          this.startTime = performance.now();
+          this.duration = 400;
+        }
+
+        draw(time) {
+          const elapsed = time - this.startTime;
+          const t = Math.min(elapsed / this.duration, 1);
+          const scale = 1 + 1.5 * t;
+          const rotation = 2 * Math.PI * 2 * t;
+          const alpha = 1 - t;
+
+          this.ctx.save();
+          this.ctx.translate(this.x, this.y);
+          this.ctx.rotate(rotation);
+          this.ctx.scale(scale, scale);
+
+          const gradient = this.ctx.createRadialGradient(0,0,this.radius*0.05,0,0,this.radius*1.8);
+          gradient.addColorStop(0, 'rgba(255,255,255,0.6)');
+          gradient.addColorStop(0.3, this.color);
+          gradient.addColorStop(1, this.color);
+
+          this.ctx.beginPath();
+          this.ctx.arc(0,0,this.radius,0,Math.PI*2);
+          this.ctx.fillStyle = gradient;
+          this.ctx.globalAlpha = alpha;
+          this.ctx.fill();
+          this.ctx.lineWidth = 1.5;
+          this.ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+          this.ctx.stroke();
+
+          if(this.word){
+            this.ctx.font = `bold ${this.fontSize}px system-ui, -apple-system, sans-serif`;
+            this.ctx.textAlign = 'center';
+            this.ctx.textBaseline = 'middle';
+            this.ctx.fillStyle = '#0d1b2a';
+            this.ctx.shadowBlur = 10;
+            this.ctx.fillText(this.word,0,0);
+            this.ctx.shadowBlur = 0;
+          }
+
+          this.ctx.restore();
+        }
+
+        isDone(time) {
+          return time - this.startTime >= this.duration;
+        }
+      }
+
+      function explodeWord(team, bubble, success){
+        if(bubble.exploded) return;
+        bubble.exploded = true;
+        const popSound = document.getElementById('popSound');
+        popSound.currentTime = 0;
+        popSound.play().catch(()=>{});
+        if(success) {
+          team.correct++;
+          team.scoreEl.textContent = team.correct;
+        }
+        team.explodingBubbles.push(new ExplodingBubble(team.canvas, bubble));
+        if(team.currentTypedWord === bubble) team.currentTypedWord = null;
+      }
+
+      function renderTeam(team, time) {
+        team.ctx.clearRect(0, 0, team.canvas.width, team.canvas.height);
+
+        team.ambientBubbles.forEach(b => { b.update(); b.draw(); });
+        team.ambientBubbles = team.ambientBubbles.filter(b => !b.exploded);
+
+        team.activeBubbles.forEach(b => { b.update(); b.draw(); });
+        team.activeBubbles = team.activeBubbles.filter(b => !b.exploded);
+
+        team.explodingBubbles.forEach(b => b.draw(time));
+        team.explodingBubbles = team.explodingBubbles.filter(b => !b.isDone(time));
+
+        if(Math.random() < 0.015) {
+          team.ambientBubbles.push(new Bubble(team.canvas));
+        }
+
+        if(!team.stopped && team.activeBubbles.length === 0 && team.nextIdx < wordList.length) {
+          team.activeBubbles.push(new Bubble(team.canvas, wordList[team.nextIdx]));
+          team.nextIdx++;
+        }
+      }
+
+      function gameLoop(time) {
+        if(gameStopped) return;
+        if(!teamA.stopped) renderTeam(teamA, time);
+        if(!teamB.stopped) renderTeam(teamB, time);
+        animationFrameId = requestAnimationFrame(gameLoop);
+      }
+
+      function startGame() {
+        if(currentSectionIndex === -1) {
+          alert('Please select a category first.');
+          return;
+        }
+        cancelAnimationFrame(animationFrameId);
+
+        [teamA, teamB].forEach(t => {
+          t.activeBubbles = [];
+          t.ambientBubbles = [];
+          t.explodingBubbles = [];
+          t.currentTypedWord = null;
+          t.correct = 0;
+          t.total = wordList.length;
+          t.nextIdx = 0;
+          t.stopped = false;
+          t.scoreEl.textContent = "0";
+        });
+
+        document.getElementById('stopTeamA').disabled = false;
+        document.getElementById('stopTeamB').disabled = false;
+        document.getElementById('scoreboardContainer').style.display = 'none';
+        document.getElementById('scoreButtons').style.display = 'none';
+
+        gameStarted = true;
+        gameStopped = false;
+
+        teamA.activeBubbles.push(new Bubble(canvasA, wordList[teamA.nextIdx++]));
+        teamB.activeBubbles.push(new Bubble(canvasB, wordList[teamB.nextIdx++]));
+
+        animationFrameId = requestAnimationFrame(gameLoop);
+      }
+
+      document.getElementById('stopTeamA').addEventListener('click', () => {
+        teamA.stopped = true;
+        document.getElementById('stopTeamA').disabled = true;
+        teamA.activeBubbles = [];
+        checkBothStopped();
+      });
+
+      document.getElementById('stopTeamB').addEventListener('click', () => {
+        teamB.stopped = true;
+        document.getElementById('stopTeamB').disabled = true;
+        teamB.activeBubbles = [];
+        checkBothStopped();
+      });
+
+      function checkBothStopped() {
+        if(teamA.stopped && teamB.stopped) {
+          gameStopped = true;
+          cancelAnimationFrame(animationFrameId);
+        }
+      }
+
+      function submitResults() {
+        if(!gameStarted) return;
+        gameStopped = true;
+        cancelAnimationFrame(animationFrameId);
+
+        const now = new Date();
+        const pad = n => n.toString().padStart(2,'0');
+        const dateStr = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+
+        let currentFile = window.location.pathname.split('/').pop() || 'unknown.html';
+        currentFile = currentFile.split('?')[0].split('#')[0];
+
+        const idVal = document.getElementById('studentId')?.value.trim() || 'Guest';
+        const resolvedName = window.resolveStudentNameFromId ? window.resolveStudentNameFromId(idVal) : "Guest";
+
+        const total = wordList.length;
+        const pctA = total ? Math.round((teamA.correct / total) * 100) + '%' : '0%';
+        const pctB = total ? Math.round((teamB.correct / total) * 100) + '%' : '0%';
+
+        const scoreLine = `${currentFile}|${currentSectionName}|${resolvedName}|${idVal}|${dateStr}|TeamA_${teamA.correct}/${total}_${pctA}|TeamB_${teamB.correct}/${total}_${pctB}`;
+
+        const scoreContainer = document.getElementById('scoreboardContainer');
+        scoreContainer.textContent = scoreLine;
+        scoreContainer.style.display = 'block';
+        document.getElementById('scoreButtons').style.display = 'flex';
+
+        if (window.saveResult) window.saveResult(scoreLine);
+      }
+
+      document.getElementById('submitBtn').addEventListener('click', submitResults);
+
+      // Export Buttons
+      document.getElementById('copyBtn').addEventListener('click', () => {
+        const text = document.getElementById('scoreboardContainer').textContent;
+        if (text) navigator.clipboard.writeText(text).then(() => alert('Copied to clipboard.'));
+      });
+
+      document.getElementById('downloadTxtBtn').addEventListener('click', () => {
+        const text = document.getElementById('scoreboardContainer').textContent;
+        if (!text) return;
+        const blob = new Blob([text], { type: "text/plain" });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'scoreboard.txt';
+        a.click();
+        a.remove();
+      });
+
+      document.getElementById('downloadPngBtn').addEventListener('click', async () => {
+        const container = document.getElementById('scoreboardContainer');
+        if (!container.textContent) return;
+        if (!window.html2canvas) {
+          await new Promise((res, rej) => {
+            const s = document.createElement('script');
+            s.src = 'https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';
+            s.onload = res; s.onerror = rej;
+            document.head.appendChild(s);
+          });
+        }
+        const canvas = await html2canvas(container, { backgroundColor: '#fff' });
+        canvas.toBlob(blob => {
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = 'scoreboard.png';
+          a.click();
+          a.remove();
+        });
+      });
+    })();
+  </script>
+
+  <!-- Instructions Modal Script -->
+  <script>
+  (function(){
+    const btn = document.getElementById("instructionsBtn");
+    const root = document.getElementById("instructionsRoot");
+    const backBtn = document.getElementById("instructionsBack");
+    const backdrop = document.getElementById("instructionsBackdrop");
+
+    function openModal() { root.style.display = "block"; }
+    function closeModal() { root.style.display = "none"; }
+
+    if (btn) btn.onclick = openModal;
+    if (backBtn) backBtn.onclick = closeModal;
+    if (backdrop) backdrop.onclick = closeModal;
+  })();
+  </script>
+
+  <!-- Green Border -->
+  <script>
+    const borderDiv = document.createElement('div');
+    borderDiv.style.cssText = 'position:fixed;inset:0;border:10px solid #39FF14;box-sizing:border-box;z-index:9999;pointer-events:none;background:transparent;';
+    document.body.appendChild(borderDiv);
+  </script>
+
+  <!-- SUPABASE LIBRARY -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const supabaseClient = window.supabase?.createClient(
+      'https://etwwriloppklhhkmswpr.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6ImpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+    );
+    window.saveResult = async function saveResult(text) {
+      if (!supabaseClient) return;
+      await supabaseClient.from("scoreboard_raw").insert([{ result_text: text }]);
+    };
+  </script>
+
+<script>
+(function() {
+    'use strict';
+
+    let sampleInterval = null;
+    let sampleActiveBubbles = { A: null, B: null };
+
+    // Helper functions matching the bubble styling
+    function sampleBrightColor(alpha=0.6) {
+        const hue = Math.random() * 360;
+        return `hsla(${hue},85%,70%,${alpha})`;
+    }
+
+    // Draw a single rising sample bubble directly onto the team canvas
+    function spawnSampleBubble(teamKey) {
+        if (window.__sampleAutoStarted) return;
+        const canvas = document.getElementById(teamKey === 'A' ? 'canvasA' : 'canvasB');
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const sampleWords = ['activity', 'fun', 'game', 'hobby', 'interest', 'practice', 'skill', 'sport', 'hero', 'friend'];
+        const word = sampleWords[Math.floor(Math.random() * sampleWords.length)];
+
+        ctx.font = 'bold 22px system-ui, -apple-system, sans-serif';
+        const textWidth = ctx.measureText(word).width;
+        const radius = Math.max(40, (textWidth / 2) + 15) + Math.random() * 10;
+
+        sampleActiveBubbles[teamKey] = {
+            canvas: canvas,
+            ctx: ctx,
+            word: word,
+            typedIndex: 0,
+            exploded: false,
+            radius: radius,
+            color: sampleBrightColor(0.6),
+            x: Math.random() * (canvas.width - radius * 2) + radius,
+            y: canvas.height + radius,
+            speed: 0.3 + Math.random() * 0.2,
+            swayAmplitude: 12 + Math.random() * 10,
+            swaySpeed: 0.015 + Math.random() * 0.01,
+            swayPhase: Math.random() * Math.PI * 2
+        };
+    }
+
+    // Handle interactive typing from the fake keyboard during sample mode
+    function handleSampleInput(teamKey, char) {
+        const bubble = sampleActiveBubbles[teamKey];
+        if (!bubble || bubble.exploded) return;
+
+        const expected = bubble.word[bubble.typedIndex]?.toLowerCase();
+        if (char === expected) {
+            bubble.typedIndex++;
+            if (bubble.typedIndex === bubble.word.length) {
+                explodeSampleBubble(teamKey, bubble, true);
+            }
+        }
+    }
+
+    function handleSampleBackspace(teamKey) {
+        const bubble = sampleActiveBubbles[teamKey];
+        if (!bubble || bubble.exploded) return;
+
+        if (bubble.typedIndex > 0) {
+            bubble.typedIndex--;
+        }
+    }
+
+    function explodeSampleBubble(teamKey, bubble, success) {
+        if (bubble.exploded) return;
+        bubble.exploded = true;
+
+        // Play pop sound effect on successful word completion
+        const popSound = document.getElementById('popSound');
+        if (popSound) {
+            popSound.currentTime = 0;
+            popSound.play().catch(() => {});
+        }
+
+        if (success) {
+            const scoreEl = document.getElementById(teamKey === 'A' ? 'scoreA' : 'scoreB');
+            if (scoreEl) {
+                scoreEl.textContent = parseInt(scoreEl.textContent || '0', 10) + 1;
+            }
+        }
+
+        setTimeout(() => {
+            sampleActiveBubbles[teamKey] = null;
+            if (!window.__sampleAutoStarted) {
+                spawnSampleBubble(teamKey);
+            }
+        }, 300);
+    }
+
+    // Main Sample Canvas Rendering Loop
+    function startSampleBubbleLoop() {
+        if (window.__sampleAutoStarted) return;
+
+        spawnSampleBubble('A');
+        spawnSampleBubble('B');
+
+        // Hook up virtual keyboard clicks during sample mode
+        ['keyboardA', 'keyboardB'].forEach(kbId => {
+            const kbContainer = document.getElementById(kbId);
+            if (kbContainer && !kbContainer.dataset.sampleListener) {
+                kbContainer.dataset.sampleListener = 'true';
+                const teamKey = kbId === 'keyboardA' ? 'A' : 'B';
+                kbContainer.addEventListener('click', (e) => {
+                    if (window.__sampleAutoStarted) return;
+                    const btn = e.target.closest('.kb-key');
+                    if (!btn) return;
+
+                    if (btn.classList.contains('backspace')) {
+                        handleSampleBackspace(teamKey);
+                    } else {
+                        const char = btn.textContent.trim().toLowerCase();
+                        if (char.length === 1) {
+                            handleSampleInput(teamKey, char);
+                        }
+                    }
+                }, true);
+            }
+        });
+
+        sampleInterval = setInterval(() => {
+            if (window.__sampleAutoStarted) {
+                stopSampleBubbleGame();
+                return;
+            }
+
+            ['A', 'B'].forEach(teamKey => {
+                const b = sampleActiveBubbles[teamKey];
+                if (!b || b.exploded) return;
+
+                b.y -= b.speed;
+
+                // Clear and redraw canvas frame for this team
+                b.ctx.clearRect(0, 0, b.canvas.width, b.canvas.height);
+
+                // Draw bubble body
+                const offsetX = Math.sin(b.swayPhase + b.y * b.swaySpeed) * b.swayAmplitude;
+                const gradient = b.ctx.createRadialGradient(
+                    b.x - b.radius * 0.2 + offsetX,
+                    b.y - b.radius * 0.2,
+                    b.radius * 0.05,
+                    b.x + offsetX,
+                    b.y,
+                    b.radius * 1.8
+                );
+                gradient.addColorStop(0, 'rgba(255,255,255,0.6)');
+                gradient.addColorStop(0.3, b.color);
+                gradient.addColorStop(1, b.color);
+
+                b.ctx.beginPath();
+                b.ctx.arc(b.x + offsetX, b.y, b.radius, 0, Math.PI * 2);
+                b.ctx.fillStyle = gradient;
+                b.ctx.fill();
+                b.ctx.lineWidth = 1.5;
+                b.ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+                b.ctx.stroke();
+
+                // Draw word letters inside the rising bubble (red for typed, dark blue for un-typed)
+                b.ctx.font = 'bold 22px system-ui, -apple-system, sans-serif';
+                b.ctx.textAlign = 'left';
+                b.ctx.textBaseline = 'middle';
+                b.ctx.shadowColor = 'rgba(255,255,255,0.6)';
+                b.ctx.shadowBlur = 4;
+
+                let startX = (b.x + offsetX) - (b.ctx.measureText(b.word).width / 2);
+                for (let i = 0; i < b.word.length; i++) {
+                    b.ctx.fillStyle = (i < b.typedIndex) ? '#d90429' : '#0d1b2a';
+                    b.ctx.fillText(b.word[i], startX, b.y);
+                    startX += b.ctx.measureText(b.word[i]).width;
+                }
+                b.ctx.shadowBlur = 0;
+
+                // If bubble floats off the top, reset it
+                if (b.y + b.radius < 0) {
+                    sampleActiveBubbles[teamKey] = null;
+                    spawnSampleBubble(teamKey);
+                }
+            });
+        }, 20);
+    }
+
+    function stopSampleBubbleGame() {
+        if (sampleInterval) {
+            clearInterval(sampleInterval);
+            sampleInterval = null;
+        }
+        ['A', 'B'].forEach(teamKey => {
+            const b = sampleActiveBubbles[teamKey];
+            if (b) {
+                b.ctx.clearRect(0, 0, b.canvas.width, b.canvas.height);
+            }
+            sampleActiveBubbles[teamKey] = null;
+        });
+
+        // Reset score displays
+        const scoreA = document.getElementById('scoreA');
+        const scoreB = document.getElementById('scoreB');
+        if (scoreA) scoreA.textContent = '0';
+        if (scoreB) scoreB.textContent = '0';
+    }
+
+    // Initialize banner, button state, and click listeners
+    function initSampleSetup() {
+        // 1. Stamp high-visibility warning banner at top: 115px
+        if (!document.getElementById('wordBombsLayoutSampleBanner')) {
+            const banner = document.createElement('div');
+            banner.id = 'wordBombsLayoutSampleBanner';
+            banner.style.cssText = `
+                position: fixed;
+                top: 115px;
+                left: 50%;
+                transform: translateX(-50%);
+                z-index: 999999;
+                background: #fffbeb;
+                color: #b45309;
+                border: 2px solid #f59e0b;
+                border-radius: 8px;
+                padding: 10px 18px;
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: 13px;
+                font-weight: 800;
+                text-align: center;
+                letter-spacing: 0.3px;
+                box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+                width: calc(100% - 24px);
+                max-width: 550px;
+                box-sizing: border-box;
+                white-space: nowrap;
+                overflow: hidden;
+                pointer-events: auto;
+            `;
+            banner.textContent = '⚠️ This is a sample game. Click "Topics" above to select a game! ⚠️';
+            document.body.appendChild(banner);
+        }
+
+        // 2. Neutral button label
+        const sectionBtn = document.getElementById('sectionSelectorBtn');
+        if (sectionBtn) {
+            sectionBtn.textContent = 'Topics';
+        }
+
+        // 3. Listener: clear sample animation and banner when any topic is selected
+        const listContainer = document.getElementById('sectionListContainer');
+        if (listContainer && !listContainer.dataset.bannerListenerAttached) {
+            listContainer.dataset.bannerListenerAttached = 'true';
+            listContainer.addEventListener('click', (e) => {
+                const item = e.target.closest('.section-item');
+                if (item) {
+                    window.__sampleAutoStarted = true;
+                    stopSampleBubbleGame();
+                    const banner = document.getElementById('wordBombsLayoutSampleBanner');
+                    if (banner) banner.remove();
+                }
+            });
+        }
+
+        // Start the sample canvas loops
+        startSampleBubbleLoop();
+    }
+
+    if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', () => setTimeout(initSampleSetup, 50));
+    } else {
+        setTimeout(initSampleSetup, 50);
+    }
+})();
+</script>
+</body>
+</html>

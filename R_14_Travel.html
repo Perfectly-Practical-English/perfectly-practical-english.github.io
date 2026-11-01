@@ -11853,5 +11853,761 @@ document.addEventListener("DOMContentLoaded", function () {
 <!-- ========================================== -->
 <!-- NARROW PHONE LAYOUT SAFETY PATCH (END) -->
 <!-- ========================================== -->
+<<<<<<< HEAD
+
+<!-- PDF libraries -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf-lib/1.17.1/pdf-lib.min.js"></script>
+
+<style>
+.pdf-export-canvas {
+    background: #ffffff;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #000000;
+    font-size: 10pt;
+    line-height: 1.35;
+    box-sizing: border-box;
+    width: 210mm;
+}
+.pdf-page {
+    width: 210mm;
+    min-height: 297mm;
+    max-height: 297mm;
+    padding: 6.35mm;
+    box-sizing: border-box;
+    position: relative;
+    background: #ffffff;
+    overflow: hidden;
+}
+.pdf-export-canvas h2 {
+    font-size: 10pt;
+    font-weight: bold;
+    color: #1976d2;
+    margin-bottom: 4px;
+    margin-top: 0;
+    padding-bottom: 2px;
+    break-after: avoid;
+    page-break-after: avoid;
+}
+.pdf-export-canvas h3 {
+    font-size: 10pt;
+    font-weight: bold;
+    color: #1976d2;
+    margin-top: 4px;
+    margin-bottom: 4px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+.pdf-export-canvas .quiz-exercise {
+    font-size: 10pt;
+    margin-bottom: 4px;
+    break-inside: avoid;
+    page-break-inside: avoid;
+}
+</style>
+
+<script>
+(function() {
+    'use strict';
+
+    let pdfModePrimed = false;
+
+    // =========================================================
+    // PDF CLEANUP: REMOVE COMPLETELY BLANK TRAILING PAGES
+    // =========================================================
+
+    async function removeTrailingBlankPDFPages(pdfBlob) {
+
+        const pdfjs = window.pdfjsLib;
+        const PDFDocument = window.PDFLib.PDFDocument;
+
+        if (!pdfjs || !PDFDocument) {
+            throw new Error("PDF cleanup libraries failed to load.");
+        }
+
+        pdfjs.GlobalWorkerOptions.workerSrc =
+            'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        const buffer = await pdfBlob.arrayBuffer();
+
+        // Give PDF.js its own copy so the original remains available
+        const pdfjsData = new Uint8Array(buffer.slice(0));
+
+        const pdf = await pdfjs.getDocument({
+            data: pdfjsData
+        }).promise;
+
+        // Store page count before destroying the PDF.js document
+        const totalPages = pdf.numPages;
+
+        const blankPages = [];
+
+        // Inspect pages backwards, starting with the last page
+        for (let pageNum = totalPages; pageNum >= 1; pageNum--) {
+
+            const page = await pdf.getPage(pageNum);
+            const viewport = page.getViewport({ scale: 0.75 });
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d', {
+                willReadFrequently: true
+            });
+
+            canvas.width = Math.ceil(viewport.width);
+            canvas.height = Math.ceil(viewport.height);
+
+            // Start with a completely white page
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            await page.render({
+                canvasContext: ctx,
+                viewport: viewport,
+                background: '#ffffff'
+            }).promise;
+
+            const pixels = ctx.getImageData(
+                0, 0, canvas.width, canvas.height
+            ).data;
+
+            let visiblePixels = 0;
+
+            // Count pixels that are not virtually white
+            for (let i = 0; i < pixels.length; i += 4) {
+
+                if (
+                    pixels[i] < 245 ||
+                    pixels[i + 1] < 245 ||
+                    pixels[i + 2] < 245
+                ) {
+                    visiblePixels++;
+
+                    if (visiblePixels > 10) break;
+                }
+            }
+
+            // Treat pages with no meaningful visible content as blank
+            if (visiblePixels <= 10) {
+                blankPages.push(pageNum - 1);
+            } else {
+                // Stop at the first page containing visible content
+                break;
+            }
+
+            // Release temporary canvas resources
+            canvas.width = 0;
+            canvas.height = 0;
+        }
+
+        await pdf.destroy();
+
+        // Keep at least one page in the document
+        if (blankPages.length === 0 || blankPages.length >= totalPages) {
+            return pdfBlob;
+        }
+
+        // Load a separate copy of the original PDF into pdf-lib
+        const editablePDF = await PDFDocument.load(buffer.slice(0));
+
+        // Remove blank pages from the actual PDF
+        // Pages are already listed in descending order
+        blankPages.forEach(pageIndex => {
+            editablePDF.removePage(pageIndex);
+        });
+
+        const cleanedBytes = await editablePDF.save();
+
+        console.log(
+            "PDF cleanup: removed " + blankPages.length + " blank trailing page(s)."
+        );
+
+        return new Blob([cleanedBytes], {
+            type: 'application/pdf'
+        });
+    }
+
+    // =========================================================
+    // PDF BUTTON
+    // =========================================================
+
+    function injectPdfButtonDirectly() {
+
+        const header = document.getElementById('sectionModalHeader');
+        if (!header) return;
+
+        if (header.querySelector('.pdf-header-toggle')) return;
+
+        const pdfBtn = document.createElement('button');
+        pdfBtn.type = 'button';
+        pdfBtn.className = 'pdf-header-toggle';
+        pdfBtn.innerHTML = '↓ PDF: <strong>OFF</strong>';
+
+        pdfBtn.style.cssText = `
+            background: #e2e8f0;
+            color: #1e293b;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 3px 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: auto;
+            margin-right: 8px;
+            display: inline-flex;
+            align-items: center;
+            box-sizing: border-box;
+            transition: all 0.2s ease;
+        `;
+
+        const closeBtn = document.getElementById('sectionModalClose');
+
+        if (closeBtn) {
+            header.insertBefore(pdfBtn, closeBtn);
+        } else {
+            header.appendChild(pdfBtn);
+        }
+
+        pdfBtn.addEventListener('click', (e) => {
+
+            e.stopPropagation();
+            pdfModePrimed = !pdfModePrimed;
+
+            if (pdfModePrimed) {
+                pdfBtn.style.background = '#dbeafe';
+                pdfBtn.style.borderColor = '#3b82f6';
+                pdfBtn.style.color = '#1e40af';
+                pdfBtn.innerHTML = '↓ PDF: <strong style="color: #1d4ed8;">ACTIVE</strong>';
+            } else {
+                resetPdfButton(pdfBtn);
+            }
+        });
+    }
+
+    function resetPdfButton(pdfBtn) {
+
+        pdfBtn.style.background = '#e2e8f0';
+        pdfBtn.style.borderColor = '#cbd5e1';
+        pdfBtn.style.color = '#1e293b';
+        pdfBtn.innerHTML = '↓ PDF: <strong>OFF</strong>';
+    }
+
+    // =========================================================
+    // PDF BUTTON CLICK HANDLER
+    // =========================================================
+
+    document.addEventListener('click', (e) => {
+
+        const item = e.target.closest('.section-item');
+        if (!item || !pdfModePrimed) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        const index = parseInt(item.dataset.index, 10);
+
+        if (
+            isNaN(index) ||
+            !window.SCRAMBLE_SECTIONS ||
+            !window.SCRAMBLE_SECTIONS[index]
+        ) {
+            alert("Could not locate section data for PDF export.");
+            return;
+        }
+
+        const section = window.SCRAMBLE_SECTIONS[index];
+
+        exportFullWorksheetToPDF(section);
+
+        pdfModePrimed = false;
+
+        const pdfBtn = document.querySelector('.pdf-header-toggle');
+        if (pdfBtn) resetPdfButton(pdfBtn);
+
+        const modalRoot = document.getElementById('sectionModalRoot');
+        if (modalRoot) modalRoot.style.display = 'none';
+
+    }, true);
+
+    // =========================================================
+    // BUILD AND EXPORT WORKSHEET
+    // =========================================================
+
+    function exportFullWorksheetToPDF(section) {
+
+        let rawFilename = window.location.pathname.split('/').pop() || 'file.html';
+
+        let cleanFilename = rawFilename
+            .replace(/\.html$/i, '')
+            .replace(/^[a-zA-Z0-9]+[_\-]*/, '')
+            .replace(/^[\d\-_]+/, '')
+            .replace(/_/g, ' ');
+
+        const exportContainer = document.createElement('div');
+        exportContainer.className = 'pdf-export-canvas';
+        exportContainer.style.cssText =
+            'width: 210mm; background: #ffffff; box-sizing: border-box;';
+
+        const readingElements = [];
+        const questionElements = [];
+        let qHeader = null;
+
+        // 1. Header Information Block
+
+        const currentYear = new Date().getFullYear();
+
+        const infoDiv = document.createElement('div');
+
+        infoDiv.style.cssText =
+            'margin-bottom: 8px; font-size: 10pt; page-break-inside: avoid;';
+
+        infoDiv.innerHTML = `
+            <div style="font-size: 10pt; font-weight: bold; color: #444; margin-bottom: 1px;">Perfectly Practical Printables</div>
+            <div style="font-size: 10pt; color: #666; margin-bottom: 1px;">PerfectlyPracticalEnglish@outlook.com</div>
+            <div style="font-size: 10pt; color: #666; margin-bottom: 6px;">&copy; ${currentYear} Perfectly Practical English</div>
+
+            <div style="font-size: 10pt; line-height: 1.5; margin-bottom: 8px;">
+                <div>Name ____________________</div>
+                <div>ID ____________________</div>
+                <div>Date ____________________</div>
+            </div>
+
+            <h2 style="font-size: 10pt; color: #1976d2; margin-bottom: 3px; padding-bottom: 0;">${cleanFilename}</h2>
+            <h2 style="font-size: 10pt; color: #1976d2; margin-bottom: 6px; padding-bottom: 2px;">${section.name}</h2>
+        `;
+
+        readingElements.push(infoDiv);
+
+        // 2. Reading Text Paragraphs
+
+        let fullText = section.text || '';
+        let readingPart = fullText;
+
+        const lines = fullText.split(/\r?\n/);
+
+        for (let i = 0; i < lines.length; i++) {
+
+            if (
+                lines[i].trim() === 'QUIZ' ||
+                lines[i].trim() === 'Quiz' ||
+                lines[i].trim().startsWith('~')
+            ) {
+                readingPart = lines.slice(0, i).join('\n');
+                break;
+            }
+        }
+
+        if (typeof window.cleanSectionText === 'function') {
+            readingPart = window.cleanSectionText(readingPart);
+        }
+
+        const paragraphs = readingPart
+            .split(/\n\s*\n/)
+            .filter(p => p.trim().length > 0);
+
+        paragraphs.forEach(pText => {
+
+            const pDiv = document.createElement('div');
+
+            pDiv.style.cssText =
+                'font-size: 10pt; white-space: pre-wrap; margin-bottom: 6px; page-break-inside: avoid;';
+
+            pDiv.textContent = pText.trim();
+
+            readingElements.push(pDiv);
+        });
+
+        // 3. Quiz Exercises Parser
+
+        let quizStartIndex = -1;
+
+        for (let i = 0; i < lines.length; i++) {
+
+            if (
+                lines[i].trim() === 'QUIZ' ||
+                lines[i].trim() === 'Quiz'
+            ) {
+                quizStartIndex = i;
+                break;
+            }
+        }
+
+        if (quizStartIndex !== -1) {
+
+            const quizPart = lines.slice(quizStartIndex).join('\n');
+            const quizLines = quizPart.split(/\r?\n/);
+
+            qHeader = document.createElement('h3');
+
+            qHeader.style.cssText =
+                'font-size: 10pt; font-weight: bold; color: #1976d2; margin-top: 4px; margin-bottom: 4px; page-break-after: avoid;';
+
+            qHeader.textContent = 'Comprehension Quiz';
+
+            let qCount = 1;
+
+            for (let i = 0; i < quizLines.length; i++) {
+
+                let l = quizLines[i].trim();
+
+                if (l.startsWith('~')) break;
+
+                if (l.startsWith('?')) {
+
+                    let qText = l.replace(/^\?\s*/, '');
+
+                    if (
+                        i + 1 < quizLines.length &&
+                        quizLines[i + 1].trim().startsWith('-')
+                    ) {
+                        qText += ' ' +
+                            quizLines[i + 1].trim().replace(/^-+\s*/, '');
+                        i++;
+                    }
+
+                    const exDiv = document.createElement('div');
+
+                    exDiv.className = 'quiz-exercise';
+
+                    exDiv.style.cssText =
+                        'font-size: 10pt; margin-bottom: 4px; page-break-inside: avoid; break-inside: avoid;';
+
+                    let qHtml =
+                        `<strong>${qCount}. ${qText}</strong><div style="font-size: 10pt; margin-left: 8px; margin-top: 1px;">`;
+
+                    qCount++;
+
+                    let j = i + 1;
+                    let optIdx = 0;
+
+                    while (
+                        j < quizLines.length &&
+                        quizLines[j].trim() !== '' &&
+                        !quizLines[j].trim().startsWith('?') &&
+                        !quizLines[j].trim().startsWith('~')
+                    ) {
+
+                        let optClean = quizLines[j].replace(/\|/g, '').trim();
+                        let letter = String.fromCharCode(65 + optIdx);
+
+                        qHtml +=
+                            `<div style="font-size: 10pt;">${letter}) ${optClean}</div>`;
+
+                        optIdx++;
+                        j++;
+                    }
+
+                    qHtml += `</div>`;
+
+                    exDiv.innerHTML = qHtml;
+
+                    questionElements.push(exDiv);
+
+                    i = j - 1;
+                }
+            }
+        }
+
+        // 4. Strict Chunking: Exactly 10 questions per chunk
+
+        const EXERCISES_PER_COLUMN = 10;
+        const exerciseChunks = [];
+
+        for (
+            let i = 0;
+            i < questionElements.length;
+            i += EXERCISES_PER_COLUMN
+        ) {
+            exerciseChunks.push(
+                questionElements.slice(i, i + EXERCISES_PER_COLUMN)
+            );
+        }
+
+        const pages = [];
+
+        // Page 1: Col 1 = Reading Text, Col 2 = Header + Exercises 1–10
+
+        let p1_col1 = [...readingElements];
+        let p1_col2 = [];
+
+        if (qHeader) p1_col2.push(qHeader);
+
+        if (exerciseChunks.length > 0) {
+            p1_col2 = p1_col2.concat(exerciseChunks[0]);
+        }
+
+        pages.push({
+            col1: p1_col1,
+            col2: p1_col2
+        });
+
+        // Subsequent pages
+
+        let chunkIdx = 1;
+
+        while (chunkIdx < exerciseChunks.length) {
+
+            let c1 = exerciseChunks[chunkIdx] || [];
+            let c2 = exerciseChunks[chunkIdx + 1] || [];
+
+            pages.push({
+                col1: c1,
+                col2: c2
+            });
+
+            chunkIdx += 2;
+        }
+
+        // 5. Render Exact Page & Column DOM Structures
+
+        pages.forEach((pageData) => {
+
+            const pageDiv = document.createElement('div');
+            pageDiv.className = 'pdf-page';
+
+            pageDiv.style.cssText = `
+                width: 210mm;
+                height: 297mm;
+                padding: 6.35mm;
+                box-sizing: border-box;
+                position: relative;
+                background: #ffffff;
+                overflow: hidden;
+                page-break-after: auto;
+                break-after: auto;
+            `;
+
+            const flexWrapper = document.createElement('div');
+
+            flexWrapper.style.cssText =
+                'display: flex; gap: 6mm; width: 197mm; height: 282mm; box-sizing: border-box; overflow: hidden;';
+
+            // Column 1
+
+            const col1Div = document.createElement('div');
+
+            col1Div.style.cssText =
+                'width: 95.5mm; height: 282mm; max-height: 282mm; overflow: hidden; box-sizing: border-box; font-size: 10pt; line-height: 1.35;';
+
+            if (pageData.col1) {
+                pageData.col1.forEach(el => {
+                    col1Div.appendChild(el.cloneNode(true));
+                });
+            }
+
+            flexWrapper.appendChild(col1Div);
+
+            // Column 2
+
+            const col2Div = document.createElement('div');
+
+            col2Div.style.cssText =
+                'width: 95.5mm; height: 282mm; max-height: 282mm; overflow: hidden; box-sizing: border-box; font-size: 10pt; line-height: 1.35;';
+
+            if (pageData.col2) {
+                pageData.col2.forEach(el => {
+                    col2Div.appendChild(el.cloneNode(true));
+                });
+            }
+
+            flexWrapper.appendChild(col2Div);
+
+            pageDiv.appendChild(flexWrapper);
+            exportContainer.appendChild(pageDiv);
+        });
+
+        // 6. Remove empty HTML page containers
+
+        const allPages = exportContainer.querySelectorAll('.pdf-page');
+
+        allPages.forEach(pageNode => {
+
+            const hasExercises =
+                pageNode.querySelectorAll('.quiz-exercise').length > 0;
+
+            const hasHeadings =
+                pageNode.querySelectorAll('h2, h3').length > 0;
+
+            const textContent = pageNode.innerText
+                ? pageNode.innerText.trim()
+                : '';
+
+            if (
+                !hasExercises &&
+                !hasHeadings &&
+                textContent.length < 10
+            ) {
+                pageNode.remove();
+            }
+        });
+
+        // 7. PDF Settings
+
+        const opt = {
+            margin: 0,
+
+            filename:
+                `EFL_Worksheet_${section.name.replace(/[^a-zA-Z0-9]/g, '_')}.pdf`,
+
+            image: {
+                type: 'jpeg',
+                quality: 0.98
+            },
+
+            html2canvas: {
+                scale: 2,
+                useCORS: true,
+                letterRendering: true
+            },
+
+            pagebreak: {
+                mode: []
+            },
+
+            jsPDF: {
+                unit: 'mm',
+                format: 'a4',
+                orientation: 'portrait',
+                putOnlyUsedFonts: true,
+                floatPrecision: 16
+            }
+        };
+
+        // 8. Generate PDF, clean trailing blank pages, then download
+
+        html2pdf()
+            .set(opt)
+            .from(exportContainer)
+            .outputPdf('blob')
+
+            .then(async pdfBlob => {
+
+                const cleanedPDF =
+                    await removeTrailingBlankPDFPages(pdfBlob);
+
+                const downloadURL =
+                    URL.createObjectURL(cleanedPDF);
+
+                const downloadLink =
+                    document.createElement('a');
+
+                downloadLink.href = downloadURL;
+                downloadLink.download = opt.filename;
+
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                downloadLink.remove();
+
+                setTimeout(() => {
+                    URL.revokeObjectURL(downloadURL);
+                }, 1000);
+
+                exportContainer.remove();
+            })
+
+            .catch(err => {
+
+                console.error("PDF Generation / Cleanup Error:", err);
+
+                exportContainer.remove();
+
+                alert(
+                    "PDF ERROR:\n\n" +
+                    (err.message || err.toString())
+                );
+            });
+    }
+
+    // =========================================================
+    // BUTTON INITIALIZATION
+    // =========================================================
+
+    document.addEventListener('click', (e) => {
+
+        if (e.target.closest('#sectionSelectorBtn')) {
+            setTimeout(injectPdfButtonDirectly, 30);
+            setTimeout(injectPdfButtonDirectly, 100);
+        }
+    });
+
+    if (document.readyState === 'loading') {
+
+        document.addEventListener(
+            'DOMContentLoaded',
+            injectPdfButtonDirectly
+        );
+
+    } else {
+
+        injectPdfButtonDirectly();
+    }
+
+    setInterval(injectPdfButtonDirectly, 400);
+
+})();
+</script>
+
+<script>
+(function() {
+    'use strict';
+
+    window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+            if (window.SCRAMBLE_SECTIONS && window.SCRAMBLE_SECTIONS.length > 0) {
+                const firstSection = window.SCRAMBLE_SECTIONS[0];
+                
+                // 1. Set internal state to the first section index
+                window.selectedSectionIndex = 0;
+                window.currentQuizSectionText = firstSection.text || '';
+                window.currentQuizSectionName = firstSection.name || '';
+
+                // 2. Load the text and parse/lock the quiz for the first section
+                if (typeof window.loadSectionWithLockedQuiz === 'function') {
+                    window.loadSectionWithLockedQuiz(firstSection.text);
+                } else if (typeof window.loadSectionByIndex === 'function') {
+                    window.loadSectionByIndex(0);
+                }
+
+                // 3. Inject the requested instruction line in blue, with a blank line beneath it
+                const editableZone = document.getElementById('editableTextZone') || document.getElementById('teleEdit');
+                if (editableZone) {
+                    // Create instruction paragraph in blue
+                    const instructionP = document.createElement('p');
+                    instructionP.className = 'line';
+                    instructionP.style.color = '#1976d2'; // Matches your theme's blue variable
+                    instructionP.textContent = 'This is a sample text. Select a topic to choose another text. Some topics have quizzes at the end.';
+
+                    // Create a blank spacer line beneath it
+                    const blankP = document.createElement('p');
+                    blankP.className = 'line';
+                    blankP.innerHTML = '&nbsp;';
+
+                    // Prepend both to the top of the editable text zone
+                    editableZone.insertBefore(blankP, editableZone.firstChild);
+                    editableZone.insertBefore(instructionP, editableZone.firstChild);
+                }
+
+                // 4. Update character and sentence metrics overlay
+                if (typeof window.updateTextOverlay === 'function') {
+                    window.updateTextOverlay();
+                } else if (typeof window.updateOverlay === 'function') {
+                    window.updateOverlay();
+                }
+
+                // 5. Ensure the category selection button remains in its neutral state
+                const sectionBtn = document.getElementById('sectionSelectorBtn');
+                if (sectionBtn) {
+                    sectionBtn.textContent = 'Topics';
+                }
+
+                console.log('First section and instruction banner auto-loaded successfully.');
+            }
+        }, 150);
+    });
+})();
+</script>
+
+=======
+>>>>>>> 8474f9fcd57602317a6a6a9b9e79de5c6dca371f
 </body>
 </html>

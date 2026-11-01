@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Classroom Smartboard Word Scramble Battle</title>
+<script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg: #f4f7f6;
+  --blue: #1976d2;
+  --blue-hover: #1565c0;
+  --input-border-blue: #cfe2f7;
+  --team-a-bg: #eef6ff;
+  --team-a-border: #1976d2;
+  --team-b-bg: #fff5f5;
+  --team-b-border: #e53935;
+  --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+html, body {
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--bg);
+  font-family: var(--font-main);
+  color: #222;
+}
+
+/* App Container Layout */
+.app-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+/* Top Navigation Bar */
+.top-bar-container {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 8px 8px;
+  flex-shrink: 0;
+}
+
+.top-bar-container input[type="text"],
+.top-bar-container button {
+  background: linear-gradient(145deg, #ffffff, #eaf6ff) !important;
+  color: var(--blue) !important;
+  border: 1px solid var(--input-border-blue) !important;
+  border-radius: 6px !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+  font-family: var(--font-main) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  height: 34px !important;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s, transform 0.08s;
+}
+
+.top-bar-container input[type="text"] {
+  width: 100px;
+  cursor: text;
+  color: #000 !important;
+}
+
+.top-bar-container button:hover {
+  background: linear-gradient(145deg, #ffffff, #d0e8ff) !important;
+  border-color: var(--blue) !important;
+}
+
+.top-bar-container button:active {
+  transform: scale(0.96);
+}
+
+.btn-submit-all {
+  background: linear-gradient(145deg, #ff9800, #f57c00) !important;
+  color: white !important;
+}
+
+/* Main Split Arena (Landscape Split View) */
+.battle-arena {
+  display: flex;
+  flex: 1;
+  gap: 12px;
+  min-height: 0;
+}
+
+.team-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-radius: 8px;
+  padding: 12px;
+  box-sizing: border-box;
+  background: #ffffff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+  min-width: 0;
+}
+
+.team-panel.team-a {
+  border: 2px solid var(--team-a-border);
+  background: linear-gradient(180deg, #ffffff 0%, var(--team-a-bg) 100%);
+}
+
+.team-panel.team-b {
+  border: 2px solid var(--team-b-border);
+  background: linear-gradient(180deg, #ffffff 0%, var(--team-b-bg) 100%);
+}
+
+.team-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 2px solid rgba(0,0,0,0.08);
+  flex-shrink: 0;
+  justify-content: space-between;
+}
+
+.team-title {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.team-a .team-title { color: #1565c0; }
+.team-b .team-title { color: #c62828; }
+
+.sentence-tracker {
+  font-size: 13px;
+  font-weight: bold;
+  color: #666;
+  font-family: var(--font-mono);
+}
+
+.btn-stop {
+  background: #d32f2f;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 16px;
+  font-size: 14px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: transform 0.1s, background 0.2s;
+}
+
+.btn-stop:hover:not(:disabled) {
+  background: #b71c1c;
+}
+
+.btn-stop:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.btn-stop:disabled {
+  background: #9e9e9e;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.exercise-viewport {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 16px;
+  background: #ffffff;
+  border: 1px solid var(--input-border-blue);
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  touch-action: none;
+}
+
+.sentence-row {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 90px;
+}
+
+.word-tile {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 18px;
+  border: 2px solid var(--blue);
+  border-radius: 8px;
+  background: linear-gradient(145deg, #ffffff, #eaf6ff);
+  color: #1565c0;
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: none;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+  transition: border-color 0.15s, transform 0.1s;
+  position: relative;
+}
+
+.word-tile.touch-dragging {
+  position: fixed;
+  z-index: 10000;
+  pointer-events: none;
+  opacity: 0.85;
+  transform: scale(1.1);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.25);
+}
+
+.word-tile.selected {
+  background: #ffecb3;
+  border-color: #ffa000;
+  color: #000;
+  transform: scale(1.08);
+}
+
+.punctuation-span {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 0 2px;
+  color: #333;
+}
+
+/* Result Feedback Badges */
+.status-badge {
+  display: block;
+  margin-top: 14px;
+  font-weight: bold;
+  font-size: 16px;
+  padding: 6px 16px;
+  border-radius: 6px;
+  text-align: center;
+}
+
+.status-correct { background: #e8f5e9; color: #2e7d32; border: 1px solid #a5d6a7; }
+.status-incorrect { background: #ffebee; color: #c62828; border: 1px solid #ef9a9a; }
+
+/* Bottom Control Panel & Scoreboard */
+.bottom-panel {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.scoreboard-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #fff;
+  border: 1px solid var(--input-border-blue);
+  border-radius: 8px;
+  padding: 8px 16px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.score-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.score-title {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.score-val {
+  font-size: 20px;
+  font-weight: 800;
+  font-family: var(--font-mono);
+}
+
+.team-a-score { color: #1565c0; }
+.team-b-score { color: #c62828; }
+
+.bottom-actions {
+  display: flex;
+  justify-content: center;
+}
+
+.btn-next-shared {
+  width: 100%;
+  height: 42px;
+  background: linear-gradient(145deg, #4caf50, #388e3c);
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+  transition: transform 0.08s, background 0.2s;
+}
+
+.btn-next-shared:hover:not(:disabled) {
+  background: linear-gradient(145deg, #43a047, #2e7d32);
+}
+
+.btn-next-shared:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn-next-shared:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Scoreboard Output Container */
+.scoreboard-output-box {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.4;
+  background: #fff;
+  border-radius: 6px;
+  padding: 8px;
+  border: 1px solid var(--input-border-blue);
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+#scrambleScoreOutput {
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  margin: 0;
+  padding: 0;
+  font-family: monospace;
+  font-weight: bold;
+}
+
+.action-buttons {
+  margin-top: 6px;
+  display: flex;
+  gap: 6px;
+}
+
+.action-buttons button {
+  flex: 1 1 0;
+  min-width: 0;
+  background: linear-gradient(145deg, #ffffff, #eaf6ff) !important;
+  color: var(--blue) !important;
+  border: 1px solid var(--input-border-blue) !important;
+  border-radius: 6px !important;
+  font-weight: bold;
+  height: 28px;
+  cursor: pointer;
+}
+
+/* Modals */
+#sectionModalRoot, #instructionsRoot {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+}
+
+#sectionModalBackdrop, #instructionsBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+#sectionModalContent, #instructionsModal {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: min(500px, 92vw);
+  max-height: min(80vh, calc(100dvh - 16px));
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--input-border-blue);
+}
+
+#sectionModalHeader, #instructionsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+#sectionModalClose, #instructionsBack {
+  background: none;
+  border: none;
+  color: var(--blue);
+  font-size: 22px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#sectionListContainer, #instructionsContent {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.section-item {
+  height: 32px;
+  padding: 0 10px;
+  margin-bottom: 6px;
+  background: #eaf6ff;
+  border: 1px solid var(--input-border-blue);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--blue);
+  display: flex;
+  align-items: center;
+}
+
+.section-item:hover {
+  background: #d0e8ff;
+}
+
+/* Green Neon Border */
+#green-border {
+  position: fixed;
+  inset: 0;
+  border: 10px solid #39FF14;
+  box-sizing: border-box;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+#copyrightSection {
+  font-size: 10px;
+  color: #666;
+  text-align: center;
+  padding-top: 2px;
+}
+</style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Top Navigation Bar -->
+  <div class="top-bar-container">
+    <input type="text" id="scrambleId" placeholder="ID">
+    <button id="sectionSelectorBtn" type="button">Topics</button>
+    <button id="instructionsBtn" type="button">Instructions</button>
+    <button class="btn-submit-all" id="submitAllBtn" type="button">Submit Final</button>
+  </div>
+
+  <!-- Battle Arena Split View -->
+  <div class="battle-arena">
+    <!-- Team A Panel -->
+    <div class="team-panel team-a">
+      <div class="team-header team-a-header">
+        <button class="btn-stop" id="stopTeamA" type="button">STOP A</button>
+        <span class="sentence-tracker" id="trackerA">Sent 1/10</span>
+        <span class="team-title">TEAM A</span>
+      </div>
+      <div class="exercise-viewport" id="viewportTeamA"></div>
+    </div>
+
+    <!-- Team B Panel -->
+    <div class="team-panel team-b">
+      <div class="team-header team-b-header">
+        <span class="team-title">TEAM B</span>
+        <span class="sentence-tracker" id="trackerB">Sent 1/10</span>
+        <button class="btn-stop" id="stopTeamB" type="button">STOP B</button>
+      </div>
+      <div class="exercise-viewport" id="viewportTeamB"></div>
+    </div>
+  </div>
+
+  <!-- Bottom Panel & Scoreboard -->
+  <div class="bottom-panel">
+    <div class="scoreboard-bar">
+      <div class="score-box">
+        <span class="score-title team-a-score">Team A Score:</span>
+        <span class="score-val team-a-score" id="scoreDisplayA">0 / 0 (0%)</span>
+      </div>
+      <div class="score-box">
+        <span class="score-title team-b-score">Team B Score:</span>
+        <span class="score-val team-b-score" id="scoreDisplayB">0 / 0 (0%)</span>
+      </div>
+    </div>
+
+    <div class="bottom-actions">
+      <button class="btn-next-shared" id="nextSharedBtn" type="button" disabled>Next Sentence</button>
+    </div>
+
+    <!-- Scoreboard Output Box -->
+    <div class="scoreboard-output-box" id="scrambleScoreboardBox">
+      <pre id="scrambleScoreOutput"></pre>
+      <div class="action-buttons" id="scoreboardBtns">
+        <button id="scrambleCopyBtn" type="button">Copy</button>
+        <button id="scrambleDownloadTextBtn" type="button">↓TXT</button>
+        <button id="scrambleDownloadPngBtn" type="button">↓PNG</button>
+      </div>
+    </div>
+
+    <div id="copyrightSection">
+      &copy; <span id="currentYear"></span> Perfectly Practical English
+    </div>
+  </div>
+</div>
+
+<!-- Section Selection Modal -->
+<div id="sectionModalRoot">
+  <div id="sectionModalBackdrop"></div>
+  <div id="sectionModalContent">
+    <div id="sectionModalHeader">
+      <span>Topics</span>
+      <button id="sectionModalClose" type="button">✕</button>
+    </div>
+    <div id="sectionListContainer"></div>
+  </div>
+</div>
+
+<!-- Instructions Modal -->
+<div id="instructionsRoot">
+  <div id="instructionsBackdrop"></div>
+  <div id="instructionsModal">
+    <div id="instructionsHeader">
+      <span>Instructions</span>
+      <button id="instructionsBack" type="button">✕</button>
+    </div>
+    <div id="instructionsContent"></div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('currentYear').textContent = new Date().getFullYear();
+</script>
+
+<script>
+const scrambleQuestionsSource = `
+~Determiners
+I saw |a| cat in the garden.
+She wants |some| water.
+There isn’t |any| milk left.
+He bought |an| umbrella.
+We need |more| time.
+She has |few| friends here.
+I don’t have |much| money.
+They own |several| houses.
+He ate |the| apple.
+She found |this| book helpful.
+
+~Nouns
+The |dog| barked loudly.
+Her |happiness| was obvious.
+The |children| are playing.
+That |city| is very old.
+His |advice| was useful.
+The |team| is winning.
+She opened the |box|.
+We visited the |museum|.
+The |teacher| arrived early.
+Music gives me |joy|.
+
+~Pronouns
+|She| is my best friend.
+This gift is |mine|.
+I spoke to |him|.
+|They| are waiting outside.
+The book belongs to |her|.
+I hurt |myself|.
+|We| are ready.
+Give it to |them|.
+That seat is |yours|.
+He blamed |himself|.
+`;
+
+let parsedSections = [];
+let currentSectionIndex = 0;
+let currentSentencesRaw = [];
+
+let currentIndex = 0;
+let checkedA = [];
+let checkedB = [];
+let scoreA = 0;
+let scoreB = 0;
+
+function parseSections(raw) {
+  return raw
+    .split(/\n(?=~)/)
+    .map(b => b.trim())
+    .filter(b => b.startsWith("~"))
+    .map(block => {
+      const lines = block.split('\n');
+      const name = lines.shift().replace(/^~+/, '').trim();
+      const text = lines.join('\n').trim();
+      return { name, text };
+    });
+}
+
+parsedSections = parseSections(scrambleQuestionsSource);
+
+// True Independent Multi-Touch Drag-and-Drop & Tap-Swap Support
+function setupTrueMultiTouchInteractions(container, teamKey) {
+  const activeTouches = new Map(); // touchId -> { tile, clone, offsetX, offsetY }
+
+  container.addEventListener('touchstart', (e) => {
+    if (isTeamLocked(teamKey)) return;
+    
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i];
+      const tile = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.word-tile');
+      
+      if (tile && container.contains(tile)) {
+        e.preventDefault();
+        const rect = tile.getBoundingClientRect();
+        
+        // Store active touch state for this specific finger
+        activeTouches.set(touch.identifier, {
+          tile: tile,
+          startX: touch.clientX,
+          startY: touch.clientY,
+          hasMoved: false,
+          clone: null,
+          rect: rect
+        });
+      }
+    }
+  }, { passive: false });
+
+  container.addEventListener('touchmove', (e) => {
+    if (isTeamLocked(teamKey)) return;
+
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i];
+      const state = activeTouches.get(touch.identifier);
+      if (!state) continue;
+
+      e.preventDefault();
+      const dx = touch.clientX - state.startX;
+      const dy = touch.clientY - state.startY;
+
+      // If moved past threshold, create floating drag clone
+      if (!state.hasMoved && (Math.abs(dx) > 8 || Math.abs(dy) > 8)) {
+        state.hasMoved = true;
+        state.tile.style.opacity = '0.4';
+
+        const clone = state.tile.cloneNode(true);
+        clone.className = 'word-tile touch-dragging';
+        clone.style.width = state.rect.width + 'px';
+        clone.style.height = state.rect.height + 'px';
+        clone.style.left = (state.rect.left) + 'px';
+        clone.style.top = (state.rect.top) + 'px';
+        document.body.appendChild(clone);
+        state.clone = clone;
+      }
+
+      if (state.hasMoved && state.clone) {
+        state.clone.style.left = (state.rect.left + dx) + 'px';
+        state.clone.style.top = (state.rect.top + dy) + 'px';
+      }
+    }
+  }, { passive: false });
+
+  const handleTouchEndOrCancel = (e) => {
+    if (isTeamLocked(teamKey)) return;
+
+    for (let i = 0; i < e.changedTouches.length; i++) {
+      const touch = e.changedTouches[i];
+      const state = activeTouches.get(touch.identifier);
+      if (!state) continue;
+
+      if (state.hasMoved) {
+        // Find drop target under finger
+        const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.word-tile');
+        if (dropTarget && dropTarget !== state.tile && container.contains(dropTarget)) {
+          const tmp = state.tile.textContent;
+          state.tile.textContent = dropTarget.textContent;
+          dropTarget.textContent = tmp;
+        }
+        state.tile.style.opacity = '1';
+        if (state.clone) state.clone.remove();
+      } else {
+        // Tap-to-swap behavior for precise touch selection
+        const allTilesInRow = Array.from(container.querySelectorAll('.word-tile'));
+        const currentlySelected = container.querySelector('.word-tile.selected');
+
+        if (!currentlySelected) {
+          state.tile.classList.add('selected');
+        } else if (currentlySelected === state.tile) {
+          state.tile.classList.remove('selected');
+        } else {
+          const tmp = currentlySelected.textContent;
+          currentlySelected.textContent = state.tile.textContent;
+          state.tile.textContent = tmp;
+          currentlySelected.classList.remove('selected');
+        }
+      }
+
+      activeTouches.delete(touch.identifier);
+    }
+  };
+
+  container.addEventListener('touchend', handleTouchEndOrCancel);
+  container.addEventListener('touchcancel', handleTouchEndOrCancel);
+
+  // Mouse support fallback for desktop testing
+  let selectedTile = null;
+  container.addEventListener('click', (e) => {
+    if (isTeamLocked(teamKey)) return;
+    const tile = e.target.closest('.word-tile');
+    if (!tile) return;
+
+    if (!selectedTile) {
+      selectedTile = tile;
+      tile.classList.add('selected');
+    } else if (selectedTile === tile) {
+      selectedTile.classList.remove('selected');
+      selectedTile = null;
+    } else {
+      const tmp = selectedTile.textContent;
+      selectedTile.textContent = tile.textContent;
+      tile.textContent = tmp;
+      selectedTile.classList.remove('selected');
+      selectedTile = null;
+    }
+  });
+}
+
+function isTeamLocked(teamKey) {
+  return teamKey === 'A' ? !!checkedA[currentIndex] : !!checkedB[currentIndex];
+}
+
+function renderSentenceForTeam(teamKey) {
+  const isTeamA = teamKey === 'A';
+  const viewport = document.getElementById(isTeamA ? 'viewportTeamA' : 'viewportTeamB');
+  const tracker = document.getElementById(isTeamA ? 'trackerA' : 'trackerB');
+  const stopBtn = document.getElementById(isTeamA ? 'stopTeamA' : 'stopTeamB');
+
+  tracker.textContent = `Sent ${Math.min(currentIndex + 1, currentSentencesRaw.length)}/${currentSentencesRaw.length}`;
+  viewport.innerHTML = "";
+
+  if (currentIndex >= currentSentencesRaw.length) {
+    viewport.innerHTML = `<div style="font-size:18px; font-weight:bold; color:#4caf50;">Section Finished!</div>`;
+    stopBtn.disabled = true;
+    return;
+  }
+
+  const sentenceText = currentSentencesRaw[currentIndex];
+  const row = document.createElement('div');
+  row.className = 'sentence-row';
+
+  const tokens = sentenceText.match(/[\w'-]+|[.,!?;:"“”‘’()]/g) || [];
+  const wordTokens = tokens.filter(t => /\w/.test(t));
+  const scrambledWords = [...wordTokens].sort((a, b) => a.localeCompare(b));
+
+  tokens.forEach(tok => {
+    if (/\w/.test(tok)) {
+      const tile = document.createElement('span');
+      tile.className = 'word-tile';
+      tile.textContent = scrambledWords.shift();
+      row.appendChild(tile);
+    } else {
+      const punct = document.createElement('span');
+      punct.className = 'punctuation-span';
+      punct.textContent = tok;
+      row.appendChild(punct);
+    }
+  });
+
+  viewport.appendChild(row);
+
+  const checkRecord = isTeamA ? checkedA[currentIndex] : checkedB[currentIndex];
+  stopBtn.disabled = !!checkRecord;
+
+  if (checkRecord) {
+    displayResultBadge(viewport, checkRecord.isCorrect);
+  }
+}
+
+function displayResultBadge(viewport, isCorrect) {
+  const badge = document.createElement('span');
+  badge.className = `status-badge ${isCorrect ? 'status-correct' : 'status-incorrect'}`;
+  badge.textContent = isCorrect ? '✓ Correct' : '✗ Incorrect';
+  viewport.appendChild(badge);
+}
+
+function loadTopicIndex(index) {
+  if (index < 0 || index >= parsedSections.length) return;
+  currentSectionIndex = index;
+  const section = parsedSections[index];
+  document.getElementById('sectionSelectorBtn').textContent = section.name;
+
+  currentSentencesRaw = section.text.split('\n').filter(Boolean);
+  
+  currentIndex = 0;
+  checkedA = new Array(currentSentencesRaw.length).fill(null);
+  checkedB = new Array(currentSentencesRaw.length).fill(null);
+  scoreA = 0;
+  scoreB = 0;
+
+  document.getElementById('nextSharedBtn').disabled = true;
+
+  renderSentenceForTeam('A');
+  renderSentenceForTeam('B');
+  updateScoreboardDisplays();
+}
+
+function evaluateCurrentSentence(teamKey) {
+  const isTeamA = teamKey === 'A';
+  if (currentIndex >= currentSentencesRaw.length) return;
+
+  const viewport = document.getElementById(isTeamA ? 'viewportTeamA' : 'viewportTeamB');
+  const userWords = Array.from(viewport.querySelectorAll('.word-tile')).map(t => t.textContent.trim());
+  const originalTokens = currentSentencesRaw[currentIndex].match(/[\w'-]+|[.,!?;:"“”‘’()]/g) || [];
+  const targetWords = originalTokens.filter(t => /\w/.test(t));
+
+  const isCorrect = userWords.length === targetWords.length &&
+                    userWords.every((w, wIdx) => w === targetWords[wIdx]);
+
+  if (isTeamA) {
+    checkedA[currentIndex] = { isCorrect };
+    if (isCorrect) scoreA++;
+  } else {
+    checkedB[currentIndex] = { isCorrect };
+    if (isCorrect) scoreB++;
+  }
+
+  document.getElementById(isTeamA ? 'stopTeamA' : 'stopTeamB').disabled = true;
+  displayResultBadge(viewport, isCorrect);
+  updateScoreboardDisplays();
+
+  const evaluatedA = !!checkedA[currentIndex];
+  const evaluatedB = !!checkedB[currentIndex];
+  const correctA = checkedA[currentIndex]?.isCorrect;
+  const correctB = checkedB[currentIndex]?.isCorrect;
+
+  if (correctA || correctB || (evaluatedA && evaluatedB)) {
+    document.getElementById('nextSharedBtn').disabled = false;
+  }
+}
+
+function goToNextSentence() {
+  if (currentIndex < currentSentencesRaw.length) {
+    currentIndex++;
+    renderSentenceForTeam('A');
+    renderSentenceForTeam('B');
+    document.getElementById('nextSharedBtn').disabled = true;
+  }
+}
+
+function updateScoreboardDisplays() {
+  const total = currentSentencesRaw.length;
+  const pctA = total ? Math.round((scoreA / total) * 100) : 0;
+  const pctB = total ? Math.round((scoreB / total) * 100) : 0;
+
+  document.getElementById('scoreDisplayA').textContent = `${scoreA} / ${total} (${pctA}%)`;
+  document.getElementById('scoreDisplayB').textContent = `${scoreB} / ${total} (${pctB}%)`;
+}
+
+function getScoreboardFilename(extension) {
+  const scoreOutput = document.getElementById('scrambleScoreOutput');
+  if (scoreOutput && scoreOutput.textContent.trim()) {
+    let firstLine = scoreOutput.textContent.split('\n')[0];
+    let baseName = firstLine
+      .replace(/\|/g, '_')
+      .replace(/\s+/g, '_')
+      .replace(/[:\/]/g, '-');
+    return baseName + '.' + extension;
+  }
+  return 'scoreboard.' + extension;
+}
+
+async function submitFinalScores() {
+  const total = currentSentencesRaw.length;
+  if (total === 0) return;
+
+  const currentFile = window.location.pathname.split('/').pop() || 'unknown.html';
+  const filenameWithoutExt = currentFile.replace(/\.[^/.]+$/, "").split('?')[0];
+
+  const rawId = document.getElementById('scrambleId').value.trim() || 'Guest';
+  const sectionName = parsedSections[currentSectionIndex]?.name || 'Scramble';
+  const now = new Date();
+  const pad = n => n.toString().padStart(2,'0');
+  const dateStr = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+  const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  
+  const pctA = Math.round((scoreA / total) * 100) + '%';
+  const pctB = Math.round((scoreB / total) * 100) + '%';
+
+  const scoreText = `${filenameWithoutExt}|${sectionName}|ID_${rawId}|${dateStr}|${timeStr}|TeamA_${scoreA}/${total}_${pctA}|TeamB_${scoreB}/${total}_${pctB}`;
+
+  const scoreOutput = document.getElementById('scrambleScoreOutput');
+  scoreOutput.textContent += (scoreOutput.textContent ? '\n' : '') + scoreText;
+  document.getElementById('scrambleScoreboardBox').style.display = 'block';
+
+  if (window.supabaseClient) {
+    try {
+      await window.supabaseClient.from("scoreboard_raw").insert([{ result_text: scoreText }]);
+    } catch(e) {
+      console.error("Supabase upload error:", e);
+    }
+  }
+}
+
+document.getElementById('scrambleCopyBtn').addEventListener('click', () => {
+  navigator.clipboard.writeText(document.getElementById('scrambleScoreOutput').textContent).then(() => alert('Copied to clipboard!'));
+});
+
+document.getElementById('scrambleDownloadTextBtn').addEventListener('click', () => {
+  const textContent = document.getElementById('scrambleScoreOutput').textContent;
+  const safeFilename = getScoreboardFilename('txt');
+  const blob = new Blob([textContent], { type: 'text/plain' });
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = safeFilename;
+  link.click();
+});
+
+document.getElementById('scrambleDownloadPngBtn').addEventListener('click', () => {
+  const resultEl = document.getElementById('scrambleScoreOutput');
+  const safeFilename = getScoreboardFilename('png');
+
+  const wrapper = document.createElement('div');
+  wrapper.style.background = '#ffffff';
+  wrapper.style.padding = '10px';
+  wrapper.style.display = 'inline-block';
+  wrapper.style.fontFamily = getComputedStyle(resultEl).fontFamily;
+  wrapper.style.fontSize = getComputedStyle(resultEl).fontSize;
+  wrapper.style.color = getComputedStyle(resultEl).color;
+
+  const clone = resultEl.cloneNode(true);
+  wrapper.appendChild(clone);
+  document.body.appendChild(wrapper);
+
+  html2canvas(wrapper, { backgroundColor: '#ffffff' }).then(canvas => {
+    const link = document.createElement('a');
+    link.href = canvas.toDataURL('image/png');
+    link.download = safeFilename;
+    link.click();
+    document.body.removeChild(wrapper);
+  });
+});
+
+const modalRoot = document.getElementById("sectionModalRoot");
+const listContainer = document.getElementById("sectionListContainer");
+
+function openSectionModal() {
+  listContainer.innerHTML = "";
+  parsedSections.forEach((sec, idx) => {
+    const item = document.createElement("div");
+    item.className = "section-item";
+    item.textContent = sec.name;
+    item.addEventListener("click", () => {
+      loadTopicIndex(idx);
+      closeSectionModal();
+    });
+    listContainer.appendChild(item);
+  });
+  modalRoot.style.display = "block";
+}
+
+function closeSectionModal() {
+  modalRoot.style.display = "none";
+}
+
+document.getElementById("sectionSelectorBtn").onclick = openSectionModal;
+document.getElementById("sectionModalClose").onclick = closeSectionModal;
+document.getElementById("sectionModalBackdrop").onclick = closeSectionModal;
+
+const instructionsRoot = document.getElementById("instructionsRoot");
+document.getElementById("instructionsBtn").onclick = () => {
+  document.getElementById("instructionsContent").innerHTML = `
+    <h3>Classroom Smartboard Scramble Battle</h3>
+    <p>• True Multi-Touch: Multiple students can drag and swap tiles simultaneously on both sides.</p>
+    <p>• Team A's <strong>STOP A</strong> button is conveniently located on the far left.</p>
+    <p>• Click <strong>STOP A</strong> or <strong>STOP B</strong> to check the current sentence.</p>
+    <p>• The shared <strong>Next Sentence</strong> button unlocks once a correct answer is given.</p>
+  `;
+  instructionsRoot.style.display = "block";
+};
+document.getElementById("instructionsBack").onclick = () => instructionsRoot.style.display = "none";
+document.getElementById("instructionsBackdrop").onclick = () => instructionsRoot.style.display = "none";
+
+document.getElementById('stopTeamA').onclick = () => evaluateCurrentSentence('A');
+document.getElementById('stopTeamB').onclick = () => evaluateCurrentSentence('B');
+
+document.getElementById('nextSharedBtn').onclick = goToNextSentence;
+document.getElementById('submitAllBtn').onclick = submitFinalScores;
+
+// Attach True Multi-Touch Handlers to Viewports
+setupTrueMultiTouchInteractions(document.getElementById('viewportTeamA'), 'A');
+setupTrueMultiTouchInteractions(document.getElementById('viewportTeamB'), 'B');
+
+window.addEventListener('DOMContentLoaded', () => {
+  if (parsedSections.length > 0) {
+    loadTopicIndex(0);
+  }
+});
+</script>
+
+<script>
+window.supabaseClient = window.supabase?.createClient(
+  'https://etwwriloppklhhkmswpr.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV0d3dyaWxvcHBrbGhoa21zd3ByIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1NDM3NTcsImV4cCI6MjA5NDExOTc1N30.rmquTqYW6WqS7jZUbHM_gWecka3jkiWzYb14eJ10hpQ'
+);
+</script>
+
+<script>
+const borderDiv = document.createElement("div");
+borderDiv.id = "green-border";
+document.body.appendChild(borderDiv);
+</script>
+
+<script>
+(function() {
+    'use strict';
+
+    function initClassroomSampleAndBanner() {
+        // 1. Ensure first section auto-loads properly once parsed
+        if (typeof parsedSections !== 'undefined' && parsedSections.length > 0) {
+            if (typeof currentSectionIndex === 'undefined') {
+                currentSectionIndex = 0;
+            }
+            if (typeof loadTopicIndex === 'function') {
+                loadTopicIndex(0);
+            }
+            const sectionBtn = document.getElementById('sectionSelectorBtn');
+            if (sectionBtn) {
+                sectionBtn.textContent = 'Topics';
+            }
+        } else {
+            // Retry briefly if the section parser is still finishing up
+            setTimeout(initClassroomSampleAndBanner, 50);
+            return;
+        }
+
+        // 2. Stamp the clean, compact sample banner inside the app container above top controls
+        const appContainer = document.querySelector('.app-container');
+        if (appContainer && !document.getElementById('layoutSampleBanner')) {
+            const banner = document.createElement('div');
+            banner.id = 'layoutSampleBanner';
+            banner.style.cssText = `
+                position: relative;
+                z-index: 99999;
+                background: #f8fafc;
+                color: #000000;
+                border: 1px solid #cbd5e1;
+                border-radius: 4px;
+                padding: 6px 8px;
+                margin-bottom: 6px;
+                font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+                font-size: 11.5px;
+                font-weight: 700;
+                text-align: center;
+                letter-spacing: 0.2px;
+                box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+                width: 100%;
+                box-sizing: border-box;
+                white-space: nowrap;
+                overflow: hidden;
+                flex-shrink: 0;
+            `;
+            banner.textContent = '⚠️ This is sample game. Select a topic to play. ⚠️';
+
+            const topBar = appContainer.querySelector('.top-bar-container');
+            if (topBar) {
+                appContainer.insertBefore(banner, topBar);
+            } else {
+                appContainer.prepend(banner);
+            }
+        }
+
+        // 3. Automatically remove the banner when any real topic is selected from the modal
+        const listContainer = document.getElementById('sectionListContainer');
+        if (listContainer && !listContainer.dataset.bannerListenerAttached) {
+            listContainer.dataset.bannerListenerAttached = 'true';
+            listContainer.addEventListener('click', (e) => {
+                const item = e.target.closest('.section-item');
+                if (item) {
+                    const banner = document.getElementById('layoutSampleBanner');
+                    if (banner) banner.remove();
+                }
+            });
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        window.addEventListener('DOMContentLoaded', initClassroomSampleAndBanner);
+    } else {
+        initClassroomSampleAndBanner();
+    }
+    
+    // Fallback trigger to guarantee execution after async data resolution
+    setTimeout(initClassroomSampleAndBanner, 200);
+})();
+</script>
+
+</body>
+</html>
