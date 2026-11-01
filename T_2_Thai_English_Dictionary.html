@@ -115,8 +115,7 @@ body{
 <!-- Top Tile -->
 <div class="tile red top-tile light-text">
   <div>
-    <strong>English - Thai</strong><br>
-    <span class="small-text"></span>
+    <strong>English - Thai</strong>
   </div>
 </div>
 
@@ -10917,259 +10916,6 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 <script>
-
-(function(){
-
-/* =========================
-   RAW INSTRUCTIONS TEXT
-========================= */
-
-const RAW_TEXT = `
-
-How to use this page...
-
-1. Type an English word and the description, Phonetic spelling and Thai word will appear.
-Feature in progress: Type a Thai word and the description, Phonetic spelling and English word will appear.
-
-`;
-
-
-/* =========================
-   RAW TEXT PARSER
-========================= */
-
-function parseRawInstructions(text){
-
-  const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
-  const html = [];
-
-  lines.forEach(line => {
-
-    if(line === "---"){
-      html.push(`<hr>`);
-      return;
-    }
-
-    if(/^\d+\./.test(line)){
-      html.push(`<p>${line}</p>`);
-      return;
-    }
-
-    if(!/[.!?:]$/.test(line)){
-      html.push(`<h3>${line}</h3>`);
-      return;
-    }
-
-    html.push(`<p>${line}</p>`);
-  });
-
-  return html.join("");
-}
-
-
-/* =========================
-   CREATE STYLE
-========================= */
-
-const style = document.createElement("style");
-
-style.textContent = `
-#instructionsBtn{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  padding:10px 16px;
-  background:#2e8b57;
-  color:#fff;
-  border:none;
-  border-radius:6px;
-  font-weight:600;
-  cursor:pointer;
-  box-shadow:0 4px 8px rgba(0,0,0,0.6);
-  z-index:99998;
-}
-
-#instructionsBtn:hover{
-  background:#257047;
-}
-
-#instructionsRoot{
-  position:fixed;
-  inset:0;
-  display:none;
-  z-index:99999;
-}
-
-#instructionsBackdrop{
-  position:absolute;
-  inset:0;
-  background:rgba(0,0,0,.35);
-}
-
-#instructionsModal{
-  position:absolute;
-  top:25px;
-  left:50%;
-  transform:translateX(-50%);
-  width:min(650px,90vw);
-  max-height:90vh;
-  background:#fff;
-  border-radius:10px;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
-
-#instructionsHeader{
-  padding:12px 16px;
-  border-bottom:1px solid #ddd;
-  display:flex;
-  align-items:center;
-  gap:10px;
-}
-
-#instructionsTitle{
-  color:#1976d2;
-  font-weight:600;
-  font-size:1.1em;
-}
-
-#instructionsBack{
-  border:none;
-  background:none;
-  font-size:20px;
-  cursor:pointer;
-  color:#1976d2;
-  font-weight:600;
-}
-
-#instructionsContent{
-  padding:2px 18px 18px 18px;
-  overflow-y:auto;
-  line-height:1.6;
-  scrollbar-width:none;
-  -ms-overflow-style:none;
-}
-
-#instructionsContent::-webkit-scrollbar{
-  display:none;
-}
-
-#instructionsContent h3{
-  color:#1976d2;
-  margin:12px 0 4px 0;
-  font-weight:600;
-}
-
-#instructionsContent p{
-  margin:4px 0;
-}
-
-#instructionsContent hr{
-  margin:12px 0;
-}
-`;
-
-document.head.appendChild(style);
-
-
-/* =========================
-   CREATE BUTTON
-========================= */
-
-const btn = document.createElement("button");
-btn.id = "instructionsBtn";
-btn.textContent = "Instructions";
-
-document.body.appendChild(btn);
-
-
-/* =========================
-   CREATE MODAL
-========================= */
-
-const root = document.createElement("div");
-root.id = "instructionsRoot";
-
-root.innerHTML = `
-<div id="instructionsBackdrop"></div>
-
-<div id="instructionsModal">
-
-  <div id="instructionsHeader">
-    <button id="instructionsBack">←</button>
-    <span id="instructionsTitle">Instructions</span>
-  </div>
-
-  <div id="instructionsContent">
-    ${parseRawInstructions(RAW_TEXT)}
-  </div>
-
-</div>
-`;
-
-document.body.appendChild(root);
-
-
-/* =========================
-   SCROLL LOCK
-========================= */
-
-const modalContent = document.getElementById("instructionsContent");
-
-modalContent.addEventListener("wheel", e=>{
-  e.stopPropagation();
-},{passive:false});
-
-modalContent.addEventListener("touchmove", e=>{
-  e.stopPropagation();
-},{passive:false});
-
-
-/* =========================
-   OPEN / CLOSE
-========================= */
-
-function openModal(){
-  root.style.display="block";
-  document.body.style.overflow="hidden";
-  document.documentElement.style.overflow="hidden";
-}
-
-function closeModal(){
-  root.style.display="none";
-  document.body.style.overflow="";
-  document.documentElement.style.overflow="";
-}
-
-btn.onclick = openModal;
-
-document.getElementById("instructionsBack").onclick = closeModal;
-document.getElementById("instructionsBackdrop").onclick = closeModal;
-
-document.addEventListener("keydown", e=>{
-  if(e.key==="Escape") closeModal();
-});
-
-/* =========================
-   DYNAMIC BODY PADDING FOR BUTTON
-========================= */
-
-function adjustBodyPadding(){
-  const btnHeight = btn.offsetHeight + -25; // include some gap
-  document.body.style.paddingBottom = `${btnHeight}px`;
-}
-
-// Initial adjustment
-adjustBodyPadding();
-
-// Update if window is resized (responsive)
-window.addEventListener("resize", adjustBodyPadding);
-
-})();
-</script>
-
-<script>
 (function() {
   // Prevent pinch-to-zoom
   function preventPinch(e) {
@@ -11198,7 +10944,6 @@ window.addEventListener("resize", adjustBodyPadding);
 </script>
 
 <script>
-
 (function(){
 
 /* =========================
@@ -11208,17 +10953,15 @@ window.addEventListener("resize", adjustBodyPadding);
 const RAW_TEXT = `
 How to use this page…
 
-• Overview: Type an English or Thai word into the designated input fields to instantly look up matching translations, definitions, and phonetics in a responsive Thai-English dictionary interface.
+- Overview: Type an English or Thai word into the designated input fields to instantly look up matching translations, definitions, and phonetics in a responsive Thai-English dictionary interface.
 
-• English Input: Type search terms into the English - Thai text box to query terms.
+- English Input: Type search terms into the English - Thai text box to query terms.
 
-• Auto: Suggestion Engine: As you type, inline auto-suggestions appear in the background to help complete your word entry.
+- Auto Suggestion Engine: As you type, inline auto-suggestions appear in the background to help complete your word entry.
 
-• Description and Phonetics: View secondary details such as definitions and phonetic pronunciations populated automatically across the corresponding info tiles.
+- Description and Phonetics: View secondary details such as definitions and phonetic pronunciations populated automatically across the corresponding info tiles.
 
-• Thai Output: Read the matching Thai script and transliteration displayed directly in the lower output field.
-
-
+- Thai Output: Read the matching Thai script and transliteration displayed directly in the lower output field.
 `;
 
 
@@ -11227,27 +10970,22 @@ How to use this page…
 ========================= */
 
 function parseRawInstructions(text){
-
   const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
   const html = [];
 
   lines.forEach(line => {
-
     if(line === "---"){
       html.push(`<hr>`);
       return;
     }
-
     if(/^\d+\./.test(line)){
       html.push(`<p>${line}</p>`);
       return;
     }
-
     if(!/[.!?:]$/.test(line)){
       html.push(`<h3>${line}</h3>`);
       return;
     }
-
     html.push(`<p>${line}</p>`);
   });
 
@@ -11418,18 +11156,14 @@ root.id = "instructionsRoot";
 
 root.innerHTML = `
 <div id="instructionsBackdrop"></div>
-
 <div id="instructionsModal">
-
   <div id="instructionsHeader">
     <span>Instructions</span>
     <button id="instructionsBack" type="button">✕</button>
   </div>
-
   <div id="instructionsContent">
     ${parseRawInstructions(RAW_TEXT)}
   </div>
-
 </div>
 `;
 
@@ -11478,7 +11212,6 @@ document.addEventListener("keydown", e=>{
 
 })();
 </script>
-
 <script>
 (function() {
   // Prevent pinch-to-zoom
