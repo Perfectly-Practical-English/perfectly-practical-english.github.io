@@ -368,13 +368,15 @@ footer p {
 <h1>Perfectly Practical English</h1>
 
 <p>
-  For instructions, click the green bar at the bottom of each page.
-  If you have questions, contact
-  <a href="mailto:PerfectlyPracticalEnglish@outlook.com">PerfectlyPracticalEnglish@outlook.com</a>.
+<a href="Grade_7_Lesson_Tracker.html">Grade 7 Lesson Tracker</a>
 </p>
-<p>
-<a href="Grade_7_Lesson%20Tracker.html">Grade 7 Lesson Tracker</a>
-</p>
+
+<div class="section">
+  <button type="button" class="collapsible" onclick="this.classList.toggle('active'); this.nextElementSibling.classList.toggle('open');">Current Files</button>
+  <div class="content">
+    <a href="R_2_Survey_School_in_the_Past.html">Survey for your parents to talk about what school was like when they were young.</a>
+  </div>
+</div>
 
 <div id="indexSections"></div>
 
@@ -404,8 +406,8 @@ footer p {
 
 const INTERNAL_FILES = [
   // Grade 7 files (will appear in the top section)
-  "Grade_7_V_5_Game_Word_Bombs_EFL.html",
-  "Grade_7_V_1_Flash_Cards_EFL.html",
+  "Grade_7_V_5_Game_Word_Bombs.html",
+  "Grade_7_V_1_Flash_Cards.html",
 
   // Standard files
   "V_1_Flash_Cards_EFL.html",
@@ -536,7 +538,16 @@ const INTERNAL_FILES = [
   "A_15_Coursebook_Presenter.html",
   "XART_16_Main_Reading_Template.html",
 
-  "XRR_55_The_Pizzarena.html"
+  "XRR_55_The_Pizzarena.html",
+
+
+
+"CVG_1_Demo_Word_Scramble_Castle_EFL.html",
+"CVG_1_Demo_Word_Scramble_EFL_Classroom_Version.html",
+"CVG_1_Demo_Word_Scramble_Football.html",
+"CVV_5_Game_Word_Bombs_EFL_Classroom_Version.html",
+"CVV_6_Game_Bubbles_EFL_Classroom_Version.html",
+"CVV_11_Vocabulary_Tiles_EFL_Classroom_Version.html"
 ];
 
 const SECTIONS = [
@@ -551,7 +562,7 @@ const SECTIONS = [
   { title: "Useful Tips", prefixes: ["RT_"] },
   { title: "Thai Language", prefixes: ["T_", "TT_"] },
   { title: "Bible Study", prefixes: ["Bible_"] },
-  { title: "Resources and Administration", prefixes: ["RA_", "A_", "ART_"] },
+  { title: "Resources and Administration", prefixes: ["RA_", "A_", "ART_", "CVG_", "CVV_"] },
   { title: "Rogue Writers Gallery", prefixes: ["RR_"] }
 ];
 
