@@ -2909,7 +2909,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const lines = fullText.split(/\r?\n/);
         for (let i = 0; i < lines.length; i++) {
             const trimmed = lines[i].trim();
-            if (trimmed === 'QUIZ' || trimmed === 'Quiz') {
+
+            if (/^(QUIZ|SURVEY)$/i.test(trimmed)) {
                 activePart = lines.slice(0, i).join('\n');
                 break;
             }
