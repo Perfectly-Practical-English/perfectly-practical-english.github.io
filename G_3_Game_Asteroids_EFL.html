@@ -375,7 +375,8 @@ button:disabled {
   font-size: 15px;
   font-weight: 600;
   white-space: pre-wrap;
-  width: 360px;               
+  width: calc(100vw - 40px);   /* Fluid width fitting mobile screens safely */
+  max-width: 360px;            /* Caps maximum width on larger screens/tablets */
   word-break: break-word;
   overflow-wrap: break-word;
   user-select: none;
@@ -386,6 +387,7 @@ button:disabled {
   opacity: 0;
   transition: opacity 2.0s ease-in-out; /* Much slower, smoother fade out (2.0s) */
 }
+
 .blank {
   display: inline-block;
   min-width: 60px;
@@ -580,6 +582,50 @@ function drawStarfield() {
 }drawStarfield();
 // --- Game Variables ---
 const wordListSource = `
+
+~Unit 5 Was, Were, Wasn't, Weren't
+Sally |was| sick at home yesterday.
+The lost keys |weren't| on the table.
+Mark and Tom |were| at school all day.
+The movie |wasn't| good, so I fell asleep.
+I |was| tired after running five miles.
+Where |were| you at ten this morning?
+The shop |wasn't| open, so we left.
+The math test |wasn't| hard, so everyone passed.
+Who |was| your teacher last year?
+My parents |weren't| home last night.
+The soup |wasn't| tasty without salt.
+Why |were| the students late today?
+It |was| dark outside after sunset.
+My brothers |weren't| at the game yesterday.
+The museum ticket |wasn't| expensive.
+You |weren't| at the bus stop.
+The children |were| happy at the zoo.
+She |wasn't| at work on Sunday.
+|Was| your pizza hot when it arrived?
+|Were| you in class yesterday morning?
+
+~Unit 5 Could, Couldn't
+At age five, he |could| play piano.
+I |couldn't| sleep because of the noise.
+After lessons, Maria |could| swim fast.
+He searched, but he |couldn't| find his wallet.
+From the top, we |could| see the lake.
+The music was loud, so I |couldn't| hear.
+At six years old, Tim |could| ride a bike.
+The road flooded, so cars |couldn't| pass.
+She studied hard, so she |could| pass.
+Strict rules meant I |couldn't| stay out late.
+It was pitch black, so we |couldn't| see.
+With new shoes, Anna |could| run fast.
+My phone died, so I |couldn't| call you.
+|Could| you speak English three years ago?
+The puzzle was hard, so kids |couldn't| solve it.
+He was strong, so he |could| lift it.
+I |couldn't| buy it because it cost too much.
+The rain stopped, so we |could| play outside.
+He was sick, so he |couldn't| eat food.
+|Could| your sister swim when she was young?
 
 ~Determiners
 
@@ -2998,10 +3044,13 @@ window.saveResult = async function saveResult(text) {
             const currentEx = sampleExercises[sampleExerciseIndex];
 
             // Create sentence matching game DOM structure
-            const span = document.createElement('span');
+const span = document.createElement('span');
             span.className = 'sentence';
             span.style.opacity = '1';
-            span.style.maxWidth = '360px';
+            
+            const sampleContainerWidth = gameArea.clientWidth || 320;
+            const sampleMaxAllowed = sampleContainerWidth - 140;
+            span.style.maxWidth = Math.min(360, sampleMaxAllowed) + 'px';
 
             if (currentEx.before) {
                 span.appendChild(document.createTextNode(currentEx.before));
