@@ -3653,6 +3653,7 @@ const SUBSECTION_MARKERS = [
         "Grammar Survey",
         "Vocabulary Survey"
     ];
+
     rawQuizLines.forEach(line => {
 
         const trimmed =
@@ -3661,14 +3662,9 @@ const SUBSECTION_MARKERS = [
         if (
             SUBSECTION_MARKERS.some(
                 marker =>
-                    trimmed
-                        .toLowerCase()
-                        .startsWith(
-                            marker.toLowerCase()
-                        )
+                    trimmed.toLowerCase() === marker.toLowerCase()
             )
         ) {
-
             currentSub = {
                 title: trimmed,
                 questions: []
@@ -3921,7 +3917,7 @@ const SUBSECTION_MARKERS = [
                             .trim();
 
                     // Force everything positive for surveys
-                    const isSurvey = (typeof currentSection !== 'undefined' && currentSection && currentSection.toLowerCase().includes('survey')) ||
+  const isSurvey = (typeof currentSection !== 'undefined' && currentSection && currentSection.toLowerCase().includes('survey')) ||
                                      (typeof sub !== 'undefined' && sub && sub.title && sub.title.toLowerCase().includes('survey'));
                     
                     const isCorrectOption = isSurvey ? true : /\|.*?\|/.test(opt);
@@ -4477,14 +4473,13 @@ window.addEventListener(
 
         const title = lines[0].replace(/^~/, '').trim();
 
-        const quizIndex = lines.findIndex(
-            line => line.toLowerCase() === 'quiz'
+const quizIndex = lines.findIndex(
+            line => line.toLowerCase() === 'quiz' || line.toLowerCase() === 'survey'
         );
 
         if (quizIndex === -1) {
-            throw new Error('The Quiz section was not found.');
+            throw new Error('The Quiz or Survey section was not found.');
         }
-
         const introduction = lines
             .slice(1, quizIndex)
             .filter(line => line.toLowerCase() !== 'parent survey');
@@ -4738,9 +4733,9 @@ window.addEventListener(
 
             const data = getSurveyData();
 
-            if (data.questions.length !== 10) {
+if (data.questions.length === 0) {
                 throw new Error(
-                    'Expected 10 survey questions, but found ' +
+                    'No survey questions found, but found ' +
                     data.questions.length + '.'
                 );
             }
@@ -5926,7 +5921,7 @@ while (node = walker.nextNode()) {
         return (str || '').trim().toLowerCase().replace(/\s+/g," "); 
     }
 
-    document.body.addEventListener('change', e => {
+document.body.addEventListener('change', e => {
         const exercise = e.target.closest('.exercise');
         if (!exercise) return;
 
@@ -5961,8 +5956,7 @@ while (node = walker.nextNode()) {
             return;
         }
 
-        const textInputs = Array.from(exercise.querySelectorAll("input[type='text'], textarea"));
-        const selectedInputs = Array.from(exercise.querySelectorAll("input:checked"));
+        const textInputs = Array.from(exercise.querySelectorAll("input[type='text'], textarea"));        const selectedInputs = Array.from(exercise.querySelectorAll("input:checked"));
 
         const userAnswers = textInputs.length 
             ? textInputs.map(i => normalize(i.value)) 
@@ -10618,12 +10612,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
         const title = lines[0].replace(/^~/, '').trim();
 
-        const quizIndex = lines.findIndex(
-            line => line.toLowerCase() === 'quiz'
+const quizIndex = lines.findIndex(
+            line => line.toLowerCase() === 'quiz' || line.toLowerCase() === 'survey'
         );
 
         if (quizIndex === -1) {
-            throw new Error('The Quiz section was not found.');
+            throw new Error('The Quiz or Survey section was not found.');
         }
 
         const introduction = lines
@@ -10644,24 +10638,104 @@ document.addEventListener("DOMContentLoaded", function () {
                     options: []
                 };
 
-            } else if (currentQuestion) {
-                currentQuestion.options.push(
-                    line.replace(/\|/g, '').trim()
-                );
-            }
-        });
+function getSurveyData() {
 
-        if (currentQuestion) {
-            questions.push(currentQuestion);
-        }
+    let sourceText = '';
+    let title = window.currentQuizSectionName || '';
 
-        return {
-            title,
-            introduction,
-            questions
-        };
+    // Get the currently selected section
+    if (
+        typeof window.currentQuizSectionText === 'string' &&
+        window.currentQuizSectionText.trim()
+    ) {
+        sourceText = window.currentQuizSectionText;
     }
 
+    // Fallback to original raw text
+    if (!sourceText) {
+        const raw = document.getElementById('rawText');
+
+        if (!raw) {
+            throw new Error('Survey source not found.');
+        }
+
+        sourceText = raw.textContent;
+    }
+
+    const lines = sourceText
+        .replace(/^\uFEFF/, '')
+        .split(/\r?\n/)
+        .map(line => line.trim())
+        .filter(Boolean);
+
+    if (!title) {
+        title = (lines[0] || 'Survey')
+            .replace(/^~+|~+$/g, '')
+            .trim();
+    }
+
+    const quizIndex = lines.findIndex(line =>
+        /^(survey|quiz)$/i.test(line)
+    );
+
+    if (quizIndex === -1) {
+        throw new Error(
+            'No Survey or Quiz heading found in the selected section.'
+        );
+    }
+
+    const introduction = lines
+        .slice(0, quizIndex)
+        .filter(line =>
+            !/^parent survey:?$/i.test(line) &&
+            !line.startsWith('~')
+        );
+
+    const questions = [];
+    let currentQuestion = null;
+
+    lines.slice(quizIndex + 1).forEach(line => {
+
+        if (line.startsWith('?')) {
+
+            if (currentQuestion) {
+                questions.push(currentQuestion);
+            }
+
+            currentQuestion = {
+                question: line.substring(1).trim(),
+                options: []
+            };
+
+        } else if (currentQuestion && line.startsWith('|')) {
+
+            const option = line
+                .replace(/^\|+|\|+$/g, '')
+                .trim();
+
+            if (option) {
+                currentQuestion.options.push(option);
+            }
+        }
+    });
+
+    if (currentQuestion) {
+        questions.push(currentQuestion);
+    }
+
+    if (questions.length !== 10) {
+        throw new Error(
+            'Expected 10 survey questions, but found ' +
+            questions.length + '.'
+        );
+    }
+
+    return {
+        title,
+        introduction,
+        questions
+    };
+}
     /* ---------------------------------------------------------
        4. CREATE THE TWO-COLUMN A4 PAGE
        --------------------------------------------------------- */
