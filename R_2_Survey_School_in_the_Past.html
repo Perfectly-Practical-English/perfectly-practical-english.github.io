@@ -4389,440 +4389,6 @@ window.addEventListener(
 
 
 
-<script>
-(function () {
-    'use strict';
-
-    const BUTTON_ID = 'standalone-survey-pdf-btn';
-
-    /* ---------------------------------------------------------
-       1. INJECT PDF BUTTON TO THE RIGHT OF THE SECTION BUTTON
-       --------------------------------------------------------- */
-
-    function injectPdfButton() {
-        const sectionBtn = document.querySelector('#sectionSelectorBtn');
-
-        if (!sectionBtn || document.getElementById(BUTTON_ID)) return;
-
-        const btn = document.createElement('button');
-
-        btn.id = BUTTON_ID;
-        btn.type = 'button';
-        btn.textContent = 'Download Blank Survey';
-
-        btn.style.cssText = `
-            cursor: pointer;
-            margin-left: 6px;
-            padding: 8px 14px;
-            border: 1px solid #aaa;
-            border-radius: 5px;
-            background: #fff;
-            color: #222;
-            font-size: 14px;
-            font-weight: bold;
-        `;
-
-        btn.addEventListener('click', downloadSurveyPdf);
-
-        sectionBtn.insertAdjacentElement('afterend', btn);
-    }
-
-    /* ---------------------------------------------------------
-       2. LOAD PDF LIBRARIES IF NECESSARY
-       --------------------------------------------------------- */
-
-    function loadScript(url) {
-        return new Promise((resolve, reject) => {
-            const script = document.createElement('script');
-            script.src = url;
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-        });
-    }
-
-    async function loadLibraries() {
-        if (!window.html2canvas) {
-            await loadScript(
-                'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'
-            );
-        }
-
-        if (!window.jspdf || !window.jspdf.jsPDF) {
-            await loadScript(
-                'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
-            );
-        }
-    }
-
-    /* ---------------------------------------------------------
-       3. READ AND PARSE THE SURVEY
-       --------------------------------------------------------- */
-
-    function getSurveyData() {
-        const raw = document.querySelector('#rawText');
-
-        if (!raw) {
-            throw new Error('The survey source (#rawText) was not found.');
-        }
-
-        const lines = raw.textContent
-            .replace(/^\uFEFF/, '')
-            .split(/\r?\n/)
-            .map(line => line.trim())
-            .filter(Boolean);
-
-        const title = lines[0].replace(/^~/, '').trim();
-
-const quizIndex = lines.findIndex(
-            line => line.toLowerCase() === 'quiz' || line.toLowerCase() === 'survey'
-        );
-
-        if (quizIndex === -1) {
-            throw new Error('The Quiz or Survey section was not found.');
-        }
-        const introduction = lines
-            .slice(1, quizIndex)
-            .filter(line => line.toLowerCase() !== 'parent survey');
-
-        const questions = [];
-        let currentQuestion = null;
-
-        lines.slice(quizIndex + 1).forEach(line => {
-            if (line.startsWith('?')) {
-                if (currentQuestion) {
-                    questions.push(currentQuestion);
-                }
-
-                currentQuestion = {
-                    question: line.substring(1).trim(),
-                    options: []
-                };
-
-            } else if (currentQuestion) {
-                currentQuestion.options.push(
-                    line.replace(/\|/g, '').trim()
-                );
-            }
-        });
-
-        if (currentQuestion) {
-            questions.push(currentQuestion);
-        }
-
-        return {
-            title,
-            introduction,
-            questions
-        };
-    }
-
-    /* ---------------------------------------------------------
-       4. CREATE THE TWO-COLUMN A4 PAGE
-       --------------------------------------------------------- */
-
-    function createPdfPage(data) {
-        const page = document.createElement('div');
-
-        page.id = 'survey-pdf-page';
-
-        page.style.cssText = `
-            position: fixed;
-            left: -10000px;
-            top: 0;
-            width: 794px;
-            height: 1123px;
-            box-sizing: border-box;
-            padding: 24px;
-            background: #ffffff;
-            color: #111111;
-            font-family: Arial, Helvetica, sans-serif;
-            font-size: 10pt;
-            overflow: hidden;
-        `;
-
-        const columns = document.createElement('div');
-
-        columns.style.cssText = `
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            column-gap: 24px;
-            width: 100%;
-            height: 100%;
-            align-items: start;
-        `;
-
-        const left = document.createElement('div');
-        const right = document.createElement('div');
-
-        [left, right].forEach(column => {
-            column.style.cssText = `
-                min-width: 0;
-                font-size: 10pt;
-                line-height: 1.15;
-            `;
-        });
-
-        /* FIRST COLUMN: TITLE AND STUDENT DETAILS */
-
-        const title = document.createElement('div');
-
-        title.textContent = data.title;
-
-        title.style.cssText = `
-            font-size: 10pt;
-            font-weight: bold;
-            margin: 0 0 10px 0;
-        `;
-
-        left.appendChild(title);
-
-        const details = document.createElement('div');
-
-        details.style.cssText = `
-            font-size: 10pt;
-            line-height: 1.6;
-            margin-bottom: 10px;
-        `;
-
-        details.innerHTML =
-            'Name: ___________________________<br>' +
-            'ID: ______________________________<br>' +
-            'Date: ____________________________';
-
-        left.appendChild(details);
-
-        /* INTRODUCTORY TEXT */
-
-        data.introduction.forEach(paragraph => {
-            const p = document.createElement('p');
-
-            p.textContent = paragraph;
-
-            p.style.cssText = `
-                margin: 0 0 6px 0;
-                font-size: 10pt;
-                line-height: 1.15;
-            `;
-
-            left.appendChild(p);
-        });
-
-        /* QUESTIONS 1–4 IN THE FIRST COLUMN */
-
-        data.questions.slice(0, 4).forEach((item, index) => {
-            left.appendChild(
-                createQuestion(item, index + 1)
-            );
-        });
-
-        /* QUESTIONS 5–10 IN THE SECOND COLUMN */
-
-        data.questions.slice(4, 10).forEach((item, index) => {
-            right.appendChild(
-                createQuestion(item, index + 5)
-            );
-        });
-
-        columns.appendChild(left);
-        columns.appendChild(right);
-
-        page.appendChild(columns);
-
-        document.body.appendChild(page);
-
-        return page;
-    }
-
-    /* ---------------------------------------------------------
-       5. CREATE QUESTION AND NUMBERED COMMENT/ANECDOTE AREA
-       --------------------------------------------------------- */
-
-    function createQuestion(item, number) {
-        const block = document.createElement('div');
-
-        block.style.cssText = `
-            margin: 0 0 10px 0;
-            padding: 0;
-            break-inside: avoid;
-            font-size: 10pt;
-        `;
-
-        const question = document.createElement('div');
-
-        question.textContent = number + '. ' + item.question;
-
-        question.style.cssText = `
-            font-size: 10pt;
-            font-weight: bold;
-            line-height: 1.15;
-            margin: 0 0 4px 0;
-        `;
-
-        block.appendChild(question);
-
-        /* ANSWER OPTIONS */
-
-        item.options.forEach(option => {
-            const answer = document.createElement('div');
-
-            answer.style.cssText = `
-                font-size: 10pt;
-                line-height: 1.15;
-                margin: 0 0 2px 12px;
-            `;
-
-            answer.textContent = '○  ' + option;
-
-            block.appendChild(answer);
-        });
-
-        /* NUMBERED COMMENT / ANECDOTE LABEL */
-
-        const commentLabel = document.createElement('div');
-
-        commentLabel.textContent = 'Comment/Anecdote ' + number + ':';
-
-        commentLabel.style.cssText = `
-            font-size: 10pt;
-            font-weight: normal;
-            margin: 5px 0 2px 0;
-        `;
-
-        block.appendChild(commentLabel);
-
-        /* THREE VISIBLE WRITING LINES */
-
-        const writingSpace = document.createElement('div');
-
-        writingSpace.style.cssText = `
-            width: 100%;
-            margin: 0;
-        `;
-
-        for (let i = 0; i < 3; i++) {
-            const line = document.createElement('div');
-
-            line.style.cssText = `
-                display: block;
-                width: 100%;
-                height: 17px;
-                box-sizing: border-box;
-                border-bottom: 1px solid #999;
-            `;
-
-            writingSpace.appendChild(line);
-        }
-
-        block.appendChild(writingSpace);
-
-        return block;
-    }
-
-    /* ---------------------------------------------------------
-       6. DOWNLOAD A SINGLE-PAGE A4 PDF
-       --------------------------------------------------------- */
-
-    async function downloadSurveyPdf() {
-        const btn = document.getElementById(BUTTON_ID);
-
-        try {
-            btn.disabled = true;
-            btn.textContent = 'Creating PDF...';
-
-            await loadLibraries();
-
-            const data = getSurveyData();
-
-if (data.questions.length === 0) {
-                throw new Error(
-                    'No survey questions found, but found ' +
-                    data.questions.length + '.'
-                );
-            }
-
-            const page = createPdfPage(data);
-
-            const canvas = await html2canvas(page, {
-                scale: 2,
-                backgroundColor: '#ffffff',
-                width: 794,
-                height: 1123,
-                windowWidth: 794,
-                windowHeight: 1123,
-                scrollX: 0,
-                scrollY: 0
-            });
-
-            document.body.removeChild(page);
-
-            const { jsPDF } = window.jspdf;
-
-            const pdf = new jsPDF({
-                orientation: 'portrait',
-                unit: 'mm',
-                format: 'a4',
-                compress: true
-            });
-
-            pdf.addImage(
-                canvas.toDataURL('image/jpeg', 0.95),
-                'JPEG',
-                0,
-                0,
-                210,
-                297
-            );
-
-// Build consistent scoreboard-style filename with _BLANK appended (omitting student name & ID)
-            const baseName = getCurrentDownloadBaseName();
-            const sectionName = getCurrentDownloadSectionName();
-            const dateTime = getScoreboardDateTime();
-            
-            const blankFilename = makeScoreboardFilename(
-                baseName,
-                sectionName,
-                '', // Pass empty string to avoid "Student"
-                '', // Pass empty string to avoid ID/Guest
-                dateTime.date,
-                dateTime.time,
-                'BLANK',
-                'PDF',
-                'pdf'
-            );
-
-            pdf.save(blankFilename);
-        } catch (error) {
-            console.error('Survey PDF error:', error);
-
-            const page = document.getElementById('survey-pdf-page');
-            if (page) page.remove();
-
-            alert('Unable to create the PDF: ' + error.message);
-
-        } finally {
-            if (btn) {
-                btn.disabled = false;
-                btn.textContent = 'PDF';
-            }
-        }
-    }
-
-    /* ---------------------------------------------------------
-       7. INITIALIZE
-       --------------------------------------------------------- */
-
-    injectPdfButton();
-
-    const observer = new MutationObserver(injectPdfButton);
-
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
-
-})();
-</script>
 
 <script>
     /* =========================================================
@@ -10526,6 +10092,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 
+
+
 <script>
 (function () {
     'use strict';
@@ -10574,7 +10142,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
             script.src = url;
             script.onload = resolve;
-            script.onerror = reject;
+            script.onerror = () => reject(
+                new Error('Unable to load PDF library: ' + url)
+            );
 
             document.head.appendChild(script);
         });
@@ -10592,44 +10162,80 @@ document.addEventListener("DOMContentLoaded", function () {
                 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
             );
         }
+
+        if (!window.html2canvas) {
+            throw new Error('html2canvas did not load correctly.');
+        }
+
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+            throw new Error('jsPDF did not load correctly.');
+        }
     }
 
     /* ---------------------------------------------------------
-       3. READ AND PARSE THE SURVEY
+       3. READ AND PARSE THE SELECTED SURVEY
        --------------------------------------------------------- */
 
     function getSurveyData() {
-        const raw = document.querySelector('#rawText');
 
-        if (!raw) {
-            throw new Error('The survey source (#rawText) was not found.');
+        let sourceText = '';
+        let title = window.currentQuizSectionName || '';
+
+        // Read the currently selected section
+        if (
+            typeof window.currentQuizSectionText === 'string' &&
+            window.currentQuizSectionText.trim()
+        ) {
+            sourceText = window.currentQuizSectionText;
         }
 
-        const lines = raw.textContent
+        // Fall back to the original raw text
+        if (!sourceText) {
+            const raw = document.getElementById('rawText');
+
+            if (!raw) {
+                throw new Error('Survey source not found.');
+            }
+
+            sourceText = raw.textContent;
+        }
+
+        const lines = sourceText
             .replace(/^\uFEFF/, '')
             .split(/\r?\n/)
             .map(line => line.trim())
             .filter(Boolean);
 
-        const title = lines[0].replace(/^~/, '').trim();
+        if (!title) {
+            title = (lines[0] || 'Survey')
+                .replace(/^~+|~+$/g, '')
+                .trim();
+        }
 
-const quizIndex = lines.findIndex(
-            line => line.toLowerCase() === 'quiz' || line.toLowerCase() === 'survey'
+        const quizIndex = lines.findIndex(line =>
+            /^(survey|quiz)$/i.test(line)
         );
 
         if (quizIndex === -1) {
-            throw new Error('The Quiz or Survey section was not found.');
+            throw new Error(
+                'No Survey or Quiz heading found in the selected section.'
+            );
         }
 
         const introduction = lines
-            .slice(1, quizIndex)
-            .filter(line => line.toLowerCase() !== 'parent survey');
+            .slice(0, quizIndex)
+            .filter(line =>
+                !/^parent survey:?$/i.test(line) &&
+                !line.startsWith('~')
+            );
 
         const questions = [];
         let currentQuestion = null;
 
         lines.slice(quizIndex + 1).forEach(line => {
+
             if (line.startsWith('?')) {
+
                 if (currentQuestion) {
                     questions.push(currentQuestion);
                 }
@@ -10639,104 +10245,36 @@ const quizIndex = lines.findIndex(
                     options: []
                 };
 
-function getSurveyData() {
+            } else if (currentQuestion && line.startsWith('|')) {
 
-    let sourceText = '';
-    let title = window.currentQuizSectionName || '';
+                const option = line
+                    .replace(/^\|+|\|+$/g, '')
+                    .trim();
 
-    // Get the currently selected section
-    if (
-        typeof window.currentQuizSectionText === 'string' &&
-        window.currentQuizSectionText.trim()
-    ) {
-        sourceText = window.currentQuizSectionText;
-    }
+                if (option) {
+                    currentQuestion.options.push(option);
+                }
+            }
+        });
 
-    // Fallback to original raw text
-    if (!sourceText) {
-        const raw = document.getElementById('rawText');
-
-        if (!raw) {
-            throw new Error('Survey source not found.');
+        if (currentQuestion) {
+            questions.push(currentQuestion);
         }
 
-        sourceText = raw.textContent;
-    }
-
-    const lines = sourceText
-        .replace(/^\uFEFF/, '')
-        .split(/\r?\n/)
-        .map(line => line.trim())
-        .filter(Boolean);
-
-    if (!title) {
-        title = (lines[0] || 'Survey')
-            .replace(/^~+|~+$/g, '')
-            .trim();
-    }
-
-    const quizIndex = lines.findIndex(line =>
-        /^(survey|quiz)$/i.test(line)
-    );
-
-    if (quizIndex === -1) {
-        throw new Error(
-            'No Survey or Quiz heading found in the selected section.'
-        );
-    }
-
-    const introduction = lines
-        .slice(0, quizIndex)
-        .filter(line =>
-            !/^parent survey:?$/i.test(line) &&
-            !line.startsWith('~')
-        );
-
-    const questions = [];
-    let currentQuestion = null;
-
-    lines.slice(quizIndex + 1).forEach(line => {
-
-        if (line.startsWith('?')) {
-
-            if (currentQuestion) {
-                questions.push(currentQuestion);
-            }
-
-            currentQuestion = {
-                question: line.substring(1).trim(),
-                options: []
-            };
-
-        } else if (currentQuestion && line.startsWith('|')) {
-
-            const option = line
-                .replace(/^\|+|\|+$/g, '')
-                .trim();
-
-            if (option) {
-                currentQuestion.options.push(option);
-            }
+        if (questions.length !== 10) {
+            throw new Error(
+                'Expected 10 survey questions, but found ' +
+                questions.length + '.'
+            );
         }
-    });
 
-    if (currentQuestion) {
-        questions.push(currentQuestion);
+        return {
+            title,
+            introduction,
+            questions
+        };
     }
 
-    if (questions.length !== 10) {
-        throw new Error(
-            'Expected 10 survey questions, but found ' +
-            questions.length + '.'
-        );
-    }
-
-    return {
-        title,
-        introduction,
-        questions
-    };
-}
     /* ---------------------------------------------------------
        4. CREATE THE TWO-COLUMN A4 PAGE
        --------------------------------------------------------- */
@@ -10897,13 +10435,27 @@ function getSurveyData() {
             block.appendChild(answer);
         });
 
+        /* NUMBERED COMMENT / ANECDOTE LABEL */
+
+        const commentLabel = document.createElement('div');
+
+        commentLabel.textContent = 'Comment/Anecdote ' + number + ':';
+
+        commentLabel.style.cssText = `
+            font-size: 10pt;
+            font-weight: normal;
+            margin: 5px 0 2px 0;
+        `;
+
+        block.appendChild(commentLabel);
+
         /* THREE VISIBLE WRITING LINES */
 
         const writingSpace = document.createElement('div');
 
         writingSpace.style.cssText = `
             width: 100%;
-            margin: 5px 0 0 0;
+            margin: 0;
         `;
 
         for (let i = 0; i < 3; i++) {
@@ -10933,23 +10485,18 @@ function getSurveyData() {
         const btn = document.getElementById(BUTTON_ID);
 
         try {
-            btn.disabled = true;
-            btn.textContent = 'Creating PDF...';
+            if (btn) {
+                btn.disabled = true;
+                btn.textContent = 'Creating PDF...';
+            }
 
             await loadLibraries();
 
             const data = getSurveyData();
 
-            if (data.questions.length !== 10) {
-                throw new Error(
-                    'Expected 10 survey questions, but found ' +
-                    data.questions.length + '.'
-                );
-            }
-
             const page = createPdfPage(data);
 
-            const canvas = await html2canvas(page, {
+            const canvas = await window.html2canvas(page, {
                 scale: 2,
                 backgroundColor: '#ffffff',
                 width: 794,
@@ -10980,16 +10527,18 @@ function getSurveyData() {
                 297
             );
 
-// Build consistent scoreboard-style filename with _BLANK appended (omitting student name & ID)
+            // Build consistent scoreboard-style filename
+            // with _BLANK appended (no student name or ID).
+
             const baseName = getCurrentDownloadBaseName();
             const sectionName = getCurrentDownloadSectionName();
             const dateTime = getScoreboardDateTime();
-            
+
             const blankFilename = makeScoreboardFilename(
                 baseName,
                 sectionName,
-                '', // Pass empty string to avoid "Student"
-                '', // Pass empty string to avoid ID/Guest
+                '',
+                '',
                 dateTime.date,
                 dateTime.time,
                 'BLANK',
@@ -10998,6 +10547,7 @@ function getSurveyData() {
             );
 
             pdf.save(blankFilename);
+
         } catch (error) {
             console.error('Survey PDF error:', error);
 
@@ -11009,7 +10559,7 @@ function getSurveyData() {
         } finally {
             if (btn) {
                 btn.disabled = false;
-                btn.textContent = 'PDF';
+                btn.textContent = 'Download Blank PDF';
             }
         }
     }
