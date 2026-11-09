@@ -332,14 +332,16 @@ Unit 5 Education | Week 2 | Lesson 3 | Objectives: To describe school life; To u
 
         `.trim();
 
-  // Days each class meets (0 = Mon, 1 = Tue, 2 = Wed, 3 = Thu, 4 = Fri)
-        const classMeetingDays = {
-            '11.1': [0, 2, 3], 'M11.1': [0, 2, 3],
-            '13.2': [0, 1, 2], 'M13.2': [0, 1, 2],
-            '14.1': [0, 1, 3], 'M14.1': [0, 1, 3],
-            '15.3': [1, 2, 4], 'M15.3': [1, 2, 4],
-            '16.2': [2, 3, 4], 'M16.2': [2, 3, 4]
-        };
+// Days each class meets (0 = Mon, 1 = Tue, 2 = Wed, 3 = Thu, 4 = Fri)
+// Double periods count as ONE lesson for that day.
+
+const classMeetingDays = {
+    '11.1': [0, 1, 2], 'M11.1': [0, 1, 2],
+    '13.2': [0, 1, 2, 3], 'M13.2': [0, 1, 2, 3],
+'14.1': [1, 3, 4], 'M14.1': [1, 3, 4],
+    '15.3': [1, 2, 3], 'M15.3': [1, 2, 3],
+    '16.2': [0, 2, 3], 'M16.2': [0, 2, 3]
+};
 
         function parseUTCDate(dateStr) {
             let parts = dateStr.split('-');
@@ -492,11 +494,22 @@ Unit 5 Education | Week 2 | Lesson 3 | Objectives: To describe school life; To u
                 let dateKey = formatDateKey(currDay);
                 let dateStr = currDay.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', timeZone: 'UTC' });
                 
-  let activeDays = classMeetingDays[currentSelectedClass] || [];
+let activeDays = classMeetingDays[currentSelectedClass] || [];
 let lessonIndex = null;
 let meetingIndex = activeDays.indexOf(i);
+
 if (meetingIndex !== -1) {
-    lessonIndex = meetingIndex + 1; // Always starts at 1 for their first meeting of the week, then 2, then 3!
+    lessonIndex = meetingIndex + 1;
+
+    // Class 13.2 meets four times:
+    // Monday = Lesson 1
+    // Tuesday = Lesson 2
+    // Wednesday = Repeat Lesson 2
+    // Thursday = Lesson 3 (final lesson)
+    if (currentSelectedClass === '13.2' || currentSelectedClass === 'M13.2') {
+        if (meetingIndex === 2) lessonIndex = 2;
+        if (meetingIndex === 3) lessonIndex = 3;
+    }
 }
 
                 let isHoliday = active && engine.holidays[dateKey];
